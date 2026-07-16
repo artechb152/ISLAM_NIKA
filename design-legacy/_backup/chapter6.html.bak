@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>פרק שישי · חמש מצוות היסוד</title>
+<style>
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-light-aaa.otf") format("opentype");font-weight:300;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-regular-aaa.otf") format("opentype");font-weight:400;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-bold-aaa.otf") format("opentype");font-weight:700;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-black-aaa.otf") format("opentype");font-weight:900;font-display:swap}
+  :root{--cream:#fff7e5;--gold:#d9b45b;--gold-soft:#e7c877;--maroon:#841b1b;--maroon-deep:#4a101e}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#0b0603;font-family:"Kedem","Heebo",system-ui,sans-serif;overflow:hidden;color:var(--cream)}
+  #stage{position:fixed;inset:0;overflow:hidden;background:#0b0603}
+
+  .scene{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .9s ease,visibility .9s}
+  .scene.active{opacity:1;visibility:visible}
+  .scene video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+  .scene .grade{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(8,4,2,.28) 0%,rgba(8,4,2,0) 22%,rgba(8,4,2,0) 55%,rgba(8,4,2,.62) 100%)}
+
+  /* icons scene */
+  .icons{position:absolute;inset:0;background:
+    radial-gradient(120% 90% at 50% 40%, #fff9ec 0%, #f7ecd2 70%, #efe1c2 100%);
+    display:flex;align-items:center;justify-content:center;gap:clamp(12px,3vw,60px);padding:6vw}
+  .icons .pill{display:flex;flex-direction:column;align-items:center;gap:14px;
+    opacity:0;transform:translateY(26px) scale(.6);transition:opacity .5s ease,transform .6s cubic-bezier(.2,1.3,.4,1)}
+  .icons .pill.pop{opacity:1;transform:none}
+  .icons .pill img{width:clamp(90px,13vw,180px);height:auto;filter:drop-shadow(0 16px 26px rgba(76,23,4,.22))}
+  .icons .pill b{font-family:"Kedem",serif;font-weight:700;color:var(--maroon);font-size:clamp(15px,1.6vw,24px)}
+  @media(max-width:640px){.icons{flex-wrap:wrap;gap:18px}.icons .pill img{width:64px}}
+
+  /* finale */
+  .finale{position:absolute;inset:0}
+  .finale .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .finale .veil{position:absolute;inset:0;background:radial-gradient(60% 64% at 50% 50%, rgba(255,247,229,.97) 40%, rgba(255,247,229,.74) 60%, rgba(255,247,229,0) 100%)}
+  .finale .inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,2.4vh,26px);text-align:center;padding:5vw}
+  .finale .eyebrow{color:var(--maroon);font-weight:700;letter-spacing:6px;font-size:clamp(13px,1.4vw,18px);opacity:0;transform:translateY(10px);transition:.8s}
+  .finale .title{font-family:"Kedem",serif;font-weight:900;color:var(--maroon);font-size:clamp(30px,4.6vw,60px);line-height:1;opacity:0;transform:translateY(14px);transition:.8s;text-shadow:0 4px 18px rgba(255,247,229,.9)}
+  .finale .row{display:flex;gap:clamp(8px,1.4vw,20px);flex-wrap:wrap;justify-content:center;opacity:0;transform:translateY(12px);transition:.8s}
+  .finale .row span{font-weight:700;color:#3a1109;font-size:clamp(13px,1.5vw,20px);background:rgba(255,247,229,.85);border:1px solid rgba(199,154,60,.6);padding:6px 16px;border-radius:999px}
+  .finale .start{pointer-events:auto;margin-top:8px;opacity:0;transform:translateY(14px);transition:.8s;font-family:"Kedem",sans-serif;font-weight:700;font-size:clamp(17px,1.7vw,24px);letter-spacing:1px;color:var(--cream);text-decoration:none;padding:14px 46px;border-radius:999px;background:linear-gradient(180deg,var(--maroon),var(--maroon-deep));border:1px solid rgba(231,200,119,.5);box-shadow:0 14px 34px rgba(74,16,30,.4)}
+  .finale .start:hover{transform:translateY(-3px)}
+  .finale .show{opacity:1 !important;transform:none !important}
+
+  /* big centered story text */
+  #big{position:absolute;inset:0;z-index:14;display:flex;align-items:center;justify-content:center;text-align:center;padding:6vw;pointer-events:none}
+  #big span{font-family:"Kedem",serif;font-weight:700;color:var(--cream);font-size:clamp(32px,6vw,78px);line-height:1.1;
+    opacity:0;transform:translateY(16px) scale(.98);transition:opacity .8s ease,transform 1s cubic-bezier(.2,.8,.2,1);
+    text-shadow:0 4px 34px rgba(0,0,0,.75),0 0 70px rgba(0,0,0,.5)}
+  #big span.show{opacity:1;transform:none}
+
+  /* subtitles */
+  #subs{position:absolute;z-index:16;left:0;right:0;bottom:clamp(28px,7vh,74px);display:flex;justify-content:center;padding:0 6vw;pointer-events:none}
+  #subs .cue{max-width:min(1000px,90vw);text-align:center;font-family:"Kedem",sans-serif;font-weight:700;
+    font-size:clamp(16px,2vw,28px);line-height:1.4;color:var(--cream);
+    background:rgba(14,7,3,.74);border:1px solid rgba(231,200,119,.26);
+    padding:10px 22px;border-radius:14px;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+    text-shadow:0 2px 10px rgba(0,0,0,.7);opacity:0;transition:opacity .35s ease}
+  #subs .cue.show{opacity:1}
+  .finale-active #subs{display:none}
+
+  /* gate */
+  #gate{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(16px,2.6vh,32px);text-align:center;padding:6vw;background:linear-gradient(180deg,rgba(8,4,2,.4),rgba(8,4,2,.72))}
+  #gate .bg{position:absolute;inset:0;z-index:-1;width:100%;height:100%;object-fit:cover;filter:brightness(.5) saturate(.9)}
+  #gate .eyebrow{color:var(--gold-soft);font-weight:700;letter-spacing:7px;font-size:clamp(13px,1.5vw,18px)}
+  #gate h1{font-family:"Kedem",serif;font-weight:900;font-size:clamp(40px,8vw,96px);line-height:1;text-shadow:0 8px 44px rgba(0,0,0,.6)}
+  #gate p{color:rgba(255,247,229,.82);font-size:clamp(15px,1.7vw,20px);max-width:34ch}
+  #gate .play{margin-top:6px;display:inline-flex;align-items:center;gap:12px;cursor:pointer;font-family:"Kedem",sans-serif;font-weight:700;font-size:clamp(17px,1.8vw,24px);letter-spacing:1px;color:#2a0f08;background:linear-gradient(180deg,var(--gold-soft),var(--gold));border:0;padding:15px 44px;border-radius:999px;box-shadow:0 16px 40px rgba(0,0,0,.5)}
+  #gate .play:hover{transform:translateY(-3px)}
+  #gate .play svg{width:20px;height:20px;fill:#2a0f08}
+
+  .skip{position:absolute;top:clamp(14px,3vh,26px);inset-inline-start:clamp(16px,3vw,34px);z-index:25;display:inline-flex;align-items:center;gap:8px;color:rgba(255,247,229,.7);text-decoration:none;font-size:clamp(13px,1vw,16px);padding:8px 14px;border-radius:999px;background:rgba(8,4,2,.4);border:1px solid rgba(231,200,119,.3);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);opacity:0;transition:opacity .5s;cursor:pointer}
+  #stage.playing .skip{opacity:1}
+  /* on the finale the "מתחילים" CTA replaces it */
+  #stage.finale-active .skip{opacity:0;pointer-events:none}
+  .skip:hover{color:var(--cream)}
+  .skip svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+  @media (prefers-reduced-motion:reduce){.scene{transition:opacity .3s}}
+</style>
+</head>
+<body>
+  <main id="stage">
+    <section class="scene" data-i="0"><video muted playsinline preload="auto" src="assets/anim-video/scene1.mp4"></video><div class="grade"></div></section>
+    <section class="scene" data-i="1"><video muted playsinline preload="auto" src="assets/anim-video/scene2.mp4"></video><div class="grade"></div></section>
+    <section class="scene" data-i="2"><video muted playsinline preload="auto" src="assets/anim-video/scene3.mp4"></video><div class="grade"></div></section>
+    <section class="scene" data-i="3">
+      <div class="icons">
+        <div class="pill" data-icon><img src="assets/anim-video/icon-shahada.png" alt=""><b>השהאדה</b></div>
+        <div class="pill" data-icon><img src="assets/anim-video/icon-prayer.png" alt=""><b>התפילה</b></div>
+        <div class="pill" data-icon><img src="assets/anim-video/icon-charity.png" alt=""><b>הצדקה</b></div>
+        <div class="pill" data-icon><img src="assets/anim-video/icon-ramadan.png" alt=""><b>צום רמדאן</b></div>
+        <div class="pill" data-icon><img src="assets/anim-video/icon-hajj.png" alt=""><b>החג׳</b></div>
+      </div>
+    </section>
+    <section class="scene" data-i="4"><video muted playsinline preload="auto" src="assets/anim-video/scene5.mp4"></video><div class="grade"></div></section>
+    <section class="scene" data-i="5"><video muted playsinline preload="auto" src="assets/anim-video/scene6.mp4"></video><div class="grade"></div></section>
+    <section class="scene" data-i="6">
+      <div class="finale">
+        <img class="bg" src="assets/anim-frames/scene7.jpg" alt="">
+        <div class="veil"></div>
+        <div class="inner">
+          <div class="eyebrow" data-f>פרק שישי</div>
+          <div class="title" data-f>חמש מצוות היסוד</div>
+          <div class="row" data-f><span>השהאדה</span><span>התפילה</span><span>הצדקה</span><span>צום רמדאן</span><span>החג׳</span></div>
+          <a class="start" data-f href="chapter6-lesson.html">מתחילים</a>
+        </div>
+      </div>
+    </section>
+
+    <div id="big"><span></span></div>
+    <div id="subs"><div class="cue"></div></div>
+    <a class="skip" id="skip" href="chapter6-lesson.html"><svg viewBox="0 0 24 24"><path d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>דלג</a>
+
+    <div id="gate">
+      <img class="bg" src="assets/anim-video/poster1.jpg" alt="">
+      <div class="eyebrow">פרק שישי</div>
+      <h1>חמש מצוות היסוד</h1>
+      <p>סיפור קצר לפני שנתחיל — עם קריינות.</p>
+      <button class="play" id="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>התחל</button>
+    </div>
+
+    <audio id="a0" preload="auto" src="assets/anim-voice/scene1.mp3"></audio>
+    <audio id="a1" preload="auto" src="assets/anim-voice/scene2.mp3"></audio>
+    <audio id="a2" preload="auto" src="assets/anim-voice/scene3.mp3"></audio>
+    <audio id="a3" preload="auto" src="assets/anim-voice/scene4.mp3"></audio>
+    <audio id="a4" preload="auto" src="assets/anim-voice/scene5.mp3"></audio>
+    <audio id="a5" preload="auto" src="assets/anim-voice/scene6.mp3"></audio>
+    <audio id="a6" preload="auto" src="assets/anim-voice/scene7.mp3"></audio>
+  </main>
+
+  <script>
+  (function(){
+    var stage=document.getElementById('stage'), gate=document.getElementById('gate');
+    var subsBox=document.getElementById('subs'), cue=subsBox.querySelector('.cue');
+    var bigBox=document.getElementById('big'), bigSpan=bigBox.querySelector('span');
+    var sceneEls=[].slice.call(document.querySelectorAll('.scene'));
+
+    var SCENES=[
+      {dur:8.16, subs:[[0,"יש מסורת באסלאם בשם עבדאללה בן עֻמַר, הח׳ליף השני,"],[4.2,"שלפיה מוחמד ישב עם חבריו — הצַחאבּה — בעיר מדינה."]]},
+      {dur:10.08, subs:[[0,"לפתע ניגש אליהם אדם עם בגדים מבהיקים מלובן ושיער שחור."],[5.3,"ולמרות שהגיע ממרחק, סימני המסע לא ניכרו עליו."]]},
+      {dur:4.72, subs:[[0,"האדם ניגש למוחמד ושאל: יא מוחמד, מהו האסלאם?"]], big:[2.0,3.6,"מהו האסלאם?"]},
+      {dur:17.36, type:"icons", subs:[[0,"מוחמד ענה: האסלאם הוא להאמין שאין אל מבלעדי אללה, ושמוחמד שליחו."],[6.0,"עליך להתפלל חמש תפילות ביום, לתת צדקה,"],[11.2,"לצום את צום הרמדאן, ולעלות לרגל פעם בחיים — אם ביכולתך."]], pops:[2.4,6.2,8.7,11.4,14.0]},
+      {dur:8.0, subs:[[0,"לאחר מספר שאלות נוספות, אמר האדם למוחמד: יפֶה אמרת."],[4.6,"ולאחר מכן — נעלם."]]},
+      {dur:9.92, subs:[[0,"מוחמד שאל את חבריו אם ידעו מי היה האיש; הם השיבו בשלילה."],[5.5,"ואז אמר להם:"]], big:[6.4,9.9,"זהו המלאך גַבּריאל"]},
+      {dur:13.36, type:"finale", subs:[[0,"דרך השיחה הזו מוצגות חמש מצוות היסוד — עמודי האסלאם."],[5.4,"בפרק זה נכיר כל אחת מהן ונבין את משמעותה,"],[9.6,"ונלמד כיצד היא באה לידי ביטוי בחיי המוסלמי."]]}
+    ];
+
+    var i=-1, guard=null, tick=null;
+    function el(id){return document.getElementById(id);}
+
+    function setCue(txt){ if(cue.textContent!==txt){ cue.classList.remove('show'); setTimeout(function(){ cue.textContent=txt; if(txt) cue.classList.add('show'); },160);} else if(txt){ cue.classList.add('show'); } }
+
+    function play(idx){
+      if(idx>=SCENES.length){ endShow(); return; }
+      i=idx; clearTimeout(guard); clearInterval(tick);
+      var S=SCENES[idx], sc=sceneEls[idx];
+      sceneEls.forEach(function(s){ s.classList.remove('active'); });
+      sc.classList.add('active');
+      stage.classList.toggle('finale-active', S.type==='finale');
+      // reset overlays
+      bigSpan.classList.remove('show'); bigSpan.textContent=''; cue.textContent=''; cue.classList.remove('show');
+      // video
+      var v=sc.querySelector('video');
+      if(v){ try{ v.currentTime=0; v.play().catch(function(){});
+        v.onloadedmetadata=function(){ if(v.duration>0.2) v.playbackRate=Math.max(0.4,Math.min(1.2, v.duration/S.dur)); };
+        if(v.readyState>=1 && v.duration>0.2) v.playbackRate=Math.max(0.4,Math.min(1.2, v.duration/S.dur));
+      }catch(e){} }
+      // icons reset
+      if(S.type==='icons'){ sc.querySelectorAll('[data-icon]').forEach(function(p){p.classList.remove('pop');}); }
+      if(S.type==='finale'){ sc.querySelectorAll('[data-f]').forEach(function(p){p.classList.remove('show');}); }
+      // audio
+      var a=el('a'+idx), t0=performance.now();
+      var done=false; function next(){ if(done) return; done=true; play(idx+1); }
+      if(a){ a.currentTime=0; a.onended=next; a.play().catch(function(){}); }
+      guard=setTimeout(next,(S.dur+1.2)*1000);
+      // timeline tick (subs, big, pops) driven by audio time (fallback perf clock)
+      tick=setInterval(function(){
+        // wall clock drives the timeline; the audio starts at the same instant so they stay in sync
+        var t = (performance.now()-t0)/1000;
+        // subtitle
+        var s=''; for(var k=0;k<S.subs.length;k++){ if(t>=S.subs[k][0]) s=S.subs[k][1]; }
+        setCue(s);
+        // big text
+        if(S.big){ if(t>=S.big[0] && t<=S.big[1]) bigSpan.classList.add('show'), bigSpan.textContent=S.big[2];
+          else if(t>S.big[1]) bigSpan.classList.remove('show'); }
+        // icon pops
+        if(S.type==='icons'){ var pills=sc.querySelectorAll('[data-icon]');
+          for(var p=0;p<S.pops.length;p++){ if(t>=S.pops[p]) pills[p].classList.add('pop'); } }
+        // finale reveal
+        if(S.type==='finale'){ var fs=sc.querySelectorAll('[data-f]'); var ft=[0.6,1.4,4.0,7.2];
+          for(var q=0;q<fs.length;q++){ if(t>=ft[q]) fs[q].classList.add('show'); } }
+      },90);
+    }
+
+    function endShow(){ clearInterval(tick); // hold finale, ensure CTA
+      var last=sceneEls[SCENES.length-1]; last.querySelectorAll('[data-f]').forEach(function(p){p.classList.add('show');});
+      cue.classList.remove('show');
+    }
+
+    el('play').addEventListener('click',function(){
+      gate.style.transition='opacity .6s'; gate.style.opacity='0';
+      setTimeout(function(){ gate.style.display='none'; },600);
+      stage.classList.add('playing'); play(0);
+    });
+
+    // preview: #s3 jump to a scene (muted audio) for testing
+    if(location.hash.indexOf('#s')===0){ var n=parseInt(location.hash.slice(2),10);
+      if(n>=1&&n<=7){ gate.style.display='none'; stage.classList.add('playing');
+        for(var k=0;k<7;k++){ var a=el('a'+k); if(a) a.muted=true; } play(n-1); } }
+  })();
+  </script>
+</body>
+</html>

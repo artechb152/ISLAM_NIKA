@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פרקי הלמידה · אסלאם</title>
+<style>
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-light-aaa.otf") format("opentype");font-weight:300;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-regular-aaa.otf") format("opentype");font-weight:400;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-bold-aaa.otf") format("opentype");font-weight:700;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-black-aaa.otf") format("opentype");font-weight:900;font-display:swap}
+
+  :root{
+    --cream:#fff7e5;
+    --brown:#4c1704;
+    --maroon:#841b1b;
+    --ink:#1c1208;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:"Kedem","Heebo",system-ui,"Segoe UI",Arial,sans-serif;
+    background:var(--cream);color:var(--ink);
+    min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;
+  }
+
+  .page{
+    position:relative;flex:1;display:flex;flex-direction:column;
+    background:var(--cream) url("background.png") center top/cover no-repeat fixed;
+  }
+
+  /* ---- header (enlarged) ---- */
+  header{
+    height:clamp(54px,6.8vh,88px);background:var(--brown);
+    box-shadow:0 3px 18px rgba(28,10,2,.3);
+    position:sticky;top:0;z-index:5;display:flex;align-items:center;
+  }
+  /* header content shares the same bounds as the title/grid, so the logo lines up */
+  .header-inner{width:min(1614px,92vw);margin-inline:auto;
+    display:flex;align-items:center;justify-content:flex-start}
+  .logo-link{display:inline-flex;align-items:center;transition:opacity .2s ease}
+  .logo-link:hover{opacity:.82}
+  .logo-link .logo{height:clamp(30px,4.2vh,50px);width:auto;display:block}
+
+  /* ---- content: title + grid share the same bounds, so they line up ---- */
+  .content{
+    width:min(1614px,92vw);margin-inline:auto;flex:1;
+    padding-top:clamp(24px,4.2vh,54px);padding-bottom:clamp(28px,5vh,64px);
+  }
+  .title{
+    display:block;text-align:right;font-family:"Kedem",serif;font-weight:700;
+    font-size:clamp(18px,1.65vw,27px);color:var(--maroon);letter-spacing:.5px;
+    text-shadow:4px 3px 22px rgba(0,0,0,.16);
+    margin-bottom:clamp(24px,4.2vh,52px);
+  }
+  /* 7 even columns; column-gap is 52/1614 of the grid width, matching the Figma */
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);
+    column-gap:3.2%;row-gap:clamp(34px,5.4vh,72px)}
+
+  .chapter{
+    all:unset;display:flex;flex-direction:column;align-items:center;gap:clamp(9px,1.2vh,16px);
+    text-align:center;
+    opacity:0;transform:translateY(16px);
+    animation:rise .6s cubic-bezier(.2,.8,.2,1) forwards;
+    animation-delay:calc(var(--i) * 42ms);
+  }
+  @keyframes rise{to{opacity:1;transform:none}}
+
+  .chapter .thumb{
+    width:100%;aspect-ratio:185/125;border-radius:clamp(18px,1.5vw,26px);
+    position:relative;overflow:hidden;
+    background:linear-gradient(155deg,#efe9dc,#ddd3bf 68%,#cfc4ac);
+    background-size:cover;background-position:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 8px 20px rgba(28,10,2,.12);
+    transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s ease;
+    /* unify the varied photos into one warm, on-brand tone */
+    filter:saturate(.88) contrast(1.05) brightness(1.02);
+  }
+  /* warm maroon-gold wash + soft vignette so every card reads as one system */
+  .chapter .thumb::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:
+      radial-gradient(120% 120% at 50% 30%, rgba(0,0,0,0) 55%, rgba(28,10,2,.28) 100%),
+      linear-gradient(165deg, rgba(199,154,60,.14), rgba(74,16,30,.22));
+    mix-blend-mode:multiply;
+  }
+  .chapter .caption{line-height:1.28;font-size:clamp(11px,.8vw,14px)}
+  .chapter .caption .lead{font-weight:700;display:block;margin-bottom:2px;color:var(--maroon)}
+  .chapter .caption .name{font-weight:400;display:block;color:#171310}
+
+  /* gentle hover on every card (so it reads as the finished menu) */
+  .chapter:hover .thumb,.chapter:focus-visible .thumb{
+    transform:translateY(-6px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 18px 36px rgba(76,23,4,.24);
+  }
+  .chapter[href]{cursor:pointer}
+  .chapter:focus-visible{outline:none}
+  .chapter:active .thumb{transform:translateY(-2px)}
+
+  @media (max-width:1100px){.grid{grid-template-columns:repeat(4,1fr)}}
+  @media (max-width:680px){.grid{grid-template-columns:repeat(2,1fr);column-gap:16px;row-gap:26px}
+    .title{text-align:center}}
+  @media (prefers-reduced-motion:reduce){.chapter{animation:none;opacity:1;transform:none}}
+</style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="header-inner">
+        <a class="logo-link" href="index.html" aria-label="חזרה למסך הבית">
+          <img class="logo" src="assets/logo-cream.png" alt="אסלאם">
+        </a>
+      </div>
+    </header>
+
+    <main class="content">
+      <h1 class="title">‏פרקי הלמידה-</h1>
+      <div class="grid" id="grid"></div>
+    </main>
+  </div>
+
+  <script>
+    // Chapter data — add `thumb` and `href` per chapter as each is built.
+    const chapters = [
+      { n: 1,  t: "ההיסטוריה של חצי האי ערב", thumb: "assets/chapters/ch1.jpg" },
+      { n: 2,  t: "תרבות שבטית טרום עליית האסלאם", thumb: "assets/chapters/ch2.jpg" },
+      { n: 3,  t: "ראשית חיי מוחמד", thumb: "assets/chapters/ch3.jpg" },
+      { n: 4,  t: "ההג׳רה והקרבות", thumb: "assets/chapters/ch4.jpg" },
+      { n: 5,  t: "שאלת הירושה והח׳ליפים ישרי הדרך", thumb: "assets/chapters/ch5.jpg" },
+      { n: 6,  t: "חמש מצוות היסוד", href: "chapter6.html", thumb: "assets/chapter6/entrance-keyframe.jpg" },
+      { n: 7,  t: "לוח השנה ההג׳רי", thumb: "assets/chapters/ch7.jpg" },
+      { n: 8,  t: "מקורות האסלאם — הקוראן והסונה", thumb: "assets/chapters/ch8.jpg" },
+      { n: 9,  t: "האסלאם השיעי", thumb: "assets/chapters/ch9.jpg" },
+      { n: 10, t: "זרמים שונים באסלאם", thumb: "assets/chapters/ch10.jpg" },
+      { n: 11, t: "מקורות ואסכולות ההלכה", thumb: "assets/chapters/ch11.jpg" },
+      { n: 12, t: "ג׳האד, ריבאט, ואסתשהאד", thumb: "assets/chapters/ch12.jpg" },
+      { n: 13, t: "דגלים וסמלים", thumb: "assets/chapters/ch13.jpg" },
+      { n: 14, t: "מוטיבים אסלאמיים בחומר המודיעין הגלוי", thumb: "assets/chapters/ch14.jpg" },
+      { n: 15, t: "ציר הזמן בראשית האסלאם", thumb: "assets/chapters/ch15.jpg" },
+      { n: 16, t: "ימי ציון אזכור", thumb: "assets/chapters/ch16.jpg" },
+      { n: 17, t: "מילון מונחים", thumb: "assets/chapters/ch17.jpg" },
+      { n: 18, t: "ספרות מומלצת", thumb: "assets/chapters/ch18.jpg" },
+    ];
+
+    const grid = document.getElementById("grid");
+    chapters.forEach((c, idx) => {
+      const el = document.createElement("a");
+      el.className = "chapter";
+      el.style.setProperty("--i", idx);
+      if (c.href) el.href = c.href;
+      el.setAttribute("aria-label", `פרק ${c.n} — ${c.t}`);
+      const thumbStyle = c.thumb ? ` style="background-image:url('${c.thumb}')"` : "";
+      el.innerHTML = `
+        <span class="thumb"${thumbStyle}></span>
+        <span class="caption"><span class="lead">פרק ${c.n}</span><span class="name">${c.t}</span></span>`;
+      grid.appendChild(el);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+/* Kedem — the project typeface.
+   Lifted verbatim from the original documents; only the url() base changed, because the
+   font files are now served from /public rather than from beside each HTML file. */
+@font-face{font-family:"Kedem";src:url("/assets/fonts/kedem-light-aaa.otf") format("opentype");font-weight:300;font-display:swap}
+@font-face{font-family:"Kedem";src:url("/assets/fonts/kedem-regular-aaa.otf") format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"Kedem";src:url("/assets/fonts/kedem-bold-aaa.otf") format("opentype");font-weight:700;font-display:swap}
+@font-face{font-family:"Kedem";src:url("/assets/fonts/kedem-black-aaa.otf") format("opentype");font-weight:900;font-display:swap}

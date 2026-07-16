@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>פרק שישי · חמש מצוות היסוד — יחידת הלימוד</title>
+<style>
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-light-aaa.otf") format("opentype");font-weight:300;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-regular-aaa.otf") format("opentype");font-weight:400;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-bold-aaa.otf") format("opentype");font-weight:700;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-black-aaa.otf") format("opentype");font-weight:900;font-display:swap}
+
+  :root{
+    --cream:#fff7e5;
+    --paper:#fffdf6;
+    --brown:#4c1704;
+    --maroon:#841b1b;
+    --maroon-deep:#4a101e;
+    --gold:#c79a3c;
+    --gold-soft:#e7c877;
+    --ink:#241a10;
+    --muted:#7a6650;
+    --line:rgba(76,23,4,.14);
+    --ok:#2e7d55;
+    --bad:#a8342b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:"Kedem","Heebo",system-ui,"Segoe UI",Arial,sans-serif;
+    color:var(--ink);
+    background:#160b05;
+    min-height:100vh;display:flex;flex-direction:column;position:relative;
+  }
+  /* atmospheric backdrop — you are inside the mosque, reading an illuminated page */
+  body::before{
+    content:"";position:fixed;inset:-60px;z-index:-3;
+    background:url("assets/chapter6/entrance-keyframe.jpg") center 30%/cover no-repeat;
+    filter:blur(14px) brightness(.4) saturate(.85);transform:scale(1.12);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+    background:
+      radial-gradient(130% 100% at 50% 22%, rgba(22,11,5,0) 34%, rgba(15,7,3,.72) 100%),
+      linear-gradient(180deg, rgba(15,7,3,.55), rgba(15,7,3,.2) 30%, rgba(15,7,3,.6));
+  }
+  .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;
+    background:url("background.png") center/560px;mix-blend-mode:overlay}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    background:var(--brown);color:var(--cream);
+    height:clamp(52px,6.6vh,74px);flex:none;
+    display:flex;align-items:center;gap:clamp(14px,2vw,30px);
+    padding:0 clamp(20px,3vw,46px);box-shadow:0 3px 16px rgba(28,10,2,.3);
+    position:sticky;top:0;z-index:20;
+  }
+  .topbar .logo{height:clamp(26px,3.4vh,40px);width:auto;display:block}
+  .topbar .logo-link{display:inline-flex;transition:opacity .2s}
+  .topbar .logo-link:hover{opacity:.82}
+  .progress{flex:1;display:flex;flex-direction:column;gap:9px;max-width:840px}
+  .progress .meta{display:flex;justify-content:space-between;align-items:baseline;
+    font-size:clamp(11px,.9vw,13.5px);color:rgba(255,247,229,.78);letter-spacing:.5px}
+  .progress .meta .sec{color:var(--gold-soft);font-weight:700;font-size:clamp(13px,1.05vw,16px);letter-spacing:1.5px}
+  .stepper{position:relative;height:16px;display:flex;align-items:center}
+  .track{position:absolute;inset-inline:6px;height:3px;top:50%;transform:translateY(-50%);
+    border-radius:99px;background:rgba(255,247,229,.16)}
+  .track > i{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--gold),var(--gold-soft));transition:width .5s cubic-bezier(.2,.8,.2,1)}
+  .dots{position:relative;width:100%;display:flex;justify-content:space-between;align-items:center}
+  .dots .dot{width:9px;height:9px;border-radius:50%;background:rgba(255,247,229,.28);
+    box-shadow:0 0 0 3px rgba(22,11,5,.55);transition:.3s;cursor:default}
+  .dots .dot.done{background:var(--gold)}
+  .dots .dot.active{background:var(--gold-soft);width:15px;height:15px;
+    box-shadow:0 0 0 3px rgba(22,11,5,.55),0 0 0 6px rgba(231,200,119,.28)}
+  .exit{color:rgba(255,247,229,.72);text-decoration:none;font-size:clamp(12px,.95vw,15px);
+    display:inline-flex;align-items:center;gap:7px;white-space:nowrap;transition:color .2s}
+  .exit:hover{color:var(--cream)}
+  .exit svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  /* ---------- stage ---------- */
+  .wrap{flex:1;display:flex;flex-direction:column;align-items:center;
+    padding:clamp(20px,4vh,52px) clamp(18px,4vw,40px) 0}
+  #stage{width:100%;max-width:1180px}
+  .screen{animation:fade .5s cubic-bezier(.2,.8,.2,1)}
+  @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  .card{
+    position:relative;
+    background-color:#f8eed6;
+    background-image:
+      radial-gradient(140% 120% at 100% 0%, rgba(199,154,60,.06), transparent 55%),
+      linear-gradient(180deg,#fdf8ea,#f5ead2);
+    border-radius:clamp(16px,1.6vw,22px);
+    padding:clamp(30px,4vw,60px);
+    box-shadow:
+      0 0 0 1px rgba(199,154,60,.55),
+      0 0 0 8px rgba(253,248,234,.92),
+      0 0 0 9px rgba(199,154,60,.32),
+      0 40px 90px rgba(0,0,0,.5), 0 10px 30px rgba(0,0,0,.35);
+  }
+  .card::before{ /* subtle parchment texture */
+    content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    background:url("background.png") center/460px;opacity:.35;mix-blend-mode:multiply;
+  }
+  .card > *{position:relative}
+  /* top ornament: a small 8-point star flanked by gold rules */
+  .card .crown{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:clamp(18px,2.4vh,30px)}
+  .card .crown::before,.card .crown::after{content:"";height:1px;width:min(120px,22%);
+    background:linear-gradient(90deg,transparent,rgba(199,154,60,.75))}
+  .card .crown svg{width:22px;height:22px}
+  .card .crown svg path,.card .crown svg rect{stroke:var(--gold);fill:none;stroke-width:1.4}
+
+  .kicker{display:none}
+  .kicker-x{display:inline-flex;align-items:center;gap:11px;color:var(--gold);
+    font-size:clamp(12px,1vw,15px);font-weight:700;letter-spacing:3px;margin-bottom:14px}
+  .kicker::before{content:"";width:15px;height:15px;flex:none;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='3.2' y='3.2' width='9.6' height='9.6' fill='none' stroke='%23c79a3c' stroke-width='1.3'/%3E%3Crect x='3.2' y='3.2' width='9.6' height='9.6' fill='none' stroke='%23c79a3c' stroke-width='1.3' transform='rotate(45 8 8)'/%3E%3C/svg%3E") center/contain no-repeat}
+  h1.h,h2.h{font-family:"Kedem",serif;font-weight:700;color:var(--maroon);line-height:1.1}
+  h1.h{font-size:clamp(28px,3.6vw,50px);margin-bottom:0}
+  h2.h{font-size:clamp(23px,2.8vw,37px);margin-bottom:0}
+  h1.h::after,h2.h::after{content:"";display:block;width:112px;height:12px;margin-top:16px;margin-bottom:clamp(14px,2vh,24px);
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='12'%3E%3Cline x1='34' y1='6' x2='112' y2='6' stroke='%23c79a3c' stroke-width='1.4'/%3E%3Crect x='2' y='2' width='8' height='8' fill='%23c79a3c' transform='rotate(45 6 6)'/%3E%3Ccircle cx='22' cy='6' r='2.3' fill='%23c79a3c'/%3E%3C/svg%3E") right center/contain no-repeat}
+  .body p{font-size:clamp(15px,1.15vw,18.5px);line-height:1.85;color:#33281c;margin-bottom:14px}
+  .body p:last-child{margin-bottom:0}
+  .lead-in{font-size:clamp(16px,1.3vw,21px);color:var(--muted);line-height:1.7;margin-bottom:20px}
+
+  .highlight{
+    margin-top:22px;padding:18px 20px;border-radius:16px;
+    background:linear-gradient(160deg,rgba(199,154,60,.12),rgba(132,27,27,.07));
+    border:1px solid rgba(199,154,60,.35);border-inline-start:4px solid var(--gold);
+  }
+  .highlight .t{font-weight:700;color:var(--maroon);margin-bottom:6px;
+    display:flex;align-items:center;gap:9px;font-size:clamp(14px,1.1vw,17px)}
+  .highlight .t svg{width:18px;height:18px;fill:var(--gold)}
+  .highlight p{font-size:clamp(14px,1.05vw,17px);line-height:1.7;color:#3a2c1c;margin:0}
+
+  /* objective / pillars map */
+  .obj{list-style:none;display:grid;gap:12px;margin:6px 0 4px}
+  .obj li{display:flex;gap:12px;align-items:flex-start;font-size:clamp(15px,1.15vw,18px);color:#33281c;line-height:1.6}
+  .obj li svg{flex:none;width:22px;height:22px;margin-top:2px;fill:var(--gold)}
+  .pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:26px}
+  .pillars .p{background:linear-gradient(180deg,#fff,rgba(255,247,229,.6));border:1px solid var(--line);
+    border-radius:14px;padding:16px 8px;text-align:center;position:relative;overflow:hidden}
+  .pillars .p .n{width:30px;height:30px;margin:0 auto 8px;border-radius:50%;
+    background:var(--maroon);color:var(--cream);display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:14px}
+  .pillars .p .nm{font-size:clamp(12px,.95vw,15px);font-weight:700;color:var(--ink)}
+  @media(max-width:640px){.pillars{grid-template-columns:repeat(2,1fr)}}
+
+  /* ---------- interactions ---------- */
+  .prompt{font-size:clamp(17px,1.5vw,23px);font-weight:700;color:var(--maroon);
+    line-height:1.4;margin-bottom:20px}
+  .opts{display:grid;gap:12px}
+  .opt{
+    text-align:right;background:#fff;border:1.5px solid var(--line);border-radius:14px;
+    padding:15px 18px;font:inherit;font-size:clamp(14px,1.1vw,17.5px);color:#2c2216;cursor:pointer;
+    display:flex;align-items:center;gap:12px;transition:.18s;line-height:1.5;
+  }
+  .opt .mk{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);
+    display:flex;align-items:center;justify-content:center}
+  .opt .mk svg{width:14px;height:14px;display:none}
+  .opt:hover:not(.locked){border-color:var(--gold);background:rgba(199,154,60,.06);transform:translateX(-3px)}
+  .opt.correct{border-color:var(--ok);background:rgba(46,125,85,.1)}
+  .opt.correct .mk{border-color:var(--ok);background:var(--ok)}
+  .opt.correct .mk svg{display:block;fill:#fff}
+  .opt.wrong{border-color:var(--bad);background:rgba(168,52,43,.09)}
+  .opt.wrong .mk{border-color:var(--bad);background:var(--bad)}
+  .opt.wrong .mk svg{display:block;fill:#fff}
+  .opt.locked{cursor:default}
+  .opt.dim{opacity:.55}
+
+  .tf{display:flex;gap:14px;margin-top:6px}
+  .tf button{flex:1;padding:18px;border-radius:16px;border:1.5px solid var(--line);background:#fff;
+    font:inherit;font-weight:700;font-size:clamp(16px,1.3vw,20px);cursor:pointer;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;gap:10px;transition:.18s}
+  .tf button svg{width:20px;height:20px}
+  .tf button:hover:not(.locked){border-color:var(--gold);background:rgba(199,154,60,.07)}
+  .tf button.correct{border-color:var(--ok);background:rgba(46,125,85,.12);color:var(--ok)}
+  .tf button.wrong{border-color:var(--bad);background:rgba(168,52,43,.1);color:var(--bad)}
+
+  .feedback{margin-top:18px;padding:15px 18px;border-radius:14px;font-size:clamp(14px,1.08vw,17px);
+    line-height:1.6;display:none;animation:fade .4s}
+  .feedback.show{display:block}
+  .feedback.good{background:rgba(46,125,85,.1);border:1px solid rgba(46,125,85,.4);color:#245c40}
+  .feedback.bad{background:rgba(168,52,43,.09);border:1px solid rgba(168,52,43,.4);color:#7c2a23}
+  .feedback b{color:inherit}
+
+  /* match */
+  .match{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,2vw,34px);margin-top:8px}
+  .match .col{display:grid;gap:10px}
+  .match .col h4{font-size:clamp(12px,.95vw,14px);letter-spacing:2px;color:var(--muted);
+    font-weight:700;text-align:center;margin-bottom:2px}
+  .chip{background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;
+    font:inherit;font-size:clamp(13px,1.02vw,16px);color:#2c2216;cursor:pointer;text-align:center;
+    transition:.16s;line-height:1.4}
+  .chip:hover:not(.done):not(.sel){border-color:var(--gold);background:rgba(199,154,60,.06)}
+  .chip.sel{border-color:var(--maroon);background:rgba(132,27,27,.08);box-shadow:0 0 0 3px rgba(132,27,27,.12)}
+  .chip.done{border-color:var(--ok);background:rgba(46,125,85,.1);color:#245c40;cursor:default}
+  .chip.flash{border-color:var(--bad);background:rgba(168,52,43,.12);animation:shake .35s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  @media(max-width:560px){.match{grid-template-columns:1fr}}
+
+  /* order */
+  .order{display:grid;gap:20px;margin-top:6px}
+  .order .pool,.order .seq{display:grid;gap:10px}
+  .order h4{font-size:clamp(12px,.95vw,14px);letter-spacing:2px;color:var(--muted);font-weight:700;margin-bottom:2px}
+  .step{background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:13px 16px;
+    font:inherit;font-size:clamp(13px,1.02vw,16.5px);color:#2c2216;cursor:pointer;text-align:right;
+    display:flex;align-items:center;gap:12px;transition:.16s;line-height:1.4}
+  .step:hover:not(.placed){border-color:var(--gold);background:rgba(199,154,60,.06)}
+  .step .idx{flex:none;width:26px;height:26px;border-radius:50%;background:var(--cream);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--maroon)}
+  .seq .step{cursor:default}
+  .seq .step.ok{border-color:var(--ok);background:rgba(46,125,85,.1)}
+  .seq .step.no{border-color:var(--bad);background:rgba(168,52,43,.09)}
+  .seq .step .idx.filled{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+  .placeholder{border:1.5px dashed var(--line);border-radius:13px;padding:13px 16px;color:var(--muted);
+    font-size:clamp(12px,1vw,15px);text-align:center}
+
+  /* flip cards */
+  .flips{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px}
+  @media(max-width:560px){.flips{grid-template-columns:1fr}}
+  .flip{perspective:1200px;height:clamp(140px,20vh,180px);cursor:pointer}
+  .flip .inner{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.2,.8,.2,1);
+    transform-style:preserve-3d}
+  .flip.on .inner{transform:rotateY(180deg)}
+  .flip .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:16px 18px;border:1px solid var(--line)}
+  .flip .front{background:linear-gradient(160deg,#fff,rgba(255,247,229,.7))}
+  .flip .front .term{font-weight:700;color:var(--maroon);font-size:clamp(17px,1.5vw,23px)}
+  .flip .front .hint{margin-top:10px;font-size:clamp(11px,.9vw,13px);color:var(--muted);letter-spacing:1px}
+  .flip .back{background:linear-gradient(160deg,var(--maroon-deep),var(--maroon));color:var(--cream);
+    transform:rotateY(180deg);font-size:clamp(13px,1.05vw,16px);line-height:1.6}
+
+  /* summary */
+  .sumgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:8px 0 22px}
+  @media(max-width:640px){.sumgrid{grid-template-columns:repeat(2,1fr)}}
+  .sumgrid .s{background:linear-gradient(180deg,#fff,rgba(255,247,229,.55));border:1px solid var(--line);
+    border-radius:15px;padding:18px 12px;text-align:center}
+  .sumgrid .s .n{width:34px;height:34px;margin:0 auto 10px;border-radius:50%;
+    background:linear-gradient(180deg,var(--maroon),var(--maroon-deep));color:var(--cream);
+    display:flex;align-items:center;justify-content:center;font-weight:700}
+  .sumgrid .s .nm{font-weight:700;color:var(--ink);font-size:clamp(13px,1vw,16px);margin-bottom:4px}
+  .sumgrid .s .d{font-size:clamp(11px,.85vw,13px);color:var(--muted);line-height:1.4}
+  .blessing{margin-top:8px;padding:22px;border-radius:16px;text-align:center;
+    background:linear-gradient(160deg,rgba(199,154,60,.12),rgba(132,27,27,.08));border:1px solid rgba(199,154,60,.35)}
+  .blessing .ar{font-size:clamp(18px,2vw,26px);color:var(--maroon);direction:rtl;margin-bottom:8px;font-weight:700}
+  .blessing .he{font-size:clamp(13px,1.05vw,16px);color:var(--muted)}
+
+  /* end */
+  .end{text-align:center;padding:clamp(10px,2vh,26px) 0}
+  .end .seal{width:clamp(84px,11vw,120px);height:auto;margin:0 auto clamp(16px,2.4vh,26px);display:block}
+  .end .score{display:inline-block;margin:6px 0 22px;padding:10px 22px;border-radius:99px;
+    background:rgba(199,154,60,.14);border:1px solid rgba(199,154,60,.4);color:var(--maroon);font-weight:700;
+    font-size:clamp(15px,1.3vw,19px)}
+  .end .actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+
+  /* ---------- nav ---------- */
+  .nav{width:100%;max-width:1180px;display:flex;align-items:center;justify-content:space-between;
+    gap:14px;padding:clamp(18px,3vh,30px) 0 clamp(24px,4vh,40px)}
+  .btn{font:inherit;font-weight:700;font-size:clamp(15px,1.2vw,18px);letter-spacing:.5px;
+    padding:13px clamp(24px,2.6vw,40px);border-radius:99px;cursor:pointer;border:1.5px solid transparent;
+    display:inline-flex;align-items:center;gap:10px;transition:.2s;text-decoration:none}
+  .btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+  .btn.primary{background:linear-gradient(180deg,var(--maroon),var(--maroon-deep));color:var(--cream);
+    box-shadow:0 12px 26px rgba(74,16,30,.32)}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(74,16,30,.4)}
+  .btn.primary[disabled]{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;filter:grayscale(.3)}
+  .btn.ghost{background:transparent;color:var(--maroon);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--maroon);background:rgba(132,27,27,.05)}
+  .btn.ghost[disabled]{opacity:.35;cursor:not-allowed}
+  .hint-tag{font-size:clamp(12px,.95vw,14px);color:var(--muted);text-align:center;flex:1}
+
+  @media (prefers-reduced-motion:reduce){.screen{animation:none}.flip .inner{transition:none}.bar>i{transition:none}}
+</style>
+</head>
+<body>
+  <div class="grain"></div>
+  <div class="topbar">
+    <a class="logo-link" href="index.html" aria-label="מסך הבית"><img class="logo" src="assets/logo-cream.png" alt="אסלאם"></a>
+    <div class="progress">
+      <div class="meta"><span class="sec" id="secName">פתיחה</span><span id="counter">מסך 1</span></div>
+      <div class="stepper"><div class="track"><i id="bar"></i></div><div class="dots" id="dots"></div></div>
+    </div>
+    <a class="exit" href="chapters.html"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>פרקי הלמידה</a>
+  </div>
+
+  <div class="wrap">
+    <div id="stage"></div>
+    <div class="nav">
+      <button class="btn ghost" id="prev"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>הקודם</button>
+      <div class="hint-tag" id="hint"></div>
+      <button class="btn primary" id="next">הבא<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    </div>
+  </div>
+
+<script>
+/* ===================== CONTENT (verbatim from the source PDF) ===================== */
+const SECTIONS = ["פתיחה","השהאדה","התפילה","הצדקה","צום רמדאן","החג׳","סיכום"];
+
+const SCREENS = [
+  { sec:"פתיחה", type:"story",
+    kicker:"פתיחה", title:"חדית׳ גַבּריאל",
+    paras:[
+      "יש מסורת באסלאם בשם עבדאללה בן עמר (הח׳ליף השני), שמוחמד ישב עם חבריו (הצחאבה) בעיר מדינה כשלפתע ניגש אליהם אדם עם בגדים מבהיקים מלובן ושערו שחור, ונראה שלמרות שהגיע ממרחק, סימני המסע לא ניכרו עליו.",
+      "האדם ניגש למוחמד ופנה אליו: יא מוחמד, מהו האסלאם? ענה לו מוחמד: האסלאם הוא שעליך להאמין שאין אל מבלעדי אללה, שמוחמד הוא שליחו, עליך להתפלל חמש תפילות ביום, לתת צדקה, לצום את צום הרמדאן ולעלות לרגל פעם בחיים אם ביכולתך.",
+      "לאחר מספר שאלות נוספות למוחמד, ענה לו: יפה אמרת, ונעלם. לפליאתם של חבריו של מוחמד, שאל אותם אם הם יודעים מי האיש, והשיבו לו בשלילה."
+    ],
+    reveal:{ q:"מי היה האיש המסתורי שהגיע אל מוחמד?", a:"ענה להם: זהו המלאך גַבּריאל." } },
+
+  { sec:"פתיחה", type:"objective",
+    kicker:"מטרת הפרק", title:"חמש מצוות היסוד",
+    lead:"בפרק זה נכיר את חמשת עמודי האסלאם — הבסיס שעליו עומדת עשיית המאמין המוסלמי.",
+    objectives:[
+      "להבין מהם חמשת עמודי האסלאם ומה מקורם.",
+      "להכיר את המשמעות, הזמנים והריטואלים של כל אחת מהמצוות.",
+      "לזהות את הקשרים ההיסטוריים והתרבותיים של המצוות."
+    ],
+    context:"בקוראן נכתבו מצוות רבות, כמו איסור הלוואה בריבית, מצוות כיבוד הורים, איסור אכילת חזיר ודם ובשר נבלה ועוד, אך חמש מצוות אלו נחשבות לעמודי האסלאם (أركان الإسلام الخمسة).",
+    pillars:["השהאדה","התפילה","הצדקה","צום רמדאן","החג׳"] },
+
+  { sec:"השהאדה", type:"content",
+    kicker:"עמוד ראשון · השהאדה", title:"השהאדה — העדות",
+    paras:[
+      "השהאדה (الشهادة) - העדות. המילה שהאדה מקורה ככל הנראה מארמית, ומוזכרת במקרא (גל-עד; יגר שהדותא, בראשית לא:מז). משמעה - עדות.",
+      "על המוסלמי להעיד שאין אל מבלעדי אללה ושמוחמד הוא שליחו."
+    ],
+    highlight:{ t:"מקור המילה", p:"״שהאדה״ מקורה ככל הנראה בארמית, ומופיעה במקרא בצירוף ״יְגַר שָׂהֲדוּתָא״ (בראשית לא:מז) — משמעה עדות." } },
+
+  { sec:"השהאדה", type:"content",
+    kicker:"עמוד ראשון · השהאדה", title:"מתי נאמרת השהאדה",
+    paras:[
+      "משפט זה נאמר בקריאה לתפילה (אד׳אן) על ידי המואזין, וכן במהלך התפילה עצמה.",
+      "כאשר אדם מבקש לקבל על עצמו את דת האסלאם, יאמר את השאהדה שלוש פעמים בפני שני עדים כשרים.",
+      "ההצהרה על ייחוד האל מתקנת את הנוהג שהיה בחצי האי ערב בתקופה הטרום-אסלאמית עת עבדו אלילים."
+    ] },
+
+  { sec:"השהאדה", type:"mcq",
+    kicker:"בדיקת הבנה", prompt:"על מה מעיד המוסלמי באמירת השהאדה?",
+    options:[
+      { t:"שאין אל מבלעדי אללה ושמוחמד הוא שליחו", ok:true },
+      { t:"על חמש התפילות שהוא מתפלל מדי יום", ok:false },
+      { t:"על נתינת הצדקה השנתית לעניים", ok:false },
+      { t:"על התחייבותו לעלות לרגל למכה", ok:false }
+    ],
+    good:"נכון. השהאדה היא העדות שאין אל מבלעדי אללה ושמוחמד הוא שליחו.",
+    bad:"לא מדויק. השהאדה היא העדות שאין אל מבלעדי אללה ושמוחמד הוא שליחו." },
+
+  { sec:"התפילה", type:"content",
+    kicker:"עמוד שני · התפילה", title:"התפילה (אלצלאה)",
+    paras:[
+      "מצוות התפילה ניתנה למוחמד במסע הלילי בשנת 621 עת עלה לשמים.",
+      "מספר התפילות בקוראן לא נותן בהירות חד משמעית, שכן בקוראן נכתב במקום אחד שעל המוסלמי להתפלל שתי תפילות ובמקום אחר נכתב שעליו להתפלל גם את ״התפילה התיכונה״. קביעת חמש תפילות התפתחה ככל הנראה בתקופה מאוחרת יותר.",
+      "על המוסלמי להתפלל חמש תפילות ביום בזמנים קבועים (שעות זמניות כמו ביהדות)."
+    ] },
+
+  { sec:"התפילה", type:"match",
+    kicker:"תרגול · התאמה", title:"חמש התפילות וזמניהן",
+    intro:"התאימו כל תפילה לזמנהּ. לחצו על תפילה ואז על הזמן המתאים לה.",
+    leftTitle:"התפילה", rightTitle:"הזמן",
+    pairs:[
+      { l:"תפילת השחר (אלפג׳ר)", r:"בעלות השחר, כשאפשר להבחין בין חוט לבן לחוט שחור" },
+      { l:"תפילת הצהריים (אלט׳הר)", r:"בחצות היום" },
+      { l:"תפילת אחר הצהריים (אלעצר)", r:"כשצלו של חפץ והחפץ עצמו באותו הגודל" },
+      { l:"תפילת הערב (אלמע׳רב)", r:"בשקיעת השמש" },
+      { l:"תפילת הלילה (אלעשאא׳)", r:"בצאת הכוכבים עד הבוקר" }
+    ],
+    good:"מצוין! חמש התפילות וזמניהן — פג׳ר, ט׳הר, עצר, מע׳רב ועשאא׳." },
+
+  { sec:"התפילה", type:"content",
+    kicker:"עמוד שני · התפילה", title:"היטהרות וכוונה",
+    paras:[
+      "המוסלמי נדרש להיטהר לקראת התפילה (וד׳וא - وضوء) באמצעות שטיפת הידיים, הפנים, שיער הראש והזקן, וכן לשטוף את הרגליים. יש שינויים קלים בין הסונים לשיעים (ראו להלן: האסלאם השיעי).",
+      "על המוסלמי להתפלל בכוונה (נִיّה), אחרת התפילה תיחשב לו כמעשה רע שעשה."
+    ],
+    highlight:{ t:"וד׳וא — היטהרות", p:"רחצה טקסית לפני התפילה: הידיים, הפנים, שיער הראש והזקן והרגליים. יש שינויים קלים בין הסונים לשיעים." } },
+
+  { sec:"התפילה", type:"content",
+    kicker:"עמוד שני · התפילה", title:"יום שישי, מסגד וכיוון התפילה",
+    paras:[
+      "המוסלמי אינו מחויב להתפלל במסגד ורשאי להתפלל היכן שנמצא בשעת התפילה, אך ביום השישי (יום אלג׳מעה) מצווה המוסלמי להגיע למסגד ולשמוע דרשה (ח׳טבה) מהאמאם של המסגד. מקובל כי תפילה ״בציבור״ במסגד היא במינימום של שלושה או ארבעה גברים. אישה מחויבת להתפלל כמו גבר אך אינה מצווה ללכת למסגד לתפילת יום השישי.",
+      "כיוון התפילה (קבלה) הוא לעבר העיר מכה, אך חשוב לציין כי בתקופה הראשונה של מוחמד במדינה (יש המציינים 17 חודשים) כיוון התפילה היה ירושלים, עד שמוחמד, יתכן בשל מורת רוחו מהיהודים במדינה שלא המירו את דתם לאסלאם, קיבל התגלות (קוראן 2:144) בה נאמר לו להפנות את פניו למכה.",
+      "שני דברים ראויים לציון: האחד, קדושתה של ירושלים, בין היתר, היא בשל היותה כיוון התפילה הראשון (אלקבלה אלאולא, או אולא אלקבלתין). השני, בעיר מדינה קיים מסגד הנקרא ״בעל שני כיווני התפילה״, שלפי המסורת ההתגלות שמוחמד קיבל, להפנות את פניו למכה, הייתה במהלך התפילה במסגד ההוא."
+    ] },
+
+  { sec:"התפילה", type:"mcq",
+    kicker:"בדיקת הבנה", prompt:"לאן היה מופנה כיוון התפילה (הקבלה) בתקופה הראשונה של מוחמד במדינה, לפני שהופנה למכה?",
+    options:[
+      { t:"ירושלים", ok:true },
+      { t:"מכה", ok:false },
+      { t:"מדינה", ok:false },
+      { t:"הר ערפה", ok:false }
+    ],
+    good:"נכון. בתקופה הראשונה במדינה (יש המציינים 17 חודשים) כיוון התפילה היה ירושלים, ובשל כך היא נחשבת ״אולא אלקבלתין״.",
+    bad:"לא מדויק. הקבלה בתקופה הראשונה במדינה הייתה ירושלים — ולכן היא ״אלקבלה אלאולא״ (כיוון התפילה הראשון)." },
+
+  { sec:"הצדקה", type:"content",
+    kicker:"עמוד שלישי · הצדקה", title:"הצדקה (זכּאת)",
+    paras:[
+      "המוסלמי מחויב לתת 2.5% מהמאזן השנתי שלו לצדקה (1/40, השוו: עין יפה), לעניים, נזקקים, יתומים, בתי תמחוי ועוד. צדקה זו מוזכרת מספר פעמים בקוראן, תוך הבטחה שנותן הצדקה יקבל שכר ״בכפליים״.",
+      "מצוות צדקה זו היא חובה, בשונה מצדקה שמחויב המוסלמי לתת בעיד אלפטר (חג שבירת הצום) ובמועדים נוספים."
+    ],
+    highlight:{ t:"כמה נותנים?", p:"‏2.5% מהמאזן השנתי (1/40) — לעניים, נזקקים, יתומים, בתי תמחוי ועוד. זו חובה, בשונה מצדקת המועדים." } },
+
+  { sec:"הצדקה", type:"mcq",
+    kicker:"בדיקת הבנה", prompt:"איזה שיעור מהמאזן השנתי מחויב המוסלמי לתת כצדקת החובה (זכּאת)?",
+    options:[
+      { t:"‏2.5% (1/40)", ok:true },
+      { t:"‏10% (מעשר)", ok:false },
+      { t:"‏5% (1/20)", ok:false },
+      { t:"‏25% (רבע)", ok:false }
+    ],
+    good:"נכון. 2.5% מהמאזן השנתי, כלומר 1/40.",
+    bad:"לא מדויק. שיעור הצדקה הוא 2.5% מהמאזן השנתי (1/40)." },
+
+  { sec:"צום רמדאן", type:"content",
+    kicker:"עמוד רביעי · צום רמדאן", title:"מקורות הצום",
+    paras:[
+      "ידוע מהמקורות האסלאמיים כי בתקופה הטרום אסלאמית הערבים בחצי האי ערב היו נוהגים לצום במהלך השנה ימים מסוימים, אך לא ניתן לדעת באופן מדויק מה הייתה הסיבה לכך.",
+      "בראשית האסלאם, ככל הידוע הצום החל להתפתח בתקופת שהותו של מוחמד במדינה (לאחר שנת 622). ישנו חדית׳ מוכר, המובא בצחיח אלבוח׳ארי (כתאב אלצום, פרק 69) על כך שכאשר מוחמד הגיע למדינה וראה יהודים צמים את יום הכיפורים (העשור לחודש - עאשוראא׳), שאל אותם לפשר הצום. היהודים ענו לו כי זהו יום טוב (יום צאלח), כי ביום הזה אללה הושיע אותם מפרעה ומשה צם בו. מוחמד ענה להם כי הוא ראוי למשה יותר מהם, וציווה על מאמיניו לצום בו.",
+      "התפתחות הצום לחודש רמדאן הייתה מספר שנים לאחר הגירתו של מוחמד למדינה עקב פסוק שירד, בו נאמר כי חודש רמדאן בו ירד הקוראן, על המוסלמים לצום בו. ירידת הקוראן כאמור הינה ההתגלות הראשונה שחווה מוחמד בשנת 610 בלילה ה-27 לחודש, המכונה ״ליל אלקדר״."
+    ] },
+
+  { sec:"צום רמדאן", type:"content",
+    kicker:"עמוד רביעי · צום רמדאן", title:"מהלך יום הצום",
+    paras:[
+      "נאסר על המוסלמי לאכול, לשתות ולעשן מעלות השחר ועד לשקיעת החמה, שאז ישבור את הצום בסעודה קלה הנקראת אפטאר, ולאחר מכן ילך למסגד להתפלל תפילות התראויח.",
+      "עשרת הלילות האחרונים של חודש רמדאן קדושים במיוחד, ורבו המסורות עליהם, ועיקרן התקרבות לאללה, עבודת המידות בין אדם לחבירו ושליטה עצמית על לשונו.",
+      "המסורת המוסלמית אומרת בשם מוחמד כי מי שצם לשם שמים בחודש רמדאן, כל עוונות העבר נמחלות לו."
+    ] },
+
+  { sec:"צום רמדאן", type:"content",
+    kicker:"עמוד רביעי · צום רמדאן", title:"עיד אלפטר וראיית הירח",
+    paras:[
+      "עם סיום חודש רמדאן ותחילת חודש שַוַّאל מתחיל חג שבירת הצום (עיד אלפטר) במהלכם מרבים המוסלמים בארוחות משפחתיות משותפות, קונים בגדים ותכשיטים חדשים, וכן מצווה המוסלמי לתת צדקה נוספת מעבר לצדקה השנתית. עיד אלפטר זהו זמן שבו מבקרים קרובי משפחה (צלה׳ אלרחם), ואף מתפייסים עם קרובים איתם יש ריב או משקעי עבר.",
+      "חודש רמדאן מתחיל ומסתיים ב״ראיית הירח״ (רויית אלהלאל), ולעיתים יש שינויים (באסלאם הסוני) בין האסכולה הסעודית הקובעת את תחילת וסוף החודש ע״י ראית המולד בטלסקופ (המולד האמיתי), לבין האסכולה המצרית הקובעת את המולד לפי חישובים אסטרונומיים (המולד הממוצע). להרחבה ראו להלן: לוח השנה ההג׳רי."
+    ] },
+
+  { sec:"צום רמדאן", type:"flip",
+    kicker:"תרגול · מושגי רמדאן", title:"מושגים בחודש רמדאן",
+    intro:"לחצו על כל קלף כדי לחשוף את פירושו.",
+    cards:[
+      { term:"אפטאר", def:"הסעודה הקלה שבה שוברים את הצום עם שקיעת החמה." },
+      { term:"תראויח", def:"התפילות שמתפלל המוסלמי במסגד לאחר שבירת הצום בערבי רמדאן." },
+      { term:"ליל אלקדר", def:"הלילה ה-27 לחודש — שבו חווה מוחמד את ההתגלות הראשונה (ירידת הקוראן) בשנת 610." },
+      { term:"עיד אלפטר", def:"חג שבירת הצום, עם סיום רמדאן ותחילת חודש שַוַّאל." }
+    ] },
+
+  { sec:"צום רמדאן", type:"tf",
+    kicker:"בדיקת הבנה", prompt:"צום חודש רמדאן היה נהוג במתכונתו כבר בתקופה הטרום-אסלאמית בחצי האי ערב.",
+    answer:false,
+    good:"נכון שציינת ״לא נכון״. הצום החל להתפתח בתקופת שהותו של מוחמד במדינה (לאחר 622), וההתפתחות לחודש רמדאן הייתה מאוחר יותר.",
+    bad:"למעשה לא נכון: הצום החל להתפתח בתקופת שהותו של מוחמד במדינה (לאחר 622), וההתפתחות לחודש רמדאן הייתה מספר שנים לאחר מכן." },
+
+  { sec:"החג׳", type:"content",
+    kicker:"עמוד חמישי · החג׳", title:"החג׳ — העלייה לרגל",
+    paras:[
+      "העלייה לרגל היא ריטואל המתקשר לאירועים שחוו הגר וישמעאל כשגורשו מביתו של אברהם, לפי המסורת המוסלמית, ומתחילה ביום ה-8 לחודש ד׳ו אלחג׳ה, החודש ה-12 בלוח השנה ההג׳רי. הנרטיב הנ״ל התקבל באסלאם, מפני שהיה קושי להגן על מנהג פגאני מובהק שהתקיים בחצי האי ערב, בכעבה, עוד הרבה לפני תקופת האסלאם.",
+      "בראשית תקופת האסלאם היה קושי גדול להתנייד לחצי האי ערב, והדבר היה כרוך בהליכה ימים רבים במדברות תוך סכנה גדולה משודדים, חיות רעות, חום המדבר ועוד, ובשל כך העלייה לרגל אינה חובה כמו שאר מצוות היסוד, אלא תלויה ביכולתו של האדם, הן בהיבט הכלכלי והן בהיבט הבריאותי, והמוסלמי נדרש להתאמץ לשם כך עד גבול מסוים, פעם אחת במהלך חייו."
+    ],
+    highlight:{ t:"מדוע החג׳ אינו חובה מוחלטת?", p:"בשל הקושי והסכנה שבמסע במדבר, העלייה לרגל תלויה ביכולתו הכלכלית והבריאותית של האדם — פעם אחת במהלך חייו." } },
+
+  { sec:"החג׳", type:"content",
+    kicker:"עמוד חמישי · החג׳", title:"הכנה לחג׳ — אחראם",
+    paras:[
+      "על המוסלמי העולה לרגל להיכנס למצב של טהרה מקסימלית (אחראם), ועליו להתגלח, להסתפר, לקצוץ את ציפורניו, ולאחר מכן להתעטף בבגד לבן המקיף את כתפו, וכן בבגד לבן נוסף המקיף את מותניו. על הבגדים להיות ללא תפרים או כפלים אלא חלקים.",
+      "חובת ההיטהרות מתחילה מאז שהמוסלמי מתקרב לאזור גאוגרפי מסוים סמוך למכה (נקרא בערבית מיקאת)."
+    ] },
+
+  { sec:"החג׳", type:"order",
+    kicker:"תרגול · סידור לפי סדר", title:"תחנות החג׳",
+    intro:"סדרו את שלבי החג׳ לפי הסדר הנכון — לחצו על השלבים אחד אחרי השני.",
+    items:[
+      "אחראם — היטהרות ולבישת הבגד הלבן",
+      "טַואף — הקפת הכעבה שבע פעמים",
+      "סַעי — הריצה בין הגבעות צפא ומרוה",
+      "יום ערפה — ה״עמידה״ (וקוף) במישור ערפה",
+      "מוזדליפה — איסוף האבנים",
+      "מינא — רגימת השטן באבנים",
+      "עיד אלאד׳חא — חג הקרבן"
+    ],
+    good:"מצוין! זהו סדר תחנות החג׳: אחראם, טַואף, סַעי, יום ערפה (וקוף), מוזדליפה, מינא (רגימת השטן) וחג הקרבן." },
+
+  { sec:"החג׳", type:"content",
+    kicker:"עמוד חמישי · החג׳", title:"תחנות החג׳ — הרחבה",
+    paras:[
+      "הריטואל הראשון הוא הקפת הכעבה (טואף) שבע פעמים (שבע הוא מספר טיפולוגי בתחומים רבים) נגד כיוון השעון, תוך אמירת פסוקי קוראן ודברי שבח לאללה.",
+      "הריטואל השני הוא הריצה בין הגבעות צפא ומרוה (סעי). ריצה זו מתקשרת לריצתה של הגר בין שתי הגבעות הללו במהלך חיפוש אחר מים לבנה ישמעאל, עד שהמלאך גבריאל המציא מבין שתי הגבעות את מעיין הזמזם, הנודע בקדושתו ובסגולותיו באסלאם.",
+      "הריטואל השלישי, והחשוב ביותר מבין כולם, הינו יום ערפה. המוסלמי נוסע להר ערפה הנמצא מספר קילומטרים ממכה, ומתכונן לפולחן סביב ההר, שזה מצהרי היום השני של החג׳ עד לבוקרו של יום השלישי. ביום הזה הוא עולה להר (מוסלמים רבים נוהגים לצום בו), תוך כדי קריאת תפילות (תלביה), ועם ירידתו עומד במישור ערפה ומבצע את ה״עמידה״ (וקוף). הר ערפה באסלאם נחשב להר קדוש, ומסורות רבות סופרו על אודותיו, בין היתר שזה ההר שאדם וחוה ידעו זה את זו לאחר גירושם מגן עדן, וכן ההר שעליו עקד אברהם את ישמעאל בנו.",
+      "עם סיום הוקוף ולקראת ערב, חוזר המוסלמי למכה, ועוצר במקום הנקרא מוזדליפה, שם הוא אוסף אבנים ונוסע ל״מינא״, שם הוא מבצע ריטואל של זריקת אבנים על השטן. רגימת השטן באבנים היא לזכר זה שהשטן ניסה לפתות את אברהם לא לעקוד את ישמעאל בנו לעולה, וזריקת האבנים מסמלת את הנזיפה שקיבל כאשר לא עלה בידו לפתות את אברהם."
+    ] },
+
+  { sec:"החג׳", type:"content",
+    kicker:"עמוד חמישי · החג׳", title:"עיד אלאד׳חא — חג הקרבן",
+    paras:[
+      "עם החזרה למכה מתחיל חג הקרבן (עיד אלאד׳חא), המתבטא בשחיטת כבש, לזכר הכבש ששחט אברהם במקום את בנו ישמעאל. חג הקרבן נמשך ארבעה ימים, והיום הראשון שלו חופף ליום האחרון של החג׳. עם סיום חג הקרבן מבצע המוסלמי הקפות נוספות סביב הכעבה."
+    ],
+    blessing:{ ar:"حج مبرور وسعي مشكور وذنب مغفور", he:"חג מקובל, טקס הריצה מבורך והחטא נמחל — ברכה רווחת בתקופת החג׳." } },
+
+  { sec:"סיכום", type:"summary",
+    kicker:"סיכום", title:"חמשת עמודי האסלאם",
+    items:[
+      { nm:"השהאדה", d:"העדות שאין אל מבלעדי אללה ומוחמד שליחו" },
+      { nm:"התפילה", d:"חמש תפילות ביום בזמנים קבועים" },
+      { nm:"הצדקה", d:"‏2.5% מהמאזן השנתי לנזקקים" },
+      { nm:"צום רמדאן", d:"צום מעלות השחר עד השקיעה, חודש שלם" },
+      { nm:"החג׳", d:"עלייה לרגל למכה, פעם בחיים לפי יכולת" }
+    ],
+    blessing:{ ar:"حج مبرور وسعي مشكور وذنب مغفور", he:"חג מקובל, טקס הריצה מבורך והחטא נמחל." } },
+
+  { sec:"סיכום", type:"quiz",
+    kicker:"בדיקת הבנה מסכמת", title:"מה זכרנו מהפרק?",
+    questions:[
+      { q:"מהם חמשת עמודי האסלאם?",
+        options:[
+          { t:"השהאדה, התפילה, הצדקה, צום רמדאן והחג׳", ok:true },
+          { t:"השהאדה, כיבוד הורים, איסור ריבית, הצום והחג׳", ok:false },
+          { t:"התפילה, הצום, החג׳, אלג׳האד והזכּאת", ok:false }
+        ] },
+      { q:"היכן וכיצד ניתנה מצוות התפילה למוחמד?",
+        options:[
+          { t:"במסע הלילי בשנת 621, עת עלה לשמים", ok:true },
+          { t:"בהתגלות הראשונה בליל אלקדר", ok:false },
+          { t:"בעת ההגירה למדינה", ok:false }
+        ] },
+      { q:"עם מה מתקשר ריטואל הסַעי (הריצה בין צפא ומרוה)?",
+        options:[
+          { t:"ריצתה של הגר בחיפוש מים לבנה ישמעאל", ok:true },
+          { t:"מסעו של מוחמד ממכה למדינה", ok:false },
+          { t:"עקדת ישמעאל על הר ערפה", ok:false }
+        ] },
+      { q:"מהו עיד אלאד׳חא (חג הקרבן)?",
+        options:[
+          { t:"שחיטת כבש לזכר הכבש ששחט אברהם במקום ישמעאל", ok:true },
+          { t:"חג שבירת הצום עם סיום רמדאן", ok:false },
+          { t:"חג ראיית הירח בתחילת החודש", ok:false }
+        ] }
+    ] },
+
+  { sec:"סיכום", type:"end",
+    title:"סיימת את פרק 6", sub:"חמש מצוות היסוד" }
+];
+
+/* ===================== ENGINE ===================== */
+const stage = document.getElementById('stage');
+const bar = document.getElementById('bar');
+const counter = document.getElementById('counter');
+const secName = document.getElementById('secName');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const hint = document.getElementById('hint');
+const dotsEl = document.getElementById('dots');
+SECTIONS.forEach(()=> dotsEl.appendChild(el('<span class="dot"></span>')));
+const crownSVG = '<div class="crown"><svg viewBox="0 0 16 16"><rect x="3.2" y="3.2" width="9.6" height="9.6"/><rect x="3.2" y="3.2" width="9.6" height="9.6" transform="rotate(45 8 8)"/></svg></div>';
+
+const svgCheck = '<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>';
+const state = {};           // per-screen completion + score
+let i = 0;
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+function paras(arr){ return arr.map(p=>`<p>${esc(p)}</p>`).join(''); }
+
+function isGated(sc){ return ['mcq','tf','match','order','quiz'].includes(sc.type); }
+function done(idx){ return !!(state[idx] && state[idx].done); }
+
+function render(){
+  const sc = SCREENS[i];
+  stage.innerHTML = '';
+  const screen = el('<div class="screen"></div>');
+  screen.appendChild(BUILders[sc.type](sc));
+  const card = screen.querySelector('.card');
+  if(card) card.insertBefore(el(crownSVG), card.firstChild);
+  stage.appendChild(screen);
+
+  // progress (section stepper)
+  const secIdx = Math.max(0, SECTIONS.indexOf(sc.sec));
+  bar.style.width = (secIdx/(SECTIONS.length-1)*100)+'%';
+  [...dotsEl.children].forEach((d,k)=>{ d.className = 'dot' + (k<secIdx?' done' : k===secIdx?' active' : ''); });
+  counter.textContent = `מסך ${i+1} מתוך ${SCREENS.length}`;
+  secName.textContent = sc.sec;
+
+  // nav
+  prevBtn.disabled = i===0;
+  const last = i===SCREENS.length-1;
+  nextBtn.style.display = last ? 'none' : '';
+  const gated = isGated(sc) && !done(i);
+  nextBtn.disabled = gated;
+  hint.textContent = gated ? 'השלימו את המשימה כדי להמשיך' : '';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function mark(done_){ state[i]=Object.assign(state[i]||{},{done:done_}); nextBtn.disabled=false; hint.textContent=''; }
+
+prevBtn.onclick=()=>{ if(i>0){ i--; render(); } };
+nextBtn.onclick=()=>{ if(i<SCREENS.length-1 && !nextBtn.disabled){ i++; render(); } };
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='BUTTON') return;
+  if(e.key==='ArrowLeft' && !nextBtn.disabled && nextBtn.style.display!=='none'){ nextBtn.click(); }
+  if(e.key==='ArrowRight' && !prevBtn.disabled){ prevBtn.click(); }
+});
+
+/* ---------- builders per screen type ---------- */
+const BUILders = {
+  story(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h1 class="h">${esc(sc.title)}</h1><div class="body">${paras(sc.paras)}</div></div>`);
+    const wrap = el('<div style="margin-top:24px"></div>');
+    const q = el(`<div class="prompt">${esc(sc.reveal.q)}</div>`);
+    const btn = el('<button class="btn primary" style="margin:0 auto;display:flex">גלה את התשובה</button>');
+    const ans = el(`<div class="highlight" style="display:none;margin-top:18px"><p style="font-size:clamp(16px,1.3vw,20px);color:var(--maroon);font-weight:700">${esc(sc.reveal.a)}</p></div>`);
+    btn.onclick=()=>{ ans.style.display='block'; btn.style.display='none'; };
+    wrap.append(q,btn,ans); c.appendChild(wrap);
+    return c;
+  },
+  objective(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h1 class="h">${esc(sc.title)}</h1><p class="lead-in">${esc(sc.lead)}</p></div>`);
+    const ul = el('<ul class="obj"></ul>');
+    sc.objectives.forEach(o=> ul.appendChild(el(`<li><svg viewBox="0 0 24 24"><path d="M12 2l2.6 6.9L22 9.3l-5.4 4.6L18.2 22 12 17.8 5.8 22l1.6-8.1L2 9.3l7.4-.4z"/></svg><span>${esc(o)}</span></li>`)) );
+    c.appendChild(ul);
+    c.appendChild(el(`<div class="highlight"><div class="t">מצוות רבות — וחמישה עמודים</div><p>${esc(sc.context)}</p></div>`));
+    const pg = el('<div class="pillars"></div>');
+    sc.pillars.forEach((p,k)=> pg.appendChild(el(`<div class="p"><div class="n">${k+1}</div><div class="nm">${esc(p)}</div></div>`)) );
+    c.appendChild(pg);
+    return c;
+  },
+  content(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h2 class="h">${esc(sc.title)}</h2><div class="body">${paras(sc.paras)}</div></div>`);
+    if(sc.highlight) c.appendChild(el(`<div class="highlight"><div class="t"><svg viewBox="0 0 24 24"><path d="M12 2 3 7v6c0 5 3.8 8.5 9 9 5.2-.5 9-4 9-9V7z"/></svg>${esc(sc.highlight.t)}</div><p>${esc(sc.highlight.p)}</p></div>`));
+    if(sc.blessing) c.appendChild(el(`<div class="blessing" style="margin-top:22px"><div class="ar">${esc(sc.blessing.ar)}</div><div class="he">${esc(sc.blessing.he)}</div></div>`));
+    return c;
+  },
+  mcq(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><div class="prompt">${esc(sc.prompt)}</div></div>`);
+    const opts = el('<div class="opts"></div>');
+    const fb = el(`<div class="feedback"></div>`);
+    sc.options.forEach(o=>{
+      const b = el(`<button class="opt"><span class="mk">${svgCheck}</span><span>${esc(o.t)}</span></button>`);
+      b.onclick=()=>{
+        if(done(i)) return;
+        [...opts.children].forEach(x=>{ x.classList.add('locked'); if(!x.classList.contains('sel')) x.classList.add('dim'); });
+        if(o.ok){ b.classList.add('correct'); fb.className='feedback show good'; fb.innerHTML=esc(sc.good); }
+        else{ b.classList.add('wrong'); const right=[...opts.children][sc.options.findIndex(x=>x.ok)]; right.classList.remove('dim'); right.classList.add('correct'); fb.className='feedback show bad'; fb.innerHTML=esc(sc.bad); }
+        mark(true);
+      };
+      opts.appendChild(b);
+    });
+    c.append(opts,fb); return c;
+  },
+  tf(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><div class="prompt">${esc(sc.prompt)}</div></div>`);
+    const row = el('<div class="tf"></div>');
+    const fb = el(`<div class="feedback"></div>`);
+    const trueB = el('<button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>נכון</button>');
+    const falseB = el('<button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>לא נכון</button>');
+    function answer(val,btn){
+      if(done(i)) return;
+      trueB.classList.add('locked'); falseB.classList.add('locked');
+      const ok = val===sc.answer;
+      btn.classList.add(ok?'correct':'wrong');
+      fb.className='feedback show '+(ok?'good':'bad'); fb.innerHTML=esc(ok?sc.good:sc.bad);
+      if(!ok){ (sc.answer?trueB:falseB).classList.add('correct'); }
+      mark(true);
+    }
+    trueB.onclick=()=>answer(true,trueB); falseB.onclick=()=>answer(false,falseB);
+    row.append(trueB,falseB); c.append(row,fb); return c;
+  },
+  match(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h2 class="h">${esc(sc.title)}</h2><p class="lead-in" style="margin-bottom:18px">${esc(sc.intro)}</p></div>`);
+    const grid = el('<div class="match"></div>');
+    const colL = el(`<div class="col"><h4>${esc(sc.leftTitle)}</h4></div>`);
+    const colR = el(`<div class="col"><h4>${esc(sc.rightTitle)}</h4></div>`);
+    const fb = el(`<div class="feedback"></div>`);
+    const rightOrder = shuffle(sc.pairs.map((p,idx)=>({t:p.r,idx})));
+    let sel=null, solved=0;
+    sc.pairs.forEach((p,idx)=>{ const chip=el(`<button class="chip" data-idx="${idx}">${esc(p.l)}</button>`); chip.onclick=()=>selectLeft(chip,idx); colL.appendChild(chip); });
+    rightOrder.forEach(r=>{ const chip=el(`<button class="chip" data-idx="${r.idx}">${esc(r.t)}</button>`); chip.onclick=()=>selectRight(chip,r.idx); colR.appendChild(chip); });
+    function selectLeft(chip,idx){ if(chip.classList.contains('done')) return; colL.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel')); chip.classList.add('sel'); sel={chip,idx}; }
+    function selectRight(chip,idx){
+      if(chip.classList.contains('done')||!sel) return;
+      if(idx===sel.idx){ sel.chip.classList.remove('sel'); sel.chip.classList.add('done'); chip.classList.add('done'); sel=null; solved++;
+        if(solved===sc.pairs.length){ fb.className='feedback show good'; fb.innerHTML=esc(sc.good); mark(true); } }
+      else{ chip.classList.add('flash'); setTimeout(()=>chip.classList.remove('flash'),380); }
+    }
+    grid.append(colR,colL); c.append(grid,fb); return c;
+  },
+  order(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h2 class="h">${esc(sc.title)}</h2><p class="lead-in" style="margin-bottom:18px">${esc(sc.intro)}</p></div>`);
+    const grid = el('<div class="order"></div>');
+    const poolCol = el('<div class="pool"><h4>השלבים</h4></div>');
+    const seqCol  = el('<div class="seq"><h4>הסדר שלכם</h4></div>');
+    const pool = el('<div style="display:grid;gap:10px"></div>');
+    const seq  = el('<div style="display:grid;gap:10px"></div>');
+    poolCol.appendChild(pool); seqCol.appendChild(seq);
+    grid.append(poolCol, seqCol);
+    const fb = el(`<div class="feedback"></div>`);
+    const order = [];
+    function refresh(){
+      seq.innerHTML='';
+      if(order.length===0){ seq.appendChild(el('<div class="placeholder">לחצו על השלבים לפי הסדר</div>')); return; }
+      order.forEach((it,k)=> seq.appendChild(el(`<div class="step"><span class="idx filled">${k+1}</span><span>${esc(it)}</span></div>`)) );
+    }
+    shuffle(sc.items).forEach((it)=>{
+      const s = el(`<button class="step"><span class="idx">+</span><span>${esc(it)}</span></button>`);
+      s.onclick=()=>{ if(s.classList.contains('placed')) return; s.classList.add('placed'); s.style.display='none'; order.push(it); refresh(); if(order.length===sc.items.length) check(); };
+      pool.appendChild(s);
+    });
+    function check(){
+      let allOk=true;
+      [...seq.children].forEach((row,k)=>{ const ok=order[k]===sc.items[k]; row.classList.add(ok?'ok':'no'); if(!ok) allOk=false; });
+      if(allOk){ fb.className='feedback show good'; fb.innerHTML=esc(sc.good); mark(true); }
+      else{
+        fb.className='feedback show bad';
+        fb.innerHTML='כמעט! חלק מהשלבים אינם בסדר הנכון. <button class="reset" style="background:none;border:none;color:var(--maroon);font:inherit;font-weight:700;cursor:pointer;text-decoration:underline">נסו שוב</button>';
+        fb.querySelector('.reset').onclick=reset;
+      }
+    }
+    function reset(){ order.length=0; fb.className='feedback'; pool.querySelectorAll('.step').forEach(s=>{ s.classList.remove('placed'); s.style.display=''; }); refresh(); }
+    refresh();
+    c.append(grid, fb); return c;
+  },
+  flip(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h2 class="h">${esc(sc.title)}</h2><p class="lead-in" style="margin-bottom:18px">${esc(sc.intro)}</p></div>`);
+    const grid = el('<div class="flips"></div>');
+    sc.cards.forEach(card=>{
+      const f = el(`<div class="flip"><div class="inner"><div class="face front"><div class="term">${esc(card.term)}</div><div class="hint">לחצו לחשיפה</div></div><div class="face back">${esc(card.def)}</div></div></div>`);
+      f.onclick=()=>f.classList.toggle('on');
+      grid.appendChild(f);
+    });
+    c.appendChild(grid); return c;
+  },
+  summary(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h1 class="h">${esc(sc.title)}</h1></div>`);
+    const g = el('<div class="sumgrid"></div>');
+    sc.items.forEach((s,k)=> g.appendChild(el(`<div class="s"><div class="n">${k+1}</div><div class="nm">${esc(s.nm)}</div><div class="d">${esc(s.d)}</div></div>`)) );
+    c.appendChild(g);
+    c.appendChild(el(`<div class="blessing"><div class="ar">${esc(sc.blessing.ar)}</div><div class="he">${esc(sc.blessing.he)}</div></div>`));
+    return c;
+  },
+  quiz(sc){
+    const c = el(`<div class="card"><div class="kicker">${esc(sc.kicker)}</div><h2 class="h">${esc(sc.title)}</h2></div>`);
+    let answered=0, correct=0;
+    sc.questions.forEach((q,qi)=>{
+      const block = el(`<div style="margin-top:${qi?28:18}px"></div>`);
+      block.appendChild(el(`<div class="prompt" style="font-size:clamp(15px,1.25vw,19px);margin-bottom:14px">${qi+1}. ${esc(q.q)}</div>`));
+      const opts = el('<div class="opts"></div>');
+      let locked=false;
+      q.options.forEach(o=>{
+        const b = el(`<button class="opt"><span class="mk">${svgCheck}</span><span>${esc(o.t)}</span></button>`);
+        b.onclick=()=>{
+          if(locked) return; locked=true;
+          [...opts.children].forEach(x=>{ x.classList.add('locked'); if(x!==b) x.classList.add('dim'); });
+          if(o.ok){ b.classList.add('correct'); correct++; }
+          else{ b.classList.add('wrong'); const right=[...opts.children][q.options.findIndex(x=>x.ok)]; right.classList.remove('dim'); right.classList.add('correct'); }
+          answered++;
+          if(answered===sc.questions.length){ state[i]=Object.assign(state[i]||{},{done:true,score:correct,total:sc.questions.length}); nextBtn.disabled=false; hint.textContent='';
+            c.appendChild(el(`<div class="feedback show good" style="margin-top:22px;text-align:center;font-size:clamp(15px,1.3vw,19px)">ענית נכון על <b>${correct}</b> מתוך <b>${sc.questions.length}</b> שאלות.</div>`)); }
+        };
+        opts.appendChild(b);
+      });
+      block.appendChild(opts); c.appendChild(block);
+    });
+    return c;
+  },
+  end(sc){
+    const c = el(`<div class="card"><div class="end"></div></div>`);
+    const e = c.querySelector('.end');
+    e.appendChild(el(`<img class="seal" src="assets/logo-dark.png" alt="אסלאם">`));
+    e.appendChild(el(`<div class="kicker" style="justify-content:center">פרק שישי</div>`));
+    e.appendChild(el(`<h1 class="h" style="margin-bottom:10px">${esc(sc.title)}</h1>`));
+    e.appendChild(el(`<p class="lead-in" style="margin-bottom:6px">${esc(sc.sub)}</p>`));
+    const qz = Object.values(state).find(s=>s&&s.total);
+    if(qz) e.appendChild(el(`<div class="score">בבדיקה המסכמת: ${qz.score}/${qz.total}</div>`));
+    const act = el('<div class="actions"></div>');
+    act.appendChild(el('<a class="btn primary" href="chapters.html">חזרה לפרקי הלמידה<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></a>'));
+    const again = el('<button class="btn ghost">התחל את הפרק מחדש</button>');
+    again.onclick=()=>{ for(const k in state) delete state[k]; i=0; render(); };
+    act.appendChild(again); e.appendChild(act);
+    return c;
+  }
+};
+
+function shuffle(a){ a=a.slice(); for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
+
+render();
+</script>
+</body>
+</html>

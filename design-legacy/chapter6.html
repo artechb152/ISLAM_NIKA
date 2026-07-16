@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>פרק שישי · חמש מצוות היסוד</title>
+<style>
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-light-aaa.otf") format("opentype");font-weight:300;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-regular-aaa.otf") format("opentype");font-weight:400;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-bold-aaa.otf") format("opentype");font-weight:700;font-display:swap}
+  @font-face{font-family:"Kedem";src:url("assets/fonts/kedem-black-aaa.otf") format("opentype");font-weight:900;font-display:swap}
+</style>
+<link rel="stylesheet" href="assets/chapter6/lesson.css">
+<link rel="stylesheet" href="assets/chapter6/mech.css">
+<link rel="stylesheet" href="assets/chapter6/film.css">
+</head>
+<body>
+
+  <!-- ============ the chapter (revealed out of the film's last frame) ============ -->
+  <div id="lesson" hidden>
+    <header class="site">
+      <div class="header-inner">
+        <a class="logo-link" href="index.html" aria-label="חזרה למסך הבית">
+          <img class="logo" src="assets/logo-cream.png" alt="אסלאם">
+        </a>
+        <a class="back-link" href="chapters.html">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          לפרקי הלמידה
+        </a>
+      </div>
+    </header>
+
+    <nav class="rail" aria-label="התקדמות בפרק">
+      <div class="rail-inner">
+        <ol id="rail-list"></ol>
+        <span class="count" id="rail-count"></span>
+      </div>
+    </nav>
+
+    <main class="chapter" id="chapter"></main>
+
+    <div class="navbar">
+      <div class="navbar-inner">
+        <button class="btn btn-ghost" id="btn-prev" type="button">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+          <span class="label">חזרה</span>
+        </button>
+        <p class="nav-hint" id="nav-hint"></p>
+        <button class="btn btn-primary" id="btn-next" type="button">
+          <span class="label">המשך</span>
+          <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ story drawer (screen 01, optional) ============ -->
+  <div class="drawer-scrim" id="drawer-scrim"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true"
+         aria-labelledby="drawer-title" aria-hidden="true">
+    <div class="drawer-head">
+      <h2 id="drawer-title"></h2>
+      <button class="drawer-close" id="drawer-close" type="button" aria-label="סגירה">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <!-- the body scrolls, so it must be reachable by keyboard: without a tab stop the story
+         can be opened but not read without a mouse -->
+    <div class="drawer-body" id="drawer-body" tabindex="0"></div>
+  </aside>
+
+  <!-- ============ screen 00 — the existing approved film ============
+       The film opens on its own first frame, held. The picture IS the play control:
+       one click starts it with full sound from the first second. Browsers forbid
+       autoplaying sound, so starting on a click is what lets the narration run at all. -->
+  <div id="film" tabindex="0" role="button" aria-label="הפעלת סרטון הפתיחה">
+    <section class="fscene" data-i="0"><video muted playsinline preload="auto" poster="assets/anim-video/poster1.jpg" src="assets/anim-video/scene1.mp4"></video><div class="grade"></div></section>
+    <section class="fscene" data-i="1"><video muted playsinline preload="auto" src="assets/anim-video/scene2.mp4"></video><div class="grade"></div></section>
+    <section class="fscene" data-i="2"><video muted playsinline preload="auto" src="assets/anim-video/scene3.mp4"></video><div class="grade"></div></section>
+    <section class="fscene" data-i="3">
+      <div class="pillars" id="pillars-mid"></div>
+    </section>
+    <section class="fscene" data-i="4"><video muted playsinline preload="auto" src="assets/anim-video/scene5.mp4"></video><div class="grade"></div></section>
+    <section class="fscene" data-i="5"><video muted playsinline preload="auto" src="assets/anim-video/scene6.mp4"></video><div class="grade"></div></section>
+    <!-- last scene: the five commandments settle and stay on screen for the handoff -->
+    <section class="fscene" data-i="6">
+      <div class="pillars is-outro" id="pillars-out"></div>
+    </section>
+
+    <div id="film-big"><span></span></div>
+    <div id="film-subs"><p class="cue" role="status" aria-live="polite"></p></div>
+
+    <div id="film-controls" role="group" aria-label="בקרת הסרטון">
+      <button id="fc-play" type="button" aria-label="השהיה"></button>
+      <button id="fc-mute" type="button" aria-label="השתקה"></button>
+      <!-- a real range: dragging seeks, clicking the track jumps, arrows step —
+           one control that is both a YouTube-style scrubber and keyboard-operable -->
+      <input id="fc-seek" type="range" min="0" max="100" step="0.1" value="0"
+             aria-label="מיקום בסרטון">
+      <span id="fc-time" aria-hidden="true">0:00 / 1:12</span>
+      <button id="fc-skip" type="button">דילוג</button>
+    </div>
+
+
+    <div id="skip-confirm" hidden>
+      <div class="sc-card" role="dialog" aria-modal="true" aria-labelledby="sc-title">
+        <h2 id="sc-title">לדלג על הסרטון?</h2>
+        <p>הסרטון מציג את הסיפור שעליו נבנה הפרק. הטקסט המלא שלו יישאר זמין בכל רגע מתוך המסך הבא, בכפתור „לקריאת הסיפור המלא”.</p>
+        <div class="sc-actions">
+          <button class="fg-btn fg-ghost" id="sc-cancel" type="button">חזרה לסרטון</button>
+          <button class="fg-btn fg-primary" id="sc-ok" type="button">דילוג והמשך</button>
+        </div>
+      </div>
+    </div>
+
+    <audio id="a0" preload="auto" src="assets/anim-voice/scene1.mp3"></audio>
+    <audio id="a1" preload="auto" src="assets/anim-voice/scene2.mp3"></audio>
+    <audio id="a2" preload="auto" src="assets/anim-voice/scene3.mp3"></audio>
+    <audio id="a3" preload="auto" src="assets/anim-voice/scene4.mp3"></audio>
+    <audio id="a4" preload="auto" src="assets/anim-voice/scene5.mp3"></audio>
+    <audio id="a5" preload="auto" src="assets/anim-voice/scene6.mp3"></audio>
+    <audio id="a6" preload="auto" src="assets/anim-voice/scene7.mp3"></audio>
+  </div>
+
+  <script src="assets/chapter6/data.js"></script>
+  <script src="assets/chapter6/engine.js"></script>
+  <script src="assets/chapter6/mech-opening.js"></script>
+  <script src="assets/chapter6/mech-shahada.js"></script>
+  <script src="assets/chapter6/mech-prayer.js"></script>
+  <script src="assets/chapter6/mech-charity.js"></script>
+  <script src="assets/chapter6/mech-ramadan.js"></script>
+  <script src="assets/chapter6/mech-hajj.js"></script>
+  <script src="assets/chapter6/mech-summary.js"></script>
+  <!-- last: it owns the check ids, so it must load after the files that once answered to them -->
+  <script src="assets/chapter6/mech-checks.js"></script>
+  <script src="assets/chapter6/film.js"></script>
+</body>
+</html>
