@@ -1,16 +1,10 @@
-/* Root layout for chapter 6 — see (entrance)/layout.tsx for why each document gets its own
-   root rather than sharing one.
-
-   The three stylesheets are imported in the order the original <link> tags had them
-   (lesson, then mech, then film). That order is not decorative: these are plain global
-   stylesheets with overlapping selectors, so the cascade decides who wins. */
+/* Root layout for the continuous chapter 6 article. It remains isolated from the other
+   route groups so its editorial layout and tokens cannot leak into the chapters menu. */
 
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
-import '@/styles/lesson.css'
-import '@/styles/mech.css'
-import '@/styles/film.css'
+import '@/styles/chapter6-article.css'
 
 export const metadata: Metadata = {
   title: "פרק שישי · חמש מצוות היסוד",

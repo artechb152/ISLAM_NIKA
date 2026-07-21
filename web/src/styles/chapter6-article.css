@@ -1,0 +1,843 @@
+/* Chapter 6 article — themed to MATCH the chapters (learning) screen: a flat vintage
+   parchment look. Fills are flat parchment tones (no decorative gradients); maroon #8a2733
+   for headings/accents, a flat maroon masthead #571820, Kedem + Ploni type. The bespoke
+   didactic illustrations (prayer sky, charity ring, maps) keep their meaning but wear the
+   parchment palette. Tokens mirror chapters.css so the two pages read as one product. */
+
+:root{
+  --paper:#EDE4D0;        /* the page — matches the chapters screen parchment tone */
+  --paper-tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.32'/%3E%3C/svg%3E");
+  --panel:#f3ead6;        /* article sheet / cards / surfaces */
+  --mat:#f5ecd6;          /* light insets, photo mats */
+  --surface:#faf4e6;      /* brightest raised inset */
+  --edge:#d8c7a3;         /* hairline borders */
+  --rule:rgba(87,24,32,.14);
+  --maroon:#8a2733;       /* titles, headings, primary accents */
+  --maroon-deep:#571820;  /* masthead + primary buttons (flat) */
+  --stamp:#a5322f;        /* brighter accent (numbers, media) */
+  --cream:#f5ecd6;        /* text on maroon / dark bands */
+  --ink:#3c2c1d;          /* body text */
+  --muted:#6f5c43;        /* secondary text */
+  --shadow:0 8px 22px rgba(60,35,18,.10);
+  --header-height:56px;
+  --content-gutter:clamp(28px,4vw,64px);  /* mirrors the chapters-screen content gutter */
+  --font-heading:"Kedem",serif;
+  --font-body:"Ploni",Arial,sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+/* overflow-x:CLIP, not hidden — hidden turns body into a scroll container, which silently
+   kills position:sticky for the header and the sidebar; clip only clips */
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-height) + 22px);overflow-x:clip;scroll-snap-type:y proximity}
+body{
+  min-height:100vh;overflow-x:clip;color:var(--ink);
+  background:var(--panel);
+  font-family:var(--font-body);font-size:20px;line-height:1.75;
+}
+button,input{font:inherit}
+a{color:inherit}
+:is(a,button,input):focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+
+.chapter-page{min-height:100vh;background:var(--panel)}
+.chapter-site-header{
+  position:sticky;top:0;z-index:50;height:var(--header-height);display:flex;align-items:center;
+  background:var(--maroon-deep);box-shadow:0 2px 10px rgba(28,10,2,.22);
+}
+.chapter-site-header-inner{
+  width:100%;padding-inline:clamp(18px,4vw,60px);
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+}
+.chapter-hdr-start{display:flex;align-items:center;gap:10px}
+.chapter-burger{
+  all:unset;box-sizing:border-box;cursor:pointer;width:40px;height:40px;border-radius:9px;
+  display:grid;place-items:center;color:var(--cream);transition:background .2s ease;
+}
+.chapter-burger svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.chapter-burger:hover{background:rgba(245,236,214,.12)}
+.chapter-burger:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
+.chapter-logo{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;margin-inline-start:4px;transition:opacity .2s ease}
+.chapter-logo:hover{opacity:.85}
+.chapter-logo:focus-visible{outline:2px solid var(--mat,#f5ecd6);outline-offset:2px;border-radius:6px}
+.chapter-logo img{display:block;width:auto;height:clamp(22px,3vh,32px)}
+.back-to-chapters svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---- in-chapter find (mirrors the chapters-page header search field) ---- */
+.chapter-find{position:relative;display:flex;align-items:center;width:clamp(180px,26vw,300px)}
+.chapter-find input{
+  width:100%;height:36px;border-radius:999px;padding-inline:38px 14px;
+  background:rgba(245,236,214,.1);border:1px solid rgba(245,236,214,.26);color:var(--cream);
+  font-family:var(--font-body);font-size:14px;
+}
+.chapter-find input::placeholder{color:rgba(245,236,214,.6)}
+.chapter-find input::-webkit-search-cancel-button{display:none}
+.chapter-find input:hover{background:rgba(245,236,214,.16);border-color:rgba(245,236,214,.4)}
+.chapter-find input:focus-visible{background:rgba(245,236,214,.18);border-color:var(--cream);outline:none}
+.chapter-find-ico{position:absolute;inset-inline-start:10px;top:50%;translate:0 -50%;display:grid;place-items:center;pointer-events:none;color:rgba(245,236,214,.72)}
+.chapter-find-ico svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chapter-find-tools{position:absolute;inset-inline-end:6px;top:50%;translate:0 -50%;display:flex;align-items:center;gap:2px}
+.chapter-find-count{font-size:12px;color:rgba(245,236,214,.75);min-width:34px;text-align:center;font-variant-numeric:tabular-nums}
+.chapter-find-tools button{
+  all:unset;box-sizing:border-box;cursor:pointer;width:24px;height:24px;border-radius:50%;
+  display:grid;place-items:center;color:rgba(245,236,214,.8);
+}
+.chapter-find-tools button:hover{background:rgba(245,236,214,.18);color:var(--cream)}
+.chapter-find-tools button:disabled{opacity:.35;cursor:default}
+.chapter-find-tools button:focus-visible{outline:2px solid var(--cream);outline-offset:1px}
+.chapter-find-tools svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+::highlight(chapter-find){background:rgba(245,196,90,.5);color:inherit}
+::highlight(chapter-find-current){background:var(--stamp);color:#fff}
+
+/* ---- chapter menu drawer (mirrors the chapters-screen off-canvas menu) ---- */
+.chapter-drawer{
+  position:fixed;inset-block:0;inset-inline-start:0;z-index:70;width:min(330px,90vw);
+  height:100vh;height:100dvh;overflow-y:auto;overscroll-behavior:contain;
+  background:var(--panel);border-inline-end:1px solid var(--edge);
+  box-shadow:-16px 0 40px rgba(28,10,2,.24);display:flex;flex-direction:column;direction:rtl;
+  transform:translateX(105%);visibility:hidden;
+  transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s linear .32s;scrollbar-width:thin;
+}
+.chapter-drawer.is-open{transform:none;visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s}
+.chapter-drawer::-webkit-scrollbar{width:8px}
+.chapter-drawer::-webkit-scrollbar-thumb{background:rgba(87,24,32,.2);border-radius:99px}
+.chapter-drawer .menu-head{position:relative;padding:24px 22px 16px;flex:none;background:var(--panel);border-bottom:1px solid var(--edge)}
+.chapter-drawer .menu-title{font-family:var(--font-heading);font-weight:700;color:var(--maroon);font-size:24px;line-height:1.2;padding-inline-end:48px}
+.chapter-drawer .menu-sub{display:block;margin-top:4px;font-size:13px;color:var(--muted)}
+.chapter-drawer .menu-close{all:unset;box-sizing:border-box;cursor:pointer;position:absolute;top:14px;inset-inline-end:12px;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--maroon);border:1px solid var(--edge);background:var(--panel)}
+.chapter-drawer .menu-close svg{width:16px;height:16px}
+.chapter-drawer .menu-close:hover{background:rgba(165,50,47,.12)}
+.chapter-menu-nav{flex:1;padding:14px 14px 8px}
+.chapter-menu-nav ol{list-style:none;display:flex;flex-direction:column;gap:2px}
+.chapter-menu-nav a{
+  display:flex;align-items:center;gap:12px;min-height:46px;padding:8px 12px;border-radius:10px;
+  color:var(--ink);text-decoration:none;font-weight:500;font-size:15.5px;transition:background .2s ease,color .2s ease;
+}
+.chapter-menu-nav a:hover{background:rgba(165,50,47,.1);color:var(--maroon)}
+.chapter-menu-nav .menu-num{flex:none;font-family:var(--font-heading);font-size:14px;color:var(--stamp);min-width:22px;font-variant-numeric:tabular-nums}
+.chapter-drawer .menu-extra{flex:none;border-top:1px solid var(--rule);padding:12px 18px 24px}
+.menu-x-item{display:flex;align-items:center;gap:8px;padding:11px 12px;border-radius:10px;color:var(--maroon);text-decoration:none;font-weight:600;font-size:15px}
+.menu-x-item svg{width:18px;height:18px}
+.menu-x-item:hover{background:rgba(165,50,47,.1)}
+.chapter-scrim{position:fixed;inset:0;z-index:65;background:rgba(20,9,3,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+
+/* shell: the sidebar sits beside the article on desktop, off-canvas on mobile */
+.chapter-shell{display:flex;min-height:0;align-items:flex-start}
+.chapter-content{flex:1;min-width:0;width:100%}
+
+.chapter-layout{
+  width:100%;margin:0;
+  padding:42px var(--content-gutter) 90px;direction:rtl;
+}
+
+/* ===== desktop: turn the off-canvas menu into a persistent, collapsible sidebar
+   (YouTube-style), mirroring the chapters-screen sidebar exactly ===== */
+@media (min-width:1024px){
+  :root{--ch6-side-expanded:300px;--ch6-side-rail:76px}
+  .chapter-drawer{
+    position:sticky;inset:auto;top:var(--header-height);z-index:5;flex:none;
+    width:var(--ch6-side-expanded);height:calc(100dvh - var(--header-height));
+    align-self:flex-start;transform:none;visibility:visible;box-shadow:none;
+    border-inline-end:1px solid var(--edge);
+    transition:width .24s cubic-bezier(.2,.8,.2,1);
+  }
+  .chapter-drawer.is-collapsed{width:var(--ch6-side-rail)}
+  .chapter-scrim{display:none}
+  /* centre the hamburger over the collapsed icon rail (matches the chapters header gutter) */
+  .chapter-site-header-inner{padding-inline:calc((var(--ch6-side-rail) - 40px) / 2)}
+  /* the persistent sidebar needs no in-panel head — the hamburger is the only control */
+  .chapter-drawer .menu-head{display:none}
+  .chapter-menu-nav{padding-top:14px}
+  /* collapsed → slim rail: only the section numbers show */
+  .chapter-drawer.is-collapsed .menu-label{display:none}
+  .chapter-drawer.is-collapsed .chapter-menu-nav a{justify-content:center;gap:0;padding-inline:0}
+  .chapter-drawer.is-collapsed .menu-extra{align-items:center;padding-inline:8px}
+  .chapter-drawer.is-collapsed .menu-x-item{font-size:0;justify-content:center;padding-inline:0}
+  .chapter-drawer.is-collapsed .menu-x-item svg{font-size:initial}
+}
+@media (prefers-reduced-motion:reduce){
+  .chapter-drawer{transition:none}
+}
+/* One continuous editorial flow — no card: the content sits directly on the parchment
+   background, matching the chapters screen (which does not box its content). */
+.chapter-article{
+  direction:rtl;min-width:0;
+  padding-inline:0;
+}
+.article-section{scroll-margin-top:calc(var(--header-height) + 22px);position:relative;min-width:0;max-width:100%}
+.article-section + .article-section{
+  margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);border-top:1px solid var(--rule);
+}
+.opening-section{text-align:right}
+.chapter-number{
+  display:block;color:var(--maroon);font-size:14px;font-weight:600;letter-spacing:2.5px;margin-bottom:4px;
+}
+h1,h2,h3{font-family:var(--font-heading);color:var(--maroon);line-height:1.17;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+h1{font-size:clamp(42px,5vw,72px);font-weight:900}
+.title-ornament{width:150px;height:17px;margin:15px 0 30px;display:flex;align-items:center;gap:10px;color:var(--maroon)}
+.title-ornament::before,.title-ornament::after{content:"";height:1px;flex:1;background:currentColor}
+.title-ornament span{width:9px;height:9px;border:1px solid currentColor;transform:rotate(45deg)}
+.opening-subtitle{margin:0 0 20px;font-family:var(--font-heading);font-weight:700;font-size:clamp(21px,2.4vw,29px);color:var(--maroon);line-height:1.3}
+
+/* Composite story film: one responsive 16:9 player built from the existing seven scenes.
+   A media player stays dark chrome; its accents follow the maroon family. */
+.story-film{width:100%;margin-inline:auto;border-radius:14px;overflow:hidden;background:#241017;box-shadow:0 10px 30px rgba(40,20,10,.24)}
+.story-film-stage{position:relative;aspect-ratio:16/9;background:#241017;overflow:hidden;color:var(--cream)}
+.story-film-stage video{width:100%;height:100%;display:block;object-fit:cover}
+.story-film-grade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(15,7,3,.04),rgba(15,7,3,.13) 58%,rgba(15,7,3,.78))}
+.story-film-pillars{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:clamp(10px,2vw,30px);
+  background:var(--maroon-deep);
+}
+.story-film-pillars span{width:15%;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--cream)}
+.story-film-pillars img{width:100%;height:auto;max-height:130px;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
+.story-film-pillars b{font-family:var(--font-heading);font-size:clamp(12px,1.5vw,22px)}
+.story-film-caption{
+  position:absolute;z-index:3;inset-inline:5%;bottom:5%;margin:auto;padding:8px 18px;width:fit-content;max-width:90%;
+  color:#fff;text-align:center;font-size:clamp(15px,1.4vw,21px);line-height:1.45;
+  background:rgba(35,16,23,.78);border:1px solid rgba(245,236,214,.25);border-radius:9px;text-shadow:0 2px 7px #000;
+}
+.story-film-caption:empty{display:none}
+.story-film-emphasis{
+  position:absolute;z-index:3;inset-inline:8%;top:42%;translate:0 -50%;
+  font-family:var(--font-heading);font-size:clamp(28px,4.6vw,64px);line-height:1.1;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.9);
+}
+.story-film-big-play{
+  all:unset;box-sizing:border-box;cursor:pointer;position:absolute;z-index:4;inset:50% auto auto 50%;translate:-50% -50%;
+  width:70px;height:70px;border-radius:50%;display:grid;place-items:center;
+  color:var(--maroon-deep);background:rgba(245,236,214,.95);box-shadow:0 10px 30px rgba(0,0,0,.45);
+}
+.story-film-big-play svg{width:28px;height:28px;fill:currentColor;margin-inline-start:3px}
+.story-film-controls{height:58px;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#2c141b;color:var(--cream)}
+.story-film-controls button{all:unset;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;border-radius:7px;color:var(--cream)}
+.story-film-controls button:hover{background:rgba(245,236,214,.12)}
+.story-film-controls button svg{width:19px;height:19px;fill:currentColor;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+.story-film-controls input{
+  flex:1;min-width:70px;height:18px;appearance:none;background:transparent;cursor:pointer;
+}
+.story-film-controls input::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:linear-gradient(to left,var(--stamp) var(--film-progress),rgba(245,236,214,.22) 0)}
+.story-film-controls input::-moz-range-track{height:4px;border-radius:99px;background:rgba(245,236,214,.22)}
+.story-film-controls input::-moz-range-progress{height:4px;background:var(--stamp);border-radius:99px}
+.story-film-controls input::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--mat);margin-top:-5px}
+.story-film-controls input::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:var(--mat)}
+.story-film-controls > span{font-size:12px;color:rgba(245,236,214,.72);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.story-toggle{
+  cursor:pointer;display:inline-flex;align-items:center;gap:9px;min-height:46px;margin-top:22px;padding:10px 23px;
+  border:1px solid var(--edge);border-radius:999px;background:var(--mat);color:var(--maroon);
+  font-weight:600;transition:background .2s ease,border-color .2s ease;
+}
+.story-toggle:hover{background:rgba(165,50,47,.1);border-color:var(--maroon)}
+.story-toggle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .25s ease}
+.story-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
+.story-reveal{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .42s ease,opacity .32s ease}
+.story-reveal > div{overflow:hidden}
+.story-reveal.is-open{grid-template-rows:1fr;opacity:1}
+.story-copy{
+  width:100%;margin:24px 0 0;padding:0;text-align:start;
+}
+.story-label,.section-eyebrow{display:block;color:var(--maroon);font-size:13px;font-weight:600;letter-spacing:1.8px;margin-bottom:5px}
+.story-copy h2{font-size:clamp(27px,3vw,38px);margin-bottom:18px}
+.story-copy p{margin-top:12px;color:var(--ink);line-height:1.82}
+
+.section-heading{margin-bottom:clamp(26px,4vw,48px)}
+.section-heading > div{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.section-heading h2{font-size:clamp(34px,4vw,56px);font-weight:900}
+.section-term{color:var(--maroon);font-size:16px;font-weight:500}
+.section-heading > p{width:min(820px,100%);margin-top:14px;font-size:22px;line-height:1.65;color:var(--muted)}
+
+.pillars-section{overflow:hidden}
+.pillars-path{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;padding-top:12px}
+.pillars-line{position:absolute;inset-inline:8%;top:58px;height:1px;background:var(--edge)}
+.pillars-path a{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;min-width:0}
+.pillar-icon{width:82px;height:82px;display:grid;place-items:center;margin-bottom:10px;transition:transform .22s ease}
+.pillar-icon img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(60,35,18,.2))}
+.pillars-path a:hover .pillar-icon{transform:translateY(-4px)}
+.pillars-path b{font-family:var(--font-heading);color:var(--maroon);font-size:20px}
+.pillars-path > a > span:not(.pillar-icon){color:var(--stamp);font-size:14px;font-weight:600}
+.pillars-path small{margin-top:5px;font-size:13px;line-height:1.45;color:var(--muted)}
+
+.content-columns{display:grid;gap:clamp(24px,3vw,44px)}
+.three-columns{grid-template-columns:repeat(3,minmax(0,1fr))}
+.two-columns{grid-template-columns:repeat(2,minmax(0,1fr))}
+.content-block{min-width:0}
+.content-columns > .content-block{
+  padding-top:18px;border-top:2px solid rgba(138,39,51,.35);
+}
+.content-block h3{font-size:clamp(23px,2vw,30px);margin-bottom:14px}
+.content-block p{color:var(--ink);line-height:1.78;margin-top:11px}
+.content-block-wide{width:min(850px,100%);margin-bottom:34px}
+.content-block-wide h3{font-size:clamp(26px,2.7vw,36px)}
+.arabic-quote{font-family:"Segoe UI",Tahoma,sans-serif;font-size:clamp(25px,3vw,38px);color:var(--maroon);line-height:1.6;margin:12px 0}
+
+.shahada-statement{
+  width:min(820px,100%);margin:0 0 34px;padding:28px;display:flex;align-items:center;justify-content:flex-start;gap:clamp(18px,4vw,52px);flex-wrap:wrap;
+  background:var(--mat);border-block:1px solid rgba(138,39,51,.3);
+}
+.shahada-statement span{font-family:"Segoe UI",Tahoma,sans-serif;font-size:clamp(42px,5vw,68px);color:var(--maroon)}
+.shahada-statement b{font-family:var(--font-heading);font-size:clamp(28px,3vw,42px);color:var(--maroon-deep)}
+.shahada-statement small{font-size:18px;color:var(--stamp);font-weight:600}
+
+.prayer-cycle{
+  display:grid;grid-template-columns:minmax(260px,.75fr) minmax(0,1.25fr);overflow:hidden;
+  margin:34px 0;border-radius:14px;background:var(--mat);border:1px solid var(--edge);
+}
+.prayer-sky{position:relative;min-height:520px;overflow:hidden;background:linear-gradient(180deg,#28213e 0,#e2a25a 22%,#93c2dd 48%,#d97849 76%,#1a1630 100%)}
+.prayer-sky::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 55% 20%,rgba(255,244,207,.92) 0 4%,rgba(255,226,168,.25) 10%,transparent 28%)}
+.prayer-sky .sun{position:absolute;top:17%;left:53%;width:34px;height:34px;border-radius:50%;background:#fff4cf;box-shadow:0 0 35px 12px rgba(255,226,168,.7)}
+.prayer-sky .horizon{position:absolute;inset-inline:0;bottom:0;height:27%;background:#1c1320;clip-path:polygon(0 72%,8% 63%,13% 70%,18% 43%,23% 69%,31% 58%,38% 72%,45% 50%,53% 71%,62% 60%,69% 72%,75% 45%,82% 70%,90% 58%,100% 68%,100% 100%,0 100%)}
+.prayer-cycle-copy{padding:clamp(26px,4vw,48px)}
+.prayer-cycle-copy h3{font-size:clamp(27px,3vw,40px);margin-bottom:10px}
+.prayer-cycle-copy > p{margin-bottom:20px;color:var(--muted)}
+.prayer-cycle-copy ol{list-style:none}
+.prayer-cycle-copy li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--rule)}
+.prayer-cycle-copy li > span{color:var(--stamp);font-size:12px;padding-top:5px;font-variant-numeric:tabular-nums}
+.prayer-cycle-copy li p{font-size:16px;line-height:1.55}
+
+.qibla-feature{display:grid;grid-template-columns:minmax(0,.9fr) minmax(420px,1.1fr);gap:28px;align-items:center;margin-top:34px}
+.map-figure{position:relative;overflow:hidden;background:#e6d6b4;border:1px solid var(--edge);border-radius:14px;box-shadow:0 10px 26px rgba(60,35,18,.12)}
+.qibla-map{aspect-ratio:1200/514}
+.hajj-map{aspect-ratio:1000/560;margin:32px 0 42px}
+.map-plate,.map-plate svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.map-figure figcaption{position:absolute;inset-inline:12px;bottom:10px;width:fit-content;padding:4px 10px;border-radius:6px;background:rgba(245,236,214,.9);font-size:12px;color:var(--maroon-deep)}
+.map-pin,.hajj-pin{position:absolute;z-index:2;translate:-50% -50%;font-size:12px;font-weight:600;color:var(--maroon);background:var(--mat);border:1px solid rgba(138,39,51,.4);border-radius:99px;padding:3px 8px;box-shadow:0 4px 10px rgba(60,35,18,.14);white-space:nowrap}
+.map-pin::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--maroon);margin-inline-end:5px}
+.qibla-map .jerusalem{left:36.87%;top:14.8%}.qibla-map .medina{left:48.22%;top:63.54%}.qibla-map .makkah{left:48.78%;top:83.87%}
+
+.charity-layout{display:grid;grid-template-columns:minmax(320px,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,70px);align-items:center}
+.charity-figure{position:relative;min-height:440px;display:grid;place-items:center;padding-bottom:100px}
+.charity-ring{width:220px;aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:conic-gradient(var(--maroon) 0 2.5%,rgba(138,39,51,.16) 2.5% 100%);position:relative}
+.charity-ring::before{content:"";position:absolute;inset:20px;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 1px rgba(138,39,51,.28)}
+.charity-ring b,.charity-ring small{position:relative;z-index:1}
+.charity-ring b{font-family:var(--font-heading);font-size:54px;color:var(--maroon);line-height:1}
+.charity-ring small{color:var(--muted);font-size:14px}
+.charity-flow{position:absolute;top:255px;width:2px;height:56px;background:var(--maroon)}
+.charity-figure ul{position:absolute;bottom:12px;list-style:none;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.charity-figure li{padding:7px 13px;border:1px solid var(--edge);border-radius:99px;background:var(--mat);font-size:14px;color:var(--maroon-deep)}
+.charity-copy{display:flex;flex-direction:column;gap:28px}
+.charity-copy .content-block + .content-block{padding-top:28px;border-top:1px solid var(--rule)}
+
+.ramadan-history .content-block:nth-child(2){margin-top:28px}.ramadan-history .content-block:nth-child(3){margin-top:56px}
+.fast-day{margin:38px 0;padding:clamp(28px,4vw,46px);border-radius:14px;color:var(--cream);background:var(--maroon-deep);overflow:hidden}
+.fast-day-head{width:min(760px,100%)}
+.fast-day h3{color:var(--cream);font-size:clamp(28px,3vw,40px);margin-bottom:10px}
+.fast-day-head p{color:rgba(245,236,214,.86)}
+.fast-day ol{position:relative;list-style:none;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:32px}
+.fast-day ol::before{content:"";position:absolute;inset-inline:7%;top:17px;height:1px;background:rgba(245,236,214,.4)}
+.fast-day li{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.fast-day li span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--mat);color:var(--maroon-deep);font-weight:600;font-size:13px}
+.fast-day li b{font-size:14px;line-height:1.35;color:var(--cream)}
+
+.hajj-pin{font-size:11px;padding:2px 6px}
+.hajj-pin i{font-style:normal;color:var(--stamp);margin-inline-end:4px}
+.hajj-map .pin-1{left:9.5%;top:74.1%}.hajj-map .pin-2{left:20.5%;top:53.6%}.hajj-map .pin-3{left:24%;top:63%}.hajj-map .pin-4{left:86%;top:71.4%}.hajj-map .pin-5{left:65.5%;top:78%}.hajj-map .pin-6{left:45.5%;top:74%}.hajj-map .pin-7{left:18.5%;top:42%}
+.hajj-journey{position:relative;display:flex;flex-direction:column;gap:0;width:min(940px,100%);margin-inline:auto}
+.hajj-journey::before{content:"";position:absolute;inset-block:0;inset-inline-start:24px;width:1px;background:linear-gradient(var(--maroon),rgba(138,39,51,.12))}
+.hajj-stop{display:grid;grid-template-columns:48px 1fr;gap:20px;padding:0 0 34px}
+.hajj-stop > span{position:relative;z-index:1;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--maroon);color:var(--maroon);font-size:12px;font-variant-numeric:tabular-nums}
+.hajj-stop .content-block{padding:0 0 0}
+
+.summary-section{text-align:right;background:var(--panel)}
+.summary-section .section-heading{text-align:start}
+.summary-band{display:grid;grid-template-columns:repeat(5,1fr);border-block:1px solid var(--edge);margin:30px 0}
+.summary-band a{display:flex;flex-direction:column;align-items:center;padding:22px 10px;text-decoration:none;border-inline-start:1px solid var(--rule)}
+.summary-band a:last-child{border-inline-start:0}
+.summary-band span{color:var(--stamp);font-size:12px}.summary-band b{font-family:var(--font-heading);font-size:20px;color:var(--maroon)}.summary-band small{color:var(--muted)}
+.summary-band a:hover{background:rgba(165,50,47,.08)}
+
+@media (max-width:1180px){
+  .three-columns{grid-template-columns:1fr 1fr}.three-columns > :last-child{grid-column:1/-1}
+  .ramadan-history .content-block:nth-child(2),.ramadan-history .content-block:nth-child(3){margin-top:0}
+  .qibla-feature{grid-template-columns:1fr}.qibla-feature .content-block{width:min(800px,100%)}
+}
+
+@media (max-width:920px){
+  :root{--header-height:52px}
+  .chapter-site-header-inner{width:100%;padding-inline:clamp(16px,4vw,40px)}
+  .chapter-logo img{height:26px}
+  .chapter-layout{width:100%;padding-block:26px 70px}
+  .pillars-path{width:100%;min-width:0;grid-template-columns:repeat(5,140px);overflow-x:auto;padding-bottom:14px;scroll-snap-type:x proximity}
+  .pillars-path a{scroll-snap-align:start}.pillars-line{inset-inline:60px;width:600px}
+  .prayer-cycle,.charity-layout{grid-template-columns:1fr}
+  .prayer-sky{min-height:260px}.charity-figure{min-height:390px}
+}
+
+@media (max-width:680px){
+  body{font-size:19px}
+  .chapter-site-header-inner{width:100%;padding-inline:14px}
+  .chapter-find{width:clamp(120px,40vw,220px)}
+  .chapter-layout{padding-top:18px}
+  .chapter-article{padding-inline:0}
+  .article-section + .article-section{margin-top:36px;padding-top:36px}
+  h1{font-size:38px;text-wrap:balance}
+  .story-film{border-radius:10px}.story-film-controls{height:54px;padding-inline:9px}.story-film-controls > span{display:none}
+  .story-film-caption{font-size:14px;padding:6px 10px;bottom:4%}
+  .story-film-big-play{width:56px;height:56px}.story-film-big-play svg{width:23px;height:23px}
+  .section-heading > div{width:100%;min-width:0;display:block}
+  .section-heading h2{width:100%;font-size:31px;text-wrap:balance}.section-heading .section-term{display:block;margin-top:5px}
+  .section-heading > p{width:100%;max-width:100%;font-size:19px}
+  .three-columns,.two-columns{grid-template-columns:1fr}.three-columns > :last-child{grid-column:auto}
+  .content-columns > .content-block{padding-top:16px}
+  .shahada-statement{flex-direction:column;gap:5px;padding:22px}.shahada-statement span{font-size:48px}
+  .prayer-cycle-copy{padding:25px 18px}.prayer-cycle-copy li{grid-template-columns:28px 1fr}
+  .qibla-map{aspect-ratio:1.3}.map-plate svg{preserve-aspect-ratio:none}
+  .map-pin{font-size:10px;padding:2px 5px}
+  .fast-day ol{grid-template-columns:1fr;gap:0;margin-top:22px}.fast-day ol::before{inset-block:16px 16px;inset-inline-start:17px;width:1px;height:auto}
+  .fast-day li{display:grid;grid-template-columns:34px 1fr;text-align:start;gap:12px;padding-bottom:12px}.fast-day li b{font-size:15px}
+  .hajj-map{aspect-ratio:1.25}.hajj-pin{font-size:0;width:25px;height:25px;padding:0;display:grid;place-items:center}.hajj-pin i{font-size:11px;margin:0}
+  .hajj-stop{grid-template-columns:38px 1fr;gap:13px}.hajj-stop > span{width:38px;height:38px}.hajj-journey::before{inset-inline-start:19px}
+  .summary-band{grid-template-columns:1fr}.summary-band a{flex-direction:row;gap:10px;justify-content:flex-start;border-inline:0;border-top:1px solid var(--rule);padding:13px 10px}.summary-band a:first-child{border-top:0}.summary-band small{margin-inline-start:auto}
+}
+
+/* ===================================================================================
+   Spec revision (7.2026): scroll reveals, the two explore interactions, the summary
+   practice, the Magnific scene plates, the commandment transitions and the draggable
+   menu — all in the existing parchment language, nothing replaces an existing component.
+   =================================================================================== */
+
+/* ---- scroll-driven reveals: armed only once JS mounts (js-reveal), reversible on
+   reverse scroll, and skipped entirely under reduced motion ---- */
+.js-reveal [data-reveal]{
+  opacity:0;translate:0 22px;
+  transition:opacity .55s ease,translate .55s ease;
+}
+.js-reveal [data-reveal].is-inview{opacity:1;translate:0 0}
+
+/* ---- menu: drag grip, reset, current highlight, done marks ---- */
+.menu-grip-row{display:none}
+@media (min-width:1024px){
+  .menu-grip-row{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    padding:8px 12px 2px;
+  }
+  .menu-grip{
+    all:unset;box-sizing:border-box;cursor:grab;touch-action:none;
+    width:56px;height:22px;border-radius:8px;display:grid;place-items:center;color:var(--muted);
+  }
+  .menu-grip:hover{background:rgba(165,50,47,.1);color:var(--maroon)}
+  .menu-grip:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+  .menu-grip svg{width:24px;height:10px;fill:currentColor}
+  .menu-reset{
+    all:unset;box-sizing:border-box;cursor:pointer;font-size:12px;font-weight:600;color:var(--maroon);
+    padding:3px 10px;border:1px solid var(--edge);border-radius:999px;background:var(--mat);
+  }
+  .menu-reset:hover{background:rgba(165,50,47,.1)}
+  .menu-reset:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+  .chapter-drawer.is-collapsed .menu-reset{display:none}
+  .chapter-drawer.is-dragging{
+    cursor:grabbing;box-shadow:0 22px 54px rgba(28,10,2,.3);
+    border:1px solid var(--edge);border-radius:0 0 12px 12px;
+  }
+  .chapter-drawer.is-dragging .menu-grip{cursor:grabbing}
+}
+.chapter-menu-nav a{position:relative}
+.chapter-menu-nav a.is-current{background:rgba(165,50,47,.12);color:var(--maroon);font-weight:700}
+.menu-done{
+  width:15px;height:15px;margin-inline-start:auto;flex:none;
+  fill:none;stroke:var(--maroon);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:.75;
+}
+.chapter-drawer.is-collapsed .menu-done{display:none}
+
+/* ---- Magnific scene plates: alongside the didactic components, never instead ---- */
+.scene-plate{
+  position:relative;width:min(880px,100%);margin:30px auto;overflow:hidden;
+  background:var(--mat);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);
+}
+.scene-plate.ratio-wide{aspect-ratio:16/9}
+.scene-plate.ratio-square{aspect-ratio:1}
+.scene-plate-narrow{width:min(430px,100%)}
+.scene-plate img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.scene-plate figcaption{
+  position:absolute;inset-inline:12px;bottom:10px;width:fit-content;padding:4px 10px;border-radius:6px;
+  background:rgba(245,236,214,.92);font-size:12px;color:var(--maroon-deep);
+}
+
+/* ---- the two explore interactions: plain tab pairs, text always above, nothing blocks ----
+   the block is flush to the inline-start (the right, in RTL) so it lines up with the intro
+   text above it rather than floating centred. */
+.explore{width:min(760px,100%);margin:44px 0 24px}
+.explore-tabs{display:flex;gap:10px;border-bottom:1px solid var(--edge);padding-bottom:0}
+.explore-tabs button{
+  all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:11px 24px;
+  border:1px solid var(--edge);border-bottom:none;border-radius:10px 10px 0 0;
+  background:var(--panel);color:var(--muted);font-weight:600;font-size:15px;
+  transition:background .2s ease,color .2s ease;
+}
+.explore-tabs button:hover{color:var(--maroon)}
+.explore-tabs button.is-active{background:var(--mat);color:var(--maroon);border-color:rgba(138,39,51,.4)}
+.explore-tabs button:focus-visible{outline:2px solid var(--maroon);outline-offset:-2px}
+.explore-panel{
+  background:var(--mat);border:1px solid var(--edge);border-top:none;border-radius:0 0 12px 12px;
+  padding:26px 26px 22px;
+}
+.explore-scene{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:9px;background:var(--surface)}
+.explore-scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.explore-caption{margin-top:16px;font-size:14px;color:var(--muted);text-align:right;line-height:1.6}
+
+/* ========== prayer: five prayers as buttons → the WHOLE-screen background changes ==========
+   the buttons sit in the text; clicking one crossfades the full-screen scene to that prayer's
+   time of day (the .st-pick layer in PrayerStage), with its explanation shown beside them */
+.st-photo > img.st-pick{transition:opacity .6s ease}
+.ptimes{margin-top:20px}
+.ptimes-btns{display:flex;flex-wrap:wrap;gap:9px}
+.ptimes-btn{
+  all:unset;box-sizing:border-box;cursor:pointer;padding:9px 17px;border-radius:999px;min-height:40px;
+  border:1px solid var(--edge);background:rgba(250,246,236,.85);color:var(--muted);font-weight:600;font-size:15px;
+  transition:background .2s,color .2s,border-color .2s;
+}
+.ptimes-btn:hover{color:var(--maroon);border-color:rgba(138,39,51,.4)}
+.ptimes-btn.is-active{background:var(--maroon);color:var(--cream);border-color:var(--maroon)}
+.ptimes-btn:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.ptimes-copy{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.ptimes-copy b{font-family:var(--font-heading);font-size:clamp(23px,2.6vw,34px);color:var(--maroon-deep);line-height:1.15}
+.ptimes-when{align-self:flex-start;font-weight:600;color:var(--stamp);background:rgba(250,246,236,.9);
+  border:1px solid var(--edge);border-radius:999px;padding:3px 14px;font-size:15px}
+.ptimes-copy p{font-size:clamp(17px,1.6vw,22px);line-height:1.75;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){
+  .st-photo > img.st-pick{transition:none}
+}
+
+/* ---- the fixed transition strip between commandments ---- */
+.commandment-transition{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  width:min(820px,100%);margin:44px auto 58px;padding:16px 22px;
+  background:var(--mat);border:1px solid var(--edge);border-radius:12px;
+  position:relative;
+}
+/* a centred divider under the transition — a clear, elegant break before the next part */
+.commandment-transition::after{
+  content:"";position:absolute;bottom:-30px;left:50%;translate:-50% 0;
+  width:min(220px,60%);height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--maroon),transparent);
+}
+.ct-icon{position:relative;flex:none;width:52px;height:52px;display:grid;place-items:center}
+.ct-icon img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 8px rgba(60,35,18,.18))}
+.ct-check{
+  position:absolute;inset-inline-end:-4px;bottom:-2px;width:20px;height:20px;padding:3px;border-radius:50%;
+  background:var(--maroon);fill:none;stroke:var(--cream);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+  opacity:0;scale:.6;transition:opacity .35s ease,scale .35s ease;
+}
+.ct-icon.is-done .ct-check{opacity:1;scale:1}
+.commandment-transition p{flex:1;min-width:220px;font-size:15.5px;line-height:1.6;color:var(--ink)}
+.ct-next{flex:none;font-family:var(--font-heading);font-weight:700;color:var(--maroon);font-size:17px}
+
+/* ---- the summary practice: click-only, no score, no failure screen ---- */
+.practice-wrap{width:min(820px,100%);margin:10px auto 0;text-align:start}
+.practice-title{font-size:clamp(24px,2.4vw,32px);margin-bottom:14px}
+.practice{
+  background:var(--mat);border:1px solid var(--edge);border-radius:14px;padding:clamp(20px,3vw,34px);
+}
+.practice-head{text-align:center}
+.practice-count{font-size:12px;color:var(--stamp);font-variant-numeric:tabular-nums;letter-spacing:1px}
+.practice-quote{
+  margin:10px auto 6px;width:min(640px,100%);
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(20px,2.2vw,27px);line-height:1.45;color:var(--maroon-deep);
+}
+.practice-ask{display:block;font-size:14px;color:var(--muted)}
+.practice-options{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:22px}
+.practice-option{
+  all:unset;box-sizing:border-box;cursor:pointer;position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:8px;min-height:44px;padding:14px 8px;
+  border:1px solid var(--edge);border-radius:12px;background:var(--surface);text-align:center;
+  transition:border-color .2s ease,background .2s ease,opacity .25s ease,transform .2s ease;
+}
+.practice-option:hover:not(:disabled){border-color:var(--maroon);transform:translateY(-2px)}
+.practice-option:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.practice-option img{width:54px;height:54px;object-fit:contain}
+.practice-option b{font-family:var(--font-heading);font-size:16px;color:var(--maroon)}
+.practice-option.is-wrong{opacity:.38;cursor:default}
+.practice-option.is-right{border-color:var(--maroon);background:rgba(165,50,47,.08)}
+.practice-check{
+  position:absolute;top:6px;inset-inline-end:6px;width:22px;height:22px;padding:4px;border-radius:50%;
+  background:var(--maroon);fill:none;stroke:var(--cream);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+}
+.practice-say{min-height:24px;margin-top:14px;text-align:center;font-weight:600;color:var(--maroon)}
+.practice-finished{display:flex;align-items:center;justify-content:center;gap:12px;text-align:center}
+.practice-finished svg{
+  width:34px;height:34px;padding:6px;border-radius:50%;background:var(--maroon);flex:none;
+  fill:none;stroke:var(--cream);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;
+}
+.practice-finished p{font-family:var(--font-heading);font-weight:700;font-size:clamp(19px,2vw,25px);color:var(--maroon-deep)}
+
+@media (max-width:1180px){
+  /* the spec: on narrow screens the illustration sits ABOVE its text */
+  .qibla-feature .map-figure{order:-1}
+}
+
+@media (max-width:680px){
+  .practice-options{grid-template-columns:repeat(2,1fr)}
+  .practice-options .practice-option:last-child{grid-column:1/-1}
+  .commandment-transition{flex-direction:column;text-align:center;gap:10px}
+  .commandment-transition p{min-width:0}
+  .explore-tabs button{flex:1;text-align:center;padding-inline:8px}
+  .scene-plate{border-radius:10px}
+}
+
+/* ===================================================================================
+   The scroll experience (spec, final revision): one sticky environment panel per area,
+   paragraphs as steps, the scene a pure function of scroll position — reversible,
+   never locking the scroll, never replacing a word of the text.
+   =================================================================================== */
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+.film-wrap{transform-origin:center top;will-change:opacity,transform}
+
+/* --- opening, part 2: the lead line, then the pillars statement rising beneath it --- */
+.pillars-lead{width:min(760px,100%);margin:0 auto;font-size:clamp(19px,2vw,24px);line-height:1.7;color:var(--ink);text-align:center}
+.pillars-statement{margin:30px auto 44px;text-align:center}
+.pillars-statement b{display:block;font-family:var(--font-heading);font-weight:900;font-size:clamp(27px,3.4vw,46px);color:var(--maroon);line-height:1.25}
+.pillars-statement span{display:block;margin-top:8px;font-size:clamp(16px,1.8vw,22px);color:var(--stamp);font-weight:600}
+.js-reveal .pillars-statement{translate:0 34px}
+.js-reveal .pillars-statement.is-inview{translate:0 0}
+
+/* --- the scrolly: copy (right, RTL) + sticky scene panel (left) --- */
+.scrolly{position:relative;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:clamp(22px,3.5vw,54px);margin:26px 0 10px}
+.scrolly-copy{grid-column:1;grid-row:1;min-width:0}
+.scrolly-art{
+  grid-column:2;grid-row:1;position:sticky;top:calc(var(--header-height) + 20px);align-self:start;
+  height:min(72vh,560px);overflow:hidden;border-radius:14px;
+  background:var(--mat);border:1px solid var(--edge);box-shadow:var(--shadow);
+}
+.scn{width:100%;height:100%;display:block}
+.scn circle,.scn rect,.scn path,.scn ellipse,.scn text,.scn g{transition:opacity .5s ease}
+.scn .zoom{transition:transform .85s cubic-bezier(.3,.75,.3,1)}
+
+.scrolly-step{min-height:52vh;display:flex;flex-direction:column;justify-content:center;padding:10px 0;opacity:.4;transition:opacity .45s ease;scroll-snap-align:center}
+.scrolly-step.is-active{opacity:1}
+.scrolly-step:first-child{min-height:34vh}
+.scrolly-step:last-child{min-height:40vh}
+.scrolly-step p{font-size:clamp(17.5px,1.6vw,20px);line-height:1.85;color:var(--ink)}
+.scrolly-big{font-family:var(--font-heading);font-weight:700;font-size:clamp(23px,2.5vw,33px)!important;line-height:1.5!important;color:var(--maroon-deep)!important}
+.scrolly-env{
+  font-family:var(--font-heading);font-size:clamp(20px,1.9vw,26px);color:var(--maroon);
+  margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);width:fit-content;
+}
+
+/* emphasis of words that already exist in the text, timed to the scroll */
+mark.wmark{background:transparent;color:inherit;border-radius:3px;padding-inline:1px;box-shadow:inset 0 -2px 0 transparent;transition:background .45s ease,box-shadow .45s ease,color .45s ease}
+mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--maroon);color:var(--maroon-deep)}
+
+/* the intro line before an explore interaction */
+.explore-block{width:min(760px,100%);margin:52px 0 0}
+.explore-block p{font-size:clamp(17.5px,1.6vw,20px);line-height:1.85}
+.explore-block .scrolly-env{margin-bottom:16px}
+
+.hijri-link{width:min(760px,100%);margin:14px auto 0;font-size:16.5px;color:var(--ink)}
+.hijri-link a{color:var(--maroon);font-weight:600;text-decoration-color:rgba(138,39,51,.5);text-underline-offset:3px}
+.hijri-link a:hover{color:var(--maroon-deep)}
+
+/* the closing blessing: Arabic first and large, the translation beneath */
+.blessing{text-align:center}
+.blessing .arabic-quote{font-size:clamp(28px,3.4vw,44px);margin:16px 0 8px}
+.blessing-he{color:var(--maroon-deep);font-weight:600}
+
+/* --- the chapter's close: five icons, each carrying one small memory of the journey --- */
+.summary-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:30px 0}
+.summary-cards a{
+  display:flex;flex-direction:column;text-decoration:none;border-radius:12px;overflow:hidden;
+  background:var(--mat);border:1px solid var(--edge);transition:transform .22s ease,box-shadow .22s ease;
+}
+.summary-cards a:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.summary-visual{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--surface);display:grid;place-items:center}
+.summary-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.summary-visual i{font-style:normal;padding:10px;font-family:var(--font-heading);font-weight:700;font-size:14.5px;line-height:1.5;color:var(--maroon-deep);text-align:center}
+.summary-name{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--rule)}
+.summary-name img{width:30px;height:30px;object-fit:contain;flex:none}
+.summary-name b{font-family:var(--font-heading);font-size:16.5px;color:var(--maroon)}
+.summary-name small{margin-inline-start:auto;color:var(--muted);font-size:12.5px}
+
+/* ===================================================================================
+   Full-screen stages: the scene fills the viewport, the scroll drives it, and the
+   paragraphs float over it in parchment cards. No layout shift, no scroll locking.
+   =================================================================================== */
+.scrolly-fullstage{display:block;margin-inline:calc(var(--content-gutter) * -1)}
+.scrolly-stage{
+  position:sticky;top:var(--header-height);z-index:1;
+  height:calc(100dvh - var(--header-height));overflow:hidden;
+}
+.scrolly-fullstage .scrolly-copy{
+  position:relative;z-index:2;
+  margin-top:calc(0px - (100dvh - var(--header-height)));
+  padding-inline:clamp(16px,4vw,60px);
+}
+/* photo sections butt straight up under the previous section's outro — no parchment gap or
+   divider line above the full-bleed scene */
+.article-section + :is(.prayer-section,.charity-section,.ramadan-section,.hajj-section){margin-top:0;padding-top:0;border-top:0}
+:is(.prayer-section,.charity-section,.ramadan-section,.hajj-section) > .scrolly-fullstage{margin-top:0}
+/* the paragraphs ride the scroll continuously: JS drifts each one in from below,
+   holds it at the centre, and lets it out above — so no frame-by-frame feeling */
+.scrolly-fullstage .scrolly-step{
+  min-height:74vh;align-items:flex-start;justify-content:center;display:flex;
+  opacity:1;transition:none;will-change:opacity,transform;
+}
+.scrolly-fullstage .scrolly-step:first-child{min-height:calc(100dvh - var(--header-height))}
+.stage-card{
+  width:min(600px,88%);text-align:start;
+  padding:0 clamp(4px,2vw,26px);
+}
+.stage-card p{
+  font-size:clamp(20px,1.9vw,28px);line-height:1.85;color:var(--ink);
+  text-shadow:0 1px 0 rgba(255,252,244,.7);
+}
+.stage-card .scrolly-env{font-size:clamp(28px,2.8vw,42px);border-bottom-width:3px;margin-bottom:16px}
+.stage-card .scrolly-big{font-size:clamp(26px,2.6vw,38px)!important}
+
+/* ---- photographic stage: blurred realistic scene + a white veil, strong on the
+   right (where the text sits) and fading toward the left ---- */
+/* ---- a full-screen step that carries an illustration/interaction on the LEFT while its
+   text sits on the RIGHT: both belong to the same scroll step, so they move together and
+   there is no sticky/overlap fragility ---- */
+.scrolly-fullstage .scrolly-step .step-split{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:clamp(16px,3vw,48px);
+}
+.step-aside{margin:0;width:min(400px,40%);flex:none}
+.step-aside > img{
+  width:100%;height:auto;display:block;border-radius:14px;
+  border:1px solid var(--edge);box-shadow:0 18px 50px rgba(28,10,2,.32);background:var(--surface);
+}
+.step-aside figcaption{
+  margin-top:8px;text-align:center;font-size:13px;color:var(--maroon-deep);
+  background:rgba(250,246,236,.9);border-radius:8px;padding:4px 10px;width:fit-content;margin-inline:auto;
+}
+.step-aside-wide{width:min(500px,46%)}
+.step-aside-wide .explore{width:100%;margin:0}
+.step-aside-wide .explore-tabs button{background:rgba(250,246,236,.92)}
+.step-aside-wide .explore-panel{box-shadow:0 18px 50px rgba(28,10,2,.32)}
+.step-split .stage-card{flex:1;min-width:0}
+
+@media (max-width:920px){
+  /* no room beside the text — stack: text first, then the illustration below it */
+  .scrolly-fullstage .scrolly-step .step-split{flex-direction:column;gap:16px}
+  .step-aside,.step-aside-wide{width:min(430px,100%);order:2}
+  .step-split .stage-card{order:1;width:100%}
+}
+
+.st-photo{background:#efe6d2}
+.st-photo > img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:blur(7px) saturate(1.04);transform:scale(1.08);
+  transition:opacity .001s linear;
+}
+.st-veil{
+  position:absolute;inset:0;
+  background:linear-gradient(to left,
+    rgba(250,246,236,.96) 0%,
+    rgba(250,246,236,.9) 26%,
+    rgba(250,246,236,.62) 48%,
+    rgba(250,246,236,.18) 74%,
+    rgba(250,246,236,.02) 100%);
+}
+
+/* ---- scene atoms ---- */
+.st{position:absolute;inset:0}
+.st-parchment{background:linear-gradient(180deg,#f0e3c4,#e6d6b4)}
+.st-stars{position:absolute;inset:0;transition:opacity .7s ease}
+.st-stars i{position:absolute;border-radius:50%;background:#e9c979;box-shadow:0 0 6px 1px rgba(233,201,121,.6)}
+.st-sun{
+  position:absolute;width:64px;height:64px;border-radius:50%;translate:-50% -50%;
+  background:#ffedbb;box-shadow:0 0 90px 44px rgba(255,224,150,.5);
+}
+.st-moon{
+  position:absolute;left:16%;top:13%;width:48px;height:48px;border-radius:50%;background:#d9b45b;
+  -webkit-mask:radial-gradient(circle at 66% 38%,transparent 0 55%,#000 57%);
+  mask:radial-gradient(circle at 66% 38%,transparent 0 55%,#000 57%);
+}
+.st-beam{
+  position:absolute;left:50%;bottom:21%;width:7px;translate:-50% 0;border-radius:99px;
+  background:linear-gradient(0deg,#d9b45b,rgba(217,180,91,.05));
+  box-shadow:0 0 30px 8px rgba(217,180,91,.35);transition:opacity .4s ease;
+}
+.st-dots{position:absolute;top:15%;inset-inline:0;display:flex;justify-content:center;gap:30px;transition:opacity .5s ease}
+.st-dots i{width:17px;height:17px;border-radius:50%;background:rgba(217,180,91,.18);transition:background .45s ease,box-shadow .45s ease}
+.st-dots i.on{background:#ffe9ae;box-shadow:0 0 24px 7px rgba(255,224,150,.5)}
+.st-horizon{
+  position:absolute;inset-inline:0;bottom:0;height:21%;background:#1c1320;transition:opacity .7s ease;
+  clip-path:polygon(0 72%,8% 63%,13% 70%,18% 43%,23% 69%,31% 58%,38% 72%,45% 50%,53% 71%,62% 60%,69% 72%,75% 45%,82% 70%,90% 58%,100% 68%,100% 100%,0 100%);
+}
+.st-plate{
+  position:absolute;left:50%;top:45%;width:min(540px,74%);border-radius:14px;
+  border:1px solid rgba(120,70,40,.35);box-shadow:0 24px 64px rgba(28,10,2,.38);
+  transition:opacity .65s ease,transform .65s ease;
+}
+.st-plate-wide{width:min(700px,84%)}
+
+/* ---- charity ---- */
+.st-grid40{
+  position:absolute;left:50%;top:42%;translate:-50% -50%;
+  display:grid;grid-template-columns:repeat(8,clamp(30px,4.4vmin,46px));gap:clamp(6px,1.2vmin,11px);
+  transition:transform .6s ease;
+}
+.st-grid40 b{
+  position:relative;aspect-ratio:1;border-radius:9px;border:2px solid #b98a3c;
+  background:rgba(248,238,214,.65);transition:opacity .5s ease,background .5s ease,border-color .5s ease;
+}
+.st-grid40 b.is-dim{opacity:.32}
+.st-grid40 b.is-pick{background:#8a2733;border-color:#8a2733}
+.st-pulse{position:absolute;inset:-6px;border-radius:13px;border:3px solid #d9b45b;transition:opacity .4s ease,scale .4s ease}
+.st-caption40{
+  position:absolute;left:24%;top:14%;translate:-50% 0;font-family:var(--font-heading);
+  font-size:clamp(24px,3vw,40px);color:var(--maroon-deep);transition:opacity .5s ease;white-space:nowrap;
+  padding:10px 26px;border-radius:999px;background:rgba(250,246,236,.88);box-shadow:0 10px 30px rgba(28,10,2,.18);
+}
+.st-chips{position:absolute;left:50%;bottom:9%;translate:-50% 0;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;transition:opacity .6s ease}
+.st-chips span{padding:8px 18px;border-radius:999px;background:var(--cream);border:1px solid var(--edge);color:var(--maroon-deep);font-weight:600}
+.st-splitlabel{position:absolute;inset-inline:7%;top:15%;display:flex;justify-content:space-between;gap:12px;color:var(--maroon-deep);font-weight:700;transition:opacity .5s ease}
+
+/* ---- ramadan ---- */
+.st-cres{position:absolute;left:13%;top:11%;width:74px;height:74px;transition:opacity .6s ease}
+.st-cres::before{content:"";position:absolute;inset:0;border-radius:50%;background:#d9b45b;box-shadow:0 0 46px 12px rgba(217,180,91,.35)}
+.st-cres i{position:absolute;inset:-2px;border-radius:50%;transition:transform .7s ease}
+.st-qadr{
+  position:absolute;left:24%;top:50%;translate:-50% -50%;
+  display:flex;flex-direction:column;align-items:center;transition:opacity .7s ease;
+}
+.st-qadr b{font-family:var(--font-heading);font-size:clamp(90px,15vmin,170px);line-height:1;color:#ffe9ae;text-shadow:0 0 60px rgba(255,224,150,.85),0 4px 24px rgba(28,10,2,.5)}
+.st-qadr small{margin-top:4px;font-family:var(--font-heading);font-size:clamp(24px,3.4vmin,36px);color:#fff7e5;text-shadow:0 2px 14px rgba(28,10,2,.6)}
+.st-ten{position:absolute;inset:0;transition:opacity .5s ease}
+.st-ten i{position:absolute;width:15px;height:15px;border-radius:50%;background:rgba(217,180,91,.14);transition:background .45s ease,box-shadow .45s ease}
+.st-ten i.on{background:#ffe9ae;box-shadow:0 0 20px 6px rgba(255,224,150,.5)}
+
+/* ---- hajj: the living map ---- */
+.st-map{position:absolute;left:50%;top:50%;translate:-50% -50%;width:min(1120px,94%);max-height:88%;aspect-ratio:16/9}
+.st-map > img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:12px;filter:drop-shadow(0 18px 44px rgba(28,10,2,.28))}
+.st-pin{
+  position:absolute;translate:-50% -150%;padding:4px 11px;border-radius:999px;white-space:nowrap;
+  background:rgba(245,236,214,.94);border:1px solid rgba(138,39,51,.45);color:var(--maroon-deep);
+  font-size:13px;font-weight:600;transition:background .45s ease,color .45s ease,scale .45s ease;
+}
+.st-pin.is-active{background:var(--maroon);color:var(--cream);scale:1.12}
+.st-walker{position:absolute;width:0;height:0;transition:left .95s cubic-bezier(.3,.75,.3,1),top .95s cubic-bezier(.3,.75,.3,1),opacity .5s ease}
+.st-walker i{position:absolute;left:-10px;top:-10px;width:20px;height:20px;border-radius:50%;background:var(--maroon);border:3px solid var(--cream);box-shadow:0 5px 16px rgba(28,10,2,.4);display:block}
+.st-count{
+  position:absolute;top:12%;left:24%;translate:-50% 0;padding:10px 26px;border-radius:999px;
+  background:var(--maroon-deep);color:var(--cream);font-family:var(--font-heading);font-size:24px;transition:opacity .5s ease;white-space:nowrap;
+  box-shadow:0 10px 30px rgba(28,10,2,.3);
+}
+
+@media (max-width:1180px){
+  .summary-cards{grid-template-columns:repeat(2,1fr)}
+  .summary-cards a:last-child{grid-column:1/-1}
+}
+
+@media (max-width:920px){
+  /* mobile: the scene sits ABOVE the text as a short sticky band; never horizontal scroll */
+  .scrolly:not(.scrolly-fullstage){grid-template-columns:1fr}
+  .scrolly:not(.scrolly-fullstage) .scrolly-art{grid-column:1;grid-row:1;position:sticky;top:var(--header-height);z-index:4;height:31vh;border-radius:0 0 12px 12px}
+  .scrolly:not(.scrolly-fullstage) .scrolly-copy{grid-column:1;grid-row:2}
+  .scrolly:not(.scrolly-fullstage) .scrolly-step{min-height:46vh}
+  .scrolly:not(.scrolly-fullstage) .scrolly-step:first-child{min-height:30vh}
+  /* full stage on mobile: the veil covers evenly so the larger text stays readable */
+  .st-veil{background:rgba(250,246,236,.86)}
+  .stage-card{width:100%;padding-inline:6px}
+  .stage-card p{font-size:19px;line-height:1.8}
+  .st-caption40,.st-qadr,.st-count{left:50%}
+}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;scroll-snap-type:none}
+  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}
+  /* every reveal is fully visible and static; every step readable; scene swaps are instant */
+  .js-reveal [data-reveal]{opacity:1;translate:0 0;transition:none}
+  .scrolly-step{opacity:1!important;transform:none!important;transition:none}
+  .st-photo > img{transition:none}
+  .film-wrap{opacity:1!important;transform:none!important}
+}

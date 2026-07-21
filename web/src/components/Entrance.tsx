@@ -1,160 +1,254 @@
 'use client'
 
-/* The entrance sequence (was the inline <script> at the bottom of index.html).
-   Same behaviour, same markup, same class names — the CSS is the original file, so the DOM
-   it styles has to stay exactly this shape. What changed: getElementById became refs, the
-   two class toggles became state, and the listeners are torn down on unmount. */
+/* The site entrance — a scroll-scrubbed film, drawn as a frame sequence.
+
+   Seeking an MP4 by its currentTime stutters: the browser can only land on the codec's
+   keyframes, so the scrub jumps. Instead the film is pre-split into 61 stills (ffmpeg,
+   12fps) and the scroll position picks a frame that is painted to a <canvas>. There is no
+   decoding on the scroll path, so it is glassy-smooth winding both forward AND back.
+
+   The logo and "enter" button fade in over the final stretch (a --reveal custom property
+   set per frame). The reveal is driven by SCROLL, not by asset loading, so the entrance is
+   always reachable. Reduced-motion skips the scrub and shows the opening over the corridor. */
 
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 
-export default function Entrance() {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const skipRef = useRef<HTMLButtonElement>(null)
-  const enterRef = useRef<HTMLAnchorElement>(null)
-  const enteredRef = useRef(false)
+const FRAME_COUNT = 61
+const framePath = (i: number) => `/assets/entrance-frames/f-${String(i + 1).padStart(3, '0')}.jpg`
+/* how much page-height the scrub spans — 3 screens of scroll winds the whole film */
+const TRACK_VH = 300
+/* the opening begins composing at 60% of the scroll and completes at the end */
+const REVEAL_START = 0.6
 
-  const [entered, setEntered] = useState(false)
+function clamp01(x: number): number {
+  return x < 0 ? 0 : x > 1 ? 1 : x
+}
+function smoothstep(x: number): number {
+  const t = clamp01(x)
+  return t * t * (3 - 2 * t)
+}
+
+export default function Entrance() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const stageRef = useRef<HTMLElement>(null)
+  const revealRef = useRef<HTMLDivElement>(null)
+  const enterRef = useRef<HTMLAnchorElement>(null)
+
   const [noIntro, setNoIntro] = useState(false)
 
   useEffect(() => {
-    const video = videoRef.current
-    const skip = skipRef.current
-    if (!video || !skip) return
+    const canvas = canvasRef.current
+    const stage = stageRef.current
+    const reveal = revealRef.current
+    if (!canvas || !stage || !reveal) return
 
-    let guard: number | undefined
-    let focusTimer: number | undefined
-
-    function enter() {
-      if (enteredRef.current) return
-      enteredRef.current = true
-      try {
-        video?.pause()
-      } catch {
-        /* a video that refuses to pause must not hold the entrance shut */
-      }
-      setEntered(true)
-      focusTimer = window.setTimeout(function () {
-        try {
-          enterRef.current?.focus({ preventScroll: true })
-        } catch {
-          /* focus is a courtesy here, never a requirement */
-        }
-      }, 1200)
-    }
-
-    // reduced motion: skip the cinematic intro entirely, show opening over the corridor image
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduce =
+      window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
       setNoIntro(true)
-      enter()
-      return () => {
-        window.clearTimeout(focusTimer)
+      stage.style.setProperty('--reveal', '1')
+      reveal.classList.add('is-live')
+      window.setTimeout(() => {
+        try {
+          enterRef.current?.focus({ preventScroll: true })
+        } catch {}
+      }, 200)
+      return
+    }
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    /* Direction: scrolling UP enters (winds the film forward, deeper into the building,
+       to the "לכניסה"); scrolling DOWN exits. So the page loads at the BOTTOM of the
+       runway — the exterior — and progress runs as the learner scrolls up toward the top.
+       Manual restoration keeps the browser from fighting the initial jump. */
+    try {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
+    } catch {
+      /* older browsers just keep their default restoration */
+    }
+
+    /* ---- preload the frames; the scrub uses whatever has arrived, nearest-first ---- */
+    const frames: HTMLImageElement[] = []
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image()
+      img.decoding = 'async'
+      img.src = framePath(i)
+      img.onload = () => kickFrame()
+      frames[i] = img
+    }
+    function ready(i: number): boolean {
+      const im = frames[i]
+      return !!im && im.complete && im.naturalWidth > 0
+    }
+    function nearestReady(i: number): number {
+      if (ready(i)) return i
+      for (let d = 1; d < FRAME_COUNT; d++) {
+        if (ready(i - d)) return i - d
+        if (ready(i + d)) return i + d
       }
+      return -1
     }
 
-    // primary trigger: the entrance finished playing
-    video.addEventListener('ended', enter)
-
-    // safety net if 'ended' never fires
-    guard = window.setTimeout(enter, 9000)
-    function onMeta() {
-      const ms = (isFinite(video!.duration) ? video!.duration : 5.1) * 1000 + 400
-      window.clearTimeout(guard)
-      guard = window.setTimeout(enter, ms)
+    /* ---- canvas sizing (cover), crisp on HiDPI ---- */
+    let cw = 0
+    let ch = 0
+    function resize(): void {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      cw = window.innerWidth
+      ch = window.innerHeight
+      canvas!.width = Math.round(cw * dpr)
+      canvas!.height = Math.round(ch * dpr)
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
+      kickFrame()
     }
-    video.addEventListener('loadedmetadata', onMeta)
-    // catch the last moment in case 'ended' is skipped
-    function onTime() {
-      if (isFinite(video!.duration) && video!.duration - video!.currentTime <= 0.05) enter()
+    function drawCover(img: HTMLImageElement): void {
+      const ir = img.naturalWidth / img.naturalHeight
+      const cr = cw / ch
+      let dw: number
+      let dh: number
+      if (cr > ir) {
+        dw = cw
+        dh = cw / ir
+      } else {
+        dh = ch
+        dw = ch * ir
+      }
+      ctx!.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh)
     }
-    video.addEventListener('timeupdate', onTime)
 
-    // user may enter early — feels interactive, not like skipping a video
-    skip.addEventListener('click', enter)
-    function onKey(e: KeyboardEvent) {
-      if (enteredRef.current) return
+    /* ---- the scrub loop ---- */
+    let raf: number | undefined
+    let curr = 0 // eased frame index chasing the scroll target
+    let running = false
+    let lastDrawn = -1
+
+    function maxScroll(): number {
+      return Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+    }
+    function frame(): void {
+      running = true
+      /* inverted: top of the page (scrollY 0) is fully ENTERED, bottom is the exterior */
+      const p = clamp01(1 - window.scrollY / maxScroll())
+      const target = p * (FRAME_COUNT - 1)
+
+      curr += (target - curr) * 0.24
+      if (Math.abs(target - curr) < 0.05) curr = target
+
+      const want = nearestReady(Math.round(curr))
+      if (want >= 0 && want !== lastDrawn) {
+        drawCover(frames[want])
+        lastDrawn = want
+      }
+
+      const r = smoothstep((p - REVEAL_START) / (1 - REVEAL_START))
+      stage!.style.setProperty('--reveal', r.toFixed(4))
+      reveal!.classList.toggle('is-live', r > 0.35)
+
+      if (Math.abs(target - curr) > 0.01) raf = requestAnimationFrame(frame)
+      else running = false
+    }
+    function kickFrame(): void {
+      if (!running) raf = requestAnimationFrame(frame)
+    }
+
+    function onScroll(): void {
+      kickFrame()
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', resize)
+
+    /* skip for keyboard / the corner button: glide to the TOP so the film enters fully and
+       the opening composes, then hand focus to the entrance link */
+    function skipToEnd(): void {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      window.setTimeout(() => {
+        try {
+          enterRef.current?.focus({ preventScroll: true })
+        } catch {}
+      }, 620)
+    }
+    function onKey(e: KeyboardEvent): void {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
-        e.preventDefault()
-        enter()
+        if (e.target !== enterRef.current) {
+          e.preventDefault()
+          skipToEnd()
+        }
       }
     }
     document.addEventListener('keydown', onKey)
+    const skipBtn = stage.querySelector<HTMLButtonElement>('#skip')
+    skipBtn?.addEventListener('click', skipToEnd)
 
-    // blocked autoplay: keep the exterior scene, start on first interaction
-    let kick: (() => void) | null = null
-    function tryPlay() {
-      const p = video!.play()
-      if (p && typeof p.then === 'function') {
-        p.catch(function () {
-          kick = function () {
-            document.removeEventListener('pointerdown', kick!)
-            video!.play().catch(function () {})
-          }
-          document.addEventListener('pointerdown', kick, { once: true })
-        })
-      }
+    /* start at the exterior: pin the scroll to the bottom of the runway, so the only way
+       forward is up. Done now (pre-paint the canvas is still blank, so no flash) and again
+       on the next frame in case the runway's height was not yet settled. */
+    function toStart(): void {
+      const el = document.scrollingElement || document.documentElement
+      el.scrollTop = maxScroll()
+      kickFrame()
     }
-    if (video.readyState >= 2) tryPlay()
-    else video.addEventListener('canplay', tryPlay, { once: true })
+    toStart()
+    const startRaf = requestAnimationFrame(toStart)
 
-    function onCtx(e: Event) {
-      e.preventDefault()
-    }
-    video.addEventListener('contextmenu', onCtx)
+    resize() // sizes the canvas and paints the first ready frame
 
     return () => {
-      window.clearTimeout(guard)
-      window.clearTimeout(focusTimer)
-      video.removeEventListener('ended', enter)
-      video.removeEventListener('loadedmetadata', onMeta)
-      video.removeEventListener('timeupdate', onTime)
-      video.removeEventListener('canplay', tryPlay)
-      video.removeEventListener('contextmenu', onCtx)
-      skip.removeEventListener('click', enter)
+      if (raf) cancelAnimationFrame(raf)
+      cancelAnimationFrame(startRaf)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', resize)
       document.removeEventListener('keydown', onKey)
-      if (kick) document.removeEventListener('pointerdown', kick)
+      skipBtn?.removeEventListener('click', skipToEnd)
+      for (const im of frames) im.onload = null
+      try {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'auto'
+      } catch {}
     }
   }, [])
 
-  const stageClass = [entered ? 'entered' : '', noIntro ? 'no-intro' : ''].filter(Boolean).join(' ')
-
   return (
-    <main id="stage" className={stageClass}>
-      {/* fallback backdrop = the video's final frame (identical), for the no-video path */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="corridor" src="/assets/corridor.jpg" alt="" aria-hidden="true" />
+    <>
+      <main id="stage" ref={stageRef} className={noIntro ? 'no-intro' : ''}>
+        {/* fallback backdrop = the film's final frame (identical), for the no-canvas path */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="corridor" src="/assets/corridor.jpg" alt="" aria-hidden="true" />
 
-      {/* the entrance sequence */}
-      <video
-        id="intro"
-        ref={videoRef}
-        muted
-        autoPlay
-        playsInline
-        preload="auto"
-        poster="/assets/exterior.jpg"
-        disablePictureInPicture
-        controlsList="nodownload noplaybackrate noremoteplayback"
-        x-webkit-airplay="deny"
-      >
-        <source src="/entrance video.mp4" type="video/mp4" />
-      </video>
+        {/* the entrance film — a frame sequence painted by scroll */}
+        <canvas id="film-canvas" ref={canvasRef} aria-hidden="true" />
 
-      {/* revealed on top of the frozen last frame — backdrop never swaps */}
-      <div id="reveal">
-        <div className="veil" aria-hidden="true" />
-        <div className="inner">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="brand" src="/assets/logo-cream.png" alt="אסלאם" />
-          <Link className="enter" id="enter" href="/chapters" ref={enterRef}>
-            לכניסה
-          </Link>
+        {/* revealed on top of the film's current frame — the backdrop pixels never swap */}
+        <div id="reveal" ref={revealRef}>
+          <div className="veil" aria-hidden="true" />
+          <div className="inner">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="brand" src="/assets/logo-cream.png" alt="אסלאם" />
+            <Link className="enter" id="enter" href="/chapters" ref={enterRef}>
+              לכניסה
+            </Link>
+          </div>
         </div>
-      </div>
 
-      {/* whole-screen "enter" affordance during the intro */}
-      <button id="skip" ref={skipRef} aria-label="כניסה לאתר" />
-    </main>
+        {/* a quiet scroll cue while the opening is still winding in — up = enter */}
+        <div id="scroll-cue" aria-hidden="true">
+          <span className="cue-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19V5M6 11l6-6 6 6" />
+            </svg>
+          </span>
+          <span className="cue-text">גללו למעלה כדי להיכנס</span>
+        </div>
+
+        {/* skip for those who would rather not scroll (keyboard-reachable) */}
+        <button id="skip" type="button" aria-label="דילוג לכניסה">
+          דילוג
+        </button>
+      </main>
+
+      {/* the scroll runway that gives the scrub its length; absent under reduced motion */}
+      {!noIntro && <div className="scroll-track" aria-hidden="true" style={{ height: `${TRACK_VH}vh` }} />}
+    </>
   )
 }

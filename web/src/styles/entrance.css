@@ -1,8 +1,6 @@
-/* The entrance (was index.html's inline <style>).
-   Lifted verbatim. The @font-face block moved to fonts.css, which this route imports too;
-   nothing else changed. This file is loaded ONLY by the entrance route's root layout, which
-   is what keeps its :root tokens — note --maroon is #4a101e here, not the #841b1b the rest
-   of the site uses — from leaking into the chapters page or the chapter. */
+/* The site entrance — a scroll-scrubbed film.
+   :root tokens are scoped to the entrance route's own root layout (note --maroon is
+   #4a101e here, not the #841b1b the rest of the site uses), so they never leak. */
 
 :root{
   --cream:#fff7e5;
@@ -10,15 +8,19 @@
   --maroon-hover:#5e1626;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
+html{scroll-behavior:smooth}
+html,body{min-height:100%}
 body{
   background:#0b0805;
   font-family:"Kedem","Heebo",system-ui,"Segoe UI",Arial,sans-serif;
-  overflow:hidden;
+  overflow-x:hidden;
   color:var(--cream);
 }
 
-#stage{position:fixed;inset:0;overflow:hidden;background:#0b0805}
+/* the film is pinned to the viewport; the .scroll-track below it provides the scroll
+   distance that drives the scrub */
+#stage{--reveal:0;position:fixed;inset:0;overflow:hidden;background:#0b0805;z-index:2}
+.scroll-track{width:100%;pointer-events:none}
 
 /* fallback backdrop (used only when the video is hidden, e.g. reduced motion) */
 .corridor{
@@ -26,22 +28,20 @@ body{
   width:100%;height:100%;object-fit:cover;object-position:center;
 }
 
-/* the entrance sequence, styled to feel like the scene itself */
-#intro{
+/* the film itself — a canvas the scroll paints frames onto (cover math is done in JS) */
+#film-canvas{
   position:absolute;inset:0;z-index:2;
-  width:100%;height:100%;object-fit:cover;object-position:center;
+  width:100%;height:100%;
   background:#0b0805;
-  pointer-events:none;               /* no native video interactions */
-}
-
-/* revealed content — sits ABOVE the video so the backdrop pixels never swap */
-#reveal{
-  position:absolute;inset:0;z-index:4;
   pointer-events:none;
 }
+
+/* revealed content — sits ABOVE the film so the backdrop pixels never swap.
+   Opacity is driven straight by --reveal (set per scroll frame), so it follows the
+   scroll with no lag; there is no transition to fight the scrub. */
+#reveal{position:absolute;inset:0;z-index:4;pointer-events:none}
 #reveal .veil{
-  position:absolute;inset:0;opacity:0;
-  transition:opacity 1100ms ease;
+  position:absolute;inset:0;opacity:var(--reveal);
   background:
     radial-gradient(115% 85% at 50% 47%, rgba(0,0,0,0) 34%, rgba(0,0,0,.24) 78%, rgba(0,0,0,.5) 100%),
     linear-gradient(180deg, rgba(10,6,3,.3) 0%, rgba(10,6,3,0) 26%, rgba(10,6,3,0) 64%, rgba(10,6,3,.42) 100%);
@@ -57,7 +57,8 @@ body{
   width:clamp(240px,43vw,720px);
   max-width:86vw;height:auto;
   filter:drop-shadow(0 10px 40px rgba(0,0,0,.55));
-  opacity:0;transform:translateY(12px) scale(.985);
+  opacity:var(--reveal);
+  transform:translateY(calc((1 - var(--reveal)) * 12px));
 }
 .enter{
   display:inline-flex;align-items:center;justify-content:center;
@@ -69,11 +70,12 @@ body{
   border:1px solid rgba(255,247,229,.22);border-radius:999px;
   box-shadow:0 10px 28px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,247,229,.14);
   -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
-  cursor:pointer;pointer-events:auto;
-  opacity:0;transform:translateY(14px);
+  cursor:pointer;pointer-events:none;                 /* off until the reveal is live */
+  opacity:var(--reveal);
   transition:background .3s ease, transform .3s cubic-bezier(.2,.8,.2,1),
              box-shadow .3s ease, border-color .3s ease;
 }
+#reveal.is-live .enter{pointer-events:auto}
 .enter:hover,.enter:focus-visible{
   background:var(--maroon-hover);border-color:rgba(255,247,229,.42);
   transform:translateY(-3px);
@@ -83,33 +85,38 @@ body{
 }
 .enter:active{transform:translateY(-1px)}
 
-/* whole-screen "enter" affordance during the intro (invisible, not video-like) */
+/* the scroll cue — present while the opening is still winding in, gone once it is live */
+#scroll-cue{
+  position:absolute;z-index:4;inset-inline:0;bottom:clamp(20px,4vh,44px);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:rgba(255,247,229,.82);pointer-events:none;
+  opacity:calc(1 - var(--reveal) * 1.6);
+}
+.cue-text{font-size:clamp(12px,1vw,15px);letter-spacing:2px;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.cue-arrow svg{width:26px;height:26px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.6));
+  animation:cue-bob 1.8s ease-in-out infinite}
+@keyframes cue-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* skip — small, corner, always reachable (keyboard too) */
 #skip{
-  position:absolute;inset:0;z-index:5;border:0;background:transparent;
-  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  position:absolute;z-index:6;top:clamp(14px,2.4vh,22px);inset-inline-start:clamp(14px,2vw,26px);
+  border:1px solid rgba(255,247,229,.28);background:rgba(10,6,3,.4);
+  color:rgba(255,247,229,.9);font-family:"Kedem",sans-serif;font-weight:700;
+  font-size:clamp(12px,1vw,14px);letter-spacing:1px;
+  padding:8px 18px;min-height:40px;border-radius:999px;cursor:pointer;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  transition:background .2s ease,border-color .2s ease,opacity .3s ease;
+  opacity:calc(1 - var(--reveal));pointer-events:auto;
 }
-#skip:focus{outline:none}
+#reveal.is-live ~ #skip,#stage.no-intro #skip{opacity:0;pointer-events:none}
+#skip:hover{background:rgba(74,16,30,.6);border-color:rgba(255,247,229,.5)}
+#skip:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
 
-/* ---------- entered state ---------- */
-/* the video simply holds on its last frame — a clean, stable freeze (no motion = no jitter) */
-#stage.entered #skip{display:none}
-#stage.entered #reveal .veil{opacity:1}
-#stage.entered #reveal .brand{
-  opacity:1;transform:none;
-  transition:opacity 1100ms ease 500ms, transform 1300ms cubic-bezier(.2,.8,.2,1) 500ms;
-}
-#stage.entered #reveal .enter{
-  opacity:1;transform:none;
-  transition:opacity 820ms ease 1050ms,
-             transform 820ms cubic-bezier(.2,.8,.2,1) 1050ms,
-             background .3s ease, box-shadow .3s ease, border-color .3s ease;
-}
-
-/* reduced motion: no video, straight to the opening over the matching corridor */
-#stage.no-intro #intro{display:none}
+/* reduced motion: no film, straight to the opening over the matching corridor still */
+#stage.no-intro #film-canvas{display:none}
+#stage.no-intro #scroll-cue{display:none}
 @media (prefers-reduced-motion: reduce){
-  #stage.entered #intro{transition:none;transform:none}
-  #stage.entered #reveal .veil,
-  #stage.entered #reveal .brand,
-  #stage.entered #reveal .enter{transition:opacity 220ms linear}
+  html{scroll-behavior:auto}
+  #reveal .brand{transform:none}
+  .cue-arrow svg{animation:none}
 }

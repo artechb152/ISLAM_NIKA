@@ -1,0 +1,13 @@
+{
+  "div:2>div:1>main:1>div:1>h1:1": {
+    "styles": {
+      "color": "#1c7c54",
+      "font-size": "60px"
+    },
+    "tx": -80,
+    "ty": -30
+  },
+  "div:2>div:1>main:1>ul:1>li:1>span:1>span:2>span:1": {
+    "html": "טקסט שנערך ידנית"
+  }
+}

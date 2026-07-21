@@ -15,7 +15,7 @@ export interface ChapterDef {
   available: boolean
 }
 
-export type CategoryIcon = 'clock' | 'person' | 'book' | 'arch' | 'shield' | 'cap'
+export type CategoryIcon = 'clock' | 'person' | 'book' | 'arabesque' | 'arch' | 'shield' | 'cap'
 
 export interface CategoryDef {
   id: string
@@ -62,12 +62,11 @@ export const chapterCategories: CategoryDef[] = [
     id: 'faith',
     number: 3,
     title: 'אמונה, פולחן ומקורות',
-    icon: 'book',
+    icon: 'arabesque',
     chapters: [
       ch(6, 'חמש מצוות היסוד', {
         href: '/chapter6',
         available: true,
-        image: '/assets/chapter6/entrance-keyframe.jpg',
       }),
       ch(7, 'לוח השנה ההג׳רי'),
       ch(8, 'מקורות האסלאם — הקוראן והסונה'),
@@ -103,17 +102,14 @@ export const chapterCategories: CategoryDef[] = [
     chapters: [
       ch(15, 'ציר הזמן בראשית האסלאם'),
       ch(16, 'ימי ציון אזכור'),
-      ch(17, 'מילון מונחים'),
-      ch(18, 'ספרות מומלצת'),
     ],
   },
 ]
 
-/* The secondary area under the categories. מילון מונחים already lives as chapter 17,
-   so — per the brief — it is NOT repeated here. */
-export const secondaryItems: Array<{ id: string; title: string; icon: 'map' | 'books' }> = [
-  { id: 'maps', title: 'מפות', icon: 'map' },
-  { id: 'sources', title: 'מקורות', icon: 'books' },
+/* Standalone learning resources shown below the chapter categories. */
+export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' }> = [
+  { id: 'glossary', title: 'מילון מונחים', icon: 'book' },
+  { id: 'recommended-reading', title: 'ספרות מומלצת', icon: 'books' },
 ]
 
 export const allChapters: ChapterDef[] = chapterCategories.flatMap((c) => c.chapters)
