@@ -71,6 +71,14 @@ export const QIBLA_PLATE = `
     <path d="M1150,22l7,18-7,18-7-18Z"/>
     <circle cx="1150" cy="66" r="2.5"/>
   </g>
+  <!-- the two directions of prayer FROM Medina, drawn from the projected city points:
+       first (memory) toward Jerusalem, faint and dashed; second (the way) toward Mecca,
+       solid maroon with an arrowhead. Endpoints match the DOM pins (same percentages). -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M578.6,326.6 L442.4,76.1" stroke="rgba(76,23,4,.42)" stroke-width="3" stroke-dasharray="10 8"/>
+    <path d="M578.6,326.6 L585.4,431.1" stroke="#8a2733" stroke-width="5"/>
+  </g>
+  <path d="M585.4,431.1 L577,415 L593,415 Z" fill="#8a2733"/>
 </svg>`
 
 /* ---- hajj plate: the Mecca basin, the loop of the journey ----
@@ -91,42 +99,37 @@ export const HAJJ_POS = [
 export const HAJJ_PLATE = `
 <svg viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
   <defs>
-    <linearGradient id="hp-land" x1="0" y1="0" x2=".6" y2="1">
-      <stop offset="0" stop-color="#f1e5c9"/>
-      <stop offset="1" stop-color="#d9c193"/>
+    <linearGradient id="hp-land" x1="0" y1="0" x2=".55" y2="1">
+      <stop offset="0" stop-color="#f4e9d1"/>
+      <stop offset="1" stop-color="#e7d5ad"/>
     </linearGradient>
+    <radialGradient id="hp-valley" cx="20%" cy="53%" r="60%">
+      <stop offset="0" stop-color="#ece0c2"/>
+      <stop offset="1" stop-color="#ece0c2" stop-opacity="0"/>
+    </radialGradient>
   </defs>
   <rect x="0" y="0" width="1000" height="560" fill="url(#hp-land)"/>
-  <g fill="none" stroke="rgba(76,23,4,.10)" stroke-linecap="round">
-    <path d="M110,175 Q260,115 430,148 Q610,180 770,138" stroke-width="26"/>
-    <path d="M290,505 Q500,545 710,502" stroke-width="20"/>
-    <path d="M60,300 Q95,255 150,235" stroke-width="16"/>
-    <path d="M905,205 Q945,255 950,320" stroke-width="18"/>
+  <rect x="0" y="0" width="1000" height="560" fill="url(#hp-valley)"/>
+  <!-- faint orientation rings around Mecca, so the loop reads as a journey out and back -->
+  <g fill="none" stroke="rgba(138,39,51,.13)">
+    <circle cx="205" cy="300" r="78"/>
+    <circle cx="205" cy="300" r="168" stroke-dasharray="3 9"/>
   </g>
-  <g stroke="rgba(76,23,4,.13)" stroke-width="3" stroke-linecap="round">
-    <path d="M120,240l16,18M150,270l14,16M96,268l12,16M700,190l16,14M740,205l16,12M660,180l14,14"/>
-  </g>
-  <path d="M842,388 Q862,360 882,388 Z" fill="rgba(76,23,4,.16)"/>
-  <circle cx="205" cy="300" r="27" fill="none" stroke="rgba(132,27,27,.4)"
-          stroke-width="1.6" stroke-dasharray="5 5"/>
+  <!-- the route: a single clean gold line — dashed on the approach, solid around the loop -->
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M95,415 Q140,370 205,300 C350,245 640,255 860,400 C795,438 710,428 655,415
-             C575,436 512,414 455,395 C355,362 262,325 192,262"
-          stroke="rgba(255,247,229,.9)" stroke-width="8"/>
-    <path d="M95,415 Q140,370 205,300" stroke="#b98f37" stroke-width="3" stroke-dasharray="8 7"/>
+    <path d="M95,415 Q140,370 205,300" stroke="#b98f37" stroke-width="3.2" stroke-dasharray="9 8"/>
     <path d="M205,300 C350,245 640,255 860,400 C795,438 710,428 655,415
              C575,436 512,414 455,395 C355,362 262,325 192,262"
-          stroke="#b98f37" stroke-width="3.4"/>
+          stroke="#b98f37" stroke-width="3.6"/>
   </g>
+  <!-- direction arrows along the loop -->
   <g fill="#b98f37">
     <path d="M522,251 L541,259 L523,268 L527,259 Z"/>
     <path d="M576,434 L557,428 L574,419 L571,427 Z"/>
     <path d="M263,330 L244,317 L262,309 L258,319 Z"/>
   </g>
-  <g>
-    <rect x="197" y="292" width="16" height="16" fill="#3d0d0d"
-          stroke="#c79a3c" stroke-width="2"/>
-  </g>
+  <!-- the Kaaba at Mecca -->
+  <rect x="197" y="292" width="16" height="16" fill="#3d0d0d" stroke="#c79a3c" stroke-width="2"/>
 </svg>`
 
 /* ---- the horizon of a lesson that keeps talking about the horizon ----

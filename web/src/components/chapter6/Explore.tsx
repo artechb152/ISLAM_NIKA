@@ -79,25 +79,25 @@ function ExploreTabs({ label, tabs }: { label: string; tabs: TabDef[] }) {
   )
 }
 
-/* the shahada spoken in its two contexts — the first explore interaction */
+/* when the shahada is said — grouped in two: within prayer, and at conversion */
 export function ShahadaContexts() {
   return (
     <ExploreTabs
-      label="השהאדה בשני הקשרים"
+      label="השהאדה — מתי היא נאמרת"
       tabs={[
         {
-          key: 'adhan',
-          title: 'קריאה לתפילה',
-          caption: 'המואזין נושא את הקריאה לתפילה (אד׳אן) מן המינרט אל העיר.',
+          key: 'prayer',
+          title: 'תפילה',
+          caption: 'משפט זה נאמר בקריאה לתפילה (אד׳אן) על ידי המואזין, וכן במהלך התפילה עצמה.',
           image: '/assets/chapter6/adhan-real.jpg',
           alt: 'מינרט, מואזין וגלי קול מעל העיר',
         },
         {
-          key: 'salah',
-          title: 'במהלך התפילה',
-          caption: 'המשפט נאמר גם בתוך התפילה עצמה, בתוך המסגד.',
-          image: '/assets/chapter6/mosque-hall-real.jpg',
-          alt: 'פנים המסגד ובו מתפללים',
+          key: 'conversion',
+          title: 'קבלת הדת',
+          caption: 'כאשר אדם מבקש לקבל על עצמו את דת האסלאם, יאמר את השהאדה שלוש פעמים בפני שני עדים כשרים.',
+          image: '/assets/chapter6/shahada-conversion.jpg',
+          alt: 'קבלת דת האסלאם באמירת השהאדה בפני עדים',
         },
       ]}
     />

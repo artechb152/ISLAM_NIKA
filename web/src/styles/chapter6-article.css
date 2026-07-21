@@ -23,12 +23,17 @@
   --content-gutter:clamp(28px,4vw,64px);  /* mirrors the chapters-screen content gutter */
   --font-heading:"Kedem",serif;
   --font-body:"Ploni",Arial,sans-serif;
+  /* one type scale for the whole chapter, so every category reads at the same size no matter
+     which section (reading block, photo card, map column) it lives in */
+  --read:clamp(18px,1.55vw,20px);   /* body / reading text — everywhere */
+  --sub:clamp(21px,2vw,27px);       /* the sub-section heading (Env) — everywhere */
+  --emph:clamp(23px,2.4vw,31px);    /* the emphasised in-text line (scrolly-big) */
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 /* overflow-x:CLIP, not hidden — hidden turns body into a scroll container, which silently
    kills position:sticky for the header and the sidebar; clip only clips */
-html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-height) + 22px);overflow-x:clip;scroll-snap-type:y proximity}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-height) + 22px);overflow-x:clip}
 body{
   min-height:100vh;overflow-x:clip;color:var(--ink);
   background:var(--panel);
@@ -253,7 +258,13 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .pillars-path a:hover .pillar-icon{transform:translateY(-4px)}
 .pillars-path b{font-family:var(--font-heading);color:var(--maroon);font-size:20px}
 .pillars-path > a > span:not(.pillar-icon){color:var(--stamp);font-size:14px;font-weight:600}
-.pillars-path small{margin-top:5px;font-size:13px;line-height:1.45;color:var(--muted)}
+/* the hover/tap peek: the action verb. Space is reserved (min-height) so revealing it never
+   shifts the row; on touch (no hover) it simply stays visible. */
+.pillar-peek{margin-top:5px;min-height:1.3em;font-size:16px;line-height:1.25;font-weight:600;color:var(--stamp)}
+@media (hover:hover){
+  .pillars-path a .pillar-peek{opacity:0;transition:opacity .2s ease}
+  .pillars-path a:hover .pillar-peek,.pillars-path a:focus-visible .pillar-peek{opacity:1}
+}
 
 .content-columns{display:grid;gap:clamp(24px,3vw,44px)}
 .three-columns{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -263,7 +274,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   padding-top:18px;border-top:2px solid rgba(138,39,51,.35);
 }
 .content-block h3{font-size:clamp(23px,2vw,30px);margin-bottom:14px}
-.content-block p{color:var(--ink);line-height:1.78;margin-top:11px}
+.content-block p{color:var(--ink);font-size:var(--read);line-height:1.8;margin-top:11px}
 .content-block-wide{width:min(850px,100%);margin-bottom:34px}
 .content-block-wide h3{font-size:clamp(26px,2.7vw,36px)}
 .arabic-quote{font-family:"Segoe UI",Tahoma,sans-serif;font-size:clamp(25px,3vw,38px);color:var(--maroon);line-height:1.6;margin:12px 0}
@@ -301,6 +312,13 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .map-pin,.hajj-pin{position:absolute;z-index:2;translate:-50% -50%;font-size:12px;font-weight:600;color:var(--maroon);background:var(--mat);border:1px solid rgba(138,39,51,.4);border-radius:99px;padding:3px 8px;box-shadow:0 4px 10px rgba(60,35,18,.14);white-space:nowrap}
 .map-pin::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--maroon);margin-inline-end:5px}
 .qibla-map .jerusalem{left:36.87%;top:14.8%}.qibla-map .medina{left:48.22%;top:63.54%}.qibla-map .makkah{left:48.78%;top:83.87%}
+/* the two-direction legend under the qibla map — reads the faint dashed line and the bold one */
+.qibla-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:13.5px}
+.qibla-legend .leg{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
+.qibla-legend .leg::before{content:"";width:22px;flex:none}
+.qibla-legend .first::before{border-top:2px dashed rgba(76,23,4,.5)}
+.qibla-legend .second::before{border-top:4px solid var(--maroon)}
+.qibla-legend .second{color:var(--maroon-deep);font-weight:600}
 
 .charity-layout{display:grid;grid-template-columns:minmax(320px,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,70px);align-items:center}
 .charity-figure{position:relative;min-height:440px;display:grid;place-items:center;padding-bottom:100px}
@@ -471,11 +489,17 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .explore-scene{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:9px;background:var(--surface)}
 .explore-scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .explore-caption{margin-top:16px;font-size:14px;color:var(--muted);text-align:right;line-height:1.6}
+/* the shahada "when is it said" card sits on the inline-END (the LEFT in RTL), filling the
+   open space beside the right-anchored reading column instead of stacking under it */
+.shahada-section .explore{margin-inline-start:auto;margin-inline-end:0}
 
 /* ========== prayer: five prayers as buttons → the WHOLE-screen background changes ==========
    the buttons sit in the text; clicking one crossfades the full-screen scene to that prayer's
    time of day (the .st-pick layer in PrayerStage), with its explanation shown beside them */
 .st-photo > img.st-pick{transition:opacity .6s ease}
+/* afternoon (asr): the midday photo pushed to a warm late-afternoon grade — golden, lower,
+   dimmer — so צהריים and אחר הצהריים read as two different times of day */
+.st-photo > img.st-pick-asr{filter:blur(7px) saturate(1.35) sepia(.34) hue-rotate(-12deg) brightness(.82) contrast(1.05)}
 .ptimes{margin-top:20px}
 .ptimes-btns{display:flex;flex-wrap:wrap;gap:9px}
 .ptimes-btn{
@@ -496,19 +520,14 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 }
 
 /* ---- the fixed transition strip between commandments ---- */
+/* a milestone between commandments — a real breath, not a tiny footnote: the finished icon
+   with its completion mark, the verbatim line, and a clear "what's next" cue on a soft card */
 .commandment-transition{
-  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
-  width:min(820px,100%);margin:44px auto 58px;padding:16px 22px;
-  background:var(--mat);border:1px solid var(--edge);border-radius:12px;
-  position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;
+  width:min(640px,100%);margin:52px auto 56px;padding:26px 26px 28px;
+  background:var(--mat);border:1px solid var(--edge);border-radius:16px;position:relative;box-shadow:var(--shadow);
 }
-/* a centred divider under the transition — a clear, elegant break before the next part */
-.commandment-transition::after{
-  content:"";position:absolute;bottom:-30px;left:50%;translate:-50% 0;
-  width:min(220px,60%);height:2px;border-radius:2px;
-  background:linear-gradient(90deg,transparent,var(--maroon),transparent);
-}
-.ct-icon{position:relative;flex:none;width:52px;height:52px;display:grid;place-items:center}
+.ct-icon{position:relative;flex:none;width:54px;height:54px;display:grid;place-items:center}
 .ct-icon img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 8px rgba(60,35,18,.18))}
 .ct-check{
   position:absolute;inset-inline-end:-4px;bottom:-2px;width:20px;height:20px;padding:3px;border-radius:50%;
@@ -516,8 +535,13 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   opacity:0;scale:.6;transition:opacity .35s ease,scale .35s ease;
 }
 .ct-icon.is-done .ct-check{opacity:1;scale:1}
-.commandment-transition p{flex:1;min-width:220px;font-size:15.5px;line-height:1.6;color:var(--ink)}
-.ct-next{flex:none;font-family:var(--font-heading);font-weight:700;color:var(--maroon);font-size:17px}
+.commandment-transition p{flex:none;min-width:0;max-width:52ch;font-size:15.5px;line-height:1.65;color:var(--ink)}
+.ct-next{
+  flex:none;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-heading);font-weight:700;
+  color:var(--cream);background:var(--maroon-deep);font-size:17px;letter-spacing:.01em;
+  padding:9px 20px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.22);
+}
+.ct-next::after{content:"‹";font-size:20px;line-height:1;margin-top:-2px}
 
 /* ---- the summary practice: click-only, no score, no failure screen ---- */
 .practice-wrap{width:min(820px,100%);margin:10px auto 0;text-align:start}
@@ -558,8 +582,8 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .practice-finished p{font-family:var(--font-heading);font-weight:700;font-size:clamp(19px,2vw,25px);color:var(--maroon-deep)}
 
 @media (max-width:1180px){
-  /* the spec: on narrow screens the illustration sits ABOVE its text */
-  .qibla-feature .map-figure{order:-1}
+  /* on narrow screens the map column sits ABOVE its text */
+  .qibla-feature .qibla-mapcol{order:-1}
 }
 
 @media (max-width:680px){
@@ -601,16 +625,19 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .scn circle,.scn rect,.scn path,.scn ellipse,.scn text,.scn g{transition:opacity .5s ease}
 .scn .zoom{transition:transform .85s cubic-bezier(.3,.75,.3,1)}
 
-.scrolly-step{min-height:52vh;display:flex;flex-direction:column;justify-content:center;padding:10px 0;opacity:.4;transition:opacity .45s ease;scroll-snap-align:center}
+.scrolly-step{min-height:52vh;display:flex;flex-direction:column;justify-content:center;padding:10px 0;opacity:.4;transition:opacity .45s ease}
 .scrolly-step.is-active{opacity:1}
 .scrolly-step:first-child{min-height:34vh}
 .scrolly-step:last-child{min-height:40vh}
-.scrolly-step p{font-size:clamp(17.5px,1.6vw,20px);line-height:1.85;color:var(--ink)}
-.scrolly-big{font-family:var(--font-heading);font-weight:700;font-size:clamp(23px,2.5vw,33px)!important;line-height:1.5!important;color:var(--maroon-deep)!important}
+.scrolly-step p{font-size:var(--read);line-height:1.85;color:var(--ink)}
+.scrolly-big{font-family:var(--font-heading);font-weight:700;font-size:var(--emph)!important;line-height:1.5!important;color:var(--maroon-deep)!important}
 .scrolly-env{
-  font-family:var(--font-heading);font-size:clamp(20px,1.9vw,26px);color:var(--maroon);
+  font-family:var(--font-heading);font-size:var(--sub);color:var(--maroon);
   margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);width:fit-content;
 }
+/* the Env keeps the shared sub-heading size even inside a content-block, whose generic h3
+   rule would otherwise enlarge it — so every sub-heading in the chapter is identical */
+.content-block .scrolly-env,.content-block-wide .scrolly-env{font-size:var(--sub)}
 
 /* emphasis of words that already exist in the text, timed to the scroll */
 mark.wmark{background:transparent;color:inherit;border-radius:3px;padding-inline:1px;box-shadow:inset 0 -2px 0 transparent;transition:background .45s ease,box-shadow .45s ease,color .45s ease}
@@ -618,7 +645,7 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 
 /* the intro line before an explore interaction */
 .explore-block{width:min(760px,100%);margin:52px 0 0}
-.explore-block p{font-size:clamp(17.5px,1.6vw,20px);line-height:1.85}
+.explore-block p{font-size:var(--read);line-height:1.85}
 .explore-block .scrolly-env{margin-bottom:16px}
 
 .hijri-link{width:min(760px,100%);margin:14px auto 0;font-size:16.5px;color:var(--ink)}
@@ -659,10 +686,10 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   margin-top:calc(0px - (100dvh - var(--header-height)));
   padding-inline:clamp(16px,4vw,60px);
 }
-/* photo sections butt straight up under the previous section's outro — no parchment gap or
-   divider line above the full-bleed scene */
-.article-section + :is(.prayer-section,.charity-section,.ramadan-section,.hajj-section){margin-top:0;padding-top:0;border-top:0}
-:is(.prayer-section,.charity-section,.ramadan-section,.hajj-section) > .scrolly-fullstage{margin-top:0}
+/* every commandment section keeps the standard divider + spacing above it, so the whole
+   chapter shares one rhythm; the full-bleed photo scene gets a small gap under the section's
+   editorial heading (which now sits ABOVE the scene, like every other section) */
+.scrolly-fullstage{margin-top:clamp(18px,2.6vw,30px)}
 /* the paragraphs ride the scroll continuously: JS drifts each one in from below,
    holds it at the centre, and lets it out above — so no frame-by-frame feeling */
 .scrolly-fullstage .scrolly-step{
@@ -675,11 +702,13 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   padding:0 clamp(4px,2vw,26px);
 }
 .stage-card p{
-  font-size:clamp(20px,1.9vw,28px);line-height:1.85;color:var(--ink);
+  font-size:var(--read);line-height:1.85;color:var(--ink);
   text-shadow:0 1px 0 rgba(255,252,244,.7);
 }
-.stage-card .scrolly-env{font-size:clamp(28px,2.8vw,42px);border-bottom-width:3px;margin-bottom:16px}
-.stage-card .scrolly-big{font-size:clamp(26px,2.6vw,38px)!important}
+/* the photo-card sub-heading matches every other sub-heading — only its border is a touch
+   heavier for legibility over the image; the SIZE is the shared token */
+.stage-card .scrolly-env{font-size:var(--sub);border-bottom-width:3px;margin-bottom:16px}
+.stage-card .scrolly-big{font-size:var(--emph)!important}
 
 /* ---- photographic stage: blurred realistic scene + a white veil, strong on the
    right (where the text sits) and fading toward the left ---- */
@@ -813,6 +842,24 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   box-shadow:0 10px 30px rgba(28,10,2,.3);
 }
 
+/* ---- hajj journey map: the sticky plate lives in the (non-full) scrolly art panel; the
+   seven stations are dots that fill as the route is reached, the active one carrying its name ---- */
+.hajj-intro{margin-top:6px}
+.hajj-intro p{margin-top:12px;font-size:var(--read);line-height:1.82;color:var(--ink)}
+.hajj-intro p:first-of-type{margin-top:14px}
+.hajj-map-art{height:min(56vh,440px);background:#efe6d2}
+.st-hajj{position:absolute;inset:0;background:#efe6d2;display:grid;place-items:center}
+.st-hajj .st-map{position:relative;left:auto;top:auto;translate:none;width:96%;max-height:none;aspect-ratio:1000/560}
+/* the tawaf counter rides at the foot of the map (centred), not floating in empty space */
+.st-hajj .st-count{top:auto;bottom:7%;left:50%;translate:-50% 0;font-size:19px;padding:7px 18px}
+.st-dot{
+  position:absolute;width:11px;height:11px;translate:-50% -50%;border-radius:50%;z-index:1;
+  background:var(--surface);border:2px solid rgba(138,39,51,.55);
+  transition:width .3s ease,height .3s ease,background .3s ease,border-color .3s ease,box-shadow .3s ease;
+}
+.st-dot.is-done{background:var(--maroon);border-color:var(--maroon)}
+.st-dot.is-active{width:16px;height:16px;background:var(--stamp);border-color:var(--stamp);box-shadow:0 0 0 5px rgba(165,50,47,.2)}
+
 @media (max-width:1180px){
   .summary-cards{grid-template-columns:repeat(2,1fr)}
   .summary-cards a:last-child{grid-column:1/-1}
@@ -841,3 +888,55 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   .st-photo > img{transition:none}
   .film-wrap{opacity:1!important;transform:none!important}
 }
+
+/* ===================================================================================
+   Per-commandment comprehension check — one closing interaction for every commandment,
+   rendered from data.ts. Click-only, no score. Gives the chapter a consistent last beat.
+   =================================================================================== */
+.check-wrap{width:min(760px,100%);margin:40px 0 6px}
+.check-title{display:flex;align-items:center;gap:10px;font-family:var(--font-heading);font-size:var(--sub);color:var(--maroon);margin-bottom:14px}
+.check-title svg{width:22px;height:22px;flex:none;fill:none;stroke:var(--maroon);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chk{background:var(--mat);border:1px solid var(--edge);border-radius:14px;padding:clamp(18px,3vw,26px);box-shadow:var(--shadow)}
+.chk-q{font-family:var(--font-heading);font-size:clamp(19px,1.9vw,23px);color:var(--maroon-deep);line-height:1.4}
+.chk-ask{display:block;font-size:14px;color:var(--muted);margin-top:4px}
+.chk-opts{display:flex;gap:10px;margin-top:16px}
+.chk-col{flex-direction:column}
+.chk-opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:11px;min-height:48px;padding:12px 16px;border:1px solid var(--edge);border-radius:11px;background:var(--surface);color:var(--ink);font-size:16px;transition:border-color .2s,background .2s,opacity .2s,transform .15s}
+.chk-opt:hover:not(:disabled){border-color:var(--maroon);transform:translateY(-1px)}
+.chk-opt:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.chk-opt.is-wrong{opacity:.4;cursor:default}
+.chk-opt.is-right{border-color:var(--maroon);background:rgba(165,50,47,.1);font-weight:600}
+.chk-multi .chk-box{width:20px;height:20px;flex:none;border:2px solid var(--edge);border-radius:6px;transition:background .2s,border-color .2s;position:relative}
+.chk-multi.is-sel .chk-box{background:var(--maroon);border-color:var(--maroon)}
+.chk-multi.is-sel .chk-box::after{content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;border:solid var(--cream);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.chk-submit{all:unset;box-sizing:border-box;cursor:pointer;margin-top:14px;padding:10px 26px;border-radius:999px;background:var(--maroon-deep);color:var(--cream);font-weight:600;font-size:15px}
+.chk-submit:disabled{opacity:.4;cursor:default}
+.chk-submit:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.chk-match{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:16px}
+.chk-col-left,.chk-col-right{list-style:none;display:flex;flex-direction:column;gap:10px;margin:0;padding:0}
+.chk-pill{all:unset;box-sizing:border-box;cursor:pointer;display:block;text-align:center;padding:11px 12px;border:1px solid var(--edge);border-radius:10px;background:var(--surface);font-size:15px;transition:border-color .2s,background .2s,opacity .2s}
+.chk-pill:hover:not(:disabled){border-color:var(--maroon)}
+.chk-pill:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.chk-pill.is-active{border-color:var(--maroon);background:rgba(165,50,47,.12);font-weight:600}
+.chk-pill.is-matched{background:var(--maroon);color:var(--cream);border-color:var(--maroon);cursor:default}
+.chk-pill:disabled:not(.is-matched){opacity:.5;cursor:default}
+.chk-slots{list-style:none;display:flex;flex-direction:column;gap:8px;margin:16px 0 0;padding:0}
+.chk-slot{display:flex;align-items:center;gap:12px;min-height:46px;padding:6px 12px;border:1px dashed var(--edge);border-radius:10px;background:rgba(250,246,236,.5)}
+.chk-slot.is-filled{border-style:solid;background:var(--surface)}
+.chk-slot-n{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--mat);color:var(--maroon-deep);font-size:13px;font-weight:600}
+.chk-slot.is-filled .chk-slot-n{background:var(--maroon);color:var(--cream)}
+.chk-slot-t{font-size:15px}
+.chk-bank{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.chk-chip{all:unset;box-sizing:border-box;cursor:pointer;padding:10px 16px;border:1px solid var(--edge);border-radius:999px;background:var(--surface);font-size:15px;transition:border-color .2s,background .2s}
+.chk-chip:hover{border-color:var(--maroon)}
+.chk-chip:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.chk-chip.is-bounce{animation:chk-bounce .3s ease}
+@keyframes chk-bounce{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.chk-say{min-height:1.4em;margin-top:14px;font-size:14.5px;font-weight:600;line-height:1.5}
+.chk-say.is-ok{color:#2f7d5c}
+.chk-say.is-try{color:var(--stamp)}
+@media (max-width:680px){
+  .chk-pill{font-size:13.5px;padding:9px 8px}
+  .chk-q{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){.chk-chip.is-bounce{animation:none}}
