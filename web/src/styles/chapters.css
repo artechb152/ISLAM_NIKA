@@ -1,13 +1,11 @@
 /* The chapters screen — a vintage parchment layout with a cinematic desert hero. The page is
    parchment, the masthead is flat maroon, and the video hero uses a soft cream readability wash.
-   The "איפה עצרתם?" resume strip sits directly under the hero; then wide, short clean-framed chapter
-   cards and a "לפי נושא" filter row. One data source (lib/chapters-data) feeds everything.
+   The "איפה עצרתם?" resume strip sits directly under the hero, then wide, short clean-framed
+   chapter cards. One data source (lib/chapters-data) feeds everything.
 
-   Typography: Kedem for the title, section titles and chapter numbers; Ploni for names + text. */
+   Typography: Kedem for the title, section titles and chapter numbers; Ploni for names + text.
+   The @font-face declarations live once in fonts.css (imported by the layout before this file). */
 
-@font-face{font-family:"Ploni";src:url("/assets/fonts/ploni-regular-aaa.otf") format("opentype");font-weight:400;font-display:swap}
-@font-face{font-family:"Ploni";src:url("/assets/fonts/ploni-medium-aaa.otf") format("opentype");font-weight:500;font-display:swap}
-@font-face{font-family:"Ploni";src:url("/assets/fonts/ploni-demibold-aaa.otf") format("opentype");font-weight:600;font-display:swap}
 :root{
   --paper:#EDE4D0;        /* the page — matches the card/panel tone so the background reads as one surface */
   --panel:#f3ead6;        /* hero / cards / resume / drawer surfaces */
@@ -74,7 +72,7 @@ button{font-family:var(--font-body)}
 .content{flex:1;min-width:0;width:100%;padding:0 0 clamp(48px,7vh,84px)}
 
 /* ================= video hero ================= */
-.hero{position:relative;isolation:isolate;display:flex;align-items:center;height:370px;background:var(--panel);border:1px solid var(--edge);border-radius:0;box-shadow:0 8px 22px rgba(60,35,18,.09);padding:clamp(42px,5vw,76px) var(--content-gutter);overflow:hidden;margin-bottom:clamp(28px,4vh,52px)}
+.hero{position:relative;isolation:isolate;display:flex;align-items:center;height:370px;background:var(--panel);border:none;border-radius:0;box-shadow:0 8px 22px rgba(60,35,18,.09);padding:clamp(42px,5vw,76px) var(--content-gutter);overflow:hidden;margin-bottom:clamp(28px,4vh,52px)}
 .hero-media{position:absolute;inset:0;z-index:-1;background:var(--panel) url('/assets/chapters/desert-hero-poster.png') center bottom/cover no-repeat}
 .hero-media::after{content:'';position:absolute;inset:0;background:rgba(30,18,8,.55);pointer-events:none}
 /* no fade: the poster is the video's own first frame, so the video reveals seamlessly.
@@ -105,27 +103,21 @@ button{font-family:var(--font-body)}
 .card-done{position:absolute;z-index:3;inset-block-start:8px;inset-inline-end:8px;width:24px;height:24px;border-radius:50%;background:var(--maroon);color:var(--mat);display:grid;place-items:center;box-shadow:0 0 0 2px var(--mat)}
 .card-done svg{width:13px;height:13px;stroke-width:3}
 .card-body{display:flex;flex-direction:column;align-items:flex-start;text-align:start;padding:10px 4px 2px;gap:2px}
-.card-num{font-family:var(--font-heading);font-weight:700;color:var(--maroon);font-size:16px;line-height:1.2}
-.card-name{font-family:var(--font-body);font-weight:400;color:var(--ink);font-size:16.5px;line-height:1.32;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-name{font-family:var(--font-body);font-weight:600;color:var(--maroon);font-size:16.5px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-num{font-family:var(--font-body);font-weight:600;color:var(--ink);font-size:12.5px;line-height:1.2;margin-top:2px}
 .card-progress{margin-top:8px;width:100%;height:3px;border-radius:99px;background:rgba(87,24,32,.14);overflow:hidden}
 .card-progress i{display:block;height:100%;background:var(--maroon)}
 a.card{cursor:pointer}
 a.card:hover,a.card:focus-visible{transform:translateY(-4px);box-shadow:0 12px 24px rgba(60,35,18,.16);border-color:var(--maroon)}
 a.card:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
-.card.is-locked{cursor:default}
+/* a locked (not-yet-built) chapter is set apart from the one available card by a quiet dim +
+   desaturated photo — enough to read what is clickable at a glance, without a loud ribbon */
+.card.is-locked{cursor:default;opacity:.66}
+.card.is-locked .card-shot{filter:grayscale(.4) brightness(.98)}
 
 .grid-empty{padding:52px 0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;font-family:var(--font-body);font-size:17px;color:var(--ink-soft)}
 .empty-clear{all:unset;box-sizing:border-box;cursor:pointer;font-family:var(--font-body);font-weight:500;font-size:15px;color:var(--maroon);padding:10px 22px;min-height:44px;border-radius:999px;border:1px solid var(--edge);background:var(--panel);transition:.2s ease}
 .empty-clear:hover{border-color:var(--maroon);background:rgba(165,50,47,.1)}
-
-/* ================= by topic ================= */
-.topics{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.4vw,20px)}
-.topic{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:12px;min-height:56px;padding:12px 18px;border-radius:12px;text-align:center;background:var(--panel);border:1px solid var(--edge);box-shadow:0 4px 12px rgba(60,35,18,.08);transition:.2s ease}
-.topic-name{font-family:var(--font-heading);font-weight:700;color:var(--ink);font-size:clamp(14px,1.1vw,17px)}
-.topic:hover{transform:translateY(-2px);border-color:var(--maroon)}
-.topic:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-.topic.is-active{background:var(--maroon);border-color:var(--maroon)}
-.topic.is-active .topic-name{color:var(--mat)}
 
 /* ================= where did you stop? ================= */
 .resume{display:flex;align-items:center;gap:clamp(14px,2vw,26px);background:var(--panel);border:1px solid var(--edge);border-radius:14px;box-shadow:0 6px 16px rgba(60,35,18,.10);padding:11px 12px 12px}
@@ -217,7 +209,6 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
 /* ================= responsive ================= */
 @media (max-width:1160px){
   .cards{grid-template-columns:repeat(3,1fr)}
-  .topics{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:1100px){
   .hero-copy{width:min(1000px,92%)}
@@ -234,7 +225,6 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
   .hero{height:clamp(350px,96vw,400px);padding:28px 18px;border-radius:0}
   .hero-title{font-size:clamp(30px,8.4vw,44px)}
   .hero-sub{margin-top:18px;font-size:18px;line-height:1.55}
-  .topics{grid-template-columns:1fr}
   .resume{flex-wrap:wrap}
   .resume-go{width:100%;justify-content:center}
   .site-hdr .search-field{width:clamp(130px,42vw,190px)}

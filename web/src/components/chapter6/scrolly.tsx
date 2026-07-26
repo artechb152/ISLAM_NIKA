@@ -175,6 +175,40 @@ function splitMarks(text: string, marks: string[]): Part[] {
   return parts
 }
 
+/* Emphasise the given key phrases (which must already appear verbatim in the text) in <b> —
+   for scannability. It never changes a word, only wraps existing ones, so the content stays
+   byte-identical to the source. */
+export function boldize(text: string, phrases: string[] = []): ReactNode[] {
+  if (!phrases.length) return [text]
+  const out: ReactNode[] = []
+  let rest = text
+  let k = 0
+  while (rest.length) {
+    let at = -1
+    let hit = ''
+    for (const phrase of phrases) {
+      if (!phrase) continue
+      const i = rest.indexOf(phrase)
+      if (i >= 0 && (at < 0 || i < at)) {
+        at = i
+        hit = phrase
+      }
+    }
+    if (at < 0) {
+      out.push(rest)
+      break
+    }
+    if (at > 0) out.push(rest.slice(0, at))
+    out.push(
+      <b className="key" key={k++}>
+        {hit}
+      </b>
+    )
+    rest = rest.slice(at + hit.length)
+  }
+  return out
+}
+
 export function P({
   text,
   marks = [],

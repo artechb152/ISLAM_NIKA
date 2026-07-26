@@ -2,15 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
-import { MoonSchools, ShahadaContexts } from '@/components/chapter6/Explore'
-import PrayerTimes from '@/components/chapter6/PrayerTimes'
-import { HajjMapStage, PrayerStage, RamadanStage } from '@/components/chapter6/stages'
-import { P, Scrolly } from '@/components/chapter6/scrolly'
+import { PrayerDayStage } from '@/components/chapter6/stages'
+import { HajjRouteMap } from '@/components/chapter6/HajjRouteMap'
+import { RamadanTimeline } from '@/components/chapter6/RamadanTimeline'
+import { boldize, P, Scrolly } from '@/components/chapter6/scrolly'
 import StoryFilm from '@/components/chapter6/StoryFilm'
-import SummaryPractice from '@/components/chapter6/SummaryPractice'
-import { QIBLA_PLATE } from '@/lib/chapter6/art'
 import { CH6 } from '@/lib/chapter6/data'
 import {
   completedSections,
@@ -30,7 +28,6 @@ const SECTION_LINKS = [
   { id: 'charity', label: 'הצדקה' },
   { id: 'ramadan', label: 'צום רמדאן' },
   { id: 'hajj', label: "החג'" },
-  { id: 'summary', label: 'מבט מסכם' },
 ] as const
 
 const SCREENS = new Map(CH6.screens.map((screen) => [screen.id, screen]))
@@ -46,6 +43,15 @@ function para(id: string, index: number): string {
   const value = screen(id).content?.[index]
   if (value === undefined) throw new Error(`Chapter 6 content is missing ${id}[${index}]`)
   return value
+}
+
+/* a verbatim paragraph rendered with its key phrases emphasised in <b> (see boldize) */
+function KP({ text, of = [], className }: { text: string; of?: string[]; className?: string }) {
+  return <p className={className}>{boldize(text, of)}</p>
+}
+/* the same emphasis as a bare node — for the paras[] fed to the timeline / route-map panels */
+function kb(text: string, of: string[] = []): ReactNode {
+  return <>{boldize(text, of)}</>
 }
 
 function Paragraphs({ paragraphs }: { paragraphs?: string[] }) {
@@ -72,18 +78,20 @@ function SectionHeading({
   lead,
 }: {
   id: string
-  eyebrow: string
+  eyebrow?: string
   title: string
   term?: string
   lead?: string
 }) {
   return (
     <header className="section-heading" data-reveal>
-      <span className="section-eyebrow">{eyebrow}</span>
+      {eyebrow && <span className="section-eyebrow">{eyebrow}</span>}
       <div>
         <h2 id={id}>{title}</h2>
-        {term && <span className="section-term">{term}</span>}
+        {term && <span className="section-term" lang="ar" dir="rtl">{term}</span>}
       </div>
+      {/* the pillars carry an Arabic term + the shahada's diamond ornament beneath the title */}
+      {term && <div className="title-ornament section-ornament" aria-hidden="true"><span /></div>}
       {lead && <p>{lead}</p>}
     </header>
   )
@@ -101,42 +109,9 @@ function PillarIcon({ image, alt }: { image: string; alt: string }) {
   )
 }
 
-/* the fixed strip between commandments: finished icon + completion mark, the verbatim
-   transition line, and the name of what comes next — no lesson content, no action */
-function CommandmentTransition({
-  screenId,
-  icon,
-  done,
-}: {
-  screenId: string
-  icon: string
-  done: boolean
-}) {
-  const item = screen(screenId)
-  return (
-    <div className="commandment-transition" data-reveal>
-      <span className={'ct-icon' + (done ? ' is-done' : '')}>
-        <PillarIcon image={icon} alt="" />
-        <svg className="ct-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7.5" /></svg>
-      </span>
-      <p>{item.text}</p>
-      {item.nextLabel && <span className="ct-next">{item.nextLabel}</span>}
-    </div>
-  )
-}
-
 const MENU_POS_KEY = 'ch6:menu-pos'
 
 const PILLAR_ICONS = ['icon-shahada.png', 'icon-prayer.png', 'icon-charity.png', 'icon-ramadan.png', 'icon-hajj.png']
-
-/* the small end-of-chapter visuals, one memory per commandment (Magnific assets) */
-const SUMMARY_MEDIA: Array<string | null> = [
-  null,
-  '/assets/chapter6/prayer-times-illustration.jpg',
-  '/assets/chapter6/zakat-illustration.jpg',
-  '/assets/chapter6/ramadan-day-illustration.jpg',
-  '/assets/chapter6/hajj-journey-map.jpg',
-]
 
 export default function Chapter6() {
   const [storyOpen, setStoryOpen] = useState(false)
@@ -150,8 +125,7 @@ export default function Chapter6() {
   const asideRef = useRef<HTMLElement | null>(null)
   const burgerRef = useRef<HTMLButtonElement | null>(null)
   const filmWrapRef = useRef<HTMLDivElement | null>(null)
-  /* the five-prayers-and-times step: which prayer's time of day fills the whole screen */
-  const [prayerPick, setPrayerPick] = useState(0)
+  const endRef = useRef<HTMLDivElement | null>(null)
 
   /* the opening sentence, split for the scroll reveal exactly as the spec draws it —
      derived by slicing the verbatim string, so not a single word can drift */
@@ -232,6 +206,27 @@ export default function Chapter6() {
   function onMenuJump(): void {
     jumpUntil.current = Date.now() + 1800
   }
+
+  /* the last section (the hajj) has no anchor after it, so it — and the whole chapter — is
+     marked complete when the reader reaches the closing block. This is the only place that
+     records the hajj as done and writes islam:chapter:6='done'. */
+  useEffect(() => {
+    const end = endRef.current
+    if (!end) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting || Date.now() < jumpUntil.current) continue
+          markChapterComplete()
+          setDoneSections(new Set(SECTION_ORDER))
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '0px 0px -20% 0px', threshold: 0 }
+    )
+    observer.observe(end)
+    return () => observer.disconnect()
+  }, [])
 
 
   /* ---------------- scroll-driven reveals (reversible, reduced-motion aware) ---------------- */
@@ -554,10 +549,29 @@ export default function Chapter6() {
         <main className="chapter-article" ref={articleRef}>
           {/* ===================== area 1 — the opening ===================== */}
           <section className="opening-section article-section" id="opening" aria-labelledby="chapter-title">
-            <span className="chapter-number">פרק 6</span>
-            <h1 id="chapter-title">חמש מצוות היסוד</h1>
-            <div className="title-ornament" aria-hidden="true"><span /></div>
-            <p className="opening-subtitle">עבדאללה בן עמר (הח'ליף השני)</p>
+            {/* cinematic banner like the chapters page — video background + title over it */}
+            <div className="ch6-hero">
+              <div className="ch6-hero-media" aria-hidden="true">
+                <video
+                  className="ch6-hero-video"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  poster="/assets/chapter6/ch6-hero-poster.jpg"
+                  tabIndex={-1}
+                  onError={(event) => { event.currentTarget.hidden = true }}
+                >
+                  <source src="/assets/chapter6/ch6-hero.mp4" type="video/mp4" />
+                </video>
+              </div>
+              <div className="ch6-hero-copy">
+                <span className="ch6-hero-eyebrow">פרק 6</span>
+                <h1 id="chapter-title" className="ch6-hero-title">חמש מצוות היסוד</h1>
+              </div>
+            </div>
+            <p className="film-caption">עבדאללה בן עמר (הח'ליף השני)</p>
             <div className="film-wrap" ref={filmWrapRef}>
               <StoryFilm />
             </div>
@@ -620,24 +634,41 @@ export default function Chapter6() {
 
           {/* ===================== area 2 — the shahada ===================== */}
           <section className="commandment-section shahada-section article-section" id="shahada" aria-labelledby="shahada-title">
-            <SectionHeading id="shahada-title" eyebrow="מצוות יסוד ראשונה" title="השהאדה — העדות" />
-            {/* space 1 — the word's origin and the wording of the testimony */}
-            <div className="explore-block" data-reveal>
-              <Env>{screen('sh-1').title}</Env>
-              <p>{para('sh-1', 0)}</p>
-              <p className="scrolly-big">{para('sh-2', 0)}</p>
+            {/* the shahada opens as an illustrated hero: the reading column on the RIGHT (the
+                natural RTL side) — the word's origin, the testimony in an illuminated frame,
+                then when it is heard — with a large watercolor minaret cutout on the LEFT */}
+            <div className="shahada-hero">
+              <div className="shahada-minaret" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/chapter6/shahada-minaret.png" alt="" loading="lazy" decoding="async" />
+              </div>
+              <div className="shahada-body" data-reveal>
+                <header className="shahada-head">
+                  <h2 id="shahada-title">
+                    השהאדה <span className="shahada-ar" lang="ar" dir="rtl">(الشهادة)</span>
+                  </h2>
+                  <div className="title-ornament" aria-hidden="true"><span /></div>
+                </header>
+                {/* sh-1[0] — origin and meaning, verbatim; the source and the meaning are lit */}
+                <p className="shahada-intro">
+                  המילה שהאדה מקורה ככל הנראה מארמית, ומוזכרת במקרא{' '}
+                  <em>(גל־עד; יגר שהדותא, בראשית לא:מז)</em>.<br />
+                  <b>משמעה – עדות.</b>
+                </p>
+                {/* sh-2[0] — split into the lead-in and the testimony itself (verbatim) */}
+                <p className="shahada-lead">על המוסלמי להעיד</p>
+                <blockquote className="shahada-quote">
+                  <span className="sq-mark sq-open" aria-hidden="true">”</span>
+                  <p>אין אל מבלעדי אללה ושמוחמד הוא שליחו.</p>
+                  <span className="sq-mark sq-close" aria-hidden="true">”</span>
+                </blockquote>
+                {/* when it is heard — both spoken contexts (sh-3[0]+[1]), then the historical
+                    meaning of the declaration (sh-2[1]) — all continuous prose in one column */}
+                <KP className="shahada-when-text" text={para('sh-3', 0)} of={['בקריאה לתפילה', 'במהלך התפילה']} />
+                <KP className="shahada-when-text" text={para('sh-3', 1)} of={['שלוש פעמים בפני שני עדים כשרים']} />
+                <KP className="shahada-when-text" text={para('sh-2', 1)} of={['ייחוד האל']} />
+              </div>
             </div>
-            {/* space 2 — "when is it said": the heading leads straight into the two contexts,
-                whose verbatim sentences (sh-3[0] prayer, sh-3[1] conversion) now live in the tabs */}
-            <div className="explore-block" data-reveal>
-              <Env>{screen('sh-3').title}</Env>
-            </div>
-            <ShahadaContexts />
-            {/* space 3 — the historical meaning of the declaration */}
-            <div className="explore-block" data-reveal>
-              <p>{para('sh-2', 1)}</p>
-            </div>
-            <CommandmentTransition screenId="sh-t" icon="icon-shahada.png" done={doneSections.has('shahada')} />
           </section>
 
           {/* ===================== area 3 — the prayer ===================== */}
@@ -645,46 +676,78 @@ export default function Chapter6() {
             {/* the title reads as a normal editorial heading (like every other section); only the
                 paragraphs live in the photo-scrolly. Four grouped steps, the five-prayers step
                 keeps the click-to-change-the-sky interaction; the qibla is its own block below. */}
-            <SectionHeading id="prayer-title" eyebrow="מצוות יסוד שנייה" title="התפילה" />
-            <Scrolly full art={(s) => <PrayerStage {...s} pick={prayerPick} />}>
-              <div>
-                <Env>{screen('pr-1').title}</Env>
-                <P text={para('pr-1', 0)} />
-                <P text={para('pr-1', 1)} marks={['שתי תפילות', 'התפילה התיכונה']} />
-              </div>
-              {/* the five prayers and their times: the intro line, then a button per prayer —
-                  clicking one changes the whole-screen scene to that prayer's time of day */}
-              <div>
-                <Env>{screen('pr-2').title}</Env>
-                <P text={para('pr-2', 0)} />
-                <PrayerTimes active={prayerPick} onPick={setPrayerPick} />
-              </div>
-              <div>
-                <Env>{screen('pr-3').title}</Env>
-                <P text={para('pr-3', 0)} />
-                <P text={para('pr-3', 1)} />
-              </div>
-              <div>
-                <Env>{screen('pr-4').title}</Env>
-                <P text={para('pr-4', 0)} />
-                <P text={para('pr-4', 1)} />
-                <P text={para('pr-4', 2)} />
-              </div>
-            </Scrolly>
+            <SectionHeading id="prayer-title" title="התפילה" term="(الصلاة)" />
+            {/* pr-1 — the night journey → five prayers, as regular parchment reading (like the
+                shahada): no immersive scene, just the text on the paper (sub-heading removed) */}
+            <div className="prayer-block" data-reveal>
+              <KP text={para('pr-1', 0)} of={['במסע הלילי בשנת 621']} />
+              <KP text={para('pr-1', 1)} of={['חמש תפילות']} />
+            </div>
+
+            {/* pr-2 — THE DAY JOURNEY: the five daily prayers read on one screen while the day
+                passes behind them (dawn → night), scroll-driven. The opening "על המוסלמי…" line
+                stays; each prayer's verbatim sentence rides its own moment of the day. No buttons. */}
+            <div className="prayer-day">
+              <Scrolly full art={(s) => <PrayerDayStage {...s} />}>
+                <div className="pd-open">
+                  <P text={para('pr-2', 0)} />
+                  <span className="pd-scrollcue" aria-hidden="true">גללו לאורך היום ↓</span>
+                </div>
+                <div className="pd-step">
+                  <h3 className="pd-name">תפילת השחר <span className="pd-ar">(צלאה אלפג׳ר)</span></h3>
+                  <p>זמנה בעלות השחר, כשהאדם יכול להבחין בין חוט לבן לחוט שחור (קוראן 2:187).</p>
+                </div>
+                <div className="pd-step">
+                  <h3 className="pd-name">תפילת הצהריים <span className="pd-ar">(צלאה אלט׳הר)</span></h3>
+                  <p>זמנה בחצות היום.</p>
+                </div>
+                <div className="pd-step">
+                  <h3 className="pd-name">תפילת אחר הצהריים <span className="pd-ar">(צלאה אלעצר)</span></h3>
+                  <p>זמנה כשצלו של חפץ והחפץ עצמו באותו הגודל.</p>
+                </div>
+                <div className="pd-step">
+                  <h3 className="pd-name">תפילת הערב <span className="pd-ar">(צלאה אלמע׳רב)</span></h3>
+                  <p>זמנה בשקיעת השמש.</p>
+                </div>
+                <div className="pd-step">
+                  <h3 className="pd-name">תפילת הלילה <span className="pd-ar">(צלאה אלעשאא׳)</span></h3>
+                  <p>זמנה בצאת הכוכבים ועד הבוקר.</p>
+                </div>
+              </Scrolly>
+            </div>
+
+            {/* pr-3, pr-4 — purification & intention, and where one prays — back on the regular
+                parchment background (like the shahada) */}
+            <div className="prayer-block" data-reveal>
+              <Env>{screen('pr-3').title}</Env>
+              <KP text={para('pr-3', 0)} of={['להיטהר']} />
+              <KP text={para('pr-3', 1)} of={['בכוונה (נייה)']} />
+            </div>
+            <div className="prayer-block" data-reveal>
+              <Env>{screen('pr-4').title}</Env>
+              <KP text={para('pr-4', 0)} of={['ביום השישי', "דרשה (ח'טבה)"]} />
+              <KP text={para('pr-4', 1)} of={[]} />
+              <KP text={para('pr-4', 2)} of={['אישה מחויבת להתפלל כמו גבר']} />
+            </div>
             {/* the qibla, as its own calm reading block: the text of the direction change beside
                 the one calibrated map that now draws BOTH directions from Medina */}
             <div className="qibla-feature" data-reveal>
+              <Env>{screen('pr-5').title}</Env>
               <div className="content-block">
-                <Env>{screen('pr-5').title}</Env>
-                <p>{para('pr-5', 0)}</p>
-                <p>{para('pr-5', 1)}</p>
-                <p>{para('pr-5', 2)}</p>
-                <p>{para('pr-5', 3)}</p>
-                <p>{para('pr-5', 4)}</p>
+                <KP text={para('pr-5', 0)} of={['(קבלה)', 'מכה']} />
+                <KP text={para('pr-5', 1)} of={['ירושלים', 'למכה']} />
+                <KP text={para('pr-5', 2)} of={[]} />
+                <KP text={para('pr-5', 3)} of={['כיוון התפילה הראשון']} />
+                <KP text={para('pr-5', 4)} of={['בעל שני כיווני התפילה']} />
               </div>
               <div className="qibla-mapcol">
                 <figure className="map-figure qibla-map">
-                  <div className="map-plate" dir="ltr" dangerouslySetInnerHTML={{ __html: QIBLA_PLATE }} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="qibla-mapimg" src="/assets/chapter6/qibla-route-map.jpg" alt="מפת אזור החִג'אז והלבנט" loading="lazy" decoding="async" />
+                  <svg className="qibla-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                    <path className="qline-first" d="M62 42 L40 19" />
+                    <path className="qline-second" d="M62 42 L60 66" />
+                  </svg>
                   <span className="map-pin jerusalem">ירושלים</span>
                   <span className="map-pin medina">מדינה</span>
                   <span className="map-pin makkah">מכה</span>
@@ -695,185 +758,142 @@ export default function Chapter6() {
                 </div>
               </div>
             </div>
-            <CommandmentTransition screenId="pr-t" icon="icon-prayer.png" done={doneSections.has('prayer')} />
           </section>
 
           {/* ===================== area 4 — the charity ===================== */}
           <section className="commandment-section charity-section article-section" id="charity" aria-labelledby="charity-title">
-            {/* a short, calm reading block — charity is a simple idea and gets a single card:
-                the 2.5% ring beside the text, no full-screen scrolly for two paragraphs */}
-            <SectionHeading id="charity-title" eyebrow="מצוות יסוד שלישית" title="הצדקה" />
-            <div className="charity-layout" data-reveal>
-              <figure className="charity-figure">
-                <div className="charity-ring"><b>2.5%</b><small>מן המאזן השנתי</small></div>
-                <span className="charity-flow" aria-hidden="true" />
-              </figure>
-              <div className="charity-copy">
+            {/* charity as an illustrated hero, like the shahada: a large watercolor of giving —
+                coins and grain poured from hand to hand — bleeds in from the LEFT edge of the
+                screen, the reading column on the right. The 2.5% still lives in the text. */}
+            <SectionHeading id="charity-title" title="הצדקה" term="(الزكاة)" />
+            <div className="charity-hero">
+              <div className="charity-illus" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/assets/chapter6/charity-illustration.png" alt="" loading="lazy" decoding="async" />
+              </div>
+              <div className="charity-body" data-reveal>
                 <div className="content-block">
                   <Env>{screen('ch-1').title}</Env>
-                  <p>{para('ch-1', 0)}</p>
+                  <KP text={para('ch-1', 0)} of={['2.5%']} />
                 </div>
                 <div className="content-block">
                   <Env>{screen('ch-2').title}</Env>
-                  <p>{para('ch-2', 0)}</p>
-                  <p>{para('ch-2', 1)}</p>
+                  <KP text={para('ch-2', 0)} of={['"בכפליים"']} />
+                  <KP text={para('ch-2', 1)} of={['היא חובה']} />
                 </div>
               </div>
             </div>
-            <CommandmentTransition screenId="ch-t" icon="icon-charity.png" done={doneSections.has('charity')} />
           </section>
 
           {/* ===================== area 5 — the Ramadan fast ===================== */}
           <section className="commandment-section ramadan-section article-section" id="ramadan" aria-labelledby="ramadan-title">
             {/* editorial heading above the scene; six grouped steps, ליל אלקדר on step 2, the two
                 crescent-sighting schools as the split step at the end */}
-            <SectionHeading id="ramadan-title" eyebrow="מצוות יסוד רביעית" title="הצום בחודש רמדאן" />
-            <Scrolly full art={(s) => <RamadanStage {...s} />}>
-              <div>
-                <Env>{screen('rm-1').title}</Env>
-                <P text={para('rm-1', 0)} />
-                <P text={para('rm-1', 1)} />
+            <SectionHeading id="ramadan-title" title="צום הרמדאן" term="(الصوم)" />
+
+            {/* how the fast was born — a vertical accordion timeline; click an era to open it */}
+            <div className="rm-ed-block" data-reveal>
+              <h3 className="rm-ed-head">איך נולד הצום</h3>
+              {/* narrative moments, not a dated axis — the year labels were removed because the
+                  source presents ליל אלקדר (610) after the Medina period (622), which read as a
+                  timeline running backwards */}
+              <RamadanTimeline
+                items={[
+                  { label: 'טרום־אסלאם', title: 'מנהג מדברי קדום', paras: [kb(para('rm-1', 0), ['לצום במהלך השנה'])], icon: 'palm' },
+                  { label: 'המעבר למדינה', title: 'הצום מתגבש', paras: [kb(para('rm-1', 1), ['בתקופת שהותו של מוחמד במדינה'])], icon: 'mosque' },
+                  { label: "עאשוראא'", title: screen('rm-2').title, paras: [kb(para('rm-2', 0), ["עאשוראא'"]), kb(para('rm-2', 1)), kb(para('rm-2', 2))], icon: 'crescent' },
+                  { label: 'ליל אלקדר', title: screen('rm-3').title, paras: [kb(para('rm-3', 0), ['בחודש רמדאן']), kb(para('rm-3', 1), ['ליל אלקדר'])], icon: 'book' },
+                ]}
+              />
+            </div>
+
+            {/* the fast day, as a row of arched scenes moving through the hours */}
+            <div className="rm-ed-block" data-reveal>
+              <h3 className="rm-ed-head">יום של צום</h3>
+              <div className="rm-day">
+                {[
+                  { img: 'ramadan-fast-dawn.jpg', title: 'עלות השחר', sub: 'תחילת הצום' },
+                  { img: 'ramadan-fast-noon.jpg', title: 'חצות היום', sub: 'הימנעות' },
+                  { img: 'ramadan-fast-sunset.jpg', title: 'שקיעה · אפטאר', sub: 'שבירת הצום' },
+                  { img: 'ramadan-fast-night.jpg', title: 'תראויח', sub: 'תפילות הלילה' },
+                ].map((c) => (
+                  <div className="rm-day-card" key={c.title}>
+                    <span className="rm-day-arch">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`/assets/chapter6/${c.img}`} alt="" loading="lazy" decoding="async" />
+                    </span>
+                    <h4 className="rm-day-title">{c.title}</h4>
+                    <p className="rm-day-sub">{c.sub}</p>
+                  </div>
+                ))}
               </div>
-              <div>
-                <Env>{screen('rm-2').title}</Env>
-                <P text={para('rm-2', 0)} />
-                <P text={para('rm-2', 1)} />
-                <P text={para('rm-2', 2)} />
-              </div>
-              <div>
-                <Env>{screen('rm-3').title}</Env>
-                <P text={para('rm-3', 0)} />
-                <P text={para('rm-3', 1)} marks={['בלילה ה־27 לחודש', 'ליל אלקדר']} />
-              </div>
-              <div>
-                <Env>{screen('rm-4').title}</Env>
-                <P text={para('rm-4', 0)} />
-                <Env>{screen('rm-5').title}</Env>
-                <P text={para('rm-5', 0)} />
-                <P text={para('rm-5', 1)} />
-              </div>
-              <div>
-                <Env>{screen('rm-6').title}</Env>
-                <P text={para('rm-6', 0)} />
-                <P text={para('rm-6', 1)} />
-              </div>
-              {/* the crescent-sighting screen: text on the right, the two schools (explore
-                  no. 2) on the LEFT */}
-              <div data-split className="step-split">
-                <div className="step-aside step-aside-wide">
-                  <MoonSchools />
+              <KP className="rm-dayline" text={para('rm-4', 0)} of={['מעלות השחר ועד לשקיעת החמה', 'אפטאר', 'תפילות התראויח']} />
+            </div>
+
+            {/* the close of the month — the last ten nights (Laylat al-Qadr), then Eid and the moon-sighting */}
+            <div className="rm-ed-block" data-reveal>
+              <h3 className="rm-ed-head">סוף החודש</h3>
+              <div className="rm-two">
+                <div className="rm-card">
+                  <h4>{screen('rm-5').title}</h4>
+                  <KP text={para('rm-5', 0)} of={['קדושים במיוחד']} />
+                  <KP text={para('rm-5', 1)} of={['כל עוונות העבר נמחלות לו']} />
                 </div>
-                <div className="stage-card">
-                  <Env>{screen('rm-7').title}</Env>
-                  <P text={para('rm-7', 0)} />
-                  <P text={para('rm-7', 1)} />
+                <div className="rm-card">
+                  <h4>{screen('rm-6').title}</h4>
+                  <KP text={para('rm-6', 0)} of={['חג שבירת הצום']} />
+                  <KP text={para('rm-6', 1)} of={[]} />
+                </div>
+                <div className="rm-card">
+                  <h4>{screen('rm-7').title}</h4>
+                  <KP text={para('rm-7', 0)} of={['המולד האמיתי', 'המולד הממוצע']} />
+                  <KP text={para('rm-7', 1)} of={[]} />
                 </div>
               </div>
-            </Scrolly>
-            <CommandmentTransition screenId="rm-t" icon="icon-ramadan.png" done={doneSections.has('ramadan')} />
+            </div>
           </section>
 
           {/* ===================== area 6 — the hajj ===================== */}
           <section className="commandment-section hajj-section article-section" id="hajj" aria-labelledby="hajj-title">
             {/* the framing (who, when, why) reads first, as a normal editorial block */}
-            <SectionHeading id="hajj-title" eyebrow="מצוות יסוד חמישית" title="החג' — העלייה לרגל למכה" />
+            <SectionHeading id="hajj-title" title="החג'" term="(الحج)" />
             <div className="hajj-intro content-block-wide" data-reveal>
               <Env>{screen('hj-1').title}</Env>
-              <p>{para('hj-1', 0)}</p>
-              <p>{para('hj-1', 1)}</p>
-              <p>{para('hj-1', 2)}</p>
-              <p>{para('hj-1', 3)}</p>
+              <KP text={para('hj-1', 0)} of={["ביום ה־8 לחודש ד'ו אלחג'ה"]} />
+              <KP text={para('hj-1', 1)} of={[]} />
+              <KP text={para('hj-1', 2)} of={[]} />
+              <KP text={para('hj-1', 3)} of={['אינה חובה', 'פעם אחת במהלך חייו']} />
             </div>
-            {/* the journey itself: ONE sticky map beside the seven stations — the map walks
-                the route as the reader scrolls, so the hajj reads as a single moving journey
-                rather than twenty-two separate screens */}
-            <Scrolly artClass="hajj-map-art" art={(s) => <HajjMapStage {...s} />}>
-              <div>
-                <Env>{screen('hj-2').title}</Env>
-                <P text={para('hj-2', 0)} />
-                <P text={para('hj-2', 1)} />
-                <P text={para('hj-2', 2)} />
-                <P text={para('hj-2', 3)} />
-              </div>
-              <div>
-                <Env>{screen('hj-3').title}</Env>
-                <P text={para('hj-3', 0)} />
-              </div>
-              <div>
-                <Env>{screen('hj-4').title}</Env>
-                <P text={para('hj-4', 0)} />
-                <P text={para('hj-4', 1)} />
-              </div>
-              <div>
-                <Env>{screen('hj-5').title}</Env>
-                <P text={para('hj-5', 0)} />
-                <P text={para('hj-5', 1)} />
-                <P text={para('hj-5', 2)} />
-                <P text={para('hj-5', 3)} />
-              </div>
-              <div>
-                <Env>{screen('hj-6').title}</Env>
-                <P text={para('hj-6', 0)} />
-              </div>
-              <div>
-                <P text={para('hj-6', 1)} />
-                <P text={para('hj-6', 2)} />
-              </div>
-              <div>
-                <Env>{screen('hj-7').title}</Env>
-                <P text={para('hj-7', 0)} />
-                <P text={para('hj-7', 1)} />
-                <P text={para('hj-7', 2)} />
-              </div>
-            </Scrolly>
-            {/* the road's blessing closes the journey */}
+            {/* the journey itself: an interactive route map anchored on Mecca — six stations sit as
+                numbered stops along a trail; clicking one opens its scene and verbatim text. */}
+            <div className="hajj-map-block" data-reveal>
+              <h3 className="rm-ed-head hjm-head">{screen('hj-v').title}</h3>
+              <HajjRouteMap
+                stops={[
+                  { label: 'אחראם', place: 'המיקאת', img: 'ihram-real.jpg', title: screen('hj-2').title, paras: [kb(para('hj-2', 0), ['(אחראם)']), kb(para('hj-2', 1)), kb(para('hj-2', 2)), kb(para('hj-2', 3), ['מיקאת'])], x: 80, y: 19 },
+                  { label: 'טוואף', place: 'מכה', img: 'tawaf-real.jpg', title: screen('hj-3').title, paras: [kb(para('hj-3', 0), ['(טוואף) שבע פעמים'])], x: 80, y: 74 },
+                  { label: 'סעי', place: 'מכה · צפא ומרוה', img: 'hajj-sai.jpg', title: screen('hj-4').title, paras: [kb(para('hj-4', 0), ['צפא ומרוה (סעי)']), kb(para('hj-4', 1), ['מעיין הזמזם'])], x: 84, y: 80 },
+                  { label: 'ערפה', place: 'הר ערפה', img: 'arafat-real.jpg', title: screen('hj-5').title, paras: [kb(para('hj-5', 0), ['יום ערפה']), kb(para('hj-5', 1)), kb(para('hj-5', 2), ['ה"עמידה" (וקוף)']), kb(para('hj-5', 3))], x: 22, y: 24 },
+                  { label: 'מוזדליפה ומינא', place: 'מוזדליפה ומינא', img: 'hajj-muzdalifah.jpg', title: screen('hj-6').title, paras: [kb(para('hj-6', 0), ['מוזדליפה']), kb(para('hj-6', 1), ['"מינא"']), kb(para('hj-6', 2))], x: 44, y: 60 },
+                  { label: 'הקפת הפרידה', place: 'מכה', img: 'kaaba-real.jpg', title: screen('hj-7').title, paras: [kb(para('hj-7', 0), ['חג הקורבן']), kb(para('hj-7', 1)), kb(para('hj-7', 2))], x: 70, y: 86 },
+                ]}
+              />
+            </div>
+            {/* the road's blessing closes the section */}
             <div className="blessing" data-reveal>
               <P text={para('hj-7', 3)} />
               <blockquote className="arabic-quote" lang="ar" dir="rtl">{para('hj-7', 4)}</blockquote>
               <P text={para('hj-7', 5)} className="blessing-he" />
             </div>
-            <CommandmentTransition screenId="hj-t" icon="icon-hajj.png" done={doneSections.has('hajj')} />
+            {/* a quiet close — just a way back, no exercise. Reaching this block is what marks
+                the hajj (and the whole chapter) as complete. */}
+            <div className="chapter-end" data-reveal ref={endRef}>
+              <Link className="chapter-end-back" href="/chapters">
+                חזרה לכל הפרקים
+              </Link>
+            </div>
           </section>
 
-          {/* ===================== the chapter's close ===================== */}
-          <section className="summary-section article-section" id="summary" aria-labelledby="summary-title">
-            <SectionHeading
-              id="summary-title"
-              eyebrow="מבט מסכם"
-              title="חמש פעולות, מערכת אחת"
-              lead={screen('sum-c').check?.ok}
-            />
-            {/* active recall before the memory wall: one verbatim sentence at a time, matched
-                to its commandment by click — the closing practice the spec already authored */}
-            <div className="practice-wrap" data-reveal>
-              <h3 className="practice-title">{screen('sum-c').title}</h3>
-              <SummaryPractice
-                onComplete={() => {
-                  markChapterComplete()
-                  setDoneSections(new Set(SECTION_ORDER))
-                }}
-              />
-            </div>
-            <div className="summary-cards" data-reveal>
-              {actions.map((action, index) => (
-                <a href={`#${SECTION_LINKS[index + 2].id}`} key={action.commandment} onClick={onMenuJump}>
-                  <span className="summary-visual">
-                    {SUMMARY_MEDIA[index] ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={SUMMARY_MEDIA[index]!} alt="" loading="lazy" decoding="async" />
-                    ) : (
-                      <i>{action.quote}</i>
-                    )}
-                  </span>
-                  <span className="summary-name">
-                    <PillarIcon image={PILLAR_ICONS[index]} alt="" />
-                    <b>{action.commandment}</b>
-                    <small>{action.action}</small>
-                  </span>
-                </a>
-              ))}
-            </div>
-          </section>
         </main>
       </div>
       </div>

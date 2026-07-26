@@ -1,9 +1,8 @@
 'use client'
 
-/* The chapters screen — a flat vintage-parchment layout: a title banner (Kedem title + two
-   photoreal photos as tilted, taped postcards), an "איפה עצרתם?" resume strip, a "כל הפרקים"
-   grid of clean-framed chapter cards, and a
-   "לפי נושא" filter row of the six categories. Progress is driven by real localStorage state.
+/* The chapters screen — a flat vintage-parchment layout: a cinematic video banner, an
+   "איפה עצרתם?" resume strip, and a "תחנות הידע" grid of clean-framed chapter cards.
+   Progress is driven by real localStorage state.
 
    The header search, the off-canvas category drawer (hamburger), navigation and completion
    marks all carry over unchanged; one data source (lib/chapters-data) still feeds everything. */
@@ -19,6 +18,10 @@ import {
   secondaryItems,
   type ChapterDef,
 } from '@/lib/chapters-data'
+import { CH6 } from '@/lib/chapter6/data'
+
+/* the number of chapter-6 screens progress is measured against (derived, not hardcoded) */
+const CH6_SCREEN_COUNT = CH6.screens.length
 
 /* ---------------- UI line-icon primitive (search, close, chevrons, arrows) --------- */
 function Icon({ d, box = '0 0 24 24', w = 1.7 }: { d: string; box?: string; w?: number }) {
@@ -31,65 +34,47 @@ function Icon({ d, box = '0 0 24 24', w = 1.7 }: { d: string; box?: string; w?: 
   )
 }
 
-/* ---------------- category icons — a detailed Islamic line-art family (512 grid) ----------------
-   Clean monoline glyphs in the style of the reference mosque: star-and-crescent, the
-   mosque itself, an open Qur'an, a mihrab niche with a hanging lamp, crossed sabers and
-   a fanous lantern. One shared stroke weight keeps them reading as a single set. */
-function LineIcon({ d }: { d: string }) {
-  return <Icon box="0 0 512 512" d={d} w={18} />
-}
-const CRESCENT =
-  'M300 128 A162 162 0 1 0 300 384 A136 136 0 1 1 300 128 Z|M360 182 L377 232 L430 233 L388 265 L403 315 L360 284 L317 315 L332 265 L290 233 L343 232 Z'
-const QURAN =
-  'M256 202 C192 176 132 174 78 198 L78 346 C132 322 192 324 256 352 Z|M256 202 C320 176 380 174 434 198 L434 346 C380 322 320 324 256 352 Z|M256 202 L256 352|M112 236 L206 228|M112 268 L206 260|M112 300 L196 294|M300 228 L400 236|M306 260 L400 268|M316 294 L400 300|M256 352 L256 396 L240 380 L272 380 Z'
-const MIHRAB =
-  'M122 452 L390 452|M150 452 L150 250 C150 168 196 118 256 82 C316 118 362 168 362 250 L362 452|M188 452 L188 252 C188 190 222 150 256 122 C290 150 324 190 324 252 L324 452|M256 122 L256 178|M256 178 C244 178 236 188 236 200 C236 214 246 224 256 224 C266 224 276 214 276 200 C276 188 268 178 256 178 Z|M150 452 L362 452'
-const SABERS =
-  'M150 384 C232 332 344 236 392 132|M362 384 C280 332 168 236 120 132|M126 402 L164 366|M140 352 L176 398|M386 402 L348 366|M372 352 L336 398|M118 400 a13 13 0 1 0 0.1 0 z|M394 400 a13 13 0 1 0 0.1 0 z'
-const LANTERN =
-  'M248 104 A15 15 0 1 0 248 134 A11 11 0 1 1 248 104 Z|M256 134 L256 140|M226 140 L286 140 L302 176 L210 176 Z|M210 176 L196 208 L196 320 L214 352 L298 352 L316 320 L316 208 L302 176|M196 208 L316 208|M196 320 L316 320|M232 208 L232 320|M280 208 L280 320|M224 352 L288 352 L288 376 L224 376 Z|M256 376 L256 394'
-const BOOKS =
-  'M108 352 L360 352 L360 402 L108 402 Z|M120 352 L120 402|M124 306 L384 306 L384 352 L124 352 Z|M372 306 L372 352|M102 262 L350 262 L350 306 L102 306 Z|M114 262 L114 306'
-
-/* the Kaaba — a draped cubic shrine: a facing seam, the kiswah band and a scalloped hem (512 grid) */
-const MOSQUE =
-  'M76 110 L436 110|M76 110 L76 430|M436 110 L436 430|M40 430 L472 430|M76 172 L436 172|M76 202 L436 202|M330 110 L330 384|M76 384 Q108 344 140 384 Q171 344 203 384 Q235 344 266 384 Q298 344 330 384|M330 384 Q356 348 383 384 Q409 348 436 384'
-/* geometric arabesque rosette — two interlaced squares (an eight-point khatam) around an octagon */
-const ARABESQUE =
-  'M120 120 L392 120 L392 392 L120 392 Z|M256 58 L454 256 L256 454 L58 256 Z|M322 256 L303 303 L256 322 L209 303 L190 256 L209 209 L256 190 L303 209 Z'
-
-/* three hanging fanous lanterns — the single-lantern glyph placed at three scales/positions
-   (the stroke scales with each group, so the smaller side lanterns read as lighter/behind) */
-function Lanterns() {
-  const parts = LANTERN.split('|')
-  const groups = [
-    'translate(142 244) scale(0.54) translate(-256 -249)',
-    'translate(370 244) scale(0.54) translate(-256 -249)',
-    'translate(256 300) scale(0.82) translate(-256 -249)',
-  ]
+/* ---------------- category icons — a clean, uniform FILLED (solid) 24-grid family ----------------
+   Solid silhouette glyphs (fill, no stroke); emblems are cut out with the even-odd rule so the
+   whole set reads as one bold, filled system. */
+function FIcon({ d }: { d: string }) {
   return (
-    <svg viewBox="0 0 512 512" width={18} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={22} strokeLinecap="round" strokeLinejoin="round">
-      {groups.map((t, gi) => (
-        <g key={gi} transform={t}>
-          {parts.map((p, i) => (
-            <path key={i} d={p} />
-          ))}
-        </g>
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" fillRule="evenodd" clipRule="evenodd">
+      {d.split('|').map((p, i) => (
+        <path key={i} d={p} />
       ))}
     </svg>
   )
 }
+const IF_HISTORY =
+  'M7 2.5A2.5 2.5 0 0 0 4.5 5V17.4A3.4 3.4 0 0 1 7 16.4H18V2.5ZM11.7 6A3.2 3.2 0 1 0 11.7 12.4 2.4 2.4 0 1 1 11.7 6ZM15.9 6.1 16.6 7.65 18.3 7.8 17 8.95 17.4 10.6 15.9 9.7 14.4 10.6 14.8 8.95 13.5 7.8 15.2 7.65Z|M7 17.9A2 2 0 0 0 7 21.9H18V17.9Z'
+const IF_MOSQUE =
+  'M12 2.2C13 3 13 4.2 12 5 11 4.2 11 3 12 2.2Z|M11.4 5.3H12.6V7.6H11.4Z|M4 21V12.4A8 8 0 0 1 20 12.4V21H14.5V17.5A2.5 2.5 0 0 0 9.5 17.5V21ZM11.5 21V17.5A0.5 0.5 0 0 1 12.5 17.5V21Z|M2.4 21H21.6V22.6H2.4Z'
+const IF_BOOK =
+  'M11.3 6.2C9.6 4.9 7.2 4.4 4.4 4.7V17.5C7 17.3 9.3 17.8 11.3 19V6.2Z|M12.7 6.2C14.4 4.9 16.8 4.4 19.6 4.7V17.5C17 17.3 14.7 17.8 12.7 19V6.2Z'
+const IF_GLOBE =
+  'M12 2A10 10 0 1 0 12 22A10 10 0 0 0 12 2ZM9.8 4.4C8.4 4.7 7.2 5.4 6.2 6.3L7.9 8.1C8.2 8.4 8.1 8.9 7.7 9.1L6.9 9.6C6.5 9.8 6.4 10.4 6.7 10.8L7.7 12C8 12.4 8.5 12.6 9 12.6C9.5 12.6 9.9 13 10 13.5L10.3 14.9C10.4 15.5 11 15.9 11.6 15.7C12.1 15.6 12.4 15.1 12.4 14.6V13.1C12.4 12.6 12.7 12.2 13.2 12.1C14 11.9 14.3 10.9 13.7 10.3L12.3 8.9C12 8.6 12 8.1 12.3 7.8L13.6 6.4C14.1 5.9 13.8 5 13.1 4.9C12 4.6 10.9 4.4 9.8 4.4ZM17.5 8.2C16.8 8.6 16.4 9.4 16.6 10.2L17.1 12.1C17.2 12.6 17.7 12.9 18.2 12.7C18.4 11 18.4 9.5 17.5 8.2Z'
+const IF_KAABA =
+  'M12 2.3 20.7 7V17L12 21.7 3.3 17V7Z M3.3 7.6 12 12 20.7 7.6 20.7 8.7 12 13.1 3.3 8.7Z M6.9 14.2 9.5 15.5 8.9 16.7 6.3 15.4Z M17.1 14.2 14.5 15.5 15.1 16.7 17.7 15.4Z'
+const IF_SHIELD = 'M12 2.3 20 5.1V11.4C20 16.5 16.6 19.9 12 21.5 7.4 19.9 4 16.5 4 11.4V5.1Z'
+const IF_CAP =
+  'M5.5 5A2.5 2.5 0 0 0 3 7.5V18A2.5 2.5 0 0 0 5.5 20.5H18.5A2.5 2.5 0 0 0 21 18V7.5A2.5 2.5 0 0 0 18.5 5ZM3 9.2H21V10.4H3ZM8 13.75A1.25 1.25 0 1 0 8 16.25 1.25 1.25 0 0 0 8 13.75ZM12 13.75A1.25 1.25 0 1 0 12 16.25 1.25 1.25 0 0 0 12 13.75ZM16 13.75A1.25 1.25 0 1 0 16 16.25 1.25 1.25 0 0 0 16 13.75Z|M8.5 2.6A0.85 0.85 0 0 1 9.35 3.45V5.4H7.65V3.45A0.85 0.85 0 0 1 8.5 2.6Z|M15.5 2.6A0.85 0.85 0 0 1 16.35 3.45V5.4H14.65V3.45A0.85 0.85 0 0 1 15.5 2.6Z'
+const IF_BOOKS = 'M3.6 15.3H16.4V19.7H3.6Z|M5.2 10.9H18V15.3H5.2Z|M3.6 6.5H16.4V10.9H3.6Z'
+const IF_SOURCES =
+  'M6.5 2.5A2 2 0 0 0 4.5 4.5V19.5A2 2 0 0 0 6.5 21.5H16.5A2 2 0 0 0 18.5 19.5V8H13.5V2.5ZM8 11.5H15V13H8ZM8 15H15V16.5H8ZM8 8H11V9.5H8Z|M14.8 3 18.4 6.6H14.8Z'
+const IF_MAP = 'M8.7 3.3 3 5.6V20.7L8.7 18.4V3.3Z|M10.1 3.4V18.5L14.9 20.2V5.1Z|M16.3 5.1V20.2L21 18V3.4Z'
 
 const CAT_ICON: Record<string, ReactNode> = {
-  clock: <LineIcon d={CRESCENT} />, // history → star & crescent
-  person: <LineIcon d={MOSQUE} />, // Muhammad & early Islam → mosque
-  book: <LineIcon d={QURAN} />, // (glossary) → open Qur'an
-  arabesque: <LineIcon d={ARABESQUE} />, // faith, worship & sources → arabesque rosette
-  arch: <LineIcon d={MIHRAB} />, // streams & jurisprudence → mihrab niche
-  shield: <LineIcon d={SABERS} />, // jihad & symbols → crossed sabers
-  cap: <Lanterns />, // study tools & depth → three fanous lanterns
-  book2: <LineIcon d={QURAN} />, // glossary → Qur'an
-  books: <LineIcon d={BOOKS} />, // recommended reading → book stack
+  clock: <FIcon d={IF_HISTORY} />, // history → book with crescent & star
+  person: <FIcon d={IF_MOSQUE} />, // early Islam → mosque
+  book: <FIcon d={IF_BOOK} />, // glossary → open book
+  arabesque: <FIcon d={IF_GLOBE} />, // faith & worship → globe
+  arch: <FIcon d={IF_KAABA} />, // streams & law → Kaaba cube
+  shield: <FIcon d={IF_SHIELD} />, // jihad & symbols → shield
+  cap: <FIcon d={IF_CAP} />, // time → mortarboard
+  books: <FIcon d={IF_BOOKS} />, // recommended reading → book stack
+  sources: <FIcon d={IF_SOURCES} />, // sources → document
+  map: <FIcon d={IF_MAP} />, // maps → folded map
 }
 const SEARCH_D = 'M10.5 4.5a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z M15 15l4.5 4.5'
 const CLOSE_D = 'M6 6l12 12M18 6 6 18'
@@ -117,7 +102,6 @@ interface ChapterStatus {
 export default function ChaptersScreen() {
   const [query, setQuery] = useState('')
   const [openCats, setOpenCats] = useState<string[]>([chapterCategories[0].id])
-  const [activeTopic, setActiveTopic] = useState<string | null>(null)
   const [drawer, setDrawer] = useState(false)
   const [status, setStatus] = useState<Record<number, ChapterStatus>>({})
   const [isDesktop, setIsDesktop] = useState(true)
@@ -148,7 +132,7 @@ export default function ChaptersScreen() {
           if (raw) {
             const p = JSON.parse(raw) as { done?: Record<string, boolean> } | null
             const n = Object.keys((p && p.done) || {}).length
-            if (n > 0) progress = Math.min(99, Math.round((n / 44) * 100))
+            if (n > 0) progress = Math.min(99, Math.round((n / CH6_SCREEN_COUNT) * 100))
           }
         }
         st[chp.number] = { completed: done, progress }
@@ -257,10 +241,7 @@ export default function ChaptersScreen() {
       })
       .filter((v) => !q || v.chapters.length > 0)
   }, [q])
-  const gridChapters = useMemo(() => {
-    const cats = activeTopic ? searchView.filter((v) => v.cat.id === activeTopic) : searchView
-    return cats.flatMap((v) => v.chapters)
-  }, [searchView, activeTopic])
+  const gridChapters = useMemo(() => searchView.flatMap((v) => v.chapters), [searchView])
 
   /* the "where did you stop?" chapter: the furthest-along available chapter.
      A brand-new visitor with no progress anywhere gets null, so the strip is hidden —
@@ -406,11 +387,11 @@ export default function ChaptersScreen() {
           )}
         </span>
         <span className="card-body">
-          <span className="card-num">
-            פרק {chp.number}
-          </span>
           <span className="card-name" title={chp.title}>
             {chp.title}
+          </span>
+          <span className="card-num">
+            פרק {chp.number}
           </span>
           {progress > 0 && (
             <span className="card-progress" aria-hidden="true">
@@ -495,8 +476,8 @@ export default function ChaptersScreen() {
               )}
             </div>
             <div className="hero-copy">
-              <h1 id="hero-title" className="hero-title">מגלים את עולם האסלאם</h1>
-              <p className="hero-sub">הכירו את ההיסטוריה, האמונה והתרבות דרך מסע בין פרקים ונושאים.</p>
+              <h1 id="hero-title" className="hero-title">מסע אל העולם האסלאמי</h1>
+              <p className="hero-sub">גלו עולם חדש של היסטוריה, תרבות ומורשת אסלאמית.</p>
             </div>
           </section>
 
@@ -530,14 +511,14 @@ export default function ChaptersScreen() {
           {/* ============ all chapters ============ */}
           <section className="sec chapters-panel" aria-labelledby="sec-all">
             <h2 id="sec-all" className="sec-title">
-              <span>כל הפרקים</span>
+              <span>תחנות הידע</span>
             </h2>
             {gridChapters.length ? (
               <ul className="cards">{gridChapters.map((chp, idx) => card(chp, idx))}</ul>
             ) : (
               <div className="grid-empty">
                 <p>לא נמצאו פרקים התואמים לחיפוש</p>
-                <button type="button" className="empty-clear" onClick={() => { setQuery(''); setActiveTopic(null) }}>
+                <button type="button" className="empty-clear" onClick={() => setQuery('')}>
                   ניקוי החיפוש
                 </button>
               </div>

@@ -11,7 +11,10 @@ import { CH6 } from './data'
 export const STORE_KEY = 'ch6:v1'
 
 /* DOM section id (the scroll anchors) → the `section` label the data carries. Two anchors
-   share the opening because the article splits it into the film and the pillars overview. */
+   share the opening because the article splits it into the film and the pillars overview.
+   The article ends on the hajj (the old 'summary' anchor was removed with the practice screen),
+   so the hajj — the last section — is completed by reaching the chapter's closing block, not by
+   scrolling into a next anchor. */
 const DOM_TO_DATA: Record<string, string> = {
   opening: 'פתיחה',
   pillars: 'פתיחה',
@@ -20,10 +23,10 @@ const DOM_TO_DATA: Record<string, string> = {
   charity: 'הצדקה',
   ramadan: 'צום רמדאן',
   hajj: "החג'",
-  summary: 'סיכום',
 }
 
-/* article order — completion of anchor i is earned by scrolling into anchor i+1 */
+/* article order — completion of anchor i is earned by scrolling into anchor i+1; the final
+   anchor (hajj) is completed by markChapterComplete() when the reader reaches the closing block */
 export const SECTION_ORDER = Object.keys(DOM_TO_DATA)
 
 export interface Ch6Store {

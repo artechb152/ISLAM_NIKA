@@ -39,52 +39,38 @@ function PhotoStage({ p, frames, children }: { p: number; frames: Frame[]; child
 
 const A = '/assets/chapter6/'
 
-/* ---- prayer: the scroll moves through the night journey, the ablution, the mosque and
-   the qibla; the "five prayers & times" step (index 2) is CLICK-driven instead — its five
-   buttons pick the time of day, and that choice fills the whole screen ---- */
-/* four grouped steps now: journey(0) · five-prayers+times(1) · ablution(2) · mosque(3).
-   the qibla left the scrolly (it is its own editorial block with the map), so the kaaba
-   frame is gone from here. */
-const PRAYER_FRAMES: Frame[] = [
-  { src: A + 'prayer-night-real.jpg', from: 0 },
-  { src: A + 'prayer-wudu-real.jpg', from: 2 },
-  { src: A + 'mosque-hall-real.jpg', from: 3 },
+/* ---- prayer, the DAY JOURNEY: the five daily prayers are read on ONE screen while the
+   day itself passes. It is the same desert-and-mosque scene from dawn to night, and the
+   sky crossfades CONTINUOUSLY with the scroll (dawn → noon → afternoon → sunset → night),
+   so the reader never leaves the scene — they simply live a day between the prayers.
+   Six steps drive it: the opening line (0), then one per prayer (1..5). No buttons. ---- */
+const PRAYER_DAY_FRAMES: Frame[] = [
+  { src: A + 'prayer-day-1.jpg', from: 0 }, // dawn — opening line + תפילת השחר
+  { src: A + 'prayer-day-2.jpg', from: 2 }, // midday — תפילת הצהריים
+  { src: A + 'prayer-day-3.jpg', from: 3 }, // afternoon — תפילת אחר הצהריים
+  { src: A + 'prayer-day-4.jpg', from: 4 }, // sunset — תפילת הערב
+  { src: A + 'prayer-day-5.jpg', from: 5 }, // night — תפילת הלילה
 ]
 
-/* one photo per prayer, dawn → night (index-aligned with the five prayer buttons) */
-const PRAYER_PICK: string[] = [
-  A + 'prayer-dawn-real.jpg', // תפילת השחר
-  A + 'prayer-noon-real.jpg', // תפילת הצהריים
-  A + 'prayer-noon-real.jpg', // תפילת אחר הצהריים
-  A + 'prayer-sunset-real.jpg', // תפילת הערב
-  A + 'prayer-night-real.jpg', // תפילת הלילה
-]
-
-const PRAYER_TIMES_STEP = 1
-
-export function PrayerStage({ step, t, pick = 0 }: ScrollyState & { pick?: number }) {
-  const onTimes = step === PRAYER_TIMES_STEP
+/* the scene itself carries the day (each frame already holds its own sun / sunset / moon),
+   so the stage is simply the crossfade — the sky moves with the scroll, the place stays.
+   A LONG, gentle crossfade (each frame eases out over almost a full step) so the tiny scene
+   drift between frames dissolves instead of reading as a jump. */
+export function PrayerDayStage({ step, t }: ScrollyState) {
   const p = step + t
   return (
     <div className="st st-photo">
-      {PRAYER_FRAMES.map((frame, i) => {
+      {PRAYER_DAY_FRAMES.map((frame, i) => {
         const start = frame.from
-        const next = PRAYER_FRAMES[i + 1]?.from
-        const alphaIn = i === 0 ? 1 : seg(p, start - 0.45, start + 0.05)
-        const alphaOut = next === undefined ? 1 : 1 - seg(p, next - 0.45, next + 0.05)
+        const next = PRAYER_DAY_FRAMES[i + 1]?.from
+        const alphaIn = i === 0 ? 1 : seg(p, start - 0.92, start + 0.08)
+        const alphaOut = next === undefined ? 1 : 1 - seg(p, next - 0.92, next + 0.08)
         const alpha = clamp01(Math.min(alphaIn, alphaOut))
         return (
           // eslint-disable-next-line @next/next/no-img-element
           <img key={i} src={frame.src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" style={{ opacity: alpha }} />
         )
       })}
-      {/* the click-controlled layer, covering the scene only on the five-prayers step. Noon (1)
-          and afternoon (2) share the midday photo, so afternoon wears a warm, lower-sun grade —
-          otherwise the two prayers look identical and the time-of-day concept is lost. */}
-      {PRAYER_PICK.map((src, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img key={'pick' + i} className={'st-pick' + (i === 2 ? ' st-pick-asr' : '')} src={src} alt="" loading="lazy" decoding="async" style={{ opacity: onTimes && i === pick ? 1 : 0 }} />
-      ))}
       <span className="st-veil" />
     </div>
   )
@@ -97,26 +83,73 @@ export function CharityStage({ step, t }: ScrollyState) {
   return <PhotoStage p={step + t} frames={CHARITY_FRAMES} />
 }
 
-/* ---- ramadan: crescent, Medina, the revelation, the fast day, the festival ----
-   six grouped steps now (0..5); ליל אלקדר lands on step 2 ---- */
-const RAMADAN_FRAMES: Frame[] = [
-  { src: A + 'ramadan-crescent-real.jpg', from: 0 },
-  { src: A + 'medina-real.jpg', from: 1 },
-  { src: A + 'quran-night-real.jpg', from: 2 },
-  { src: A + 'iftar-real.jpg', from: 3 },
-  { src: A + 'eid-lanterns-real.jpg', from: 4 },
-  { src: A + 'ramadan-crescent-real.jpg', from: 5 },
+/* ---- ramadan, the MONTH OF THE MOON: one night sky held across the whole month while the
+   moon changes its face with the scroll. It opens blazing on ליל אלקדר (the descent of the
+   Quran), then wanes through the fast days and the last nights down to the thin crescent that
+   opens Eid. Purely a function of scroll — reversible, no photos. The text rides over it. ---- */
+export function RamadanStage({ step, t }: ScrollyState) {
+  const p = step + t
+  /* fullness wanes from a bright moon (Laylat al-Qadr) to a thin Eid crescent */
+  const frac = 1 - clamp01(p / 2) * 0.84 // 1 → ~0.16
+  const mx = 116 - frac * 132 // terminator position for the phase mask
+  const qadr = step === 0
+  return (
+    <div className="st rm-night">
+      <span className="rm-stars" aria-hidden="true" />
+      <span className={'rm-moon' + (qadr ? ' is-qadr' : '')} aria-hidden="true">
+        <span className="rm-moon-lit" style={{ ['--mx' as string]: mx + '%' }} />
+      </span>
+      <span className={'rm-qadr-tag' + (qadr ? ' is-on' : '')} aria-hidden="true">ליל אלקדר · 27</span>
+      <span className="st-veil" />
+    </div>
+  )
+}
+
+/* ---- hajj, the DAY-JOURNEY through the pilgrimage: the same immersive language as the
+   prayer day, but moving through PLACE — the reader walks the seven stations, each its own
+   full-screen scene, the scroll crossfading gently between them. The embodied rituals (the
+   seven tawaf circuits, the seven stones at Mina) live as small interactions in the copy. ---- */
+/* one scene per station (ihram is now read as prose, before the journey). These are
+   DIFFERENT places, so the dissolve between them is short — each scene stays crisp and
+   never muddies into the next. */
+const HAJJ_JOURNEY_FRAMES: Frame[] = [
+  { src: A + 'tawaf-real.jpg', from: 0 }, // טוואף — circling the Kaaba
+  { src: A + 'hajj-sai.jpg', from: 1 }, // סעי — between Safa and Marwah
+  { src: A + 'arafat-real.jpg', from: 2 }, // ערפה — the standing
+  { src: A + 'hajj-muzdalifah.jpg', from: 3 }, // מוזדליפה — night, gathering stones
+  { src: A + 'mina-real.jpg', from: 4 }, // מינא — stoning the devil
+  { src: A + 'kaaba-real.jpg', from: 5 }, // return to Mecca — the sacrifice
 ]
 
-export function RamadanStage({ step, t }: ScrollyState) {
-  const qadr = step === 2
+export function HajjJourneyStage({ step, t, tawafTurn = 0 }: ScrollyState & { tawafTurn?: number }) {
+  const p = step + t
+  /* the scene spins one-seventh of a full turn per tawaf circuit (7 → a whole 360°). While
+     it is mid-spin the rotor is zoomed so its corners always cover the screen; it settles
+     back to normal at 0 and at the completed 360°. The veil stays fixed so text never turns. */
+  /* only the tawaf scene (the first station) turns — otherwise the tilt would leak into the
+     later stations */
+  const onTawaf = step === 0
+  const rot = onTawaf ? tawafTurn * (360 / 7) : 0
+  const spinning = onTawaf && tawafTurn > 0 && tawafTurn < 7
+  const scale = spinning ? 1.55 : 1.08
   return (
-    <PhotoStage p={step + t} frames={RAMADAN_FRAMES}>
-      <div className="st-qadr" style={{ opacity: qadr ? 1 : 0 }}>
-        <b>27</b>
-        <small>ליל אלקדר</small>
+    <div className="st st-photo">
+      <div className="st-rotor" style={{ transform: `rotate(${rot}deg) scale(${scale})` }}>
+        {HAJJ_JOURNEY_FRAMES.map((frame, i) => {
+          const start = frame.from
+          const next = HAJJ_JOURNEY_FRAMES[i + 1]?.from
+          /* short, crisp cross-dissolve near each boundary — no long blend of two places */
+          const alphaIn = i === 0 ? 1 : seg(p, start - 0.22, start)
+          const alphaOut = next === undefined ? 1 : 1 - seg(p, next - 0.22, next)
+          const alpha = clamp01(Math.min(alphaIn, alphaOut))
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={i} src={frame.src} alt="" loading={i === 0 ? 'eager' : 'lazy'} decoding="async" style={{ opacity: alpha }} />
+          )
+        })}
       </div>
-    </PhotoStage>
+      <span className="st-veil" />
+    </div>
   )
 }
 

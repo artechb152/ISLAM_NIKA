@@ -1,9 +1,7 @@
 'use client'
 
-/* The chapter's opening film — the NEW single-file cut (ch6-story.mp4), with subtitles
-   rendered as the same caption strip the composite player used. The cues live in
-   film-cues.ts (generated from the narration by transcription, then hand-checked);
-   regenerating them never touches this player. */
+/* The chapter's opening film — a compact video player with subtitles (from film-cues.ts),
+   play/pause, mute + volume slider, a seek bar, elapsed time, and a fullscreen button. */
 
 import { useMemo, useRef, useState } from 'react'
 import { FILM_CUES } from './film-cues'
@@ -18,8 +16,10 @@ function formatTime(value: number): string {
 
 export default function StoryFilm() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
+  const rootRef = useRef<HTMLDivElement | null>(null)
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
+  const [volume, setVolume] = useState(1)
   const [time, setTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [finished, setFinished] = useState(false)
@@ -56,10 +56,26 @@ export default function StoryFilm() {
     setFinished(false)
   }
 
+  function changeVolume(value: number): void {
+    const video = videoRef.current
+    setVolume(value)
+    if (video) video.volume = value
+    if (value === 0) setMuted(true)
+    else if (muted) setMuted(false)
+  }
+
+  function toggleFullscreen(): void {
+    const el = rootRef.current
+    if (!el) return
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void el.requestFullscreen()
+  }
+
   const total = duration || 1
+  const shownVolume = muted ? 0 : volume
 
   return (
-    <div className="story-film" aria-label="סרטון הפתיחה של פרק 6">
+    <div className="story-film" ref={rootRef} aria-label="סרטון הפתיחה של פרק 6">
       <div className="story-film-stage">
         <video
           ref={videoRef}
@@ -68,15 +84,24 @@ export default function StoryFilm() {
           playsInline
           preload="metadata"
           muted={muted}
+          onClick={togglePlayback}
           onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)}
-          onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+          onLoadedMetadata={(event) => {
+            setDuration(event.currentTarget.duration)
+            event.currentTarget.volume = volume
+          }}
           onEnded={() => {
             setPlaying(false)
             setFinished(true)
           }}
-        />
+        >
+          {/* standard caption resource (same narration as the on-screen captions); not shown by
+              default so it never double-renders over the styled captions, but available to
+              assistive tech and any native caption UI */}
+          <track kind="captions" src="/assets/ch6-story.vtt" srcLang="he" label="עברית" />
+        </video>
         <span className="story-film-grade" aria-hidden="true" />
-        <p className="story-film-caption" aria-live="polite">
+        <p className={'story-film-caption' + (caption.includes('גבריאל') ? ' is-reveal' : '')} aria-live="polite">
           {caption}
         </p>
         {!playing && !finished && (
@@ -96,13 +121,27 @@ export default function StoryFilm() {
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
           )}
         </button>
-        <button type="button" onClick={() => setMuted((value) => !value)} aria-label={muted ? 'ביטול השתקה' : 'השתקת הסרטון'}>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d={muted ? 'M4 9v6h4l5 4V5L8 9H4m8 1 7 7m0-7-7 7' : 'M4 9v6h4l5 4V5L8 9H4m8.5-1a5 5 0 0 1 0 8'} />
-          </svg>
-        </button>
+        <span className="film-vol">
+          <button type="button" onClick={() => setMuted((value) => !value)} aria-label={muted ? 'ביטול השתקה' : 'השתקת הסרטון'}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d={muted ? 'M4 9v6h4l5 4V5L8 9H4m8 1 7 7m0-7-7 7' : 'M4 9v6h4l5 4V5L8 9H4m8.5-1a5 5 0 0 1 0 8'} />
+            </svg>
+          </button>
+          <input
+            type="range"
+            className="film-volume"
+            min="0"
+            max="1"
+            step="0.05"
+            value={shownVolume}
+            aria-label="עוצמת קול"
+            onChange={(event) => changeVolume(Number(event.target.value))}
+            style={{ ['--film-progress' as string]: `${shownVolume * 100}%` }}
+          />
+        </span>
         <input
           type="range"
+          className="film-seek"
           min="0"
           max={total}
           step="0.1"
@@ -113,6 +152,11 @@ export default function StoryFilm() {
           style={{ ['--film-progress' as string]: `${(time / total) * 100}%` }}
         />
         <span aria-hidden="true" dir="ltr">{formatTime(time)} / {formatTime(total)}</span>
+        <button type="button" className="film-fs" onClick={toggleFullscreen} aria-label="מסך מלא">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" />
+          </svg>
+        </button>
       </div>
     </div>
   )

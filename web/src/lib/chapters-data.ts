@@ -40,7 +40,7 @@ export const chapterCategories: CategoryDef[] = [
   {
     id: 'history',
     number: 1,
-    title: 'רקע היסטורי ותרבותי',
+    title: 'היסטוריה',
     icon: 'clock',
     chapters: [
       ch(1, 'ההיסטוריה של חצי האי ערב'),
@@ -50,7 +50,7 @@ export const chapterCategories: CategoryDef[] = [
   {
     id: 'muhammad',
     number: 2,
-    title: 'מוחמד וראשית האסלאם',
+    title: 'ראשית האסלאם',
     icon: 'person',
     chapters: [
       ch(3, 'ראשית חיי מוחמד'),
@@ -61,7 +61,7 @@ export const chapterCategories: CategoryDef[] = [
   {
     id: 'faith',
     number: 3,
-    title: 'אמונה, פולחן ומקורות',
+    title: 'אמונה ופולחן',
     icon: 'arabesque',
     chapters: [
       ch(6, 'חמש מצוות היסוד', {
@@ -86,7 +86,7 @@ export const chapterCategories: CategoryDef[] = [
   {
     id: 'jihad',
     number: 5,
-    title: 'ג׳האד, סמלים ומודיעין',
+    title: 'ג׳האד וסמלים',
     icon: 'shield',
     chapters: [
       ch(12, 'ג׳האד, ריבאט, ואסתשהאד'),
@@ -97,7 +97,7 @@ export const chapterCategories: CategoryDef[] = [
   {
     id: 'tools',
     number: 6,
-    title: 'כלי עזר והעמקה',
+    title: 'זמן',
     icon: 'cap',
     chapters: [
       ch(15, 'ציר הזמן בראשית האסלאם'),
@@ -107,9 +107,11 @@ export const chapterCategories: CategoryDef[] = [
 ]
 
 /* Standalone learning resources shown below the chapter categories. */
-export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' }> = [
+export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' | 'sources' | 'map' }> = [
   { id: 'glossary', title: 'מילון מונחים', icon: 'book' },
   { id: 'recommended-reading', title: 'ספרות מומלצת', icon: 'books' },
+  { id: 'sources', title: 'מקורות', icon: 'sources' },
+  { id: 'maps', title: 'מפות', icon: 'map' },
 ]
 
 export const allChapters: ChapterDef[] = chapterCategories.flatMap((c) => c.chapters)
