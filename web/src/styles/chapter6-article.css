@@ -205,7 +205,6 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .ch6-hero-media::after{content:"";position:absolute;inset:0;background:rgba(30,18,8,.55);pointer-events:none}
 .ch6-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;border:0;display:block}
 .ch6-hero-copy{position:relative;z-index:1;width:min(1200px,94%);min-width:0;margin-inline-end:auto;text-align:right;direction:rtl}
-.ch6-hero-eyebrow{display:block;font-family:var(--font-body);font-weight:600;letter-spacing:.12em;font-size:14px;color:var(--paper);opacity:.9;margin-bottom:8px}
 .ch6-hero-title{font-family:var(--font-heading);font-weight:900;font-size:clamp(42px,4.5vw,70px);line-height:1.08;letter-spacing:-.015em;color:var(--paper);margin:0}
 @media (prefers-reduced-motion:reduce){.ch6-hero-video{display:none}}
 /* the story film's title — moved out of the banner, sits above the film */
@@ -363,9 +362,9 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .map-pin::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--maroon);margin-inline-end:5px}
 .qibla-map .jerusalem{left:40%;top:19%}.qibla-map .medina{left:62%;top:42%}.qibla-map .makkah{left:60%;top:66%}
 /* the two-direction legend under the qibla map — reads the faint dashed line and the bold one */
-.qibla-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-size:13.5px}
-.qibla-legend .leg{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}
-.qibla-legend .leg::before{content:"";width:22px;flex:none}
+.qibla-legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;font-size:clamp(15px,1.4vw,17.5px)}
+.qibla-legend .leg{display:inline-flex;align-items:center;gap:10px;color:var(--muted)}
+.qibla-legend .leg::before{content:"";width:30px;flex:none}
 .qibla-legend .first::before{border-top:2px dashed rgba(76,23,4,.5)}
 .qibla-legend .second::before{border-top:4px solid var(--maroon)}
 .qibla-legend .second{color:var(--maroon-deep);font-weight:600}

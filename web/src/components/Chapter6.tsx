@@ -567,7 +567,6 @@ export default function Chapter6() {
                 </video>
               </div>
               <div className="ch6-hero-copy">
-                <span className="ch6-hero-eyebrow">פרק 6</span>
                 <h1 id="chapter-title" className="ch6-hero-title">חמש מצוות היסוד</h1>
               </div>
             </div>
