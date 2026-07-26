@@ -13,7 +13,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import {
   allChapters,
-  categoryRange,
   chapterCategories,
   secondaryItems,
   type ChapterDef,
@@ -80,7 +79,6 @@ const SEARCH_D = 'M10.5 4.5a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z M15 15l4.5 4.5'
 const CLOSE_D = 'M6 6l12 12M18 6 6 18'
 const CHECK_D = 'M20 6 9 17l-5-5'
 const ARROW_L = 'M14 6l-6 6 6 6' // ← continue / enter (RTL)
-const CHEVRON = 'M6.5 9.5 12 15l5.5-5.5'
 
 /* persistent sidebar (YouTube-style): a fixed-width panel that toggles between the full
    width and a slim icon rail via the header hamburger. Widths live in the stylesheet. */
@@ -101,7 +99,7 @@ interface ChapterStatus {
 
 export default function ChaptersScreen() {
   const [query, setQuery] = useState('')
-  const [openCats, setOpenCats] = useState<string[]>([chapterCategories[0].id])
+  const [activeTopic, setActiveTopic] = useState<string | null>(null)
   const [drawer, setDrawer] = useState(false)
   const [status, setStatus] = useState<Record<number, ChapterStatus>>({})
   const [isDesktop, setIsDesktop] = useState(true)
@@ -118,10 +116,6 @@ export default function ChaptersScreen() {
   }
 
   useEffect(() => {
-    try {
-      const oc = sessionStorage.getItem('chapters:open')
-      if (oc) setOpenCats(JSON.parse(oc) as string[])
-    } catch {}
     try {
       const st: Record<number, ChapterStatus> = {}
       for (const chp of allChapters) {
@@ -156,16 +150,6 @@ export default function ChaptersScreen() {
     }
   }, [])
 
-  function persistOpen(next: string[]): void {
-    setOpenCats(next)
-    try {
-      sessionStorage.setItem('chapters:open', JSON.stringify(next))
-    } catch {}
-  }
-  function toggleCat(id: string): void {
-    persistOpen(openCats.includes(id) ? [] : [id])
-  }
-
   /* ---------------- persistent sidebar (YouTube-style): viewport class + saved collapse ---------------- */
   useEffect(() => {
     try {
@@ -187,13 +171,6 @@ export default function ChaptersScreen() {
       } catch {}
       return next
     })
-  }
-  function expandTo(catId: string): void {
-    setCollapsed(false)
-    try {
-      localStorage.setItem('chapters:side-collapsed', '0')
-    } catch {}
-    persistOpen([catId])
   }
 
   /* ---------------- drawer: scrim, Escape, focus trap, focus return ---------------- */
@@ -241,7 +218,10 @@ export default function ChaptersScreen() {
       })
       .filter((v) => !q || v.chapters.length > 0)
   }, [q])
-  const gridChapters = useMemo(() => searchView.flatMap((v) => v.chapters), [searchView])
+  const gridChapters = useMemo(() => {
+    const cats = activeTopic ? searchView.filter((v) => v.cat.id === activeTopic) : searchView
+    return cats.flatMap((v) => v.chapters)
+  }, [searchView, activeTopic])
 
   /* the "where did you stop?" chapter: the furthest-along available chapter.
      A brand-new visitor with no progress anywhere gets null, so the strip is hidden —
@@ -291,6 +271,9 @@ export default function ChaptersScreen() {
     )
   }
 
+  /* The sidebar holds only the study tools (glossary, reading, sources, maps), moved to the
+     top, each on its own row with a divider between them. The subject categories live in the
+     chip filter under the cards, not here. */
   function menuBody() {
     return (
       <>
@@ -298,64 +281,9 @@ export default function ChaptersScreen() {
           <button type="button" className="menu-close" aria-label="סגירת התפריט" onClick={() => setDrawer(false)}>
             <Icon d={CLOSE_D} />
           </button>
-          <h2 className="menu-title">תפריט התוכן</h2>
+          <h2 className="menu-title">כלי עזר</h2>
         </div>
-        <nav className="menu-cats" aria-label="ניווט בתוכן">
-          {searchView.map(({ cat, chapters }) => {
-            const active = openCats.includes(cat.id)
-            const open = q ? true : active
-            const listId = 'cat-list-' + cat.id
-            return (
-              <section className="cat" key={cat.id}>
-                <button
-                  type="button"
-                  className={'cat-head' + (active ? ' is-active' : '')}
-                  aria-expanded={open}
-                  aria-controls={listId}
-                  title={cat.title}
-                  onClick={() => (collapsed ? expandTo(cat.id) : toggleCat(cat.id))}
-                >
-                  <span className="cat-ico">{CAT_ICON[cat.icon]}</span>
-                  <span className="cat-text">
-                    <b className="cat-name">{cat.title}</b>
-                    <span className="cat-range">{categoryRange(cat)}</span>
-                  </span>
-                  <span className={'cat-chev' + (open ? ' is-open' : '')} aria-hidden="true">
-                    <Icon d={CHEVRON} />
-                  </span>
-                </button>
-                <ul id={listId} className="cat-list" hidden={!open}>
-                  {chapters.map((chp) => {
-                    const st = status[chp.number]
-                    const label = `פרק ${chp.number} — ${chp.title}`
-                    const inner = (
-                      <>
-                        <span className={'m-dot' + (st?.completed ? ' is-done' : '')} aria-hidden="true" />
-                        <span className="m-name">{label}</span>
-                        {st?.completed && <span className="m-seen">נצפה</span>}
-                      </>
-                    )
-                    return (
-                      <li key={chp.id}>
-                        {chp.available ? (
-                          <Link className="m-item" href={chp.href!} aria-label={label} onClick={() => setDrawer(false)}>
-                            {inner}
-                          </Link>
-                        ) : (
-                          <span className="m-item is-locked" aria-label={label + ' — יעלה בקרוב'} title="הפרק יעלה בקרוב">
-                            {inner}
-                          </span>
-                        )}
-                      </li>
-                    )
-                  })}
-                </ul>
-              </section>
-            )
-          })}
-          {q && searchView.length === 0 && <p className="menu-empty">לא נמצאו פרקים התואמים לחיפוש</p>}
-        </nav>
-        <div className="menu-extra">
+        <nav className="menu-extra menu-tools" aria-label="כלי עזר והעמקה">
           {secondaryItems.map((s) => (
             <span className="m-item x-item is-locked" key={s.id} title="יעלה בקרוב">
               <span className="x-ico" aria-hidden="true">
@@ -364,7 +292,7 @@ export default function ChaptersScreen() {
               <span className="m-name">{s.title}</span>
             </span>
           ))}
-        </div>
+        </nav>
       </>
     )
   }
@@ -425,7 +353,7 @@ export default function ChaptersScreen() {
               type="button"
               ref={hamburgerRef}
               className="hamburger"
-              aria-label={isDesktop ? 'כיווץ/הרחבה של התפריט' : 'פתיחת תפריט התוכן'}
+              aria-label={isDesktop ? 'כיווץ/הרחבה של התפריט' : 'פתיחת תפריט כלי העזר'}
               aria-controls="side-menu"
               aria-expanded={isDesktop ? !collapsed : drawer}
               onClick={() => (isDesktop ? toggleCollapse() : setDrawer(true))}
@@ -446,7 +374,7 @@ export default function ChaptersScreen() {
           id="side-menu"
           ref={asideRef}
           className={'side' + (drawer ? ' is-drawer-open' : '') + (collapsed ? ' is-collapsed' : '')}
-          aria-label="תפריט התוכן"
+          aria-label="כלי עזר"
           aria-hidden={!isDesktop && !drawer ? true : undefined}
           inert={!isDesktop && !drawer}
         >
@@ -509,16 +437,35 @@ export default function ChaptersScreen() {
           )}
 
           {/* ============ all chapters ============ */}
-          <section className="sec chapters-panel" aria-labelledby="sec-all">
-            <h2 id="sec-all" className="sec-title">
-              <span>תחנות הידע</span>
-            </h2>
+          <section className="sec chapters-panel" aria-label="פרקי הלמידה">
+            {/* YouTube-style topic chips: filter the grid; "הכל" clears the filter */}
+            <div className="chip-row" role="group" aria-label="סינון לפי נושא">
+              <button
+                type="button"
+                className={'chip' + (activeTopic === null ? ' is-active' : '')}
+                aria-pressed={activeTopic === null}
+                onClick={() => setActiveTopic(null)}
+              >
+                הכל
+              </button>
+              {chapterCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={'chip' + (activeTopic === cat.id ? ' is-active' : '')}
+                  aria-pressed={activeTopic === cat.id}
+                  onClick={() => setActiveTopic((t) => (t === cat.id ? null : cat.id))}
+                >
+                  {cat.title}
+                </button>
+              ))}
+            </div>
             {gridChapters.length ? (
               <ul className="cards">{gridChapters.map((chp, idx) => card(chp, idx))}</ul>
             ) : (
               <div className="grid-empty">
                 <p>לא נמצאו פרקים התואמים לחיפוש</p>
-                <button type="button" className="empty-clear" onClick={() => setQuery('')}>
+                <button type="button" className="empty-clear" onClick={() => { setQuery(''); setActiveTopic(null) }}>
                   ניקוי החיפוש
                 </button>
               </div>

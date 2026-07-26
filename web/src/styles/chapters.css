@@ -31,8 +31,9 @@
 html,body{height:100%}
 /* clip the off-canvas drawer's off-screen position at the root so it never adds horizontal scroll */
 html{overflow-x:hidden}
-body{font-family:var(--font-body);background:var(--paper);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
-.page{position:relative;flex:1;display:flex;flex-direction:column;background-color:var(--paper);background-image:url('/background.png');background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed;background-blend-mode:multiply}
+body{font-family:var(--font-body);background:var(--panel);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+/* flat page background in the menu's own tone (no paper texture) */
+.page{position:relative;flex:1;display:flex;flex-direction:column;background:var(--panel)}
 button{font-family:var(--font-body)}
 :is(button,a,input):focus-visible{outline:2px solid var(--maroon);outline-offset:2px;border-radius:6px}
 
@@ -91,7 +92,7 @@ button{font-family:var(--font-body)}
 .sec-title > span{flex:0 0 auto}
 /* a subtle paper-grain texture washes over the "כל הפרקים" panel — multiply-blended over the
    cream so the warm tone stays and only a faint fibre shows through */
-.chapters-panel{margin-inline:0;padding:clamp(28px,3.5vw,48px) var(--content-gutter) clamp(36px,4.5vw,60px);background:transparent;border-block-end:1px solid var(--edge)}
+.chapters-panel{margin-inline:0;padding:clamp(8px,1.4vw,18px) var(--content-gutter) clamp(36px,4.5vw,60px);background:transparent;border-block-end:1px solid var(--edge)}
 
 /* ================= chapter cards (wide, short, torn photos) ================= */
 .cards{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,1.8vw,28px)}
@@ -118,6 +119,16 @@ a.card:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
 .grid-empty{padding:52px 0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;font-family:var(--font-body);font-size:17px;color:var(--ink-soft)}
 .empty-clear{all:unset;box-sizing:border-box;cursor:pointer;font-family:var(--font-body);font-weight:500;font-size:15px;color:var(--maroon);padding:10px 22px;min-height:44px;border-radius:999px;border:1px solid var(--edge);background:var(--panel);transition:.2s ease}
 .empty-clear:hover{border-color:var(--maroon);background:rgba(165,50,47,.1)}
+
+/* ================= topic chips (YouTube-style pill row under the grid title) ================= */
+.chip-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:clamp(18px,2.4vw,28px);scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+.chip-row::-webkit-scrollbar{height:6px}
+.chip-row::-webkit-scrollbar-thumb{background:rgba(87,24,32,.2);border-radius:99px}
+.chip{all:unset;box-sizing:border-box;cursor:pointer;flex:none;white-space:nowrap;padding:8px 17px;min-height:38px;display:inline-flex;align-items:center;border-radius:999px;background:var(--panel);border:1px solid var(--edge);color:var(--ink);font-family:var(--font-body);font-weight:600;font-size:14.5px;transition:background .18s ease,color .18s ease,border-color .18s ease}
+.chip:hover{border-color:var(--maroon);background:rgba(165,50,47,.08)}
+.chip:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.chip.is-active{background:var(--header);border-color:var(--header);color:var(--mat)}
+.chip.is-active:hover{background:var(--maroon);border-color:var(--maroon)}
 
 /* ================= where did you stop? ================= */
 .resume{display:flex;align-items:center;gap:clamp(14px,2vw,26px);background:var(--panel);border:1px solid var(--edge);border-radius:14px;box-shadow:0 6px 16px rgba(60,35,18,.10);padding:11px 12px 12px}
@@ -171,6 +182,11 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
 .m-seen{flex:none;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--maroon);background:rgba(165,50,47,.14);padding:2px 8px;border-radius:99px}
 .menu-empty{padding:22px 20px;font-family:var(--font-body);font-size:14px;color:var(--ink-soft);border-top:1px solid var(--edge-soft)}
 .menu-extra{flex:none;border-top:1px solid var(--edge-soft);padding:10px 20px 24px;display:flex;flex-direction:column;gap:2px}
+/* the tools ARE the whole menu (the subject categories live in the chip filter). They sit at
+   the top and fill the panel, each on its own row with a hairline divider between them. */
+.menu-extra.menu-tools{flex:1;border-top:none;gap:0;padding:8px 14px 24px}
+.menu-tools .m-item{border-radius:0;padding-block:16px;border-bottom:1px solid var(--edge-soft)}
+.menu-tools .m-item:last-child{border-bottom:none}
 .x-item{flex-direction:row-reverse;justify-content:space-between}
 .x-ico{width:23px;height:23px;color:var(--maroon);flex:none}
 .x-ico svg{width:23px;height:23px}
