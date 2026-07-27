@@ -592,7 +592,6 @@ export default function Chapter6() {
             >
               <div>
                 <article className="story-copy" aria-labelledby="story-title">
-                  <span className="story-label">הרקע לפרק</span>
                   <h2 id="story-title">{opening.drawerTitle}</h2>
                   <Paragraphs paragraphs={opening.drawerContent} />
                 </article>

@@ -3,11 +3,18 @@
 /* The chapter's opening film — a compact video player with subtitles (from film-cues.ts),
    play/pause, mute + volume slider, a seek bar, elapsed time, and a fullscreen button. */
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { FILM_CUES } from './film-cues'
 
 const SRC = '/assets/ch6-story.mp4'
 const POSTER = '/assets/ch6-story-poster.jpg'
+
+/* Opening title card, rendered as HTML over the first seconds of the film (so its FONT is ours,
+   not baked into the video). Set the FROM/TO seconds to match where it should sit in the new
+   video; set FILM_TITLE to '' to disable it. */
+const FILM_TITLE: string = 'מדינה'
+const FILM_TITLE_FROM = 0.3
+const FILM_TITLE_TO = 4.5
 
 function formatTime(value: number): string {
   const seconds = Math.max(0, Math.round(value))
@@ -23,6 +30,29 @@ export default function StoryFilm() {
   const [time, setTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [finished, setFinished] = useState(false)
+
+  /* The video is server-rendered and starts loading its metadata immediately, so
+     loadedmetadata/durationchange can fire BEFORE React hydrates and attaches the handlers —
+     the initial duration would then be missed and the seek bar/total would stay stuck. On mount
+     we read whatever duration is already known and keep listening for later updates (some MP4s
+     reveal the real length only via a later durationchange). */
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    const sync = (): void => {
+      const d = video.duration
+      if (Number.isFinite(d) && d > 0) setDuration(d)
+    }
+    sync()
+    video.addEventListener('durationchange', sync)
+    video.addEventListener('loadedmetadata', sync)
+    return () => {
+      video.removeEventListener('durationchange', sync)
+      video.removeEventListener('loadedmetadata', sync)
+    }
+  }, [])
+
+  const showTitle = FILM_TITLE !== '' && time >= FILM_TITLE_FROM && time <= FILM_TITLE_TO
 
   const caption = useMemo(() => {
     const cue = FILM_CUES.find(([start, end]) => time >= start && time <= end)
@@ -87,7 +117,6 @@ export default function StoryFilm() {
           onClick={togglePlayback}
           onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)}
           onLoadedMetadata={(event) => {
-            setDuration(event.currentTarget.duration)
             event.currentTarget.volume = volume
           }}
           onEnded={() => {
@@ -101,6 +130,11 @@ export default function StoryFilm() {
           <track kind="captions" src="/assets/ch6-story.vtt" srcLang="he" label="עברית" />
         </video>
         <span className="story-film-grade" aria-hidden="true" />
+        {FILM_TITLE && (
+          <span className={'story-film-title' + (showTitle ? ' is-on' : '')} aria-hidden="true">
+            {FILM_TITLE}
+          </span>
+        )}
         <p className={'story-film-caption' + (caption.includes('גבריאל') ? ' is-reveal' : '')} aria-live="polite">
           {caption}
         </p>
