@@ -20,6 +20,10 @@ import type { NextConfig } from 'next'
    The site is served from a project subpath, https://<user>.github.io/ISLAM_NIKA/, hence basePath. */
 const repo = 'ISLAM_NIKA'
 const isPages = process.env.GH_PAGES === 'true'
+/* GitHub Pages project site at https://<user>.github.io/ISLAM_NIKA/. basePath makes Next's own
+   assets (_next) and <Link>/router routes resolve under the subpath. The app ALSO has many
+   absolute public-asset refs ("/assets/...", incl. @font-face url() in CSS) that Next does NOT
+   rewrite; a postbuild step (scripts/fix-basepath.mjs, run when GH_PAGES=true) prefixes those. */
 const pagesConfig: Partial<NextConfig> = isPages
   ? {
       output: 'export',
