@@ -16,7 +16,22 @@ import type { NextConfig } from 'next'
       still carries "paths" so the editor and tsc resolve @/, and webpack is told separately
       here so the two agree. */
 
+/* GitHub Pages static export — active only when GH_PAGES=true (so local `npm run dev` is unchanged).
+   The site is served from a project subpath, https://<user>.github.io/ISLAM_NIKA/, hence basePath. */
+const repo = 'ISLAM_NIKA'
+const isPages = process.env.GH_PAGES === 'true'
+const pagesConfig: Partial<NextConfig> = isPages
+  ? {
+      output: 'export',
+      basePath: `/${repo}`,
+      assetPrefix: `/${repo}/`,
+      images: { unoptimized: true },
+      trailingSlash: true,
+    }
+  : {}
+
 const nextConfig: NextConfig = {
+  ...pagesConfig,
   reactStrictMode: true,
   /* there is a stray package-lock.json in C:\Users\wolft, and without this Next walks up and
      picks that as the workspace root — which is also where it then goes looking for the
