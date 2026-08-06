@@ -43,7 +43,10 @@ export const chapterCategories: CategoryDef[] = [
     title: 'היסטוריה',
     icon: 'clock',
     chapters: [
-      ch(1, 'ההיסטוריה של חצי האי ערב'),
+      ch(1, 'ההיסטוריה של חצי האי ערב', {
+        href: '/chapter1',
+        available: true,
+      }),
       ch(2, 'תרבות שבטית טרום עליית האסלאם'),
     ],
   },

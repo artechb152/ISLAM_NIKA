@@ -37,6 +37,12 @@ const pagesConfig: Partial<NextConfig> = isPages
 const nextConfig: NextConfig = {
   ...pagesConfig,
   reactStrictMode: true,
+  /* NEXT_DIST_DIR lets a production build write somewhere other than .next. A build run while
+     `npm run dev` is up otherwise rewrites the directory the dev server is serving out of, and
+     the dev server starts answering 500 to everything until it is restarted. Verifying a build
+     should not be able to take the running site down:
+       NEXT_DIST_DIR=.next-verify npm run build */
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   /* there is a stray package-lock.json in C:\Users\wolft, and without this Next walks up and
      picks that as the workspace root — which is also where it then goes looking for the
      project's own dependencies */

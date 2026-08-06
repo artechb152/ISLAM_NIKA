@@ -1,10 +1,14 @@
 /* Scroll-progress persistence for the continuous chapter-6 article.
 
    It writes the SAME store the rest of the product already reads: `ch6:v1` (the engine's
-   shape — `done` keyed by screen id out of the 44 screens, `screen` as a resume index) and
-   `islam:chapter:6 = 'done'` on completion. The chapters screen derives its percentage from
-   `done`, so a section is recorded by marking every screen id belonging to that section —
-   nothing outside this file needs to know the article replaced the screen-by-screen lesson. */
+   shape — `done` keyed by screen id out of the 44 screens, `screen` as a resume index). The
+   chapters screen derives its percentage from `done`, so a section is recorded by marking
+   every screen id belonging to that section — nothing outside this file needs to know the
+   article replaced the screen-by-screen lesson.
+
+   `islam:chapter:6 = 'done'` is NO LONGER written by finishing the article. The chapter ends
+   in its closing practice, so the flag moved to markChapterComplete() below, which the
+   practice page calls. See the comment there for why the chapters screen needed no change. */
 
 import { CH6 } from './data'
 
@@ -101,15 +105,33 @@ export function markSectionDone(domId: string): Ch6Store {
   return store
 }
 
-export function markChapterComplete(): Ch6Store {
+/* Reaching the end of the article means the CONTENT was read — it no longer means the chapter
+   is finished, because the chapter now ends in its own practice page (/chapter6/practice).
+
+   So this records everything it always did inside ch6:v1, and deliberately does NOT write
+   islam:chapter:6. The chapters screen reads both: the flag first (100%), and otherwise a
+   percentage derived from `done` which it already clamps at 99. That clamp is what makes the
+   in-between state — content read, practice pending — display correctly with no change to
+   ChaptersScreen and no change to the ch6:v1 format. */
+export function markContentComplete(): Ch6Store {
   const store = readStore()
   for (const s of CH6.screens) store.done[s.id] = true
   store.sections = [...SECTION_ORDER]
   store.completed = true
   writeStore(store)
+  return store
+}
+
+/* The chapter is done only once the closing practice is done. Called from the practice page
+   and from nowhere else. Idempotent, so a returning reader whose earlier write failed still
+   ends up marked complete. */
+export function markChapterComplete(): Ch6Store {
+  const store = markContentComplete()
   try {
     localStorage.setItem('islam:chapter:6', 'done')
-  } catch {}
+  } catch {
+    /* blocked storage must never break the chapter */
+  }
   return store
 }
 

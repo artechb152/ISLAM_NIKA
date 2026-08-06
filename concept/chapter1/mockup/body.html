@@ -1,0 +1,889 @@
+<title>פרק 1 — עולם פתוח</title>
+
+<style>
+/* ==========================================================================
+   פרק 1 · דרך הבשמים — עולם פתוח אחד
+   One continuous roamable world from Yemen to Mecca. No stations, no screen
+   switching: regions of a single map. Ravi walks beside the player; people met
+   on the road teach the chapter by speaking it; everything lands in the
+   notebook. Every content string is the source text.
+   UI mirrors the shipped game: chapter-site-header, hud-panel glass, the
+   hud-dialogue bubble anchored over the speaker (station-1 style), poi rings.
+   ========================================================================== */
+:root{
+  --maroon:#8a2733; --maroon-deep:#571820;
+  --gold:#c79a3c; --gold-soft:#e2bd72;
+  --cream:#f5ecd6; --olive:#8a9a5b;
+  --parch:#efe4c9; --ink:#3b2a17;
+  --glass:rgba(30,20,12,.86); --glass-edge:rgba(199,154,60,.55);
+
+  --bg:#f2ece2; --bg-sunk:#e4dbcb; --surface:#fbf7ef;
+  --line:rgba(60,40,28,.16);
+  --text:#241a13; --text-dim:#6b5a49;
+  --shadow:0 14px 40px rgba(50,32,16,.14);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#100d0b; --bg-sunk:#0a0807; --surface:#191411;
+    --line:rgba(226,189,114,.18);
+    --text:#f0e7d7; --text-dim:#a3917b;
+    --shadow:0 16px 44px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#100d0b; --bg-sunk:#0a0807; --surface:#191411;
+  --line:rgba(226,189,114,.18);
+  --text:#f0e7d7; --text-dim:#a3917b;
+  --shadow:0 16px 44px rgba(0,0,0,.55);
+}
+:root[data-theme="light"]{
+  --bg:#f2ece2; --bg-sunk:#e4dbcb; --surface:#fbf7ef;
+  --line:rgba(60,40,28,.16);
+  --text:#241a13; --text-dim:#6b5a49;
+  --shadow:0 14px 40px rgba(50,32,16,.14);
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--bg);color:var(--text);direction:rtl;
+  font-family:Ploni,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased
+}
+h1,h2,h3{font-family:Kedem,serif;font-weight:400;margin:0;text-wrap:balance}
+
+/* ---------- page shell ---------- */
+.wrap{max-width:1500px;margin-inline:auto;padding:0 clamp(16px,3vw,40px) 90px}
+.masthead{padding:clamp(40px,7vh,80px) 0 clamp(20px,3.5vh,36px)}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8a6a1e;margin:0 0 12px}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .eyebrow{color:var(--gold-soft)}}
+:root[data-theme="dark"] .eyebrow{color:var(--gold-soft)}
+.masthead h1{font-size:clamp(34px,5.6vw,66px);line-height:1.04;letter-spacacing:-.015em}
+.masthead h1{letter-spacing:-.015em}
+.lede{max-width:64ch;margin:18px 0 0;font-size:clamp(16px,1.5vw,19px);color:var(--text-dim)}
+.lede b{color:var(--text);font-weight:400}
+
+.sec{margin-top:clamp(34px,5.5vh,60px);display:grid;gap:18px}
+.sec h2{font-size:clamp(21px,2.5vw,29px)}
+.sec > p{margin:0;max-width:76ch;color:var(--text-dim);font-size:15px;line-height:1.62}
+.sec > p b{color:var(--text);font-weight:400}
+
+.screens{display:grid;gap:clamp(36px,5.5vh,70px);min-width:0;margin-top:clamp(26px,5vh,52px)}
+.entry{display:grid;gap:16px;scroll-margin-top:18px}
+@media (min-width:1360px){.entry{grid-template-columns:minmax(0,1fr) 290px;gap:24px;align-items:start}}
+.entry-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.entry-num{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--text-dim);letter-spacing:.1em}
+.entry-head h2{font-size:clamp(20px,2.3vw,27px)}
+.verbtag{font-size:11.5px;padding:3px 10px;border-radius:999px;white-space:nowrap;
+  border:1px solid var(--line);color:var(--text-dim);background:var(--surface)}
+
+.notes{display:grid;gap:14px;align-content:start}
+.note h3{font-family:Ploni,sans-serif;font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--text-dim);margin:0 0 5px}
+.note p{margin:0;font-size:13.8px;line-height:1.6}
+.note ul{margin:0;padding-inline-start:16px;font-size:13.4px;line-height:1.55;display:grid;gap:3px}
+.srcline{border-inline-start:2px solid var(--gold);padding-inline-start:11px;
+  font-size:13px;color:var(--text-dim);line-height:1.6}
+.srcline b{color:var(--text);font-weight:400}
+
+/* ==========================================================================
+   THE FRAME
+   ========================================================================== */
+.frame{
+  container-type:inline-size;position:relative;aspect-ratio:16/9;overflow:hidden;
+  border-radius:10px;border:1px solid var(--line);box-shadow:var(--shadow);
+  background:#0a0810;isolation:isolate
+}
+.scene{position:absolute;inset:0;z-index:1;background-size:cover;background-position:center}
+.s-title{background-image:var(--img-title)}
+.s-camp {background-image:var(--img-camp)}
+.s-gate {background-image:var(--img-gate)}
+.s-mesa {background-image:var(--img-mesa)}
+.s-load {background-image:var(--img-load)}
+.s-oasis{background-image:var(--img-oasis)}
+.s-study{background-image:var(--img-study)}
+.s-cliff{background-image:var(--img-cliff)}
+.s-mecca{background-image:var(--img-mecca)}
+.s-idols{background-image:var(--img-idols)}
+.s-yemen{background-image:var(--img-yemen)}
+.s-army {background-image:var(--img-army)}
+.s-birds{background-image:var(--img-birds)}
+.s-ridge{background-image:var(--img-ridge)}
+.s-night{background-image:var(--img-night)}
+.s-map  {background-image:var(--img-worldmap)}
+
+.grade{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(rgba(18,9,12,.42) 0%,rgba(18,9,12,.05) 22%,
+    rgba(14,7,10,.14) 52%,rgba(10,5,8,.55) 84%,rgba(8,4,7,.78) 100%)}
+.tint{position:absolute;inset:0;z-index:2;pointer-events:none;background:rgba(138,39,51,.09);mix-blend-mode:soft-light}
+.vig{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 44%,transparent 42%,rgba(8,4,7,.48) 100%)}
+.deep{position:absolute;inset:0;z-index:2;pointer-events:none;background:rgba(6,3,8,.55)}
+.lb::before,.lb::after{content:"";position:absolute;left:0;right:0;height:7cqw;background:#07050a;z-index:8}
+.lb::before{top:0}
+.lb::after{bottom:0}
+
+/* ==========================================================================
+   SITE HEADER — copied from the shipped game (chapter-site-header)
+   ========================================================================== */
+.hdr{
+  position:absolute;left:0;right:0;top:0;height:4.6cqw;z-index:9;
+  background:var(--maroon-deep);box-shadow:0 .2cqw .8cqw rgba(28,10,2,.22);
+  display:flex;align-items:center;justify-content:space-between;
+  padding-inline:2.2cqw
+}
+.logo{font-family:Kedem,serif;color:var(--cream);font-size:1.9cqw;letter-spacing:.02em}
+.hdr-btn{
+  display:inline-flex;align-items:center;gap:.5cqw;
+  color:var(--cream);font-size:1.15cqw;padding:.45cqw 1.15cqw;border-radius:99cqw;
+  border:1px solid rgba(245,236,214,.26);background:rgba(245,236,214,.1)
+}
+.hdr-btn svg{width:1.3cqw;height:1.3cqw;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ==========================================================================
+   CHARACTERS STANDING IN THE WORLD
+   ========================================================================== */
+.char{
+  position:absolute;z-index:4;transform:translate(-50%,-100%);
+  background-size:contain;background-repeat:no-repeat;background-position:bottom center;
+  filter:drop-shadow(0 .7cqw 1cqw rgba(8,4,2,.55))
+}
+.char.flip{transform:translate(-50%,-100%) scaleX(-1)}
+.c-rawi    {background-image:var(--char-rawi)}
+.c-chief   {background-image:var(--char-chief)}
+.c-merchant{background-image:var(--char-merchant)}
+.c-scholar {background-image:var(--char-scholar)}
+.c-monk    {background-image:var(--char-monk)}
+.c-envoy   {background-image:var(--char-envoy)}
+/* contact shadow on the ground */
+.char::after{
+  content:"";position:absolute;bottom:-.5cqw;left:50%;transform:translateX(-50%);
+  width:62%;height:1.6cqw;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(6,3,2,.5),transparent 70%)
+}
+
+/* ==========================================================================
+   HUD — the shipped game's glass language
+   ========================================================================== */
+.panel{
+  position:absolute;z-index:10;background:var(--glass);
+  border:1px solid var(--glass-edge);border-radius:1cqw;
+  backdrop-filter:blur(6px);color:var(--cream);
+  box-shadow:0 .5cqw 2cqw rgba(0,0,0,.35)
+}
+.hud-title{font-family:Kedem,serif;font-weight:400;color:var(--gold-soft);margin:0}
+
+/* dialogue bubble — .hud-dialogue from chapter1.css, anchored over the speaker */
+.bub{
+  position:absolute;z-index:10;transform:translate(-50%,-100%);
+  width:min(46cqw,88%);
+  display:flex;align-items:flex-start;gap:1.15cqw;padding:1.3cqw 1.6cqw;
+  background:var(--glass);border:1px solid var(--glass-edge);border-radius:1cqw;
+  backdrop-filter:blur(6px);color:var(--cream);box-shadow:0 .5cqw 2cqw rgba(0,0,0,.35)
+}
+.bub::after{
+  content:'';position:absolute;bottom:-.75cqw;inset-inline-start:3.6cqw;
+  width:1.3cqw;height:1.3cqw;background:var(--glass);
+  border-inline-end:1px solid var(--glass-edge);border-block-end:1px solid var(--glass-edge);
+  transform:rotate(45deg)
+}
+.bub .pfp{
+  width:5.1cqw;height:5.1cqw;flex:none;border-radius:.8cqw;
+  border:1px solid var(--glass-edge);background-size:cover;background-position:center 12%
+}
+.bub .body{flex:1;min-width:0}
+.bub .who{font-family:Kedem,serif;font-size:1.4cqw;color:var(--gold-soft);margin:0 0 .25cqw}
+.bub .said{margin:0;font-size:1.22cqw;line-height:1.5;color:rgba(245,236,214,.92)}
+.bub .row{display:flex;align-items:center;gap:.8cqw;margin-top:.9cqw}
+.bub .count{font-size:1cqw;color:var(--gold-soft);margin-inline-end:auto}
+.gbtn{
+  font-size:1.1cqw;color:var(--cream);border:1px solid var(--glass-edge);
+  border-radius:99cqw;padding:.4cqw 1.25cqw;white-space:nowrap
+}
+.gbtn.pri{background:var(--maroon);border-color:var(--maroon)}
+/* the voice button — narration plays per line */
+.speak{
+  width:2.9cqw;height:2.9cqw;flex:none;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--glass-edge);color:var(--gold-soft);background:rgba(0,0,0,.25)
+}
+.speak svg{width:1.5cqw;height:1.5cqw;fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* question choices the learner can ask — under the bubble */
+.asks{position:absolute;z-index:10;display:grid;gap:.45cqw;justify-items:start}
+.ask{
+  background:rgba(24,15,9,.92);border:.1cqw solid rgba(226,189,114,.45);
+  border-radius:99cqw;padding:.45cqw 1.3cqw;font-size:1.15cqw;color:rgba(244,236,219,.85);
+  display:flex;align-items:center;gap:.6cqw;white-space:nowrap
+}
+.ask.sel{border-color:var(--gold);color:#fff;background:rgba(138,39,51,.72)}
+.ask i{width:.6cqw;height:.6cqw;border-radius:50%;background:var(--gold-soft);flex:none;font-style:normal}
+
+/* poi ring + prompt */
+.ring{
+  position:absolute;transform:translate(-50%,-50%);z-index:5;width:3.2cqw;height:3.2cqw;
+  border-radius:50%;border:.14cqw solid rgba(226,189,114,.85);
+  box-shadow:0 0 1.4cqw rgba(226,189,114,.45),inset 0 0 1.2cqw rgba(226,189,114,.25)
+}
+.act{
+  position:absolute;transform:translate(-50%,-50%);z-index:7;white-space:nowrap;
+  display:flex;align-items:center;gap:.5cqw;font-size:1.15cqw;color:#f8f0de;
+  text-shadow:0 .15cqw .7cqw rgba(0,0,0,.98)
+}
+.kbd{
+  min-width:1.9cqw;height:1.9cqw;padding-inline:.4cqw;border-radius:.35cqw;flex:none;
+  display:inline-grid;place-items:center;direction:ltr;font-size:.95cqw;
+  border:.1cqw solid rgba(245,236,214,.8);background:rgba(8,5,4,.72);color:#fff
+}
+
+/* objective + saved toasts */
+.toast{
+  position:absolute;top:6.4cqw;right:2cqw;z-index:10;max-width:27cqw;
+  border-inline-start:.22cqw solid var(--gold);padding:.5cqw 1.1cqw;
+  background:linear-gradient(90deg,transparent,rgba(10,6,5,.86));
+  color:#f2e9d6;font-size:1.15cqw;line-height:1.35
+}
+.toast em{display:block;font-style:normal;font-family:Kedem,serif;font-size:1cqw;
+  letter-spacing:.1em;color:var(--gold-soft)}
+.saved{
+  position:absolute;top:6.4cqw;left:2cqw;z-index:10;display:flex;align-items:center;gap:.7cqw;
+  background:rgba(12,8,7,.9);border:.1cqw solid rgba(138,154,91,.75);border-radius:.5cqw;
+  padding:.5cqw 1.1cqw;color:#d9e8b6;font-size:1.14cqw
+}
+
+/* compass strip — open-world orientation, no minimap circle */
+.compass{
+  position:absolute;top:5.6cqw;left:50%;transform:translateX(-50%);z-index:9;
+  width:34cqw;height:2.2cqw;overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent)
+}
+.compass .tape{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  gap:2.6cqw;font-size:1cqw;color:rgba(245,236,214,.75);letter-spacing:.08em
+}
+.compass .tape b{color:var(--gold-soft);font-weight:400;font-family:Kedem,serif;font-size:1.2cqw}
+.compass .tape i{font-style:normal;opacity:.5}
+.compass::after{
+  content:"";position:absolute;top:0;bottom:0;left:50%;width:.12cqw;
+  background:var(--gold-soft)
+}
+
+/* quest line under the compass */
+.quest{
+  position:absolute;top:8.2cqw;left:50%;transform:translateX(-50%);z-index:9;
+  font-size:1.1cqw;color:rgba(245,236,214,.82);white-space:nowrap;
+  text-shadow:0 .15cqw .6cqw rgba(0,0,0,.9);display:flex;gap:.6cqw;align-items:center
+}
+.quest b{color:var(--gold-soft);font-weight:400}
+
+/* narration line (the narrator voice, no box) */
+.sub{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:3.2cqw;z-index:9;
+  width:min(64cqw,88%);margin:0;text-align:center;
+  font-size:1.45cqw;line-height:1.5;color:#f6eddb;
+  text-shadow:0 .2cqw .9cqw rgba(0,0,0,.98),0 0 2.6cqw rgba(0,0,0,.85)
+}
+.sub .nvoice{
+  display:inline-flex;align-items:center;gap:.5cqw;margin-inline-end:.7cqw;
+  color:var(--gold-soft);font-size:1.05cqw;vertical-align:middle
+}
+
+/* title card */
+.tcard{position:absolute;inset:0;z-index:9;display:grid;place-content:center;justify-items:center;
+  gap:.7cqw;text-align:center}
+.tc-eyebrow{margin:0;font-size:1.1cqw;letter-spacing:.42em;color:var(--gold-soft);
+  text-transform:uppercase;text-indent:.42em}
+.tc-title{font-family:Kedem,serif;font-size:4.6cqw;color:#fdf8ec;margin:0;line-height:1.06;
+  max-width:70cqw;text-shadow:0 .3cqw 2.2cqw rgba(0,0,0,.9)}
+.tc-rule{width:15cqw;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.tc-sub{margin:0;font-size:1.2cqw;color:rgba(245,236,214,.86);line-height:1.5;max-width:56cqw}
+
+/* world map overlay (M) */
+.mappins{position:absolute;inset:0;z-index:5}
+.mpin{
+  position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:.2cqw
+}
+.mpin .dot{width:1.15cqw;height:1.15cqw;border-radius:50%;background:var(--gold);
+  border:.14cqw solid #fff8e8;box-shadow:0 0 1cqw rgba(199,154,60,.9)}
+.mpin.seen .dot{background:var(--olive);box-shadow:0 0 .8cqw rgba(138,154,91,.8)}
+.mpin.here .dot{background:#fff;box-shadow:0 0 1.4cqw #fff}
+.mpin .lb2{
+  font-family:Kedem,serif;font-size:1.15cqw;color:#4a3416;white-space:nowrap;
+  background:rgba(245,236,214,.85);border:1px solid rgba(90,60,20,.35);
+  border-radius:.4cqw;padding:.1cqw .7cqw
+}
+.mroute{position:absolute;inset:0;z-index:4;pointer-events:none}
+.mroute svg{width:100%;height:100%;overflow:visible}
+
+/* notebook */
+.nb{position:absolute;inset:0;z-index:9;padding:3.4cqw 4cqw;display:grid}
+.nbpage{
+  background:var(--parch);color:var(--ink);border-radius:.5cqw;border:1px solid #c3ab7d;
+  box-shadow:0 1.6cqw 4.5cqw rgba(0,0,0,.7);padding:1.6cqw 2cqw;
+  display:grid;gap:.9cqw;align-content:start;overflow:hidden
+}
+.nbhead{display:flex;align-items:baseline;justify-content:space-between;gap:1cqw;
+  border-bottom:1px solid rgba(122,90,28,.3);padding-bottom:.6cqw}
+.nbhead h4{font-family:Kedem,serif;font-size:1.9cqw;margin:0;color:#5d3b18;font-weight:400}
+.nbtabs{display:flex;gap:.45cqw;font-size:1cqw}
+.nbtab{border:1px solid rgba(122,90,28,.42);border-radius:99cqw;padding:.18cqw .9cqw;color:#7a5a1c;white-space:nowrap}
+.nbtab.on{background:#7a5a1c;color:var(--parch);border-color:#7a5a1c}
+.nbgrid{display:grid;gap:.65cqw;grid-template-columns:1fr 1fr}
+.nbcard{display:grid;grid-template-columns:auto 1fr;gap:.75cqw;background:rgba(122,90,28,.08);
+  border-radius:.4cqw;padding:.65cqw .85cqw;align-items:start}
+.nbface{width:3cqw;height:3cqw;border-radius:50%;background-size:cover;background-position:center 12%;flex:none}
+.nbwho{font-family:Kedem,serif;font-size:1.06cqw;color:#8a6a2a;margin:0 0 .18cqw}
+.nbtxt{margin:0;font-size:1.06cqw;line-height:1.42}
+.nbfoot{font-size:1cqw;color:#7a5a1c;display:flex;justify-content:space-between;gap:1cqw;
+  border-top:1px solid rgba(122,90,28,.28);padding-top:.5cqw}
+
+.thread{position:absolute;left:0;right:0;bottom:0;height:.28cqw;z-index:9;background:rgba(245,236,214,.16)}
+.thread i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-soft))}
+
+/* ---------- beat strip ---------- */
+.strip{display:grid;gap:14px}
+@media (min-width:820px){.strip{grid-template-columns:1fr 1fr}}
+.strip .cell{display:grid;gap:8px}
+.strip .cap{font-size:12.5px;color:var(--text-dim);line-height:1.45}
+.strip .cap b{color:var(--text);font-weight:400;font-family:Kedem,serif;font-size:14.5px}
+
+/* ---------- region ribbon ---------- */
+.ribbon{border:1px solid var(--line);border-radius:10px;background:var(--bg-sunk);padding:15px;overflow-x:auto}
+.rtrack{display:flex;gap:7px;min-width:min-content;align-items:stretch}
+.rnode{width:118px;flex:none;display:grid;gap:5px;text-decoration:none;color:inherit;align-content:start}
+.rnode:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:5px}
+.rthumb{aspect-ratio:16/9;border-radius:4px;background-size:cover;background-position:center;
+  position:relative;box-shadow:0 2px 8px rgba(0,0,0,.28)}
+.rname{font-size:11.4px;line-height:1.25;color:var(--text-dim)}
+.rnode:hover .rname{color:var(--text)}
+.rwho{font-size:10.5px;color:var(--gold-soft)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .rwho{color:#8a6a1e}}
+:root[data-theme="light"] .rwho{color:#8a6a1e}
+.rgap{flex:none;align-self:center;color:var(--text-dim);font-size:13px;opacity:.55;padding-inline:1px}
+
+/* ---------- coverage ---------- */
+.coverage{margin-top:clamp(46px,7vh,88px)}
+.coverage h2{font-size:clamp(22px,2.6vw,30px);margin-bottom:8px}
+.coverage > p{margin:0 0 20px;color:var(--text-dim);font-size:14.5px;max-width:72ch}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:13.6px;background:var(--surface)}
+th,td{text-align:right;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:Ploni,sans-serif;font-weight:400;font-size:11.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text-dim);background:var(--bg-sunk);position:sticky;top:0}
+tbody tr:last-child td{border-bottom:0}
+td.sec2{font-family:Kedem,serif;font-size:15px;white-space:nowrap}
+td.who{white-space:nowrap;color:var(--text-dim)}
+td.scr{white-space:nowrap;color:var(--text-dim)}
+
+.colophon{margin-top:clamp(46px,7vh,88px);padding-top:26px;border-top:1px solid var(--line);
+  color:var(--text-dim);font-size:14px;display:grid;gap:10px}
+.colophon b{color:var(--text);font-weight:400}
+.colophon .flag{border-inline-start:2px solid var(--maroon);padding-inline-start:12px}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">פרק ראשון · חצי האי ערב טרום תקופת האסלאם</p>
+    <h1>דרך הבשמים · עולם פתוח</h1>
+    <p class="lede">
+      <b>עולם אחד רציף, מתימן ועד מכה.</b> אין תחנות ואין מעברי מסך — הולכים על הדרך,
+      והדרך עוברת דרך כל מה שהטקסט מלמד. רָאוִי הולך לצידכם ומכוון; אנשים שפוגשים בדרך
+      מלמדים את החומר בדיבור, עם קריינות; וכל מה שנאמר נרשם למחברת. כל משפט שנאמר
+      במשחק הוא הטקסט הלימודי.
+    </p>
+  </header>
+
+  <!-- ============ THE WORLD ============ -->
+  <section class="sec">
+    <h2>העולם — אזור אחד נמשך לתוך הבא</h2>
+    <p>
+      שבעה אזורים על ציר דרום–צפון, בלי מסכי טעינה ביניהם: יוצאים מהרמות של תימן, עולים
+      דרך תחנת הגבול והמעבר הצר, נכנסים לנווה המדבר של ית׳רב, חולפים על המנזר, ומגיעים
+      למכה. <b>הסדר הגאוגרפי הוא סדר הטקסט</b> — לכן המסע מלמד אותו נכון גם בלי כפייה.
+    </p>
+    <div class="ribbon">
+      <div class="rtrack">
+        <span class="rnode"><span class="rthumb" style="background-image:var(--img-yemen)"></span><span class="rname">רמות תימן</span><span class="rwho">רָאוִי · הפתיחה</span></span>
+        <span class="rgap">←</span>
+        <span class="rnode"><span class="rthumb" style="background-image:var(--img-camp)"></span><span class="rname">מחנה הלילה</span><span class="rwho">רָאוִי · ג׳אהליה</span></span>
+        <span class="rgap">←</span>
+        <span class="rnode"><span class="rthumb" style="background-image:var(--img-gate)"></span><span class="rname">תחנת הגבול</span><span class="rwho">שליח האימפריה</span></span>
+        <span class="rgap">←</span>
+        <span class="rnode"><span class="rthumb" style="background-image:var(--img-mesa)"></span><span class="rname">המעבר הצר</span><span class="rwho">ראש השבט</span></span>
+        <span class="rgap">←</span>
+        <span class="rnode"><span class="rthumb" style="background-image:var(--img-oasis)"></span><span class="rname">ית׳רב</span><span class="rwho">הסוחר היהודי</span></span>
+        <span class="rgap">←</span>
+        <span class="rnode"><span class="rthumb" style="background-image:var(--img-cliff)"></span><span class="rname">המנזר</span><span class="rwho">הנזיר</span></span>
+        <span class="rgap">←</span>
+        <span class="rnode"><span class="rthumb" style="background-image:var(--img-mecca)"></span><span class="rname">מכה</span><span class="rwho">הסוחר · רָאוִי</span></span>
+      </div>
+    </div>
+    <p>
+      <b>חופש עם עמוד שדרה.</b> בתוך כל אזור מסתובבים חופשי — אפשר לדבר עם אנשים בכל
+      סדר, לחזור, או סתם ללכת. קדימה על הציר אפשר רק כשראוי סיים את מה שיש באזור:
+      השיירה פשוט לא זזה בלעדיו. אחורה — תמיד פתוח.
+    </p>
+  </section>
+
+  <main class="screens">
+
+    <!-- ============ 0 · OPENING ============ -->
+    <article class="entry" id="s0">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">00</span>
+          <h2>פתיחה</h2>
+          <span class="verbtag">קולנועי</span>
+        </div>
+        <div class="frame lb">
+          <div class="scene s-title"></div>
+          <div class="grade"></div><div class="tint"></div><div class="vig"></div>
+          <div class="tcard">
+            <p class="tc-eyebrow">פרק ראשון</p>
+            <h3 class="tc-title">ההיסטוריה של חצי האי ערב טרום תקופת האסלאם</h3>
+            <span class="tc-rule"></span>
+            <p class="tc-sub">
+              כדי להבין כיצד התפתחה דת האסלאם, ואיך רעיון המונותאיזם עלה בדעתו של מוחמד,
+              יש להבין את החיים בחצי האי ערב לפני כן.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>הרגע</h3>
+          <p>קריין פותח (קול מוקלט) על נסיעת השיירה, הכותרת עולה ונעלמת, והשליטה עוברת ללומד. אין תפריט.</p>
+        </div>
+        <p class="srcline"><b>מקור:</b> פסקת הפתיחה של הטקסט, כלשונה, בקול הקריין.</p>
+      </div>
+    </article>
+
+    <!-- ============ 1 · FREE ROAM ============ -->
+    <article class="entry" id="s1">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">01</span>
+          <h2>הליכה חופשית · ראוי לצידך</h2>
+          <span class="verbtag">העולם הפתוח</span>
+        </div>
+        <div class="frame">
+          <div class="scene s-mesa"></div>
+          <div class="grade"></div><div class="tint"></div><div class="vig"></div>
+          <div class="hdr">
+            <span class="logo">אסלאם</span>
+            <span class="hdr-btn"><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4zM5 4v14M9 8h6M9 12h6"/></svg>מחברת המסע</span>
+          </div>
+
+          <div class="compass"><div class="tape">
+            <i>·</i><span>דרום</span><i>·</i><b>צפון־מזרח</b><i>·</i><span>צפון</span><i>·</i>
+          </div></div>
+          <div class="quest"><b>◈</b> מצאו את מי שחוסם את המעבר</div>
+
+          <!-- Ravi walks beside the player -->
+          <div class="char c-rawi" style="left:30%;top:88%;width:10.5cqw;aspect-ratio:.47"></div>
+          <!-- the chief stands ahead, marked -->
+          <div class="char c-chief flip" style="left:71%;top:76%;width:8cqw;aspect-ratio:.47"></div>
+          <div class="ring" style="left:71%;top:58%"></div>
+          <div class="act" style="left:71%;top:52%"><span class="kbd">E</span> לדבר</div>
+
+          <p class="sub">
+            <span class="nvoice">🕪 רָאוִי</span>
+            האנשים האלה על הרכס — הם לא שודדים. תקשיב להם.
+          </p>
+          <div class="thread"><i style="width:24%"></i></div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>מה רואים</h3>
+          <p>גוף שלישי, ראוי הולך לצידך בעולם. מי שאפשר לדבר איתו עומד בסצנה כדמות מלאה עם טבעת. המצפן למעלה — לא מיני־מפה: בעולם פתוח הכיוון חשוב מהתרשים.</p>
+        </div>
+        <div class="note">
+          <h3>הקו־קווסט</h3>
+          <p>שורת המשימה מתחת למצפן היא הכוונה רכה. אין חץ על הקרקע ואין GPS — ראוי מכוון בקול.</p>
+        </div>
+        <p class="srcline"><b>ההאדר</b> הוא ההאדר של האתר אחד־לאחד: לוגו, „מחברת המסע“, אותם צבעים — כמו בתחנה שכבר בנויה.</p>
+      </div>
+    </article>
+
+    <!-- ============ 2 · DIALOGUE ============ -->
+    <article class="entry" id="s2">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">02</span>
+          <h2>שיחה · הבועה של תחנה 1</h2>
+          <span class="verbtag">שיחה + קריינות</span>
+        </div>
+        <div class="frame">
+          <div class="scene s-mesa"></div>
+          <div class="grade"></div><div class="tint"></div><div class="vig"></div>
+          <div class="hdr">
+            <span class="logo">אסלאם</span>
+            <span class="hdr-btn"><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4zM5 4v14M9 8h6M9 12h6"/></svg>מחברת המסע</span>
+          </div>
+
+          <!-- both characters stand in the world; bubble anchors over the chief -->
+          <div class="char c-rawi" style="left:22%;top:92%;width:9.5cqw;aspect-ratio:.47"></div>
+          <div class="char c-chief flip" style="left:66%;top:90%;width:12cqw;aspect-ratio:.47"></div>
+
+          <div class="bub" style="left:58%;top:47%">
+            <span class="pfp" style="background-image:var(--face-chief)"></span>
+            <div class="body">
+              <p class="who">ראש השבט</p>
+              <p class="said">
+                במאות הראשונות לספירה חיינו כאן שבטים נוודים, ואנחנו בני חסות של
+                האימפריות. נדדנו צפונה מאזור תימן, ואנחנו המתווכים ביניהן — שומרים
+                על נתיבי הסחר.
+              </p>
+              <div class="row">
+                <span class="speak"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+                <span class="count">1 / 3</span>
+                <span class="gbtn pri">המשך ←</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="asks" style="left:8%;bottom:34cqw;bottom:30%">
+            <span class="ask sel"><i></i>ולמי אתם עובדים?</span>
+            <span class="ask"><i></i>מה עובר בדרך הזאת?</span>
+          </div>
+
+          <div class="thread"><i style="width:26%"></i></div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>הבועה</h3>
+          <p>אותה בועת זכוכית של תחנה 1 — דיוקן מרובע, שם בזהב, זנב שמצביע על הדובר, כפתור קול לכל שורה, ומונה שורות. מעוגנת מעל הראש של מי שמדבר, לא בתחתית המסך.</p>
+        </div>
+        <div class="note">
+          <h3>השאלות</h3>
+          <p>הכפתורים משמאל הם שאלות שהלומד בוחר לשאול. אף אחת לא שגויה — הן קובעות את סדר החשיפה, וכל תשובה נרשמת.</p>
+        </div>
+        <p class="srcline"><b>מקור:</b> „במאות הראשונות לספירה חיו שבטים נוודים… בני חסות של האימפריות“ · „נדדו צפונה מאזור תימן… מתווכים… שמירה על נתיבי הסחר.“</p>
+      </div>
+    </article>
+
+    <!-- ============ 3 · RAVI ADDS + SAVED ============ -->
+    <article class="entry" id="s3">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">03</span>
+          <h2>ראוי מחדד · והמחברת נכתבת</h2>
+          <span class="verbtag">הלולאה</span>
+        </div>
+        <div class="frame">
+          <div class="scene s-mesa"></div>
+          <div class="grade"></div><div class="tint"></div><div class="vig"></div>
+          <div class="hdr">
+            <span class="logo">אסלאם</span>
+            <span class="hdr-btn"><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4zM5 4v14M9 8h6M9 12h6"/></svg>מחברת המסע</span>
+          </div>
+
+          <div class="saved"><span>✓</span> נרשם במחברת</div>
+
+          <div class="char c-rawi" style="left:34%;top:92%;width:11.5cqw;aspect-ratio:.47"></div>
+          <div class="char c-chief flip" style="left:72%;top:90%;width:10.5cqw;aspect-ratio:.47;opacity:.85"></div>
+
+          <div class="bub" style="left:41%;top:49%">
+            <span class="pfp" style="background-image:var(--face-rawi)"></span>
+            <div class="body">
+              <p class="who">רָאוִי</p>
+              <p class="said">
+                נרשום מדויק: שבט <b>גסאן</b> — בן חסות של הביזנטית. שבט <b>לח׳ם</b> —
+                של הסאסאנית־פרסית.
+              </p>
+              <div class="row">
+                <span class="speak"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+                <span class="gbtn">סגור</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="thread"><i style="width:28%"></i></div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>הלולאה כולה</h3>
+          <p>לדבר ← ראוי מחדד ← „נרשם במחברת“. ההבחנה בין מסורת למחקר היא תמיד בפיו של ראוי — „כך מספרת המסורת“, „שים לב שאמרתי אולי“ — לא תגית על המסך.</p>
+        </div>
+        <p class="srcline"><b>מקור:</b> „שבט גסאן היה בן חסות של האימפריה הביזנטית, ושבט לח׳ם היה של זו הסאסאנית־פרסית.“</p>
+      </div>
+    </article>
+
+    <!-- ============ 4 · WORLD MAP ============ -->
+    <article class="entry" id="s4">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">M</span>
+          <h2>מפת העולם</h2>
+          <span class="verbtag">נפתחת ב־M</span>
+        </div>
+        <div class="frame">
+          <div class="scene s-map"></div>
+          <div class="mroute">
+            <svg viewBox="0 0 160 90" preserveAspectRatio="none">
+              <path d="M118 78 C112 66 104 60 96 54 C86 47 78 42 74 34 C70 27 66 22 60 16"
+                    fill="none" stroke="rgba(90,50,20,.65)" stroke-width=".7" stroke-dasharray="1.6 1.6"/>
+            </svg>
+          </div>
+          <div class="mappins">
+            <div class="mpin seen" style="left:74%;top:86%"><span class="dot"></span><span class="lb2">רמות תימן</span></div>
+            <div class="mpin seen" style="left:62%;top:62%"><span class="dot"></span><span class="lb2">תחנת הגבול</span></div>
+            <div class="mpin here" style="left:47%;top:41%"><span class="dot"></span><span class="lb2">המעבר הצר</span></div>
+            <div class="mpin" style="left:46%;top:26%"><span class="dot"></span><span class="lb2">ית׳רב</span></div>
+            <div class="mpin" style="left:39%;top:18%"><span class="dot"></span><span class="lb2">המנזר</span></div>
+            <div class="mpin" style="left:36%;top:9%"><span class="dot"></span><span class="lb2">מכה</span></div>
+          </div>
+          <div class="toast" style="top:2cqw"><em>מפה</em>לחיצה על אזור שהושלם — חזרה אליו</div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>מפה, לא תפריט</h3>
+          <p>קלף מצויר של הדרך כולה. זהוב — עוד לא ביקרתם; ירוק — הושלם; לבן — אתם כאן. אפשר לחזור לכל אזור שהושלם.</p>
+        </div>
+        <div class="note">
+          <h3>אין דילוג קדימה</h3>
+          <p>אזורים שטרם הגעתם אליהם מסומנים אבל לא לחיצים — אל העתיד הולכים ברגל, עם ראוי.</p>
+        </div>
+        <p class="srcline"><b>הערה:</b> המפה מצוירת בלי כיתוב — השמות שכבות HTML, כמו שאר הממשק, כדי שאפשר לתקן טקסט בלי לצייר מחדש.</p>
+      </div>
+    </article>
+
+    <!-- ============ 5 · YATHRIB ============ -->
+    <article class="entry" id="s5">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">05</span>
+          <h2>ית׳רב · שיחה בעולם</h2>
+          <span class="verbtag">אזור רביעי</span>
+        </div>
+        <div class="frame">
+          <div class="scene s-oasis"></div>
+          <div class="grade"></div><div class="tint"></div><div class="vig"></div>
+          <div class="hdr">
+            <span class="logo">אסלאם</span>
+            <span class="hdr-btn"><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4zM5 4v14M9 8h6M9 12h6"/></svg>מחברת המסע</span>
+          </div>
+
+          <div class="char c-scholar flip" style="left:63%;top:94%;width:11.5cqw;aspect-ratio:.47"></div>
+          <div class="char c-rawi" style="left:24%;top:95%;width:10cqw;aspect-ratio:.47"></div>
+
+          <div class="bub" style="left:55%;top:47%">
+            <span class="pfp" style="background-image:var(--face-scholar)"></span>
+            <div class="body">
+              <p class="who">הסוחר היהודי</p>
+              <p class="said">
+                אנחנו כאן לכל הפחות מאז המאה הראשונה לספירה, אחרי חורבן בית המקדש השני
+                בידי הרומאים. בח׳יבר, בתימא, וכאן בית׳רב. חיים בשלום עם שכנינו — מסחר,
+                ואפילו שירה משותפת. אבל כל שבט חי עם החוקים והמנהגים שלו.
+              </p>
+              <div class="row">
+                <span class="speak"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+                <span class="count">2 / 4</span>
+                <span class="gbtn pri">המשך ←</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="asks" style="left:6%;bottom:30%">
+            <span class="ask sel"><i></i>מאין הגעתם לכאן?</span>
+            <span class="ask"><i></i>ומה אתם מצפים שיקרה?</span>
+          </div>
+
+          <div class="thread"><i style="width:52%"></i></div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>אותה לולאה, אזור אחר</h3>
+          <p>השאלה השנייה מביאה את הציפייה למשיח וקוראן 2:94, וראוי סוגר עם „ית׳רב תכונה לימים אלמדינה“ ועם ההסתייגות „לא מן הנמנע ש…“ על תקוות מוחמד.</p>
+        </div>
+        <p class="srcline"><b>מקור:</b> „מקובל לומר כי יהודים חיו… מאז המאה הראשונה לספירה, לאחר חורבן בית המקדש השני בידי הרומאים, ובעיקר ביישובים כמו ח׳יבר, תימא וית׳רב“ · „חיו בשלום עם שכניהם הערבים… כמו שירה, אך כל שבט חי עם החוקים והמנהגים שלו.“</p>
+      </div>
+    </article>
+
+    <!-- ============ 6 · NOTEBOOK ============ -->
+    <article class="entry" id="s6">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">J</span>
+          <h2>מחברת המסע</h2>
+          <span class="verbtag">התוצר</span>
+        </div>
+        <div class="frame">
+          <div class="scene s-night"></div>
+          <div class="deep"></div>
+          <div class="nb">
+            <div class="nbpage">
+              <div class="nbhead">
+                <h4>מחברת המסע</h4>
+                <div class="nbtabs">
+                  <span class="nbtab on">הכול</span>
+                  <span class="nbtab">לפי אזור</span>
+                  <span class="nbtab">לפי דמות</span>
+                  <span class="nbtab">פסוקים</span>
+                </div>
+              </div>
+              <div class="nbgrid">
+                <div class="nbcard">
+                  <span class="nbface" style="background-image:var(--face-rawi)"></span>
+                  <div>
+                    <p class="nbwho">רָאוִי · מחנה הלילה</p>
+                    <p class="nbtxt">התקופה מכונה ג׳אהליה — הבערות והברבריות. המידע דל, ורובו מהמסורת המוסלמית — בעירבון מוגבל.</p>
+                  </div>
+                </div>
+                <div class="nbcard">
+                  <span class="nbface" style="background-image:var(--face-envoy)"></span>
+                  <div>
+                    <p class="nbwho">שליח האימפריה · תחנת הגבול</p>
+                    <p class="nbtxt">הביזנטית — יורשת רומא, נוצרית אורתודוקסית. הסאסאנית — קטסיפון על החידקל; דת האליטה זורואסטרית, אל טוב ואל רע.</p>
+                  </div>
+                </div>
+                <div class="nbcard">
+                  <span class="nbface" style="background-image:var(--face-chief)"></span>
+                  <div>
+                    <p class="nbwho">ראש השבט · המעבר הצר</p>
+                    <p class="nbtxt">בני חסות: גסאן — ביזנטית, לח׳ם — סאסאנית. מתווכים ששומרים על נתיבי הסחר.</p>
+                  </div>
+                </div>
+                <div class="nbcard">
+                  <span class="nbface" style="background-image:var(--face-scholar)"></span>
+                  <div>
+                    <p class="nbwho">הסוחר היהודי · ית׳רב</p>
+                    <p class="nbtxt">כאן מאז חורבן בית שני. ח׳יבר, תימא, ית׳רב — שתכונה אלמדינה. קוראן 2:94 בלשונית הפסוקים.</p>
+                  </div>
+                </div>
+                <div class="nbcard">
+                  <span class="nbface" style="background-image:var(--face-monk)"></span>
+                  <div>
+                    <p class="nbwho">הנזיר · המנזר</p>
+                    <p class="nbtxt">אקסום בדרום, ארם נהריים בצפון, פרס נשארה זורואסטרית. צניעות, חסידות, פרישות, צדקה.</p>
+                  </div>
+                </div>
+                <div class="nbcard">
+                  <span class="nbface" style="background-image:var(--face-merchant)"></span>
+                  <div>
+                    <p class="nbwho">הסוחר · מכה</p>
+                    <p class="nbtxt">האבן השחורה — אלחג׳ר אלאסוד — בפינת הכעבה. הבל, הגורלות, ו„אולי שיבוש בעל“ — כך אמר ראוי.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="nbfoot">
+                <span>נרשמו 17 מתוך 26 רשומות</span>
+                <span>J לסגירה</span>
+              </div>
+            </div>
+          </div>
+          <div class="thread"><i style="width:64%"></i></div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>התוצר של הלומד</h3>
+          <p>כל שיחה נרשמת לבד — מי אמר, איפה, מה. בסוף הפרק המחברת מכילה את כל הטקסט הלימודי, ממוין, עם הפסוקים בלשונית משלהם.</p>
+        </div>
+        <p class="srcline"><b>הערה:</b> אין במחברת מידע שלא נשמע במשחק.</p>
+      </div>
+    </article>
+
+    <!-- ============ 7 · ABRAHA FINALE ============ -->
+    <article class="entry" id="s7">
+      <div>
+        <div class="entry-head">
+          <span class="entry-num">07</span>
+          <h2>סיפור אברהה · השיא</h2>
+          <span class="verbtag">קולנועי בתוך העולם</span>
+        </div>
+        <div class="strip">
+          <div class="cell">
+            <div class="frame">
+              <div class="scene s-mecca"></div>
+              <div class="grade"></div><div class="tint"></div><div class="vig"></div>
+              <div class="hdr">
+                <span class="logo">אסלאם</span>
+                <span class="hdr-btn"><svg viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4zM5 4v14M9 8h6M9 12h6"/></svg>מחברת המסע</span>
+              </div>
+              <div class="char c-rawi" style="left:26%;top:93%;width:10.5cqw;aspect-ratio:.47"></div>
+              <div class="bub" style="left:33%;top:50%">
+                <span class="pfp" style="background-image:var(--face-rawi)"></span>
+                <div class="body">
+                  <p class="who">רָאוִי</p>
+                  <p class="said">
+                    המסורת המוסלמית מספרת: אברהה, ששלט בתימן ובחבש, הצפין לעבר מכה —
+                    ותכנן להרוס את הכעבה ולבנות שם כנסייה נוצרית.
+                  </p>
+                  <div class="row">
+                    <span class="speak"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+                    <span class="gbtn pri">המשך ←</span>
+                  </div>
+                </div>
+              </div>
+              <div class="thread"><i style="width:86%"></i></div>
+            </div>
+            <p class="cap"><b>בתוך העולם</b> ראוי מספר את הסיפור מול הכעבה, במילות הטקסט — „המסורת המוסלמית מספרת“.</p>
+          </div>
+          <div class="cell">
+            <div class="frame lb">
+              <div class="scene s-birds"></div>
+              <div class="grade"></div><div class="tint"></div><div class="vig"></div>
+              <p class="sub" style="bottom:9.2cqw">
+                <span class="nvoice">🕪 קריין</span>
+                חרף התנגדותו של עבד אל־מטלב, סבו של מוחמד, התקרב אברהה עם צבאו.
+                וכשהגיע לשערי מכה — עטו עליו ציפורים, ובמקורן אבני חמר.
+              </p>
+            </div>
+            <p class="cap"><b>הקטע הקולנועי</b> העולם מחשיך לרגע, פסי קולנוע, הקריין קורא את הטקסט. אחריו — סורה 105 וההדהוד המודרני, מפי ראוי, ונרשם.</p>
+          </div>
+        </div>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>שיא בלי המצאות</h3>
+          <p>אין נאום של עבד אל־מטלב ואין פינוי עיר — רק מה שהטקסט אומר, מחולק בין ראוי (המסורת), הקריין (האירוע), והמחברת (סורה 105, אלצ׳יף, „אל־עצף אל־מאכול“, 2014).</p>
+        </div>
+        <p class="srcline"><b>מקור:</b> „המסורת המוסלמית מספרת כי אברהה… תכנן להרוס את הכעבה ולבנות שם כנסייה נוצרית“ · „חרף התנגדותו של עבד אל־מטלב… כאשר הגיע לשערי מכה, עטו עליו ציפורים…“</p>
+      </div>
+    </article>
+
+  </main>
+
+  <!-- ============ COVERAGE ============ -->
+  <section class="coverage" id="cov">
+    <h2>טבלת כיסוי</h2>
+    <p>כל סעיף בטקסט, מי אומר אותו, ובאיזה אזור בעולם. אין שורה ריקה.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>סעיף בטקסט</th><th>מה נאמר בו</th><th>מי אומר</th><th>אזור</th></tr></thead>
+        <tbody>
+          <tr><td class="sec2">פתיחה</td><td>מטרת הפרק; ג׳אהליה; „עירבון מוגבל“</td><td class="who">קריין · רָאוִי</td><td class="scr">רמות תימן · המחנה</td></tr>
+          <tr><td class="sec2">שתי האימפריות</td><td>ביזנטית, סאסאנית, קטסיפון, זורואסטריות ודואליות</td><td class="who">שליח האימפריה · רָאוִי</td><td class="scr">תחנת הגבול</td></tr>
+          <tr><td class="sec2">השבטים</td><td>נוודים, בני חסות, מתווכים; גסאן ← ביזנטית, לח׳ם ← סאסאנית</td><td class="who">ראש השבט · רָאוִי</td><td class="scr">המעבר הצר</td></tr>
+          <tr><td class="sec2">השבטים</td><td>משי ותבלינים; החג׳אז חבוי; חלחול איטי ומדורג</td><td class="who">הסוחר · רָאוִי</td><td class="scr">המעבר הצר · הדרך</td></tr>
+          <tr><td class="sec2">היהדות</td><td>מאז חורבן בית שני; ח׳יבר, תימא, ית׳רב/אלמדינה; שלום ומסחר לצד חוקים נפרדים; בדרום מהמאה החמישית</td><td class="who">הסוחר היהודי · רָאוִי</td><td class="scr">ית׳רב</td></tr>
+          <tr><td class="sec2">היהדות</td><td>הייחוד והעליונות; קוראן 2:94; הציפייה למשיח; תקוות מוחמד („לא מן הנמנע“)</td><td class="who">הסוחר היהודי · רָאוִי</td><td class="scr">ית׳רב · בית המדרש</td></tr>
+          <tr><td class="sec2">הנצרות</td><td>אקסום; ארם נהריים — בין אלראפדין; פרס הזורואסטרית; הליכות הנזירים; „רוב הריטואלים… מקורם בדתות שקדמו“; קוראן 5:82 ומשלחת חבש</td><td class="who">הנזיר · רָאוִי</td><td class="scr">המנזר</td></tr>
+          <tr><td class="sec2">עבודת האלילים</td><td>פוליתיאיזם; האבן השחורה; הבל („אולי שיבוש בעל“), קוריש, הגורלות</td><td class="who">הסוחר · רָאוִי</td><td class="scr">מכה</td></tr>
+          <tr><td class="sec2">עבודת האלילים</td><td>אבן השאם ועמרו בן לחי; מה גורסים החוקרים; דת אברהם וההקפה; „קדם ליהדות ולנצרות“</td><td class="who">רָאוִי</td><td class="scr">מכה</td></tr>
+          <tr><td class="sec2">אלילים נוספים</td><td>אללאת, אלעזה, מנאת; קוראן 71:23 — וד, סואע, יגות׳, יעוק, נשר</td><td class="who">רָאוִי</td><td class="scr">מכה · לשכת האלילים</td></tr>
+          <tr><td class="sec2">סיפור אברהה</td><td>ממלכה נוצרית בתימן; התוכנית; התנגדות עבד אל־מטלב; הפילים; הציפורים בשערי מכה</td><td class="who">רָאוִי · קריין</td><td class="scr">מכה · השיא</td></tr>
+          <tr><td class="sec2">סיפור אברהה</td><td>סורה 105; אלצ׳יף, „אברהה של זמננו“, „אל־עצף אל־מאכול“, 2014</td><td class="who">רָאוִי</td><td class="scr">מכה · אחרי השיא</td></tr>
+          <tr><td class="sec2">ערב עליית האסלאם</td><td>לא איום, אף אימפריה לא שאפה לכבוש; קצר, ברג׳, קלם; לא השליטו את דתם; רעיונות נוצריים בקוראן והדהודי תנ״ך וחז״ל</td><td class="who">רָאוִי</td><td class="scr">היציאה ממכה · הסיום</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <p><b>מה השתנה.</b> אין תחנות — עולם אחד רציף בשבעה אזורים, עם הליכה חופשית בתוך כל אזור וחזרה חופשית אחורה. הדמויות עומדות בעולם בגוף מלא, כמו בתחנה 1. הבועה חזרה להיות בועת הזכוכית של תחנה 1, מעוגנת מעל הדובר, עם כפתור קריינות לכל שורה. ההאדר הוא ההאדר של האתר.</p>
+    <p class="flag"><b>הכלל נשאר.</b> כל משפט שדמות או קריין אומרים הוא הטקסט הלימודי. טבלת הכיסוי — למטה, בלי שורות ריקות.</p>
+    <p><b>נכסים עד כה.</b> 20 סצנות, 6 דמויות בגוף מלא (רקע מוסר) + דיוקנאות, ומפת עולם מצוירת. חסר: קריינות מוקלטת (קול לכל דמות), אנימציות הליכה/דיבור, ובניית שבעת האזורים בתלת־ממד על בסיס המנוע של תחנה 1.</p>
+  </footer>
+
+</div>

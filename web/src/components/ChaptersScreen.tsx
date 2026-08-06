@@ -18,6 +18,8 @@ import {
   type ChapterDef,
 } from '@/lib/chapters-data'
 import { CH6 } from '@/lib/chapter6/data'
+import { STORE_KEY as CH1_STORE_KEY } from '@/lib/chapter1/progress'
+import { STATION_COUNT_PLANNED as CH1_STATION_COUNT } from '@/lib/chapter1/stations'
 
 /* the number of chapter-6 screens progress is measured against (derived, not hardcoded) */
 const CH6_SCREEN_COUNT = CH6.screens.length
@@ -127,6 +129,15 @@ export default function ChaptersScreen() {
             const p = JSON.parse(raw) as { done?: Record<string, boolean> } | null
             const n = Object.keys((p && p.done) || {}).length
             if (n > 0) progress = Math.min(99, Math.round((n / CH6_SCREEN_COUNT) * 100))
+          }
+        }
+        /* chapter 1 is the exploration game: progress is stations completed */
+        if (chp.number === 1 && !done) {
+          const raw = localStorage.getItem(CH1_STORE_KEY)
+          if (raw) {
+            const p = JSON.parse(raw) as { stationsDone?: string[] } | null
+            const n = Array.isArray(p?.stationsDone) ? p.stationsDone.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH1_STATION_COUNT) * 100))
           }
         }
         st[chp.number] = { completed: done, progress }

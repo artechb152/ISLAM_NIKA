@@ -10,9 +10,10 @@ import { RamadanTimeline } from '@/components/chapter6/RamadanTimeline'
 import { boldize, P, Scrolly } from '@/components/chapter6/scrolly'
 import StoryFilm from '@/components/chapter6/StoryFilm'
 import { CH6 } from '@/lib/chapter6/data'
+import { readPractice } from '@/lib/chapter6/practice-progress'
 import {
   completedSections,
-  markChapterComplete,
+  markContentComplete,
   markSectionDone,
   resumeSectionId,
   saveCurrentSection,
@@ -207,9 +208,10 @@ export default function Chapter6() {
     jumpUntil.current = Date.now() + 1800
   }
 
-  /* the last section (the hajj) has no anchor after it, so it — and the whole chapter — is
-     marked complete when the reader reaches the closing block. This is the only place that
-     records the hajj as done and writes islam:chapter:6='done'. */
+  /* the last section (the hajj) has no anchor after it, so it is marked done when the reader
+     reaches the closing block. That records the READING — every section of ch6:v1 — but no
+     longer completes the chapter: islam:chapter:6='done' now belongs to the closing practice
+     at /chapter6/practice, which is the only place that writes it. */
   useEffect(() => {
     const end = endRef.current
     if (!end) return
@@ -217,15 +219,27 @@ export default function Chapter6() {
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting || Date.now() < jumpUntil.current) continue
-          markChapterComplete()
+          markContentComplete()
           setDoneSections(new Set(SECTION_ORDER))
           observer.disconnect()
         }
       },
-      { rootMargin: '0px 0px -20% 0px', threshold: 0 }
+      /* A PIXEL margin, not a percentage. This block is the last thing in the document, with
+         only ~70–90px of layout padding beneath it, so a -20% bottom margin (154px at 768px
+         tall, 216px at 1080px) put the observer's edge permanently above it and the block could
+         never intersect at any viewport size — the closing sections were never recorded. A
+         small fixed margin still demands the block be properly in view, and is reachable. */
+      { rootMargin: '0px 0px -24px 0px', threshold: 0 }
     )
     observer.observe(end)
     return () => observer.disconnect()
+  }, [])
+
+  /* the closing button carries a quiet "הושלם" once the practice has been finished; it still
+     links there either way, because re-entering a finished practice must never be blocked */
+  const [practiceDone, setPracticeDone] = useState(false)
+  useEffect(() => {
+    setPracticeDone(readPractice().completed)
   }, [])
 
 
@@ -883,12 +897,14 @@ export default function Chapter6() {
               <blockquote className="arabic-quote" lang="ar" dir="rtl">{para('hj-7', 4)}</blockquote>
               <P text={para('hj-7', 5)} className="blessing-he" />
             </div>
-            {/* a quiet close — just a way back, no exercise. Reaching this block is what marks
-                the hajj (and the whole chapter) as complete. */}
-            <div className="chapter-end" data-reveal ref={endRef}>
-              <Link className="chapter-end-back" href="/chapters">
-                חזרה לכל הפרקים
+            {/* the close: the chapter hands off to its practice. Reaching this block records the
+                reading; the chapter itself is completed there. There is deliberately no second
+                way out here — the route back to the chapters list is on the practice page. */}
+            <div className="chapter-end" id="chapter-end" data-reveal ref={endRef}>
+              <Link className="chapter-end-back" href="/chapter6/practice">
+                לתרגול המסכם
               </Link>
+              {practiceDone && <span className="chapter-end-done">הושלם</span>}
             </div>
           </section>
 

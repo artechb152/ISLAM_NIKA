@@ -1,0 +1,526 @@
+/* Chapter 6 — the closing screen, „חמש מצוות היסוד“.
+
+   THIS SHEET EXISTS TO ADD AS LITTLE AS POSSIBLE. The page sits in the (chapter6) route group,
+   so chapter6-article.css is already loaded and its classes are usable directly. The page now
+   uses the article's SHELL as well as its parts: `.chapter-site-header`, `.chapter-drawer`,
+   `.chapter-shell`, `.chapter-layout`, `.chapter-article`, `.ch6-hero`, `.article-section`,
+   `.section-heading`, `.content-columns`, `.content-block`, `.title-ornament`, `.shahada-quote`.
+   Nothing below re-declares a page width, a section rhythm, a heading size or a masthead.
+
+   WHAT WENT WRONG BEFORE, TWICE, AND WHAT THAT MEANS HERE.
+
+   1. Cards. An earlier version wrapped every block in a `.gv-card` — border, 18px radius, inset
+      gold ring. That ring exists exactly once in the chapter, on `.shahada-quote`, around a
+      nine-word illuminated quotation; making it the default container of ten blocks is what
+      „יותר מדי כרטיסיות“ meant. The article puts its content DIRECTLY on the parchment.
+
+   2. A second page. The version after that had no cards and still did not belong: its own
+      masthead with an empty middle, no sidebar, and a centred 1180px column. Measured at 1920
+      the article's text column began 64px from the edge and this one began 370px from it — the
+      two pages did not share a single edge. That is fixed in the markup (PracticeNav), not
+      here; what is left in this file is the exercise surfaces and nothing else.
+
+   Three rules taken from the article and not broken here:
+     1. No container. A box is for a quotation or a popover, not for an exercise.
+     2. Selection is MAROON FILL on cream. Gold is a hairline and a ring around a number —
+        never the state colour, and never gradient-clipped text (a technique the article
+        never uses).
+     3. Headings are the article's `.section-heading`: start-aligned, ornament, muted lead. */
+
+/* ------------------------------------------------------------------ page shell ---- */
+.gv-page{background:var(--panel)}
+/* the masthead's end slot, where the article puts its find-field — same height, same hairline
+   on maroon, so the two mastheads read as one component family rather than two */
+.gv-back{
+  display:inline-flex;align-items:center;gap:7px;height:36px;text-decoration:none;
+  color:var(--cream);font-weight:600;font-size:15px;
+  padding-inline:16px;border-radius:999px;border:1px solid rgba(245,236,214,.26);
+  background:rgba(245,236,214,.1);
+  transition:background .2s ease,border-color .2s ease;
+}
+.gv-back:hover{background:rgba(245,236,214,.18);border-color:var(--cream)}
+.gv-back svg{width:16px;height:16px}
+
+/* --------------------------------------------------------------- the banner ----
+   The article's own opening band, without the video: a practice screen has no business
+   autoplaying the chapter's film a second time, and the poster carries the same picture. */
+.gv-banner .ch6-hero-title{text-shadow:0 3px 22px rgba(20,10,4,.55)}
+
+/* ------------------------------------------------------------------ sections ----
+   `.article-section` carries the rhythm (one hairline, a lot of air) and the scroll-margin the
+   sidebar's anchors need. Only the colour of the heading is set here. */
+.gv-section-head h2{color:var(--maroon)}
+/* the working block. No background, no border, no radius, no shadow — this is the class that
+   replaced `.gv-card`, and the whole point is that it draws nothing. It is as wide as the
+   article's column because the surfaces inside it are five things across; text inside sets its
+   own measure in `ch`. */
+.gv-ex{width:100%}
+/* the beat's instruction, in the article's lead shape — the same one `.section-heading > p`
+   gives the exercise's instruction directly above it */
+.gv-ask{
+  margin:0 0 clamp(16px,2vw,24px);width:min(820px,100%);
+  font-size:22px;line-height:1.65;color:var(--muted);
+}
+
+/* The closing line of an exercise — the source's own „ok“, with a tick.
+
+   FULL COLUMN, not a 70ch measure. 70 characters is the right width for a paragraph somebody
+   reads for a minute; this is one sentence under a row of five photographs, and capping it
+   broke „…מעלות השחר, דרך חצות היום והצל המתארך, אל השקיעה“ onto a second line carrying two
+   words. It runs to the end of the column now and wraps only where the column genuinely
+   cannot hold it. */
+.gv-done{
+  display:flex;align-items:flex-start;gap:11px;margin-top:clamp(18px,2.4vw,26px);
+  width:100%;font-size:var(--read);line-height:1.75;color:var(--ink);
+}
+.gv-done-mark{flex:none;width:22px;height:22px;color:var(--maroon);margin-top:3px}
+.gv-done-mark svg{width:100%;height:100%}
+
+/* ============================================================== THE SLOT ========
+   One component on four surfaces. Its parts are the article's parts: a gold-ringed numbered
+   medallion (`.rm-tl-med`), a mihrab-arched photograph (`.rm-day-arch`) with its caption BELOW
+   the frame rather than inside it (`.rm-day-title`), and a blank rule that fills with maroon.
+
+   No box around any of it. */
+.gv-surface{position:relative;margin-top:clamp(6px,1vw,12px)}
+.gv-slot{
+  all:unset;box-sizing:border-box;position:relative;z-index:1;
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;min-width:0;
+}
+.gv-slot:not([aria-disabled="true"]){cursor:pointer}
+.gv-slot:focus-visible{outline:none}
+.gv-slot:focus-visible .gv-slot-n{outline:2px solid var(--maroon);outline-offset:4px}
+.gv-slot.is-refused{animation:chk-bounce .3s ease}
+
+/* the medallion — the article's timeline node, one size down */
+.gv-slot-n{
+  position:relative;flex:none;width:42px;height:42px;border-radius:50%;
+  display:grid;place-items:center;background:var(--paper);border:2px solid var(--gold);
+  box-shadow:0 5px 13px rgba(60,35,18,.12);
+  font-family:var(--font-heading);font-weight:800;font-size:17px;color:var(--maroon);
+  transition:transform .22s,background .22s,border-color .22s,color .22s;
+}
+.gv-slot-n::before{content:"";position:absolute;inset:4px;border-radius:50%;border:1px solid rgba(199,154,60,.5)}
+/* an order-free exercise carries no digits: a number on each medallion is a promise of a
+   sequence, and the charity recipients have none — „לעניים, נזקקים, יתומים, בתי תמחוי“ is one
+   sentence's word order, not a rank. */
+.gv-slot-n.is-blank::after{
+  content:"";width:7px;height:7px;border:1px solid var(--gold-text);transform:rotate(45deg);
+}
+.gv-slot.is-full .gv-slot-n.is-blank::after{border-color:var(--cream)}
+.gv-slot:not([aria-disabled="true"]):hover .gv-slot-n{transform:scale(1.1)}
+/* filled = MAROON FILL, the article's one selection language */
+.gv-slot.is-full .gv-slot-n{background:var(--maroon);border-color:var(--maroon-deep);color:var(--cream)}
+.gv-slot.is-full .gv-slot-n::before{border-color:rgba(245,236,214,.5)}
+
+/* the photograph — the chapter's mihrab arch */
+.gv-slot-photo{
+  display:block;width:100%;height:var(--gv-arch,clamp(150px,15vw,210px));overflow:hidden;
+  border-radius:clamp(56px,7vw,100px) clamp(56px,7vw,100px) 14px 14px;
+  border:1px solid var(--edge);box-shadow:0 14px 30px rgba(60,35,18,.17);
+}
+.gv-slot-photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* the cue — the article's caption under an arch, not a label inside a box */
+.gv-slot-cue{
+  font-family:var(--font-heading);color:var(--maroon-deep);
+  font-size:clamp(16px,1.6vw,20px);line-height:1.3;text-wrap:balance;
+}
+
+/* the blank. Dashed and empty, or a solid maroon rule with the answer on it — the difference
+   reads with the colour removed, which is the requirement. */
+.gv-slot-line{
+  display:flex;align-items:center;justify-content:center;width:100%;min-height:2.1em;
+  padding:4px 6px;font-size:var(--read);line-height:1.4;color:var(--ink);text-wrap:balance;
+  border-bottom:2px dashed rgba(138,39,51,.42);
+}
+.gv-slot.is-full .gv-slot-line{
+  border-bottom:2px solid var(--maroon);color:var(--maroon-deep);font-weight:700;
+}
+/* the locked slot: a muted aside that says why it is closed. Its rule is TRANSPARENT rather
+   than absent — `border-bottom:none` made its box two pixels shorter than its neighbours', and
+   at 834px that landed its line sixteen pixels above theirs, which read as a bug. */
+.gv-slot.is-locked .gv-slot-line{border-bottom-color:transparent;color:var(--muted);font-style:italic;font-weight:400}
+.gv-slot.is-locked .gv-slot-n{background:none;border-style:dashed;border-color:var(--edge);color:var(--muted)}
+.gv-slot.is-locked .gv-slot-n::before{display:none}
+
+/* ---- the shared axis: a row of medallions on one hairline (the article's .rm-tl-axis) ---- */
+.gv-track{position:relative;display:grid;gap:clamp(14px,2vw,28px);align-items:stretch}
+.gv-track::before{
+  content:"";position:absolute;inset-inline:9%;top:21px;height:1px;background:var(--edge);z-index:0;
+}
+/* EVERY PART LINES UP ACROSS THE ROW. Each slot is its own four-row grid — medallion, arch,
+   cue, rule — and the SLACK ROW (3) takes the difference, so a cue that runs to three lines
+   („כשצלו של חפץ והחפץ עצמו באותו הגודל“) grows downward into its own slot instead of pushing
+   its rule below its neighbours'. The rules end up on one baseline without a magic height.
+
+   Two things this grid must not do, both of which it used to:
+
+     · The cue is `align-self:start`, not `center`. Centred, a one-line caption floated
+       twenty-three pixels below the arch it belongs to while a three-line one sat tight
+       against it — five captions at five heights under five photographs at one height. The
+       article's captions sit directly under their frames.
+
+     · There is no grid `gap`. A fixed row gap is charged for every row whether or not it has
+       anything in it, so the charity track — no photograph, no cue — paid it three times and
+       opened a 36px hole between each medallion and its rule on an otherwise empty band. The
+       spacing lives on the parts instead, so an absent part costs nothing. */
+.gv-track .gv-slot{
+  display:grid;grid-template-rows:auto auto 1fr auto;justify-items:center;align-content:start;gap:0;
+}
+.gv-track .gv-slot-n{grid-row:1;align-self:start}
+.gv-track .gv-slot-photo{grid-row:2;margin-top:12px}
+.gv-track .gv-slot-cue{grid-row:3;align-self:start;margin-top:11px}
+.gv-track .gv-slot-line{grid-row:4;align-self:end;margin-top:12px}
+
+/* --------------------------------------------------------------- surface: LINE ----
+   צום רמדאן. The same row, plus direction: this is a required sequence and the number IS the
+   order, which is why its instruction says „סדרו“. */
+.gv-line .gv-track{grid-template-columns:repeat(5,1fr)}
+.gv-line{--gv-arch:clamp(130px,13vw,190px)}
+/* the arrow between two stages. The page is RTL, so „next“ is to the LEFT. */
+.gv-line .gv-slot:not(:last-of-type)::after{
+  content:"";position:absolute;inset-inline-end:calc(-1 * clamp(10px,1.4vw,17px));top:15px;
+  width:9px;height:9px;border-top:2px solid var(--maroon);border-left:2px solid var(--maroon);
+  transform:rotate(-45deg);opacity:.55;
+}
+
+/* --------------------------------------------------------------- surface: ROW ----
+   השהאדה. Three situations, straight across, on the same hairline every other track uses.
+   They were arranged AROUND the testimony — three photographs at three heights with a
+   gold-framed quotation between them — which was true to „they surround one sentence“ and
+   unreadable as an exercise. No arrows: these three are not a sequence. */
+.gv-row{--gv-arch:clamp(130px,13vw,200px)}
+.gv-row .gv-track{grid-template-columns:repeat(var(--gv-cols,3),1fr)}
+/* the time signs are the longest cues on the page and they sit in a fifth of the row */
+.gv-row .gv-slot-cue{font-size:clamp(15px,1.4vw,18px)}
+/* a track with neither photographs nor cues — the charity vessels — is one line of medallions
+   over one line of rules, and it should read as that rather than as a band of empty parchment.
+   The blank sits close under its medallion so the two read as one thing. */
+.gv-row.is-bare{--gv-arch:0px}
+.gv-row.is-bare .gv-track .gv-slot-line{margin-top:6px}
+
+/* ---------------------------------------------------------------- surface: MAP ----
+   החג'. The article's own map pins, on the article's own painting. Positioned with PHYSICAL
+   `left` from SlotSurface: the coordinates were measured from the left edge of the painting
+   and a logical property would mirror every one of them on this RTL page.
+
+   THE PAINTING IS BOUND BY THE WINDOW'S HEIGHT, NOT BY ITS COLUMN. Filling a column, on a wide
+   screen it stood taller than the screen: the pins were at the top, the label tray was below
+   the fold, and every single placement cost a scroll up and a scroll back down. „זה תוקע את
+   זה“, and it did.
+
+   `(100vh - 230px) * 1.5` is the painting's own 3:2 (1872×1248, measured off the file), so the
+   width is whatever leaves the map about 230px of window for its feedback line and its tray.
+   The column still wins when it is the smaller of the two, so nothing overflows.
+
+   A SMALLER PAINTING IS ONLY ALLOWED IF EVERYTHING ON IT SHRINKS WITH IT. A pin is anchored by
+   its own centre, and its dot sits above that centre by half the height of the name pill under
+   it — a FIXED number of pixels. Shrink the painting alone and that fixed offset becomes a
+   larger fraction of it, and every dot creeps off the coordinate it shares with the chapter's
+   map. So the pin is sized in `cqw` against the painting itself: at the 1025px the article
+   renders at, `3.5122cqw` IS 36px, `1.2683cqw` IS 13px, and every other value is the same
+   division. The result is a true uniform scale — scripts/cmp reports Δx=0.00% Δy=0.00% against
+   the chapter at any size, which is what „בול איפה שהם היו בפרק 6“ has to mean once the
+   painting is allowed to be smaller than the chapter's.
+
+   And because the whole thing scales together, the pins' spacing relative to their own size is
+   now constant — so the 900px floor that used to keep „טוואף“ (80%/74%) and „סעי“ (84%/80%)
+   from swallowing each other's clicks is no longer needed at any width the pins scale at. It
+   survives only below 720px, where they stop scaling and take fixed sizes instead. */
+.gv-mapwrap{overflow-x:auto;overscroll-behavior-x:contain}
+.gv-map{
+  position:relative;line-height:0;container-type:inline-size;
+  width:min(100%,calc((100vh - 230px) * 1.5));
+}
+.gv-map-img{width:100%;height:auto;display:block;border-radius:16px;box-shadow:0 12px 30px rgba(60,35,18,.14)}
+.gv-map-pins{position:absolute;inset:0;line-height:1}
+.gv-map .gv-slot{position:absolute;transform:translate(-50%,-50%);gap:0.4878cqw;width:auto}
+.gv-map .gv-slot-photo,.gv-map .gv-slot-cue{display:none}
+/* THE ARTICLE'S PIN, both states. `.hjm-dot` at rest is a cream disc with a 2px maroon ring
+   and a maroon numeral — light enough to sit on a watercolour without punching a hole in it.
+   A solid maroon fill is what the article uses for the ONE pin you are currently holding open,
+   and filling all six permanently turned the sanctuary into a cluster of dark blobs.
+   So: empty keeps the gold ring every other medallion on this page has, placed turns the ring
+   and the numeral maroon, and the name pill beside it does the rest of the announcing. */
+/* 36px and 15px, expressed as their share of the 1025px painting the article draws */
+.gv-map .gv-slot-n{
+  width:3.5122cqw;height:3.5122cqw;font-size:1.4634cqw;
+  box-shadow:0 4px 12px rgba(60,35,18,.28);
+}
+.gv-map .gv-slot-n::before{display:none}
+/* the background has to be reset too — the general filled-medallion rule above fills it
+   maroon, which on the map made six dark blobs on a watercolour and, once the numeral went
+   maroon to match the ring, hid the numeral inside them */
+.gv-map .gv-slot.is-full .gv-slot-n{
+  background:var(--paper);border-color:var(--maroon);color:var(--maroon);
+}
+/* every value here matches `.hjm-plabel` in the article — `display` and `line-height` included.
+   It was inheriting 1.4 from the slot base, which made the pin five pixels taller than the
+   article's and pushed its dot two and a half pixels off the coordinate they share. `display`
+   is the same trap one level down: the article's label is a plain span, and leaving this one
+   a flex box made it fifteen pixels tall against the article's thirteen — one more pixel of
+   drift, on every pin, invisible to the eye and not to scripts/cmp. */
+/* 13px / 1px 8px / 7px, as their share of the same 1025px. The font size and the block padding
+   are the two that MATTER: together with the gap above they are the whole of the offset between
+   the dot's centre and the pin's, which is what a fixed-size pin on a resized painting gets
+   wrong. */
+.gv-map .gv-slot-line{
+  display:block;min-height:0;width:auto;white-space:nowrap;margin:0;
+  padding:0.0976cqw 0.7805cqw;border:none;border-radius:0.6829cqw;
+  font-family:var(--font-heading);font-weight:700;font-size:1.2683cqw;line-height:1;
+}
+.gv-map .gv-slot.is-empty .gv-slot-line{display:none}
+/* `border:none` again, and it has to be here rather than only on `.gv-map .gv-slot-line`:
+   `.gv-slot.is-full .gv-slot-line` carries three classes to that rule's two, so the filled
+   state's 2px maroon underline outranked it and every placed pin was two pixels taller than
+   the article's. Which put its dot a pixel off the coordinate the two maps share. */
+.gv-map .gv-slot.is-full .gv-slot-line{
+  border:none;background:var(--maroon);color:var(--cream);box-shadow:0 2px 7px rgba(60,35,18,.16);
+}
+.gv-map .gv-slot.is-locked .gv-slot-line{
+  display:block;background:rgba(245,236,214,.9);color:var(--maroon-deep);font-style:normal;
+  box-shadow:0 2px 7px rgba(60,35,18,.16);
+}
+.gv-map .gv-slot.is-locked .gv-slot-n{display:none}
+
+/* ----------------------------------------------------------- surface: SENTENCE ----
+   The beats. The gap sits where the source's own words were removed, so filling it puts the
+   chapter's sentence back the way the chapter wrote it. */
+/* FULL COLUMN, like the ✓ line above it and for the same reason: a 62ch measure broke
+   „…יאמר את השהאדה שלוש פעמים בפני שני עדים כשרים.“ across two lines, the second carrying
+   three words. `line-height` stays large — this paragraph has medallions and filled underlines
+   riding in it and needs the room. */
+.gv-sentence-text{
+  width:100%;margin:0;font-size:clamp(18px,1.8vw,22px);line-height:2.3;color:var(--ink);
+}
+.gv-sentence .gv-slot{display:inline;gap:0}
+.gv-sentence .gv-slot-n{
+  display:inline-grid;width:26px;height:26px;font-size:14px;vertical-align:middle;
+  margin-inline-end:6px;box-shadow:none;
+}
+/* and it goes once the gap is filled. The number identifies a blank while there are blanks to
+   tell apart; on a finished sentence it is two maroon discs interrupting the chapter's own
+   words, which is the one thing this beat exists to hand back intact. The filled underline
+   already says which words the reader put there. */
+.gv-sentence .gv-slot.is-full .gv-slot-n{display:none}
+/* the padding is ASYMMETRIC on purpose. Even 8px on the end side put a visible space between
+   the filled gap and whatever punctuation follows it — the charity sentence printed
+   „…שכר בכפליים , ומצוות…“, with the comma adrift. Breathing room goes on the start side,
+   where it separates the gap from the word before it and nothing else. */
+.gv-sentence .gv-slot-line{
+  display:inline;min-height:0;margin:0;padding:2px 8px 2px 1px;
+  border-bottom:2px dashed rgba(138,39,51,.42);
+}
+.gv-sentence .gv-slot.is-empty .gv-slot-line::before{content:"";display:inline-block;width:clamp(64px,12vw,140px)}
+.gv-sentence .gv-slot.is-full .gv-slot-line{border-bottom:2px solid var(--maroon)}
+
+/* ------------------------------------------------------------------- the tray ----
+   Not a box. A small label and a wrapped row of the article's pill buttons, on the parchment.
+   Held = maroon fill, which is how the article shows every selected thing. */
+/* the top margin used to belong to the „תוויות“ heading that stood here; the row keeps the
+   step now that the heading is gone */
+.gv-tray{
+  display:flex;flex-wrap:wrap;gap:10px;min-height:46px;align-items:center;
+  margin-top:clamp(18px,2.4vw,26px);
+}
+.gv-tray-empty{margin:0;font-size:var(--read);color:var(--muted)}
+.gv-chip{
+  cursor:grab;min-height:46px;padding:10px 20px;
+  border:1px solid var(--edge);border-radius:999px;background:var(--mat);color:var(--maroon);
+  font-size:17px;font-weight:600;line-height:1.3;text-align:center;max-width:100%;
+  transition:background .2s ease,border-color .2s ease,color .2s ease;
+}
+.gv-chip:hover{background:rgba(165,50,47,.1);border-color:var(--maroon)}
+.gv-chip:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.gv-chip.is-held{background:var(--maroon);border-color:var(--maroon);color:var(--cream);cursor:grabbing}
+
+/* -------------------------------------------------------- feedback and the hint ----
+   „You got it wrong“ and „you are not finished yet“ can never be confused: different glyph,
+   different colour, different sentence shape. And the hint sits DIRECTLY under the feedback
+   line that announced it — it used to open below a tall tray, off the bottom of the screen,
+   under a message that said „פתחתי רמז מתחת“. */
+.gv-feedback{
+  display:flex;align-items:flex-start;gap:10px;min-height:52px;
+  margin-top:clamp(16px,2vw,24px);font-size:17px;line-height:1.6;
+}
+.gv-fb-mark{flex:none;width:22px;height:22px;display:grid;place-items:center;margin-top:2px}
+.gv-fb-mark svg{width:100%;height:100%}
+.gv-fb-diamond{width:9px;height:9px;border:1px solid currentColor;transform:rotate(45deg)}
+.gv-feedback.is-idle{color:var(--muted)}
+.gv-feedback.is-ok{color:var(--maroon-deep);font-weight:600}
+.gv-feedback.is-ok .gv-fb-mark{color:var(--maroon)}
+.gv-feedback.is-miss{color:var(--stamp);font-weight:600}
+.gv-hint{
+  margin:2px 0 0;padding-inline-start:14px;border-inline-start:2px solid var(--gold);
+  font-size:17px;line-height:1.7;color:var(--ink);width:min(70ch,100%);
+}
+.gv-hint-label{
+  display:block;font-size:12.5px;letter-spacing:.16em;font-weight:700;color:var(--gold-text);margin-bottom:3px;
+}
+
+/* ---------------------------------------------------------------- the beat ----
+   A second block inside one section, marked the way the article marks one: a hairline and the
+   article's own step of air (`.charity-body .content-block + .content-block`). It used to be
+   set off by 58px of blank parchment and nothing else, which reads as a gap rather than as a
+   new thing. */
+.gv-beat{margin-top:clamp(26px,3.4vw,34px);padding-top:clamp(26px,3.4vw,34px);border-top:1px solid var(--rule)}
+.gv-beat-arabic{margin-top:14px}
+.gv-after{display:grid;gap:clamp(12px,1.8vw,22px);margin-top:clamp(18px,2.4vw,28px);width:min(820px,100%)}
+.gv-after.n2{grid-template-columns:1fr 1fr}
+.gv-after figure{margin:0}
+.gv-after img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;display:block;box-shadow:0 12px 30px rgba(60,35,18,.14)}
+.gv-after.n1 img{aspect-ratio:2/1}
+.gv-after figcaption{margin-top:9px;font-size:15.5px;color:var(--muted)}
+
+/* ------------------------------------------------------------ multiple choice ----
+   Pill buttons on the parchment, in the article's button recipe. A wrong answer FADES and
+   stays faded — the chapter's own `.practice-option.is-wrong{opacity:.38}` — so a mistake
+   narrows the field instead of resetting it.
+
+   The two closing questions sit in `.content-columns.two-columns`, the article's own
+   side-by-side block: stacked they read as a form, side by side they are the page's one wide
+   element and the block halves in height. Everything about the column — the 2px maroon rule
+   above it, its padding, its collapse to one column at 680px — comes from the article. */
+.gv-mcq-q{
+  margin:0;font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(23px,2vw,30px);line-height:1.35;
+}
+.gv-mcq-opts{display:flex;flex-wrap:wrap;gap:11px;margin-top:clamp(16px,2vw,22px)}
+.gv-mcq .gv-feedback{min-height:38px;margin-top:10px}
+.gv-quiz .gv-pick{font-size:17px;padding:10px 18px}
+.gv-pick:disabled{cursor:default}
+.gv-pick.is-wrong{opacity:.38}
+/* the chosen answer stays, filled maroon — the article's one selection language */
+.gv-pick.is-right{background:var(--maroon);border-color:var(--maroon);color:var(--cream);opacity:1}
+
+/* ------------------------------------------------------------------ closing ---- */
+/* five inline buttons, in the article's button recipe. The previous version asked the reader
+   to go back and click a sticky row at the top of the page. */
+.gv-closing-picks{display:flex;flex-wrap:wrap;gap:11px}
+.gv-pick{
+  cursor:pointer;min-height:46px;padding:10px 24px;
+  border:1px solid var(--edge);border-radius:999px;background:var(--mat);
+  font-family:var(--font-heading);font-size:19px;font-weight:700;color:var(--maroon);
+  transition:background .2s ease,border-color .2s ease,color .2s ease;
+}
+/* `:not(:disabled)` MATTERS. Without it, the hover wash beat `.gv-pick.is-right` — same
+   specificity, later in the file — so the answer you had just clicked showed cream text on a
+   10% maroon tint and was unreadable for as long as the cursor stayed on it. Which, having
+   just clicked it, it does. */
+.gv-pick:hover:not(:disabled){background:rgba(165,50,47,.1);border-color:var(--maroon)}
+.gv-pick:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.gv-pick.is-wrong{opacity:.45}
+.gv-closing-miss{min-height:1.6em;margin:14px 0 0;font-size:17px;color:var(--stamp);font-weight:600}
+.gv-closing-quote{margin:0}
+.gv-closing-note{width:min(70ch,100%);margin:18px 0 0;font-size:var(--read);line-height:1.75;color:var(--ink)}
+
+/* ------------------------------------------------------------------- the end ---- */
+.gv-end h2{font-size:clamp(32px,3.8vw,52px);font-weight:900;color:var(--maroon);margin:0}
+.gv-end .title-ornament{margin:14px 0 18px}
+.gv-end-lead{width:min(70ch,100%);margin:0;font-size:var(--read);line-height:1.7;color:var(--muted)}
+.gv-end-frieze{
+  position:relative;list-style:none;display:grid;grid-template-columns:repeat(5,1fr);
+  gap:clamp(14px,2vw,26px);margin:clamp(28px,3.6vw,46px) 0 0;padding:12px 0 0;
+}
+.gv-end-frieze::before{content:"";position:absolute;inset-inline:9%;top:calc(12px + clamp(48px,5vw,72px) / 2);height:1px;background:var(--edge)}
+.gv-end-pillar{
+  position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;
+  gap:9px;text-decoration:none;
+}
+.gv-end-ico{
+  width:clamp(48px,5vw,72px);height:clamp(48px,5vw,72px);background:var(--panel);border-radius:50%;padding:3px;
+  transition:transform .22s ease;
+}
+.gv-end-ico img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(60,35,18,.2))}
+.gv-end-pillar:hover .gv-end-ico{transform:translateY(-4px)}
+.gv-end-pillar b{font-family:var(--font-heading);font-size:clamp(18px,1.9vw,23px);color:var(--maroon)}
+.gv-end-memory{font-size:15.5px;line-height:1.55;color:var(--muted);max-width:22ch}
+.gv-end-quote{margin:clamp(30px,3.8vw,48px) 0 0;width:min(700px,100%)}
+.gv-end-quote figcaption{font-size:16px;color:var(--muted);margin-bottom:12px}
+.gv-end-quote blockquote{
+  margin:0;padding-inline-start:18px;border-inline-start:2px solid var(--gold);
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(19px,2vw,26px);
+  line-height:1.5;color:var(--maroon-deep);
+}
+.gv-revisit{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px;width:fit-content;max-width:100%;
+  margin:clamp(24px,3vw,36px) 0 0;padding-inline-start:14px;border-inline-start:2px solid var(--gold);
+  font-size:16px;color:var(--muted);
+}
+.gv-revisit a{color:var(--maroon);font-weight:700}
+.gv-out{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:clamp(28px,3.6vw,44px)}
+.gv-out .chapter-end-back{font-size:clamp(15px,1.4vw,18px);padding:13px 32px}
+.gv-secondary{
+  cursor:pointer;min-height:46px;padding:11px 22px;border-radius:999px;
+  border:1px solid var(--edge);background:var(--mat);color:var(--maroon);font-weight:600;font-size:16px;
+}
+.gv-secondary:hover{background:rgba(165,50,47,.1);border-color:var(--maroon)}
+.gv-secondary:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.gv-reset-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
+.gv-reset-ask{font-size:16px;color:var(--muted)}
+.gv-out-note{margin-top:15px;font-size:14px;color:var(--muted)}
+@keyframes gv-settle{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.gv-fin.is-fresh{animation:gv-settle .6s ease both}
+
+/* ---------------------------------------------------------------- the ghost ---- */
+.gv-ghost{position:fixed;z-index:60;pointer-events:none;translate:-50% -50%}
+.gv-ghost-chip{
+  display:block;max-width:260px;padding:10px 18px;border-radius:999px;
+  background:var(--maroon);color:var(--cream);font-size:16px;font-weight:700;
+  box-shadow:0 14px 34px rgba(28,10,2,.4);
+}
+
+/* ------------------------------------------------------------------- narrow ---- */
+@media (max-width:920px){
+  /* the article shortens its banner's negative top margin with its own padding change */
+  .gv-banner{height:290px}
+}
+@media (max-width:720px){
+  /* every horizontal surface becomes a vertical list: on a phone the row is the enemy */
+  .gv-track{grid-template-columns:1fr !important;gap:18px}
+  .gv-track::before{inset-inline:auto;inset-inline-start:21px;top:10px;bottom:10px;width:1px;height:auto}
+  .gv-slot{flex-direction:row;align-items:center;text-align:start;gap:14px;flex-wrap:wrap}
+  .gv-slot-photo{width:96px;height:104px;flex:none;border-radius:44px 44px 10px 10px}
+  .gv-slot-cue{flex:1;min-width:0}
+  /* the four-row grid is a wide-screen device — on a phone each slot is a row again, and the
+     margins that spaced its rows there would space nothing here */
+  .gv-track .gv-slot{display:flex}
+  .gv-track .gv-slot-photo,.gv-track .gv-slot-cue,.gv-track .gv-slot-line{margin-top:0}
+  .gv-slot-line{flex-basis:100%;justify-content:flex-start}
+  /* the blank drops to its own line because it shares the row with a photograph and a caption.
+     Where there is neither — the charity vessels — it belongs BESIDE its medallion: „○ ____“
+     on one line rather than four ninety-pixel rows of mostly nothing. */
+  .gv-row.is-bare .gv-track .gv-slot-line{flex:1;flex-basis:auto;margin-top:0}
+  .gv-line .gv-slot:not(:last-of-type)::after{
+    inset-inline-end:auto;inset-inline-start:17px;top:auto;bottom:-14px;transform:rotate(-135deg);
+  }
+
+  /* Below here the pins STOP scaling with the painting and take fixed sizes: a phone column is
+     about 334px, and a pin that stayed proportional would be an eleven-pixel dot under a
+     four-pixel name — correct, invisible, and impossible to tap. Fixed pins on a small painting
+     collide, so the painting takes a floor and the wrapper scrolls sideways instead: 620px is
+     where a 26px dot still clears the four per cent between „טוואף“ and „סעי“. Measured.
+     This is also the one width at which the pins are not a true scale of the chapter's — the
+     places they point at are still exact, the dots sit a pixel low. */
+  .gv-map{min-width:620px;width:100%}
+  .gv-map .gv-slot{gap:4px}
+  .gv-map .gv-slot-n{width:26px;height:26px;font-size:12.5px}
+  .gv-map .gv-slot-line{font-size:10.5px;padding:1px 5px;border-radius:6px}
+
+  .gv-end-pillar{flex-direction:row;text-align:start;gap:14px}
+  .gv-end-memory{max-width:none}
+  .gv-after.n2{grid-template-columns:1fr}
+  .gv-out{flex-direction:column;align-items:stretch}
+}
+@media (max-width:680px){
+  .gv-banner{height:230px}
+  .gv-ask{font-size:19px}
+  .gv-end-frieze::before{display:none}
+}
+
+/* ---------------------------------------------------------- reduced motion ---- */
+@media (prefers-reduced-motion:reduce){
+  .gv-slot.is-refused,.gv-fin.is-fresh{animation:none}
+  .gv-slot-n,.gv-chip,.gv-end-ico,.gv-pick{transition:none}
+}

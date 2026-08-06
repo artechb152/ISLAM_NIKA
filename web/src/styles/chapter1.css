@@ -1,0 +1,373 @@
+/* Chapter 1 — exploration game. Site tokens are copied verbatim from
+   chapter6-article.css so both chapters read as one product; the HUD adds a
+   dark-glass variant of the palette for overlay panels above the 3D scene. */
+
+:root{
+  --paper:#EDE4D0;
+  --panel:#f3ead6;
+  --mat:#f5ecd6;
+  --surface:#faf4e6;
+  --edge:#d8c7a3;
+  --rule:rgba(87,24,32,.14);
+  --maroon:#8a2733;
+  --maroon-deep:#571820;
+  --stamp:#a5322f;
+  --cream:#f5ecd6;
+  --ink:#3c2c1d;
+  --muted:#6f5c43;
+  --gold:#c79a3c;
+  --gold-soft:#d9b45b;
+  --gold-text:#856016;
+  --shadow:0 8px 22px rgba(60,35,18,.10);
+  --header-height:56px;
+  --font-heading:"Kedem",serif;
+  --font-body:"Ploni",Arial,sans-serif;
+  /* game-only tokens: the dark-glass HUD */
+  --glass:rgba(30,20,12,.82);
+  --glass-soft:rgba(30,20,12,.6);
+  --glass-edge:rgba(199,154,60,.55);
+  --olive:#7c8a4f;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+html{overflow-x:clip}
+body{
+  font-family:var(--font-body);color:var(--cream);background:#1c1108;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- chapter opening ---------- */
+.ch1-opening{
+  position:relative;isolation:isolate;min-height:100dvh;overflow:hidden;
+  width:100%;max-width:100vw;grid-template-columns:minmax(0,1fr);
+  display:grid;align-items:center;padding:clamp(96px,13vh,150px) clamp(24px,7vw,110px) 76px;
+  background:#160d09;color:var(--cream);
+}
+.ch1-opening-backdrop,.ch1-opening-shade{position:absolute;inset:0;width:100%;height:100%}
+.ch1-opening-backdrop{z-index:-3;object-fit:cover;object-position:center;animation:ch1-opening-drift 18s ease-out both}
+.ch1-opening-shade{
+  z-index:-2;background:
+    linear-gradient(90deg,rgba(16,8,7,.18) 0%,rgba(16,8,7,.45) 42%,rgba(16,8,7,.92) 100%),
+    linear-gradient(180deg,rgba(16,8,7,.5) 0%,transparent 30%,rgba(16,8,7,.55) 100%);
+}
+.ch1-opening::before{
+  content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.28;
+  background-image:radial-gradient(rgba(245,236,214,.24) .65px,transparent .65px);
+  background-size:5px 5px;mix-blend-mode:soft-light;
+}
+.ch1-opening-header{
+  position:absolute;z-index:2;inset-inline:0;top:0;height:72px;padding-inline:clamp(22px,4.5vw,72px);
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(245,236,214,.12);background:linear-gradient(180deg,rgba(42,11,18,.8),rgba(42,11,18,.25));
+}
+.ch1-opening-logo{display:inline-flex;transition:opacity .2s ease}
+.ch1-opening-logo:hover{opacity:.82}
+.ch1-opening-logo:focus-visible,.ch1-opening-back:focus-visible{outline:2px solid var(--gold-soft);outline-offset:5px;border-radius:5px}
+.ch1-opening-logo img{display:block;width:auto;height:clamp(25px,3vw,34px)}
+.ch1-opening-back{
+  display:inline-flex;align-items:center;gap:8px;color:rgba(245,236,214,.82);text-decoration:none;
+  font-size:14px;transition:color .2s ease;
+}
+.ch1-opening-back:hover{color:var(--cream)}
+.ch1-opening-back svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ch1-opening-content{width:min(680px,58vw);max-width:100%;min-width:0;animation:ch1-opening-rise .8s cubic-bezier(.2,.8,.2,1) both}
+.ch1-opening h1{
+  margin:18px 0 20px;font-family:var(--font-heading);font-weight:400;
+  font-size:clamp(46px,6.2vw,94px);line-height:.92;letter-spacing:-.025em;text-wrap:balance;
+  text-shadow:0 8px 34px rgba(0,0,0,.48);
+}
+.ch1-opening-lead{
+  width:min(610px,100%);margin:0;color:rgba(245,236,214,.86);
+  font-size:clamp(17px,1.45vw,21px);line-height:1.65;
+}
+.ch1-opening-start{
+  margin-top:34px;
+  border:1px solid rgba(245,236,214,.24);border-radius:999px;min-height:54px;padding:12px 28px 12px 21px;
+  display:inline-flex;align-items:center;gap:24px;background:var(--maroon);color:var(--cream);
+  font:600 18px var(--font-heading);cursor:pointer;box-shadow:0 12px 32px rgba(20,5,7,.42),inset 0 1px rgba(255,255,255,.1);
+  transition:transform .25s ease,background .25s ease,box-shadow .25s ease;
+}
+.ch1-opening-start:hover{transform:translateY(-3px);background:var(--stamp);box-shadow:0 17px 38px rgba(20,5,7,.5),0 0 0 4px rgba(199,154,60,.08)}
+.ch1-opening-start:active{transform:translateY(-1px)}
+.ch1-opening-start:focus-visible{outline:2px solid var(--gold-soft);outline-offset:4px}
+.ch1-opening-start svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s ease}
+.ch1-opening-start:hover svg{transform:translateX(-4px)}
+.ch1-opening-route{
+  position:absolute;inset-inline-start:clamp(24px,7vw,110px);bottom:28px;
+  display:flex;align-items:center;gap:9px;direction:rtl;
+}
+.ch1-opening-route span{width:5px;height:5px;border-radius:50%;background:rgba(245,236,214,.32)}
+.ch1-opening-route span.is-current{width:34px;border-radius:999px;background:var(--gold-soft);box-shadow:0 0 12px rgba(217,180,91,.45)}
+@keyframes ch1-opening-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes ch1-opening-drift{from{transform:scale(1.035)}to{transform:scale(1)}}
+
+@media (max-width:760px){
+  .ch1-opening{display:block;padding:0}
+  .ch1-opening-backdrop{object-position:43% center}
+  .ch1-opening-shade{background:linear-gradient(180deg,rgba(16,8,7,.32) 0%,rgba(16,8,7,.5) 32%,rgba(16,8,7,.94) 72%,#160d09 100%)}
+  .ch1-opening-header{left:0;right:0;width:100vw;height:62px;padding-inline:20px}
+  .ch1-opening-content{position:absolute;left:22px;right:22px;bottom:68px;width:auto;max-width:none;min-width:0}
+  .ch1-opening h1{font-size:clamp(42px,12vw,58px);margin-block:14px 16px}
+  .ch1-opening-lead{font-size:16px;line-height:1.55}
+  .ch1-opening-start{min-height:50px;margin-top:26px;font-size:17px}
+  .ch1-opening-route{inset-inline-start:22px;bottom:22px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ch1-opening-backdrop,.ch1-opening-content{animation:none}
+  .ch1-opening-start,.ch1-opening-start svg{transition:none}
+}
+
+/* ---------- site header (identical to the article chapters) ---------- */
+.chapter-site-header{
+  position:sticky;top:0;z-index:50;height:var(--header-height);display:flex;align-items:center;
+  background:var(--maroon-deep);box-shadow:0 2px 10px rgba(28,10,2,.22);
+}
+.chapter-site-header-inner{
+  width:100%;padding-inline:clamp(18px,4vw,60px);
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+}
+.chapter-hdr-start{display:flex;align-items:center;gap:10px}
+.chapter-logo{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;margin-inline-start:4px;transition:opacity .2s ease}
+.chapter-logo:hover{opacity:.85}
+.chapter-logo:focus-visible{outline:2px solid var(--mat,#f5ecd6);outline-offset:2px;border-radius:6px}
+.chapter-logo img{display:block;width:auto;height:clamp(22px,3vh,32px)}
+
+.ch1-journal-btn{
+  all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  color:var(--cream);font-size:14px;padding:7px 14px;border-radius:999px;
+  border:1px solid rgba(245,236,214,.26);background:rgba(245,236,214,.1);transition:background .2s ease;
+}
+.ch1-journal-btn:hover{background:rgba(245,236,214,.16)}
+.ch1-journal-btn:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
+.ch1-journal-btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- stage ---------- */
+.ch1-stage{position:relative;height:calc(100dvh - var(--header-height));overflow:hidden}
+.ch1-stage canvas{display:block}
+.ch1-loading{
+  height:calc(100dvh - var(--header-height));display:grid;place-items:center;
+  background:#1c1108;color:var(--cream);font-family:var(--font-body);font-size:18px;
+}
+
+/* ---------- HUD shared ---------- */
+.hud-panel{
+  position:absolute;z-index:10;
+  background:var(--glass);border:1px solid var(--glass-edge);border-radius:12px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  color:var(--cream);box-shadow:0 6px 24px rgba(0,0,0,.35);
+}
+.hud-title{font-family:var(--font-heading);font-weight:400;color:var(--gold-soft);margin:0}
+
+/* station panel — inline-start (right in RTL) */
+.hud-station{inset-inline-start:18px;top:18px;width:min(272px,72vw);padding:16px 18px}
+.hud-station-head{display:flex;align-items:center;gap:10px}
+.hud-station-icon{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--glass-edge);
+  display:grid;place-items:center;background:rgba(0,0,0,.25);font-size:18px;
+}
+.hud-station-head .hud-title{font-size:21px}
+.hud-station-eyebrow{font-size:12px;color:rgba(245,236,214,.65);margin:0}
+.hud-station-desc{font-size:13.5px;line-height:1.5;color:rgba(245,236,214,.85);margin:10px 0 12px}
+.hud-progress-row{display:flex;align-items:center;gap:10px;font-size:13px}
+.hud-progress{
+  flex:1;height:7px;border-radius:999px;background:rgba(245,236,214,.14);overflow:hidden;
+}
+.hud-progress i{
+  display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));
+  transition:width .5s ease;
+}
+.hud-checklist{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:7px}
+.hud-checklist li{display:flex;align-items:center;gap:9px;font-size:14px;color:rgba(245,236,214,.85)}
+.hud-checklist li.is-done{color:var(--olive)}
+.hud-check{
+  width:17px;height:17px;border-radius:50%;border:1.4px solid rgba(245,236,214,.45);
+  display:grid;place-items:center;flex:none;font-size:11px;line-height:1;
+}
+.is-done .hud-check{border-color:var(--olive);background:rgba(124,138,79,.18);color:var(--olive)}
+.hud-req{margin-inline-start:auto;color:var(--gold);font-size:11px}
+/* a collected entry becomes a button so the card can be read again */
+.hud-reread{
+  all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  color:inherit;border-radius:6px;padding:1px 4px;transition:background .18s ease;
+}
+.hud-reread:hover{background:rgba(199,154,60,.16)}
+.hud-reread:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.hud-reread-hint{font-size:10.5px;color:var(--gold-soft);opacity:0;transition:opacity .18s ease}
+.hud-reread:hover .hud-reread-hint,.hud-reread:focus-visible .hud-reread-hint{opacity:1}
+
+/* movement help — below the station panel */
+.hud-controls{inset-inline-start:18px;bottom:18px;padding:14px 16px;width:min(272px,72vw)}
+.hud-controls .hud-title{font-size:16px;margin-bottom:10px}
+.hud-ver{font-size:10px;color:rgba(245,236,214,.4);font-family:var(--font-body)}
+.hud-keys{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px;color:rgba(245,236,214,.85)}
+.hud-keys span{display:inline-flex;align-items:center;gap:6px}
+.hud-key{
+  min-width:26px;height:26px;padding-inline:6px;border-radius:6px;display:inline-grid;place-items:center;
+  border:1px solid rgba(245,236,214,.4);background:rgba(0,0,0,.3);
+  font-size:12px;font-weight:600;color:var(--cream);direction:ltr;
+  transition:background .12s ease,color .12s ease;
+}
+/* lights up while the physical key is held — doubles as an input-debug indicator */
+.hud-key.is-down{background:var(--gold);border-color:var(--gold);color:#2a1a10}
+
+/* information card — centered like a focused reading popup */
+.hud-card{
+  left:50%;top:50%;width:min(430px,88vw);padding:22px 24px;
+  transform:translate(-50%,-50%);box-shadow:0 18px 60px rgba(15,8,3,.58);
+}
+.hud-card .hud-title{font-size:23px;margin-bottom:6px}
+.hud-card-tag{
+  display:inline-block;font-size:11px;color:var(--gold-soft);border:1px solid var(--glass-edge);
+  border-radius:999px;padding:2px 10px;margin-bottom:8px;
+}
+.hud-card-lead{font-size:15px;line-height:1.55;margin:0 0 10px;color:rgba(245,236,214,.92)}
+.hud-card ul{margin:0;padding-inline-start:18px;display:grid;gap:6px;font-size:14px;line-height:1.5;color:rgba(245,236,214,.85)}
+.hud-card-actions{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:10px}
+.hud-card-btn{
+  all:unset;box-sizing:border-box;cursor:pointer;font-size:14px;color:var(--cream);
+  border:1px solid var(--glass-edge);border-radius:999px;padding:7px 18px;transition:background .2s ease;
+}
+.hud-card-btn:hover{background:rgba(199,154,60,.18)}
+.hud-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.hud-card-btn.is-primary{background:var(--maroon);border-color:var(--maroon)}
+.hud-card-btn.is-primary:hover{background:var(--stamp)}
+.hud-card-again{font-size:12px;color:var(--gold-soft)}
+
+/* dialogue bubble — the guide speaking, above the goal bar */
+.hud-dialogue{
+  left:0;top:0;width:min(430px,80vw);transform:translate(-50%,-100%);
+  display:flex;align-items:center;gap:14px;padding:12px 16px;
+  transition:width .25s ease,padding .25s ease;
+}
+/* engaged in conversation: the bubble grows into the teaching surface that
+   replaced the old side card */
+.hud-dialogue.is-open{width:min(560px,88vw);align-items:flex-start;padding:16px 20px}
+.hud-dialogue.is-station-intro{
+  position:absolute;left:50%;top:auto;bottom:92px;transform:translateX(-50%);
+}
+.hud-dialogue.is-station-intro::after{display:none}
+.hud-dialogue.is-open::after{
+  content:'';position:absolute;bottom:-9px;inset-inline-start:44px;
+  width:16px;height:16px;background:var(--glass);
+  border-inline-end:1px solid var(--glass-edge);border-block-end:1px solid var(--glass-edge);
+  transform:rotate(45deg);
+}
+.hud-portrait{width:84px;height:84px}
+.hud-portrait{
+  width:62px;height:62px;flex:none;border-radius:10px;object-fit:cover;
+  border:1px solid var(--glass-edge);background:rgba(0,0,0,.3);
+}
+.hud-speaker-avatar{
+  display:grid;place-items:center;font-family:var(--font-heading);font-size:36px;
+  color:var(--gold-soft);background:linear-gradient(145deg,rgba(199,154,60,.18),rgba(0,0,0,.42));
+}
+.hud-dialogue-body{flex:1;min-width:0}
+.hud-dialogue-body .hud-title{font-size:17px;margin-bottom:3px}
+.hud-dialogue-topic{color:rgba(245,236,214,.6);font-family:var(--font-body);font-size:13px}
+.hud-dialogue-actions{display:flex;align-items:center;gap:10px;margin-top:12px}
+.hud-dialogue-count{font-size:12px;color:var(--gold-soft);margin-inline-end:auto}
+.hud-dialogue-body p{
+  margin:0;font-size:14.5px;line-height:1.5;color:rgba(245,236,214,.9);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.hud-dialogue-body p.is-full{-webkit-line-clamp:unset;display:block;font-size:15.5px;min-height:44px}
+.hud-speak{
+  all:unset;box-sizing:border-box;cursor:pointer;flex:none;
+  width:38px;height:38px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--glass-edge);color:var(--gold-soft);transition:background .2s ease;
+}
+.hud-speak:hover{background:rgba(199,154,60,.18)}
+.hud-speak:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.hud-speak svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* goal bar — bottom center */
+.hud-goal{
+  inset-inline:0;margin-inline:auto;bottom:18px;width:min(560px,92vw);
+  display:flex;align-items:center;gap:14px;padding:10px 18px;font-size:14px;
+}
+.hud-goal .hud-progress{max-width:130px}
+
+/* world POI markers (DOM projected from 3D) */
+.poi-marker{
+  /* top/left anchor is load-bearing: the per-frame transform is measured from the
+     element's static position, so without an explicit 0,0 anchor the markers land
+     below the canvas and the projection pushes them off-screen. Physical `left`
+     (not inset-inline-start) because the projected pixels are physical. */
+  position:absolute;left:0;top:0;z-index:5;transform:translate(-50%,-100%);
+  display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;
+  transition:opacity .25s ease;
+}
+.poi-marker-ring{
+  width:64px;height:64px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(24,15,9,.9);border:2px solid var(--gold);font-size:27px;line-height:1;
+  box-shadow:0 0 0 0 rgba(199,154,60,0), 0 4px 18px rgba(0,0,0,.5);
+}
+.poi-marker.is-near .poi-marker-ring{animation:poi-breathe 1.8s ease-in-out infinite}
+.poi-marker.is-done .poi-marker-ring{
+  border-color:var(--olive);background:rgba(24,15,9,.7);color:var(--olive);
+}
+.poi-marker-label{
+  font-family:var(--font-heading);font-size:15px;color:var(--cream);
+  background:rgba(24,15,9,.9);border:1px solid var(--glass-edge);border-radius:8px;
+  padding:3px 14px;white-space:nowrap;box-shadow:0 3px 12px rgba(0,0,0,.4);
+}
+/* a thin stem down to a dot on the ground, so the marker reads as belonging to
+   a spot in the world rather than floating over it */
+.poi-marker-stem{
+  width:2px;height:34px;
+  background:linear-gradient(var(--gold),rgba(199,154,60,.12));
+}
+.poi-marker-foot{
+  width:9px;height:9px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 10px rgba(199,154,60,.9);margin-top:-2px;
+}
+.poi-marker.is-done .poi-marker-stem{background:linear-gradient(var(--olive),rgba(124,138,79,.1))}
+.poi-marker.is-done .poi-marker-foot{background:var(--olive);box-shadow:0 0 8px rgba(124,138,79,.8)}
+.poi-marker.is-board-marker{opacity:0;visibility:hidden}
+.poi-marker.is-dialogue-marker{gap:0;transition:opacity .22s ease,visibility .22s ease}
+.poi-marker.is-dialogue-marker.is-done{opacity:0;visibility:hidden}
+.poi-dialogue-bubble{
+  position:relative;direction:ltr;min-width:44px;height:32px;padding:0 11px;
+  display:grid;place-items:center;border-radius:17px;background:rgba(24,15,9,.92);
+  border:1.5px solid var(--gold);color:var(--cream);font-family:Arial,sans-serif;
+  font-size:18px;font-weight:700;line-height:1;letter-spacing:2px;
+  box-shadow:0 4px 14px rgba(0,0,0,.42);transform:translateY(-3px);
+}
+.poi-dialogue-bubble::after{
+  content:'';position:absolute;bottom:-5px;left:17px;width:8px;height:8px;
+  background:rgba(24,15,9,.92);border-right:1.5px solid var(--gold);
+  border-bottom:1.5px solid var(--gold);transform:rotate(45deg);
+}
+.poi-marker.is-near .poi-dialogue-bubble{animation:poi-breathe 1.8s ease-in-out infinite}
+.ch1-visually-hidden{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+.poi-hint{
+  position:absolute;inset-inline:0;margin-inline:auto;bottom:150px;width:fit-content;z-index:11;
+  display:flex;align-items:center;gap:10px;padding:8px 18px;font-size:14.5px;
+}
+@keyframes poi-breathe{
+  0%,100%{box-shadow:0 0 0 0 rgba(199,154,60,.45)}
+  50%{box-shadow:0 0 0 11px rgba(199,154,60,0)}
+}
+
+/* mini-map — bottom, opposite side from controls */
+.hud-map{
+  inset-inline-end:18px;bottom:18px;width:172px;height:172px;border-radius:50%;
+  padding:0;overflow:hidden;display:block;background:#a97843;
+}
+.hud-map-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hud-map svg{position:relative;z-index:1;display:block;width:100%;height:100%}
+
+@media (prefers-reduced-motion:reduce){
+  .poi-marker.is-near .poi-marker-ring{animation:none}
+  .hud-progress i{transition:none}
+}
+
+@media (max-width:680px){
+  .hud-station{width:min(230px,64vw);padding:12px 14px}
+  .hud-controls{display:none}
+  .hud-map{width:120px;height:120px}
+}

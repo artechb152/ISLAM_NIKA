@@ -147,32 +147,11 @@ export default function StoryFilm() {
         )}
       </div>
 
-      <div className="story-film-controls" role="group" aria-label="בקרת הסרטון">
-        <button type="button" onClick={togglePlayback} aria-label={playing ? 'השהיית הסרטון' : finished ? 'הפעלת הסרטון מחדש' : 'הפעלת הסרטון'}>
-          {playing ? (
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z" /></svg>
-          ) : (
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
-          )}
-        </button>
-        <span className="film-vol">
-          <button type="button" onClick={() => setMuted((value) => !value)} aria-label={muted ? 'ביטול השתקה' : 'השתקת הסרטון'}>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d={muted ? 'M4 9v6h4l5 4V5L8 9H4m8 1 7 7m0-7-7 7' : 'M4 9v6h4l5 4V5L8 9H4m8.5-1a5 5 0 0 1 0 8'} />
-            </svg>
-          </button>
-          <input
-            type="range"
-            className="film-volume"
-            min="0"
-            max="1"
-            step="0.05"
-            value={shownVolume}
-            aria-label="עוצמת קול"
-            onChange={(event) => changeVolume(Number(event.target.value))}
-            style={{ ['--film-progress' as string]: `${shownVolume * 100}%` }}
-          />
-        </span>
+      {/* Laid out like a standard video player: the scrubber gets its own full-width row, and
+          below it play/volume/elapsed sit on the left with the actions pushed to the right. The
+          bar carries dir="ltr" against the RTL page so both sliders fill left→right and the
+          drag/arrow-key directions match. */}
+      <div className="story-film-bar" dir="ltr">
         <input
           type="range"
           className="film-seek"
@@ -185,12 +164,39 @@ export default function StoryFilm() {
           onChange={(event) => seek(Number(event.target.value))}
           style={{ ['--film-progress' as string]: `${(time / total) * 100}%` }}
         />
-        <span aria-hidden="true" dir="ltr">{formatTime(time)} / {formatTime(total)}</span>
-        <button type="button" className="film-fs" onClick={toggleFullscreen} aria-label="מסך מלא">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" />
-          </svg>
-        </button>
+        <div className="story-film-controls" role="group" aria-label="בקרת הסרטון">
+          <button type="button" onClick={togglePlayback} aria-label={playing ? 'השהיית הסרטון' : finished ? 'הפעלת הסרטון מחדש' : 'הפעלת הסרטון'}>
+            {playing ? (
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z" /></svg>
+            ) : (
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+            )}
+          </button>
+          <span className="film-vol">
+            <button type="button" onClick={() => setMuted((value) => !value)} aria-label={muted ? 'ביטול השתקה' : 'השתקת הסרטון'}>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d={muted ? 'M4 9v6h4l5 4V5L8 9H4m8 1 7 7m0-7-7 7' : 'M4 9v6h4l5 4V5L8 9H4m8.5-1a5 5 0 0 1 0 8'} />
+              </svg>
+            </button>
+            <input
+              type="range"
+              className="film-volume"
+              min="0"
+              max="1"
+              step="0.05"
+              value={shownVolume}
+              aria-label="עוצמת קול"
+              onChange={(event) => changeVolume(Number(event.target.value))}
+              style={{ ['--film-progress' as string]: `${shownVolume * 100}%` }}
+            />
+          </span>
+          <span className="film-time" aria-hidden="true">{formatTime(time)} / {formatTime(total)}</span>
+          <button type="button" className="film-fs" onClick={toggleFullscreen} aria-label="מסך מלא">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   )

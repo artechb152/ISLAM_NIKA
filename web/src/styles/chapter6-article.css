@@ -252,29 +252,40 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   color:var(--maroon-deep);background:rgba(245,236,214,.95);box-shadow:0 10px 30px rgba(0,0,0,.45);
 }
 .story-film-big-play svg{width:28px;height:28px;fill:currentColor;margin-inline-start:3px}
-.story-film-controls{height:58px;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#2c141b;color:var(--cream)}
+/* --- control bar: full-width scrubber row, then the button row (see StoryFilm.tsx) --- */
+.story-film-bar{background:#2c141b;color:var(--cream);padding:2px 12px 4px}
+.story-film-controls{height:44px;display:flex;align-items:center;gap:4px}
 .story-film-controls button{all:unset;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;border-radius:7px;color:var(--cream)}
 .story-film-controls button:hover{background:rgba(245,236,214,.12)}
 .story-film-controls button svg{width:19px;height:19px;fill:currentColor;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
-.story-film-controls input{
-  flex:1;min-width:70px;height:18px;appearance:none;background:transparent;cursor:pointer;
-}
-.story-film-controls input::-webkit-slider-runnable-track{height:4px;border-radius:99px;background:linear-gradient(to left,var(--stamp) var(--film-progress),rgba(245,236,214,.22) 0)}
-.story-film-controls input::-moz-range-track{height:4px;border-radius:99px;background:rgba(245,236,214,.22)}
-.story-film-controls input::-moz-range-progress{height:4px;background:var(--stamp);border-radius:99px}
-.story-film-controls input::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--mat);margin-top:-5px}
-.story-film-controls input::-moz-range-thumb{width:14px;height:14px;border:0;border-radius:50%;background:var(--mat)}
-.story-film-controls > span{font-size:12px;color:rgba(245,236,214,.72);font-variant-numeric:tabular-nums;white-space:nowrap}
-.story-film-controls .film-seek{flex:1;min-width:0}
-.film-vol{display:flex;align-items:center}
-.story-film-controls .film-vol .film-volume{flex:0 0 auto;width:0;min-width:0;opacity:0;margin-inline-start:0;overflow:hidden;transition:width .22s ease,opacity .18s ease,margin-inline-start .22s ease}
-.film-vol:hover .film-volume,.film-vol:focus-within .film-volume{width:58px;opacity:1;margin-inline-start:2px}
+.film-time{font-size:12.5px;color:rgba(245,236,214,.82);font-variant-numeric:tabular-nums;white-space:nowrap;margin-inline-start:8px}
+/* the only thing on the right-hand side */
+.story-film-controls .film-fs{margin-inline-start:auto}
 .story-film-controls button.film-fs svg{fill:none}
+
+/* Both sliders share one skin, re-coloured per control: the scrubber takes the chapter accent
+   (a red that already reads as a video timeline), the volume bar stays cream like its icon.
+   --film-track/--film-dot are the resting sizes; the scrubber grows both on hover. The webkit
+   thumb has no auto-centering, hence the margin-top: half the difference between the two. */
+.story-film-bar input[type=range]{
+  appearance:none;background:transparent;cursor:pointer;height:16px;margin:0;
+  --film-track:3px;--film-dot:12px;--film-accent:var(--stamp);
+}
+.story-film-bar input[type=range]::-webkit-slider-runnable-track{height:var(--film-track);border-radius:99px;background:linear-gradient(to right,var(--film-accent) var(--film-progress),rgba(245,236,214,.25) 0)}
+.story-film-bar input[type=range]::-moz-range-track{height:var(--film-track);border-radius:99px;background:rgba(245,236,214,.25)}
+.story-film-bar input[type=range]::-moz-range-progress{height:var(--film-track);background:var(--film-accent);border-radius:99px}
+.story-film-bar input[type=range]::-webkit-slider-thumb{appearance:none;width:var(--film-dot);height:var(--film-dot);border-radius:50%;background:var(--film-accent);margin-top:calc((var(--film-track) - var(--film-dot)) / 2)}
+.story-film-bar input[type=range]::-moz-range-thumb{width:var(--film-dot);height:var(--film-dot);border:0;border-radius:50%;background:var(--film-accent)}
+.film-seek{display:block;width:100%}
+.film-seek:hover,.film-seek:focus-visible{--film-track:5px;--film-dot:15px}
+.film-vol{display:flex;align-items:center}
+.story-film-bar .film-volume{--film-accent:var(--cream);flex:0 0 auto;width:0;min-width:0;opacity:0;margin-inline-start:0;overflow:hidden;transition:width .22s ease,opacity .18s ease,margin-inline-start .22s ease}
+.film-vol:hover .film-volume,.film-vol:focus-within .film-volume{width:62px;opacity:1;margin-inline-start:4px}
 /* fullscreen: fill the screen, video contained, controls pinned to the bottom */
 .story-film:fullscreen{max-width:none;width:100vw;height:100vh;display:flex;flex-direction:column;border-radius:0;background:#000}
 .story-film:fullscreen .story-film-stage{flex:1 1 auto;aspect-ratio:auto;min-height:0}
 .story-film:fullscreen .story-film-stage video{object-fit:contain}
-.story-film:fullscreen .story-film-controls{flex:none}
+.story-film:fullscreen .story-film-bar{flex:none}
 
 .story-toggle{
   cursor:pointer;display:inline-flex;align-items:center;gap:9px;min-height:46px;margin-top:22px;padding:10px 23px;
@@ -483,10 +494,17 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   .chapter-article{padding-inline:0}
   .article-section + .article-section{margin-top:36px;padding-top:36px}
   h1{font-size:38px;text-wrap:balance}
-  .story-film{border-radius:10px}.story-film-controls{height:54px;padding-inline:9px}.story-film-controls > span{display:none}
+  /* narrow bar: drop the timestamp so play + volume + fullscreen keep full-size hit areas
+     (the old rule here was `> span`, which took the volume control down with it) */
+  .story-film{border-radius:10px}.story-film-bar{padding-inline:9px}.story-film-controls{height:40px}.film-time{display:none}
   .story-film-caption{font-size:14px;padding:6px 10px;bottom:4%}
   .story-film-big-play{width:56px;height:56px}.story-film-big-play svg{width:23px;height:23px}
-  .section-heading > div{width:100%;min-width:0;display:block}
+  /* `:not(.title-ornament)` is load-bearing. The diamond ornament is ALSO a direct div child of
+     `.section-heading`, and `.section-heading > div` outranks `.title-ornament` — so below
+     680px this rule was turning the ornament's flex row into a block, which collapsed its two
+     `flex:1` hairlines to nothing and left the rotated diamond as a stray 2×25 vertical stroke
+     under every pillar title. Measured on the practice screen; the article has it too. */
+  .section-heading > div:not(.title-ornament){width:100%;min-width:0;display:block}
   .section-heading h2{width:100%;font-size:31px;text-wrap:balance}.section-heading .section-term{display:block;margin-top:5px}
   .section-heading > p{width:100%;max-width:100%;font-size:19px}
   .three-columns,.two-columns{grid-template-columns:1fr}.three-columns > :last-child{grid-column:auto}
@@ -835,8 +853,15 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 
 /* the chapter's quiet close — just a way back to the chapters list. No score, no badge:
    reaching this block silently records the chapter as complete. */
-.chapter-end{display:flex;justify-content:center;text-align:center;
+/* scroll-margin: the practice page links back to #chapter-end, and the masthead is sticky */
+.chapter-end{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;text-align:center;
+  scroll-margin-top:calc(var(--header-height) + 26px);
   margin-top:clamp(46px,7vw,96px);padding-bottom:clamp(8px,3vw,28px)}
+/* a quiet mark that the practice was already finished — never a gate on entering it again */
+.chapter-end-done{
+  font-size:13px;font-weight:700;color:var(--gold-text);
+  padding:4px 13px;border-radius:999px;background:rgba(199,154,60,.16);border:1px solid var(--gold-soft);
+}
 .chapter-end-back{display:inline-flex;align-items:center;text-decoration:none;
   font-family:var(--font-heading);font-weight:700;font-size:clamp(15px,1.3vw,18px);color:var(--cream);
   background:var(--maroon-deep);padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);

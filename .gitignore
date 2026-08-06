@@ -1,0 +1,12 @@
+# Blender working files — hundreds of MB, exceed GitHub's 100MB file limit.
+# The game consumes the exported GLBs in web/public/assets/; the .blend sources
+# stay local (see web/blender/README.md for the round-trip pipeline).
+web/blender/
+
+# runtime noise tile that drei drops into the cwd
+waveletNoiseTile.bin
+web/waveletNoiseTile.bin
+
+# temp files from the Blender import scripts
+web/layout-before.tmp.json
+*.tmp.json
