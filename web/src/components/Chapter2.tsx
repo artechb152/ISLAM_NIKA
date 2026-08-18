@@ -276,12 +276,19 @@ function TraitCard({ id }: { id: string }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/assets/chapter2/${art.src}`} alt={art.alt} />
       </span>
-      <h3 className="ch2-sub" id={id}>
-        <button type="button" className="ch2-card-btn" onClick={() => openTrait(id)}>
-          {s.title}
-          {s.term && <span> ({s.term})</span>}
-        </button>
-      </h3>
+      <span className="ch2-card-text">
+        <h3 className="ch2-sub" id={id}>
+          <button type="button" className="ch2-card-btn" onClick={() => openTrait(id)}>
+            {s.title}
+            {s.term && <span> ({s.term})</span>}
+          </button>
+        </h3>
+        {/* the affordance: this card opens onto something. A chevron on the
+            outer edge, drawn from two borders on an inner box so the rotated
+            square cannot grow past the corner it sits in — the column check
+            caught exactly that when the rotation was on the box itself. */}
+        <span className="ch2-card-go" aria-hidden="true" />
+      </span>
     </article>
   )
 }

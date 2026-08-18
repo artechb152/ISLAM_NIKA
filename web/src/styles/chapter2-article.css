@@ -262,31 +262,68 @@
   .ch2-card{scroll-snap-align:start}
 }
 
-.ch2-card{position:relative;min-width:0;display:flex;flex-direction:column;gap:14px}
-.ch2-card-art{
-  display:block;overflow:hidden;border:1px solid var(--edge);border-radius:14px;
-  background:var(--paper,#EDE4D0);
+/* ONE bounded surface, not a picture with a caption under it. The picture is
+   flush to the card's own edges and the card clips it, the name sits in a padded
+   foot below, and a single hairline draws the whole object — which is what makes
+   it read as a card rather than as two things that happen to be stacked.
+
+   No shadow at rest: the sheet the card opens is the only lifted thing in this
+   chapter, and giving the cards one too would flatten that difference. The card
+   is drawn by its border and its tone. */
+.ch2-card{
+  position:relative;min-width:0;display:flex;flex-direction:column;
+  background:var(--surface,#faf4e6);
+  border:1px solid var(--edge);border-radius:16px;
+  overflow:hidden;
 }
+.ch2-card-art{display:block;background:var(--paper,#EDE4D0)}
 .ch2-card-art img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+/* the hairline between the picture and the name — the same rule the chapter
+   draws under every sub-heading, doing the same job in a smaller place */
+.ch2-card-text{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:clamp(14px,1.5vw,20px);border-top:1px solid var(--edge);
+}
 
 /* the heading is the card's label; the button inside it covers the whole card.
    `margin-top:0` because the chapter's own rule gives every `.ch2-sub` a
    `--flow-part` (66px) above it — the step before a new movement in a column of
    prose. Inside a card that rule opened a canyon between the picture and the
-   words that name it; the card's own `gap` owns this space. */
-.ch2-card .ch2-sub{padding-bottom:0;border-bottom:0;width:100%}
-.chapter-article .ch2-card > .ch2-sub{margin-top:0}
+   words that name it. */
+.ch2-card .ch2-sub{padding-bottom:0;border-bottom:0;width:100%;flex:1 1 auto}
+.chapter-article .ch2-card .ch2-sub{margin-top:0}
 .ch2-card-btn{
   font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;
   text-align:start;cursor:pointer;display:block;width:100%;
 }
-.ch2-card-btn::after{content:"";position:absolute;inset:0;border-radius:16px}
-.ch2-card-btn:focus-visible{outline:none}
-.ch2-card-btn:focus-visible::after{outline:2px solid var(--maroon);outline-offset:4px}
+.ch2-card-btn::after{content:"";position:absolute;inset:0}
+
+/* the chevron: points the way the reader is going, which in RTL is LEFT.
+   A chevron is two borders of a square turned 45°, and WHICH two decides where
+   it points. `border-top` + `border-inline-start` is top + RIGHT in RTL, and at
+   -45° that is an upward „^" — a collapse mark, the opposite of the signal.
+   `border-inline-end` is the left edge here (the chapter's stated convention:
+   inline-start = right = the reading edge, inline-end = left = the outer one),
+   so top + inline-end at -45° is the „<" this needs. */
+.ch2-card-go{flex:none;position:relative;width:18px;height:18px;margin-top:6px}
+.ch2-card-go::before{
+  content:"";position:absolute;top:4px;inset-inline-start:4px;width:9px;height:9px;
+  border-top:2px solid var(--maroon);border-inline-end:2px solid var(--maroon);
+  rotate:-45deg;
+}
+
+/* one state for the whole card, driven from the card and not from the button:
+   the reader is pointing at an object, so the object answers */
+.ch2-card,.ch2-card-btn,.ch2-card-go::before{transition:border-color .2s ease,color .2s ease,background-color .2s ease}
+.ch2-card:hover{border-color:var(--maroon);background:var(--mat,#f5ecd6)}
 .ch2-card:hover .ch2-card-btn{color:var(--maroon-deep);text-decoration:underline;text-underline-offset:6px}
-.ch2-card:hover .ch2-card-art{border-color:var(--maroon)}
-.ch2-card-art,.ch2-card-btn{transition:border-color .2s ease,color .2s ease}
-@media (prefers-reduced-motion:reduce){.ch2-card-art,.ch2-card-btn{transition:none}}
+/* the focus ring belongs to the CARD — the button's own ring would be clipped
+   by the card's `overflow:hidden`, which is what rounds the picture's corners */
+.ch2-card-btn:focus-visible{outline:none}
+.ch2-card:focus-within{outline:2px solid var(--maroon);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){
+  .ch2-card,.ch2-card-btn,.ch2-card-go::before{transition:none}
+}
 
 /* ---- the dialog ----
    `<dialog>` + showModal(): the top layer, the focus trap, Esc and the
