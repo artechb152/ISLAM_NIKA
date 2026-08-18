@@ -77,8 +77,36 @@ export default function ChapterSearch({ containerRef }: { containerRef: RefObjec
 
   const scrollTo = useCallback((range: Range | undefined) => {
     if (!range) return
+    // A match inside a CLOSED <dialog> or <details> measures 0×0, and the guard
+    // below would drop it — the reader would be told the chapter has a hit and
+    // then watch the page not move. Chapter 2 keeps four traits behind dialogs,
+    // so reveal whatever the match is inside before measuring it. The text was
+    // always in the DOM, which is why the walker found it at all.
+    const start = range.startContainer
+    let el: Element | null =
+      start.nodeType === Node.ELEMENT_NODE ? (start as Element) : start.parentElement
+    let inDialog: HTMLDialogElement | null = null
+    while (el) {
+      const panel = el.closest('details, dialog')
+      if (!panel) break
+      if (panel instanceof HTMLDialogElement) {
+        if (!panel.open) panel.showModal()
+        inDialog = inDialog ?? panel
+      } else {
+        ;(panel as HTMLDetailsElement).open = true
+      }
+      el = panel.parentElement
+    }
     const rect = range.getBoundingClientRect()
     if (!rect.height && !rect.width) return
+    // Inside a modal the window does not scroll — the sheet does. Bring the match
+    // into view within its own scroll container instead.
+    if (inDialog) {
+      const target =
+        start.nodeType === Node.ELEMENT_NODE ? (start as Element) : start.parentElement
+      target?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      return
+    }
     window.scrollTo({ top: window.scrollY + rect.top - HEADER_OFFSET, behavior: 'smooth' })
   }, [])
 

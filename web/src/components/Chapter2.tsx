@@ -224,6 +224,92 @@ function Cycle({ refs }: { refs: [string, string] }) {
   )
 }
 
+/* ---------------- the four traits: a row of cards, each opening a dialog ------
+
+   The pictures are chosen from what the SOURCE says caused each trait, not for
+   decoration — none of the four is an illustration of the thing itself:
+
+     עצביה      a moonlit empty desert. §15: „קשה מאוד, ולעיתים בלתי אפשרי, לחיות
+                במדבר כאדם בודד… בשל הסכנות והתנאים הקשים התפתחה נאמנות הדדית".
+                The danger in that picture is the reason the loyalty exists.
+     מרואה      two riders with spears — §17's „חזק. חסון. לוחם. צייד."
+     קבורת בנות drought. §20 names the cause outright: „בתקופות של רעב ובצורת".
+                The subject is infanticide; the picture is the famine, and that
+                is a deliberate limit, not a failure of nerve.
+     ת'אר       the two camps on facing slopes, which is §23 entire.            */
+const TRAIT_ART: Record<string, { src: string; alt: string; cut?: boolean }> = {
+  asabiyya: { src: 'desert-night.jpg', alt: 'מדבר ריק תחת ירח מלא, בלי נפש חיה' },
+  muruwa: { src: 'raiders.webp', alt: 'שני רוכבים על גמלים, אוחזים ברמחים', cut: true },
+  wad: { src: 'desert-noon.jpg', alt: 'מישור מדברי יבש ושחון בשעת צהריים' },
+  thar: { src: 'two-camps.jpg', alt: 'שני מחנות שבטיים על מדרונות נגדיים של אותו ואדי, בשעת ערב' },
+}
+
+/** Open a trait's dialog. Addressed by id rather than through a ref because the
+    rail links to the same id from outside this subtree. */
+function openTrait(id: string): void {
+  const d = document.getElementById(`trait-${id}`) as HTMLDialogElement | null
+  if (d && !d.open) d.showModal()
+}
+
+/** The card. The heading is a real `<h3.ch2-sub>` — the shape gate counts those,
+    the rail anchors to them — and the button lives INSIDE it, stretched over the
+    whole card by `::after`. A `<button>` wrapping an `<h3>` would be invalid
+    (a button may only hold phrasing content) and would cost the heading. */
+function TraitCard({ id }: { id: string }) {
+  const s = sub('culture', id)
+  const art = TRAIT_ART[id]
+  return (
+    <article className="ch2-card" data-reveal>
+      <span className={'ch2-card-art' + (art.cut ? ' is-cut' : '')}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/assets/chapter2/${art.src}`} alt={art.alt} />
+      </span>
+      <h3 className="ch2-sub" id={id}>
+        <button type="button" className="ch2-card-btn" onClick={() => openTrait(id)}>
+          {s.title}
+          {s.term && <span> ({s.term})</span>}
+        </button>
+      </h3>
+    </article>
+  )
+}
+
+/** The dialog behind a card.
+
+    A real `<dialog>` + `showModal()`: focus trap, Esc, inertness of the page
+    behind it and the top layer all come from the platform. And — the reason it
+    is a dialog rather than a component mounted on demand — **its children are in
+    the DOM whether it is open or not**. `audit.mjs` proves every source fragment
+    reaches the page, and the chapter's own search walks text nodes; a popup that
+    rendered its content only when opened would pass the gate silently and go
+    invisible to search, which is the §6.a failure told again. */
+function TraitDialog({ id, children }: { id: string; children: React.ReactNode }) {
+  const s = sub('culture', id)
+  return (
+    <dialog
+      className="ch2-modal"
+      id={`trait-${id}`}
+      aria-labelledby={`${id}-modal-title`}
+      /* the backdrop is part of the dialog's own box, so a click that lands on
+         the element itself — and not on the panel inside it — is a click outside */
+      onClick={(e) => { if (e.target === e.currentTarget) (e.currentTarget as HTMLDialogElement).close() }}
+    >
+      <div className="ch2-modal-panel">
+        <form method="dialog">
+          <button className="ch2-modal-close" aria-label="סגירת החלון">
+            <span aria-hidden="true">×</span>
+          </button>
+        </form>
+        <h3 className="ch2-modal-title" id={`${id}-modal-title`}>
+          {s.title}
+          {s.term && <span> ({s.term})</span>}
+        </h3>
+        <div className="ch2-modal-body">{children}</div>
+      </div>
+    </dialog>
+  )
+}
+
 /** A sentence the source itself marks as a quotation.
     Chapter 6's own treatment — `.shahada-quote`: a gold-ruled card with bracket
     corners and a quotation mark hung at each end. Same object, same marks.
@@ -637,7 +723,7 @@ export default function Chapter2() {
                             href={`#${sb.id}`}
                             className={currentSub === sb.id ? 'is-current' : undefined}
                             aria-current={currentSub === sb.id ? 'true' : undefined}
-                            onClick={() => { onMenuJump(); setDrawer(false) }}
+                            onClick={() => { openTrait(sb.id); onMenuJump(); setDrawer(false) }}
                           >
                             {sb.title}
                           </a>
@@ -719,100 +805,89 @@ export default function Chapter2() {
                   culture DOES when it meets famine and blood. They are sub-headings
                   here, where they belong, and the chapter runs six sections. */}
               <Section id="culture">
-                <div className="ch2-bleedwrap">
-                  <div className="ch2-bleed-img" aria-hidden="true">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/assets/chapter2/arbiter.webp" alt="" loading="lazy" />
-                  </div>
-                  <Head id="culture" />
-                  <div className="ch2-body" data-reveal>
-                    <T r={['§13.a', '§14.a']} em={['אתגר לקיומם של חוקי מדינה', 'קודם כול לחוקי השבט']} />
-                    {/* §14.b is the word „לדוגמה:" and a colon — it introduces the
-                        two lines under it. Fused into the paragraph above, the
-                        example ran straight on from the claim, and §14.no ("לא
-                        באמצעות מנגנונים מדינתיים כמו משטרה או בתי משפט") landed as
-                        a sentence with no verb in it. It leads its own line now. */}
-                    <T r={['§14.b', '§14.yes', '§14.no']} em={['בורר שבטי']} />
-                  </div>
-                  {/* עצביה opens INSIDE the illustrated block, beside the arbiter
-                      rather than below him: he is tall, and everything down his
-                      full height belongs in the column he leaves free. */}
-                  <SubHead section="culture" id="asabiyya" />
-                  <div className="ch2-body" data-reveal>
-                    <T r={['§15.a', '§15.b']} em={['בלתי אפשרי']} />
-                  </div>
-                  <Cycle refs={['§15.one', '§15.many']} />
-                </div>
-
-                <div className="ch2-body ch2-after-device" data-reveal>
-                  <T r="§16.a" />
-                </div>
-                <Verse r="§16.poem" />
+                <Head id="culture" />
                 <div className="ch2-body" data-reveal>
-                  <T r="§16.b" />
+                  <T r={['§13.a', '§14.a']} em={['אתגר לקיומם של חוקי מדינה', 'קודם כול לחוקי השבט']} />
+                  {/* §14.b is the word „לדוגמה:" and a colon — it introduces the
+                      two lines under it. Fused into the paragraph above, the
+                      example ran straight on from the claim, and §14.no ("לא
+                      באמצעות מנגנונים מדינתיים כמו משטרה או בתי משפט") landed as
+                      a sentence with no verb in it. It leads its own line now. */}
+                  <T r={['§14.b', '§14.yes', '§14.no']} em={['בורר שבטי']} />
                 </div>
 
-                {/* מרואה and קבורת בנות FACE each other on a wide screen, rather
-                    than running one under the other down the reading column.
+                {/* THE FOUR TRAITS — one row of cards, each opening its own
+                    dialog. The row is the whole of this culture at a glance;
+                    everything the source says about each trait is behind it. */}
+                <div className="ch2-cards">
+                  <TraitCard id="asabiyya" />
+                  <TraitCard id="muruwa" />
+                  <TraitCard id="wad" />
+                  <TraitCard id="thar" />
+                </div>
 
-                    Not a layout trick to fill the empty outer half: §21 says the
-                    custom „נבע מהתפיסה שנשים נחותות מבחינה פיזית ואינן מסוגלות
-                    להילחם כמו גברים" — which is the מרואה ideal (חזק, חסון, לוחם)
-                    turned against half the tribe. Set side by side, the custom
-                    stands next to the value it comes from, and the reader can see
-                    both at once. Stacked (below the breakpoint) the DOM order is
-                    unchanged and it reads מרואה → קבורת בנות, as it did before. */}
-                <div className="ch2-facing">
-                  <div className="ch2-facing-col">
-                    <SubHead section="culture" id="muruwa" />
-                    <div className="ch2-body" data-reveal>
+                <div className="ch2-modals">
+                  <TraitDialog id="asabiyya">
+                    <div className="ch2-body">
+                      <T r={['§15.a', '§15.b']} em={['בלתי אפשרי']} />
+                    </div>
+                    <Cycle refs={['§15.one', '§15.many']} />
+                    <div className="ch2-body ch2-after-device">
+                      <T r="§16.a" />
+                    </div>
+                    <Verse r="§16.poem" />
+                    <div className="ch2-body">
+                      <T r="§16.b" />
+                    </div>
+                  </TraitDialog>
+
+                  <TraitDialog id="muruwa">
+                    <div className="ch2-body">
                       <T r={['§17.a', '§17.list', '§18.a', '§18.list']} em={['נדיב']} />
                       <T r="§19.a" em={['מעמדו וכבודו']} />
                     </div>
-                  </div>
-                  <div className="ch2-facing-col">
-                    <SubHead section="culture" id="wad" />
-                    <div className="ch2-body" data-reveal>
+                  </TraitDialog>
+
+                  {/* §21 derives this custom from the מרואה ideal itself, which is
+                      why that clause is the emphasis */}
+                  <TraitDialog id="wad">
+                    <div className="ch2-body">
                       <T r={['§20.a', '§21.a', '§22.a', '§22.list']} em={['אינן מסוגלות להילחם כמו גברים']} />
                     </div>
-                  </div>
-                </div>
+                  </TraitDialog>
 
-                <SubHead section="culture" id="thar" />
-                {/* two camps on opposite slopes of one valley: the whole of §23 in
-                    a picture — the offence is between GROUPS, across a distance.
-                    It runs to the window edge, because DISTANCE is the subject:
-                    the widest thing in the chapter, cropped to a band. */}
-                <figure className="ch2-plate is-bleed" data-reveal>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/assets/chapter2/two-camps.jpg" alt="שני מחנות שבטיים על מדרונות נגדיים של אותו ואדי, בשעת ערב" loading="lazy" />
-                </figure>
-                <div className="ch2-body ch2-after-device" data-reveal>
-                  <T r={['§23.a', '§23.b']} em={['מוסד חברתי מרכזי']} />
-                </div>
-                {/* the diagram IS the text: one default and the two ways out of it */}
-                <div className="ch2-diagram" data-reveal>
-                  <div className="ch2-diagram-node is-default">
-                    <b>ברירת המחדל</b>
-                    <p>{text('§24.a')}</p>
-                  </div>
-                  <p className="ch2-diagram-label">{text('§25.a')}</p>
-                  {/* both exits carry their own term in parentheses — "תשלום כופר
-                      נפש (עטוה)" — so a heading above them said the word twice.
-                      The term is emphasised inside the sentence instead. */}
-                  <div className="ch2-diagram-exits">
-                    <div className="ch2-diagram-node">
-                      <T r="§25.atwa" em={[termOf('§25.atwa')]} />
+                  <TraitDialog id="thar">
+                    {/* no picture inside this one: the two camps ARE the card the
+                        reader just clicked, and repeating the same painting two
+                        seconds later says nothing the card has not already said */}
+                    <div className="ch2-body">
+                      <T r={['§23.a', '§23.b']} em={['מוסד חברתי מרכזי']} />
                     </div>
-                    <div className="ch2-diagram-node">
-                      <T r="§25.sulh" em={[termOf('§25.sulh')]} />
+                    {/* the diagram IS the text: one default and the two ways out */}
+                    <div className="ch2-diagram">
+                      <div className="ch2-diagram-node is-default">
+                        <b>ברירת המחדל</b>
+                        <p>{text('§24.a')}</p>
+                      </div>
+                      <p className="ch2-diagram-label">{text('§25.a')}</p>
+                      {/* both exits carry their own term in parentheses — "תשלום
+                          כופר נפש (עטוה)" — so a heading above them said the word
+                          twice. The term is emphasised inside the sentence. */}
+                      <div className="ch2-diagram-exits">
+                        <div className="ch2-diagram-node">
+                          <T r="§25.atwa" em={[termOf('§25.atwa')]} />
+                        </div>
+                        <div className="ch2-diagram-node">
+                          <T r="§25.sulh" em={[termOf('§25.sulh')]} />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                    <div className="ch2-body ch2-after-device">
+                      <T r={['§25.b', '§26.a']} em={['הסבלנות']} />
+                    </div>
+                    <Saying r="§26.quote" />
+                  </TraitDialog>
                 </div>
-                <div className="ch2-body ch2-after-device" data-reveal>
-                  <T r={['§25.b', '§26.a']} em={['הסבלנות']} />
-                </div>
-                <Saying r="§26.quote" />
               </Section>
 
               {/* ============ 05 · Mecca and the Kaaba ============ */}

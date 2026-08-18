@@ -55,8 +55,7 @@
    at 27, 51, 56, 62, 70, 78 — six different values for the same relationship.
    One rule owns the space between blocks; the rest declare none. */
 .chapter-article .article-section > * + *,
-.chapter-article .ch2-withmap > * + *,
-.chapter-article .ch2-bleedwrap > *:not(.ch2-bleed-img) + *{margin-top:var(--flow)}
+.chapter-article .ch2-withmap > * + *{margin-top:var(--flow)}
 .chapter-article .section-heading,
 .chapter-article .ch2-sub,
 .chapter-article .ch2-hero{margin-bottom:0}
@@ -69,10 +68,9 @@
 .chapter-article .article-section > .ch2-quote,
 .chapter-article .article-section > .ch2-verse,
 .chapter-article .article-section > .ch2-saying,
-.chapter-article .article-section > .ch2-statement,
-.chapter-article .ch2-bleedwrap > .ch2-quote,
-.chapter-article .ch2-bleedwrap > .ch2-verse,
-.chapter-article .ch2-bleedwrap > .ch2-saying{margin-top:var(--flow-lead)}
+.chapter-article .article-section > .ch2-statement{margin-top:var(--flow-lead)}
+/* the card row is a movement of its own: a full step before what follows it */
+.chapter-article .ch2-cards + *{margin-top:var(--flow-part)}
 .chapter-article .ch2-quote + *,
 .chapter-article .ch2-verse + *,
 .chapter-article .ch2-saying + *,
@@ -239,43 +237,115 @@
 }
 .ch2-pair dd{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
 
-/* ================= two traits FACING each other =================
-   מרואה on the reading edge, קבורת בנות in the outer column beside it, instead
-   of the second running under the first down one column. §21 derives the custom
-   from the מרואה ideal itself („אינן מסוגלות להילחם כמו גברים"), so the two
-   belong in one glance — and the outer half of a wide page, which this stretch
-   of the chapter left empty, is where that second column goes.
+/* ============ the four traits: one row of cards, each opening a dialog ========
+   עצביה · מרואה · קבורת בנות · ת'אר, side by side across the column — the whole
+   of this culture in one look, with everything the source says behind each card.
 
-   THE BREAKPOINT IS MEASURED, not chosen. Two prose columns each need a readable
-   line, and the article's own floor is 62 characters. Measured with the rail
-   OPEN, the worse of the two states:
-
-     window 1600 → article 1172px → 56 chars per column   ✗ under the floor
-     window 1760 → article 1332px → 63 chars per column   ✓
-     window 1920 → article 1492px → 71 chars per column
-
-   So 1760px, and below it the two stack in DOM order exactly as before.
-   Each column also carries the chapter's own ceiling: past ~2200px two columns
-   of the full article would run 85+ characters and keep growing, so the pair
-   caps at two measures and a gutter and stays on the reading edge. */
-
-/* STACKED — the default, and it must be declared BEFORE the grid: these two
-   selectors carry the same weight as the ones inside the media query, so the
-   later of the two wins regardless of the query. The second trait opens a new
-   movement, which is the step the chapter gives every sub-heading. */
-.chapter-article .ch2-facing > * + *{margin-top:var(--flow-part)}
-.chapter-article .ch2-facing-col > * + *{margin-top:var(--flow)}
-
-@media (min-width:1760px){
-  .ch2-facing{
-    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-    gap:clamp(26px,2.8vw,40px);align-items:start;
-    max-width:calc(2 * var(--measure,880px) + 40px);
-  }
-  .ch2-facing .ch2-facing-col{min-width:0}
-  /* the grid gap owns the space between the columns now, not a margin */
-  .chapter-article .ch2-facing > * + *{margin-top:0}
+   ALL FOUR IN ONE ROW, at every width down to the phone. Four is a small enough
+   number to hold a row, and the row is the point: the traits are a set, and a
+   set that wraps to two lines stops looking like one. Below the point where four
+   cards would be narrower than a thumb, the row SCROLLS sideways instead of
+   wrapping — the shape survives, the reader swipes. */
+.ch2-cards{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(12px,1.6vw,22px);width:100%;
 }
+@media (max-width:700px){
+  .ch2-cards{
+    grid-template-columns:repeat(4,minmax(190px,1fr));
+    overflow-x:auto;scroll-snap-type:x mandatory;
+    /* the row reaches the window edge as it scrolls, so the last card does not
+       look clipped by the column it is escaping */
+    margin-inline:calc(-1 * var(--content-gutter));
+    padding-inline:var(--content-gutter);padding-bottom:10px;
+  }
+  .ch2-card{scroll-snap-align:start}
+}
+
+.ch2-card{position:relative;min-width:0;display:flex;flex-direction:column;gap:14px}
+.ch2-card-art{
+  display:block;overflow:hidden;border:1px solid var(--edge);border-radius:14px;
+  /* the PAGE's parchment, not `--mat`. --mat (#f5ecd6) is lighter than the page
+     (#EDE4D0), so behind the cutout it lit up as a bright rectangle between
+     three dark paintings — a hole in the row. On the page's own tone the riders
+     read as drawn onto the paper, which is how this chapter has treated every
+     cutout, and the hairline is what makes it a card. */
+  background:var(--paper,#EDE4D0);
+}
+.ch2-card-art img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+/* a CUTOUT (the riders) has no ground of its own — cropped to fill it would lose
+   the spears and the camels' legs, which is the whole of what it shows. It sits
+   whole on the card's parchment instead. */
+.ch2-card-art.is-cut img{object-fit:contain;padding:8px}
+
+/* the heading is the card's label; the button inside it covers the whole card.
+   `margin-top:0` because the chapter's own rule gives every `.ch2-sub` a
+   `--flow-part` (66px) above it — the step before a new movement in a column of
+   prose. Inside a card that rule opened a canyon between the picture and the
+   words that name it; the card's own `gap` owns this space. */
+.ch2-card .ch2-sub{padding-bottom:0;border-bottom:0;width:100%}
+.chapter-article .ch2-card > .ch2-sub{margin-top:0}
+.ch2-card-btn{
+  font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;
+  text-align:start;cursor:pointer;display:block;width:100%;
+}
+.ch2-card-btn::after{content:"";position:absolute;inset:0;border-radius:16px}
+.ch2-card-btn:focus-visible{outline:none}
+.ch2-card-btn:focus-visible::after{outline:2px solid var(--maroon);outline-offset:4px}
+.ch2-card:hover .ch2-card-btn{color:var(--maroon-deep);text-decoration:underline;text-underline-offset:6px}
+.ch2-card:hover .ch2-card-art{border-color:var(--maroon)}
+.ch2-card-art,.ch2-card-btn{transition:border-color .2s ease,color .2s ease}
+@media (prefers-reduced-motion:reduce){.ch2-card-art,.ch2-card-btn{transition:none}}
+
+/* ---- the dialog ----
+   `<dialog>` + showModal(): the top layer, the focus trap, Esc and the
+   inertness of the page behind it are the platform's, not ours. */
+.ch2-modals{display:contents}
+.ch2-modal{
+  border:0;padding:0;background:none;max-width:none;max-height:none;
+  width:100%;height:100%;
+}
+.ch2-modal::backdrop{background:rgba(60,44,29,.62)}
+.ch2-modal-panel{
+  position:relative;margin:auto;
+  width:min(var(--measure,880px) + 96px,calc(100% - 32px));
+  max-height:calc(100dvh - 64px);overflow-y:auto;
+  /* `--surface` — the chapter's brightest raised inset. The sheet is lifted off
+     a darkened page, so it takes the raised tone, not the page's own. */
+  background:var(--surface,#faf4e6);border:1px solid var(--edge);border-radius:18px;
+  padding:clamp(26px,3.6vw,52px);
+  /* the panel is a sheet lifted off the page; the chapter has no other shadow,
+     and this one exists only to separate it from the darkened article behind */
+  box-shadow:0 24px 60px rgba(60,44,29,.34);
+}
+/* centre the sheet in the viewport — the dialog itself is the full window */
+.ch2-modal{display:none}
+.ch2-modal[open]{display:flex;align-items:center;justify-content:center}
+
+.ch2-modal-close{
+  position:absolute;inset-block-start:14px;inset-inline-end:14px;
+  width:40px;height:40px;display:grid;place-items:center;
+  font-size:26px;line-height:1;color:var(--maroon);
+  background:none;border:1px solid var(--edge);border-radius:50%;cursor:pointer;
+}
+.ch2-modal-close:hover{color:var(--maroon-deep);border-color:var(--maroon)}
+.ch2-modal-close:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+
+.ch2-modal-title{
+  font-family:var(--font-heading);font-size:var(--sub);font-weight:700;color:var(--maroon);
+  line-height:1.2;width:fit-content;max-width:100%;margin:0 0 var(--flow-lead);
+  padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);
+}
+.ch2-modal-title span{font-family:var(--ui,"Segoe UI",Tahoma,sans-serif);font-weight:400;font-size:.72em;color:var(--maroon)}
+.chapter-article .ch2-modal-body > * + *{margin-top:var(--flow)}
+.chapter-article .ch2-modal-body > .ch2-verse,
+.chapter-article .ch2-modal-body > .ch2-saying,
+.chapter-article .ch2-modal-body > .ch2-quote{margin-top:var(--flow-lead)}
+/* inside the sheet the prose has the sheet's own width; the measure is set by
+   the panel, so a second ceiling here would only narrow it twice */
+.ch2-modal-body .ch2-body,
+.ch2-modal-body .ch2-diagram,
+.ch2-modal-body .ch2-cycle{max-width:none}
 
 /* ============================ 02 · the desert stage ============================
    The chapter's one full-screen device: five conditions of ONE valley, advanced
@@ -432,77 +502,6 @@
   .ch2-stage-said{font-size:21px;line-height:1.5;min-height:7em}
 }
 
-/* ============================ 03 · the arbiter ============================
-   Opens on the illustration, with the heading beside it — chapter 6 does exactly
-   this with the shahada's minaret. Bleeds off the OUTER (left) edge in RTL. */
-/* the illustrated block. Its height is the PLATE's height, because everything
-   inside it reads down the column the arbiter leaves free — heading, the tribal
-   law paragraph, עצביה and its pair. Sized shorter, the sub-heading dropped
-   below the figure and left a field of empty parchment beside him. */
-.ch2-bleedwrap{
-  position:relative;isolation:isolate;min-height:clamp(300px,50vw,690px);
-  /* ONE number for the plate, used twice: the figure's width and the room the
-     prose gives it. Declared apart from both so they cannot drift. */
-  --plate:clamp(320px,44%,600px);
-  /* the gap is a share of the page, not a fixed number: the plate stops
-     growing at 600px and the page does not, so a fixed gap kept shrinking as a
-     proportion of what the reader sees. Marked on a wide screen at ~11%. */
-  --plate-gap:clamp(34px,11%,240px);
-  /* WHERE THE PROSE STARTS. Padding on the wrapper rather than a margin on each
-     child: the sub-heading is sized to its own text and would otherwise
-     auto-margin to the far edge, out of line with the paragraph above it. */
-  padding-inline-start:calc(var(--plate) - var(--content-gutter) + var(--plate-gap));
-}
-/* The plate starts ONE PIXEL below where the desert stage ends. The stage runs
-   down to this section's hairline (its negative bottom margin cancels the
-   section's margin-top), and this offset cancels the section's padding-top —
-   so the watercolour begins exactly where the photograph stopped, with no band
-   of parchment between them. Anchored by the BOTTOM, as it was, a tall plate
-   grew upward instead and climbed into the section above. */
-.ch2-bleed-img{
-  position:absolute;top:calc(1px - clamp(46px,6vw,84px));
-  inset-inline-start:calc(-1 * var(--content-gutter));
-  width:var(--plate);z-index:0;pointer-events:none;user-select:none;
-  /* mirrored with the side. He is drawn seated with his hand held out to one
-     side; moved across the page unflipped, that hand pointed off the paper and
-     away from the text he is illustrating. Nothing in the plate reads as
-     handed — no lettering, no asymmetric object — so the flip costs nothing. */
-  transform:scaleX(-1);
-}
-/* No blend mode, no CSS mask, no opacity: the plate has no background left to
-   hide. `mix-blend-mode:multiply` could never hide the sheet, because the
-   watercolour paper multiplied by the page still lands lighter than the page —
-   so a bright rectangle sat on the parchment with four visible edges. The paper
-   is cut away in the file itself, by scripts/ch2-arbiter.mjs. */
-.ch2-bleed-img img{display:block;width:100%;height:auto}
-/* EVERY child stays in the free column, not just the prose — the sub-heading and
-   the הפרט/השבט pair sit here too, and at full width the pair ran straight over
-   the figure. The pair's two columns are simply narrower here; that is the
-   correct answer, not a second layout for it. */
-/* the free column IS the measure here — the 60ch cap left the prose stopping
-   short of the page edge with a second empty band beyond it, which is the thing
-   the plate was moved across the page to close. */
-.ch2-bleedwrap > *:not(.ch2-bleed-img){position:relative;z-index:1;width:min(99ch,100%)}
-/* …including the two devices that carry the chapter-wide measure of their own.
-   Left capped at 880px they ended 250px short of the heading above them, so the
-   marked column had two different outer edges — the heading's and the prose's.
-   Inside this block the free column IS the measure, and everything in it shares
-   both edges: the plate's on one side, the page's on the other. */
-.ch2-bleedwrap > .ch2-body,
-.ch2-bleedwrap > .ch2-cycle{max-width:none}
-.ch2-bleedwrap > .ch2-sub{width:fit-content;max-width:100%}
-/* 1300px, not 900px: pushing the prose out to the midpoint costs it width, and
-   measured at 1024px the free column came out 323px — 28 characters, which is
-   not a line. Below this the figure hides and the prose takes the page, which
-   is what chapter 6 does with its own bleed illustration. */
-@media(max-width:1300px){
-  .ch2-bleed-img{display:none}
-  .ch2-bleedwrap{min-height:0;padding-inline-start:0}
-  .ch2-bleedwrap > *:not(.ch2-bleed-img,.ch2-sub){width:100%}
-  /* the sub-heading’s rule underlines its TEXT, at every width — stretched to
-     100% it reads as a section divider instead of a heading */
-  .ch2-bleedwrap > .ch2-sub{width:fit-content;max-width:100%}
-}
 
 /* ============================ quotations ============================
    The poem, the Bedouin proverb and the hadith are the three places the source

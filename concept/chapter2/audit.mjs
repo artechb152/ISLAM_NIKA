@@ -118,8 +118,11 @@ const result = await page.evaluate(() => {
   if (info.medianChars > 95) fail.push(`${info.medianChars} תווים בשורה — בפרק 6 החציון הוא 84`)
   if (info.medianChars < 62) fail.push(`${info.medianChars} תווים בשורה — צר מדי, בפרק 6 החציון הוא 84`)
 
-  /* the chapter must not be one width all the way down */
-  const blockWidths = [...document.querySelectorAll('.chapter-article .ch2-body, .chapter-article figure, .chapter-article .ch2-pair, .chapter-article .ch2-diagram')]
+  /* the chapter must not be one width all the way down.
+     `.ch2-cards` joined this list when the four traits became a row of cards:
+     it is a full-column block and it is what fills the column in section 03
+     now that the two-camps band is the card rather than a plate in the flow. */
+  const blockWidths = [...document.querySelectorAll('.chapter-article .ch2-body, .chapter-article figure, .chapter-article .ch2-pair, .chapter-article .ch2-diagram, .chapter-article .ch2-cards')]
     .map((e) => Math.round(e.getBoundingClientRect().width))
     .filter((w) => w > 0)
   info.distinctWidths = new Set(blockWidths).size
@@ -195,12 +198,26 @@ const result = await page.evaluate(() => {
      as "repetitive and not aligned like chapter 6, which plays right/centre":
      measured, chapter 6 sets 39 of 154 blocks off its right column and this one
      set 8 — five of which were inside one card. Seven sections down a single
-     axis is what made every section read as the same shape. */
-  const offAxis = [...document.querySelectorAll('.chapter-article .article-section *')]
+     axis is what made every section read as the same shape.
+
+     LEAVING THE COLUMN IS NOT ONLY CENTRING. This counted centred text and
+     nothing else, which was a fair proxy while every section was a single
+     column of prose with the occasional centred declaration. Section 03 is now
+     a row of four cards spanning the whole column — as plain a departure from
+     the reading column as the chapter makes — and the old measure scored it
+     zero, because a card's label is aligned to its own start. So a section
+     counts if it centres something OR if it puts a block materially wider than
+     the measure on the page. Content inside a closed dialog is invisible and
+     correctly counts for nothing. */
+  const MEASURE = 880
+  const offAxisEls = [...document.querySelectorAll('.chapter-article .article-section *')]
     .filter((el) => !el.closest('.ch2-stage'))
     .filter((el) => el.getBoundingClientRect().width > 60)
-    .filter((el) => getComputedStyle(el).textAlign === 'center')
-  info.offAxis = new Set(offAxis.map((el) => el.closest('.article-section')?.id)).size
+    .filter((el) => {
+      const w = el.getBoundingClientRect().width
+      return getComputedStyle(el).textAlign === 'center' || w > MEASURE + 40
+    })
+  info.offAxis = new Set(offAxisEls.map((el) => el.closest('.article-section')?.id)).size
   if (info.offAxis < 3) fail.push(`הפרק כולו על ציר אחד — רק ${info.offAxis} מקטעים יוצאים מעמודת הקריאה`)
 
   /* 5c · and no one costume may dress three different voices. The chapter quotes
@@ -280,53 +297,80 @@ const result = await page.evaluate(() => {
   return { fail: [...new Set(fail)], info }
 })
 
-/* 9b · THE WIDE PASS. Everything above is measured at 1600px, and the facing
-   block — מרואה beside קבורת בנות — only forms at 1760px. Measured at 1600
-   alone, that layout is never looked at by any gate at all: the audit would keep
-   reporting a clean page while the arrangement the reader actually asked for
-   went unchecked, which is exactly how §6.a survived two drafts.
+/* 9b · THE PANELS. The four traits are `<details>`, and a disclosure has exactly
+   one failure mode that matters here: content that is not in the page until the
+   reader clicks. Check 2c above already proves every source fragment is present
+   with three of the four panels SHUT — that is the invariant, and it is only
+   meaningful because these panels keep their children mounted.
 
-   So: reload wide, prove the two columns really are side by side, and hold each
-   one to the same 62-character floor the single column is held to. If a future
-   edit narrows the columns or drops the breakpoint, this fails instead of
-   quietly shipping two unreadable ribbons of prose. */
-await page.setViewport({ width: 1800, height: 1080 })
-await page.reload({ waitUntil: 'networkidle0' })
-await page.evaluate(() => document.fonts.ready)
-await new Promise((r) => setTimeout(r, 1400))
-const wide = await page.evaluate(() => {
+   What is left to prove is that shut is not the resting state of the whole
+   section, that opening one actually reveals it, and that a panel closed by the
+   reader does not take its heading with it. */
+const panels = await page.evaluate(() => {
   const out = []
-  const cols = [...document.querySelectorAll('.ch2-facing-col')]
-  if (cols.length !== 2) {
-    out.push(`לוח הפנים־אל־פנים: ${cols.length} עמודות במקום 2`)
-    return out
-  }
-  const [a, b] = cols.map((c) => c.getBoundingClientRect())
-  if (Math.abs(a.top - b.top) > 40) {
-    out.push('מרואה וקבורת בנות לא זו לצד זו ב־1800px — נקודת השבירה לא נתפסה')
-  }
-  /* the same glyph probe the single-column measure uses */
-  const para = cols[0].querySelector('p')
-  const probe = document.createElement('span')
-  const cs = getComputedStyle(para)
-  probe.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-family:${cs.fontFamily};font-size:${cs.fontSize}`
-  probe.textContent = 'אבגדהוזחטיכלמנסעפצקרשת אבגדהוזחטיכלמנסעפצקרשת'
-  document.body.appendChild(probe)
-  const glyph = probe.getBoundingClientRect().width / probe.textContent.length
-  probe.remove()
-  for (const [i, r] of [a, b].entries()) {
-    const chars = Math.round(r.width / glyph)
-    if (chars < 62) out.push(`עמודה ${i + 1} בלוח הפנים־אל־פנים: ${chars} תווים — מתחת לרצפה של 62`)
-    if (chars > 95) out.push(`עמודה ${i + 1} בלוח הפנים־אל־פנים: ${chars} תווים — מעל התקרה של 95`)
+  const cards = [...document.querySelectorAll('.ch2-card')]
+  if (cards.length !== 4) out.push(`${cards.length} כרטיסיות במקום 4`)
+
+  /* ONE ROW. The four are a set, and a set that wraps onto two lines stops
+     reading as one — so this is a measurement, not a preference. */
+  const tops = new Set(cards.map((c) => Math.round(c.getBoundingClientRect().top)))
+  if (tops.size > 1) out.push(`הכרטיסיות נשברו ל־${tops.size} שורות — הן אמורות להיות בשורה אחת`)
+
+  for (const c of cards) {
+    const img = c.querySelector('img')
+    const btn = c.querySelector('.ch2-card-btn')
+    const name = (c.querySelector('.ch2-sub')?.textContent ?? '').trim().slice(0, 22)
+    if (!c.querySelector('.ch2-sub')) out.push('כרטיסייה בלי כותרת משנה — הסרגל לא ימצא אותה')
+    if (!img || !img.complete || img.naturalWidth === 0) out.push(`תמונת כרטיסייה לא נטענה: ${name}`)
+    if (!img?.getAttribute('alt')) out.push(`תמונת כרטיסייה בלי alt: ${name}`)
+    /* the click target is the whole card, and it must be one a finger can hit */
+    const r = btn.getBoundingClientRect()
+    if (r.width < 24 || r.height < 24) out.push(`יעד לחיצה קטן מדי בכרטיסייה: ${name}`)
   }
   return out
 })
-result.fail.push(...wide)
+result.fail.push(...panels)
+
+/* Every dialog must ALREADY hold its text — that is the whole reason these are
+   `<dialog>` elements and not content mounted on click. Check 2c above proves it
+   for the page as a whole with all four shut; this proves each sheet opens onto
+   something, and that closing it puts the page back as it was. */
+const opened = await page.evaluate(async () => {
+  const out = []
+  const dialogs = [...document.querySelectorAll('.ch2-modal')]
+  if (dialogs.length !== 4) out.push(`${dialogs.length} חלונות במקום 4`)
+  for (const d of dialogs) {
+    const name = (d.querySelector('.ch2-modal-title')?.textContent ?? '').trim().slice(0, 22)
+    if (d.open) out.push(`חלון פתוח בטעינת העמוד: ${name}`)
+    d.showModal()
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    const panel = d.querySelector('.ch2-modal-panel')
+    const pr = panel.getBoundingClientRect()
+    if (pr.height < 120) out.push(`חלון שנפתח אל כלום: ${name} (${Math.round(pr.height)}px)`)
+    /* the sheet must fit the window — a panel taller than the viewport with no
+       scroll of its own would strand the end of נקמת דם out of reach */
+    if (pr.height > window.innerHeight + 1) out.push(`חלון גבוה מהמסך ואינו נגלל: ${name}`)
+    if (pr.width > window.innerWidth + 1) out.push(`חלון רחב מהמסך: ${name}`)
+    if (!d.querySelector('.ch2-modal-close')) out.push(`חלון בלי כפתור סגירה: ${name}`)
+    d.close()
+  }
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+  if (document.querySelectorAll('.ch2-modal[open]').length) out.push('חלון נשאר פתוח אחרי סגירה')
+  return out
+})
+result.fail.push(...opened)
 
 /* 10 · mobile. Document width is not enough: anything inside `overflow:hidden`
    is CLIPPED rather than scrolled, so the stage cut 30px off the start of every
    line at 390px while this check reported a clean page. Measure each element
-   against the viewport as well. */
+   against the viewport as well.
+
+   What this rule is really about is content the reader cannot REACH. Content
+   sitting outside the window inside a container the reader can scroll sideways
+   is reachable, so the traits' card row — four cards that stay one row on a
+   phone and swipe — is not a finding. The exemption is written against the
+   computed overflow rather than against the class name, so it holds for any
+   scroller and cannot be used to wave through a clipped one. */
 await page.setViewport({ width: 390, height: 844, isMobile: true })
 await page.reload({ waitUntil: 'networkidle0' })
 await new Promise((r) => setTimeout(r, 1400))
@@ -335,10 +379,19 @@ const mobile = await page.evaluate(() => {
   if (document.documentElement.scrollWidth > document.documentElement.clientWidth + 1) {
     out.push('גלישה אופקית במובייל')
   }
+  /* is this element inside something the reader can scroll sideways? */
+  const inScroller = (el) => {
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      const ox = getComputedStyle(p).overflowX
+      if ((ox === 'auto' || ox === 'scroll') && p.scrollWidth > p.clientWidth + 1) return true
+    }
+    return false
+  }
   for (const el of document.querySelectorAll('.chapter-article *')) {
     const r = el.getBoundingClientRect()
     if (r.width === 0 || el.ownerSVGElement) continue
     if (r.left < -1 || r.right > window.innerWidth + 1) {
+      if (inScroller(el)) continue
       out.push(`נחתך במובייל: ${el.tagName}.${(el.className || '').toString().slice(0, 24)} (${Math.round(r.left)}…${Math.round(r.right)})`)
     }
   }
