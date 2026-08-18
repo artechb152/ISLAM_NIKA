@@ -59,16 +59,17 @@ const result = await page.evaluate(() => {
   const info = {}
   const secs = [...document.querySelectorAll('.article-section')]
 
-  /* 1 · six sections, six sub-headings — chapter 6's pacing.
-     Was seven, until „שני מנהגים" was folded back into „התרבות השבטית": the
-     source keeps all four traits — עצביה, מרואה, קבורת בנות, ת'אר — under one
-     running head, and splitting the last two into a top-level section made them
-     read as a new subject. The gate that matters was never the number 7; it is
-     that this chapter not run TWELVE thin sections with two sub-headings, which
-     is what the reader felt as „טקסט רץ עם שטחים ריקים". Six sections carrying
-     six sub-headings is the same shape, one section deeper. */
+  /* 1 · SEVEN sections, six sub-headings — one per topic in the content document.
+     The number has moved twice and both moves were content decisions, not taste:
+     down to six when „שני מנהגים" was folded back into „התרבות השבטית" (the
+     source keeps all four traits under one running head), and back up to seven
+     when „ייחוסו של מוחמד וישמעאל" was restored to the front, where the document
+     opens — that material had been folded into „מכה והכעבה" in fifth place.
+     What this gate is really guarding against is never the number: it is TWELVE
+     thin sections with two sub-headings between them, which is what the reader
+     felt as „טקסט רץ עם שטחים ריקים". Seven sections is also chapter 6's count. */
   info.sections = secs.length
-  if (secs.length !== 6) fail.push(`${secs.length} מקטעים ראשיים — הפרק בנוי על 6`)
+  if (secs.length !== 7) fail.push(`${secs.length} מקטעים ראשיים — הפרק בנוי על 7`)
   info.subHeadings = document.querySelectorAll('.chapter-article .ch2-sub').length
   if (info.subHeadings < 6) fail.push(`רק ${info.subHeadings} כותרות משנה — פרק 6 מציב 15`)
 
@@ -441,4 +442,4 @@ if (result.fail.length) {
   console.error('❌\n' + result.fail.map((f) => ' - ' + f).join('\n'))
   process.exit(1)
 }
-console.log('✅ צורת פרק 6: 6 מקטעים, כותרות משנה בפנים, פסקאות בנפח מלא, אפס עיטורים, אפס גלישות')
+console.log('✅ צורת פרק 6: 7 מקטעים, כותרות משנה בפנים, פסקאות בנפח מלא, אפס עיטורים, אפס גלישות')

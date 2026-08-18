@@ -834,7 +834,12 @@ export default function Chapter2() {
             <main className="chapter-article" ref={articleRef}>
 
               {/* ============ 01 · the peninsula ============ */}
-              <Section id="peninsula" className="opening-section">
+              {/* ============ 01 · the lineage, and the Kaaba ============
+                  The content document opens here — „ייחוסו של מוחמד וישמעאל" is
+                  its first topic, and §1–§4 belong to it. An earlier build folded
+                  that material into „מכה והכעבה" in fifth place; it is back at
+                  the front, where the document puts it. */}
+              <Section id="lineage" className="opening-section">
                 <div className="ch2-hero">
                   <div className="ch2-hero-media" aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -847,10 +852,36 @@ export default function Chapter2() {
                     <h1 className="ch2-hero-title">{CH2.title}</h1>
                   </div>
                 </div>
-                {/* `Head`, not a hand-rolled header. This section wrote its own
-                    copy of the markup, so when the ornament was added to `Head`
-                    every section got it EXCEPT the first — the one the reader
-                    sees before any other. One source for the heading. */}
+                <Head id="lineage" />
+                <div className="ch2-body" data-reveal>
+                  <T r="§0.a" em={['ישמעאל']} />
+                </div>
+
+                <SubHead section="lineage" id="kaaba-tradition" />
+                {/* The stops run in the CONTENT DOCUMENT's order — see KAABA_STOPS.
+                    §1.gloss opens with "ומכאן" and points at the migration, so it
+                    rides that stop rather than being printed on its own; it also
+                    names הג'ר itself, which is why no term prefix. §3.aside
+                    comments on the creation stop and rides it for the same
+                    reason. */}
+                <div className="ch2-timeline" data-reveal>
+                  <div className="ch2-stops">
+                    {KAABA_STOPS.map(({ refs, aside }) => (
+                      <div className="ch2-stop" key={refs[0]}>
+                        <T r={refs} em={refs.length > 1 ? [termOf('§1.gloss')] : []} />
+                        {aside && (
+                          <div className="ch2-aside">
+                            <p>{text(aside)}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Section>
+
+              {/* ============ 02 · the peninsula and its tribes ============ */}
+              <Section id="peninsula">
                 <Head id="peninsula" />
                 {/* the map stands BESIDE its prose on a wide screen rather than
                     under it: the paragraphs name the two empires and the trade
@@ -861,7 +892,7 @@ export default function Chapter2() {
                   <div className="ch2-body">
                     {/* §5.a introduces the tribes, so it leads — the layers can
                         then say things ABOUT them without dangling pronouns */}
-                    <T r={['§0.a', '§5.a']} em={['ישמעאל', 'רובם נודדים']} />
+                    <T r="§5.a" em={['רובם נודדים']} />
                     <T r={['§5.b', '§6.a']} em={['בדואים', "בּאדִיה"]} />
                   </div>
                   <PeninsulaChart />
@@ -1021,34 +1052,10 @@ export default function Chapter2() {
               {/* ============ 05 · Mecca and the Kaaba ============ */}
               <Section id="mecca">
                 <Head id="mecca" />
-
-                <SubHead section="mecca" id="kaaba-tradition" />
-                {/* The stops run in the CONTENT DOCUMENT's order — see KAABA_STOPS.
-                    §1.gloss opens with "ומכאן" and points at the migration, so it
-                    rides that stop rather than being printed on its own; it also
-                    names הג'ר itself, which is why no term prefix. §3.aside
-                    comments on the creation stop and rides it for the same
-                    reason. */}
-                <div className="ch2-timeline" data-reveal>
-                  <div className="ch2-stops">
-                    {KAABA_STOPS.map(({ refs, aside }) => (
-                      <div className="ch2-stop" key={refs[0]}>
-                        <T r={refs} em={refs.length > 1 ? [termOf('§1.gloss')] : []} />
-                        {aside && (
-                          <div className="ch2-aside">
-                            <p>{text(aside)}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* the plate stands BESIDE its prose, not above it: what the text
                     describes is a place with things IN it — the Kaaba, the black
                     stone, the 360 idols, Quraysh feeding the pilgrims — so the
                     reader should be able to look while reading. */}
-                <SubHead section="mecca" id="mecca-before" />
                 <div className="ch2-beside" data-reveal>
                   <figure className="ch2-precinct">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
