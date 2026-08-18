@@ -47,7 +47,10 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter1',
         available: true,
       }),
-      ch(2, 'תרבות שבטית טרום עליית האסלאם'),
+      ch(2, 'תרבות שבטית טרום עליית האסלאם', {
+        href: '/chapter2',
+        available: true,
+      }),
     ],
   },
   {
@@ -109,12 +112,17 @@ export const chapterCategories: CategoryDef[] = [
   },
 ]
 
-/* Standalone learning resources shown below the chapter categories. */
-export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' | 'sources' | 'map' }> = [
+/* Standalone learning resources shown below the chapter categories.
+
+   "חדר המבחנים" is the one item that is not reference material: it is where a learner
+   picks the chapters they want to be examined on and the site composes an exam from those
+   chapters' question banks. It stays locked until the chapters — and their banks — exist. */
+export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' | 'sources' | 'map' | 'exam' }> = [
   { id: 'glossary', title: 'מילון מונחים', icon: 'book' },
   { id: 'recommended-reading', title: 'ספרות מומלצת', icon: 'books' },
   { id: 'sources', title: 'מקורות', icon: 'sources' },
   { id: 'maps', title: 'מפות', icon: 'map' },
+  { id: 'exams', title: 'חדר המבחנים', icon: 'exam' },
 ]
 
 export const allChapters: ChapterDef[] = chapterCategories.flatMap((c) => c.chapters)
