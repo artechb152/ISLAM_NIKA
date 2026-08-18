@@ -272,7 +272,11 @@
    is drawn by its border and its tone. */
 .ch2-card{
   position:relative;min-width:0;display:flex;flex-direction:column;
-  background:var(--surface,#faf4e6);
+  /* THE PAGE'S OWN TONE, not `--surface`. --surface (#faf4e6) is the chapter's
+     brightest inset and against the parchment (#EDE4D0) it read as a white
+     panel laid on the page. The card is drawn by its hairline and by the
+     picture inside it; it is not a lighter sheet. */
+  background:var(--paper,#EDE4D0);
   border:1px solid var(--edge);border-radius:16px;
   overflow:hidden;
 }
@@ -312,17 +316,23 @@
   rotate:-45deg;
 }
 
-/* one state for the whole card, driven from the card and not from the button:
-   the reader is pointing at an object, so the object answers */
-.ch2-card,.ch2-card-btn,.ch2-card-go::before{transition:border-color .2s ease,color .2s ease,background-color .2s ease}
-.ch2-card:hover{border-color:var(--maroon);background:var(--mat,#f5ecd6)}
+/* One state for the whole card, driven from the card and not from the button:
+   the reader is pointing at an object, so the object answers.
+
+   THE HOVER DOES NOT TOUCH THE FRAME. A maroon border on hover drew a saturated
+   red outline around the whole card — a hard ring of colour where the chapter
+   has only ever used a hairline, and it read as an alert rather than as a
+   response. The card answers in its TYPE instead: the name darkens and
+   underlines, and the chevron darkens with it. The hairline stays the hairline. */
+.ch2-card-btn,.ch2-card-go::before{transition:color .2s ease,border-color .2s ease}
 .ch2-card:hover .ch2-card-btn{color:var(--maroon-deep);text-decoration:underline;text-underline-offset:6px}
+.ch2-card:hover .ch2-card-go::before{border-color:var(--maroon-deep)}
 /* the focus ring belongs to the CARD — the button's own ring would be clipped
    by the card's `overflow:hidden`, which is what rounds the picture's corners */
 .ch2-card-btn:focus-visible{outline:none}
 .ch2-card:focus-within{outline:2px solid var(--maroon);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){
-  .ch2-card,.ch2-card-btn,.ch2-card-go::before{transition:none}
+  .ch2-card-btn,.ch2-card-go::before{transition:none}
 }
 
 /* ---- the dialog ----
@@ -338,9 +348,10 @@
   position:relative;margin:auto;
   width:min(var(--measure,880px) + 96px,calc(100% - 32px));
   max-height:calc(100dvh - 64px);overflow-y:auto;
-  /* `--surface` — the chapter's brightest raised inset. The sheet is lifted off
-     a darkened page, so it takes the raised tone, not the page's own. */
-  background:var(--surface,#faf4e6);border:1px solid var(--edge);border-radius:18px;
+  /* the page's own parchment here too, for the same reason the cards take it:
+     `--surface` reads as white. The sheet does not need a lighter tone to
+     separate — the darkened backdrop behind it already does all of that. */
+  background:var(--paper,#EDE4D0);border:1px solid var(--edge);border-radius:18px;
   padding:clamp(26px,3.6vw,52px);
   /* the panel is a sheet lifted off the page; the chapter has no other shadow,
      and this one exists only to separate it from the darkened article behind */
