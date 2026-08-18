@@ -227,14 +227,24 @@ function SubHead({ section, id }: { section: string; id: string }) {
   )
 }
 
-/** The Kaaba's five stops, in chronological order — see the note at the
-    timeline for why the source's own order could not be printed as one. */
+/** The Kaaba's five stops, IN THE ORDER THE CONTENT DOCUMENT GIVES THEM.
+
+    An earlier build turned this around into the order the events happened —
+    created at the beginning, destroyed by the flood, Hagar arrives, Mecca is
+    founded, the Kaaba is raised again — because read down a numbered rail the
+    document's own order says Abraham and Ishmael „שיקמו את הכעבה" two stops
+    before anything says it was ever broken.
+
+    That reordering was reverted on request: the document's sequence is the
+    chapter's sequence. The consequence is the one named above and it is now a
+    deliberate, accepted one — the source tells the Hagar story first and only
+    afterwards steps back to say what the Kaaba had been from the creation. */
 const KAABA_STOPS: { refs: string[]; aside?: string }[] = [
-  { refs: ['§3.a'], aside: '§3.aside' },
-  { refs: ['§4.a'] },
   { refs: ['§1.a', '§1.gloss'] },
   { refs: ['§1.b'] },
   { refs: ['§2.a'] },
+  { refs: ['§3.a'], aside: '§3.aside' },
+  { refs: ['§4.a'] },
 ]
 
 function Section({ id, className = '', children }: { id: string; className?: string; children: React.ReactNode }) {
@@ -1013,21 +1023,12 @@ export default function Chapter2() {
                 <Head id="mecca" />
 
                 <SubHead section="mecca" id="kaaba-tradition" />
-                {/* §1.gloss opens with "ומכאן" and points at the migration in the
-                    FIRST stop. Printed after the timeline it pointed back across
-                    four stops and a flood, so it rides its own stop instead.
-                    It also names הג'ר itself, which is why no term prefix. */}
-                {/* IN THE ORDER IT HAPPENED, which is not the order the source
-                    lists it in. The source tells the Hagar story first and only
-                    afterwards notes that the Kaaba was made at the creation and
-                    destroyed in the flood — so read down a numbered rail, stop 3
-                    said Abraham and Ishmael „שיקמו את הכעבה" before anything had
-                    said it was ever broken. Rebuilt from what? Turned around, the
-                    five stops are one story: made at the beginning, destroyed by
-                    the flood, Hagar arrives, Mecca is founded, the two of them
-                    raise the Kaaba again.
-                    §3.aside comments on the FIRST stop, so it rides that stop
-                    rather than sitting four below the sentence it answers. */}
+                {/* The stops run in the CONTENT DOCUMENT's order — see KAABA_STOPS.
+                    §1.gloss opens with "ומכאן" and points at the migration, so it
+                    rides that stop rather than being printed on its own; it also
+                    names הג'ר itself, which is why no term prefix. §3.aside
+                    comments on the creation stop and rides it for the same
+                    reason. */}
                 <div className="ch2-timeline" data-reveal>
                   <div className="ch2-stops">
                     {KAABA_STOPS.map(({ refs, aside }) => (
