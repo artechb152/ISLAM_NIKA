@@ -676,7 +676,12 @@
   padding:18px 22px;background:transparent;border:1px solid var(--edge);border-radius:14px;
   min-width:0;
 }
-.ch2-diagram-node.is-default{border-inline-start:3px solid var(--stamp)}
+/* NO coloured spine on the reading edge. The default carried a maroon bar and
+   the two exits a gold one, so three boxes in one small diagram were painted in
+   three different colours — and the distinction they were drawing is already
+   drawn by the diagram itself: one wide box, a line of prose, then two boxes
+   side by side under it. The colour was saying a second time what the layout
+   had already said, in the loudest register the palette has. */
 /* every sub-level label in the chapter is ONE size — the --sub token. 25px
    beside the sub-heading’s 27px is not a distinction, it is a near-miss. */
 .ch2-diagram-node > b{
@@ -689,7 +694,6 @@
 }
 .ch2-diagram-exits{display:grid;gap:14px}
 @media(min-width:760px){.ch2-diagram-exits{grid-template-columns:1fr 1fr}}
-.ch2-diagram-exits .ch2-diagram-node{border-inline-start:3px solid var(--gold)}
 
 /* ---- 03 · the reciprocal: הפרט ⇄ השבט --------------------------------------
    The chapter's other diagram is a BRANCH — one default and the two ways out of

@@ -891,7 +891,7 @@ export default function Chapter2() {
                     </div>
                     {/* the diagram IS the text: one default and the two ways out */}
                     <div className="ch2-diagram">
-                      <div className="ch2-diagram-node is-default">
+                      <div className="ch2-diagram-node">
                         <b>ברירת המחדל</b>
                         <p>{text('§24.a')}</p>
                       </div>
