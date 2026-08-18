@@ -801,10 +801,27 @@
   border-radius:14px;border:1px solid var(--edge);
 }
 
-/* 1 · to the window edge, as a band */
+/* 1 · to the window edge, as a band.
+
+   A BAND, and it has to actually be one. At 21/9 this was 557px tall on a
+   1600px screen — more than half of everything under נקמת דם, and 2.3× מרואה
+   and קבורת בנות put together. One picture was outweighing two whole traits,
+   which is what made this trait swallow the section.
+
+   32/9 measured against the painting, not picked: the left camp sits at ~44% of
+   the image height and the right camp at ~62%, and BOTH have to survive the crop
+   — the subject is the distance between them, so a band holding one camp says
+   nothing. A half-height window covers both with room to spare.
+
+   The 48% is off the four positions rendered side by side. At 40% the right
+   camp is pushed against the bottom edge and reads as cut; at 55% and 62% both
+   camps are safe but the sky is gone entirely and the picture stops being an
+   evening. 48% holds both camps clear of the edges AND keeps the orange line of
+   the horizon, which is what the caption promises. 366px instead of 557px. */
 .ch2-plate.is-bleed{margin-inline:calc(-1 * var(--content-gutter));width:auto}
 .ch2-plate.is-bleed img{
-  aspect-ratio:21/9;border-radius:0;border:0;border-block:1px solid var(--edge);
+  aspect-ratio:32/9;object-position:center 48%;
+  border-radius:0;border:0;border-block:1px solid var(--edge);
 }
 
 /* 2 · beside its prose — the plate takes the outer edge, the text the reading
