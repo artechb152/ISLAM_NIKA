@@ -1,0 +1,961 @@
+/* Chapter 2 — תרבות שבטית טרום עליית האסלאם.
+
+   The shell is chapter 6's: the route layout imports chapter6-article.css first,
+   so masthead, rail, type scale, reveals, `.key`, the quote treatment and every
+   colour token come from that one sheet. There is exactly one :root in the
+   product. Nothing below introduces a colour, a radius or a font.
+
+   RTL CONVENTION, stated once and obeyed everywhere in this file:
+       inline-start = RIGHT = the reading edge  (every line begins here)
+       inline-end   = LEFT  = the outer edge    (this is where art bleeds off)
+
+   WHAT WAS DELETED FROM THIS FILE, AND WHY.
+   The first build invented six devices that do not exist anywhere in chapter 6,
+   and together they were what read as machine-made:
+
+     · .ch2-part          part markers (חלק א׳/ב׳) between sections
+     · .ch2-promoted      a noun lifted out of the prose, centred, at 58px, with
+                          a grey gloss under it — a third heading level ch6
+                          does not have, and the main source of the empty space
+     · .title-ornament    the diamond, sprinkled between sections. Chapter 6
+                          puts it under a PILLAR title and nowhere else.
+     · .ch2-wide-line     a paragraph fenced by hairlines above AND below
+     · ::before diamonds  bulleted lists. Chapter 6 has zero bulleted lists;
+                          the source's short clauses now run as prose, which is
+                          also what lifted 10.8 words per paragraph to ~17.
+     · overlay captions   gold text on a darkened photo, with a text-shadow —
+                          .ch2-plate figcaption and .ch2-annot both did this.
+                          Captions now sit under the plate, on paper.
+
+   WHAT REPLACED THEM: .ch2-sub, which is chapter 6's own `.scrolly-env` — the
+   sub-heading that appears fifteen times in that chapter and twice in the first
+   build of this one. Six sub-headings inside seven sections is the whole
+   structural fix. */
+
+/* ============================ the flow rhythm ============================
+
+   ONE rule sets the vertical space between blocks in this chapter, instead of
+   every device carrying its own margin-top. Measured before this existed, the
+   gap after a section heading swung between 26px and 48px depending on whether
+   a paragraph, a figure or a sub-heading came next — the reader cannot name
+   that, but they feel a page whose spacing has no system.
+
+   Headings keep their own before/after, because their spacing is asymmetric by
+   nature: a lot of air above, little below, so the heading belongs to what
+   follows it rather than floating between two things. */
+.chapter-article{
+  --flow:clamp(24px,2.6vw,34px);      /* between two blocks of content     */
+  --flow-lead:clamp(32px,3.8vw,48px); /* after a heading, around a quote   */
+  --flow-part:clamp(44px,5.2vw,66px); /* before a sub-heading — a new move */
+  --flow-tight:clamp(14px,1.8vw,20px);/* a sub-heading to its own first line */
+}
+/* NOTHING inside the article sets its own outer margin. The article is not a
+   margin-collapsing context here, so a device that kept a margin-top of its own
+   ADDED to the previous block's margin-bottom, and the measured gaps came out
+   at 27, 51, 56, 62, 70, 78 — six different values for the same relationship.
+   One rule owns the space between blocks; the rest declare none. */
+.chapter-article .article-section > * + *,
+.chapter-article .ch2-withmap > * + *,
+.chapter-article .ch2-bleedwrap > *:not(.ch2-bleed-img) + *{margin-top:var(--flow)}
+.chapter-article .section-heading,
+.chapter-article .ch2-sub,
+.chapter-article .ch2-hero{margin-bottom:0}
+.chapter-article .section-heading + *,
+.chapter-article .ch2-hero + *{margin-top:var(--flow-lead)}
+.chapter-article * + .ch2-sub{margin-top:var(--flow-part)}
+.chapter-article .section-heading + .ch2-sub{margin-top:var(--flow-lead)}
+.chapter-article .ch2-sub + *{margin-top:var(--flow-tight)}
+/* a quotation is a change of voice and gets more air on both sides */
+.chapter-article .article-section > .ch2-quote,
+.chapter-article .article-section > .ch2-verse,
+.chapter-article .article-section > .ch2-saying,
+.chapter-article .article-section > .ch2-statement,
+.chapter-article .ch2-bleedwrap > .ch2-quote,
+.chapter-article .ch2-bleedwrap > .ch2-verse,
+.chapter-article .ch2-bleedwrap > .ch2-saying{margin-top:var(--flow-lead)}
+.chapter-article .ch2-quote + *,
+.chapter-article .ch2-verse + *,
+.chapter-article .ch2-saying + *,
+.chapter-article .ch2-statement + *{margin-top:var(--flow-lead)}
+
+/* ============================ the sub-heading ============================
+   Chapter 6's `.scrolly-env`, restated here because this chapter's sub-headings
+   are <h3> and must not pick up a generic h3 size. Same face, same size token,
+   same rule underneath, same fit-content width. */
+.ch2-sub{
+  font-family:var(--font-heading);font-size:var(--sub);font-weight:700;color:var(--maroon);
+  line-height:1.2;width:fit-content;max-width:100%;
+  margin:0;
+  padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);
+  scroll-margin-top:96px;
+}
+.ch2-sub span{font-family:var(--ui,"Segoe UI",Tahoma,sans-serif);font-weight:400;font-size:.72em;color:var(--maroon)}
+/* A sub-heading that follows the SECTION heading directly has nothing to be
+   separated from — the source gives these two sections no opening sentence. The
+   full margin left two headings stranded in a field of parchment; closed up,
+   they read as a title and its first movement. */
+
+/* the rail lists the sub-headings under their section, so seven entries stay
+   seven entries while the reader can still reach מרואה or ת'אר directly.
+   COLLAPSED, the rail is a strip of numbers only: chapter 6 hides `.menu-label`
+   there, and these labels have to go with it — otherwise the strip fills with
+   wrapped Hebrew and stops being a strip. */
+.chapter-drawer.is-collapsed .menu-subs{display:none}
+.menu-subs{list-style:none;margin:2px 0 8px;padding:0}
+.menu-subs a{
+  display:block;padding:5px 46px 5px 18px;font-size:15px;color:var(--muted);text-decoration:none;
+  border-radius:7px;
+}
+.menu-subs a:hover{color:var(--maroon);background:rgba(138,39,51,.06)}
+/* the movement the reader is actually in */
+.menu-subs a.is-current{color:var(--maroon);font-weight:700}
+.menu-subs a.is-current::before{
+  content:"";position:absolute;inset-inline-start:30px;width:5px;height:5px;border-radius:50%;
+  background:var(--maroon);translate:0 .95em;
+}
+.menu-subs li{position:relative}
+/* the jump target clears the sticky masthead with room to spare — 96px landed
+   the heading 31px ABOVE the fold once the reveal had settled */
+.ch2-sub{scroll-margin-top:calc(var(--header-height) + 84px)}
+
+/* ============================ 01 · opening ============================ */
+.ch2-hero{
+  position:relative;isolation:isolate;display:flex;align-items:flex-end;
+  height:min(440px,60vh);
+  margin-inline:calc(-1 * var(--content-gutter));margin-top:-42px;
+  background:var(--maroon-deep);overflow:hidden;
+}
+.ch2-hero-media{position:absolute;inset:0}
+.ch2-hero-media img,.ch2-hero-media video{width:100%;height:100%;object-fit:cover;display:block}
+.ch2-hero-media::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(30,16,8,.2) 0%,rgba(28,14,7,.42) 52%,rgba(22,10,5,.82) 100%);
+}
+.ch2-hero-copy{position:relative;width:100%;padding:clamp(26px,3.4vw,52px) var(--content-gutter)}
+.ch2-hero-title{
+  font-family:var(--font-heading);font-weight:900;color:var(--paper);margin:0;
+  font-size:clamp(36px,4.6vw,68px);line-height:1.06;letter-spacing:-.015em;text-wrap:balance;
+  text-shadow:0 6px 30px rgba(0,0,0,.5);
+}
+
+/* ============================ the peninsula chart ============================
+   The chapter's one informational graphic: it carries what prose cannot — where
+   the two empires sat relative to the tribes, and which way the trade ran. The
+   legend does not dim layers for decoration; it BRINGS THE SENTENCE. */
+/* The map sits on the reading edge and the layer's sentence stands BESIDE it,
+   in the space the map does not need. Stacked, the sentence fell under a
+   near-square plate and left a column of empty parchment as tall as the map. */
+.ch2-chart{display:grid;gap:16px;width:100%;max-width:min(760px,100%)}
+
+/* --- the map beside its prose ---------------------------------------------
+   Stacked, the opening left the whole outer half of the page empty: the prose
+   is capped at the measure and the map at 760px, both on the reading edge.
+   Side by side they spend that half instead.
+
+   1660px, and not the 900px `.ch2-beside` uses, because what has to be wide
+   enough is the ARTICLE, not the window, and the rail costs it between 76px
+   and 300px. At 1660 with the rail OPEN — the worse of the two states — the
+   article is 1232px, which still leaves the prose column 63 characters. Below
+   that the two columns would be narrower than a readable line, so the map goes
+   back under the text.
+
+   Below that the map goes back under the text, exactly as it was. */
+@media (min-width:1660px){
+  .ch2-withmap{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.86fr);
+    /* top-aligned, unlike `.ch2-beside`: centred, the prose detached from the
+       section title above it and left a hole under the heading. The heading
+       owns its first paragraph; the map is simply the taller column. */
+    /* row gap is the chapter's own flow step, column gap is wider — the two
+       axes are different relationships and must not share one number */
+    gap:var(--flow) clamp(26px,2.8vw,40px);align-content:start;
+    /* NOT capped as a pair. Capping the grid and letting it sit on the reading
+       edge pushed the MAP inward — at 2300px it started 192px in from the page,
+       with dead parchment behind it. Each column carries its own ceiling
+       instead, and each is pinned to the edge it belongs to: the prose to the
+       reading edge, the map to the outer one. */
+  }
+  /* the map holds the outer column for the whole block; the prose, the lead and
+     the pair stack down the reading column beside it. DOM order is untouched —
+     only the placement moves — so the stacked layout below 1660px still reads
+     prose → map → lead → pair, exactly as it did before this existed. */
+  /* RTL: justify-self start is the RIGHT edge of the cell, end is the LEFT.
+     The map takes CENTRE of its cell, not the outer edge — flush against the
+     page it read as falling off it. Centre also does nothing until the column
+     is wider than the map, so below ~2100px nothing moves at all. */
+  .ch2-withmap > .ch2-body{grid-column:1;grid-row:1;max-width:var(--measure,880px);justify-self:start}
+  .ch2-withmap > .ch2-lead{grid-column:1;grid-row:2}
+  .ch2-withmap > .ch2-pair{grid-column:1;grid-row:3}
+  .ch2-withmap > .ch2-chart{grid-column:2;grid-row:1 / span 3;align-self:start;justify-self:center;max-width:760px}
+  /* the hint and the two pills sat ABOVE the map with nothing above THEM — a
+     line of text floating alone at the top of the page's outer half, at a
+     different height from the section title it sits beside. Stacked they still
+     announce the interaction before the picture, which is why the DOM order is
+     untouched; here the map leads and they read as its legend. */
+  .ch2-withmap .ch2-chart-figure{order:-1}
+  /* the stacked gap is the grid gap here, not a margin on the second child */
+  .chapter-article .ch2-withmap > * + *{margin-top:0}
+}
+.ch2-chart-hint{margin:0;font-size:16px;color:var(--muted);line-height:1.5}
+.ch2-chart-legend{display:flex;flex-wrap:wrap;gap:9px}
+.ch2-layer-btn{
+  all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:9px;
+  font-size:16px;color:var(--muted);background:var(--surface);
+  border:1px solid var(--edge);border-radius:999px;padding:7px 17px;
+  transition:background .18s ease,color .18s ease,border-color .18s ease;
+}
+.ch2-layer-btn i{width:9px;height:9px;border-radius:50%;background:var(--edge);flex:none}
+.ch2-layer-btn[aria-pressed="true"]{background:var(--maroon);border-color:var(--maroon);color:var(--mat)}
+.ch2-layer-btn[aria-pressed="true"] i{background:var(--gold-soft)}
+.ch2-layer-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+/* The painted map carries the figure's height; the SVG lies exactly over it and
+   carries the layers. The figure is capped rather than the image, so the two
+   always share one box — cap the IMAGE instead and the overlay coordinates slide
+   off the coastline. */
+/* no frame: the map is a painted plate and it was sitting inside a white card
+   with a border and 14px of padding, so the parchment had a hard white edge
+   around it that belongs to no other picture in the chapter */
+.ch2-chart-figure{
+  position:relative;margin:0;width:100%;
+  /* the radius stays — it belongs to the picture, not to the card that used to
+     hold it. `overflow:hidden` so the SVG overlay is clipped to the same
+     corners as the plate under it. */
+  border-radius:14px;overflow:hidden;
+}
+.ch2-chart-figure img{display:block;width:100%;height:auto}
+.ch2-chart-figure svg{position:absolute;inset:0;width:100%;height:100%}
+.ch2-chart-layer{opacity:0;transition:opacity .35s ease}
+.ch2-chart-layer.is-on{opacity:1}
+@media (prefers-reduced-motion:reduce){.ch2-chart-layer{transition:none}}
+
+/* two named things the source sets against each other — יקטן/עדנאן, הפרט/השבט.
+   One device, used twice, the way chapter 6 reuses .content-block. */
+.ch2-pair{display:grid;gap:clamp(18px,2.4vw,30px);width:100%}
+@media(min-width:760px){.ch2-pair{grid-template-columns:1fr 1fr}}
+.ch2-pair > div{padding-top:16px;border-top:2px solid rgba(138,39,51,.3);min-width:0}
+.ch2-pair dt{
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon);
+  font-size:var(--sub);line-height:1.2;margin-bottom:9px;
+}
+.ch2-pair dd{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
+
+/* ============================ 02 · the desert stage ============================
+   The chapter's one full-screen device: five conditions of ONE valley, advanced
+   by a CLICK rather than by scroll. Chapter 6's immersive scene is scroll-driven
+   because it passes a day; this passes no time — it names five states, and the
+   reader should be able to hold on any one of them.
+
+   It is a normal block in the document flow at viewport height: nothing is
+   scroll-jacked, and scrolling past it behaves like scrolling past a picture. */
+.ch2-stage{
+  position:relative;isolation:isolate;overflow:hidden;
+  margin-inline:calc(-1 * var(--content-gutter));
+  /* the bottom margin CANCELS the next section's `margin-top`, so the scene runs
+     all the way down to the hairline that separates the sections instead of
+     stopping short and leaving a band of parchment under a full-bleed plate */
+  margin-block:0 calc(-1 * clamp(46px,6vw,84px));
+  /* exactly the room available, never more. A flat min-height made the stage
+     560px inside a 225px viewport at 400% zoom (and inside a 390px landscape
+     phone), which put its own controls below the fold. The floor applies only
+     where there is height to spare. */
+  height:calc(100dvh - var(--header-height));
+  background:var(--maroon-deep);
+  display:grid;place-items:center;
+}
+@media(min-height:660px){.ch2-stage{min-height:560px}}
+/* a short screen — landscape phone, or heavy browser zoom — gets smaller stage
+   type and a shorter reserved line box, so the sentence and its controls share
+   the screen instead of pushing each other off it */
+@media(max-height:560px){
+  .ch2-stage-said{font-size:clamp(17px,3.4vh,22px);line-height:1.4}
+  .ch2-stage-line{min-height:4.6em}
+  .ch2-stage-copy{gap:12px}
+  .ch2-stage-scene img.ch2-stage-figure{width:min(26vw,220px)}
+}
+.ch2-stage-scene{position:absolute;inset:0;z-index:0}
+.ch2-stage-scene img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  opacity:0;transition:opacity .75s ease;
+}
+.ch2-stage-scene img.is-on{opacity:1}
+.ch2-stage-scene img[hidden]{display:none}
+/* the two dangers, each walking into its own side of the SAME valley.
+   RTL: inline-start is the RIGHT of the screen — that is where the beasts come
+   from, and the raiders come from the outer (left) edge. */
+/* NOTE THE SELECTOR. `.ch2-stage-scene img` above is a descendant selector and
+   outranks a lone class, so it was handing these figures inset:0, width:100%,
+   height:100% and object-fit:cover — both of them stretched across the entire
+   stage, invisible against the frame. They have to out-specify it and reset
+   `inset` explicitly. */
+.ch2-stage-scene img.ch2-stage-figure{
+  inset:auto;bottom:3%;
+  width:clamp(200px,23vw,380px);height:auto;
+  object-fit:contain;opacity:0;pointer-events:none;
+  transition:opacity .55s ease,transform .75s cubic-bezier(.22,.61,.36,1);
+  filter:drop-shadow(0 16px 24px rgba(24,12,5,.55));
+}
+/* RTL: inline-start is the RIGHT of the screen. The beasts come in from the
+   right, the raiders from the outer (left) edge — each from its own side. */
+.ch2-stage-scene img.is-beasts{inset-inline-start:1.5%;transform:translateX(-9%) scale(.96)}
+.ch2-stage-scene img.is-raiders{inset-inline-end:1.5%;transform:translateX(9%) scale(.96)}
+.ch2-stage-scene img.ch2-stage-figure.is-in{opacity:1;transform:translateX(0) scale(1)}
+@media(max-width:720px){
+  .ch2-stage-scene img.ch2-stage-figure{width:min(44vw,220px);bottom:2%}
+}
+@media (prefers-reduced-motion:reduce){
+  .ch2-stage-scene img.ch2-stage-figure{transition:none;transform:none}
+}
+/* the scrim: a radial pool under the centred type, clearing toward the frame so
+   the painting keeps its corners. Chapter 6's prayer stage does exactly this. */
+.ch2-stage-veil{
+  position:absolute;inset:0;
+  background:radial-gradient(128% 94% at 50% 50%,
+    rgba(18,10,5,.66) 0%, rgba(18,10,5,.52) 38%, rgba(18,10,5,.26) 68%,
+    rgba(18,10,5,.06) 90%, transparent 100%);
+}
+/* the scene IS the next control; a real button carries it for keyboard and AT */
+.ch2-stage-advance{
+  all:unset;position:absolute;inset:0;z-index:1;cursor:pointer;
+}
+.ch2-stage-advance[aria-disabled="true"]{cursor:default}
+.ch2-stage-advance:focus-visible{outline:3px solid var(--gold);outline-offset:-6px}
+
+/* CENTRED on the screen, horizontally and vertically — the treatment chapter 6
+   gives its prayer stage. Running prose everywhere else on this page is
+   right-aligned on the reading edge; inside a full-screen scene the text is not
+   a column being read down, it is a line being held in the middle of a place. */
+.ch2-stage-copy{
+  position:relative;z-index:2;pointer-events:none;text-align:center;
+  width:min(58ch,68%);padding:0 clamp(16px,3vw,40px);
+  display:grid;justify-items:center;gap:clamp(20px,2.6vw,32px);
+}
+/* `justify-items:center` sizes a grid item to its max-content and centres it —
+   so anything wider than the track overflows EQUALLY on both sides. Inside a
+   stage with overflow:hidden that is invisible to a document-width check, and
+   on a 390px screen it silently cut 30px off the start of every line. */
+.ch2-stage-copy > *,.ch2-stage-line > *{max-width:100%}
+/* the reserved box: it holds the tallest beat's height so a click never shifts
+   the controls, and centres whatever the current beat happens to be */
+.ch2-stage-line{display:grid;place-items:center;min-height:6.2em;width:100%}
+.ch2-stage-said{
+  margin:0;color:#f6eeda;font-size:clamp(22px,2.2vw,31px);line-height:1.5;
+  font-family:var(--font-heading);font-weight:700;
+  text-shadow:0 3px 22px rgba(10,5,2,.85);text-wrap:balance;
+}
+/* a word lights as its figure walks into the scene — the sentence is never cut
+   in two and never reprinted, only revealed in the order it is written */
+/* maroon, the chapter's own colour for a word that matters. No halo: it keeps
+   the paragraph's own shadow and nothing else. */
+.ch2-stage-lit{color:var(--maroon);font-weight:inherit;transition:color .5s ease}
+.ch2-stage-controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 16px;pointer-events:auto;max-width:100%}
+.ch2-stage-btn{
+  all:unset;box-sizing:border-box;cursor:pointer;width:42px;height:42px;flex:none;
+  border:1px solid rgba(245,236,214,.4);border-radius:50%;display:grid;place-items:center;
+  color:var(--mat);transition:background .2s ease,border-color .2s ease;
+}
+.ch2-stage-btn svg{width:20px;height:20px}
+.ch2-stage-btn:hover:not(:disabled){background:rgba(245,236,214,.16);border-color:var(--gold-soft)}
+.ch2-stage-btn:disabled{opacity:.3;cursor:default}
+.ch2-stage-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;background:rgba(245,236,214,.2)}
+.ch2-stage-dots{list-style:none;margin:0;padding:0;display:flex;gap:2px}
+/* The dot stays 11px; the BUTTON is 26px so it clears the 24px minimum for a
+   touch target. The visible mark is drawn by ::before inside that box — an
+   11px tap target is a design decision that only works with a mouse. */
+.ch2-stage-dots button{
+  all:unset;box-sizing:border-box;cursor:pointer;width:26px;height:26px;border-radius:50%;
+  display:grid;place-items:center;
+}
+.ch2-stage-dots button::before{
+  content:"";width:11px;height:11px;border-radius:50%;
+  border:1px solid rgba(245,236,214,.55);transition:background .2s ease,transform .2s ease;
+}
+.ch2-stage-dots button.is-on::before{background:var(--gold-soft);border-color:var(--gold-soft);transform:scale(1.25)}
+.ch2-stage-dots button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.ch2-stage-hint{
+  margin-inline-start:6px;color:rgba(245,236,214,.72);font-size:16px;white-space:nowrap;
+  animation:ch2-hint 2.6s ease-in-out infinite;
+}
+@keyframes ch2-hint{0%,100%{opacity:.5}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .ch2-stage-scene img{transition:none}
+  .ch2-stage-hint{animation:none;opacity:.85}
+}
+/* On a phone the layout does not invert — the type stays light over the scene,
+   because splitting it onto paper below the picture would break the one thing
+   this device is for: reading the sentence while looking at what it describes.
+   Only the scrim turns bottom-up, since there is no room beside the text. */
+@media(max-width:720px){
+  .ch2-stage{min-height:480px}
+  .ch2-stage-veil{
+    background:radial-gradient(140% 80% at 50% 50%,
+      rgba(18,10,5,.78) 0%, rgba(18,10,5,.6) 44%, rgba(18,10,5,.28) 74%, rgba(18,10,5,.06) 100%);
+  }
+  .ch2-stage-copy{width:min(34ch,90%);gap:22px}
+  .ch2-stage-said{font-size:21px;line-height:1.5;min-height:7em}
+}
+
+/* ============================ 03 · the arbiter ============================
+   Opens on the illustration, with the heading beside it — chapter 6 does exactly
+   this with the shahada's minaret. Bleeds off the OUTER (left) edge in RTL. */
+/* the illustrated block. Its height is the PLATE's height, because everything
+   inside it reads down the column the arbiter leaves free — heading, the tribal
+   law paragraph, עצביה and its pair. Sized shorter, the sub-heading dropped
+   below the figure and left a field of empty parchment beside him. */
+.ch2-bleedwrap{
+  position:relative;isolation:isolate;min-height:clamp(300px,50vw,690px);
+  /* ONE number for the plate, used twice: the figure's width and the room the
+     prose gives it. Declared apart from both so they cannot drift. */
+  --plate:clamp(320px,44%,600px);
+  /* the gap is a share of the page, not a fixed number: the plate stops
+     growing at 600px and the page does not, so a fixed gap kept shrinking as a
+     proportion of what the reader sees. Marked on a wide screen at ~11%. */
+  --plate-gap:clamp(34px,11%,240px);
+  /* WHERE THE PROSE STARTS. Padding on the wrapper rather than a margin on each
+     child: the sub-heading is sized to its own text and would otherwise
+     auto-margin to the far edge, out of line with the paragraph above it. */
+  padding-inline-start:calc(var(--plate) - var(--content-gutter) + var(--plate-gap));
+}
+/* The plate starts ONE PIXEL below where the desert stage ends. The stage runs
+   down to this section's hairline (its negative bottom margin cancels the
+   section's margin-top), and this offset cancels the section's padding-top —
+   so the watercolour begins exactly where the photograph stopped, with no band
+   of parchment between them. Anchored by the BOTTOM, as it was, a tall plate
+   grew upward instead and climbed into the section above. */
+.ch2-bleed-img{
+  position:absolute;top:calc(1px - clamp(46px,6vw,84px));
+  inset-inline-start:calc(-1 * var(--content-gutter));
+  width:var(--plate);z-index:0;pointer-events:none;user-select:none;
+  /* mirrored with the side. He is drawn seated with his hand held out to one
+     side; moved across the page unflipped, that hand pointed off the paper and
+     away from the text he is illustrating. Nothing in the plate reads as
+     handed — no lettering, no asymmetric object — so the flip costs nothing. */
+  transform:scaleX(-1);
+}
+/* No blend mode, no CSS mask, no opacity: the plate has no background left to
+   hide. `mix-blend-mode:multiply` could never hide the sheet, because the
+   watercolour paper multiplied by the page still lands lighter than the page —
+   so a bright rectangle sat on the parchment with four visible edges. The paper
+   is cut away in the file itself, by scripts/ch2-arbiter.mjs. */
+.ch2-bleed-img img{display:block;width:100%;height:auto}
+/* EVERY child stays in the free column, not just the prose — the sub-heading and
+   the הפרט/השבט pair sit here too, and at full width the pair ran straight over
+   the figure. The pair's two columns are simply narrower here; that is the
+   correct answer, not a second layout for it. */
+/* the free column IS the measure here — the 60ch cap left the prose stopping
+   short of the page edge with a second empty band beyond it, which is the thing
+   the plate was moved across the page to close. */
+.ch2-bleedwrap > *:not(.ch2-bleed-img){position:relative;z-index:1;width:min(99ch,100%)}
+/* …including the two devices that carry the chapter-wide measure of their own.
+   Left capped at 880px they ended 250px short of the heading above them, so the
+   marked column had two different outer edges — the heading's and the prose's.
+   Inside this block the free column IS the measure, and everything in it shares
+   both edges: the plate's on one side, the page's on the other. */
+.ch2-bleedwrap > .ch2-body,
+.ch2-bleedwrap > .ch2-cycle{max-width:none}
+.ch2-bleedwrap > .ch2-sub{width:fit-content;max-width:100%}
+/* 1300px, not 900px: pushing the prose out to the midpoint costs it width, and
+   measured at 1024px the free column came out 323px — 28 characters, which is
+   not a line. Below this the figure hides and the prose takes the page, which
+   is what chapter 6 does with its own bleed illustration. */
+@media(max-width:1300px){
+  .ch2-bleed-img{display:none}
+  .ch2-bleedwrap{min-height:0;padding-inline-start:0}
+  .ch2-bleedwrap > *:not(.ch2-bleed-img,.ch2-sub){width:100%}
+  /* the sub-heading’s rule underlines its TEXT, at every width — stretched to
+     100% it reads as a section divider instead of a heading */
+  .ch2-bleedwrap > .ch2-sub{width:fit-content;max-width:100%}
+}
+
+/* ============================ quotations ============================
+   The poem, the Bedouin proverb and the hadith are the three places the source
+   quotes rather than states. One treatment for all three.
+
+   Chapter 6's own treatment for a quoted statement is `.shahada-statement`: a
+   panel on `--mat`, padded, held between two maroon hairlines top and bottom and
+   open at the sides. Same object here — the side rule is replaced by the pair of
+   rules, which is what makes it read as a statement rather than a pull-quote. */
+.ch2-quote{
+  position:relative;width:min(720px,100%);
+  padding:clamp(24px,3vw,32px) clamp(26px,4vw,44px);
+  background:linear-gradient(180deg,var(--cream),var(--panel));
+  border:2px solid var(--gold);border-radius:14px;
+  box-shadow:inset 0 0 0 4px rgba(199,154,60,.16),0 10px 26px rgba(87,24,32,.1);
+}
+/* the bracket corners */
+.ch2-quote::before,.ch2-quote::after{
+  content:"";position:absolute;width:18px;height:18px;border:2px solid var(--gold);opacity:.9;
+}
+.ch2-quote::before{top:7px;inset-inline-start:7px;border-inline-end:none;border-block-end:none;border-start-start-radius:8px}
+.ch2-quote::after{bottom:7px;inset-inline-end:7px;border-inline-start:none;border-block-start:none;border-end-end-radius:8px}
+.ch2-quote .sq-mark{
+  position:absolute;font-family:var(--font-heading);
+  font-size:64px;line-height:1;color:var(--gold);opacity:.85;pointer-events:none;
+}
+.ch2-quote .sq-open{top:-11px;inset-inline-start:18px}
+.ch2-quote .sq-close{bottom:-10px;inset-inline-end:18px;transform:rotate(180deg)}
+/* the quoted lines themselves — centred, as chapter 6 centres its testimony */
+.ch2-quote-body{
+  display:grid;gap:10px;text-align:center;
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(20px,2.3vw,28px);line-height:1.4;text-wrap:balance;
+}
+/* A LONG quotation keeps the card but not the display setting. Chapter 6's
+   testimony is one short line, which is why centred 28px works there; the
+   hadith is forty-five words, and at that length the same treatment produces
+   six ragged centred rows. It reads on the reading edge, at reading size. */
+.ch2-quote.is-long{width:min(860px,100%)}
+.ch2-quote.is-long .ch2-quote-body{
+  text-align:start;font-family:var(--font-body);font-weight:400;color:var(--ink);
+  font-size:var(--read);line-height:var(--lh,1.82);
+}
+
+/* ==================== the three set-apart voices ====================
+   The chapter quotes three times, and the first build dressed all three in the
+   card above — a poem, a proverb and a hadith as one identical gold box, in
+   three consecutive sections. Measured, the page ran 126 blocks on the reading
+   edge and 8 anywhere else; chapter 6 runs 39 off it. That single axis is what
+   makes this chapter read as one shape repeated seven times.
+
+   So the three voices are told apart by AXIS and by weight of frame, which is
+   also how chapter 6 paces itself — it drops out of the right column at each
+   turn, holds a centred line, and snaps back:
+
+     verse      centred, held by two hairlines   — no frame
+     saying     on the reading edge, no frame at all — type alone
+     hadith     the card (chapter 6's `.shahada-quote`) — the one with authority
+
+   ---- 1 · the verse -------------------------------------------------------
+   A poem's line breaks ARE its structure. Inside the 720px card the third line
+   wrapped, which broke the only thing the form carries, so the frame goes and
+   the lines get the width they need. */
+.ch2-verse{
+  width:min(780px,100%);margin-inline:auto;
+  padding-block:clamp(26px,3.4vw,40px);
+  border-block:1px solid var(--gold);
+  display:grid;gap:clamp(7px,.9vw,12px);text-align:center;
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  /* sized off the VIEWPORT, not the column: the longest line is 37 characters
+     and the whole point of the device is that it does not wrap, so the type
+     has to come down with the screen rather than sit on a 19px floor. */
+  font-size:clamp(15px,4.5vw,27px);line-height:1.32;
+}
+
+/* ---- 2 · the saying ------------------------------------------------------
+   A Bedouin proverb is speech — wry, and its own punchline. It is the one
+   moment in the chapter carried by type and nothing else: no card, no rule,
+   no mark. A rule on the reading edge was the obvious move and is already
+   taken by `.ch2-aside`, which would have made this the fourth gold-ruled
+   object rather than a different one. */
+.ch2-saying{
+  width:min(760px,100%);margin-block:0;margin-inline:0;
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(21px,2.6vw,32px);line-height:1.36;text-wrap:balance;
+}
+.ch2-saying p{margin:0}
+
+/* ---- 3 · the turn -------------------------------------------------------
+   Chapter 6's `.pillars-statement`: the chapter steps off the column entirely
+   for one declaration, then returns. §34 is where this chapter turns — the
+   sentence in which the desert becomes Islam — and it is the only place that
+   earns display scale outside a heading. */
+.ch2-statement{
+  width:min(820px,100%);margin-inline:auto;text-align:center;
+  padding-block:clamp(10px,1.6vw,22px);
+}
+/* 35px, not the 45px chapter 6 uses: there the statement stands where the <h2>
+   is screen-reader-only, so it IS the largest thing on that screen. Here it
+   follows a visible 56px section title, and at 45px the two display blocks
+   stacked and neither led. */
+.ch2-statement b{
+  display:block;font-family:var(--font-heading);font-weight:900;
+  font-size:clamp(23px,2.6vw,35px);color:var(--maroon);line-height:1.26;text-wrap:balance;
+}
+.ch2-statement span{
+  display:block;margin-top:clamp(10px,1.2vw,15px);
+  font-size:clamp(16px,1.7vw,21px);color:var(--stamp);font-weight:600;
+  line-height:1.55;text-wrap:balance;
+}
+
+/* ---- the centred lead, over a centred row -------------------------------
+   Chapter 6 opens its pillars with a centred lead above a centred row of five.
+   §7.a names two fathers and the pair below defines them, which is the same
+   shape — and it puts the chapter's first step off the column in section 1,
+   where it sets the expectation that the axis moves. */
+.ch2-lead{
+  width:min(720px,100%);margin-inline:auto;text-align:center;
+  font-size:clamp(18px,1.9vw,23px);line-height:1.6;color:var(--ink);text-wrap:balance;
+}
+.ch2-pair.is-centred{width:min(900px,100%);margin-inline:auto}
+.ch2-pair.is-centred > div{text-align:center}
+
+/* ============================ 04 · the vengeance diagram ============================
+   The section IS the diagram: §24 and §25 are its text, not paragraphs beside
+   it. One default, then the two ways out of it. */
+/* the diagram carries prose, so it takes the measure like prose. Left at
+   100% it ran 146 characters a line on a 1920 screen. */
+.ch2-diagram{width:100%;max-width:var(--measure,880px)}
+/* no fill: the cards sit on the page's own parchment and are held by their
+   rule alone, so three framed boxes in one section stop reading as three panels */
+.ch2-diagram-node{
+  padding:18px 22px;background:transparent;border:1px solid var(--edge);border-radius:14px;
+  min-width:0;
+}
+.ch2-diagram-node.is-default{border-inline-start:3px solid var(--stamp)}
+/* every sub-level label in the chapter is ONE size — the --sub token. 25px
+   beside the sub-heading’s 27px is not a distinction, it is a near-miss. */
+.ch2-diagram-node > b{
+  display:block;font-family:var(--font-heading);font-weight:700;font-size:var(--sub);
+  color:var(--maroon);margin-bottom:6px;line-height:1.2;
+}
+.ch2-diagram-node p{font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
+.ch2-diagram-label{
+  margin:18px 0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink);
+}
+.ch2-diagram-exits{display:grid;gap:14px}
+@media(min-width:760px){.ch2-diagram-exits{grid-template-columns:1fr 1fr}}
+.ch2-diagram-exits .ch2-diagram-node{border-inline-start:3px solid var(--gold)}
+
+/* ---- 03 · the reciprocal: הפרט ⇄ השבט --------------------------------------
+   The chapter's other diagram is a BRANCH — one default and the two ways out of
+   it. This one is a CYCLE: the same obligation running both ways, which is the
+   whole content of עצביה. Set as two definitions side by side it read as a list
+   of two facts, and the thing that makes it עצביה — that each side owes the
+   other — was carried by nothing on the page.
+
+   Same node treatment as the branch diagram (transparent, one hairline, 14px)
+   so the two read as one family of object; the STRUCTURE is what differs. */
+.ch2-cycle{display:grid;gap:0;width:100%;max-width:var(--measure,880px)}
+/* A NAME IS NOT A BOX. Enclosed in a rounded rectangle, one display word sat in
+   a large empty pill and the whole device came out looking like a flowchart —
+   an object from a diagramming tool, not from this chapter. The chapter already
+   has a way of marking a named thing: the word in Kedem with one maroon rule
+   under it, which is `.ch2-sub` and `.ch2-pair > div`. Same mark here.
+   And the connector colour in this chapter is GOLD — the timeline rail, the
+   aside's rule, the verse's two hairlines. A 2px maroon stick was neither. */
+.ch2-cycle-node{
+  font-family:var(--font-heading);font-weight:700;font-size:var(--sub);
+  color:var(--maroon);line-height:1.2;text-align:center;
+}
+/* The two nodes come first in the DOM, then the two arms — so on ONE column the
+   pair stacked together and the arrows fell in a heap under them, which is not
+   a cycle. Placed explicitly, the column reads הפרט → השבט → back. */
+.ch2-cycle-node:nth-of-type(1){grid-row:1}
+.ch2-cycle-arm.is-out{grid-row:2}
+.ch2-cycle-node:nth-of-type(2){grid-row:3}
+.ch2-cycle-arm.is-back{grid-row:4}
+/* the arm: its sentence, and the shaft that points where the obligation runs.
+   The head is a border triangle, not a glyph — an arrowhead is structure here,
+   and the chapter carries no ornament characters. Down the column the shaft
+   runs in a rail on the reading edge and joins one node to the next; the row
+   gap is zero so it actually touches both. */
+.ch2-cycle-arm{
+  position:relative;margin:0;padding-block:16px;padding-inline-start:38px;
+  font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink);text-wrap:pretty;
+}
+.ch2-cycle-arm::before{
+  content:"";position:absolute;inset-inline-start:9px;top:0;bottom:0;width:2px;background:var(--gold);
+}
+.ch2-cycle-arm::after{
+  content:"";position:absolute;inset-inline-start:4px;width:0;height:0;
+  border:0;border-inline:5px solid transparent;
+}
+/* The head is centred on the shaft by arithmetic, not by eye. Across the arm
+   the shaft sits at bottom 8 and is 2px tall, so its axis is at 9; the head is
+   10px tall (5+5 transparent), so it starts at 4. Down the column the shaft is
+   at inline-start 9 and 2px wide — axis 10 — and the head is 10px across, so it
+   starts at 5. At 2 and at 4 the triangle hung low and off the line. */
+/* Down the column, the head caps the shaft. Every one of the four borders is
+   named here and again in the horizontal block, at the SAME specificity — a
+   partial reset in the wider block would be outranked by these two class
+   selectors whatever the source order, and the heads came out as gold squares. */
+.ch2-cycle-arm.is-out::after{
+  top:auto;bottom:0;inset-inline-start:5px;inset-inline-end:auto;
+  border-inline:5px solid transparent;border-block-start:12px solid var(--gold);border-block-end:0;
+}
+.ch2-cycle-arm.is-back::after{
+  top:0;bottom:auto;inset-inline-start:5px;inset-inline-end:auto;
+  border-inline:5px solid transparent;border-block-end:12px solid var(--gold);border-block-start:0;
+}
+
+/* SIDE BY SIDE ONLY WHERE THE CHANNEL FITS THE SENTENCE.
+   The longer arm is 31 characters — about 380px set at the reading size — and
+   the channel is what is left after the two names and their gaps. Measured:
+
+     760–1299px   the plate is hidden, the block takes the page   channel 400–640  ✓
+     1300–1699px  the plate is back and the column is 460–640     channel 222–402  ✗
+     1700px+                                                      channel 447+     ✓
+
+   In the middle band the second sentence broke onto two lines while the first
+   stayed on one, and the two arms came out at different heights. That band gets
+   the column instead, which reads the same and is not cramped. */
+@media (min-width:760px) and (max-width:1299px), (min-width:1700px){
+  /* nodes at the two ends, the two arms stacked in the channel between them */
+  .ch2-cycle{
+    grid-template-columns:auto minmax(0,1fr) auto;
+    align-items:center;column-gap:clamp(16px,2vw,26px);
+    /* 10px put each sentence as close to the arrow ABOVE it as to its own —
+       the two arms have to separate more than a sentence sits from its shaft */
+    row-gap:26px;
+  }
+  .ch2-cycle-node:nth-of-type(1){grid-column:1;grid-row:1 / span 2}
+  .ch2-cycle-node:nth-of-type(2){grid-column:3;grid-row:1 / span 2}
+  .ch2-cycle-arm.is-out{grid-column:2;grid-row:1}
+  .ch2-cycle-arm.is-back{grid-column:2;grid-row:2}
+  .ch2-cycle-arm{padding:0 0 20px;text-align:center}
+  .ch2-cycle-arm::before{inset-inline:11px;top:auto;bottom:8px;width:auto;height:2px}
+  /* RTL: inline-start is the RIGHT edge, so a head built from
+     `border-inline-start` is a triangle whose point faces LEFT — the direction
+     הפרט → השבט runs. */
+  .ch2-cycle-arm.is-out::after{
+    top:auto;bottom:4px;inset-inline-start:auto;inset-inline-end:0;
+    border-block:5px solid transparent;border-inline-start:12px solid var(--gold);border-inline-end:0;
+  }
+  .ch2-cycle-arm.is-back::after{
+    top:auto;bottom:4px;inset-inline-start:0;inset-inline-end:auto;
+    border-block:5px solid transparent;border-inline-end:12px solid var(--gold);border-inline-start:0;
+  }
+}
+
+/* ============================ 05 · the Kaaba timeline ============================
+   A real sequence in time, so it gets a rule with rings and the stops under it. */
+/* The Kaaba's five stops run DOWN the page, not across it.
+
+   Across, five stops shared the 1172px column: about 214px each, which is
+   twenty-one Hebrew characters a line — far below the point where reading
+   breaks down, and the first stop ran six lines while the last ran two, so the
+   row ended ragged as well as cramped. Down the page each stop gets the
+   chapter's measure, and the rail still says "this is a sequence in time".
+   RTL: the rail is on the reading edge (right), the text beside it. */
+.ch2-timeline{position:relative}
+.ch2-stops{display:grid;gap:0;width:100%;max-width:var(--measure,880px)}
+.ch2-stop{position:relative;padding-inline-start:38px;padding-block:0 clamp(18px,2.2vw,26px);min-width:0}
+.ch2-stop::before{
+  content:"";position:absolute;top:4px;inset-inline-start:0;width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--gold);background:var(--paper);z-index:1;box-sizing:border-box;
+}
+/* the rail: drawn from each ring down to the next one */
+.ch2-stop::after{
+  content:"";position:absolute;top:24px;bottom:0;inset-inline-start:9px;width:1px;background:var(--edge);
+}
+.ch2-stop:last-child{padding-bottom:0}
+/* the last ring stays an OUTLINE. A filled maroon circle means „you are here”
+   everywhere else in this chapter (the rail, the stage dots), and on the
+   timeline it landed on Noah’s flood — which ends nothing. */
+.ch2-stop:last-child::after{display:none}
+.ch2-stop p{font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
+
+/* THREE PLATES, THREE MEETINGS.
+
+   All three used to be the same object: 16:9, full column, same frame, same
+   place above the text — 1080×608 three times, in sections 4, 5 and 6 running
+   back to back. The assets stay; what changes is how each one meets the page,
+   and each choice comes from what its own picture is about.
+
+     is-bleed    the two camps run to the WINDOW edge, cropped to a band,
+                 because the subject of that picture is distance.
+     .ch2-beside Mecca stands NEXT to its prose, because the text names things
+                 that are in the picture and the reader should look while reading.
+     is-inset    the abandoned shrine is a contained plate on the reading edge
+                 with paper around it: a painting hung, not a banner. */
+.ch2-precinct,.ch2-plate{width:100%}
+.ch2-precinct img,.ch2-plate img{
+  display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
+  border-radius:14px;border:1px solid var(--edge);
+}
+
+/* 1 · to the window edge, as a band */
+.ch2-plate.is-bleed{margin-inline:calc(-1 * var(--content-gutter));width:auto}
+.ch2-plate.is-bleed img{
+  aspect-ratio:21/9;border-radius:0;border:0;border-block:1px solid var(--edge);
+}
+
+/* 2 · beside its prose — the plate takes the outer edge, the text the reading
+   edge, and they share one row. Portrait here, so the column has a shape of its
+   own rather than a third landscape band. */
+.ch2-beside{display:grid;gap:clamp(20px,2.6vw,32px)}
+@media(min-width:900px){
+  /* centred, not top-aligned: two short paragraphs beside a 671px plate left
+     440px of nothing under the text. Centred, the prose sits in the middle of
+     the picture it is about. */
+  .ch2-beside{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);align-items:center}
+  /* both need an explicit ROW. The figure comes first in the DOM but sits in
+     column 2, and sparse auto-placement will not send a later item back to a
+     row it has already passed — so the prose dropped underneath instead of
+     standing beside it. */
+  .ch2-beside .ch2-body{grid-column:1;grid-row:1;max-width:none}
+  .ch2-beside .ch2-precinct{grid-column:2;grid-row:1}
+  .ch2-beside .ch2-precinct img{aspect-ratio:4/5}
+}
+
+/* 3 · a contained plate on the reading edge, paper around it */
+.ch2-plate.is-inset{width:min(62%,620px)}
+@media(max-width:820px){.ch2-plate.is-inset{width:100%}}
+
+/* ============================ 06 · claim and answer ============================ */
+.ch2-meanings{display:grid;gap:clamp(22px,3vw,32px);width:100%;max-width:var(--measure,880px)}
+.ch2-meaning{display:grid;gap:9px;padding-top:18px;border-top:2px solid rgba(138,39,51,.3)}
+.ch2-meaning > b{
+  font-family:var(--font-heading);font-weight:700;font-size:var(--sub);color:var(--maroon);line-height:1.2;
+}
+.ch2-meaning p{font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
+/* what Islam set against it — the source always pairs the two, so they stay
+   paired. Maroon marks the pairing; the weight stays normal, because chapter 6
+   bolds PHRASES inside a sentence and never a whole paragraph. */
+.ch2-answer{padding-inline-start:20px;border-inline-start:3px solid var(--gold);color:var(--maroon)}
+
+/* ============================ 07 · what was adopted ============================ */
+.ch2-verdicts{width:100%;max-width:var(--measure,880px)}
+.ch2-verdicts dl{margin:0}
+.ch2-verdict-intro{font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink);margin:0 0 6px}
+.ch2-verdict-row{
+  display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:4px 12px;align-items:baseline;
+  padding:10px 0;border-top:1px solid var(--rule);
+}
+.ch2-verdict-row dt{
+  font-family:var(--font-body);font-weight:700;font-size:var(--read);color:var(--maroon-deep);
+  line-height:var(--lh,1.82);
+}
+.ch2-verdict-row dd{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
+@media(max-width:680px){.ch2-verdict-row{grid-template-columns:1fr}}
+
+/* ============================ shared ============================
+
+   THE MEASURE, and why it is a number and not 100%.
+
+   Measured on chapter 6 at a 1821px window: its median paragraph is 860px wide
+   — about 84 Hebrew characters — and only certain moments run the full 1393px
+   column. Its rhythm is the ALTERNATION between the two.
+
+   This chapter first capped everything with `ch` units, which stopped the prose
+   at 904px however wide the window grew and left a third of the page dead. The
+   correction removed every cap, and overshot: every paragraph in the chapter
+   became 1393px / 137 characters, roughly twice a comfortable measure, and all
+   of them identical — so the page lost its rhythm as well as its readability.
+
+   So: prose sits at chapter 6's measure. Figures, the map row, the timeline,
+   the diagram and the pair take the whole column. The alternation is the point. */
+.ch2-measure{--measure:880px}
+.ch2-body{display:grid;gap:16px;width:100%;max-width:var(--measure,880px)}
+/* text-wrap:pretty keeps a paragraph from ending on a single stranded word —
+   reading the chapter found „אני.”, „הדם:” and „מפשע).” each alone on a line */
+.ch2-body p,.ch2-stop p,.ch2-diagram-node p,.ch2-diagram-label,.ch2-meaning p,
+.ch2-aside p,.ch2-pair dd,.ch2-verdict-row dd,.ch2-gloss dd{text-wrap:pretty}
+.ch2-body p{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
+
+/* the source's own aside (Aphrodite/Venus) — a comment on the KIND of story,
+   so it is set apart from the story without becoming a panel */
+.ch2-aside{
+  padding-inline-start:22px;border-inline-start:3px solid var(--gold);
+  width:100%;max-width:var(--measure,880px);
+}
+.ch2-aside p{font-size:var(--read);line-height:var(--lh,1.82);color:var(--muted)}
+/* a term and its definition, standing apart from the prose that introduced it */
+.ch2-gloss{
+  display:flex;align-items:baseline;gap:12px;
+  padding-top:14px;border-top:1px solid var(--rule);width:100%;
+}
+/* reading scale, like the ledger — a --sub term beside a two-word definition
+   is a heading with a stranded phrase next to it, not a glossed pair */
+.ch2-gloss dt{font-family:var(--font-body);font-weight:700;font-size:var(--read);color:var(--maroon-deep);line-height:var(--lh,1.82)}
+.ch2-gloss dd{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--muted)}
+
+/* ============================ the closing practice ============================
+   Same paper, same type, same palette. No score and no failure: a question stays
+   open until it is solved, which is the chapter's stance on learning everywhere
+   else too. */
+/* the practice is the same chapter: same measure, same flow rhythm, and the
+   heading rule that keeps the question tied to its own answers. */
+.p2-main{padding-bottom:40px}
+.p2-main .section-heading > p{max-width:var(--measure,880px)}
+.p2-q > * + *{margin-top:var(--flow)}
+.p2-q h2 + *{margin-top:var(--flow-lead)}
+.p2-main h1{font-family:var(--font-heading);font-weight:900;color:var(--maroon);font-size:clamp(34px,4vw,56px);margin:0;line-height:1.14}
+.p2-back{
+  color:var(--mat);text-decoration:none;font-size:14px;padding:7px 16px;border-radius:999px;
+  border:1px solid rgba(245,236,214,.26);background:rgba(245,236,214,.1);transition:background .2s ease;
+}
+.p2-back:hover{background:rgba(245,236,214,.18)}
+.p2-progress{display:flex;align-items:center;gap:14px;margin:0 0 clamp(28px,3.4vw,44px);width:100%;max-width:var(--measure,880px)}
+.p2-progress-bar{flex:1;height:7px;border-radius:999px;background:rgba(87,24,32,.12);overflow:hidden}
+.p2-progress-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));transition:width .45s ease}
+.p2-progress-n{font-size:15px;color:var(--muted);white-space:nowrap}
+
+.p2-list{list-style:none;margin:0;padding:0;display:grid;gap:clamp(34px,4.4vw,64px)}
+.p2-q{padding-top:clamp(26px,3.4vw,44px);border-top:1px solid var(--rule)}
+.p2-q:first-child{border-top:0;padding-top:0}
+.p2-q h2{
+  display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:baseline;
+  font-family:var(--font-heading);font-weight:800;color:var(--maroon);
+  font-size:clamp(23px,2.3vw,30px);line-height:1.3;margin:0 0 clamp(18px,2.2vw,26px);
+  width:100%;max-width:var(--measure,880px);
+}
+.p2-q-n{font-size:17px;color:var(--gold-text);font-weight:400}
+.p2-q.is-solved h2{color:var(--maroon-deep)}
+
+.p2-options{list-style:none;margin:0;padding:0;display:grid;gap:9px;width:100%;max-width:var(--measure,880px)}
+.p2-option{
+  all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;
+  padding:15px 18px;border:1px solid var(--edge);border-radius:14px;background:var(--surface);
+  font-size:18.5px;line-height:1.6;color:var(--ink);transition:border-color .18s ease,background .18s ease;
+}
+.p2-option:hover{border-color:var(--gold)}
+.p2-option:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.p2-option.is-picked{border-color:var(--maroon);background:rgba(138,39,51,.07)}
+.p2-option.is-right{border-color:var(--gold);background:rgba(199,154,60,.14)}
+.p2-hint{margin:9px 0 0;font-size:15px;color:var(--muted)}
+
+/* narrower than the measure ON PURPOSE: a matching row is a label and its
+   control, and at full measure the two ended up 470px apart with nothing
+   between them. Close enough to read as one pair, still aligned in a column. */
+.p2-match{display:grid;gap:10px;width:100%;max-width:min(var(--measure,880px),620px)}
+.p2-match-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,240px);gap:18px;align-items:center;padding:12px 0;border-top:1px solid var(--rule)}
+.p2-match-row:first-child{border-top:0}
+.p2-match-left{font-size:18.5px;line-height:1.55;color:var(--ink)}
+.p2-select{
+  font-family:var(--font-body);font-size:17px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--edge);border-radius:999px;padding:9px 16px;cursor:pointer;
+}
+.p2-select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:680px){.p2-match-row{grid-template-columns:1fr}}
+
+.p2-order{list-style:none;margin:0;padding:0;display:grid;gap:8px;width:100%;max-width:var(--measure,880px);counter-reset:none}
+.p2-order li{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  padding:14px 18px;border:1px solid var(--edge);border-radius:14px;background:var(--surface);
+}
+.p2-order-n{font-family:var(--font-heading);font-size:21px;color:var(--gold-text);min-width:22px}
+.p2-order-text{font-size:18.5px;line-height:1.55;color:var(--ink)}
+.p2-order-moves{display:flex;gap:6px}
+.p2-order-moves button{
+  all:unset;box-sizing:border-box;cursor:pointer;width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--edge);display:grid;place-items:center;color:var(--maroon);font-size:16px;
+}
+.p2-order-moves button:hover:not(:disabled){background:rgba(138,39,51,.09)}
+.p2-order-moves button:disabled{opacity:.3;cursor:default}
+.p2-order-moves button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.p2-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:18px}
+.p2-check{
+  all:unset;box-sizing:border-box;cursor:pointer;background:var(--maroon);color:var(--mat);
+  border-radius:999px;padding:11px 28px;font-family:var(--font-heading);font-size:17px;
+  transition:background .2s ease;
+}
+.p2-check:hover:not(:disabled){background:var(--stamp)}
+.p2-check:disabled{opacity:.35;cursor:default}
+.p2-check:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.p2-feedback{margin:0;font-size:17px;line-height:1.6;color:var(--stamp);max-width:56ch}
+.p2-feedback.is-right{color:var(--gold-text)}
+
+.p2-done{margin-top:clamp(44px,5.4vw,76px);padding-top:clamp(36px,4.4vw,60px);border-top:1px solid var(--rule);display:grid;justify-items:center;gap:10px;text-align:center}
+.p2-done .title-ornament{margin:0 auto}
+.p2-done p{margin:0;font-family:var(--font-heading);font-size:clamp(26px,2.8vw,36px);color:var(--maroon)}
+
+/* the closing link — chapter 6 ends on exactly one link and nothing else */
+.ch2-end{margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);border-top:1px solid var(--rule);display:grid;justify-items:center}
+.ch2-end-link{
+  display:inline-flex;align-items:center;gap:10px;text-decoration:none;
+  background:var(--maroon);color:var(--mat);border-radius:999px;padding:14px 32px;
+  font-family:var(--font-heading);font-size:18px;font-weight:700;transition:background .2s ease,transform .2s ease;
+}
+.ch2-end-link:hover{background:var(--stamp);transform:translateY(-2px)}
+.ch2-end-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}

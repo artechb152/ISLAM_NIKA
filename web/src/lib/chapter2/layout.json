@@ -1,0 +1,244 @@
+{
+  "$note": "הפריסה: אילו קטעים יושבים בכל מקטע, ובאיזה תפקיד. הקומפוננטה קוראת מכאן ולא כותבת טקסט. verify-chapter2.mjs מוודא שכל 81 הקטעים נצרכים כאן בדיוק פעם אחת — לא פחות, לא יותר.\n\nמבנה: 7 מקטעים ראשיים, בדיוק כמו פרק 6, וכותרות משנה (subs) בתוכם. הגרסה הקודמת פירקה את אותו תוכן ל־12 מקטעים ראשיים עם 2 כותרות משנה בלבד; פרק 6 עובד עם 7 ראשיים ו־15 משנה. זה ההבדל בין פרק שמרגיש קצוב לפרק שמרגיש אינסופי.",
+  "sections": [
+    {
+      "id": "peninsula",
+      "title": "חצי האי ערב והשבטים",
+      "device": "hero + layered-chart",
+      "slots": {
+        "lead": [
+          "§0.a",
+          "§5.a",
+          "§5.b",
+          "§6.a"
+        ],
+        "branchesIntro": [
+          "§7.a"
+        ],
+        "branches": [
+          "§7.b",
+          "§8.a"
+        ]
+      }
+    },
+    {
+      "id": "desert",
+      "title": "תנאי החיים במדבר",
+      "device": "fullscreen-stage · click to advance",
+      "$note": "חמישה מצבים של מקום אחד. הסלוטים כאן הם חמשת הפריימים של DesertStage — אותה חלוקה בדיוק, ובאותו סדר.",
+      "slots": {
+        "frame1": [
+          "§9.a",
+          "§9.b"
+        ],
+        "frame2": [
+          "§9.day"
+        ],
+        "frame3": [
+          "§9.night"
+        ],
+        "frame4": [
+          "§9.dry",
+          "§10.a",
+          "§10.b"
+        ],
+        "frame5": [
+          "§11.a",
+          "§11.list",
+          "§11.b",
+          "§12.a",
+          "§12.gloss"
+        ]
+      }
+    },
+    {
+      "id": "culture",
+      "title": "התרבות השבטית",
+      "device": "bleed-illustration + quote",
+      "subs": [
+        {
+          "id": "asabiyya",
+          "title": "נאמנות שבטית",
+          "term": "עצביה"
+        },
+        {
+          "id": "muruwa",
+          "title": "גבריות",
+          "term": "מרואה"
+        }
+      ],
+      "slots": {
+        "lead": [
+          "§13.a",
+          "§14.a"
+        ],
+        "example": [
+          "§14.b",
+          "§14.yes",
+          "§14.no"
+        ],
+        "asabiyyaBody": [
+          "§15.a",
+          "§15.b",
+          "§15.one",
+          "§15.many"
+        ],
+        "quoteIntro": [
+          "§16.a"
+        ],
+        "poem": [
+          "§16.poem"
+        ],
+        "afterQuote": [
+          "§16.b"
+        ],
+        "muruwaBody": [
+          "§17.a",
+          "§17.list",
+          "§18.a",
+          "§18.list",
+          "§19.a"
+        ]
+      }
+    },
+    {
+      "id": "customs",
+      "title": "שני מנהגים",
+      "device": "prose + vengeance-diagram",
+      "subs": [
+        {
+          "id": "wad",
+          "title": "קבורת בנות",
+          "term": "ואד אלבנת"
+        },
+        {
+          "id": "thar",
+          "title": "נקמת דם",
+          "term": "ת'אר"
+        }
+      ],
+      "slots": {
+        "wadBody": [
+          "§20.a",
+          "§21.a",
+          "§22.a",
+          "§22.list"
+        ],
+        "tharLead": [
+          "§23.a",
+          "§23.b"
+        ],
+        "default": [
+          "§24.a"
+        ],
+        "exitsIntro": [
+          "§25.a"
+        ],
+        "exits": [
+          "§25.atwa",
+          "§25.sulh"
+        ],
+        "exile": [
+          "§25.b"
+        ],
+        "quote": [
+          "§26.a",
+          "§26.quote"
+        ]
+      }
+    },
+    {
+      "id": "mecca",
+      "title": "מכה והכעבה",
+      "device": "timeline + plate",
+      "subs": [
+        {
+          "id": "kaaba-tradition",
+          "title": "לפי המסורת"
+        },
+        {
+          "id": "mecca-before",
+          "title": "ערב עליית האסלאם"
+        }
+      ],
+      "slots": {
+        "steps": [
+          "§1.a",
+          "§1.gloss",
+          "§1.b",
+          "§2.a",
+          "§3.a",
+          "§4.a"
+        ],
+        "aside": [
+          "§3.aside"
+        ],
+        "gathering": [
+          "§30.a",
+          "§31.a"
+        ],
+        "quraysh": [
+          "§32.a",
+          "§33.a",
+          "§33.list"
+        ]
+      }
+    },
+    {
+      "id": "jahiliyya",
+      "title": "תקופת הג'אהליה",
+      "device": "claim-and-answer",
+      "slots": {
+        "lead": [
+          "§27.a",
+          "§27.list",
+          "§27.b"
+        ],
+        "twoMeanings": [
+          "§28.a"
+        ],
+        "claim1": [
+          "§28.claim"
+        ],
+        "answer1": [
+          "§28.answer"
+        ],
+        "term": [
+          "§28.gloss"
+        ],
+        "claim2": [
+          "§29.claim"
+        ],
+        "answer2": [
+          "§29.answer"
+        ]
+      }
+    },
+    {
+      "id": "legacy",
+      "title": "מה אומץ ומה נדחה",
+      "device": "ledger",
+      "slots": {
+        "lead": [
+          "§34.a",
+          "§34.b",
+          "§35.a",
+          "§36.a"
+        ],
+        "kept": [
+          "§35.muruwa",
+          "§35.thar"
+        ],
+        "rejected": [
+          "§36.wad",
+          "§36.lots"
+        ],
+        "asabiyyaVerdict": [
+          "§37.a",
+          "§37.hadith",
+          "§37.b"
+        ]
+      }
+    }
+  ]
+}
