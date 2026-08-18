@@ -54,6 +54,7 @@ interface Sub {
 interface LayoutSection {
   id: string
   title: string
+  umbrella?: string
   subs?: Sub[]
 }
 const LAYOUT = layoutData as unknown as { sections: LayoutSection[] }
@@ -213,6 +214,34 @@ function Cycle({ refs }: { refs: [string, string] }) {
       <p className="ch2-cycle-arm is-out">{text(out)}</p>
       <p className="ch2-cycle-arm is-back">{text(back)}</p>
     </div>
+  )
+}
+
+/** The roof over the four traits. The source sets all four under ONE running
+    head — „מאפייני התרבות השבטית · נאמנות שבטית / גבריות / קבורת בנות / נקמת דם" —
+    and the layout splits them across two sections: the values stay here, the two
+    hard customs get „שני מנהגים" to themselves. Split silently, the customs read
+    as a fresh subject; so the roof is printed once, where the family begins, with
+    all four members under it. Each is an anchor: the first two land in this
+    section, the last two carry the reader into the next — which is the connection
+    itself, made structurally rather than with a sentence no source wrote.
+    Every string is data (the umbrella from layout.json is the source's own
+    heading; terms and titles are the subs the rail already navigates by). */
+function TraitRail() {
+  const roof = meta('culture').umbrella
+  const entries = [...(meta('culture').subs ?? []), ...(meta('customs').subs ?? [])]
+  return (
+    <nav className="ch2-traits" aria-label={roof} data-reveal>
+      <b className="ch2-traits-roof">{roof}</b>
+      <div className="ch2-traits-row">
+        {entries.map((s) => (
+          <a key={s.id} href={`#${s.id}`}>
+            <b>{s.term}</b>
+            <span>{s.title}</span>
+          </a>
+        ))}
+      </div>
+    </nav>
   )
 }
 
@@ -720,6 +749,11 @@ export default function Chapter2() {
                         a sentence with no verb in it. It leads its own line now. */}
                     <T r={['§14.b', '§14.yes', '§14.no']} em={['בורר שבטי']} />
                   </div>
+                  {/* the roof: this culture's four named traits, two of which live
+                      in the NEXT section — printed here so that when the reader
+                      meets קבורת בנות and ת'אר they arrive as members of this
+                      family, not as a new subject */}
+                  <TraitRail />
                   {/* עצביה opens INSIDE the illustrated block, beside the arbiter
                       rather than below him: he is tall, and everything down his
                       full height belongs in the column he leaves free. */}

@@ -239,6 +239,34 @@
 }
 .ch2-pair dd{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
 
+/* ============ the roof over the four traits ============
+   The source's own running head — „מאפייני התרבות השבטית" — printed once, where
+   the family begins, with all four members under it; the last two are the customs
+   the NEXT section holds, and their anchors are what ties „שני מנהגים" back to
+   this culture. Same rule-above mark as the pair device, same type styles: the
+   rail adds no size of its own to the chapter's thirteen. */
+.ch2-traits-roof{
+  display:block;font-family:var(--font-heading);font-weight:700;
+  font-size:var(--sub);color:var(--maroon-deep);line-height:1.2;
+}
+.ch2-traits-row{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(18px,2.4vw,30px);margin-top:20px;
+}
+.ch2-traits-row a{
+  display:block;min-width:0;text-decoration:none;
+  padding-top:16px;border-top:2px solid rgba(138,39,51,.3);
+}
+.ch2-traits-row b{
+  display:block;font-family:var(--font-heading);font-weight:700;color:var(--maroon);
+  font-size:var(--sub);line-height:1.2;margin-bottom:9px;
+}
+.ch2-traits-row span{font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
+.ch2-traits-row a:hover b,.ch2-traits-row a:focus-visible b{
+  color:var(--maroon-deep);text-decoration:underline;text-underline-offset:6px;
+}
+.ch2-traits-row a:focus-visible{outline:2px solid var(--maroon);outline-offset:4px}
+
 /* ============================ 02 · the desert stage ============================
    The chapter's one full-screen device: five conditions of ONE valley, advanced
    by a CLICK rather than by scroll. Chapter 6's immersive scene is scroll-driven
