@@ -25,6 +25,15 @@ export interface Fragment {
   name?: string
   /** an Arabic term this fragment introduces — the article sets it in maroon */
   term?: string
+  /** An APPROVED REWORDING, printed instead of `text`.
+      The chapter's rule is that every sentence on the page is the source's own.
+      This is the one sanctioned way to depart from it, and it exists so that a
+      departure is a declared fact rather than a quiet edit: `text` still holds
+      the source sentence and is still checked against SOURCE-TEXT.md, and
+      verify-chapter2.mjs lists every `page` it finds so the count can never sit
+      at zero while the page says something else. Add one only when the user has
+      asked for that wording. */
+  page?: string
 }
 
 interface PassagesFile {
@@ -53,9 +62,11 @@ export function frag(ref: string): Fragment {
   return found
 }
 
-/** The sentence at `ref`. */
+/** The sentence at `ref`, as the page prints it — the approved rewording if the
+    fragment carries one, otherwise the source's own sentence. */
 export function text(ref: string): string {
   const f = frag(ref)
+  if (f.page) return f.page
   if (!f.text) throw new Error(`chapter 2: ${ref} carries no text`)
   return f.text
 }

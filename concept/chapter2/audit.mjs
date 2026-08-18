@@ -141,7 +141,9 @@ const result = await page.evaluate(() => {
     const hay = flat(document.querySelector('.chapter-article').textContent)
     for (const [sec, frags] of Object.entries(window.__CH2_PASSAGES__ ?? {})) {
       for (const f of frags) {
-        for (const str of [f.text, ...(f.list ?? [])].filter(Boolean)) {
+        /* what the PAGE is expected to carry — the approved rewording where a
+           fragment has one, otherwise the source's own sentence */
+        for (const str of [f.page ?? f.text, ...(f.list ?? [])].filter(Boolean)) {
           if (!hay.includes(flat(str))) info.absent.push(`${sec}.${f.id}`)
         }
       }

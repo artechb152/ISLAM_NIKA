@@ -24,6 +24,11 @@ try {
 
 const errors = []
 const warn = []
+/* Sentences the user asked to be printed in different words from the source.
+   They are collected and PRINTED, never merely tolerated: the whole worth of
+   this gate is that "no invented sentences" is a fact and not a slogan, so a
+   sanctioned departure has to be visible every single run. */
+const reworded = []
 
 /* ---------- 1 · fidelity ---------- */
 /* compare with punctuation and quote glyphs stripped: the layout is allowed to
@@ -46,12 +51,19 @@ for (const [sec, frags] of Object.entries(data.passages)) {
     if (ids.has(f.id)) errors.push(`${sec}: id כפול "${f.id}"`)
     ids.add(f.id)
 
+    /* `page` is deliberately NOT in this list: it is the approved rewording and
+       by definition is not in the source. `text` still is, and still must be —
+       so the source sentence stays on record and stays checked. */
     const strings = [f.text, f.name, ...(f.list ?? [])].filter((s) => typeof s === 'string' && s.trim())
     if (!strings.length) errors.push(`${sec}.${f.id}: קטע ריק`)
     for (const s of strings) {
       if (!flatSrc.includes(flat(s))) {
         errors.push(`${sec}.${f.id}: טקסט שאינו במקור — "${s.slice(0, 56)}…"`)
       }
+    }
+    if (f.page) {
+      if (!f.text) errors.push(`${sec}.${f.id}: ניסוח חלופי בלי משפט מקור לצידו`)
+      reworded.push(`${sec}.${f.id}`)
     }
     allFragments.push(`${sec}.${f.id}`)
   }
@@ -99,4 +111,11 @@ if (errors.length) {
   console.error('❌\n' + errors.map((e) => ' - ' + e).join('\n'))
   process.exit(1)
 }
-console.log(`✅ נאמנות מלאה · ${external.length} סעיפים · אפס משפטים מומצאים${layout ? ' · כל קטע פעם אחת בדיוק' : ''}`)
+if (reworded.length) {
+  console.log(`⚠ ניסוחים מאושרים על ידי המשתמשת (מודפסים במקום משפט המקור): ${reworded.join(', ')}`)
+}
+console.log(
+  `✅ נאמנות מלאה · ${external.length} סעיפים · ` +
+    `${reworded.length ? `${reworded.length} ניסוחים מאושרים, כל השאר מהמקור` : 'אפס משפטים מומצאים'}` +
+    `${layout ? ' · כל קטע פעם אחת בדיוק' : ''}`,
+)

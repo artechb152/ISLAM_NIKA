@@ -891,8 +891,10 @@ export default function Chapter2() {
                     </div>
                     {/* the diagram IS the text: one default and the two ways out */}
                     <div className="ch2-diagram">
+                      {/* no label above it. „ברירת המחדל" was a phrase this file
+                          wrote — the one thing the file is not allowed to do —
+                          and the sentence inside says what it is without help. */}
                       <div className="ch2-diagram-node">
-                        <b>ברירת המחדל</b>
                         <p>{text('§24.a')}</p>
                       </div>
                       <p className="ch2-diagram-label">{text('§25.a')}</p>
