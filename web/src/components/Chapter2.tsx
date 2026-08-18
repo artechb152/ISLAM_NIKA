@@ -237,11 +237,23 @@ function Cycle({ refs }: { refs: [string, string] }) {
                 The subject is infanticide; the picture is the famine, and that
                 is a deliberate limit, not a failure of nerve.
      ת'אר       the two camps on facing slopes, which is §23 entire.            */
-const TRAIT_ART: Record<string, { src: string; alt: string; cut?: boolean }> = {
-  asabiyya: { src: 'desert-night.jpg', alt: 'מדבר ריק תחת ירח מלא, בלי נפש חיה' },
-  muruwa: { src: 'raiders.webp', alt: 'שני רוכבים על גמלים, אוחזים ברמחים', cut: true },
-  wad: { src: 'desert-noon.jpg', alt: 'מישור מדברי יבש ושחון בשעת צהריים' },
-  thar: { src: 'two-camps.jpg', alt: 'שני מחנות שבטיים על מדרונות נגדיים של אותו ואדי, בשעת ערב' },
+const TRAIT_ART: Record<string, { src: string; alt: string }> = {
+  asabiyya: {
+    src: 'trait-asabiyya.webp',
+    alt: 'מחנה בדואי בשעת דמדומים: אוהלי שיער שחורים צפופים זה לזה, מדורות ואנשים יושבים סביבן, ומסביב מרחב מדברי ריק עד האופק',
+  },
+  muruwa: {
+    src: 'trait-muruwa.webp',
+    alt: 'פרש בדואי יחיד עוצר על רכס סלעי עם שחר, רומח זקוף בידו, ומשקיף על העמק',
+  },
+  wad: {
+    src: 'trait-wad.webp',
+    alt: 'מחנה בדואי בבצורת: אדמה סדוקה, באר יבשה עם דלי ריק, כדי מים מוטים על צידם ועיזים כחושות',
+  },
+  thar: {
+    src: 'trait-thar.webp',
+    alt: 'שתי קבוצות רוכבים בדואים עוצרות זו מול זו משני עברי מרחב אבנים ריק בשעת ערב, רמחים זקופים, איש אינו מתקדם',
+  },
 }
 
 /** Open a trait's dialog. Addressed by id rather than through a ref because the
@@ -260,7 +272,7 @@ function TraitCard({ id }: { id: string }) {
   const art = TRAIT_ART[id]
   return (
     <article className="ch2-card" data-reveal>
-      <span className={'ch2-card-art' + (art.cut ? ' is-cut' : '')}>
+      <span className="ch2-card-art">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/assets/chapter2/${art.src}`} alt={art.alt} />
       </span>

@@ -265,18 +265,9 @@
 .ch2-card{position:relative;min-width:0;display:flex;flex-direction:column;gap:14px}
 .ch2-card-art{
   display:block;overflow:hidden;border:1px solid var(--edge);border-radius:14px;
-  /* the PAGE's parchment, not `--mat`. --mat (#f5ecd6) is lighter than the page
-     (#EDE4D0), so behind the cutout it lit up as a bright rectangle between
-     three dark paintings — a hole in the row. On the page's own tone the riders
-     read as drawn onto the paper, which is how this chapter has treated every
-     cutout, and the hairline is what makes it a card. */
   background:var(--paper,#EDE4D0);
 }
 .ch2-card-art img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
-/* a CUTOUT (the riders) has no ground of its own — cropped to fill it would lose
-   the spears and the camels' legs, which is the whole of what it shows. It sits
-   whole on the card's parchment instead. */
-.ch2-card-art.is-cut img{object-fit:contain;padding:8px}
 
 /* the heading is the card's label; the button inside it covers the whole card.
    `margin-top:0` because the chapter's own rule gives every `.ch2-sub` a
