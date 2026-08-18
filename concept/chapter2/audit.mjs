@@ -280,6 +280,49 @@ const result = await page.evaluate(() => {
   return { fail: [...new Set(fail)], info }
 })
 
+/* 9b · THE WIDE PASS. Everything above is measured at 1600px, and the facing
+   block — מרואה beside קבורת בנות — only forms at 1760px. Measured at 1600
+   alone, that layout is never looked at by any gate at all: the audit would keep
+   reporting a clean page while the arrangement the reader actually asked for
+   went unchecked, which is exactly how §6.a survived two drafts.
+
+   So: reload wide, prove the two columns really are side by side, and hold each
+   one to the same 62-character floor the single column is held to. If a future
+   edit narrows the columns or drops the breakpoint, this fails instead of
+   quietly shipping two unreadable ribbons of prose. */
+await page.setViewport({ width: 1800, height: 1080 })
+await page.reload({ waitUntil: 'networkidle0' })
+await page.evaluate(() => document.fonts.ready)
+await new Promise((r) => setTimeout(r, 1400))
+const wide = await page.evaluate(() => {
+  const out = []
+  const cols = [...document.querySelectorAll('.ch2-facing-col')]
+  if (cols.length !== 2) {
+    out.push(`לוח הפנים־אל־פנים: ${cols.length} עמודות במקום 2`)
+    return out
+  }
+  const [a, b] = cols.map((c) => c.getBoundingClientRect())
+  if (Math.abs(a.top - b.top) > 40) {
+    out.push('מרואה וקבורת בנות לא זו לצד זו ב־1800px — נקודת השבירה לא נתפסה')
+  }
+  /* the same glyph probe the single-column measure uses */
+  const para = cols[0].querySelector('p')
+  const probe = document.createElement('span')
+  const cs = getComputedStyle(para)
+  probe.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-family:${cs.fontFamily};font-size:${cs.fontSize}`
+  probe.textContent = 'אבגדהוזחטיכלמנסעפצקרשת אבגדהוזחטיכלמנסעפצקרשת'
+  document.body.appendChild(probe)
+  const glyph = probe.getBoundingClientRect().width / probe.textContent.length
+  probe.remove()
+  for (const [i, r] of [a, b].entries()) {
+    const chars = Math.round(r.width / glyph)
+    if (chars < 62) out.push(`עמודה ${i + 1} בלוח הפנים־אל־פנים: ${chars} תווים — מתחת לרצפה של 62`)
+    if (chars > 95) out.push(`עמודה ${i + 1} בלוח הפנים־אל־פנים: ${chars} תווים — מעל התקרה של 95`)
+  }
+  return out
+})
+result.fail.push(...wide)
+
 /* 10 · mobile. Document width is not enough: anything inside `overflow:hidden`
    is CLIPPED rather than scrolled, so the stage cut 30px off the start of every
    line at 390px while this check reported a clean page. Measure each element

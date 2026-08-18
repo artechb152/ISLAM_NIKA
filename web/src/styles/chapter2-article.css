@@ -239,6 +239,44 @@
 }
 .ch2-pair dd{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
 
+/* ================= two traits FACING each other =================
+   מרואה on the reading edge, קבורת בנות in the outer column beside it, instead
+   of the second running under the first down one column. §21 derives the custom
+   from the מרואה ideal itself („אינן מסוגלות להילחם כמו גברים"), so the two
+   belong in one glance — and the outer half of a wide page, which this stretch
+   of the chapter left empty, is where that second column goes.
+
+   THE BREAKPOINT IS MEASURED, not chosen. Two prose columns each need a readable
+   line, and the article's own floor is 62 characters. Measured with the rail
+   OPEN, the worse of the two states:
+
+     window 1600 → article 1172px → 56 chars per column   ✗ under the floor
+     window 1760 → article 1332px → 63 chars per column   ✓
+     window 1920 → article 1492px → 71 chars per column
+
+   So 1760px, and below it the two stack in DOM order exactly as before.
+   Each column also carries the chapter's own ceiling: past ~2200px two columns
+   of the full article would run 85+ characters and keep growing, so the pair
+   caps at two measures and a gutter and stays on the reading edge. */
+
+/* STACKED — the default, and it must be declared BEFORE the grid: these two
+   selectors carry the same weight as the ones inside the media query, so the
+   later of the two wins regardless of the query. The second trait opens a new
+   movement, which is the step the chapter gives every sub-heading. */
+.chapter-article .ch2-facing > * + *{margin-top:var(--flow-part)}
+.chapter-article .ch2-facing-col > * + *{margin-top:var(--flow)}
+
+@media (min-width:1760px){
+  .ch2-facing{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:clamp(26px,2.8vw,40px);align-items:start;
+    max-width:calc(2 * var(--measure,880px) + 40px);
+  }
+  .ch2-facing .ch2-facing-col{min-width:0}
+  /* the grid gap owns the space between the columns now, not a margin */
+  .chapter-article .ch2-facing > * + *{margin-top:0}
+}
+
 /* ============================ 02 · the desert stage ============================
    The chapter's one full-screen device: five conditions of ONE valley, advanced
    by a CLICK rather than by scroll. Chapter 6's immersive scene is scroll-driven

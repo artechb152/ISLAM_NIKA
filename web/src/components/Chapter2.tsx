@@ -752,16 +752,30 @@ export default function Chapter2() {
                   <T r="§16.b" />
                 </div>
 
-                <SubHead section="culture" id="muruwa" />
-                <div className="ch2-body" data-reveal>
-                  <T r={['§17.a', '§17.list', '§18.a', '§18.list']} em={['נדיב']} />
-                  <T r="§19.a" em={['מעמדו וכבודו']} />
-                </div>
+                {/* מרואה and קבורת בנות FACE each other on a wide screen, rather
+                    than running one under the other down the reading column.
 
-                {/* the two hard customs — the same family, not a new section */}
-                <SubHead section="culture" id="wad" />
-                <div className="ch2-body" data-reveal>
-                  <T r={['§20.a', '§21.a', '§22.a', '§22.list']} />
+                    Not a layout trick to fill the empty outer half: §21 says the
+                    custom „נבע מהתפיסה שנשים נחותות מבחינה פיזית ואינן מסוגלות
+                    להילחם כמו גברים" — which is the מרואה ideal (חזק, חסון, לוחם)
+                    turned against half the tribe. Set side by side, the custom
+                    stands next to the value it comes from, and the reader can see
+                    both at once. Stacked (below the breakpoint) the DOM order is
+                    unchanged and it reads מרואה → קבורת בנות, as it did before. */}
+                <div className="ch2-facing">
+                  <div className="ch2-facing-col">
+                    <SubHead section="culture" id="muruwa" />
+                    <div className="ch2-body" data-reveal>
+                      <T r={['§17.a', '§17.list', '§18.a', '§18.list']} em={['נדיב']} />
+                      <T r="§19.a" em={['מעמדו וכבודו']} />
+                    </div>
+                  </div>
+                  <div className="ch2-facing-col">
+                    <SubHead section="culture" id="wad" />
+                    <div className="ch2-body" data-reveal>
+                      <T r={['§20.a', '§21.a', '§22.a', '§22.list']} em={['אינן מסוגלות להילחם כמו גברים']} />
+                    </div>
+                  </div>
                 </div>
 
                 <SubHead section="culture" id="thar" />
