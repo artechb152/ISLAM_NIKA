@@ -59,9 +59,16 @@ const result = await page.evaluate(() => {
   const info = {}
   const secs = [...document.querySelectorAll('.article-section')]
 
-  /* 1 · seven sections, six sub-headings — chapter 6's pacing */
+  /* 1 · six sections, six sub-headings — chapter 6's pacing.
+     Was seven, until „שני מנהגים" was folded back into „התרבות השבטית": the
+     source keeps all four traits — עצביה, מרואה, קבורת בנות, ת'אר — under one
+     running head, and splitting the last two into a top-level section made them
+     read as a new subject. The gate that matters was never the number 7; it is
+     that this chapter not run TWELVE thin sections with two sub-headings, which
+     is what the reader felt as „טקסט רץ עם שטחים ריקים". Six sections carrying
+     six sub-headings is the same shape, one section deeper. */
   info.sections = secs.length
-  if (secs.length !== 7) fail.push(`${secs.length} מקטעים ראשיים — פרק 6 עובד עם 7`)
+  if (secs.length !== 6) fail.push(`${secs.length} מקטעים ראשיים — הפרק בנוי על 6`)
   info.subHeadings = document.querySelectorAll('.chapter-article .ch2-sub').length
   if (info.subHeadings < 6) fail.push(`רק ${info.subHeadings} כותרות משנה — פרק 6 מציב 15`)
 
@@ -317,4 +324,4 @@ if (result.fail.length) {
   console.error('❌\n' + result.fail.map((f) => ' - ' + f).join('\n'))
   process.exit(1)
 }
-console.log('✅ צורת פרק 6: 7 מקטעים, כותרות משנה בפנים, פסקאות בנפח מלא, אפס עיטורים, אפס גלישות')
+console.log('✅ צורת פרק 6: 6 מקטעים, כותרות משנה בפנים, פסקאות בנפח מלא, אפס עיטורים, אפס גלישות')

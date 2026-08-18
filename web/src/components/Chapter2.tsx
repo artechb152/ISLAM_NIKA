@@ -21,8 +21,15 @@
    of prose under every heading — which is exactly what the reader felt:
    "יותר מידי טקסט רץ, המון שטחים ריקים, משעמם".
 
-   So: seven sections, sub-headings inside them, and adjacent fragments set as
+   So: few sections, sub-headings inside them, and adjacent fragments set as
    one paragraph rather than one apiece.
+
+   The count settled at SIX, not seven. „שני מנהגים" — קבורת בנות and ת'אר —
+   was a top-level section until it was folded back into „התרבות השבטית",
+   where the source keeps it: all four traits sit under one running head there,
+   and split off, the two customs read as a new subject instead of as what this
+   culture does when it meets famine and blood. The gate was never the number
+   seven; it is that this chapter not run twelve thin sections.
 
    WHAT THIS FILE STILL MAY NOT DO: write a sentence. Every string comes from
    passages.json through `text()` / `list()`, addressed by the §N.fragment it
@@ -214,34 +221,6 @@ function Cycle({ refs }: { refs: [string, string] }) {
       <p className="ch2-cycle-arm is-out">{text(out)}</p>
       <p className="ch2-cycle-arm is-back">{text(back)}</p>
     </div>
-  )
-}
-
-/** The roof over the four traits. The source sets all four under ONE running
-    head — „מאפייני התרבות השבטית · נאמנות שבטית / גבריות / קבורת בנות / נקמת דם" —
-    and the layout splits them across two sections: the values stay here, the two
-    hard customs get „שני מנהגים" to themselves. Split silently, the customs read
-    as a fresh subject; so the roof is printed once, where the family begins, with
-    all four members under it. Each is an anchor: the first two land in this
-    section, the last two carry the reader into the next — which is the connection
-    itself, made structurally rather than with a sentence no source wrote.
-    Every string is data (the umbrella from layout.json is the source's own
-    heading; terms and titles are the subs the rail already navigates by). */
-function TraitRail() {
-  const roof = meta('culture').umbrella
-  const entries = [...(meta('culture').subs ?? []), ...(meta('customs').subs ?? [])]
-  return (
-    <nav className="ch2-traits" aria-label={roof} data-reveal>
-      <b className="ch2-traits-roof">{roof}</b>
-      <div className="ch2-traits-row">
-        {entries.map((s) => (
-          <a key={s.id} href={`#${s.id}`}>
-            <b>{s.term}</b>
-            <span>{s.title}</span>
-          </a>
-        ))}
-      </div>
-    </nav>
   )
 }
 
@@ -732,7 +711,13 @@ export default function Chapter2() {
                 <DesertStage />
               </Section>
 
-              {/* ============ 03 · tribal culture, with עצביה and מרואה inside ============ */}
+              {/* ============ 03 · tribal culture — all FOUR traits inside ============
+                  עצביה, מרואה, קבורת בנות and ת'אר. The source sets all four under one
+                  running head, „מאפייני התרבות השבטית · …", and an earlier build split
+                  the last two off into a section of their own called „שני מנהגים" —
+                  which made them read as a fresh subject rather than as what this
+                  culture DOES when it meets famine and blood. They are sub-headings
+                  here, where they belong, and the chapter runs six sections. */}
               <Section id="culture">
                 <div className="ch2-bleedwrap">
                   <div className="ch2-bleed-img" aria-hidden="true">
@@ -749,11 +734,6 @@ export default function Chapter2() {
                         a sentence with no verb in it. It leads its own line now. */}
                     <T r={['§14.b', '§14.yes', '§14.no']} em={['בורר שבטי']} />
                   </div>
-                  {/* the roof: this culture's four named traits, two of which live
-                      in the NEXT section — printed here so that when the reader
-                      meets קבורת בנות and ת'אר they arrive as members of this
-                      family, not as a new subject */}
-                  <TraitRail />
                   {/* עצביה opens INSIDE the illustrated block, beside the arbiter
                       rather than below him: he is tall, and everything down his
                       full height belongs in the column he leaves free. */}
@@ -777,18 +757,14 @@ export default function Chapter2() {
                   <T r={['§17.a', '§17.list', '§18.a', '§18.list']} em={['נדיב']} />
                   <T r="§19.a" em={['מעמדו וכבודו']} />
                 </div>
-              </Section>
 
-              {/* ============ 04 · the two hard customs ============ */}
-              <Section id="customs">
-                <Head id="customs" />
-
-                <SubHead section="customs" id="wad" />
+                {/* the two hard customs — the same family, not a new section */}
+                <SubHead section="culture" id="wad" />
                 <div className="ch2-body" data-reveal>
                   <T r={['§20.a', '§21.a', '§22.a', '§22.list']} />
                 </div>
 
-                <SubHead section="customs" id="thar" />
+                <SubHead section="culture" id="thar" />
                 {/* two camps on opposite slopes of one valley: the whole of §23 in
                     a picture — the offence is between GROUPS, across a distance.
                     It runs to the window edge, because DISTANCE is the subject:
@@ -928,7 +904,7 @@ export default function Chapter2() {
                       <dd>{text('§35.muruwa')}</dd>
                     </div>
                     <div className="ch2-verdict-row">
-                      <dt>{subLabel('customs', 'thar')}</dt>
+                      <dt>{subLabel('culture', 'thar')}</dt>
                       <dd>{text('§35.thar')}</dd>
                     </div>
                   </dl>
