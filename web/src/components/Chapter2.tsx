@@ -154,6 +154,11 @@ function Head({ id }: { id: string }) {
       <div>
         <h2 id={`${id}-title`}>{meta(id).title}</h2>
       </div>
+      {/* chapter 6's own mark: two hairlines with a small diamond between them,
+          inside the heading and directly under the title. Both classes, because
+          `.title-ornament` draws it and `.section-ornament` is the width it
+          takes under a section title rather than under the shahada. */}
+      <div className="title-ornament section-ornament" aria-hidden="true"><span /></div>
     </header>
   )
 }
@@ -781,9 +786,11 @@ export default function Chapter2() {
                     <h1 className="ch2-hero-title">{CH2.title}</h1>
                   </div>
                 </div>
-                <header className="section-heading" data-reveal>
-                  <div><h2 id="peninsula-title">{meta('peninsula').title}</h2></div>
-                </header>
+                {/* `Head`, not a hand-rolled header. This section wrote its own
+                    copy of the markup, so when the ornament was added to `Head`
+                    every section got it EXCEPT the first — the one the reader
+                    sees before any other. One source for the heading. */}
+                <Head id="peninsula" />
                 {/* the map stands BESIDE its prose on a wide screen rather than
                     under it: the paragraphs name the two empires and the trade
                     roads that the map draws, so the reader should be able to

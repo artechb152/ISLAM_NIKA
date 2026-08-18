@@ -154,9 +154,28 @@ const result = await page.evaluate(() => {
     }
   }
 
-  /* 3 · no ornament inside the prose */
-  info.ornaments = document.querySelectorAll('.chapter-article .title-ornament').length
-  if (info.ornaments > 0) fail.push(`עיטור בתוך המאמר: ${info.ornaments}`)
+  /* 3 · the ornament belongs to a HEADING, and nowhere else.
+     This used to forbid the diamond outright, because the first build set eleven
+     of them at even intervals BETWEEN sections, which is decoration. But chapter
+     6 does carry it — inside `.section-heading`, directly under the title — and
+     the chapter was asked for that same mark. So the rule keeps its real intent
+     and drops the overreach: inside a heading it is chapter 6's mark, anywhere
+     else in the article it is the sprinkling this gate exists to stop, and one
+     heading may not carry two. */
+  const orn = [...document.querySelectorAll('.chapter-article .title-ornament')]
+  info.ornaments = orn.length
+  const loose = orn.filter((o) => !o.closest('.section-heading'))
+  if (loose.length) fail.push(`עיטור מחוץ לכותרת מקטע: ${loose.length}`)
+  for (const h of document.querySelectorAll('.chapter-article .section-heading')) {
+    const n = h.querySelectorAll('.title-ornament').length
+    const name = (h.querySelector('h2')?.textContent ?? '').trim().slice(0, 20)
+    if (n > 1) fail.push(`${n} עיטורים בכותרת אחת: ${name}`)
+    /* …and EVERY section heading carries it. Section 01 hand-rolled its own
+       header markup, so adding the ornament to the shared component gave it to
+       five headings out of six — and the one it missed is the first the reader
+       sees. A count of ornaments would have read "5" and looked healthy. */
+    if (n === 0) fail.push(`כותרת מקטע בלי העיטור: ${name}`)
+  }
 
   /* 4 · the promoted-noun gesture is gone. In RUNNING prose, chapter 6's largest
      type is its sub-heading at 27px; anything bigger that is not an h1/h2/h3 is
