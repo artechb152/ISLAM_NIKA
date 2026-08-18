@@ -61,7 +61,8 @@ interface Sub {
 interface LayoutSection {
   id: string
   title: string
-  umbrella?: string
+  /** the heading over the row of trait cards — the source's own running head */
+  cardsTitle?: string
   subs?: Sub[]
 }
 const LAYOUT = layoutData as unknown as { sections: LayoutSection[] }
@@ -86,24 +87,9 @@ const subLabel = (sectionId: string, subId: string): string => {
 
 /* ---------------- text primitives ---------------- */
 
-/** Verbatim sentences set as ONE paragraph.
-    `r` may be a list of refs: adjacent source sentences belong in one paragraph,
-    which is how chapter 6 reaches 16.7 words per paragraph instead of 10.8.
-    A ref that names a `list` fragment contributes all of its lines. */
-function T({
-  r,
-  em = [],
-  className,
-  reveal = false,
-}: { r: string | string[]; em?: string[]; className?: string; reveal?: boolean }) {
-  const refs = Array.isArray(r) ? r : [r]
-  const s = refs
-    .map((ref) => (frag(ref).list ? list(ref).join(' ') : text(ref)))
-    .join(' ')
-  /* a T that stands on its own in the section (rather than inside a
-     `.ch2-body`) has to carry the reveal itself */
-  const rv = reveal ? { 'data-reveal': true } : {}
-  if (!em.length) return <p className={className} {...rv}>{s}</p>
+/** Bold every `em` phrase inside one line, leaving the rest as it is. */
+function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] {
+  if (!em.length) return [s]
   const parts: React.ReactNode[] = []
   let rest = s
   let k = 0
@@ -123,13 +109,78 @@ function T({
     }
     if (at > 0) parts.push(rest.slice(0, at))
     parts.push(
-      <b className="key" key={k++}>
+      <b className="key" key={`${keyBase}-${k++}`}>
         {hit}
       </b>,
     )
     rest = rest.slice(at + hit.length)
   }
-  return <p className={className} {...rv}>{parts}</p>
+  return parts
+}
+
+/** Verbatim sentences set as ONE paragraph.
+    `r` may be a list of refs: adjacent source sentences belong in one paragraph,
+    which is how chapter 6 reaches 16.7 words per paragraph instead of 10.8.
+
+    A ref that names a `list` fragment is DIFFERENT, and this is the whole point
+    of the distinction. The source writes its lists as strings of two-word items
+    ending in full stops — „חזק. חסון. לוחם. צייד. בעל השפעה." — and run together
+    as prose they read as a stutter of one-word sentences rather than as a list
+    of qualities. Each item takes its own line: no bullet, no marker (chapter 6
+    has zero bulleted lists), just the break the source's own punctuation asks
+    for. A line of running prose beside a list keeps its own line too, so the
+    sentence that introduces the items does not run into the first of them.
+
+    The space pushed after every `<br/>` is deliberate: it is collapsed away at
+    the start of a line box and never seen, but it keeps the words separated in
+    `textContent` — without it „צייד." and „בעל" fuse into one token and the
+    audit's words-per-paragraph reading silently drops. */
+function T({
+  r,
+  em = [],
+  className,
+  reveal = false,
+}: { r: string | string[]; em?: string[]; className?: string; reveal?: boolean }) {
+  const refs = Array.isArray(r) ? r : [r]
+  const lines: string[] = []
+  let run = ''
+  const flush = () => {
+    if (run) {
+      lines.push(run)
+      run = ''
+    }
+  }
+  for (let i = 0; i < refs.length; i++) {
+    const ref = refs[i]
+    if (frag(ref).list) {
+      flush()
+      for (const item of list(ref)) lines.push(item)
+      continue
+    }
+    /* A sentence that INTRODUCES a list takes its own line — „בתרבות זו יועד
+       לאישה בעיקר תפקיד של:" sitting at the tail of a long run put the colon in
+       the middle of a line with its items starting under the line above it.
+       Detected by what FOLLOWS rather than by the colon character, so an
+       ordinary sentence that happens to end in a colon is not broken out of the
+       prose it belongs to. */
+    if (i + 1 < refs.length && frag(refs[i + 1]).list) {
+      flush()
+      lines.push(text(ref))
+      continue
+    }
+    run = run ? `${run} ${text(ref)}` : text(ref)
+  }
+  flush()
+
+  /* a T that stands on its own in the section (rather than inside a
+     `.ch2-body`) has to carry the reveal itself */
+  const rv = reveal ? { 'data-reveal': true } : {}
+  const out: React.ReactNode[] = []
+  lines.forEach((line, i) => {
+    if (i) out.push(<br key={`br-${i}`} />, ' ')
+    out.push(...emphasise(line, em, `l${i}`))
+  })
+  return <p className={className} {...rv}>{out}</p>
 }
 
 /** The source's own name for an item (יקטן, הפרט, בערות…). Never a literal in JSX. */
@@ -844,7 +895,10 @@ export default function Chapter2() {
 
                 {/* THE FOUR TRAITS — one row of cards, each opening its own
                     dialog. The row is the whole of this culture at a glance;
-                    everything the source says about each trait is behind it. */}
+                    everything the source says about each trait is behind it.
+                    The heading over it is the source's own running head, and it
+                    comes from layout.json: this file writes no words. */}
+                <h3 className="ch2-sub ch2-cards-title">{meta('culture').cardsTitle}</h3>
                 <div className="ch2-cards">
                   <TraitCard id="asabiyya" />
                   <TraitCard id="muruwa" />
@@ -918,6 +972,42 @@ export default function Chapter2() {
                 </div>
               </Section>
 
+              {/* ============ 06 · the jahiliyya — claim and answer ============ */}
+              <Section id="jahiliyya">
+                <Head id="jahiliyya" />
+                {/* the deserted precinct: the standing stones, the tipped vessels
+                    and the lot-arrows of §27, after everyone has gone.
+                    A contained plate on the reading edge — a painting hung in a
+                    book, not a banner. The subject is an abandoned object, and
+                    it should sit apart with paper around it. */}
+                <figure className="ch2-plate is-inset" data-reveal>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/chapter2/shrine.jpg" alt="מתחם פולחן ערבי קדם-אסלאמי נטוש בלילה: אבנים ניצבות, כלי חרס וחצי גורל על הקרקע" loading="lazy" />
+                </figure>
+                <div className="ch2-body ch2-after-device" data-reveal>
+                  <T r={['§27.a', '§27.list', '§27.b', '§28.a']} em={["הג'אהליה"]} />
+                </div>
+                <div className="ch2-meanings" data-reveal>
+                  <article className="ch2-meaning">
+                    <b>{nameOf('§28.claim')}</b>
+                    <p>{text('§28.claim')}</p>
+                    <p className="ch2-answer">{text('§28.answer')}</p>
+                    {/* the gloss belongs to THIS meaning — עִלְם is named in the
+                        answer just above it. Placed after both meanings it sat
+                        two paragraphs away from the word it defines. */}
+                    <dl className="ch2-gloss">
+                      <dt>{termOf('§28.gloss')}</dt>
+                      <dd>{text('§28.gloss')}</dd>
+                    </dl>
+                  </article>
+                  <article className="ch2-meaning">
+                    <b>{nameOf('§29.claim')}</b>
+                    <p>{text('§29.claim')}</p>
+                    <p className="ch2-answer">{text('§29.answer')}</p>
+                  </article>
+                </div>
+              </Section>
+
               {/* ============ 05 · Mecca and the Kaaba ============ */}
               <Section id="mecca">
                 <Head id="mecca" />
@@ -967,42 +1057,6 @@ export default function Chapter2() {
                     <T r={['§30.a', '§31.a']} em={['האבן השחורה']} />
                     <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
                   </div>
-                </div>
-              </Section>
-
-              {/* ============ 06 · the jahiliyya — claim and answer ============ */}
-              <Section id="jahiliyya">
-                <Head id="jahiliyya" />
-                {/* the deserted precinct: the standing stones, the tipped vessels
-                    and the lot-arrows of §27, after everyone has gone.
-                    A contained plate on the reading edge — a painting hung in a
-                    book, not a banner. The subject is an abandoned object, and
-                    it should sit apart with paper around it. */}
-                <figure className="ch2-plate is-inset" data-reveal>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/assets/chapter2/shrine.jpg" alt="מתחם פולחן ערבי קדם-אסלאמי נטוש בלילה: אבנים ניצבות, כלי חרס וחצי גורל על הקרקע" loading="lazy" />
-                </figure>
-                <div className="ch2-body ch2-after-device" data-reveal>
-                  <T r={['§27.a', '§27.list', '§27.b', '§28.a']} em={["הג'אהליה"]} />
-                </div>
-                <div className="ch2-meanings" data-reveal>
-                  <article className="ch2-meaning">
-                    <b>{nameOf('§28.claim')}</b>
-                    <p>{text('§28.claim')}</p>
-                    <p className="ch2-answer">{text('§28.answer')}</p>
-                    {/* the gloss belongs to THIS meaning — עִלְם is named in the
-                        answer just above it. Placed after both meanings it sat
-                        two paragraphs away from the word it defines. */}
-                    <dl className="ch2-gloss">
-                      <dt>{termOf('§28.gloss')}</dt>
-                      <dd>{text('§28.gloss')}</dd>
-                    </dl>
-                  </article>
-                  <article className="ch2-meaning">
-                    <b>{nameOf('§29.claim')}</b>
-                    <p>{text('§29.claim')}</p>
-                    <p className="ch2-answer">{text('§29.answer')}</p>
-                  </article>
                 </div>
               </Section>
 

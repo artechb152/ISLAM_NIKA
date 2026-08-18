@@ -246,6 +246,10 @@
    set that wraps to two lines stops looking like one. Below the point where four
    cards would be narrower than a thumb, the row SCROLLS sideways instead of
    wrapping — the shape survives, the reader swipes. */
+/* the heading over the row. `.ch2-sub` already carries the face, the size and
+   the rule under it; the only thing it needs here is the tight step down to the
+   cards it names, which is the step every sub-heading gives its own first line */
+.chapter-article .ch2-cards-title + .ch2-cards{margin-top:var(--flow-tight)}
 .ch2-cards{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:clamp(12px,1.6vw,22px);width:100%;
