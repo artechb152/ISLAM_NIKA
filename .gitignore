@@ -10,3 +10,4 @@ web/waveletNoiseTile.bin
 # temp files from the Blender import scripts
 web/layout-before.tmp.json
 *.tmp.json
+concept/chapter2/node_modules/

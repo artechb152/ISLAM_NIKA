@@ -260,24 +260,27 @@ export default function DesertStage() {
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
           </button>
 
-          {/* The invitation, shown until the reader takes it. It rides the
-              control row rather than sitting under it, so it cannot fall below
-              the fold on the one screen where it is the whole point.
-
-              It is HIDDEN, never unmounted. On a narrow screen the control row
-              wraps and the hint takes a line of its own, so dropping it out of
-              the flow made the row shorter — and because the copy block is
-              vertically centred, the controls jumped 20px on the reader's very
-              first click. Measured on a 390px screen: 539 before, 559 after,
-              and stable from then on. Keeping its box reserved costs one line of
-              air below the controls and buys a row that never moves. */}
-          <span
-            className={'ch2-stage-hint' + (touched ? ' is-taken' : '')}
-            aria-hidden="true"
-          >
-            לחצו כדי להמשיך
-          </span>
         </div>
+
+        {/* The invitation, on a LINE OF ITS OWN under the controls.
+
+            It used to ride the control row. Inside that row it did two things
+            wrong at once. Unmounted when taken, it made the row shorter on a
+            narrow screen — the row wraps there, so the hint held a line — and
+            since the copy block is vertically centred the controls jumped 20px
+            on the reader's very first click. Kept in place but hidden, its box
+            still sat at one END of the row, so the arrows and dots were pushed
+            off the centre the sentence above them is centred on.
+
+            On its own centred line it does neither: the control row holds only
+            the arrows and the dots and centres on the same axis as the text, and
+            this line's box is reserved whether the hint is showing or not. */}
+        <span
+          className={'ch2-stage-hint' + (touched ? ' is-taken' : '')}
+          aria-hidden="true"
+        >
+          לחצו כדי להמשיך
+        </span>
       </div>
     </div>
   )

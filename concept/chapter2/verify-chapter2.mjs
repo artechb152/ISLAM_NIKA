@@ -29,6 +29,7 @@ const warn = []
    this gate is that "no invented sentences" is a fact and not a slogan, so a
    sanctioned departure has to be visible every single run. */
 const reworded = []
+const omitted = []
 
 /* ---------- 1 · fidelity ---------- */
 /* compare with punctuation and quote glyphs stripped: the layout is allowed to
@@ -65,6 +66,15 @@ for (const [sec, frags] of Object.entries(data.passages)) {
       if (!f.text) errors.push(`${sec}.${f.id}: ניסוח חלופי בלי משפט מקור לצידו`)
       reworded.push(`${sec}.${f.id}`)
     }
+    /* a fragment the user asked to leave off the page. It stays here, and stays
+       checked against the source — it is simply not printed, and the layout is
+       not required to consume it. Reported every run for the same reason the
+       rewordings are: an omission that nobody can see is an omission nobody
+       remembers making. */
+    if (f.omitted) {
+      if (f.page) errors.push(`${sec}.${f.id}: גם מוסר וגם מנוסח מחדש`)
+      omitted.push(`${sec}.${f.id}`)
+    }
     allFragments.push(`${sec}.${f.id}`)
   }
 }
@@ -89,7 +99,8 @@ if (layout) {
 
   for (const ref of allFragments) {
     const n = used.get(ref) ?? 0
-    if (n === 0) errors.push(`קטע שלא מופיע בפרק: ${ref}`)
+    if (n === 0 && !omitted.includes(ref)) errors.push(`קטע שלא מופיע בפרק: ${ref}`)
+    if (n > 0 && omitted.includes(ref)) errors.push(`קטע מסומן כמוסר אך הפריסה צורכת אותו: ${ref}`)
     if (n > 1) errors.push(`קטע שמופיע ${n} פעמים: ${ref}`)
   }
   for (const ref of used.keys()) {
@@ -110,6 +121,9 @@ for (const w of warn) console.log('⚠ ' + w)
 if (errors.length) {
   console.error('❌\n' + errors.map((e) => ' - ' + e).join('\n'))
   process.exit(1)
+}
+if (omitted.length) {
+  console.log(`⚠ קטעים שהוסרו מהעמוד באישור המשתמשת: ${omitted.join(', ')}`)
 }
 if (reworded.length) {
   console.log(`⚠ ניסוחים מאושרים על ידי המשתמשת (מודפסים במקום משפט המקור): ${reworded.join(', ')}`)

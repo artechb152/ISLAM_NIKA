@@ -849,7 +849,7 @@ export default function Chapter2() {
                   </div>
                 </div>
                 <Head id="lineage" />
-                <div className="ch2-body" data-reveal>
+                <div className="ch2-body ch2-wide" data-reveal>
                   <T r="§0.a" em={['ישמעאל']} />
                 </div>
 
@@ -866,8 +866,14 @@ export default function Chapter2() {
 
                     No sub-heading either: „לפי המסורת" is how the paragraphs under
                     it already open, so a heading with those words on it was the
-                    page saying the same thing twice, once in a louder voice. */}
-                <div className="ch2-body" data-reveal>
+                    page saying the same thing twice, once in a louder voice.
+
+                    The prose runs the FULL COLUMN here — see `.ch2-wide`. Three
+                    short paragraphs at the chapter's measure left 612px of empty
+                    parchment beside them at 1920, and this was asked for with the
+                    line lengths on the table. Two columns were tried first and
+                    were not what was wanted. */}
+                <div className="ch2-body ch2-wide" data-reveal>
                   <T
                     r={['§1.a', '§1.b', '(§1.gloss)']}
                     em={['לחצי האי ערב', termOf('§1.gloss')]}
@@ -1014,21 +1020,39 @@ export default function Chapter2() {
 
               {/* ============ 06 · the jahiliyya — claim and answer ============ */}
               <Section id="jahiliyya">
-                <Head id="jahiliyya" />
-                {/* the deserted precinct: the standing stones, the tipped vessels
-                    and the lot-arrows of §27, after everyone has gone.
-                    A contained plate on the reading edge — a painting hung in a
-                    book, not a banner. The subject is an abandoned object, and
-                    it should sit apart with paper around it. */}
-                <figure className="ch2-plate is-inset" data-reveal>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/assets/chapter2/shrine.jpg" alt="מתחם פולחן ערבי קדם-אסלאמי נטוש בלילה: אבנים ניצבות, כלי חרס וחצי גורל על הקרקע" loading="lazy" />
-                </figure>
-                <div className="ch2-body ch2-after-device" data-reveal>
-                  <T r={['§27.a', '§27.list', '§27.b', '§28.a']} em={["הג'אהליה"]} />
+                {/* The seated figure bleeds off the OUTER (left) edge and the
+                    section reads down the column he leaves free — the heading,
+                    the list of what the period is described as, and the two
+                    meanings beside him. He is turned to face the text.
+
+                    This is the block that used to open „התרבות השבטית"; that
+                    section is a row of cards now and had no use for him. The
+                    contained night plate of the abandoned precinct that stood
+                    here is gone with him — one picture to a section. */}
+                <div className="ch2-bleedwrap">
+                  <div className="ch2-bleed-img" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/chapter2/arbiter.webp" alt="" loading="lazy" />
+                  </div>
+                  <Head id="jahiliyya" />
+                  {/* §27.b — „תקופה זו מכונה הג'אהליה." — takes its own line: it
+                      is the sentence that names the thing, and it used to share a
+                      line with „למושג שתי משמעויות", which is gone. */}
+                  <div className="ch2-body" data-reveal>
+                    <T r={['§27.a', '§27.list', '§27.b']} em={["הג'אהליה"]} />
+                  </div>
                 </div>
-                <div className="ch2-meanings" data-reveal>
+
+                {/* THE TWO MEANINGS, side by side, an arrow into each.
+                    They sit OUTSIDE the illustrated block on purpose: beside the
+                    figure the free column is about 527px at 1600, and two columns
+                    in it would be 240px — twenty-three characters, which is not a
+                    line. Out here they get the full column and about 55 each.
+                    The arrows do the work „למושג שתי משמעויות" used to do, which
+                    is why that sentence could go. */}
+                <div className="ch2-meanings is-forked" data-reveal>
                   <article className="ch2-meaning">
+                    <span className="ch2-meaning-arrow" aria-hidden="true" />
                     <b>{nameOf('§28.claim')}</b>
                     <p>{text('§28.claim')}</p>
                     <p className="ch2-answer">{text('§28.answer')}</p>
@@ -1041,6 +1065,7 @@ export default function Chapter2() {
                     </dl>
                   </article>
                   <article className="ch2-meaning">
+                    <span className="ch2-meaning-arrow" aria-hidden="true" />
                     <b>{nameOf('§29.claim')}</b>
                     <p>{text('§29.claim')}</p>
                     <p className="ch2-answer">{text('§29.answer')}</p>

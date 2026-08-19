@@ -55,7 +55,8 @@
    at 27, 51, 56, 62, 70, 78 — six different values for the same relationship.
    One rule owns the space between blocks; the rest declare none. */
 .chapter-article .article-section > * + *,
-.chapter-article .ch2-withmap > * + *{margin-top:var(--flow)}
+.chapter-article .ch2-withmap > * + *,
+.chapter-article .ch2-bleedwrap > *:not(.ch2-bleed-img) + *{margin-top:var(--flow)}
 .chapter-article .section-heading,
 .chapter-article .ch2-sub,
 .chapter-article .ch2-hero{margin-bottom:0}
@@ -531,8 +532,10 @@
 }
 .ch2-stage-dots button.is-on::before{background:var(--gold-soft);border-color:var(--gold-soft);transform:scale(1.25)}
 .ch2-stage-dots button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+/* its own centred line under the controls — NOT inside the control row, where
+   its box pushed the arrows and dots off the axis the sentence is centred on */
 .ch2-stage-hint{
-  margin-inline-start:6px;color:rgba(245,236,214,.72);font-size:16px;white-space:nowrap;
+  color:rgba(245,236,214,.72);font-size:16px;white-space:nowrap;text-align:center;
   animation:ch2-hint 2.6s ease-in-out infinite;
 }
 /* taken: it goes, but its box stays — see the note in DesertStage. `visibility`
@@ -558,6 +561,82 @@
   .ch2-stage-said,.ch2-stage-sizer{font-size:21px;line-height:1.5}
 }
 
+
+/* ============================ 05 · the arbiter — the seated figure beside the prose ============================
+   Opens on the illustration, with the heading beside it — chapter 6 does exactly
+   this with the shahada's minaret. Bleeds off the OUTER (left) edge in RTL. */
+/* the illustrated block. Its height is the PLATE's height, because everything
+   inside it reads down the column the arbiter leaves free — heading, the tribal
+   law paragraph, עצביה and its pair. Sized shorter, the sub-heading dropped
+   below the figure and left a field of empty parchment beside him. */
+.ch2-bleedwrap{
+  /* SIZED TO ITS LEAD, not to the figure. In its first home this block carried a
+     whole section down the free column and the plate could be 600px tall without
+     leaving a hole. Here it accompanies seven lines, and at that size 350px of
+     empty parchment opened between the last line and what follows. */
+  position:relative;isolation:isolate;min-height:clamp(240px,30vw,470px);
+  /* ONE number for the plate, used twice: the figure's width and the room the
+     prose gives it. Declared apart from both so they cannot drift. */
+  --plate:clamp(260px,28%,410px);
+  /* the gap is a share of the page, not a fixed number: the plate stops
+     growing at 600px and the page does not, so a fixed gap kept shrinking as a
+     proportion of what the reader sees. Marked on a wide screen at ~11%. */
+  --plate-gap:clamp(34px,11%,240px);
+  /* WHERE THE PROSE STARTS. Padding on the wrapper rather than a margin on each
+     child: the sub-heading is sized to its own text and would otherwise
+     auto-margin to the far edge, out of line with the paragraph above it. */
+  padding-inline-start:calc(var(--plate) - var(--content-gutter) + var(--plate-gap));
+}
+/* The plate starts ONE PIXEL below where the desert stage ends. The stage runs
+   down to this section's hairline (its negative bottom margin cancels the
+   section's margin-top), and this offset cancels the section's padding-top —
+   so the watercolour begins exactly where the photograph stopped, with no band
+   of parchment between them. Anchored by the BOTTOM, as it was, a tall plate
+   grew upward instead and climbed into the section above. */
+.ch2-bleed-img{
+  position:absolute;top:calc(1px - clamp(46px,6vw,84px));
+  inset-inline-start:calc(-1 * var(--content-gutter));
+  width:var(--plate);z-index:0;pointer-events:none;user-select:none;
+  /* mirrored with the side. He is drawn seated with his hand held out to one
+     side; moved across the page unflipped, that hand pointed off the paper and
+     away from the text he is illustrating. Nothing in the plate reads as
+     handed — no lettering, no asymmetric object — so the flip costs nothing. */
+  transform:scaleX(-1);
+}
+/* No blend mode, no CSS mask, no opacity: the plate has no background left to
+   hide. `mix-blend-mode:multiply` could never hide the sheet, because the
+   watercolour paper multiplied by the page still lands lighter than the page —
+   so a bright rectangle sat on the parchment with four visible edges. The paper
+   is cut away in the file itself, by scripts/ch2-arbiter.mjs. */
+.ch2-bleed-img img{display:block;width:100%;height:auto}
+/* EVERY child stays in the free column, not just the prose — the sub-heading and
+   the הפרט/השבט pair sit here too, and at full width the pair ran straight over
+   the figure. The pair's two columns are simply narrower here; that is the
+   correct answer, not a second layout for it. */
+/* the free column IS the measure here — the 60ch cap left the prose stopping
+   short of the page edge with a second empty band beyond it, which is the thing
+   the plate was moved across the page to close. */
+.ch2-bleedwrap > *:not(.ch2-bleed-img){position:relative;z-index:1;width:min(99ch,100%)}
+/* …including the two devices that carry the chapter-wide measure of their own.
+   Left capped at 880px they ended 250px short of the heading above them, so the
+   marked column had two different outer edges — the heading's and the prose's.
+   Inside this block the free column IS the measure, and everything in it shares
+   both edges: the plate's on one side, the page's on the other. */
+.ch2-bleedwrap > .ch2-body,
+.ch2-bleedwrap > .ch2-cycle{max-width:none}
+.ch2-bleedwrap > .ch2-sub{width:fit-content;max-width:100%}
+/* 1300px, not 900px: pushing the prose out to the midpoint costs it width, and
+   measured at 1024px the free column came out 323px — 28 characters, which is
+   not a line. Below this the figure hides and the prose takes the page, which
+   is what chapter 6 does with its own bleed illustration. */
+@media(max-width:1300px){
+  .ch2-bleed-img{display:none}
+  .ch2-bleedwrap{min-height:0;padding-inline-start:0}
+  .ch2-bleedwrap > *:not(.ch2-bleed-img,.ch2-sub){width:100%}
+  /* the sub-heading’s rule underlines its TEXT, at every width — stretched to
+     100% it reads as a section divider instead of a heading */
+  .ch2-bleedwrap > .ch2-sub{width:fit-content;max-width:100%}
+}
 
 /* ============================ quotations ============================
    The poem, the Bedouin proverb and the hadith are the three places the source
@@ -880,6 +959,34 @@
 
 /* ============================ 06 · claim and answer ============================ */
 .ch2-meanings{display:grid;gap:clamp(22px,3vw,32px);width:100%;max-width:var(--measure,880px)}
+/* FORKED: the two meanings of the word, side by side, an arrow down into each.
+   One concept, two readings — the layout says it, so the sentence that used to
+   say it („למושג שתי משמעויות") is no longer printed. Full column, not the
+   measure, because two columns inside 880px would be 55 characters at best. */
+.ch2-meanings.is-forked{max-width:none}
+@media(min-width:820px){
+  .ch2-meanings.is-forked{grid-template-columns:1fr 1fr;gap:clamp(26px,3.4vw,44px)}
+}
+/* the arrow: a shaft with a chevron at its foot, pointing INTO the meaning under
+   it. The chevron is drawn on an inner box so the rotated square cannot grow
+   past its corner — the column check caught that once already. */
+.ch2-meaning-arrow{
+  position:relative;display:block;justify-self:center;
+  width:2px;height:34px;background:rgba(138,39,51,.45);margin-bottom:4px;
+}
+/* PHYSICAL borders, not logical. A chevron is two sides of a square turned 45°,
+   and which two decides where it points; `border-inline-end` is the LEFT edge in
+   this RTL page, and bottom+left at 45° points sideways, not down. Bottom+right
+   is the down arrow — and unlike the card's „forward" chevron this one is not
+   direction-dependent, so it must not flip with the writing direction. */
+.ch2-meaning-arrow::after{
+  content:"";position:absolute;bottom:0;left:-5px;width:12px;height:12px;
+  border-bottom:2px solid rgba(138,39,51,.45);border-right:2px solid rgba(138,39,51,.45);
+  rotate:45deg;
+}
+/* with an arrow above it the hairline would be a second line saying the same
+   thing; the arrow is the mark that opens each meaning now */
+.ch2-meanings.is-forked .ch2-meaning{border-top:0;padding-top:0;justify-items:stretch}
 .ch2-meaning{display:grid;gap:9px;padding-top:18px;border-top:2px solid rgba(138,39,51,.3)}
 .ch2-meaning > b{
   font-family:var(--font-heading);font-weight:700;font-size:var(--sub);color:var(--maroon);line-height:1.2;
@@ -923,6 +1030,19 @@
    the diagram and the pair take the whole column. The alternation is the point. */
 .ch2-measure{--measure:880px}
 .ch2-body{display:grid;gap:16px;width:100%;max-width:var(--measure,880px)}
+
+/* THE FULL COLUMN, for the opening section only.
+   That section is three short paragraphs and nothing else, so at the chapter's
+   normal measure it was a narrow ribbon against a very large void — 612px of
+   empty parchment at 1920. Asked for, chosen with the numbers on the table, and
+   the number is this: the line runs about 115 characters at 1600 and about 146
+   at 1920, against a chapter ceiling of 95.
+
+   The measure gate still passes, and that is worth being honest about rather
+   than reading as approval: it takes the MEDIAN of every prose paragraph in the
+   chapter, and three wide paragraphs do not move a median built from dozens.
+   The gate is not blessing this block, it simply cannot see it. */
+.ch2-body.ch2-wide{max-width:none}
 /* text-wrap:pretty keeps a paragraph from ending on a single stranded word —
    reading the chapter found „אני.”, „הדם:” and „מפשע).” each alone on a line */
 .ch2-body p,.ch2-diagram-node p,.ch2-diagram-label,.ch2-meaning p,
