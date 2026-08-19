@@ -1015,16 +1015,22 @@
 .ch2-fork-head{
   margin:0;text-align:center;font-size:var(--read);line-height:1.5;color:var(--ink);
 }
-/* ALIGNED LEFT: the trunk stands over the OUTER branch and the bar reaches
-   across to the other one, instead of a stem coming down the middle.
-   The head is given a box twice the trunk's offset and pushed to the left, so
-   its centred sentence lands on exactly the same vertical as the trunk — one
-   number (`--arm`) places all three. */
+/* ALIGNED TO THE READING EDGE. The trunk stands over the FIRST branch — בערות,
+   the meaning the reader meets first — and the bar reaches across to the second.
+   In RTL that edge is the right, which is also where the section's prose sits,
+   so the whole section hangs from one vertical.
+
+   The head is given a box twice the trunk's offset and pushed to that edge, so
+   its centred sentence lands on exactly the same vertical as the trunk: one
+   number (`--arm`) places the head, the trunk and the branch together.
+   `margin-inline-end:auto` is the one that pushes right here — end is the LEFT
+   side in this direction, so giving the left margin the slack moves the box
+   right. */
 @media(min-width:820px){
-  .ch2-fork.is-left .ch2-fork-head{
-    width:calc(2 * var(--arm));margin-inline-start:auto;
+  .ch2-fork.is-right .ch2-fork-head{
+    width:calc(2 * var(--arm));margin-inline-end:auto;
   }
-  .ch2-fork.is-left .ch2-fork-stem{left:var(--arm);translate:-1px 0}
+  .ch2-fork.is-right .ch2-fork-stem{left:auto;right:var(--arm);translate:1px 0}
 }
 .ch2-fork-head p{margin:0}
 /* the named word itself — the thing the tree hangs from.
