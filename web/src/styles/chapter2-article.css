@@ -585,7 +585,12 @@
   /* WHERE THE PROSE STARTS. Padding on the wrapper rather than a margin on each
      child: the sub-heading is sized to its own text and would otherwise
      auto-margin to the far edge, out of line with the paragraph above it. */
-  padding-inline-start:calc(var(--plate) - var(--content-gutter) + var(--plate-gap));
+  /* THE FIGURE BLEEDS OFF THE OUTER EDGE, WHICH IN RTL IS THE LEFT.
+     It was on  — the RIGHT, the reading edge — so the prose was
+     pushed off the edge it is read from and the illustration stood where the
+     eye starts every line. That is what made the section read wrong. The
+     chapter states this convention in its own log and the code contradicted it. */
+  padding-inline-end:calc(var(--plate) - var(--content-gutter) + var(--plate-gap));
 }
 /* The plate starts ONE PIXEL below where the desert stage ends. The stage runs
    down to this section's hairline (its negative bottom margin cancels the
@@ -595,13 +600,13 @@
    grew upward instead and climbed into the section above. */
 .ch2-bleed-img{
   position:absolute;top:calc(1px + clamp(4px,1vw,18px));
-  inset-inline-start:calc(-1 * var(--content-gutter));
+  inset-inline-end:calc(-1 * var(--content-gutter));
   width:var(--plate);z-index:0;pointer-events:none;user-select:none;
-  /* mirrored with the side. He is drawn seated with his hand held out to one
-     side; moved across the page unflipped, that hand pointed off the paper and
-     away from the text he is illustrating. Nothing in the plate reads as
-     handed — no lettering, no asymmetric object — so the flip costs nothing. */
-  transform:scaleX(-1);
+  /* MIRRORED WITH THE SIDE HE IS ON. He is drawn seated with his hand held out
+     to one side, and that hand has to point at the text. On the reading edge he
+     needed the flip; on the outer edge — where he is now — the flip would send
+     the hand off the page, so it comes off. Nothing in the plate reads as
+     handed (no lettering, no asymmetric object), so either way costs nothing. */
 }
 /* No blend mode, no CSS mask, no opacity: the plate has no background left to
    hide. `mix-blend-mode:multiply` could never hide the sheet, because the
