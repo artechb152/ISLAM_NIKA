@@ -163,7 +163,15 @@ function T({
        which is exactly how the document prints it. */
     const par = PARENTHETICAL.exec(ref)
     if (par) {
-      const inner = text(par[1]).replace(/\s*\.\s*$/, '')
+      /* The last two words of the remark are bound with a non-breaking space, so
+         the closing bracket cannot be left holding one word alone at the start of
+         a line — „…שנולדה מקצף" / „הים)." was breaking exactly there. A rule
+         rather than a hand-placed fix on one phrase: it holds for every
+         parenthetical and at every width. The character is whitespace to
+         `split(/\s+/)` and to the gates' `flat()`, so no measurement moves. */
+      const inner = text(par[1])
+        .replace(/\s*\.\s*$/, '')
+        .replace(/ (\S+)$/, ' $1')
       run = `${run.replace(/\s*\.\s*$/, '')} (${inner}).`
       continue
     }
@@ -1035,41 +1043,56 @@ export default function Chapter2() {
                     <img src="/assets/chapter2/arbiter.webp" alt="" loading="lazy" />
                   </div>
                   <Head id="jahiliyya" />
-                  {/* §27.b — „תקופה זו מכונה הג'אהליה." — takes its own line: it
-                      is the sentence that names the thing, and it used to share a
-                      line with „למושג שתי משמעויות", which is gone. */}
                   <div className="ch2-body" data-reveal>
-                    <T r={['§27.a', '§27.list', '§27.b']} em={["הג'אהליה"]} />
+                    <T r={['§27.a', '§27.list']} />
                   </div>
                 </div>
 
-                {/* THE TWO MEANINGS, side by side, an arrow into each.
-                    They sit OUTSIDE the illustrated block on purpose: beside the
-                    figure the free column is about 527px at 1600, and two columns
-                    in it would be 240px — twenty-three characters, which is not a
-                    line. Out here they get the full column and about 55 each.
-                    The arrows do the work „למושג שתי משמעויות" used to do, which
-                    is why that sentence could go. */}
-                <div className="ch2-meanings is-forked" data-reveal>
-                  <article className="ch2-meaning">
-                    <span className="ch2-meaning-arrow" aria-hidden="true" />
-                    <b>{nameOf('§28.claim')}</b>
-                    <p>{text('§28.claim')}</p>
-                    <p className="ch2-answer">{text('§28.answer')}</p>
-                    {/* the gloss belongs to THIS meaning — עִלְם is named in the
-                        answer just above it. Placed after both meanings it sat
-                        two paragraphs away from the word it defines. */}
-                    <dl className="ch2-gloss">
-                      <dt>{termOf('§28.gloss')}</dt>
-                      <dd>{text('§28.gloss')}</dd>
-                    </dl>
-                  </article>
-                  <article className="ch2-meaning">
-                    <span className="ch2-meaning-arrow" aria-hidden="true" />
-                    <b>{nameOf('§29.claim')}</b>
-                    <p>{text('§29.claim')}</p>
-                    <p className="ch2-answer">{text('§29.answer')}</p>
-                  </article>
+                {/* THE FORK. §27.b is the sentence that names the period, so it is
+                    the head of the tree rather than the last line of a paragraph:
+                    the word itself is set large, and two arms come down from it
+                    into the two meanings.
+
+                    The whole thing sits OUTSIDE the illustrated block on purpose —
+                    beside the figure the free column is about 527px at 1600, and
+                    two columns in it would be 240px, twenty-three characters,
+                    which is not a line. Out here each gets about 55.
+
+                    The tree does the work „למושג שתי משמעויות" used to do, which is
+                    why that sentence could come off the page. */}
+                <div className="ch2-fork" data-reveal>
+                  {/* a div, not a `<p>`: `T` renders a paragraph of its own, and
+                      a `<p>` inside a `<p>` is closed by the parser — the server
+                      and client then disagree and React re-renders the subtree.
+                      The audit's pageerror listener caught it. */}
+                  <div className="ch2-fork-head">
+                    <T r="§27.b" em={["הג'אהליה"]} />
+                  </div>
+                  <div className="ch2-fork-tree" aria-hidden="true">
+                    <span className="ch2-fork-stem" />
+                    <span className="ch2-fork-bar" />
+                    <span className="ch2-fork-arm is-start" />
+                    <span className="ch2-fork-arm is-end" />
+                  </div>
+                  <div className="ch2-meanings is-forked">
+                    <article className="ch2-meaning">
+                      <b>{nameOf('§28.claim')}</b>
+                      <p>{text('§28.claim')}</p>
+                      <p className="ch2-answer">{text('§28.answer')}</p>
+                      {/* the gloss belongs to THIS meaning — עִלְם is named in the
+                          answer just above it. Placed after both meanings it sat
+                          two paragraphs away from the word it defines. */}
+                      <dl className="ch2-gloss">
+                        <dt>{termOf('§28.gloss')}</dt>
+                        <dd>{text('§28.gloss')}</dd>
+                      </dl>
+                    </article>
+                    <article className="ch2-meaning">
+                      <b>{nameOf('§29.claim')}</b>
+                      <p>{text('§29.claim')}</p>
+                      <p className="ch2-answer">{text('§29.answer')}</p>
+                    </article>
+                  </div>
                 </div>
               </Section>
 

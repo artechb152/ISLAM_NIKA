@@ -208,7 +208,11 @@ const result = await page.evaluate(() => {
     if (el.children.length) continue
     /* the banner, quotations, declarations and the full-screen stage are display
        moments, and SVG text is sized in viewBox units, not CSS px */
-    if (el.closest('.ch2-hero, blockquote, .ch2-quote, .ch2-statement, .ch2-stage')) continue
+    /* `.ch2-fork-head` joins the list for the same reason the others are on it:
+       it is a display moment, not running prose. The word the period is named by
+       heads a tree that splits into its two meanings, and it is set at that size
+       deliberately. */
+    if (el.closest('.ch2-hero, blockquote, .ch2-quote, .ch2-statement, .ch2-stage, .ch2-fork-head')) continue
     if (el.ownerSVGElement) continue
     if (['H1', 'H2', 'H3'].includes(el.tagName)) continue
     if (parseFloat(getComputedStyle(el).fontSize) > 30) {

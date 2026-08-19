@@ -963,26 +963,50 @@
    One concept, two readings — the layout says it, so the sentence that used to
    say it („למושג שתי משמעויות") is no longer printed. Full column, not the
    measure, because two columns inside 880px would be 55 characters at best. */
-.ch2-meanings.is-forked{max-width:none}
+.ch2-meanings.is-forked{max-width:none;margin-top:0}
 @media(min-width:820px){
   .ch2-meanings.is-forked{grid-template-columns:1fr 1fr;gap:clamp(26px,3.4vw,44px)}
 }
-/* the arrow: a shaft with a chevron at its foot, pointing INTO the meaning under
-   it. The chevron is drawn on an inner box so the rotated square cannot grow
-   past its corner — the column check caught that once already. */
-.ch2-meaning-arrow{
-  position:relative;display:block;justify-self:center;
-  width:2px;height:34px;background:rgba(138,39,51,.45);margin-bottom:4px;
+/* ---- THE FORK: one word, two branches ----
+   „תקופה זו מכונה הג'אהליה." is the sentence that names the period, so it heads a
+   tree rather than closing a paragraph: the word large and centred, a stem down
+   from it, a bar across, and an arm dropping into each meaning. */
+.ch2-fork{width:100%}
+.ch2-fork-head{
+  margin:0;text-align:center;font-size:var(--read);line-height:1.5;color:var(--ink);
 }
-/* PHYSICAL borders, not logical. A chevron is two sides of a square turned 45°,
-   and which two decides where it points; `border-inline-end` is the LEFT edge in
-   this RTL page, and bottom+left at 45° points sideways, not down. Bottom+right
-   is the down arrow — and unlike the card's „forward" chevron this one is not
-   direction-dependent, so it must not flip with the writing direction. */
-.ch2-meaning-arrow::after{
-  content:"";position:absolute;bottom:0;left:-5px;width:12px;height:12px;
-  border-bottom:2px solid rgba(138,39,51,.45);border-right:2px solid rgba(138,39,51,.45);
-  rotate:45deg;
+.ch2-fork-head p{margin:0}
+/* the named word itself — the thing the tree hangs from.
+   INLINE, not a block: as a block it took the line to itself and the sentence's
+   full stop dropped to a line of its own underneath, a single dot floating under
+   the word. Inline it stays enlarged and the stop stays where it belongs. */
+.ch2-fork-head .key{
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon);
+  font-size:clamp(28px,3.2vw,44px);line-height:1.1;
+}
+
+/* the connector. Percentages, not pixels: the arms land on the centre of each
+   meaning column at any width, and the whole thing collapses to a single stem
+   below the breakpoint where the two columns stack. */
+.ch2-fork-tree{position:relative;height:26px;margin-top:14px}
+.ch2-fork-stem,.ch2-fork-bar,.ch2-fork-arm{position:absolute;background:rgba(138,39,51,.45)}
+.ch2-fork-stem{top:0;left:50%;width:2px;height:100%;translate:-1px 0}
+.ch2-fork-bar,.ch2-fork-arm{display:none}
+@media(min-width:820px){
+  .ch2-fork-tree{height:56px}
+  .ch2-fork-stem{height:26px}
+  .ch2-fork-bar{display:block;top:24px;left:25%;right:25%;height:2px}
+  .ch2-fork-arm{display:block;top:24px;width:2px;height:32px}
+  /* physical left/right on purpose: the two arms are a mirrored pair, not a
+     „forward" direction, so they must not swap with the writing direction */
+  .ch2-fork-arm.is-start{right:25%;translate:1px 0}
+  .ch2-fork-arm.is-end{left:25%;translate:-1px 0}
+  /* the head of each arm — bottom+right borders at 45° is the DOWN chevron */
+  .ch2-fork-arm::after{
+    content:"";position:absolute;bottom:0;left:-5px;width:12px;height:12px;
+    border-bottom:2px solid rgba(138,39,51,.45);border-right:2px solid rgba(138,39,51,.45);
+    rotate:45deg;
+  }
 }
 /* with an arrow above it the hairline would be a second line saying the same
    thing; the arrow is the mark that opens each meaning now */
