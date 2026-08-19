@@ -1215,12 +1215,17 @@
    buttons (flat)", where that token is declared). Two chapters ending on the
    same act, in two different reds. `--mat` and `--cream` are the same value;
    the token here is the one that means text on a dark band. The shadow comes
-   with it, because without it the same fill still reads as a flatter object. */
+   with it, because without it the same fill still reads as a flatter object.
+
+   THE DECLARATIONS BELOW ARE `.chapter-end-back`'s, PROPERTY FOR PROPERTY —
+   padding and type size included. 14px/32px against 12px/28px and a fixed 18px
+   against a size that answers the window are differences nobody can name and
+   everybody sees when the two pages sit side by side. */
 .ch2-end-link{
-  display:inline-flex;align-items:center;gap:10px;text-decoration:none;
-  background:var(--maroon-deep);color:var(--cream);border-radius:999px;padding:14px 32px;
-  box-shadow:0 6px 16px rgba(87,24,32,.24);
-  font-family:var(--font-heading);font-size:18px;font-weight:700;transition:background .2s ease,transform .2s ease;
+  display:inline-flex;align-items:center;text-decoration:none;
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(15px,1.3vw,18px);color:var(--cream);
+  background:var(--maroon-deep);padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);
+  transition:background .2s ease,transform .2s ease;
 }
 .ch2-end-link:hover{background:var(--maroon);transform:translateY(-2px)}
 .ch2-end-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
