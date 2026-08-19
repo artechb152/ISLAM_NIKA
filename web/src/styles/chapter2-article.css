@@ -965,7 +965,24 @@
    measure, because two columns inside 880px would be 55 characters at best. */
 .ch2-meanings.is-forked{max-width:none;margin-top:0}
 @media(min-width:820px){
-  .ch2-meanings.is-forked{grid-template-columns:1fr 1fr;gap:clamp(26px,3.4vw,44px)}
+  .ch2-meanings.is-forked{
+    grid-template-columns:1fr 1fr;gap:clamp(26px,3.4vw,44px);
+    /* both panels the same height whatever they hold — the right one carries the
+       עִלְם gloss and would otherwise stand a head taller than its twin, which on
+       a fork reads as one branch mattering more */
+    align-items:stretch;
+  }
+}
+/* EACH MEANING IS A PANEL. The arrows had nothing to land on: two runs of loose
+   text with no edges, so each arm came down and simply stopped in the air. Given
+   the chapter's own card language — the page's tone, one hairline, the same
+   radius as the trait cards — the fork reads as one word opening into two
+   things, which is what it is. */
+.ch2-meanings.is-forked .ch2-meaning{
+  background:var(--paper,#EDE4D0);
+  border:1px solid var(--edge);border-radius:16px;
+  padding:clamp(18px,2vw,26px);
+  gap:12px;
 }
 /* ---- THE FORK: one word, two branches ----
    „תקופה זו מכונה הג'אהליה." is the sentence that names the period, so it heads a
@@ -984,21 +1001,23 @@
   font-family:var(--font-heading);font-weight:700;color:var(--maroon);
   /* enlarged, but not so far above the words around it that the line tips over:
      at 44px the four small words either side read as a caption stuck to a title */
-  font-size:clamp(26px,2.6vw,34px);line-height:1.1;
+  font-size:clamp(25px,2.4vw,31px);line-height:1.1;
 }
 
 /* the connector. Percentages, not pixels: the arms land on the centre of each
    meaning column at any width, and the whole thing collapses to a single stem
    below the breakpoint where the two columns stack. */
-.ch2-fork-tree{position:relative;height:26px;margin-top:14px}
-.ch2-fork-stem,.ch2-fork-bar,.ch2-fork-arm{position:absolute;background:rgba(138,39,51,.45)}
+.ch2-fork-tree{position:relative;height:22px;margin-top:10px}
+.ch2-fork-stem,.ch2-fork-bar,.ch2-fork-arm{position:absolute;background:rgba(138,39,51,.3)}
 .ch2-fork-stem{top:0;left:50%;width:2px;height:100%;translate:-1px 0}
 .ch2-fork-bar,.ch2-fork-arm{display:none}
 @media(min-width:820px){
-  .ch2-fork-tree{height:50px}
-  .ch2-fork-stem{height:22px}
-  .ch2-fork-bar{display:block;top:20px;left:25%;right:25%;height:2px}
-  .ch2-fork-arm{display:block;top:20px;width:2px;height:28px}
+  /* short. A tall connector turns a two-way split into a band of empty page —
+     the fork is a joint between two things, not a device in its own right. */
+  .ch2-fork-tree{height:38px}
+  .ch2-fork-stem{height:16px}
+  .ch2-fork-bar{display:block;top:14px;left:25%;right:25%;height:2px}
+  .ch2-fork-arm{display:block;top:14px;width:2px;height:20px}
   /* physical left/right on purpose: the two arms are a mirrored pair, not a
      „forward" direction, so they must not swap with the writing direction */
   .ch2-fork-arm.is-start{right:25%;translate:1px 0}
@@ -1006,7 +1025,7 @@
   /* the head of each arm — bottom+right borders at 45° is the DOWN chevron */
   .ch2-fork-arm::after{
     content:"";position:absolute;bottom:0;left:-5px;width:12px;height:12px;
-    border-bottom:2px solid rgba(138,39,51,.45);border-right:2px solid rgba(138,39,51,.45);
+    border-bottom:2px solid rgba(138,39,51,.3);border-right:2px solid rgba(138,39,51,.3);
     rotate:45deg;
   }
   /* THE NAME EACH ARM POINTS AT IS CENTRED UNDER IT.
