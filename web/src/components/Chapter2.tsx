@@ -1073,7 +1073,7 @@ export default function Chapter2() {
 
                     The tree does the work „למושג שתי משמעויות" used to do, which is
                     why that sentence could come off the page. */}
-                <div className="ch2-fork" data-reveal>
+                <div className="ch2-fork is-left" data-reveal>
                   {/* a div, not a `<p>`: `T` renders a paragraph of its own, and
                       a `<p>` inside a `<p>` is closed by the parser — the server
                       and client then disagree and React re-renders the subtree.
