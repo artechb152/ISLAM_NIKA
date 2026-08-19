@@ -1031,31 +1031,21 @@
    meaning column at any width, and the whole thing collapses to a single stem
    below the breakpoint where the two columns stack. */
 .ch2-fork-tree{position:relative;height:22px;margin-top:10px}
-/* BOTH SIDES STATED, not left to `auto`. An `<svg>` with a viewBox is a REPLACED
-   element: given `width:auto` it takes its intrinsic ratio and ignores `right`,
-   so `left`+`right` produced an 86×86 square where 733×86 was wanted. Width and
-   height are both written out, and `left` alone places it. */
-.ch2-fork-branches{
-  position:absolute;top:18px;left:var(--arm);
-  width:calc(100% - 2 * var(--arm));height:calc(100% - 18px);overflow:visible;
-}
-.ch2-fork-branches path{stroke:rgba(138,39,51,.3);stroke-width:2;fill:none}
 .ch2-fork-stem,.ch2-fork-bar,.ch2-fork-arm{position:absolute;background:rgba(138,39,51,.3)}
 .ch2-fork-stem{top:0;left:50%;width:2px;height:100%;translate:-1px 0}
-.ch2-fork-bar,.ch2-fork-arm,.ch2-fork-branches{display:none}
+.ch2-fork-bar,.ch2-fork-arm{display:none}
 @media(min-width:820px){
   /* short. A tall connector turns a two-way split into a band of empty page —
      the fork is a joint between two things, not a device in its own right. */
-  .ch2-fork-tree{height:104px}
-  .ch2-fork-branches{display:block}
-  .ch2-fork-stem{height:18px}
+  .ch2-fork-tree{height:38px}
+  .ch2-fork-stem{height:16px}
   /* THE ARM SITS ON THE CENTRE OF ITS OWN HEADING, computed rather than guessed.
      25% is the centre of half the block — but the two columns are separated by a
      gutter, so a column is (100% − gap)/2 wide and its centre is (100% − gap)/4
      from the edge. At the chapter's gutter that is 11px off 25%, which is exactly
      how far each arrow was landing beside the word it points at. */
-  .ch2-fork-bar{display:none}
-  .ch2-fork-arm{display:block;top:auto;bottom:0;width:2px;height:12px}
+  .ch2-fork-bar{display:block;top:14px;left:var(--arm);right:var(--arm);height:2px}
+  .ch2-fork-arm{display:block;top:14px;width:2px;height:20px}
   /* physical left/right on purpose: the two arms are a mirrored pair, not a
      „forward" direction, so they must not swap with the writing direction */
   .ch2-fork-arm.is-start{right:var(--arm);translate:1px 0}

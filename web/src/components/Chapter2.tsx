@@ -1081,27 +1081,15 @@ export default function Chapter2() {
                   <div className="ch2-fork-head">
                     <T r="§27.b" em={["הג'אהליה"]} />
                   </div>
-                  {/* TWO BRANCHES, DRAWN AS DIAGONALS.
-
-                      They were a stem, a horizontal bar and two drops off it —
-                      an org-chart bracket. Measured, that bar ran 733px across a
-                      tree 38px tall: a 19:1 beam, which is why the thing read as
-                      a stray rule however it was aligned. Left, right and centred
-                      were all tried; alignment was never the problem, the shape
-                      was.
-
-                      The svg's own left and right edges ARE the two column
-                      centres, so the branches end on the names by construction.
-                      `preserveAspectRatio="none"` lets it stretch to that width
-                      and `vector-effect` keeps the stroke 2px while it does. No
-                      `role="img"`: it is decoration, and the audit holds every
-                      `svg[role="img"]` in the article to 120px. */}
+                  {/* A stem down from the sentence, a bar across, an arm into
+                      each name — CENTRED. Three other shapes were tried after
+                      this one and every one was worse: panels round the meanings,
+                      the trunk pushed to the left edge, the trunk pushed to the
+                      right, and the bar redrawn as two diagonals. This is the one
+                      that was right; it is back, and it stays. */}
                   <div className="ch2-fork-tree" aria-hidden="true">
                     <span className="ch2-fork-stem" />
-                    <svg className="ch2-fork-branches" viewBox="0 0 100 100" preserveAspectRatio="none">
-                      <path d="M50 0 L0 100" vectorEffect="non-scaling-stroke" />
-                      <path d="M50 0 L100 100" vectorEffect="non-scaling-stroke" />
-                    </svg>
+                    <span className="ch2-fork-bar" />
                     <span className="ch2-fork-arm is-start" />
                     <span className="ch2-fork-arm is-end" />
                   </div>
