@@ -392,6 +392,33 @@ const opened = await page.evaluate(async () => {
 })
 result.fail.push(...opened)
 
+/* 9c · THE STAGE'S CONTROLS MUST NOT MOVE. The five beats are different lengths,
+   and for a long time the box that held them reserved its height with a guessed
+   `min-height` — the short beats fitted, the long ones overflowed, and the row of
+   arrows and dots travelled 102px between the first beat and the last. A reader
+   clicking „next" had the thing they were clicking slide out from under them.
+
+   Measured inside the stage, not against the window, so page scroll cannot
+   flatter the result. */
+const stage = await page.evaluate(async () => {
+  const out = []
+  const controls = document.querySelector('.ch2-stage-controls')
+  const stageEl = document.querySelector('.ch2-stage')
+  if (!controls || !stageEl) return ['לוח המדבר לא נמצא']
+  const at = () => Math.round(controls.getBoundingClientRect().top - stageEl.getBoundingClientRect().top)
+  const next = [...document.querySelectorAll('.ch2-stage-btn')].pop()
+  const seen = [at()]
+  for (let k = 0; k < 8; k++) {
+    next?.click()
+    await new Promise((r) => setTimeout(r, 380))
+    seen.push(at())
+  }
+  const drift = Math.max(...seen) - Math.min(...seen)
+  if (drift > 2) out.push(`פקדי הלוח זזים ${drift}px בין הפריימים — ${seen.join(', ')}`)
+  return out
+})
+result.fail.push(...stage)
+
 /* 10 · mobile. Document width is not enough: anything inside `overflow:hidden`
    is CLIPPED rather than scrolled, so the stage cut 30px off the start of every
    line at 390px while this check reported a clean page. Measure each element

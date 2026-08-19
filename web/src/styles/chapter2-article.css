@@ -418,8 +418,9 @@
    type and a shorter reserved line box, so the sentence and its controls share
    the screen instead of pushing each other off it */
 @media(max-height:560px){
-  .ch2-stage-said{font-size:clamp(17px,3.4vh,22px);line-height:1.4}
-  .ch2-stage-line{min-height:4.6em}
+  /* the sizer takes the same type, or the box reserves a height the visible
+     beat does not have */
+  .ch2-stage-said,.ch2-stage-sizer{font-size:clamp(17px,3.4vh,22px);line-height:1.4}
   .ch2-stage-copy{gap:12px}
   .ch2-stage-scene img.ch2-stage-figure{width:min(26vw,220px)}
 }
@@ -485,10 +486,18 @@
    stage with overflow:hidden that is invisible to a document-width check, and
    on a 390px screen it silently cut 30px off the start of every line. */
 .ch2-stage-copy > *,.ch2-stage-line > *{max-width:100%}
-/* the reserved box: it holds the tallest beat's height so a click never shifts
-   the controls, and centres whatever the current beat happens to be */
-.ch2-stage-line{display:grid;place-items:center;min-height:6.2em;width:100%}
-.ch2-stage-said{
+/* THE RESERVED BOX. Every beat sits in the SAME grid cell — the visible one and
+   an invisible copy of all five — so the cell is as tall as the longest beat at
+   whatever width the reader happens to be at, and the controls under it do not
+   move when the beat changes.
+   No `min-height` here any more: it was 6.2em, a guess, and the long beats
+   overflowed it. The controls travelled 102px between the first beat and the
+   last, which is what „it moves when you click" was. */
+.ch2-stage-line{display:grid;place-items:center;width:100%}
+.ch2-stage-line > *{grid-area:1/1}
+.ch2-stage-sizer{visibility:hidden;pointer-events:none}
+/* the sizer must be set in the beat's own type or it reserves the wrong height */
+.ch2-stage-said,.ch2-stage-sizer{
   margin:0;color:#f6eeda;font-size:clamp(22px,2.2vw,31px);line-height:1.5;
   font-family:var(--font-heading);font-weight:700;
   text-shadow:0 3px 22px rgba(10,5,2,.85);text-wrap:balance;
@@ -526,6 +535,10 @@
   margin-inline-start:6px;color:rgba(245,236,214,.72);font-size:16px;white-space:nowrap;
   animation:ch2-hint 2.6s ease-in-out infinite;
 }
+/* taken: it goes, but its box stays — see the note in DesertStage. `visibility`
+   and not `display`, or the control row loses a wrapped line on a phone and the
+   whole centred block jumps on the first click. */
+.ch2-stage-hint.is-taken{visibility:hidden;animation:none}
 @keyframes ch2-hint{0%,100%{opacity:.5}50%{opacity:1}}
 @media (prefers-reduced-motion:reduce){
   .ch2-stage-scene img{transition:none}
@@ -542,7 +555,7 @@
       rgba(18,10,5,.78) 0%, rgba(18,10,5,.6) 44%, rgba(18,10,5,.28) 74%, rgba(18,10,5,.06) 100%);
   }
   .ch2-stage-copy{width:min(34ch,90%);gap:22px}
-  .ch2-stage-said{font-size:21px;line-height:1.5;min-height:7em}
+  .ch2-stage-said,.ch2-stage-sizer{font-size:21px;line-height:1.5}
 }
 
 

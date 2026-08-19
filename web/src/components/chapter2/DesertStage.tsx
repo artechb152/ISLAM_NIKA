@@ -200,6 +200,26 @@ export default function DesertStage() {
             paragraph itself turned every inline run into a flex item, so the two
             revealed clauses broke out of the line and stacked mid-sentence. */}
         <div className="ch2-stage-line">
+          {/* THE SIZER. Every beat, rendered once, invisible, all of them in the
+              same grid cell — so the box is always as tall as the LONGEST beat
+              and the controls under it never move when the reader clicks.
+
+              This box used to reserve its height with `min-height:6.2em`, which
+              is a guess and not a measurement: the short beats fitted inside it
+              and the long ones overflowed it, so the controls travelled 102px
+              between the first beat and the last. Measured, that is what the
+              reader saw as „it moves when you click".
+
+              `visibility:hidden` and not `display:none`, because a box that is
+              not laid out reserves nothing. `aria-hidden` because this is a
+              layout device and not text — it also keeps the chapter's search out
+              of it, which rejects any `[aria-hidden]` branch, so the sentences
+              are not found five times over. */}
+          {STEPS.map((s, n) => (
+            <span className="ch2-stage-sizer" aria-hidden="true" key={n}>
+              <Said step={s} />
+            </span>
+          ))}
           <p className="ch2-stage-said" aria-live="polite">
             <Said step={step} />
           </p>
@@ -240,10 +260,23 @@ export default function DesertStage() {
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
           </button>
 
-          {/* the invitation, shown until the reader takes it. It rides the
+          {/* The invitation, shown until the reader takes it. It rides the
               control row rather than sitting under it, so it cannot fall below
-              the fold on the one screen where it is the whole point. */}
-          {!touched && <span className="ch2-stage-hint" aria-hidden="true">לחצו כדי להמשיך</span>}
+              the fold on the one screen where it is the whole point.
+
+              It is HIDDEN, never unmounted. On a narrow screen the control row
+              wraps and the hint takes a line of its own, so dropping it out of
+              the flow made the row shorter — and because the copy block is
+              vertically centred, the controls jumped 20px on the reader's very
+              first click. Measured on a 390px screen: 539 before, 559 after,
+              and stable from then on. Keeping its box reserved costs one line of
+              air below the controls and buys a row that never moves. */}
+          <span
+            className={'ch2-stage-hint' + (touched ? ' is-taken' : '')}
+            aria-hidden="true"
+          >
+            לחצו כדי להמשיך
+          </span>
         </div>
       </div>
     </div>
