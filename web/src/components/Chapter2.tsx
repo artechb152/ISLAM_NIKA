@@ -453,22 +453,12 @@ function TraitDialog({ id, children }: { id: string; children: React.ReactNode }
   )
 }
 
-/** A sentence the source itself marks as a quotation.
-    Chapter 6's own treatment — `.shahada-quote`: a gold-ruled card with bracket
-    corners and a quotation mark hung at each end. Same object, same marks.
-
-    Kept for the hadith alone. The chapter quotes three times, and dressing a
-    poem, a proverb and a hadith in one identical card put the same object in
-    three consecutive sections — see `Verse` and `Saying` below. */
-function Quote({ children, long = false }: { children: React.ReactNode; long?: boolean }) {
-  return (
-    <blockquote className={'ch2-quote' + (long ? ' is-long' : '')} data-reveal>
-      <span className="sq-mark sq-open" aria-hidden="true">”</span>
-      <div className="ch2-quote-body">{children}</div>
-      <span className="sq-mark sq-close" aria-hidden="true">”</span>
-    </blockquote>
-  )
-}
+/* `Quote` — the gold-ruled card with bracket corners — stood here and was kept
+   for one passage, the עצביה hadith in section 07. That passage was removed by
+   editorial decision, so the component and its CSS went with it. The chapter
+   quotes three times and the other two were never dressed in it: the poem is
+   `Verse` and the proverb is `Saying`, which is the point of the three voices
+   being told apart at all. */
 
 /** Verse. A poem's line breaks ARE its structure, so each source line is its own
     row and the card is dropped — inside it the longest line wrapped. Centred:
@@ -1204,18 +1194,13 @@ export default function Chapter2() {
                     </div>
                   </dl>
                 </div>
-                {/* §37.a opens the עצביה verdict — a new subject, and the one the
-                    hadith below answers. Fused onto the rejected-practices list it
-                    read as a fourth item in that list. */}
+                {/* The עצביה verdict — §37.a, the hadith that answers it and the
+                    qualification after it — was removed by editorial decision.
+                    The three fragments are marked `omitted` in passages.json, so
+                    the gate prints them on every run instead of letting them
+                    disappear quietly. */}
                 <div className="ch2-body ch2-after-device" data-reveal>
                   <T r={['§36.a', '§36.wad', '§36.lots']} />
-                  <T r="§37.a" em={['הנאמנות השבטית העיוורת']} />
-                </div>
-                {/* 45 words: the shahada card is built for one short line, and at
-                    this length centred display type breaks into six ragged rows */}
-                <Quote long>{text('§37.hadith')}</Quote>
-                <div className="ch2-body" data-reveal>
-                  <T r="§37.b" em={['הכפיף את הנאמנות אליו לנאמנות לאללה']} />
                 </div>
               </Section>
 

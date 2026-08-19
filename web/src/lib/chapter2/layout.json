@@ -222,14 +222,10 @@
           "§35.muruwa",
           "§35.thar"
         ],
+        "$asabiyyaVerdict-note": "הסלוט הוסר: §37.a, §37.hadith ו-§37.b מסומנים omitted ב-passages.json. פריסה שצורכת קטע מושמט היא שגיאת גייט, ולכן ההסרה כאן היא חלק אחד מהחלטה אחת ולא מחיקה נפרדת.",
         "rejected": [
           "§36.wad",
           "§36.lots"
-        ],
-        "asabiyyaVerdict": [
-          "§37.a",
-          "§37.hadith",
-          "§37.b"
         ]
       }
     }

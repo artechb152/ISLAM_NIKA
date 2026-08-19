@@ -66,13 +66,11 @@
 .chapter-article .section-heading + .ch2-sub{margin-top:var(--flow-lead)}
 .chapter-article .ch2-sub + *{margin-top:var(--flow-tight)}
 /* a quotation is a change of voice and gets more air on both sides */
-.chapter-article .article-section > .ch2-quote,
 .chapter-article .article-section > .ch2-verse,
 .chapter-article .article-section > .ch2-saying,
 .chapter-article .article-section > .ch2-statement{margin-top:var(--flow-lead)}
 /* the card row is a movement of its own: a full step before what follows it */
 .chapter-article .ch2-cards + *{margin-top:var(--flow-part)}
-.chapter-article .ch2-quote + *,
 .chapter-article .ch2-verse + *,
 .chapter-article .ch2-saying + *,
 .chapter-article .ch2-statement + *{margin-top:var(--flow-lead)}
@@ -383,8 +381,7 @@
 .ch2-modal-title span{font-family:var(--ui,"Segoe UI",Tahoma,sans-serif);font-weight:400;font-size:.72em;color:var(--maroon)}
 .chapter-article .ch2-modal-body > * + *{margin-top:var(--flow)}
 .chapter-article .ch2-modal-body > .ch2-verse,
-.chapter-article .ch2-modal-body > .ch2-saying,
-.chapter-article .ch2-modal-body > .ch2-quote{margin-top:var(--flow-lead)}
+.chapter-article .ch2-modal-body > .ch2-saying{margin-top:var(--flow-lead)}
 /* inside the sheet the prose has the sheet's own width; the measure is set by
    the panel, so a second ceiling here would only narrow it twice */
 .ch2-modal-body .ch2-body,
@@ -644,47 +641,11 @@
 }
 
 /* ============================ quotations ============================
-   The poem, the Bedouin proverb and the hadith are the three places the source
-   quotes rather than states. One treatment for all three.
-
-   Chapter 6's own treatment for a quoted statement is `.shahada-statement`: a
-   panel on `--mat`, padded, held between two maroon hairlines top and bottom and
-   open at the sides. Same object here — the side rule is replaced by the pair of
-   rules, which is what makes it read as a statement rather than a pull-quote. */
-.ch2-quote{
-  position:relative;width:min(720px,100%);
-  padding:clamp(24px,3vw,32px) clamp(26px,4vw,44px);
-  background:linear-gradient(180deg,var(--cream),var(--panel));
-  border:2px solid var(--gold);border-radius:14px;
-  box-shadow:inset 0 0 0 4px rgba(199,154,60,.16),0 10px 26px rgba(87,24,32,.1);
-}
-/* the bracket corners */
-.ch2-quote::before,.ch2-quote::after{
-  content:"";position:absolute;width:18px;height:18px;border:2px solid var(--gold);opacity:.9;
-}
-.ch2-quote::before{top:7px;inset-inline-start:7px;border-inline-end:none;border-block-end:none;border-start-start-radius:8px}
-.ch2-quote::after{bottom:7px;inset-inline-end:7px;border-inline-start:none;border-block-start:none;border-end-end-radius:8px}
-.ch2-quote .sq-mark{
-  position:absolute;font-family:var(--font-heading);
-  font-size:64px;line-height:1;color:var(--gold);opacity:.85;pointer-events:none;
-}
-.ch2-quote .sq-open{top:-11px;inset-inline-start:18px}
-.ch2-quote .sq-close{bottom:-10px;inset-inline-end:18px;transform:rotate(180deg)}
-/* the quoted lines themselves — centred, as chapter 6 centres its testimony */
-.ch2-quote-body{
-  display:grid;gap:10px;text-align:center;
-  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
-  font-size:clamp(20px,2.3vw,28px);line-height:1.4;text-wrap:balance;
-}
-/* A LONG quotation keeps the card but not the display setting. Chapter 6's
-   testimony is one short line, which is why centred 28px works there; the
-   hadith is forty-five words, and at that length the same treatment produces
-   six ragged centred rows. It reads on the reading edge, at reading size. */
-.ch2-quote.is-long{width:min(860px,100%)}
-.ch2-quote.is-long .ch2-quote-body{
-  text-align:start;font-family:var(--font-body);font-weight:400;color:var(--ink);
-  font-size:var(--read);line-height:var(--lh,1.82);
-}
+   THE GOLD CARD IS GONE WITH THE HADITH IT WAS KEPT FOR. It dressed one
+   quotation — the עצביה hadith in section 07 — and that passage was removed by
+   editorial decision, so the card had no remaining subject. The poem and the
+   proverb never used it: they are set by `.ch2-verse` and `.ch2-saying` below,
+   which is the whole point of the three voices being told apart. */
 
 /* ==================== the three set-apart voices ====================
    The chapter quotes three times, and the first build dressed all three in the
