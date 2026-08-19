@@ -18,11 +18,20 @@ import raw from '@/lib/chapter2/practice.json'
 import { CH2 } from '@/lib/chapter2/content'
 import { markChapterComplete } from '@/lib/chapter2/progress'
 
+/* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED, and that is the whole
+   principle here. The practice does not get a picture set of its own: the four
+   trait figures are the ones that open the cards in section 04, the four desert
+   frames are beats of the stage the reader has just walked, the two camps are
+   the valley the wars happen in, and the arbiter is the man section 04 draws
+   sitting beside the prose. A reader who worked the chapter recognises every one
+   of them, and recognition is the exercise. */
 type Q =
-  | { id: string; label: string; type: 'single' | 'multi'; prompt: string; ok: string; retry: string; options: { text: string; right: boolean }[] }
-  | { id: string; label: string; type: 'match'; prompt: string; ok: string; retry: string; pairs: { left: string; right: string }[] }
-  | { id: string; label: string; type: 'order'; prompt: string; ok: string; retry: string; steps: string[] }
-  | { id: string; label: string; type: 'situations'; prompt: string; ok: string; retry: string; pairs: { key: string; text: string; to: string }[] }
+  | { id: string; label: string; photo?: string; type: 'single' | 'multi'; prompt: string; ok: string; retry: string; options: { text: string; right: boolean }[] }
+  | { id: string; label: string; photo?: string; type: 'match'; prompt: string; ok: string; retry: string; pairs: { left: string; right: string; photo?: string }[] }
+  | { id: string; label: string; photo?: string; type: 'order'; prompt: string; ok: string; retry: string; steps: string[]; photos?: Record<string, string> }
+  | { id: string; label: string; photo?: string; type: 'situations'; prompt: string; ok: string; retry: string; pairs: { key: string; text: string; to: string; photo?: string }[] }
+
+const ART = '/assets/chapter2/'
 
 const QUESTIONS = (raw as unknown as { questions: Q[] }).questions
 
@@ -98,7 +107,11 @@ function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; 
 }
 
 function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }>; onSolved: () => void }) {
-  const rows = q.type === 'match' ? q.pairs.map((p) => ({ left: p.left, right: p.right })) : q.pairs.map((p) => ({ left: p.key + ' — ' + p.text, right: p.to }))
+  const rows =
+    q.type === 'match'
+      ? q.pairs.map((p) => ({ left: p.left, right: p.right, photo: p.photo }))
+      : q.pairs.map((p) => ({ left: p.key + ' — ' + p.text, right: p.to, photo: p.photo }))
+  const withArt = rows.some((r) => r.photo)
   const answers = useMemo(() => shuffled(rows.map((r) => r.right), q.id.length * 53), [q])
   const [chosen, setChosen] = useState<Record<string, string>>({})
   const [held, setHeld] = useState<string | null>(null)
@@ -172,9 +185,21 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
           something is held: that condition read `held` from state, so a slot
           could still be disabled at the instant a fast reader clicked it. A slot
           clicked with an empty hand simply does nothing. */}
-      <ul className="p2-match">
+      {/* WITH PICTURES IT IS A ROW OF BOARDS, WITHOUT THEM IT IS A LIST OF ROWS.
+          Chapter 6's exercises put the answer UNDER the thing it belongs to —
+          each picture is a place, and the reader fills the place. Where this
+          chapter has painted the subject already (the four traits, the desert's
+          own beats) the exercise takes that shape; where it has not, the row
+          keeps its plain two-column form rather than reaching for stock art. */}
+      <ul className={'p2-match' + (withArt ? ' is-boards' : '')}>
         {rows.map((r) => (
           <li className="p2-match-row" key={r.left}>
+            {r.photo && (
+              <span className="p2-shot" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={ART + r.photo} alt="" loading="lazy" decoding="async" />
+              </span>
+            )}
             <span className="p2-match-left">{r.left}</span>
             <button
               type="button"
@@ -228,10 +253,22 @@ function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: ()
 
   return (
     <>
-      <ol className="p2-order">
+      {/* THE PICTURE TRAVELS WITH THE STEP. The chain is four beats of the
+          desert stage the reader has just walked — the dusk valley, the shrunken
+          waterhole, the two camps facing each other, the lone traveller — so
+          ordering the chain is ordering those four pictures, and the sentence
+          under each is what the frame says. Keyed by the step's own text, so a
+          step carries its frame wherever it is moved to. */}
+      <ol className={'p2-order' + (q.photos ? ' is-illustrated' : '')}>
         {items.map((s, i) => (
           <li key={s}>
             <span className="p2-order-n">{i + 1}</span>
+            {q.photos?.[s] && (
+              <span className="p2-shot" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={ART + q.photos[s]} alt="" loading="lazy" decoding="async" />
+              </span>
+            )}
             <span className="p2-order-text">{s}</span>
             <span className="p2-order-moves">
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0 || state === 'right'} aria-label="הזזה למעלה">↑</button>
@@ -275,7 +312,7 @@ export default function Chapter2Practice() {
   const stops = QUESTIONS.map((q) => ({ id: `p2-${q.id}`, label: q.label, done: solved.has(q.id) }))
 
   return (
-    <PracticeNav stops={stops} back={{ href: '/chapter2', label: 'חזרה לפרק' }}>
+    <PracticeNav stops={stops} back={{ href: '/chapter2', label: 'חזרה לפרק 2' }}>
       <main className="chapter-article p2-main">
         {/* THE CHAPTER'S OWN BANNER, and this is the largest thing that was
             missing. The practice opened on a bare heading in a column as wide as
@@ -316,7 +353,19 @@ export default function Chapter2Practice() {
               </div>
               <div className="title-ornament section-ornament" aria-hidden="true"><span /></div>
             </header>
-            <div className="p2-work" data-reveal>
+            <div className={'p2-work' + (q.photo ? ' has-plate' : '')} data-reveal>
+              {/* A QUESTION THAT NAMES A THING GETS THE THING BESIDE IT. „ממה
+                  התעשר שבט קורייש" over the Kaaba, „כיצד נפתרו סכסוכים" over
+                  the seated arbiter, the two ancestors over the map of the
+                  peninsula — the picture is not decoration, it is the subject
+                  the four options are about, and the reader has met all three
+                  in the chapter. */}
+              {q.photo && (
+                <figure className="p2-plate" aria-hidden="true">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={ART + q.photo} alt="" loading="lazy" decoding="async" />
+                </figure>
+              )}
               {(q.type === 'single' || q.type === 'multi') && <Choice q={q} onSolved={() => solve(q.id)} />}
               {(q.type === 'match' || q.type === 'situations') && <Match q={q} onSolved={() => solve(q.id)} />}
               {q.type === 'order' && <Order q={q} onSolved={() => solve(q.id)} />}

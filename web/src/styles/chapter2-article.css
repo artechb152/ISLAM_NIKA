@@ -1326,6 +1326,44 @@ html{scrollbar-gutter:stable}
   gap:16px;align-items:center;padding:10px 0;border-top:1px solid var(--rule);
 }
 .p2-match-left{font-size:var(--read);line-height:1.45;color:var(--ink)}
+
+/* ---- the illustrated board ----
+   Where the chapter has already painted the subject, the exercise becomes a row
+   of boards and the answer goes UNDER its picture — chapter 6's own shape. The
+   rows lose their hairlines here: a rule between two boards reads as a divider
+   cutting a row that is meant to be read across. */
+/* flex and not `auto-fit`: with three boards in a 1157px row `auto-fit` laid
+   five tracks and packed the boards into the first three at their minimum, so
+   they sat small and left-heavy with dead tracks beside them. Flex gives every
+   board an equal share of whatever the row has, whatever the count. */
+.p2-match.is-boards{display:flex;flex-wrap:wrap;gap:clamp(16px,2vw,26px);max-width:var(--measure,880px)}
+.p2-match.is-boards .p2-match-row{
+  display:grid;grid-template-columns:1fr;gap:12px;border-top:0;padding:0;align-content:start;
+  flex:1 1 200px;min-width:0;
+}
+.p2-match.is-boards .p2-match-left{text-align:center;font-weight:700;color:var(--maroon-deep)}
+.p2-shot{
+  display:block;overflow:hidden;border-radius:12px;
+  aspect-ratio:4/3;background:var(--surface);border:1px solid var(--rule);
+}
+.p2-shot img{width:100%;height:100%;object-fit:cover;display:block}
+/* the ordering board: the frame sits between the number and the sentence, so a
+   step is a picture with its caption and the whole chain reads as a strip */
+.p2-order.is-illustrated li{grid-template-columns:auto 92px minmax(0,1fr) auto}
+.p2-order.is-illustrated .p2-shot{aspect-ratio:1/1;border-radius:10px}
+@media(max-width:680px){
+  .p2-order.is-illustrated li{grid-template-columns:auto 64px minmax(0,1fr) auto}
+}
+/* a question whose subject is one picture: the plate beside the options, the
+   way the article sets a plate beside its prose */
+.p2-work.has-plate{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:clamp(20px,2.6vw,36px);align-items:start}
+.p2-work.has-plate > .p2-plate{grid-column:2;grid-row:1/span 4}
+.p2-plate{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--rule);background:var(--surface)}
+.p2-plate img{width:100%;height:auto;display:block}
+@media(max-width:760px){
+  .p2-work.has-plate{grid-template-columns:1fr}
+  .p2-work.has-plate > .p2-plate{grid-column:1;grid-row:auto;max-width:420px}
+}
 .p2-slot{
   all:unset;box-sizing:border-box;cursor:pointer;
   min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center;
@@ -1368,19 +1406,11 @@ html{scrollbar-gutter:stable}
 .p2-option.is-right{border-color:var(--gold);background:rgba(199,154,60,.14)}
 .p2-hint{margin:9px 0 0;font-size:15px;color:var(--muted)}
 
-/* narrower than the measure ON PURPOSE: a matching row is a label and its
-   control, and at full measure the two ended up 470px apart with nothing
-   between them. Close enough to read as one pair, still aligned in a column. */
-.p2-match{display:grid;gap:10px;width:100%;max-width:min(var(--measure,880px),620px)}
-.p2-match-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,240px);gap:18px;align-items:center;padding:12px 0;border-top:1px solid var(--rule)}
-.p2-match-row:first-child{border-top:0}
-.p2-match-left{font-size:18.5px;line-height:1.55;color:var(--ink)}
-.p2-select{
-  font-family:var(--font-body);font-size:17px;color:var(--ink);background:var(--surface);
-  border:1px solid var(--edge);border-radius:999px;padding:9px 16px;cursor:pointer;
-}
-.p2-select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-@media(max-width:680px){.p2-match-row{grid-template-columns:1fr}}
+/* THE OLD MATCHING BLOCK STOOD HERE, and it outranked the new one simply by
+   coming later: a 620px ceiling on `.p2-match` held the illustrated boards to
+   two columns and wrapped the third onto a line of its own. It also styled the
+   `<select>`, and there are no selects on this page any more. The rules that
+   replaced it are above, beside the bank and the slots they belong to. */
 
 .p2-order{list-style:none;margin:0;padding:0;display:grid;gap:8px;width:100%;max-width:var(--measure,880px);counter-reset:none}
 .p2-order li{
