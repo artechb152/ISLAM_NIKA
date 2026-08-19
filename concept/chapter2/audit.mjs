@@ -155,8 +155,18 @@ const result = await page.evaluate(() => {
         /* a fragment marked `omitted` was taken off the page on purpose. It is
            checked in the OTHER direction: it had better not be here. */
         if (f.omitted) {
+          /* Checked as a WHOLE RENDERED ELEMENT, not as a substring of the page.
+             §28.gloss is the word „ידע." — three letters — and the answer above it
+             says „כדת של ידע (עִלְם)", so a substring test reports it as printed
+             when it is not. Matching an element whose entire text IS the fragment
+             says the thing that actually matters: is this fragment on the page as
+             itself? */
           for (const str of [f.text, ...(f.list ?? [])].filter(Boolean)) {
-            if (hay.includes(flat(str))) fail.push(`קטע מסומן כמוסר אך מודפס: ${sec}.${f.id}`)
+            const want = flat(str)
+            const shown = [...document.querySelectorAll('.chapter-article *')].some(
+              (el) => !el.children.length && flat((el.textContent || '').trim()) === want,
+            )
+            if (shown) fail.push(`קטע מסומן כמוסר אך מודפס: ${sec}.${f.id}`)
           }
           continue
         }

@@ -1079,13 +1079,10 @@ export default function Chapter2() {
                       <b>{nameOf('§28.claim')}</b>
                       <p>{text('§28.claim')}</p>
                       <p className="ch2-answer">{text('§28.answer')}</p>
-                      {/* the gloss belongs to THIS meaning — עִלְם is named in the
-                          answer just above it. Placed after both meanings it sat
-                          two paragraphs away from the word it defines. */}
-                      <dl className="ch2-gloss">
-                        <dt>{termOf('§28.gloss')}</dt>
-                        <dd>{text('§28.gloss')}</dd>
-                      </dl>
+                      {/* the „עִלְם · ידע" gloss was taken off the page. The answer
+                          just above already names the term inside its own
+                          sentence — „כדת של ידע (עִלְם)" — so the gloss repeated
+                          both halves of itself one line later. */}
                     </article>
                     <article className="ch2-meaning">
                       <b>{nameOf('§29.claim')}</b>

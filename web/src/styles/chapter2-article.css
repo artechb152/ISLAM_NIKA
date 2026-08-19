@@ -574,10 +574,10 @@
      whole section down the free column and the plate could be 600px tall without
      leaving a hole. Here it accompanies seven lines, and at that size 350px of
      empty parchment opened between the last line and what follows. */
-  position:relative;isolation:isolate;min-height:clamp(240px,30vw,470px);
+  position:relative;isolation:isolate;min-height:clamp(210px,26vw,400px);
   /* ONE number for the plate, used twice: the figure's width and the room the
      prose gives it. Declared apart from both so they cannot drift. */
-  --plate:clamp(260px,28%,410px);
+  --plate:clamp(240px,25%,355px);
   /* the gap is a share of the page, not a fixed number: the plate stops
      growing at 600px and the page does not, so a fixed gap kept shrinking as a
      proportion of what the reader sees. Marked on a wide screen at ~11%. */
@@ -1000,10 +1000,6 @@
 .ch2-meanings.is-forked .ch2-answer{
   padding:0;border:0;width:100%;
 }
-.ch2-meanings.is-forked .ch2-gloss{padding-top:0;border-top:0}
-/* the gloss is a flex row, so `justify-items` does nothing to it — it needs
-   `justify-content` to bring its term and definition onto the group's axis */
-.ch2-meanings.is-forked .ch2-gloss{justify-content:center}
 /* ---- THE FORK: one word, two branches ----
    „תקופה זו מכונה הג'אהליה." is the sentence that names the period, so it heads a
    tree rather than closing a paragraph: the word large and centred, a stem down
@@ -1246,3 +1242,9 @@
 }
 .ch2-end-link:hover{background:var(--stamp);transform:translateY(-2px)}
 .ch2-end-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* the fork follows the illustrated lead directly. Measured, the tree was sitting
+   153px below the last line of the lead — 97px of it dead space inside the block
+   (the figure is taller than the seven lines beside it) and 56px of flow on top.
+   The figure is smaller now and this closes what is left. */
+.chapter-article .ch2-bleedwrap + .ch2-fork{margin-top:var(--flow)}
