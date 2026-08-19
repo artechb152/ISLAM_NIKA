@@ -1059,7 +1059,6 @@ export default function Chapter2() {
                   <div className="ch2-body" data-reveal>
                     <T r={['§27.a', '§27.list']} />
                   </div>
-                </div>
 
                 {/* THE FORK. §27.b is the sentence that names the period, so it is
                     the head of the tree rather than the last line of a paragraph:
@@ -1110,24 +1109,20 @@ export default function Chapter2() {
                     </article>
                   </div>
                 </div>
+                </div>
               </Section>
 
               {/* ============ 05 · Mecca and the Kaaba ============ */}
               <Section id="mecca">
                 <Head id="mecca" />
-                {/* the plate stands BESIDE its prose, not above it: what the text
-                    describes is a place with things IN it — the Kaaba, the black
-                    stone, the 360 idols, Quraysh feeding the pilgrims — so the
-                    reader should be able to look while reading. */}
-                <div className="ch2-beside" data-reveal>
-                  <figure className="ch2-precinct">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/assets/chapter2/mecca-precinct.jpg" alt="מכה בתקופת הג'אהליה — מבט על מתחם הכעבה" loading="lazy" />
-                  </figure>
-                  <div className="ch2-body">
-                    <T r={['§30.a', '§31.a']} em={['האבן השחורה']} />
-                    <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
-                  </div>
+                {/* Running text, no plate. The precinct painting stood beside this
+                    prose so the reader could look while reading — but the passage
+                    is four short sentences and a four-item list, and a tall
+                    picture next to it left the words in a narrow strip with a
+                    field of parchment between the two. */}
+                <div className="ch2-body" data-reveal>
+                  <T r={['§30.a', '§31.a']} em={['האבן השחורה']} />
+                  <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
                 </div>
               </Section>
 

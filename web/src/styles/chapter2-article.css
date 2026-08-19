@@ -577,7 +577,7 @@
   position:relative;isolation:isolate;min-height:clamp(240px,33vw,500px);
   /* ONE number for the plate, used twice: the figure's width and the room the
      prose gives it. Declared apart from both so they cannot drift. */
-  --plate:clamp(270px,28%,400px);
+  --plate:clamp(300px,35%,510px);
   /* the gap is a share of the page, not a fixed number: the plate stops
      growing at 600px and the page does not, so a fixed gap kept shrinking as a
      proportion of what the reader sees. Marked on a wide screen at ~11%. */
@@ -907,12 +907,14 @@
 
      is-bleed    the two camps run to the WINDOW edge, cropped to a band,
                  because the subject of that picture is distance.
-     .ch2-beside Mecca stands NEXT to its prose, because the text names things
-                 that are in the picture and the reader should look while reading.
-     is-inset    the abandoned shrine is a contained plate on the reading edge
-                 with paper around it: a painting hung, not a banner. */
-.ch2-precinct,.ch2-plate{width:100%}
-.ch2-precinct img,.ch2-plate img{
+
+   Two of the three are gone from the page now — the abandoned shrine with the
+   seated figure that replaced it, and the Mecca precinct with the plate that
+   stood beside its prose. Section 06 is running text: the passage is four short
+   sentences and a list, and a tall picture beside it left the words in a narrow
+   strip with a field of parchment between the two. */
+.ch2-plate{width:100%}
+.ch2-plate img{
   display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
   border-radius:14px;border:1px solid var(--edge);
 }
@@ -943,19 +945,14 @@
 /* 2 · beside its prose — the plate takes the outer edge, the text the reading
    edge, and they share one row. Portrait here, so the column has a shape of its
    own rather than a third landscape band. */
-.ch2-beside{display:grid;gap:clamp(20px,2.6vw,32px)}
 @media(min-width:900px){
   /* centred, not top-aligned: two short paragraphs beside a 671px plate left
      440px of nothing under the text. Centred, the prose sits in the middle of
      the picture it is about. */
-  .ch2-beside{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);align-items:center}
   /* both need an explicit ROW. The figure comes first in the DOM but sits in
      column 2, and sparse auto-placement will not send a later item back to a
      row it has already passed — so the prose dropped underneath instead of
      standing beside it. */
-  .ch2-beside .ch2-body{grid-column:1;grid-row:1;max-width:none}
-  .ch2-beside .ch2-precinct{grid-column:2;grid-row:1}
-  .ch2-beside .ch2-precinct img{aspect-ratio:4/5}
 }
 
 /* 3 · a contained plate on the reading edge, paper around it */
