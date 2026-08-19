@@ -1253,14 +1253,8 @@
    The figure is smaller now and this closes what is left. */
 .chapter-article .ch2-bleedwrap + .ch2-fork{margin-top:var(--flow)}
 
-/* the line that introduces a list, with a rule under it — the items below belong
-   to it, and without the rule they read as five more sentences of their own.
-   The chapter's own hairline, the one under every sub-heading. */
-.ch2-intro{
-  /* as wide as ITS OWN SENTENCE, not as the column. Stretched to the block it
-     read as a section divider under a short line rather than as a rule that
-     belongs to the words above it — the narrow free column beside the seated
-     figure made that unmistakable. */
-  display:table;padding-bottom:8px;margin-bottom:8px;
-  border-bottom:2px solid rgba(138,39,51,.3);
-}
+/* the line that introduces a list keeps its OWN LINE — the items below belong
+   to it — but carries no rule. The rule was asked for, then asked away twice:
+   under a short sentence it read as a divider cutting the passage rather than
+   as an underline belonging to the words above it. The break is enough. */
+.ch2-intro{display:block;margin-bottom:2px}
