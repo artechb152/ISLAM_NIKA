@@ -226,7 +226,7 @@
 .ch2-chart-legend{display:flex;flex-wrap:wrap;gap:9px}
 .ch2-layer-btn{
   all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:9px;
-  font-size:16px;color:var(--muted);background:var(--surface);
+  font-size:16px;color:var(--muted);background:transparent;
   border:1px solid var(--edge);border-radius:999px;padding:7px 17px;
   transition:background .18s ease,color .18s ease,border-color .18s ease;
 }
@@ -1301,6 +1301,17 @@ html{scrollbar-gutter:stable}
   color:var(--muted);max-width:var(--measure,880px);
 }
 
+/* NOTHING ON THIS PAGE IS LIGHTER THAN THE PAGE. Every raised inset here —
+   the answer chips, the option rows, the ordering cards, the picture frames,
+   the plate, the map legend — was painted `--surface`, the palette's brightest
+   tone, and against the parchment a field of them reads as white cards floating
+   on a warm page. They sit on the page's own colour now and are told apart by
+   one hairline each, which is what the trait cards in the article were changed
+   to for exactly this reason: „בלי הלבן — שהצבע יהיה בצבע של הרקע".
+
+   A filled slot then cannot say so with a paler fill, so it says it with the
+   gold border it already had and the weight of the word inside it. */
+
 /* ---- the answer bank and its slots ----
    The matching questions used a native `<select>` per row: a government form on
    parchment, and worse, it hid the whole answer set behind a click so nothing
@@ -1312,11 +1323,11 @@ html{scrollbar-gutter:stable}
 .p2-chip{
   all:unset;box-sizing:border-box;cursor:pointer;
   padding:9px 18px;border-radius:999px;
-  border:1px solid var(--rule);background:var(--mat);
+  border:1px solid var(--rule);background:transparent;
   font-family:var(--font-body);font-size:var(--read);line-height:1.4;color:var(--ink);
   transition:background .18s ease,border-color .18s ease,color .18s ease;
 }
-.p2-chip:hover:not(:disabled){border-color:var(--gold);background:var(--surface)}
+.p2-chip:hover:not(:disabled){border-color:var(--gold)}
 .p2-chip.is-held{background:var(--maroon);border-color:var(--maroon);color:var(--cream)}
 .p2-chip.is-placed{opacity:.28;cursor:default}
 .p2-chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -1344,7 +1355,7 @@ html{scrollbar-gutter:stable}
 .p2-match.is-boards .p2-match-left{text-align:center;font-weight:700;color:var(--maroon-deep)}
 .p2-shot{
   display:block;overflow:hidden;border-radius:12px;
-  aspect-ratio:4/3;background:var(--surface);border:1px solid var(--rule);
+  aspect-ratio:4/3;background:transparent;border:1px solid var(--rule);
 }
 .p2-shot img{width:100%;height:100%;object-fit:cover;display:block}
 /* the ordering board: the frame sits between the number and the sentence, so a
@@ -1358,7 +1369,7 @@ html{scrollbar-gutter:stable}
    way the article sets a plate beside its prose */
 .p2-work.has-plate{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:clamp(20px,2.6vw,36px);align-items:start}
 .p2-work.has-plate > .p2-plate{grid-column:2;grid-row:1/span 4}
-.p2-plate{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--rule);background:var(--surface)}
+.p2-plate{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--rule);background:transparent}
 .p2-plate img{width:100%;height:auto;display:block}
 @media(max-width:760px){
   .p2-work.has-plate{grid-template-columns:1fr}
@@ -1373,7 +1384,7 @@ html{scrollbar-gutter:stable}
   transition:border-color .18s ease,background .18s ease;
 }
 .p2-slot:hover:not(:disabled){border-color:var(--gold)}
-.p2-slot.is-full{border-style:solid;border-color:var(--gold);background:var(--surface)}
+.p2-slot.is-full{border-style:solid;border-color:var(--gold);color:var(--maroon-deep);font-weight:700}
 .p2-slot:disabled{cursor:default}
 .p2-slot:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(max-width:680px){.p2-match-row{grid-template-columns:1fr}}
@@ -1397,7 +1408,7 @@ html{scrollbar-gutter:stable}
 .p2-options{list-style:none;margin:0;padding:0;display:grid;gap:9px;width:100%;max-width:var(--measure,880px)}
 .p2-option{
   all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;
-  padding:15px 18px;border:1px solid var(--edge);border-radius:14px;background:var(--surface);
+  padding:15px 18px;border:1px solid var(--edge);border-radius:14px;background:transparent;
   font-size:18.5px;line-height:1.6;color:var(--ink);transition:border-color .18s ease,background .18s ease;
 }
 .p2-option:hover{border-color:var(--gold)}
@@ -1415,7 +1426,7 @@ html{scrollbar-gutter:stable}
 .p2-order{list-style:none;margin:0;padding:0;display:grid;gap:8px;width:100%;max-width:var(--measure,880px);counter-reset:none}
 .p2-order li{
   display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
-  padding:14px 18px;border:1px solid var(--edge);border-radius:14px;background:var(--surface);
+  padding:14px 18px;border:1px solid var(--edge);border-radius:14px;background:transparent;
 }
 .p2-order-n{font-family:var(--font-heading);font-size:21px;color:var(--gold-text);min-width:22px}
 .p2-order-text{font-size:18.5px;line-height:1.55;color:var(--ink)}
