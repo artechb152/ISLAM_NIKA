@@ -164,7 +164,7 @@ function T({
   reveal = false,
 }: { r: string | string[]; em?: string[]; className?: string; reveal?: boolean }) {
   const refs = Array.isArray(r) ? r : [r]
-  const lines: { text: string; intro?: boolean }[] = []
+  const lines: { text: string; intro?: boolean; item?: boolean }[] = []
   let run = ''
   const flush = () => {
     if (run) {
@@ -201,7 +201,7 @@ function T({
     }
     if (frag(ref).list) {
       flush()
-      for (const item of list(ref)) lines.push({ text: item })
+      for (const item of list(ref)) lines.push({ text: item, item: true })
       continue
     }
     /* A sentence that INTRODUCES a list takes its own line — „בתרבות זו יועד
@@ -241,6 +241,21 @@ function T({
       return
     }
     if (i && !lines[i - 1].intro) out.push(<br key={`br-${i}`} />, ' ')
+    /* AN ITEM OF A LIST IS MARKED WITH A DOT, and it is the only mark this
+       chapter uses. Wrapped rather than bulleted: the items are lines inside one
+       paragraph, not `<li>`s, because the source writes its lists as strings of
+       short sentences and the words-per-paragraph measure the whole chapter is
+       held to counts them as prose. The span is inline and the dot is a
+       `::before`, so every line box, every break and every reading the gates
+       take stay exactly where they were. */
+    if (line.item) {
+      out.push(
+        <span className="ch2-item" key={`it${i}`}>
+          {emphasise(line.text, em, `l${i}`)}
+        </span>,
+      )
+      return
+    }
     out.push(...emphasise(line.text, em, `l${i}`))
   })
   return <p className={className} {...rv}>{out}</p>

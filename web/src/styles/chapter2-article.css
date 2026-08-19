@@ -1256,6 +1256,16 @@
    as an underline belonging to the words above it. The break is enough. */
 .ch2-intro{display:block;margin-bottom:2px}
 
+/* The dot that marks an item of a list. Small, maroon, and set on the reading
+   side of the line — 6px, which is the size at which it reads as a mark on the
+   line rather than as a bullet the line hangs off. The span is inline, so the
+   dot rides the first line box of the item and nothing about the paragraph's
+   measurement changes. */
+.ch2-item::before{
+  content:'';display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--maroon);vertical-align:0.28em;margin-inline-end:10px;
+}
+
 /* ============ 06 · Mecca — chapter 6's charity hero, part for part ============
    A watercolour bleeding off the RIGHT edge (`inline-start` in RTL, the reading
    edge) with the reading column beside it on the left. Copied from
@@ -1285,22 +1295,34 @@
      block leaves ~105px at each end, which is what תקופת הג'אהליה above it
      shows under its own rule (107px). Same spacing, and symmetrical. */
   .ch2-mecca-hero{display:flex;flex-direction:column;justify-content:center;min-height:clamp(430px,38vw,640px)}
-  /* THE COLUMN IS PINNED TO THE OUTER EDGE, not offset from the reading edge.
-     `margin-inline-start:44%` beside `width:58%` adds up to 102% — at 1850 the
-     680px cap hid it, but at 1440 nothing caps the width and the prose ran 21px
-     past the article's own left edge. Anchored at `inline-end` with a small gap
-     it sits as far from the picture as the measure allows and cannot overflow,
-     whatever the window does. */
-  .ch2-mecca-body{width:min(680px,50%);margin-inline-start:auto;margin-inline-end:clamp(0px,6%,92px);max-width:none}
-  /* THE HEADING SITS OVER ITS OWN TEXT, not at the article edge. Left at the far
-     right it hung above the illustration with the prose starting far below and
-     to the left of it, so the section had two right edges. Same box as the body,
-     so heading and prose share one. */
-  .ch2-mecca-head{width:min(680px,50%);margin-inline-start:auto;margin-inline-end:clamp(0px,6%,92px)}
+  /* THE COLUMN IS MEASURED FROM THE PICTURE, not from either edge of the page,
+     and it is the same arithmetic `--plate` uses higher up this file. Three
+     attempts failed before this on percentages that do not know about each
+     other: `margin-inline-start:44%` beside `width:58%` adds to 102%, so at
+     1440 the prose ran past the article's own left edge; anchoring to the outer
+     edge instead left the gap to the picture at the window's mercy — 101px at
+     1850 and 17px at 1440; and two independent percentages, one for the text
+     and one for the watercolour, had them overlapping by 47px at 1100. One
+     variable holds the picture's width, the text reserves exactly that much
+     plus a gap, and the auto margin on the outer side takes whatever is left.
+     The distance between prose and painting is then the same at every width,
+     because it is written once. */
+  /* the picture's floor is 320px and not 390px: at 1100 the article is 713px
+     wide, a 390px watercolour takes 55% of it, and the column had 5px of slack
+     left — no room to move the prose at all */
+  .ch2-mecca-hero{--kaaba:clamp(320px,44%,620px);--kaaba-gap:clamp(40px,3.6vw,66px)}
+  /* THE HEADING SHARES THE PROSE'S BOX. Left at the article edge it hung above
+     the illustration with the prose starting far below and to the left of it,
+     so the section had two right edges. */
+  .ch2-mecca-body,.ch2-mecca-head{
+    width:min(680px,46%);max-width:none;
+    margin-inline-start:calc(var(--kaaba) - var(--content-gutter) + var(--kaaba-gap));
+    margin-inline-end:auto;
+  }
   .ch2-mecca-illus{
     display:block;position:absolute;top:50%;translate:0 -50%;
     inset-inline-end:auto;inset-inline-start:calc(-1 * var(--content-gutter));
-    width:clamp(390px,44%,620px);z-index:0;pointer-events:none;user-select:none;
+    width:var(--kaaba);z-index:0;pointer-events:none;user-select:none;
   }
   /* THE FILE IS A PORTRAIT PLATE, 1200×1607, AND MOST OF IT IS EMPTY SKY AND
      SAND — the Kaaba itself occupies the middle three fifths. Printed whole at a
