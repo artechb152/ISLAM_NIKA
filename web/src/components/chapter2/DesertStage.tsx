@@ -34,6 +34,16 @@ const A = '/assets/chapter2/'
 type Figure = 'beasts' | 'raiders'
 
 interface Step {
+  /** A LINE HELD ABOVE THE BEAT WHILE ITS ITEMS CHANGE UNDER IT.
+      „האקלים התאפיין ב:" introduces four items, and the whole point of this
+      device is that each item gets its own picture — heat, cold, dust. Printed
+      once on the first beat and then gone, it left a reader on beat 3 looking
+      at „קור עז בלילה." with no verb and no antecedent anywhere on the screen.
+      Held, the sentence stays and the item under it changes, which is exactly
+      what the scarcity beat does in one screen and what the source's own colon
+      asks for. It is the same fragment, not a repeated one: §9.b is consumed
+      once, by this slot. */
+  lead?: string
   /** the source fragments this beat carries, in order */
   refs: string[]
   frame: string
@@ -103,10 +113,10 @@ const DANGER_PARTS = (() => {
    above them. A list belongs to the line that introduces it and to nothing
    else. */
 const STEPS: Step[] = [
-  { refs: ['§9.a', '§9.b'], frame: 'desert-1.jpg', scene: 'העמק באור ראשון' },
-  { refs: ['§9.day'], frame: 'desert-2.jpg', scene: 'אותו עמק בשיא החום' },
-  { refs: ['§9.night'], frame: 'desert-3.jpg', scene: 'אותו עמק בלילה, כפור על האבנים' },
-  { refs: ['§9.dry'], frame: 'desert-4.jpg', scene: 'אותו עמק ביובש ובאבק' },
+  { refs: ['§9.a'], frame: 'desert-1.jpg', scene: 'העמק באור ראשון' },
+  { lead: '§9.b', refs: ['§9.day'], frame: 'desert-2.jpg', scene: 'אותו עמק בשיא החום' },
+  { lead: '§9.b', refs: ['§9.night'], frame: 'desert-3.jpg', scene: 'אותו עמק בלילה, כפור על האבנים' },
+  { lead: '§9.b', refs: ['§9.dry'], frame: 'desert-4.jpg', scene: 'אותו עמק ביובש ובאבק' },
   { refs: DANGER_LEAD, frame: 'desert-6.jpg', reveal: 1, scene: 'העמק בדמדומים — מרחב מסוכן' },
   { refs: DANGER_LEAD, frame: 'desert-6.jpg', reveal: 2, figures: ['beasts'], scene: 'זאב וצבוע נכנסים לעמק מימין' },
   {
@@ -169,8 +179,12 @@ const pieces = (s: Step): Piece[] => {
     sentence as far as it has been written on this beat */
 function Said({ step }: { step: Step }) {
   const ps = pieces(step)
+  /* where the items ARE the beat — no sentence beside them, only the held lead
+     above — they carry the voice of a sentence rather than of a caption */
+  const alone = !ps.some((p) => p.kind === 'say')
   return (
     <>
+      {step.lead ? <span className="ch2-stage-lead">{text(step.lead)} </span> : null}
       {ps.map((p, n) => {
         if (p.kind === 'items') {
           return (
@@ -179,7 +193,7 @@ function Said({ step }: { step: Step }) {
                as two words rather than one fused token — the chapter's search
                and the audit's counts both read this text, exactly as they do
                the article's own lists */
-            <span className="ch2-stage-items" key={n}>
+            <span className={'ch2-stage-items' + (alone ? ' is-alone' : '')} key={n}>
               {p.items!.map((item) => (
                 <span className="ch2-stage-item" key={item}>
                   {item}{' '}
@@ -191,6 +205,10 @@ function Said({ step }: { step: Step }) {
         const last = n === ps.length - 1
         return (
           <span className={p.kind === 'note' ? 'ch2-stage-note' : 'ch2-stage-say'} key={n}>
+            {/* the same separator the items carry, for the same reason: without
+                it „…שהתבטא בצבר." and „אורך רוח…" fuse into one token for every
+                reader of `textContent` — the chapter's search and the gates */}
+            {n ? ' ' : null}
             {p.text}
             {last && step.reveal ? (
               <>
@@ -235,8 +253,14 @@ export default function DesertStage() {
     if (!root) return
     const onKey = (e: KeyboardEvent) => {
       if (!root.contains(document.activeElement)) return
-      if (e.key === 'ArrowLeft' || e.key === 'PageDown') { e.preventDefault(); move(1) }
-      else if (e.key === 'ArrowRight' || e.key === 'PageUp') { e.preventDefault(); move(-1) }
+      /* THE ARROWS AND NOT THE PAGING KEYS. A focused widget owning the arrow
+         keys is conventional; owning PageDown is not. A reader who merely
+         CLICKED the scene with a mouse — which focuses the advance button —
+         found that PageDown no longer scrolled the article, it advanced the
+         beat. This component's own contract is that the page never scroll-jacks,
+         and swallowing the paging keys is the same thing by another route. */
+      if (e.key === 'ArrowLeft') { e.preventDefault(); move(1) }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); move(-1) }
       else if (e.key === 'Home') { e.preventDefault(); go(0) }
       else if (e.key === 'End') { e.preventDefault(); go(STEPS.length - 1) }
     }
@@ -316,12 +340,18 @@ export default function DesertStage() {
           </p>
         </div>
 
+        {/* BOTH ARROWS CARRY aria-disabled AND NOT disabled — the same trap the
+            scene button was fixed for, and these two were left in it. A disabled
+            button drops focus: reaching the last beat from the forward arrow
+            emptied document.activeElement, the key handler's containment check
+            stopped matching, and the arrows and Home died with no way back.
+            `move()` already clamps, so a click at either bound does nothing. */}
         <div className="ch2-stage-controls">
           <button
             type="button"
             className="ch2-stage-btn"
             onClick={(e) => { e.stopPropagation(); move(-1) }}
-            disabled={i === 0}
+            aria-disabled={i === 0 || undefined}
             aria-label="אחורה"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
@@ -345,7 +375,7 @@ export default function DesertStage() {
             type="button"
             className="ch2-stage-btn"
             onClick={(e) => { e.stopPropagation(); move(1) }}
-            disabled={last}
+            aria-disabled={last || undefined}
             aria-label="קדימה"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6" /></svg>

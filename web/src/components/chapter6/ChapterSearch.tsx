@@ -75,7 +75,15 @@ export default function ChapterSearch({ containerRef }: { containerRef: RefObjec
     else api.highlights.delete('chapter-find-current')
   }, [])
 
-  const scrollTo = useCallback((range: Range | undefined) => {
+  /* `reveal` IS WHY THIS TAKES A SECOND ARGUMENT, and it is a keyboard fix.
+     Opening a panel is a navigation, not a side effect of typing. Called on
+     every keystroke it did this: the reader typed „הסבלנות", the count reached
+     one on the third letter, `showModal()` ran, the browser moved focus into
+     the sheet, and the remaining four letters went nowhere — a modal nobody
+     asked for, with a truncated query behind it and no way to finish the word.
+     While the query changes the search only counts and paints; the panels open
+     when the reader actually goes to a match, with Enter or the arrows. */
+  const scrollTo = useCallback((range: Range | undefined, reveal = true) => {
     if (!range) return
     // A match inside a CLOSED <dialog> or <details> measures 0×0, and the guard
     // below would drop it — the reader would be told the chapter has a hit and
@@ -90,9 +98,13 @@ export default function ChapterSearch({ containerRef }: { containerRef: RefObjec
       const panel = el.closest('details, dialog')
       if (!panel) break
       if (panel instanceof HTMLDialogElement) {
-        if (!panel.open) panel.showModal()
+        if (!panel.open) {
+          if (!reveal) return
+          panel.showModal()
+        }
         inDialog = inDialog ?? panel
       } else {
+        if (!reveal && !(panel as HTMLDetailsElement).open) return
         ;(panel as HTMLDetailsElement).open = true
       }
       el = panel.parentElement
@@ -118,7 +130,7 @@ export default function ChapterSearch({ containerRef }: { containerRef: RefObjec
     const next = ranges.length ? 1 : 0
     setActive(next)
     paint(ranges, next)
-    scrollTo(ranges[next - 1])
+    scrollTo(ranges[next - 1], false)
     return () => paint([], 0)
   }, [collect, paint, scrollTo])
 

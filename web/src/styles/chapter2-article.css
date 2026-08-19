@@ -48,6 +48,18 @@
   --flow-lead:clamp(32px,3.8vw,48px); /* after a heading, around a quote   */
   --flow-part:clamp(44px,5.2vw,66px); /* before a sub-heading — a new move */
   --flow-tight:clamp(14px,1.8vw,20px);/* a sub-heading to its own first line */
+
+  /* DECLARED HERE, AND THEY WERE NOT. `var(--measure,880px)` is referenced
+     twenty times in this file, `var(--lh,1.82)` thirteen, `var(--ui,…)` twice —
+     and none of the three was declared anywhere the article could reach, so
+     every one of those thirty-five references was quietly taking its fallback.
+     A token system that looks live and is not is worse than literals: change
+     the value in one place and nothing moves. The values below are the
+     fallbacks that were actually in force, so nothing changes today; from here
+     on they can be changed. */
+  --measure:880px;   /* the reading column's ceiling                        */
+  --lh:1.82;         /* leading for every block set at --read               */
+  --ui:"Segoe UI",Tahoma,sans-serif; /* the interface face beside the serif */
 }
 /* NOTHING inside the article sets its own outer margin. The article is not a
    margin-collapsing context here, so a device that kept a margin-top of its own
@@ -140,7 +152,11 @@
 /* the still is already painted on the media layer, so a film that fails, or a
    reader who asked for less motion, leaves the banner whole rather than black */
 .ch2-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;display:block}
-@media (prefers-reduced-motion:reduce){.ch2-hero-video{display:none}}
+/* `.ch2-hero-media .ch2-hero-video` AND NOT `.ch2-hero-video`, because a media
+   query adds no specificity: the descendant rule above (0,1,1) beat the reduce
+   rule (0,1,0) and the banner went on playing for exactly the readers who asked
+   it to stop. */
+@media (prefers-reduced-motion:reduce){.ch2-hero-media .ch2-hero-video{display:none}}
 .ch2-hero-copy{position:relative;z-index:1;width:min(1200px,94%);min-width:0;margin-inline-end:auto;text-align:right;direction:rtl}
 .ch2-hero-title{
   font-family:var(--font-heading);font-weight:900;color:var(--paper);margin:0;
@@ -266,7 +282,13 @@
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
   gap:clamp(12px,1.6vw,22px);width:100%;
 }
-@media (max-width:700px){
+/* 780px AND NOT 700. The row is supposed to start scrolling below the width at
+   which four cards would be narrower than a thumb — but the cards reach that
+   190px floor at about 780px, so between 701 and 780 they went on shrinking
+   inside a row that would not scroll: 152px each at 701px, which is narrower
+   than the same cards are at 700px, where the scroller finally engages. The
+   cards were getting wider as the window got narrower. */
+@media (max-width:780px){
   .ch2-cards{
     grid-template-columns:repeat(4,minmax(190px,1fr));
     overflow-x:auto;scroll-snap-type:x mandatory;
@@ -274,6 +296,11 @@
        look clipped by the column it is escaping */
     margin-inline:calc(-1 * var(--content-gutter));
     padding-inline:var(--content-gutter);padding-bottom:10px;
+    /* THE SNAPPORT STARTS AT THE READING EDGE, and padding alone does not put it
+       there: snap overrode it, so at rest the row sat at scrollLeft −28 with the
+       first card flush against the window and its border clipped off — 28px
+       outside the edge the title above it and every paragraph end on. */
+    scroll-padding-inline:var(--content-gutter);
   }
   .ch2-card{scroll-snap-align:start}
 }
@@ -353,7 +380,19 @@
 
 /* ---- the dialog ----
    `<dialog>` + showModal(): the top layer, the focus trap, Esc and the
-   inertness of the page behind it are the platform's, not ours. */
+   inertness of the page behind it are the platform's, not ours.
+
+   THE ONE THING THE PLATFORM DOES NOT DO IS HOLD THE PAGE STILL. The article
+   behind an open sheet scrolled freely — a wheel over the backdrop moved it
+   1472px — so Escape returned focus, correctly, to a card that was by then
+   659px above the top of the window. The reader came back to a different place
+   than the one they left. */
+html:has(dialog[open]){overflow:hidden}
+/* and the gutter is held open whether the scrollbar is there or not, so taking
+   it away on open does not jolt the article sideways on a desktop that draws a
+   classic scrollbar. Headless browsers use overlay scrollbars and never showed
+   this; a real Windows window would have. */
+html{scrollbar-gutter:stable}
 .ch2-modals{display:contents}
 .ch2-modal{
   border:0;padding:0;background:none;max-width:none;max-height:none;
@@ -425,16 +464,6 @@
   display:grid;place-items:center;
 }
 @media(min-height:660px){.ch2-stage{min-height:560px}}
-/* a short screen — landscape phone, or heavy browser zoom — gets smaller stage
-   type and a shorter reserved line box, so the sentence and its controls share
-   the screen instead of pushing each other off it */
-@media(max-height:560px){
-  /* the sizer takes the same type, or the box reserves a height the visible
-     beat does not have */
-  .ch2-stage-said,.ch2-stage-sizer{font-size:clamp(17px,3.4vh,22px);line-height:1.4}
-  .ch2-stage-copy{gap:12px}
-  .ch2-stage-scene img.ch2-stage-figure{width:min(26vw,220px)}
-}
 .ch2-stage-scene{position:absolute;inset:0;z-index:0}
 .ch2-stage-scene img{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
@@ -509,7 +538,7 @@
 .ch2-stage-sizer{visibility:hidden;pointer-events:none}
 /* the sizer must be set in the beat's own type or it reserves the wrong height */
 .ch2-stage-said,.ch2-stage-sizer{
-  margin:0;color:#f6eeda;font-size:clamp(22px,2.2vw,31px);line-height:1.5;
+  margin:0;color:#f6eeda;font-size:var(--emph);line-height:1.5;
   font-family:var(--font-heading);font-weight:700;
   text-shadow:0 3px 22px rgba(10,5,2,.85);text-wrap:balance;
 }
@@ -526,29 +555,44 @@
    („מים. שטחי מרעה. שדות חקלאיים.") and run together they read as a stutter */
 .ch2-stage-items{display:grid;gap:clamp(4px,.5vw,8px);justify-items:center}
 .ch2-stage-item{
-  display:block;font-size:clamp(19px,1.8vw,26px);line-height:1.35;
+  display:block;font-size:clamp(19px,1.8vw,26px);line-height:1.35; /* one deliberate step under --emph */
   color:rgba(246,238,218,.92);font-weight:600;
 }
 /* A LIST THAT IS THE WHOLE BEAT IS NOT SUBORDINATE TO ANYTHING. „יובש. צחיחות."
-   stands alone on its own beat, and set one notch down it read as a caption
-   under a picture with no sentence above it to be a caption to. Where the items
-   are the only voice on the screen they take the voice of a sentence. */
-.ch2-stage-items:only-child .ch2-stage-item{
-  font-size:clamp(22px,2.2vw,31px);line-height:1.5;
+   stands alone on its beat, and set one notch down it read as a caption under a
+   picture with no sentence above it to be a caption to. Where the items are the
+   only voice on the screen they take the voice of a sentence — the held lead
+   above them is context, and does not make them a caption. */
+.ch2-stage-items.is-alone .ch2-stage-item{
+  font-size:var(--emph);line-height:1.5;
   color:#f6eeda;font-weight:700;
+}
+/* THE HELD LEAD — the line that introduces the items, kept on screen while they
+   change under it. A running head and not a sentence of the beat: one notch
+   down, lighter, and set apart by space rather than by a rule. */
+.ch2-stage-lead{
+  display:block;margin-bottom:clamp(12px,1.6vw,22px);
+  font-size:var(--read);line-height:1.45;font-weight:600;
+  color:rgba(246,238,218,.8);
 }
 /* the definition of צבר, and it is not the sentence that names it */
 .ch2-stage-note{
   font-family:var(--font-body);font-weight:400;
-  font-size:clamp(15px,1.35vw,20px);line-height:1.6;
+  font-size:var(--read);line-height:1.6;
   color:var(--gold-soft);text-shadow:0 2px 14px rgba(10,5,2,.8);
 }
 
 /* a word lights as its figure walks into the scene — the sentence is never cut
    in two and never reprinted, only revealed in the order it is written */
-/* maroon, the chapter's own colour for a word that matters. No halo: it keeps
-   the paragraph's own shadow and nothing else. */
-.ch2-stage-lit{color:var(--maroon);font-weight:inherit;transition:color .5s ease}
+/* GOLD AND NOT MAROON, AND THE REASON IS THE PHOTOGRAPH UNDER IT. Maroon is
+   the chapter's colour for a word that matters — on parchment. Measured against
+   the frame these words actually sit on, `#8a2733` came out at 1.79:1 (2.20:1
+   at its most favourable, 1.33:1 at its worst) while the cream around it reads
+   13.45:1: two of the three clauses of §10.b, real chapter text, were painted
+   in a colour that all but disappears into the valley. On a dark ground the
+   emphasis has to go LIGHTER than the body, not darker — this is the same gold
+   the gloss uses, 7.21:1 here, and the two never share a beat. */
+.ch2-stage-lit{color:var(--gold-soft);font-weight:inherit;transition:color .5s ease}
 .ch2-stage-controls{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 16px;pointer-events:auto;max-width:100%}
 .ch2-stage-btn{
   all:unset;box-sizing:border-box;cursor:pointer;width:42px;height:42px;flex:none;
@@ -557,7 +601,10 @@
 }
 .ch2-stage-btn svg{width:20px;height:20px}
 .ch2-stage-btn:hover:not(:disabled){background:rgba(245,236,214,.16);border-color:var(--gold-soft)}
-.ch2-stage-btn:disabled{opacity:.3;cursor:default}
+/* the arrows announce their bound with aria-disabled and keep their focus —
+   see the comment on them in DesertStage.tsx */
+.ch2-stage-btn:disabled,.ch2-stage-btn[aria-disabled="true"]{opacity:.3;cursor:default}
+.ch2-stage-btn[aria-disabled="true"]:hover{background:none;border-color:rgba(245,236,214,.4)}
 .ch2-stage-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;background:rgba(245,236,214,.2)}
 .ch2-stage-dots{list-style:none;margin:0;padding:0;display:flex;gap:2px}
 /* The dot stays 11px; the BUTTON is 26px so it clears the 24px minimum for a
@@ -566,6 +613,34 @@
 .ch2-stage-dots button{
   all:unset;box-sizing:border-box;cursor:pointer;width:26px;height:26px;border-radius:50%;
   display:grid;place-items:center;
+}
+/* ON A TOUCH SCREEN THE TARGET GROWS AND THE DOT DOES NOT. Ten 26px buttons at
+   a 2px pitch is a row a thumb cannot hit reliably — the mark stays 11px, drawn
+   by the ::before, while the thing you press reaches 44. */
+@media (pointer:coarse){
+  .ch2-stage-dots button{width:44px;height:44px}
+  .ch2-stage-dots{gap:0}
+}
+/* ON A NARROW PHONE THE ROW BECOMES A GRID, so that the two arrows keep each
+   other's line. Ten beats and two arrows need about 394px against a 351px copy
+   box, and as a wrapping flex row it broke into three lines with „back" and
+   „next" on different ones and the dots between them — the two controls that
+   are a pair, separated. Arrows at the two ends of one row, dots centred on
+   their own row under them; the dots may still take two lines at ten beats, and
+   centred under the arrows that reads as one block rather than as a break. */
+@media (max-width:720px),(max-height:480px){
+  .ch2-stage-controls{display:grid;grid-template-columns:auto 1fr auto;align-items:center;row-gap:12px}
+  .ch2-stage-btn:first-of-type{grid-area:1/1}
+  .ch2-stage-btn:last-of-type{grid-area:1/3}
+  .ch2-stage-dots{grid-area:2/1/2/4;justify-self:center;flex-wrap:wrap;justify-content:center}
+}
+/* ON A VERY SHORT SCREEN THE DOTS GO AND THE ARROWS STAY. Ten touch-sized dots
+   wrap to two rows and take 100px of a screen 320px tall, which is what put the
+   controls 42px under the fold at 568×320. Between a pager the reader cannot
+   see and two arrows they can, the arrows win: the scene itself, both arrows
+   and the keyboard all still move the beat. */
+@media (max-height:420px){
+  .ch2-stage-dots{display:none}
 }
 .ch2-stage-dots button::before{
   content:"";width:11px;height:11px;border-radius:50%;
@@ -592,14 +667,39 @@
    because splitting it onto paper below the picture would break the one thing
    this device is for: reading the sentence while looking at what it describes.
    Only the scrim turns bottom-up, since there is no room beside the text. */
-@media(max-width:720px){
+/* THE FLOOR IS GATED ON HEIGHT, like the one at the top of this device. The
+   stage sizes itself to the room it has — `100dvh` minus the masthead — and a
+   floor that ignores height undoes that: at 667×375 the available 323px was
+   overridden to 480px and the controls landed 56px below the fold, which is the
+   documented regression this device was already fixed for once. It looked fixed
+   because the check was made at 844×390, where the width is over 720 and this
+   rule never applied. */
+@media(max-width:720px) and (min-height:660px){
   .ch2-stage{min-height:480px}
+}
+@media(max-width:720px){
   .ch2-stage-veil{
     background:radial-gradient(140% 80% at 50% 50%,
       rgba(18,10,5,.78) 0%, rgba(18,10,5,.6) 44%, rgba(18,10,5,.28) 74%, rgba(18,10,5,.06) 100%);
   }
   .ch2-stage-copy{width:min(34ch,90%);gap:22px}
   .ch2-stage-said,.ch2-stage-sizer{font-size:21px;line-height:1.5}
+}
+/* A SHORT SCREEN — landscape phone, or heavy browser zoom — gets smaller stage
+   type and a shorter reserved line box, so the sentence and its controls share
+   the screen instead of pushing each other off it.
+
+   IT SITS HERE, AT THE END, AND NOT WITH THE STAGE'S OTHER MEDIA QUERIES. It
+   was declared before the base type rule and every one of its three
+   declarations lost to a later rule of equal specificity — measured at 844×390,
+   inside its own range, the type was still 22px and the copy gap still 21.9px.
+   A dead block, and the one that was supposed to keep the controls on screen. */
+@media(max-height:560px){
+  /* the sizer takes the same type, or the box reserves a height the visible
+     beat does not have */
+  .ch2-stage-said,.ch2-stage-sizer{font-size:clamp(17px,3.4vh,22px);line-height:1.4}
+  .ch2-stage-copy{gap:12px}
+  .ch2-stage-scene img.ch2-stage-figure{width:min(26vw,220px)}
 }
 
 
@@ -677,7 +777,17 @@
    is what chapter 6 does with its own bleed illustration. */
 @media(max-width:1300px){
   .ch2-bleed-img{display:none}
-  .ch2-bleedwrap{min-height:0;padding-inline-start:0}
+  /* padding-inline-END, and the wrong side here was the worst defect in the
+     chapter. The figure was moved from the reading edge to the outer edge — the
+     comment above records it — and the reserve it leaves moved with it, from
+     `padding-inline-start` to `padding-inline-end`. This reset was never
+     followed across. So on every screen under 1300px the section went on
+     reserving room for a picture that is `display:none` here, and on a 390px
+     phone the whole of תקופת הג'אהליה — heading, prose and the fork — was laid
+     out in a column 25px wide: the h2 set one Hebrew letter per line and ran
+     471px tall. Measured; it is the reason the section stood 2154px against
+     481px for מכה beside it. */
+  .ch2-bleedwrap{min-height:0;padding-inline-start:0;padding-inline-end:0}
   .ch2-bleedwrap > *:not(.ch2-bleed-img,.ch2-sub){width:100%}
   /* the sub-heading’s rule underlines its TEXT, at every width — stretched to
      100% it reads as a section divider instead of a heading */
@@ -971,7 +1081,16 @@
    say it („למושג שתי משמעויות") is no longer printed. Full column, not the
    measure, because two columns inside 880px would be 55 characters at best. */
 .ch2-meanings.is-forked{max-width:none;margin-top:0}
-@media(min-width:820px){
+/* 1700px AND NOT 820px, AND THE REASON IS THE PLATE. This is a VIEWPORT query
+   over a container whose width is set by something else: from 1301px up the
+   seated arbiter is drawn and takes its reserve out of this block, so the two
+   columns were splitting an already-narrowed column. Measured at 1440: 279.5px
+   a column — 28 characters a line, and 21 inside `.ch2-answer`. The chapter's
+   own floor for these columns is about 43 characters. Below 1301 the plate is
+   hidden and the full column returns, but by then the viewport is too narrow to
+   split; so two columns begin where the free column can carry two measures, and
+   that is 1700. */
+@media(min-width:1700px){
   .ch2-meanings.is-forked{
     grid-template-columns:1fr 1fr;gap:var(--fork-gap,clamp(26px,3.4vw,44px));
     /* both panels the same height whatever they hold — the right one carries the
@@ -1014,8 +1133,12 @@
 /* ONE number for the gutter between the two meanings, used by the grid AND by
    the arms, so an arm cannot drift off the column it points at. */
 .ch2-fork{width:100%;--fork-gap:clamp(26px,3.4vw,44px);--arm:calc((100% - var(--fork-gap)) / 4)}
+/* the chapter's leading, not a second one. Set at --read like every other block
+   of prose, it ran 1.5 against their 1.82 — the same token, the same face and
+   6.4px of leading apart, which reads as a different kind of text rather than
+   as the same text in a different place. */
 .ch2-fork-head{
-  margin:0;text-align:center;font-size:var(--read);line-height:1.5;color:var(--ink);
+  margin:0;text-align:center;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink);
 }
 .ch2-fork-head p{margin:0}
 /* the named word itself — the thing the tree hangs from.
@@ -1316,7 +1439,14 @@
 .ch2-mecca-section{position:relative}
 /* two classes, because the padding comes from `.article-section + .article-section`
    and a single class loses to it however late this file loads */
-.article-section.ch2-mecca-section{padding-top:0}
+/* SYMMETRIC, NOT ZERO. Zeroing the top padding did make the block's middle the
+   middle between the two rules — at 1850, where the reserved height is larger
+   than the words in it and `justify-content` had space to distribute. At 1440 it
+   had none: the content is 619px tall against 547px reserved, so the title sat
+   flush on the hairline with 1px of air while every other section in the chapter
+   held 85px. Equal padding at both ends centres just as exactly and cannot run
+   out — the air is the padding's, and the reserved height only adds to it. */
+.article-section.ch2-mecca-section{padding-block:clamp(46px,6vw,84px)}
 .ch2-mecca-hero{margin-top:0}
 .ch2-mecca-illus{display:none}
 @media (min-width:900px){

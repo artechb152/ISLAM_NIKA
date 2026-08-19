@@ -24,12 +24,16 @@
    So: few sections, sub-headings inside them, and adjacent fragments set as
    one paragraph rather than one apiece.
 
-   The count settled at SIX, not seven. „שני מנהגים" — קבורת בנות and ת'אר —
-   was a top-level section until it was folded back into „התרבות השבטית",
-   where the source keeps it: all four traits sit under one running head there,
-   and split off, the two customs read as a new subject instead of as what this
-   culture does when it meets famine and blood. The gate was never the number
-   seven; it is that this chapter not run twelve thin sections.
+   THE COUNT IS SEVEN, and the arithmetic is worth stating because these
+   comments went on saying „six" after it had stopped being true. „שני מנהגים"
+   — קבורת בנות and ת'אר — was a top-level section until it was folded back
+   into „התרבות השבטית", where the source keeps it: all four traits sit under
+   one running head there, and split off, the two customs read as a new subject
+   instead of as what this culture does when it meets famine and blood. Seven
+   became six. Then „ייחוסו של מוחמד וישמעאל" was pulled out as the opening
+   section, in the place the content document gives it, and six became seven.
+   The gate was never the number; it is that this chapter not run twelve thin
+   sections.
 
    WHAT THIS FILE STILL MAY NOT DO: write a sentence. Every string comes from
    passages.json through `text()` / `list()`, addressed by the §N.fragment it
@@ -232,6 +236,11 @@ function T({
        own. It is a block of its own, which is why nothing has to break after it
        and why the line after it must not add a break either. */
     if (line.intro) {
+      /* a space BEFORE it as well as after. The intro is a block, so the text
+         that ran before it fused with its first word in `textContent` —
+         „בעל השפעה.כבודו" — and the words-per-paragraph reading lost one word
+         at every such boundary. Collapsed at a block edge, never seen. */
+      if (i) out.push(' ')
       out.push(
         <span className="ch2-intro" key={`i${i}`}>
           {emphasise(line.text, em, `l${i}`)}
@@ -294,7 +303,7 @@ function Head({ id }: { id: string }) {
 
 /** A sub-heading — chapter 6's `.scrolly-env`: Kedem at --sub, maroon, one rule
     under it, sized to its own text. Fifteen of these are what make chapter 6
-    feel paced; this chapter now has six. */
+    feel paced; this chapter has four, all of them inside „התרבות השבטית". */
 function SubHead({ section, id }: { section: string; id: string }) {
   const s = sub(section, id)
   return (
@@ -524,6 +533,37 @@ const LAYER_LABEL: Record<Layer, string> = {
   routes: 'נתיבי המסחר',
 }
 
+/* THE MAP'S FIVE NAMES ARE THE SOURCE'S, AND THIS PROVES IT.
+   They were typed into the SVG as literals — ביזנטית, סאסאנית, דרך המשי,
+   דרך הבשמים, מכה — which made them the only chapter text on the page that
+   this component wrote itself, and left the map free to drift silently away
+   from §5.b, §6.a and §1.b if a word there were ever changed.
+
+   Each name is now LOOKED UP in the fragment it comes from, at a word boundary,
+   and a name that is no longer in its sentence throws at build time instead of
+   printing a stale label over a map. The same mechanism the desert stage uses
+   to cut §10.b into its three clauses — see DANGER_PARTS there. */
+const EDGE = /[\s,.;:—"'„”()–-]/
+/* Hebrew hangs its article and its prepositions on the FRONT of the word:
+   §5.b says „האימפריה הביזנטית", and the name the map carries is ביזנטית. One
+   such letter between a separator and the word is still a word boundary — it is
+   a clitic, not part of the name. Without this the lookup threw on the two
+   empires, which is the mechanism working: it refused to print a label it could
+   not find in the sentence it claims to come from. */
+const CLITIC = /[ הובלמכש]/
+const mapLabel = (ref: string, word: string): string => {
+  const s = text(ref)
+  const at = s.indexOf(word)
+  const end = at + word.length
+  const opensAt = (n: number) => n === 0 || EDGE.test(s[n - 1])
+  const opens = opensAt(at) || (CLITIC.test(s[at - 1]) && opensAt(at - 1))
+  const closes = end === s.length || EDGE.test(s[end])
+  if (at < 0 || !opens || !closes) {
+    throw new Error(`chapter 2: the map label „${word}" must appear in ${ref} at a word boundary — ${s}`)
+  }
+  return s.slice(at, end)
+}
+
 function PeninsulaChart() {
   const [layer, setLayer] = useState<Layer>('empires')
   return (
@@ -570,10 +610,10 @@ function PeninsulaChart() {
             <path id="ch2-arc-byz" d="M40,205 C120,115 250,81 372,81" fill="none" stroke="#8a2733" strokeWidth="13" strokeLinecap="round" opacity=".85" />
             <path id="ch2-arc-sas" d="M660,89 C790,113 900,183 986,287" fill="none" stroke="#8a2733" strokeWidth="13" strokeLinecap="round" opacity=".85" />
             <text fontFamily="Kedem, serif" fontSize="34" fontWeight="700" fill="#8a2733" textAnchor="middle" dy="-17">
-              <textPath href="#ch2-arc-byz" startOffset="50%">ביזנטית</textPath>
+              <textPath href="#ch2-arc-byz" startOffset="50%">{mapLabel('§5.b', 'ביזנטית')}</textPath>
             </text>
             <text fontFamily="Kedem, serif" fontSize="34" fontWeight="700" fill="#8a2733" textAnchor="middle" dy="-17">
-              <textPath href="#ch2-arc-sas" startOffset="50%">סאסאנית</textPath>
+              <textPath href="#ch2-arc-sas" startOffset="50%">{mapLabel('§5.b', 'סאסאנית')}</textPath>
             </text>
           </g>
           <g className={`ch2-chart-layer${layer === 'routes' ? ' is-on' : ''}`} aria-hidden={layer !== 'routes' || undefined}>
@@ -598,9 +638,9 @@ function PeninsulaChart() {
                 horizontally at the southern end where the road begins, close
                 enough to the last dash to belong to it (23 units, measured). */}
             <text fontFamily="Kedem, serif" fontSize="30" fontWeight="700" fill="#856016" textAnchor="middle" dy="-13">
-              <textPath href="#ch2-road-silk" startOffset="50%">דרך המשי</textPath>
+              <textPath href="#ch2-road-silk" startOffset="50%">{mapLabel('§6.a', 'דרך המשי')}</textPath>
             </text>
-            <text x="770" y="826" fontFamily="Kedem, serif" fontSize="30" fontWeight="700" fill="#856016">דרך הבשמים</text>
+            <text x="770" y="826" fontFamily="Kedem, serif" fontSize="30" fontWeight="700" fill="#856016">{mapLabel('§6.a', 'דרך הבשמים')}</text>
           </g>
           {/* Mecca is always on: it is the fixed point the whole chapter turns
               around, and hiding a city behind a toggle is not a layer, it is a
@@ -610,7 +650,7 @@ function PeninsulaChart() {
             {/* under the inherited direction:rtl, textAnchor="end" anchors the LEFT edge,
                 so the word runs rightward from x — at 352 it ran straight through
                 the dot it labels (measured: 77 units of overlap). */}
-            <text x="408" y="456" fontFamily="Kedem, serif" fontSize="36" fontWeight="700" fill="#571820" textAnchor="end">מכה</text>
+            <text x="408" y="456" fontFamily="Kedem, serif" fontSize="36" fontWeight="700" fill="#571820" textAnchor="end">{mapLabel('§1.b', 'מכה')}</text>
           </g>
         </svg>
       </figure>
@@ -854,13 +894,20 @@ export default function Chapter2() {
                   {/* the sub-headings ride under their section, as chapter 6's rail does */}
                   {s.subs && (
                     <ul className="menu-subs">
+                      {/* THE DIALOG IS THE DESTINATION, so the fragment jump is
+                          not merely redundant but harmful: the browser followed
+                          `#thar` after the dialog had opened and reset focus to
+                          the hash target, leaving the reader on <body> with a
+                          modal up and nothing announced. The href stays — it is
+                          what makes this a real link, and where a reader opening
+                          it in a new tab should land. */}
                       {s.subs.map((sb) => (
                         <li key={sb.id}>
                           <a
                             href={`#${sb.id}`}
                             className={currentSub === sb.id ? 'is-current' : undefined}
                             aria-current={currentSub === sb.id ? 'true' : undefined}
-                            onClick={() => { openTrait(sb.id); onMenuJump(); setDrawer(false) }}
+                            onClick={(event) => { event.preventDefault(); openTrait(sb.id); onMenuJump(); setDrawer(false) }}
                           >
                             {sb.title}
                           </a>
@@ -895,10 +942,16 @@ export default function Chapter2() {
                 <div className="ch2-hero">
                   {/* CHAPTER 6'S BANNER, PART FOR PART: the painting is the
                       background of the media layer, the film plays over it, and
-                      the poster is what stands when it cannot. `onError` hides a
-                      video that fails rather than leaving a black band, and
-                      `prefers-reduced-motion` drops it in CSS — in both cases
-                      the still behind it is already there.
+                      the poster is what stands when it cannot.
+
+                      NO onError HANDLER, and that is deliberate rather than an
+                      omission: one stood here and was dead code. A failing
+                      `<source>` does not raise `error` on the media element, so
+                      it never ran — and it never needed to, because the poster
+                      and the media layer's own background are the same painting.
+                      A blocked film was measured and is indistinguishable from a
+                      playing one at rest. `prefers-reduced-motion` drops the
+                      video in CSS, onto that same still.
 
                       `tabIndex={-1}` and no controls: this is scenery, not a
                       player. The chapter's film, if it ever gets one, is a
@@ -913,7 +966,6 @@ export default function Chapter2() {
                       preload="auto"
                       poster="/assets/chapter2/hero-desert.jpg"
                       tabIndex={-1}
-                      onError={(event) => { event.currentTarget.hidden = true }}
                     >
                       <source src="/assets/chapter2/hero-desert.mp4" type="video/mp4" />
                     </video>
@@ -969,10 +1021,15 @@ export default function Chapter2() {
                     otherwise empty down the whole opening. */}
                 <div className="ch2-withmap" data-reveal>
                   <div className="ch2-body">
-                    {/* §5.a introduces the tribes, so it leads — the layers can
-                        then say things ABOUT them without dangling pronouns */}
-                    <T r="§5.a" em={['רובם נודדים']} />
-                    <T r={['§5.b', '§6.a']} em={['בדואים', "בּאדִיה"]} />
+                    {/* ONE PARAGRAPH PER SOURCE PASSAGE. §5.a led alone so the
+                        layers could speak about the tribes without a dangling
+                        pronoun — but that only moved the dangle down a line:
+                        §5.b opens „חלקם" and was starting a paragraph, with its
+                        antecedent in the paragraph above and a different subject
+                        (what the nomads lived on, §6) fused in beside it. §5 is
+                        one passage in the source and is one paragraph here. */}
+                    <T r={['§5.a', '§5.b']} em={['רובם נודדים']} />
+                    <T r="§6.a" em={['בדואים', "בּאדִיה"]} />
                   </div>
                   <PeninsulaChart />
                   {/* §7.a names two fathers and the pair below defines them —
@@ -1000,7 +1057,7 @@ export default function Chapter2() {
                   the last two off into a section of their own called „שני מנהגים" —
                   which made them read as a fresh subject rather than as what this
                   culture DOES when it meets famine and blood. They are sub-headings
-                  here, where they belong, and the chapter runs six sections. */}
+                  here, where they belong. */}
               <Section id="culture">
                 <Head id="culture" />
                 <div className="ch2-body" data-reveal>
@@ -1084,8 +1141,18 @@ export default function Chapter2() {
                         </div>
                       </div>
                     </div>
+                    {/* §25.b IS THE THIRD WAY OUT, not the first half of the
+                        proverb's set-up. The diagram announces „ניתן היה למנוע
+                        את נקמת הדם באמצעות:" and showed two ways, while the
+                        third — exile of the killer's family — stood below it
+                        glued to the sentence that hands off to the saying. It
+                        keeps its own line under the diagram it belongs to, and
+                        §26.a starts the paragraph that introduces the proverb. */}
                     <div className="ch2-body ch2-after-device">
-                      <T r={['§25.b', '§26.a']} em={['הסבלנות']} />
+                      <T r="§25.b" />
+                    </div>
+                    <div className="ch2-body">
+                      <T r="§26.a" em={['הסבלנות']} />
                     </div>
                     <Saying r="§26.quote" />
                   </TraitDialog>
