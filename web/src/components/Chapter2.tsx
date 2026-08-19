@@ -1140,12 +1140,6 @@ export default function Chapter2() {
 
               {/* ============ 05 · Mecca and the Kaaba ============ */}
               <Section id="mecca" className="ch2-mecca-section">
-                {/* the heading is boxed to the same column as the prose, so the
-                    two share one right edge instead of the heading hanging at the
-                    article's edge above an illustration */}
-                <div className="ch2-mecca-head">
-                  <Head id="mecca" />
-                </div>
                 {/* Chapter 6's charity hero, exactly: a watercolour bleeding off
                     the RIGHT edge with the reading column beside it on the left.
                     The mask in the CSS is what makes it belong to the page — the
@@ -1158,6 +1152,15 @@ export default function Chapter2() {
                   <div className="ch2-mecca-illus" aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/assets/chapter2/mecca-kaaba.webp" alt="" loading="lazy" decoding="async" />
+                  </div>
+                  {/* THE HEADING BELONGS TO THE SAME CENTRED GROUP AS THE PROSE.
+                      Left outside this block it was pinned to the top of the
+                      section while the prose centred itself against the picture
+                      below, which opened 221px of nothing between the title and
+                      its first line — a hole, not air. Heading and prose centre
+                      together now, boxed to one column, sharing one right edge. */}
+                  <div className="ch2-mecca-head">
+                    <Head id="mecca" />
                   </div>
                   <div className="ch2-mecca-body ch2-body" data-reveal>
                     <T r={['§30.a', '|§31.a']} em={['האבן השחורה']} />

@@ -1268,7 +1268,7 @@
 .ch2-mecca-hero{margin-top:8px}
 .ch2-mecca-illus{display:none}
 @media (min-width:900px){
-  .ch2-mecca-hero{display:flex;flex-direction:column;justify-content:center;min-height:clamp(560px,52vw,860px)}
+  .ch2-mecca-hero{display:flex;flex-direction:column;justify-content:center;min-height:clamp(430px,38vw,640px)}
   /* the text reads leftward from the middle of the column, clear of the picture */
   .ch2-mecca-body{width:min(680px,58%);margin-inline-start:38%;margin-inline-end:auto;max-width:none}
   /* THE HEADING SITS OVER ITS OWN TEXT, not at the article edge. Left at the far
@@ -1279,10 +1279,19 @@
   .ch2-mecca-illus{
     display:block;position:absolute;top:50%;translate:0 -50%;
     inset-inline-end:auto;inset-inline-start:calc(-1 * var(--content-gutter));
-    width:clamp(420px,52%,720px);z-index:0;pointer-events:none;user-select:none;
+    width:clamp(400px,48%,660px);z-index:0;pointer-events:none;user-select:none;
   }
+  /* THE FILE IS A PORTRAIT PLATE, 1200×1607, AND MOST OF IT IS EMPTY SKY AND
+     SAND — the Kaaba itself occupies the middle three fifths. Printed whole at a
+     width that makes the building large, the block came out 976px tall beside
+     309px of prose: the section was measured by the picture, the text was left
+     in a corner, and 331px of nothing opened between the heading and the first
+     line. Cropping to a square keeps the Kaaba at exactly the size it was and
+     throws away only the dead margins, which is why this is `cover` and not a
+     smaller `contain`. 46% pulls the frame up a little — the horizon and the
+     standing stones sit below centre in the painting. */
   .ch2-mecca-illus img{
-    width:100%;height:auto;object-fit:contain;
+    width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;object-position:center 46%;
     /* TIGHTER than chapter 6 uses, and for a reason of this picture: the giving
        illustration there is a cut-out on transparency, so its mask only has to
        soften an edge. This one is painted ON parchment, and the parchment is a
