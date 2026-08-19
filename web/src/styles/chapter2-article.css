@@ -1470,7 +1470,7 @@ html{scrollbar-gutter:stable}
   /* the picture's floor is 320px and not 390px: at 1100 the article is 713px
      wide, a 390px watercolour takes 55% of it, and the column had 5px of slack
      left — no room to move the prose at all */
-  .ch2-mecca-hero{--kaaba:clamp(320px,44%,620px);--kaaba-gap:clamp(40px,3.6vw,66px)}
+  .ch2-mecca-hero{--kaaba:clamp(320px,44%,620px);--kaaba-gap:clamp(28px,2.4vw,44px)}
   /* THE HEADING SHARES THE PROSE'S BOX. Left at the article edge it hung above
      the illustration with the prose starting far below and to the left of it,
      so the section had two right edges. */
