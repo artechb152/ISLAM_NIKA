@@ -893,12 +893,30 @@ export default function Chapter2() {
                   the front, where the document puts it. */}
               <Section id="lineage" className="opening-section">
                 <div className="ch2-hero">
+                  {/* CHAPTER 6'S BANNER, PART FOR PART: the painting is the
+                      background of the media layer, the film plays over it, and
+                      the poster is what stands when it cannot. `onError` hides a
+                      video that fails rather than leaving a black band, and
+                      `prefers-reduced-motion` drops it in CSS — in both cases
+                      the still behind it is already there.
+
+                      `tabIndex={-1}` and no controls: this is scenery, not a
+                      player. The chapter's film, if it ever gets one, is a
+                      different object with its own controls, as in chapter 6. */}
                   <div className="ch2-hero-media" aria-hidden="true">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {/* the banner is the largest thing painted on first view, so
-                        it is fetched eagerly and at high priority rather than
-                        competing with the five stage frames below it */}
-                    <img src="/assets/chapter2/hero-desert.jpg" alt="" loading="eager" fetchPriority="high" decoding="async" />
+                    <video
+                      className="ch2-hero-video"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      poster="/assets/chapter2/hero-desert.jpg"
+                      tabIndex={-1}
+                      onError={(event) => { event.currentTarget.hidden = true }}
+                    >
+                      <source src="/assets/chapter2/hero-desert.mp4" type="video/mp4" />
+                    </video>
                   </div>
                   <div className="ch2-hero-copy">
                     <h1 className="ch2-hero-title">{CH2.title}</h1>

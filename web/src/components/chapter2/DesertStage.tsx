@@ -52,7 +52,13 @@ interface Step {
    figure walks into the valley. The split points are FOUND in the source string
    rather than typed out, so the sentence stays verbatim and an edit upstream
    throws here instead of silently truncating the text on screen. */
-const DANGER_LEAD = ['§9.dry', '§10.a']
+/* §10.a ALONE, and this is the hierarchy fix. The lead used to be
+   `['§9.dry', '§10.a']` — the last two items of the CLIMATE list („יובש.
+   צחיחות.") glued to the sentence that opens a different subject entirely, the
+   desert as a dangerous place. One beat held the end of one list and the start
+   of the next idea, so neither read as what it is. יובש and צחיחות close their
+   own list on their own beat now. */
+const DANGER_LEAD = ['§10.a']
 /* the מ is PART of the word: the source reads "מחיות טרף". Cutting at "חיות"
    ended the first beat on a stranded מ and painted half of one word maroon and
    half cream — the exact mid-sentence break this device exists to avoid. */
@@ -73,23 +79,49 @@ const DANGER_PARTS = (() => {
   return [s.slice(0, a), s.slice(a, b), s.slice(b)]
 })()
 
+/* TEN BEATS, AND THE COUNT IS NOT THE POINT — THE DIVISION IS.
+   Seven beats carried the source unevenly: six of them held one or two
+   fragments and the last held FIVE — the scarcity lead, its three items, the
+   wars that followed, the endurance that followed those, and the gloss that
+   defines it. On screen that is a wall of display type under a photograph, and
+   the reader has no way to stop anywhere inside it.
+
+   The source's own hierarchy is three-deep, and the beats now follow it:
+     a claim                — תנאי החיים היו קשים ביותר
+     a lead and its items   — האקלים התאפיין ב: חום · קור · יובש וצחיחות
+     what came of it        — מלחמות, ואז הצבר
+
+   So: the climate list closes on its own beat, the danger sentence keeps its
+   three-click reveal, scarcity holds its lead with its items, the war those
+   caused takes its own beat, and the endurance — the sentence the whole section
+   is walking toward — stands last, with its gloss under it and nothing else.
+
+   THE WAR SENTENCE IS ITS OWN BEAT, and that is a hierarchy fix rather than a
+   volume one. Held with the scarcity lead and its items it made a sandwich:
+   display type, three small lines, display type again, so the eye read the
+   items as an interruption of one sentence rather than as the list of the one
+   above them. A list belongs to the line that introduces it and to nothing
+   else. */
 const STEPS: Step[] = [
   { refs: ['§9.a', '§9.b'], frame: 'desert-1.jpg', scene: 'העמק באור ראשון' },
   { refs: ['§9.day'], frame: 'desert-2.jpg', scene: 'אותו עמק בשיא החום' },
   { refs: ['§9.night'], frame: 'desert-3.jpg', scene: 'אותו עמק בלילה, כפור על האבנים' },
-  { refs: DANGER_LEAD, frame: 'desert-4.jpg', reveal: 1, scene: 'אותו עמק ביובש ובאבק' },
-  { refs: DANGER_LEAD, frame: 'desert-4.jpg', reveal: 2, figures: ['beasts'], scene: 'זאב וצבוע נכנסים לעמק מימין' },
+  { refs: ['§9.dry'], frame: 'desert-4.jpg', scene: 'אותו עמק ביובש ובאבק' },
+  { refs: DANGER_LEAD, frame: 'desert-6.jpg', reveal: 1, scene: 'העמק בדמדומים — מרחב מסוכן' },
+  { refs: DANGER_LEAD, frame: 'desert-6.jpg', reveal: 2, figures: ['beasts'], scene: 'זאב וצבוע נכנסים לעמק מימין' },
   {
     refs: DANGER_LEAD,
-    frame: 'desert-4.jpg',
+    frame: 'desert-6.jpg',
     reveal: 3,
     figures: ['beasts', 'raiders'],
     scene: 'שני שודדים רכובים נכנסים לעמק משמאל',
   },
+  { refs: ['§11.a', '§11.list'], frame: 'desert-7.jpg', scene: 'שלולית מכווצת, רצועת מרעה וכתם שדה — כל המשאבים שיש' },
+  { refs: ['§11.b'], frame: 'desert-7.jpg', scene: 'אותו מקום, ועליו נלחמים' },
   {
-    refs: ['§11.a', '§11.list', '§11.b', '§12.a', '§12.gloss'],
+    refs: ['§12.a', '§12.gloss'],
     frame: 'desert-5.jpg',
-    scene: 'אותו עמק באור חוזר, ונוסע יחיד בנחל האכזב',
+    scene: 'נוסע יחיד בנחל האכזב — החוסן שנולד מן המקום',
   },
 ]
 
@@ -99,19 +131,78 @@ const STEPS: Step[] = [
    as an image that failed to load. */
 const FRAMES: string[] = [...new Set(STEPS.map((s) => s.frame))]
 
-/** the fragments of a beat, joined into one paragraph */
-const say = (s: Step): string =>
-  s.refs.map((r) => (frag(r).list ? list(r).join(' ') : text(r))).join(' ')
+/* THE BEAT HAS THREE VOICES, AND THEY ARE READ OFF THE SOURCE, NOT AUTHORED.
+   Everything used to be joined with spaces into one run of display type, so
+   „גם המשאבים היו מועטים:" and „מים. שטחי מרעה. שדות חקלאיים." and „אורך רוח
+   ויכולת לשאת סבל." all arrived in the same size and weight — a colon in the
+   middle of a paragraph, three two-word sentences reading as a stutter, and a
+   definition indistinguishable from the sentence it defines.
 
-/** the beat's text: the whole sentence, or the danger sentence written so far */
+   A fragment declared `list` in passages.json is a list and takes one line per
+   item. A fragment whose id is `gloss` is a gloss and is set as one. Everything
+   else is the sentence. No fragment is ROLED here by hand — the kinds come from
+   the data, which is the same rule the article body follows. */
+type Kind = 'say' | 'items' | 'note'
+interface Piece {
+  kind: Kind
+  text?: string
+  items?: string[]
+}
+const pieces = (s: Step): Piece[] => {
+  const out: Piece[] = []
+  for (const r of s.refs) {
+    if (frag(r).list) {
+      out.push({ kind: 'items', items: list(r) })
+      continue
+    }
+    const kind: Kind = r.endsWith('.gloss') ? 'note' : 'say'
+    const prev = out[out.length - 1]
+    /* two plain sentences in one beat are one paragraph, as they are in the
+       article — „תנאי החיים היו קשים ביותר. האקלים התאפיין ב:" is one thought */
+    if (kind === 'say' && prev?.kind === 'say') prev.text = `${prev.text} ${text(r)}`
+    else out.push({ kind, text: text(r) })
+  }
+  return out
+}
+
+/** the beat's text: its pieces in order, the last of them carrying the danger
+    sentence as far as it has been written on this beat */
 function Said({ step }: { step: Step }) {
-  const lead = say(step)
-  if (!step.reveal) return <>{lead}</>
+  const ps = pieces(step)
   return (
     <>
-      {lead} {DANGER_PARTS[0]}
-      {step.reveal >= 2 && <b className="ch2-stage-lit">{DANGER_PARTS[1]}</b>}
-      {step.reveal >= 3 && <b className="ch2-stage-lit">{DANGER_PARTS[2]}</b>}
+      {ps.map((p, n) => {
+        if (p.kind === 'items') {
+          return (
+            /* the space after each item is collapsed away between two blocks
+               and never seen, and it is why `textContent` reads „יובש. צחיחות."
+               as two words rather than one fused token — the chapter's search
+               and the audit's counts both read this text, exactly as they do
+               the article's own lists */
+            <span className="ch2-stage-items" key={n}>
+              {p.items!.map((item) => (
+                <span className="ch2-stage-item" key={item}>
+                  {item}{' '}
+                </span>
+              ))}
+            </span>
+          )
+        }
+        const last = n === ps.length - 1
+        return (
+          <span className={p.kind === 'note' ? 'ch2-stage-note' : 'ch2-stage-say'} key={n}>
+            {p.text}
+            {last && step.reveal ? (
+              <>
+                {' '}
+                {DANGER_PARTS[0]}
+                {step.reveal >= 2 && <b className="ch2-stage-lit">{DANGER_PARTS[1]}</b>}
+                {step.reveal >= 3 && <b className="ch2-stage-lit">{DANGER_PARTS[2]}</b>}
+              </>
+            ) : null}
+          </span>
+        )
+      })}
     </>
   )
 }

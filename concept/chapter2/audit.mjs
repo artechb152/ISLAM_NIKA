@@ -318,7 +318,14 @@ const result = await page.evaluate(() => {
   ])
   for (const el of document.querySelectorAll('.chapter-article *')) {
     if (el.closest('svg') || el.tagName === 'IMG') continue
+    /* `<source>` and `<track>` are DECLARATIONS inside a media element, not
+       things that render. Their computed colour is the empty string, which is
+       neither in the palette nor an `rgba(…)`, so the banner's film failed a
+       check about the colour of TEXT. An element that paints nothing cannot
+       paint text in the wrong colour. */
+    if (el.tagName === 'SOURCE' || el.tagName === 'TRACK') continue
     const c = getComputedStyle(el).color.replace(/\s/g, '')
+    if (!c) continue
     if (!ALLOWED.has(c) && !c.startsWith('rgba')) {
       fail.push(`צבע טקסט מחוץ לפלטה: ${c} על ${el.tagName}.${(el.className || '').toString().slice(0, 24)}`)
     }
