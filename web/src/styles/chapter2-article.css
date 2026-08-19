@@ -966,7 +966,7 @@
 .ch2-meanings.is-forked{max-width:none;margin-top:0}
 @media(min-width:820px){
   .ch2-meanings.is-forked{
-    grid-template-columns:1fr 1fr;gap:clamp(26px,3.4vw,44px);
+    grid-template-columns:1fr 1fr;gap:var(--fork-gap,clamp(26px,3.4vw,44px));
     /* both panels the same height whatever they hold — the right one carries the
        עִלְם gloss and would otherwise stand a head taller than its twin, which on
        a fork reads as one branch mattering more */
@@ -980,7 +980,9 @@
    „תקופה זו מכונה הג'אהליה." is the sentence that names the period, so it heads a
    tree rather than closing a paragraph: the word large and centred, a stem down
    from it, a bar across, and an arm dropping into each meaning. */
-.ch2-fork{width:100%}
+/* ONE number for the gutter between the two meanings, used by the grid AND by
+   the arms, so an arm cannot drift off the column it points at. */
+.ch2-fork{width:100%;--fork-gap:clamp(26px,3.4vw,44px)}
 .ch2-fork-head{
   margin:0;text-align:center;font-size:var(--read);line-height:1.5;color:var(--ink);
 }
@@ -1008,12 +1010,18 @@
      the fork is a joint between two things, not a device in its own right. */
   .ch2-fork-tree{height:38px}
   .ch2-fork-stem{height:16px}
-  .ch2-fork-bar{display:block;top:14px;left:25%;right:25%;height:2px}
+  /* THE ARM SITS ON THE CENTRE OF ITS OWN HEADING, computed rather than guessed.
+     25% is the centre of half the block — but the two columns are separated by a
+     gutter, so a column is (100% − gap)/2 wide and its centre is (100% − gap)/4
+     from the edge. At the chapter's gutter that is 11px off 25%, which is exactly
+     how far each arrow was landing beside the word it points at. */
+  .ch2-fork-tree{--arm:calc((100% - var(--fork-gap)) / 4)}
+  .ch2-fork-bar{display:block;top:14px;left:var(--arm);right:var(--arm);height:2px}
   .ch2-fork-arm{display:block;top:14px;width:2px;height:20px}
   /* physical left/right on purpose: the two arms are a mirrored pair, not a
      „forward" direction, so they must not swap with the writing direction */
-  .ch2-fork-arm.is-start{right:25%;translate:1px 0}
-  .ch2-fork-arm.is-end{left:25%;translate:-1px 0}
+  .ch2-fork-arm.is-start{right:var(--arm);translate:1px 0}
+  .ch2-fork-arm.is-end{left:var(--arm);translate:-1px 0}
   /* the head of each arm — bottom+right borders at 45° is the DOWN chevron */
   .ch2-fork-arm::after{
     content:"";position:absolute;bottom:0;left:-5px;width:12px;height:12px;
