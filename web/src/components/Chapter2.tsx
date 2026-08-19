@@ -1199,8 +1199,22 @@ export default function Chapter2() {
                     The three fragments are marked `omitted` in passages.json, so
                     the gate prints them on every run instead of letting them
                     disappear quietly. */}
-                <div className="ch2-body ch2-after-device" data-reveal>
-                  <T r={['§36.a', '§36.wad', '§36.lots']} />
+                {/* THE REJECTED PRACTICES ARE THE SAME LEDGER AS THE ADOPTED
+                    VALUES. Set as running prose they read as one sentence with
+                    two names trailing after a colon, while the two values above
+                    them stood in ruled rows — the same kind of statement in two
+                    different voices, three lines apart.
+
+                    A list and not a `<dl>`: the adopted rows pair a name with the
+                    source's own gloss of it, and here the source gives the names
+                    alone. A definition list with nothing to define would be
+                    markup pretending to a structure the text does not have. */}
+                <div className="ch2-verdicts ch2-after-device" data-reveal>
+                  <p className="ch2-verdict-intro">{text('§36.a')}</p>
+                  <ul className="ch2-verdict-list">
+                    <li className="ch2-verdict-row is-name">{text('§36.wad')}</li>
+                    <li className="ch2-verdict-row is-name">{text('§36.lots')}</li>
+                  </ul>
                 </div>
               </Section>
 

@@ -1049,6 +1049,17 @@
 }
 .ch2-verdict-row dd{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
 @media(max-width:680px){.ch2-verdict-row{grid-template-columns:1fr}}
+/* THE REJECTED PRACTICES USE THE SAME ROW WITH ONE COLUMN. The source names
+   them and stops — there is no gloss to set beside them — so the row carries
+   the `dt` setting and nothing else. Same rule above it, same padding, same
+   weight and colour: on the page the two ledgers are one object, which is the
+   point, because the section's subject is one sorting and not two lists. */
+.ch2-verdict-list{list-style:none;margin:0;padding:0}
+.ch2-verdict-row.is-name{
+  display:block;
+  font-family:var(--font-body);font-weight:700;font-size:var(--read);color:var(--maroon-deep);
+  line-height:var(--lh,1.82);
+}
 
 /* ============================ shared ============================
 
