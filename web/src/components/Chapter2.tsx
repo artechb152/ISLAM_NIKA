@@ -862,8 +862,11 @@ export default function Chapter2() {
                     remarks pulled out as asides. Both were devices laid over
                     text that does not need one. The document prints two
                     paragraphs with the remarks in round brackets inside the
-                    sentences they belong to, and that is what is printed here. */}
-                <SubHead section="lineage" id="kaaba-tradition" />
+                    sentences they belong to, and that is what is printed here.
+
+                    No sub-heading either: „לפי המסורת" is how the paragraphs under
+                    it already open, so a heading with those words on it was the
+                    page saying the same thing twice, once in a louder voice. */}
                 <div className="ch2-body" data-reveal>
                   <T
                     r={['§1.a', '§1.b', '(§1.gloss)']}

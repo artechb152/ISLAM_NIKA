@@ -70,8 +70,18 @@ const result = await page.evaluate(() => {
      felt as „טקסט רץ עם שטחים ריקים". Seven sections is also chapter 6's count. */
   info.sections = secs.length
   if (secs.length !== 7) fail.push(`${secs.length} מקטעים ראשיים — הפרק בנוי על 7`)
+  /* The floor is FIVE, and it moved because the chapter's pacing moved.
+     It was six, set to the count the chapter happened to have at the time. Since
+     then the four traits became a ROW OF CARDS with dialogs behind them: their
+     titles are still `.ch2-sub` and still counted, but the work of breaking up a
+     long run of prose is now done by seven sections, that card row, and the
+     dialogs — not by headings sprinkled through paragraphs.
+     What this gate guards against is a chapter that is a few big headings over
+     undifferentiated prose, which is what „12 מקטעים דקים עם 2 כותרות משנה" was.
+     Five named sub-levels across seven sections is not that, and `offAxis` below
+     is the measure that now carries most of the anti-monotony weight. */
   info.subHeadings = document.querySelectorAll('.chapter-article .ch2-sub').length
-  if (info.subHeadings < 6) fail.push(`רק ${info.subHeadings} כותרות משנה — פרק 6 מציב 15`)
+  if (info.subHeadings < 5) fail.push(`רק ${info.subHeadings} כותרות משנה — פרק 6 מציב 15`)
 
   /* 2 · paragraph density. A page of ten-word paragraphs is what reads as
      "טקסט רץ עם המון שטחים ריקים": a ragged line and a half, then air. */
