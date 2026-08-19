@@ -800,33 +800,6 @@
   }
 }
 
-/* ============================ 05 · the Kaaba timeline ============================
-   A real sequence in time, so it gets a rule with rings and the stops under it. */
-/* The Kaaba's five stops run DOWN the page, not across it.
-
-   Across, five stops shared the 1172px column: about 214px each, which is
-   twenty-one Hebrew characters a line — far below the point where reading
-   breaks down, and the first stop ran six lines while the last ran two, so the
-   row ended ragged as well as cramped. Down the page each stop gets the
-   chapter's measure, and the rail still says "this is a sequence in time".
-   RTL: the rail is on the reading edge (right), the text beside it. */
-.ch2-timeline{position:relative}
-.ch2-stops{display:grid;gap:0;width:100%;max-width:var(--measure,880px)}
-.ch2-stop{position:relative;padding-inline-start:38px;padding-block:0 clamp(18px,2.2vw,26px);min-width:0}
-.ch2-stop::before{
-  content:"";position:absolute;top:4px;inset-inline-start:0;width:20px;height:20px;border-radius:50%;
-  border:2px solid var(--gold);background:var(--paper);z-index:1;box-sizing:border-box;
-}
-/* the rail: drawn from each ring down to the next one */
-.ch2-stop::after{
-  content:"";position:absolute;top:24px;bottom:0;inset-inline-start:9px;width:1px;background:var(--edge);
-}
-.ch2-stop:last-child{padding-bottom:0}
-/* the last ring stays an OUTLINE. A filled maroon circle means „you are here”
-   everywhere else in this chapter (the rail, the stage dots), and on the
-   timeline it landed on Noah’s flood — which ends nothing. */
-.ch2-stop:last-child::after{display:none}
-.ch2-stop p{font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
 
 /* THREE PLATES, THREE MEETINGS.
 
@@ -869,6 +842,12 @@
   aspect-ratio:32/9;object-position:center 48%;
   border-radius:0;border:0;border-block:1px solid var(--edge);
 }
+/* A band whose subject sits LOW in the painting. The opening plate puts its two
+   travellers at about 80% of the canvas height, and the 48% window ends at 74% —
+   the crop removed the only two figures in the picture, which are the whole of
+   what it is for. 72% brings them in with room under their feet. Measured, like
+   the 48%: a band's window has to be aimed at what the band is about. */
+.ch2-plate.is-bleed.is-low img{object-position:center 72%}
 
 /* 2 · beside its prose — the plate takes the outer edge, the text the reading
    edge, and they share one row. Portrait here, so the column has a shape of its
@@ -939,7 +918,7 @@
 .ch2-body{display:grid;gap:16px;width:100%;max-width:var(--measure,880px)}
 /* text-wrap:pretty keeps a paragraph from ending on a single stranded word —
    reading the chapter found „אני.”, „הדם:” and „מפשע).” each alone on a line */
-.ch2-body p,.ch2-stop p,.ch2-diagram-node p,.ch2-diagram-label,.ch2-meaning p,
+.ch2-body p,.ch2-diagram-node p,.ch2-diagram-label,.ch2-meaning p,
 .ch2-aside p,.ch2-pair dd,.ch2-verdict-row dd,.ch2-gloss dd{text-wrap:pretty}
 .ch2-body p{margin:0;font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink)}
 
