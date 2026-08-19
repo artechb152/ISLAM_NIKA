@@ -990,16 +990,17 @@
    quietly widened. */
 .ch2-meanings.is-forked .ch2-meaning{text-align:center;justify-items:center}
 .ch2-meanings.is-forked .ch2-meaning > *{max-width:100%}
-/* the gold rule marked „what Islam set against it" from the side. On a centred
-   group a side rule points nowhere; the same mark reads as a short rule above. */
+/* NO RULES INSIDE A GROUP. The gold bar marked „what Islam set against it" and
+   a hairline stood over the gloss; inside a centred group they read as two fences
+   cutting one short passage into three, and the group is meant to be read
+   straight through. The answer keeps its maroon — the chapter's own mark for
+   that turn — and needs no line to carry it.
+   Full width and not `fit-content`: a shrink-to-fit box sizes itself to its own
+   longest line and stopped landing on the group's axis, measured 60px off. */
 .ch2-meanings.is-forked .ch2-answer{
-  padding:12px 0 0;border-inline-start:0;border-top:2px solid var(--gold);
-  /* full width, NOT `fit-content`: a shrink-to-fit box sized itself to its own
-     longest line and stopped landing on the group's axis — measured 60px off it.
-     Full width, centred text, and the rule becomes a divider across the column
-     between the claim and what Islam set against it. */
-  width:100%;
+  padding:0;border:0;width:100%;
 }
+.ch2-meanings.is-forked .ch2-gloss{padding-top:0;border-top:0}
 /* the gloss is a flex row, so `justify-items` does nothing to it — it needs
    `justify-content` to bring its term and definition onto the group's axis */
 .ch2-meanings.is-forked .ch2-gloss{justify-content:center}
