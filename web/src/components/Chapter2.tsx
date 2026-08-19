@@ -91,6 +91,13 @@ const subLabel = (sectionId: string, subId: string): string => {
     sentence rather than as a sentence of its own. See the loop in `T`. */
 const PARENTHETICAL = /^\((§\d+\.[\w-]+)\)$/
 
+/** „|§31.a" — a fragment that STARTS ITS OWN LINE inside the paragraph. Used
+    where a sentence has to be read whole rather than picked up mid-line: the
+    Kaaba sentence names three things in one breath — the Kaaba, the black stone,
+    the three hundred and sixty idols — and reads as a list only if it is not cut
+    in two. Still one paragraph, so the words-per-paragraph measure is unmoved. */
+const OWN_LINE = /^\|(§\d+\.[\w-]+)$/
+
 /** A SHORT emphasised phrase is one name and must not break across two lines.
     „האבן השחורה" was splitting with „האבן" ending a line and „השחורה" starting
     the next, which reads as two things rather than one. Up to three words are
@@ -186,6 +193,12 @@ function T({
       run = `${run.replace(/\s*\.\s*$/, '')} (${inner}).`
       continue
     }
+    const own = OWN_LINE.exec(ref)
+    if (own) {
+      flush()
+      lines.push({ text: text(own[1]) })
+      continue
+    }
     if (frag(ref).list) {
       flush()
       for (const item of list(ref)) lines.push({ text: item })
@@ -198,7 +211,9 @@ function T({
        ordinary sentence that happens to end in a colon is not broken out of the
        prose it belongs to. */
     const next = refs[i + 1]
-    if (next && !PARENTHETICAL.test(next) && frag(next).list) {
+    /* both markers have to be excluded before `next` is treated as a plain
+       fragment id — „|§31.a" is not one, and `frag` throws on it */
+    if (next && !PARENTHETICAL.test(next) && !OWN_LINE.test(next) && frag(next).list) {
       flush()
       lines.push({ text: text(ref), intro: true })
       continue
@@ -1124,16 +1139,30 @@ export default function Chapter2() {
               </Section>
 
               {/* ============ 05 · Mecca and the Kaaba ============ */}
-              <Section id="mecca">
-                <Head id="mecca" />
-                {/* Running text, no plate. The precinct painting stood beside this
-                    prose so the reader could look while reading — but the passage
-                    is four short sentences and a four-item list, and a tall
-                    picture next to it left the words in a narrow strip with a
-                    field of parchment between the two. */}
-                <div className="ch2-body" data-reveal>
-                  <T r={['§30.a', '§31.a']} em={['האבן השחורה']} />
-                  <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
+              <Section id="mecca" className="ch2-mecca-section">
+                {/* the heading is boxed to the same column as the prose, so the
+                    two share one right edge instead of the heading hanging at the
+                    article's edge above an illustration */}
+                <div className="ch2-mecca-head">
+                  <Head id="mecca" />
+                </div>
+                {/* Chapter 6's charity hero, exactly: a watercolour bleeding off
+                    the RIGHT edge with the reading column beside it on the left.
+                    The mask in the CSS is what makes it belong to the page — the
+                    painting has no frame and no edge, it fades into the parchment.
+
+                    The photographic precinct plate that stood here before was a
+                    framed 16:9 rectangle above the prose; this is the chapter's
+                    other register, the one the seated figure is painted in. */}
+                <div className="ch2-mecca-hero">
+                  <div className="ch2-mecca-illus" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/chapter2/mecca-kaaba.webp" alt="" loading="lazy" decoding="async" />
+                  </div>
+                  <div className="ch2-mecca-body ch2-body" data-reveal>
+                    <T r={['§30.a', '|§31.a']} em={['האבן השחורה']} />
+                    <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
+                  </div>
                 </div>
               </Section>
 

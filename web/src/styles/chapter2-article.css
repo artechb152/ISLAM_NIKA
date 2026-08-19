@@ -1255,3 +1255,43 @@
    under a short sentence it read as a divider cutting the passage rather than
    as an underline belonging to the words above it. The break is enough. */
 .ch2-intro{display:block;margin-bottom:2px}
+
+/* ============ 06 · Mecca — chapter 6's charity hero, part for part ============
+   A watercolour bleeding off the RIGHT edge (`inline-start` in RTL, the reading
+   edge) with the reading column beside it on the left. Copied from
+   `.charity-hero` rather than reinvented: same absolute illustration, same
+   radial-and-linear mask, same soft shadow, same 42%-wide text block pushed off
+   the picture. The mask is the part that matters — the painting has no frame and
+   no edge, it fades into the parchment, which is why it reads as belonging to
+   the page instead of sitting on it. */
+.ch2-mecca-section{position:relative}
+.ch2-mecca-hero{margin-top:8px}
+.ch2-mecca-illus{display:none}
+@media (min-width:900px){
+  .ch2-mecca-hero{display:flex;flex-direction:column;justify-content:center;min-height:clamp(560px,52vw,860px)}
+  /* the text reads leftward from the middle of the column, clear of the picture */
+  .ch2-mecca-body{width:min(680px,58%);margin-inline-start:38%;margin-inline-end:auto;max-width:none}
+  /* THE HEADING SITS OVER ITS OWN TEXT, not at the article edge. Left at the far
+     right it hung above the illustration with the prose starting far below and
+     to the left of it, so the section had two right edges. Same box as the body,
+     so heading and prose share one. */
+  .ch2-mecca-head{width:min(680px,58%);margin-inline-start:38%;margin-inline-end:auto}
+  .ch2-mecca-illus{
+    display:block;position:absolute;top:50%;translate:0 -50%;
+    inset-inline-end:auto;inset-inline-start:calc(-1 * var(--content-gutter));
+    width:clamp(420px,52%,720px);z-index:0;pointer-events:none;user-select:none;
+  }
+  .ch2-mecca-illus img{
+    width:100%;height:auto;object-fit:contain;
+    /* TIGHTER than chapter 6 uses, and for a reason of this picture: the giving
+       illustration there is a cut-out on transparency, so its mask only has to
+       soften an edge. This one is painted ON parchment, and the parchment is a
+       shade lighter than the page — left to the wider fade it showed as a pale
+       rectangle behind the Kaaba. The window closes inside the painted subject,
+       so what reaches the page is the painting and none of its ground. */
+    -webkit-mask-image:radial-gradient(66% 62% at 50% 52%,#000 38%,transparent 76%);
+            mask-image:radial-gradient(66% 62% at 50% 52%,#000 38%,transparent 76%);
+    filter:drop-shadow(0 16px 30px rgba(60,35,18,.08));
+  }
+  .ch2-mecca-body > :first-child{margin-top:0}
+}

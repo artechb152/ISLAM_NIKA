@@ -345,7 +345,7 @@ const result = await page.evaluate(() => {
     /* the banner, the bleeding watercolour and the full-screen stage are
        deliberately full-bleed: they carry a negative inline margin so the art
        reaches the window edge. Everything else must stay in the column. */
-    if (el.closest('.ch2-hero, .ch2-bleed-img, .ch2-stage, .ch2-plate.is-bleed')) continue
+    if (el.closest('.ch2-hero, .ch2-bleed-img, .ch2-stage, .ch2-plate.is-bleed, .ch2-mecca-illus')) continue
     if (r.right > art.right + 2 || r.left < art.left - 2) {
       fail.push(`חורג מהעמודה: ${el.tagName}.${(el.className || '').toString().slice(0, 26)}`)
     }
