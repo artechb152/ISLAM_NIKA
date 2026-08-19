@@ -31,11 +31,17 @@ export interface NavStop {
   done: boolean
 }
 
+/* `back` IS A PROP because this shell is no longer chapter 6's alone: chapter 2's
+   practice renders inside it too, and a shell that hard-codes „חזרה לפרק 6" in
+   the masthead is a lookalike again rather than the same component. It defaults
+   to chapter 6's own link, so nothing about that page changes. */
 export default function PracticeNav({
   stops,
+  back = { href: '/chapter6#chapter-end', label: 'חזרה לפרק 6' },
   children,
 }: {
   stops: NavStop[]
+  back?: { href: string; label: string }
   children: React.ReactNode
 }) {
   const router = useRouter()
@@ -131,11 +137,11 @@ export default function PracticeNav({
           </div>
           {/* the end slot the article gives to its find-field. Same height, same hairline on
               maroon — one component family, not a second button style. */}
-          <Link className="gv-back" href="/chapter6#chapter-end">
+          <Link className="gv-back" href={back.href}>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 6l6 6-6 6" />
             </svg>
-            חזרה לפרק 6
+            {back.label}
           </Link>
         </div>
       </header>
