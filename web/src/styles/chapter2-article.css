@@ -1208,12 +1208,21 @@
 
 /* the closing link — chapter 6 ends on exactly one link and nothing else */
 .ch2-end{margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);border-top:1px solid var(--rule);display:grid;justify-items:center}
+/* THE SAME BUTTON AS CHAPTER 6'S, IN THE SAME COLOURS. It was painted
+   `--maroon` on `--mat` with a `--stamp` hover — the token set for TITLES — and
+   chapter 6's hand-off is `--maroon-deep` on `--cream` with a `--maroon` hover,
+   which is what the palette says primary buttons are ("masthead + primary
+   buttons (flat)", where that token is declared). Two chapters ending on the
+   same act, in two different reds. `--mat` and `--cream` are the same value;
+   the token here is the one that means text on a dark band. The shadow comes
+   with it, because without it the same fill still reads as a flatter object. */
 .ch2-end-link{
   display:inline-flex;align-items:center;gap:10px;text-decoration:none;
-  background:var(--maroon);color:var(--mat);border-radius:999px;padding:14px 32px;
+  background:var(--maroon-deep);color:var(--cream);border-radius:999px;padding:14px 32px;
+  box-shadow:0 6px 16px rgba(87,24,32,.24);
   font-family:var(--font-heading);font-size:18px;font-weight:700;transition:background .2s ease,transform .2s ease;
 }
-.ch2-end-link:hover{background:var(--stamp);transform:translateY(-2px)}
+.ch2-end-link:hover{background:var(--maroon);transform:translateY(-2px)}
 .ch2-end-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
 /* the fork follows the illustrated lead directly. Measured, the tree was sitting
