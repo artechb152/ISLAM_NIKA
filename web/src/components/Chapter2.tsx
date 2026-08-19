@@ -91,6 +91,17 @@ const subLabel = (sectionId: string, subId: string): string => {
     sentence rather than as a sentence of its own. See the loop in `T`. */
 const PARENTHETICAL = /^\((§\d+\.[\w-]+)\)$/
 
+/** A SHORT emphasised phrase is one name and must not break across two lines.
+    „האבן השחורה" was splitting with „האבן" ending a line and „השחורה" starting
+    the next, which reads as two things rather than one. Up to three words are
+    bound with non-breaking spaces; anything longer is a clause, not a name, and
+    is left free to wrap — forced onto one line it would overflow a narrow
+    column. The character is whitespace to `split(/\s+/)` and to the gates'
+    `flat()`, so no measurement moves. */
+const NBSP = ' '
+const bindShort = (phrase: string): string =>
+  phrase.split(' ').length <= 3 ? phrase.replace(/ /g, NBSP) : phrase
+
 /** Bold every `em` phrase inside one line, leaving the rest as it is. */
 function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] {
   if (!em.length) return [s]
@@ -114,7 +125,7 @@ function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] 
     if (at > 0) parts.push(rest.slice(0, at))
     parts.push(
       <b className="key" key={`${keyBase}-${k++}`}>
-        {hit}
+        {bindShort(hit)}
       </b>,
     )
     rest = rest.slice(at + hit.length)
