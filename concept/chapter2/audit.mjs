@@ -232,7 +232,11 @@ const result = await page.evaluate(() => {
        it, which is exactly how chapter 6 sets `.pillars-lead` over its five */
     /* an arrow's own sentence is centred ON ITS SHAFT — that is what attaches
        it to that arrow rather than to the one under it. Not running text. */
-    if (el.closest('.ch2-lead, .ch2-statement, .ch2-verse, .ch2-saying, .ch2-cycle-arm')) continue
+    /* the two meanings under the fork are centred AS GROUPS, on the axis each
+       arrow comes down — an explicit instruction, and the only running text in
+       the chapter that is centred. Named here so the exemption is a fact on the
+       record and not a quietly loosened rule. */
+    if (el.closest('.ch2-lead, .ch2-statement, .ch2-verse, .ch2-saying, .ch2-cycle-arm, .ch2-meanings.is-forked')) continue
     if (getComputedStyle(el).textAlign === 'center' && (el.textContent || '').trim().length > 30) {
       fail.push(`פסקה ממורכזת: "${(el.textContent || '').trim().slice(0, 30)}…"`)
     }

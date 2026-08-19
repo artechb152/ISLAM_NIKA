@@ -976,6 +976,33 @@
 /* NO panels around the meanings. Framing them was tried and made the section
    worse: two bordered boxes under a bordered card row, in a chapter whose whole
    argument is that it reads like a page and not a control panel. */
+
+/* EACH MEANING IS CENTRED AS A GROUP — heading, prose and gloss on one axis.
+   Right-aligned prose under a centred name shares a BOX centre but not a visible
+   one: the lines are flush right and ragged left, so nothing under the name
+   straddles it and the arrow appears to point at a column that has drifted.
+   Centred, the whole group sits on the axis its arrow comes down.
+
+   ⚠ This is the one place in the chapter where running text is centred, and it
+   overrides a founding rule — chapter 6 never centres a paragraph, and the rule
+   exists because of that. It is a deliberate instruction, it is limited to the
+   two short meanings under the fork, and `audit.mjs` names it rather than being
+   quietly widened. */
+.ch2-meanings.is-forked .ch2-meaning{text-align:center;justify-items:center}
+.ch2-meanings.is-forked .ch2-meaning > *{max-width:100%}
+/* the gold rule marked „what Islam set against it" from the side. On a centred
+   group a side rule points nowhere; the same mark reads as a short rule above. */
+.ch2-meanings.is-forked .ch2-answer{
+  padding:12px 0 0;border-inline-start:0;border-top:2px solid var(--gold);
+  /* full width, NOT `fit-content`: a shrink-to-fit box sized itself to its own
+     longest line and stopped landing on the group's axis — measured 60px off it.
+     Full width, centred text, and the rule becomes a divider across the column
+     between the claim and what Islam set against it. */
+  width:100%;
+}
+/* the gloss is a flex row, so `justify-items` does nothing to it — it needs
+   `justify-content` to bring its term and definition onto the group's axis */
+.ch2-meanings.is-forked .ch2-gloss{justify-content:center}
 /* ---- THE FORK: one word, two branches ----
    „תקופה זו מכונה הג'אהליה." is the sentence that names the period, so it heads a
    tree rather than closing a paragraph: the word large and centred, a stem down
