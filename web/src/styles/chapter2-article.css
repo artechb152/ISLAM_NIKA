@@ -973,17 +973,9 @@
     align-items:stretch;
   }
 }
-/* EACH MEANING IS A PANEL. The arrows had nothing to land on: two runs of loose
-   text with no edges, so each arm came down and simply stopped in the air. Given
-   the chapter's own card language — the page's tone, one hairline, the same
-   radius as the trait cards — the fork reads as one word opening into two
-   things, which is what it is. */
-.ch2-meanings.is-forked .ch2-meaning{
-  background:var(--paper,#EDE4D0);
-  border:1px solid var(--edge);border-radius:16px;
-  padding:clamp(18px,2vw,26px);
-  gap:12px;
-}
+/* NO panels around the meanings. Framing them was tried and made the section
+   worse: two bordered boxes under a bordered card row, in a chapter whose whole
+   argument is that it reads like a page and not a control panel. */
 /* ---- THE FORK: one word, two branches ----
    „תקופה זו מכונה הג'אהליה." is the sentence that names the period, so it heads a
    tree rather than closing a paragraph: the word large and centred, a stem down
