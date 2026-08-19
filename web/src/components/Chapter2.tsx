@@ -87,6 +87,10 @@ const subLabel = (sectionId: string, subId: string): string => {
 
 /* ---------------- text primitives ---------------- */
 
+/** „(§1.gloss)" — a fragment the source prints in brackets inside another
+    sentence rather than as a sentence of its own. See the loop in `T`. */
+const PARENTHETICAL = /^\((§\d+\.[\w-]+)\)$/
+
 /** Bold every `em` phrase inside one line, leaving the rest as it is. */
 function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] {
   if (!em.length) return [s]
@@ -152,6 +156,17 @@ function T({
   }
   for (let i = 0; i < refs.length; i++) {
     const ref = refs[i]
+    /* A ref written „(§1.gloss)" is PARENTHETICAL: the source has it in round
+       brackets inside the sentence before it, not standing on its own. It folds
+       into the running text — the preceding sentence gives up its full stop, the
+       remark goes in brackets, and the stop is set after the closing bracket,
+       which is exactly how the document prints it. */
+    const par = PARENTHETICAL.exec(ref)
+    if (par) {
+      const inner = text(par[1]).replace(/\s*\.\s*$/, '')
+      run = `${run.replace(/\s*\.\s*$/, '')} (${inner}).`
+      continue
+    }
     if (frag(ref).list) {
       flush()
       for (const item of list(ref)) lines.push(item)
@@ -163,7 +178,8 @@ function T({
        Detected by what FOLLOWS rather than by the colon character, so an
        ordinary sentence that happens to end in a colon is not broken out of the
        prose it belongs to. */
-    if (i + 1 < refs.length && frag(refs[i + 1]).list) {
+    const next = refs[i + 1]
+    if (next && !PARENTHETICAL.test(next) && frag(next).list) {
       flush()
       lines.push(text(ref))
       continue
@@ -417,14 +433,11 @@ function Saying({ r }: { r: string }) {
 
 /** The chapter's turn — chapter 6's `.pillars-statement`. A centred declaration
     at display scale, the one place outside a heading that earns it. */
-function Statement({ main, sub: subRef }: { main: string; sub?: string }) {
+function Statement({ main, sub: subRef }: { main: string; sub: string }) {
   return (
     <div className="ch2-statement" data-reveal>
       <b>{text(main)}</b>
-      {/* the second line is optional: the chapter's opening declaration is one
-          sentence and has nothing under it, while the closing one is a claim
-          with its consequence beneath */}
-      {subRef && <span>{text(subRef)}</span>}
+      <span>{text(subRef)}</span>
     </div>
   )
 }
@@ -836,52 +849,30 @@ export default function Chapter2() {
                   </div>
                 </div>
                 <Head id="lineage" />
-                {/* The chapter's opening claim, and the sentence the section is
-                    named for. Set as a declaration rather than as the first line
-                    of a paragraph: it is the premise everything after it rests
-                    on, and chapter 6 leaves the reading column at exactly this
-                    kind of moment. */}
-                <Statement main="§0.a" />
-
-                {/* NOT A TIMELINE any more, and that is the point of this pass.
-
-                    Five short lines on a numbered rail made two promises the
-                    content cannot keep. A rail says „these happened in this
-                    order", and in the document's order stop 3 has Abraham and
-                    Ishmael „שיקמו את הכעבה" two stops BEFORE anything says it was
-                    ever broken — so the device was actively arguing with the
-                    text. And a rail says „this is a sequence" when what the
-                    source actually gives is one story followed by two separate
-                    remarks that step outside it („לפי המסורת… המסורת אף מספרת").
-
-                    So: the story runs as prose, at proper paragraph length, and
-                    the two remarks that stand outside it are set as asides —
-                    which is what they are. Nothing is reordered and nothing is
-                    dropped; the shape simply stops claiming a chronology the
-                    source never had. */}
-                <SubHead section="lineage" id="kaaba-tradition" />
-                <figure className="ch2-plate is-bleed is-low" data-reveal>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/assets/chapter2/lineage-migration.webp"
-                    alt="עמק מדברי רחב באור ראשון, ובתוכו שני הולכים זעירים במרחק — מבוגר וילד — צועדים לאורך אפיק יבש אל האופק"
-                  />
-                </figure>
-                <div className="ch2-body ch2-after-device" data-reveal>
-                  <T r={['§1.a', '§1.b', '§2.a']} em={['לחצי האי ערב', 'שיקמו את הכעבה']} />
-                </div>
-                {/* §1.gloss opens with „ומכאן" and points back at the migration in
-                    the paragraph above, so it sits directly under it and names
-                    הג'ר itself — which is why no term prefix. */}
-                <div className="ch2-aside" data-reveal>
-                  <p>{text('§1.gloss')}</p>
-                </div>
-
                 <div className="ch2-body" data-reveal>
-                  <T r={['§3.a', '§4.a']} em={['אבני היסוד']} />
+                  <T r="§0.a" em={['ישמעאל']} />
                 </div>
-                <div className="ch2-aside" data-reveal>
-                  <p>{text('§3.aside')}</p>
+
+                {/* PLAIN RUNNING TEXT, in the document's own paragraphing.
+
+                    This part has been through a numbered timeline (which claimed
+                    a chronology the source does not have — in the document's
+                    order „שיקמו את הכעבה" comes two stops before anything says the
+                    Kaaba was ever broken) and then through prose with the two
+                    remarks pulled out as asides. Both were devices laid over
+                    text that does not need one. The document prints two
+                    paragraphs with the remarks in round brackets inside the
+                    sentences they belong to, and that is what is printed here. */}
+                <SubHead section="lineage" id="kaaba-tradition" />
+                <div className="ch2-body" data-reveal>
+                  <T
+                    r={['§1.a', '§1.b', '(§1.gloss)']}
+                    em={['לחצי האי ערב', termOf('§1.gloss')]}
+                  />
+                  <T
+                    r={['§2.a', '§3.a', '(§3.aside)', '§4.a']}
+                    em={['שיקמו את הכעבה', 'אבני היסוד']}
+                  />
                 </div>
               </Section>
 

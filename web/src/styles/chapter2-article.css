@@ -842,12 +842,6 @@
   aspect-ratio:32/9;object-position:center 48%;
   border-radius:0;border:0;border-block:1px solid var(--edge);
 }
-/* A band whose subject sits LOW in the painting. The opening plate puts its two
-   travellers at about 80% of the canvas height, and the 48% window ends at 74% —
-   the crop removed the only two figures in the picture, which are the whole of
-   what it is for. 72% brings them in with room under their feet. Measured, like
-   the 48%: a band's window has to be aimed at what the band is about. */
-.ch2-plate.is-bleed.is-low img{object-position:center 72%}
 
 /* 2 · beside its prose — the plate takes the outer edge, the text the reading
    edge, and they share one row. Portrait here, so the column has a shape of its
