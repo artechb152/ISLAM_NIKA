@@ -1268,14 +1268,25 @@
 .ch2-mecca-hero{margin-top:8px}
 .ch2-mecca-illus{display:none}
 @media (min-width:900px){
-  .ch2-mecca-hero{display:flex;flex-direction:column;justify-content:center;min-height:clamp(430px,38vw,640px)}
-  /* the text reads leftward from the middle of the column, clear of the picture */
-  .ch2-mecca-body{width:min(680px,58%);margin-inline-start:38%;margin-inline-end:auto;max-width:none}
+  /* THE GROUP STARTS UNDER THE RULE, as it does in every other section.
+     Centred in this block the heading floated 210px below the divider while
+     תקופת הג'אהליה above it starts 85px below its own — the same padding, but
+     one section hangs its title in mid-air and the other does not. The block
+     still reserves the picture's height, so the illustration has room to centre
+     itself; only the words stop drifting away from the rule they sit under. */
+  .ch2-mecca-hero{display:flex;flex-direction:column;min-height:clamp(430px,38vw,640px)}
+  /* THE COLUMN IS PINNED TO THE OUTER EDGE, not offset from the reading edge.
+     `margin-inline-start:44%` beside `width:58%` adds up to 102% — at 1850 the
+     680px cap hid it, but at 1440 nothing caps the width and the prose ran 21px
+     past the article's own left edge. Anchored at `inline-end` with a small gap
+     it sits as far from the picture as the measure allows and cannot overflow,
+     whatever the window does. */
+  .ch2-mecca-body{width:min(680px,50%);margin-inline-start:auto;margin-inline-end:clamp(0px,3%,48px);max-width:none}
   /* THE HEADING SITS OVER ITS OWN TEXT, not at the article edge. Left at the far
      right it hung above the illustration with the prose starting far below and
      to the left of it, so the section had two right edges. Same box as the body,
      so heading and prose share one. */
-  .ch2-mecca-head{width:min(680px,58%);margin-inline-start:38%;margin-inline-end:auto}
+  .ch2-mecca-head{width:min(680px,50%);margin-inline-start:auto;margin-inline-end:clamp(0px,3%,48px)}
   .ch2-mecca-illus{
     display:block;position:absolute;top:50%;translate:0 -50%;
     inset-inline-end:auto;inset-inline-start:calc(-1 * var(--content-gutter));
