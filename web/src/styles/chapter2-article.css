@@ -982,7 +982,9 @@
    the word. Inline it stays enlarged and the stop stays where it belongs. */
 .ch2-fork-head .key{
   font-family:var(--font-heading);font-weight:700;color:var(--maroon);
-  font-size:clamp(28px,3.2vw,44px);line-height:1.1;
+  /* enlarged, but not so far above the words around it that the line tips over:
+     at 44px the four small words either side read as a caption stuck to a title */
+  font-size:clamp(26px,2.6vw,34px);line-height:1.1;
 }
 
 /* the connector. Percentages, not pixels: the arms land on the centre of each
@@ -993,10 +995,10 @@
 .ch2-fork-stem{top:0;left:50%;width:2px;height:100%;translate:-1px 0}
 .ch2-fork-bar,.ch2-fork-arm{display:none}
 @media(min-width:820px){
-  .ch2-fork-tree{height:56px}
-  .ch2-fork-stem{height:26px}
-  .ch2-fork-bar{display:block;top:24px;left:25%;right:25%;height:2px}
-  .ch2-fork-arm{display:block;top:24px;width:2px;height:32px}
+  .ch2-fork-tree{height:50px}
+  .ch2-fork-stem{height:22px}
+  .ch2-fork-bar{display:block;top:20px;left:25%;right:25%;height:2px}
+  .ch2-fork-arm{display:block;top:20px;width:2px;height:28px}
   /* physical left/right on purpose: the two arms are a mirrored pair, not a
      „forward" direction, so they must not swap with the writing direction */
   .ch2-fork-arm.is-start{right:25%;translate:1px 0}
@@ -1007,6 +1009,13 @@
     border-bottom:2px solid rgba(138,39,51,.45);border-right:2px solid rgba(138,39,51,.45);
     rotate:45deg;
   }
+  /* THE NAME EACH ARM POINTS AT IS CENTRED UNDER IT.
+     The arms land on the centre of each column because that is the only place a
+     symmetric fork can put them — a stem down the middle, a bar, two arms. The
+     names were on the columns' reading edge, so each arrow came down into three
+     hundred pixels of nothing while the word it meant sat far to the side. The
+     name is centred; the prose under it keeps the reading edge, as prose does. */
+  .ch2-meanings.is-forked .ch2-meaning > b{text-align:center}
 }
 /* with an arrow above it the hairline would be a second line saying the same
    thing; the arrow is the mark that opens each meaning now */
