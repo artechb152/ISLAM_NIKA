@@ -574,10 +574,10 @@
      whole section down the free column and the plate could be 600px tall without
      leaving a hole. Here it accompanies seven lines, and at that size 350px of
      empty parchment opened between the last line and what follows. */
-  position:relative;isolation:isolate;min-height:clamp(210px,26vw,400px);
+  position:relative;isolation:isolate;min-height:clamp(210px,24vw,380px);
   /* ONE number for the plate, used twice: the figure's width and the room the
      prose gives it. Declared apart from both so they cannot drift. */
-  --plate:clamp(240px,25%,355px);
+  --plate:clamp(280px,31%,450px);
   /* the gap is a share of the page, not a fixed number: the plate stops
      growing at 600px and the page does not, so a fixed gap kept shrinking as a
      proportion of what the reader sees. Marked on a wide screen at ~11%. */
@@ -594,7 +594,7 @@
    of parchment between them. Anchored by the BOTTOM, as it was, a tall plate
    grew upward instead and climbed into the section above. */
 .ch2-bleed-img{
-  position:absolute;top:calc(1px - clamp(46px,6vw,84px));
+  position:absolute;top:calc(1px - clamp(60px,9vw,150px));
   inset-inline-start:calc(-1 * var(--content-gutter));
   width:var(--plate);z-index:0;pointer-events:none;user-select:none;
   /* mirrored with the side. He is drawn seated with his hand held out to one
@@ -1248,3 +1248,11 @@
    (the figure is taller than the seven lines beside it) and 56px of flow on top.
    The figure is smaller now and this closes what is left. */
 .chapter-article .ch2-bleedwrap + .ch2-fork{margin-top:var(--flow)}
+
+/* the line that introduces a list, with a rule under it — the items below belong
+   to it, and without the rule they read as five more sentences of their own.
+   The chapter's own hairline, the one under every sub-heading. */
+.ch2-intro{
+  display:block;padding-bottom:8px;margin-bottom:8px;
+  border-bottom:2px solid rgba(138,39,51,.3);
+}

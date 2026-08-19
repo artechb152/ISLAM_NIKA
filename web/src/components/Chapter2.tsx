@@ -146,11 +146,11 @@ function T({
   reveal = false,
 }: { r: string | string[]; em?: string[]; className?: string; reveal?: boolean }) {
   const refs = Array.isArray(r) ? r : [r]
-  const lines: string[] = []
+  const lines: { text: string; intro?: boolean }[] = []
   let run = ''
   const flush = () => {
     if (run) {
-      lines.push(run)
+      lines.push({ text: run })
       run = ''
     }
   }
@@ -177,7 +177,7 @@ function T({
     }
     if (frag(ref).list) {
       flush()
-      for (const item of list(ref)) lines.push(item)
+      for (const item of list(ref)) lines.push({ text: item })
       continue
     }
     /* A sentence that INTRODUCES a list takes its own line — „בתרבות זו יועד
@@ -189,7 +189,7 @@ function T({
     const next = refs[i + 1]
     if (next && !PARENTHETICAL.test(next) && frag(next).list) {
       flush()
-      lines.push(text(ref))
+      lines.push({ text: text(ref), intro: true })
       continue
     }
     run = run ? `${run} ${text(ref)}` : text(ref)
@@ -201,8 +201,21 @@ function T({
   const rv = reveal ? { 'data-reveal': true } : {}
   const out: React.ReactNode[] = []
   lines.forEach((line, i) => {
-    if (i) out.push(<br key={`br-${i}`} />, ' ')
-    out.push(...emphasise(line, em, `l${i}`))
+    /* The sentence that introduces a list carries a rule under it, so the items
+       below read as belonging to it rather than as five more sentences of their
+       own. It is a block of its own, which is why nothing has to break after it
+       and why the line after it must not add a break either. */
+    if (line.intro) {
+      out.push(
+        <span className="ch2-intro" key={`i${i}`}>
+          {emphasise(line.text, em, `l${i}`)}
+        </span>,
+        ' ',
+      )
+      return
+    }
+    if (i && !lines[i - 1].intro) out.push(<br key={`br-${i}`} />, ' ')
+    out.push(...emphasise(line.text, em, `l${i}`))
   })
   return <p className={className} {...rv}>{out}</p>
 }
