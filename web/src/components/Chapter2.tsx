@@ -484,12 +484,16 @@ function Saying({ r }: { r: string }) {
 }
 
 /** The chapter's turn — chapter 6's `.pillars-statement`. A centred declaration
-    at display scale, the one place outside a heading that earns it. */
-function Statement({ main, sub: subRef }: { main: string; sub: string }) {
+    at display scale, the one place outside a heading that earns it.
+
+    `sub` is optional: the declaration stood at the head of section 07 with a
+    second line under it, and that second line is ordinary prose — it now runs
+    with the paragraph it belongs to, leaving the turn to stand alone. */
+function Statement({ main, sub: subRef }: { main: string; sub?: string }) {
   return (
     <div className="ch2-statement" data-reveal>
       <b>{text(main)}</b>
-      <span>{text(subRef)}</span>
+      {subRef && <span>{text(subRef)}</span>}
     </div>
   )
 }
@@ -1177,10 +1181,14 @@ export default function Chapter2() {
               {/* ============ 07 · what was kept and what was rejected ============ */}
               <Section id="legacy">
                 <Head id="legacy" />
-                {/* the sentence in which the desert becomes Islam: the chapter
-                    leaves the reading column for it, as chapter 6 does at each
-                    of its own turns, and comes back for the ledger below. */}
-                <Statement main="§34.a" sub="§34.b" />
+                {/* §34.b is ordinary prose and now reads as such, on the line
+                    above the ledger it introduces. Set as the second line of the
+                    declaration it was centred display type, which put a sentence
+                    of plain explanation in the voice the chapter keeps for its
+                    one turn. */}
+                <div className="ch2-body" data-reveal>
+                  <T r="§34.b" />
+                </div>
                 <div className="ch2-verdicts" data-reveal>
                   <p className="ch2-verdict-intro">{text('§35.a')}</p>
                   <dl>
@@ -1216,6 +1224,14 @@ export default function Chapter2() {
                     <li className="ch2-verdict-row is-name">{text('§36.lots')}</li>
                   </ul>
                 </div>
+                {/* THE TURN CLOSES THE CHAPTER INSTEAD OF OPENING THE SECTION.
+                    „מתוך תרבות עובדי האלילים התפתחה דת האסלאם" is the sentence
+                    the whole chapter has been walking toward, and at the head of
+                    section 07 it announced the sorting before the reader had
+                    seen any of it. Last, after the ledger, it is what the ledger
+                    adds up to — and it stands where chapter 6 puts its own
+                    closing block, directly above the hand-off to the practice. */}
+                <Statement main="§34.a" />
               </Section>
 
               <div className="ch2-end" ref={endRef} data-reveal>
