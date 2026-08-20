@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ליהוק קולות — פרק 1</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>" />
+<style>
+  :root { --maroon:#8a2733; --maroon-deep:#571820; --gold:#c79a3c; --cream:#f5ecd6; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Ploni','Segoe UI',system-ui,sans-serif; background:#241610; color:var(--cream); padding-bottom:5rem; }
+  header { background:var(--maroon-deep); border-bottom:2px solid var(--gold); padding:.8rem 1.2rem; position:sticky; top:0; z-index:5; }
+  header h1 { font-size:1.05rem; font-weight:600; }
+  header p { font-size:.8rem; opacity:.7; margin-top:.15rem; }
+  main { max-width:820px; margin:1.4rem auto 0; padding:0 1.2rem; display:flex; flex-direction:column; gap:1rem; }
+  .row { display:flex; gap:1rem; background:rgba(0,0,0,.35); border:1px solid rgba(199,154,60,.3); border-radius:.7rem; padding:1rem; }
+  .row img { width:72px; height:72px; border-radius:.5rem; object-fit:cover; border:1px solid var(--gold); flex-shrink:0; }
+  .row .who { font-weight:600; color:var(--gold); margin-bottom:.15rem; }
+  .row .line { font-size:.85rem; opacity:.8; margin-bottom:.6rem; max-width:58ch; }
+  .cands { display:flex; gap:.6rem; flex-wrap:wrap; }
+  .cand { display:flex; align-items:center; gap:.5rem; background:rgba(0,0,0,.3); border-radius:.5rem; padding:.4rem .7rem; cursor:pointer; border:2px solid transparent; }
+  .cand:has(input:checked) { border-color:var(--gold); background:rgba(138,39,51,.4); }
+  .cand button { width:1.9rem; height:1.9rem; border-radius:50%; border:none; cursor:pointer; background:var(--gold); color:var(--maroon-deep); }
+  .cand input { accent-color:var(--gold); }
+  #result { position:fixed; bottom:0; inset-inline:0; background:var(--maroon-deep); border-top:2px solid var(--gold); padding:.7rem 1.2rem; font-size:.9rem; }
+  #result b { color:var(--gold); }
+</style>
+</head>
+<body>
+<header>
+  <h1>ליהוק קולות — ElevenLabs</h1>
+  <p>כל דמות קוראת שורה אמיתית שלה מהטקסט. השמיעי את שני המועמדים, סמני את הזוכה — והרשימה נבנית למטה.</p>
+</header>
+<main id="board"></main>
+<div id="result"><b>הליהוק שלך:</b> <span id="summary">—</span></div>
+<script>
+const CAST = [
+  { key:'rawi', who:'רָאוִי — נער מתעד', face:'/faces/rawi.jpg', line:'„המידע על החיים בחצי האי ערב לפני האסלאם דל מאוד…" (§1)',
+    cands:[['benji','rawi-benji'],['cody','rawi-cody']] },
+  { key:'envoy', who:'שליח האימפריה', face:'/faces/envoy.jpg', line:'„מצפון־מערב הביזנטית… מצפון־מזרח הסאסאנית, ובירתה קטסיפון" (§3–4)',
+    cands:[['sterling','envoy-sterling'],['alistair','envoy-alistair']] },
+  { key:'chief', who:'ראש השבט', face:'/faces/chief.jpg', line:'„אנחנו בני חסות של האימפריות… שומרים על נתיבי הסחר" (§6–7)',
+    cands:[['marcus','chief-marcus'],['fraser','chief-fraser']] },
+  { key:'merchant', who:'הסוחר', face:'/faces/merchant.jpg', line:'„האבן השחורה — אלחג\'ר אלאסוד — קדושה ונערצת שנים רבות לפני האסלאם" (§34)',
+    cands:[['brooks','merchant-brooks'],['grady','merchant-grady']] },
+  { key:'jewish', who:'הסוחר היהודי', face:'/faces/scholar.jpg', line:'„יהודים חיים כאן מאז חורבן הבית השני — ח\'יבר, תימא וית\'רב" (§10)',
+    cands:[['arthur','jewish-arthur'],['gideon','jewish-gideon']] },
+  { key:'monk', who:'הנזיר', face:'/faces/monk.jpg', line:'„האומרים נוצרים אנו — אהבתם למאמינים גדולה מכל" (קוראן 5:82, §24)',
+    cands:[['julian','monk-julian'],['desmond','monk-desmond']] },
+  { key:'narrator', who:'קריין', face:'/faces/rawi.jpg', line:'„כדי להבין כיצד התפתחה דת האסלאם… תקופה המכונה ג\'אהליה" (§0)',
+    cands:[['harrison','narrator-harrison'],['xavier','narrator-xavier']] },
+]
+const board = document.getElementById('board')
+let audio = null
+for (const c of CAST) {
+  const row = document.createElement('div')
+  row.className = 'row'
+  row.innerHTML = `<img src="${c.face}" alt="" /><div>
+    <div class="who">${c.who}</div><div class="line">${c.line}</div>
+    <div class="cands">${c.cands.map(([n, f]) => `
+      <label class="cand"><button data-f="${f}">🕪</button>
+      <input type="radio" name="${c.key}" value="${n}"><span>${n}</span></label>`).join('')}
+    </div></div>`
+  board.appendChild(row)
+}
+board.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-f]')
+  if (!b) return
+  e.preventDefault()
+  audio?.pause()
+  audio = new Audio('./casting/' + b.dataset.f + '.mp3')
+  audio.play()
+})
+document.addEventListener('change', () => {
+  const parts = CAST.map((c) => {
+    const v = document.querySelector(`input[name="${c.key}"]:checked`)
+    return v ? `${c.who.split(' —')[0]}: ${v.value}` : null
+  }).filter(Boolean)
+  document.getElementById('summary').textContent = parts.length ? parts.join(' · ') : '—'
+})
+</script>
+</body>
+</html>

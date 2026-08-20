@@ -1,0 +1,577 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>הסדר המלא</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f7f2e8;--paper-2:#efe8da;--ink:#241d16;--ink-2:#5b5044;--ink-3:#8b7f70;
+  --rule:#ded3c0;--gold:#a8762a;--cool:#3f6d8c;--warn:#9c4a2f;--walk:#2f6b52;
+  --serif:'Frank Ruhl Libre','David Libre',serif;--sans:'Heebo',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--walk:#6dbf9a}}
+:root[data-theme="dark"]{
+  --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--walk:#6dbf9a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.72;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:clamp(26px,5vw,64px) clamp(18px,4vw,44px) 100px}
+
+header{border-bottom:1px solid var(--rule);padding-bottom:30px;margin-bottom:36px}
+.kick{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.32em;
+  color:var(--gold);margin-bottom:14px}
+h1{font-weight:300;font-size:clamp(1.9rem,1.3rem + 3vw,3.2rem);line-height:1.14;
+  text-wrap:balance;margin-bottom:14px}
+.lede{font-weight:300;font-size:clamp(1rem,.96rem + .4vw,1.2rem);color:var(--ink-2);max-width:62ch}
+h2{font-weight:400;font-size:clamp(1.2rem,1.05rem + .8vw,1.6rem);margin:46px 0 6px;
+  padding-top:26px;border-top:1px solid var(--rule)}
+h2 .n{font-family:var(--sans);font-weight:700;font-size:.68rem;letter-spacing:.2em;
+  color:var(--gold);display:block;margin-bottom:8px}
+p{max-width:66ch;margin-bottom:12px;font-weight:300}
+p.small{font-size:.93rem;color:var(--ink-2)}
+strong{font-weight:500}
+em{font-style:normal;color:var(--gold);font-weight:400}
+code{font-family:ui-monospace,monospace;font-size:.84em;background:var(--paper-2);
+  padding:1px 6px;border-radius:3px;direction:ltr;unicode-bidi:isolate;display:inline-block}
+ul{margin:0 0 14px;padding-inline-start:20px;max-width:66ch}
+li{margin-bottom:6px;font-weight:300}
+
+/* ── שורת ביט ─────────────────────────────────────────── */
+.beat{display:grid;grid-template-columns:78px 1fr;gap:16px;
+  border-top:1px solid var(--rule);padding:15px 0}
+.beat:first-of-type{border-top:0}
+.id{font-family:var(--sans);font-weight:700;font-size:.66rem;letter-spacing:.1em;
+  padding-top:3px;font-variant-numeric:tabular-nums}
+.id small{display:block;font-weight:300;font-size:.58rem;letter-spacing:.14em;
+  margin-top:5px;color:var(--ink-3)}
+.beat.w .id{color:var(--walk)}
+.beat.s .id{color:var(--gold)}
+.beat.c .id{color:var(--cool)}
+.beat.i .id{color:var(--warn)}
+.beat.f .id{color:var(--ink-2)}
+
+.what{font-weight:400;font-size:1.02rem;margin-bottom:7px}
+.see{font-size:.92rem;color:var(--ink-2);font-weight:300;margin-bottom:9px}
+.say{border-inline-start:2px solid var(--rule);padding-inline-start:13px;margin:9px 0 0}
+.say .who{font-family:var(--sans);font-weight:500;font-size:.6rem;letter-spacing:.22em;
+  margin-bottom:6px;display:block}
+.say.rawi{border-color:var(--gold)} .say.rawi .who{color:var(--gold)}
+.say.note{border-color:var(--cool)} .say.note .who{color:var(--cool)}
+.say.quote{border-color:var(--warn)} .say.quote .who{color:var(--warn)}
+.say.npc{border-color:var(--ink-3)} .say.npc .who{color:var(--ink-3)}
+.say p{font-size:.97rem;margin:0 0 7px;max-width:62ch}
+.say p:last-child{margin-bottom:0}
+.ref{display:inline-block;margin-inline-start:8px;font-family:var(--sans);font-weight:300;
+  font-size:.6rem;letter-spacing:.12em;color:var(--ink-3);
+  direction:ltr;unicode-bidi:isolate;vertical-align:.24em;white-space:nowrap}
+
+.note-box{border-inline-start:3px solid var(--cool);background:var(--paper-2);
+  padding:15px 18px;margin:20px 0;border-radius:0 3px 3px 0}
+.note-box.w{border-color:var(--warn)}
+.note-box h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--cool);margin-bottom:9px}
+.note-box.w h4{color:var(--warn)}
+.note-box p{font-size:.95rem;margin:0 0 8px;max-width:none}
+.note-box p:last-child{margin-bottom:0}
+
+.legend{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 8px}
+.chip{font-family:var(--sans);font-weight:400;font-size:.68rem;padding:5px 12px;
+  border:1px solid var(--rule);border-radius:3px;color:var(--ink-2);background:var(--paper-2)}
+.chip b{font-weight:700;margin-inline-end:6px}
+.chip.w b{color:var(--walk)} .chip.s b{color:var(--gold)}
+.chip.c b{color:var(--cool)} .chip.i b{color:var(--warn)} .chip.f b{color:var(--ink-2)}
+
+.scroller{overflow-x:auto;margin:16px 0;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.86rem;
+  font-weight:300;min-width:480px}
+th{background:var(--paper-2);font-weight:500;font-size:.66rem;letter-spacing:.14em;
+  color:var(--ink-2);text-align:right;padding:10px 13px;white-space:nowrap}
+td{padding:9px 13px;border-top:1px solid var(--rule);font-variant-numeric:tabular-nums}
+footer{margin-top:52px;padding-top:24px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kick">פרק 1 · תסריט הפקה</div>
+  <h1>הסדר המלא</h1>
+  <p class="lede">כל ביט במשחק לפי הסדר — מה רואים, מה נאמר, ומאיזה סעיף. זהו המסמך שממנו נגזרים הפרומפטים, ולכן הוא חייב להיות שלם לפני שמייצרים קליפ אחד.</p>
+</header>
+
+<div class="note-box w">
+  <h4>שלושה כללים שקובעים הכל</h4>
+  <p><strong>רצף מלא.</strong> ההליכה לא נעצרת מעצמה ואין מסכי „הקטע נגמר“. הקטעים נשרשרים — פריים הסיום של כל אחד הוא פריים הפתיחה של הבא.</p>
+  <p><strong>עצירה רק להסבר.</strong> השחקן עוצר כשהוא רוצה, והמשחק עוצר אותו רק כשיש מה ללמד.</p>
+  <p><strong>קדימה בלבד.</strong> אין הליכה אחורה — ולכן אין גלילת וידאו, ולכן האיכות נשארת מלאה.</p>
+</div>
+
+<div class="legend">
+  <span class="chip w"><b>W</b>הליכה · קליפ וידאו</span>
+  <span class="chip s"><b>ST</b>מסך עצירה · הסבר</span>
+  <span class="chip c"><b>CV</b>שיחה עם דמות</span>
+  <span class="chip i"><b>IN</b>אינטראקציה</span>
+  <span class="chip f"><b>CIN</b>קולנועי</span>
+</div>
+
+<p class="small">שלושת הקולות: <em>הראוי</em> מוסר את הסיפור · <em>הערת שוליים</em> עוצרת אותו איפה שהמקור מסתייג · <em>ציטוט</em> מהקוראן, כתוב ולא מדובר. דמויות אומרות רק מה שהמקור תומך בו.</p>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה אפס</span>פתיחה</h2>
+
+<div class="beat f"><div class="id">CIN 1<small>0:20</small></div><div>
+  <div class="what">שחור · רוח · ירידה אל העמק</div>
+  <div class="see">מסך שחור. רוח מדברית. מופיע „חצי האי ערב“, ואחריו „רגע לפני הופעת האסלאם“. המצלמה יורדת מעל רכס אל עמק שבמרכזו עיר בוץ וקובייה כהה.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 1<small>עצירה</small></div><div>
+  <div class="what">הראוי מציג את המסע</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>כדי להבין כיצד התפתחה דת האסלאם — איך עלה בדעתו של מוחמד רעיון המונותאיזם, האמונה באל אחד ויחיד — יש להבין קודם את המקום שאליו נולד.<span class="ref">§0</span></p>
+    <p>את התרבות והחיים בחצי האי ערב טרום עליית האסלאם. תקופה המכונה <em>ג׳אהליה</em> — תקופת הבערות והברבריות.<span class="ref">§0</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>המידע על אודות החיים בחצי האי ערב טרום תקופת האסלאם דל, ומרביתו ידוע לנו מהספרות והמסורת המוסלמית — אשר אותה יש לקחת ב״עירבון מוגבל“ במבט ביקורתי.<span class="ref">§1</span></p>
+    <p>שימו לב היכן ההערות האלה חוזרות.</p></div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה ראשונה</span>מכה — ביקור ראשון</h2>
+<p class="small">מטרת המערכה: <strong>לראות בלי להבין.</strong> כמעט לא מסבירים כאן דבר. זה מה שהופך את החזרה בסוף לרגע.</p>
+
+<div class="beat w"><div class="id">W 1<small>12ש׳</small></div><div>
+  <div class="what">הסמטה המזרחית → הכיכר</div>
+  <div class="see">גוף ראשון. סמטת בוץ צרה, סוככי פשתן, כדים, סוחר פורק גמל, אנשים חולפים. בסוף הסמטה נפתחת הכיכר והקובייה הכהה נכנסת לפריים.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 2<small>קצר</small></div><div>
+  <div class="what">מול הכעבה — רק השם</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>הכעבה. מקדש בצורת קובייה בעיר מכה.<span class="ref">§34</span></p>
+    <p>המסע עוד יחזיר אותך לכאן.</p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 2<small>10ש׳</small></div><div>
+  <div class="what">חציית הכיכר → שער העיר</div>
+  <div class="see">הקפה סביב הקובייה, דוכני שוק, גמלים טעונים, פסלי אבן בשולי הכיכר שעוברים לידם בלי הסבר. השער בקצה.</div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה שנייה</span>היציאה והדרך</h2>
+
+<div class="beat w"><div class="id">W 3<small>10ש׳</small></div><div>
+  <div class="what">יציאה מהשער אל הדרך</div>
+  <div class="see">השיירה נטענת ויוצאת. באמצע הקטע המצלמה מסתובבת פעם אחת לאחור — מכה מתרחקת. זה שוט שצריך לבנות בכוונה.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 3<small>מפה</small></div><div>
+  <div class="what">המפה נפתחת בפעם הראשונה</div>
+  <div class="see">עור מגורד, כמעט ריק. סימן אחד בעיגול: מכה. סביבו שטח לא מסומן.</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>זה כל מה שידוע לך כרגע.</p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 4<small>12ש׳</small></div><div>
+  <div class="what">הדרך במדבר עם השיירה</div>
+  <div class="see">גמלים טעונים, אבק, מרחב, אבני דרך. שמש גבוהה.</div>
+</div></div>
+
+<div class="beat c"><div class="id">CV 1<small>שיחה</small></div><div>
+  <div class="what">מלווה השיירה</div>
+  <div class="say npc"><span class="who">מלווה השיירה</span>
+    <p>במאות הראשונות לספירה חיו שבטים נוודים בצפון חצי האי, והם היו בני חסות של האימפריות.<span class="ref">§6</span></p>
+    <p>הם נדדו צפונה מאזור תימן, ושימשו מתווכים בין האימפריות.<span class="ref">§7</span></p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 5<small>10ש׳</small></div><div>
+  <div class="what">המעבר הצר — רוכבים מצטרפים</div>
+  <div class="see">קירות בזלת. רוכבים מופיעים בכניסה למעבר, ולרגע לא ברור אם הם איום. הם מצטרפים לשיירה ומלווים אותה. <strong>רואים את התפקיד שלהם לפני שמסבירים אותו.</strong></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 4<small>עצירה</small></div><div>
+  <div class="what">בני חסות</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>שבט גסאן היה בן חסות של האימפריה הביזנטית, ושבט לח׳ם היה של זו הסאסאנית־פרסית.<span class="ref">§8</span></p>
+    <p>אימפריה שרוצה שהדרך תישמר לא חייבת לכבוש אותה. מספיק שמישהו ישמור עליה בשבילה.</p></div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה שלישית</span>שתי האימפריות</h2>
+
+<div class="beat w"><div class="id">W 6<small>12ש׳</small></div><div>
+  <div class="what">עלייה לנקודת תצפית</div>
+  <div class="see">טיפוס במעלה רכס. ה־HUD נחלש. בפסגה נפתח מרחב עצום לשני הכיוונים.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 5<small>הסתכלות</small></div><div>
+  <div class="what">צפון־מערב</div>
+  <div class="see">המבט פונה שמאלה. אזור רחוק מקבל סימון.</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>במאות שקדמו לעליית האסלאם חיו שתי אימפריות מצפון לחצי האי ערב.<span class="ref">§2</span></p>
+    <p>מצפון־מערב — האימפריה הביזנטית, זו שהחליפה את האימפריה הרומית העתיקה. דתה הייתה נוצרית אורתודוקסית.<span class="ref">§3</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 6<small>הסתכלות</small></div><div>
+  <div class="what">צפון־מזרח</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>מצפון־מזרח — האימפריה הסאסאנית־פרסית, שמשלה באזור איראן ועיראק. עיר בירתה הייתה <em>קטסיפון</em>, על גדת נהר החידקל.<span class="ref">§4</span></p></div>
+</div></div>
+
+<div class="beat c"><div class="id">CV 2<small>שיחה</small></div><div>
+  <div class="what">נוסע פרסי ליד מדורה</div>
+  <div class="say npc"><span class="who">הנוסע</span>
+    <p>דתה של האליטה השלטונית אצלנו זורואסטרית — אמונה באל טוב ובאל רע שנלחמים זה בזה.<span class="ref">§5</span></p></div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>דואליות. שניות של האלוהות.<span class="ref">§5</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 7<small>מפה</small></div><div>
+  <div class="what">המפה מקבלת שתי שכבות</div>
+  <div class="see">ביזנטיון מצפון־מערב, הסאסאנים מצפון־מזרח. העולם של השחקן הפסיק להיות „מכה ומדבר“.</div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה רביעית</span>סחורות ורעיונות</h2>
+
+<div class="beat w"><div class="id">W 7<small>12ש׳</small></div><div>
+  <div class="what">תחנת הגבול</div>
+  <div class="see">שער, מאזני מכס, תור של גמלים, ארגזים וערמות שקים, דגלים. האזור העמוס ביותר בפרק.</div>
+</div></div>
+
+<div class="beat c"><div class="id">CV 3<small>שיחה</small></div><div>
+  <div class="what">סוחר ליד הארגזים</div>
+  <div class="say npc"><span class="who">הסוחר</span>
+    <p>משי. תבלינים. הדרך הזאת שומרת על עצמה כי כולם צריכים אותה.<span class="ref">§7</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 8<small>עצירה</small></div><div>
+  <div class="what">לא רק סחורות</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>אזור החג׳אז היה יחסית חבוי, והאימפריות לא גילו בו עניין רב.<span class="ref">§9</span></p>
+    <p>ובכל זאת חלחלו אליו רעיונות ומושגים מונותאיסטים — מהיהדות ומהנצרות — בתהליך איטי ומדורג. אלה הותירו רושם בארצם של הערבים.<span class="ref">§9</span></p></div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה חמישית</span>ית׳רב</h2>
+
+<div class="beat w"><div class="id">W 8<small>12ש׳</small></div><div>
+  <div class="what">כניסה לית׳רב</div>
+  <div class="see">שינוי ויזואלי חד: ירוק, דקלים, מים, צל, חקלאות. אחרי המדבר זה כמו לנשום.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 9<small>עצירה</small></div><div>
+  <div class="what">מאיפה ומתי</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>מקובל לומר כי יהודים חיו בחלקו הצפוני של חצי האי לכל הפחות מאז המאה הראשונה לספירה, לאחר חורבן בית המקדש השני בידי הרומאים — ובעיקר ביישובים כמו <em>ח׳יבר, תימא</em> ו<em>ית׳רב</em>, שתכונה לימים ״אלמדינה“, העיר של הנביא.<span class="ref">§10</span></p>
+    <p>בדרום חצי האי יש עדויות על התיישבות יהודים מאז המאה החמישית לספירה.<span class="ref">§12</span></p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 9<small>14ש׳</small></div><div>
+  <div class="what">השוק של ית׳רב</div>
+  <div class="see">סוחרים, מיקוח, משורר יושב בצל, נשים וילדים, באר. אנשים מאותה סביבה עם זהויות שונות, חיים באותו מרחב.</div>
+</div></div>
+
+<div class="beat c"><div class="id">CV 4<small>שיחה</small></div><div>
+  <div class="what">סוחר יהודי בשוק</div>
+  <div class="say npc"><span class="who">הסוחר</span>
+    <p>אנחנו חיים כאן בתצורה שבטית, ומושפעים באופן טבעי מהתרבות הערבית.<span class="ref">§11</span></p>
+    <p>בחיי היום־יום אנחנו חיים בשלום עם שכנינו. יש מסחר, ויש נושאי תרבות משותפים — כמו שירה. אבל כל שבט חי עם החוקים והמנהגים שלו.<span class="ref">§13</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 10<small>עצירה</small></div><div>
+  <div class="what">תודעת השוני</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>הערבים ידעו כי היהודים שונים בכך שיש להם דת משלהם — ואף היו מודעים לעליונות שהרגישו היהודים מכך.<span class="ref">§14</span></p></div>
+  <div class="say quote"><span class="who">הקוראן · 2:94</span>
+    <p>״כי רק להם מכל האנשים נועדה נחלת העולם הבא אצל אללה.“<span class="ref">§15</span></p></div>
+</div></div>
+
+<div class="beat c"><div class="id">CV 5<small>שיחה</small></div><div>
+  <div class="what">חכם יהודי</div>
+  <div class="say npc"><span class="who">החכם</span>
+    <p>אנחנו משתפים את שכנינו באמונתנו, במסורותינו, ואף בציפייתנו למשיח.<span class="ref">§16</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>לא מן הנמנע שכאשר מוחמד היגר לית׳רב, הוא קיווה שהיהודים יטו אוזן קשבת לבשורתו.<span class="ref">§17</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 11<small>מפה</small></div><div>
+  <div class="what">הקהילות מופיעות</div>
+  <div class="see">ית׳רב, ח׳יבר, תימא. השחקן לא התבקש למקם אותן — הוא פשוט למד שהמרחב רחב מהעיר שבה ביקר.</div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה שישית</span>הנזירים</h2>
+
+<div class="beat w"><div class="id">W 10<small>12ש׳</small></div><div>
+  <div class="what">הדרך אל המנזר</div>
+  <div class="see">מדרון אבן, פחות אנשים, הקצב משתנה. <strong>הסאונד נחלש ככל שמתקרבים</strong> — רעש השוק נעלם ונשארים רוח וצעדים. זו הדרך ללמד פרישות לפני שאומרים את המילה.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 12<small>עצירה</small></div><div>
+  <div class="what">מאיפה הגיעה הנצרות</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>גם הנצרות לא הייתה זרה לתושבי חצי האי — הן מהאזור הדרום־מערבי שבו משלה ממלכת אקסום הנוצרית, שחלשה גם על חלקים של תימן, והן מהצפון, בסביבות ארם נהריים, בין הפרת והחידקל — <em>בין אלראפדין</em>.<span class="ref">§18</span></p>
+    <p>שונים היו תושבי פרס, שדבקו באמונתם הזורואסטרית וכמעט שלא הושפעו מן הנצרות.<span class="ref">§19</span></p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 11<small>10ש׳</small></div><div>
+  <div class="what">בתוך המנזר</div>
+  <div class="see">חצר אבן, נזיר מטפל בגינת ירק, אחר יושב לבדו, נר, מזבח פשוט. שקט כמעט מלא. <strong>ללא כיפות וללא צריחים.</strong></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 13<small>עצירה</small></div><div>
+  <div class="what">מה מכה ידעה ומה לא</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>תושבי מכה ידעו ככל הנראה מעט על השורשים של הנצרות — אך הושפעו במשך הזמן ממנהגי הנוצרים, מאורחות חייהם, ובעיקר מהליכותיהם של הנזירים.<span class="ref">§20</span></p></div>
+</div></div>
+
+<div class="beat c"><div class="id">CV 6<small>שיחה</small></div><div>
+  <div class="what">נזיר</div>
+  <div class="say npc"><span class="who">הנזיר</span>
+    <p>צניעות. חסידות. פרישות. דאגה לנזקקים וליתומים.<span class="ref">§21</span></p>
+    <p>ויש כאן גם התבודדות, כתיבת שירה, ומנהגים פולחניים.<span class="ref">§22</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>רוב הריטואלים הפולחניים הקיימים היום בדת האסלאם — מקורם בדתות שקדמו לה.<span class="ref">§23</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 14<small>עצירה</small></div><div>
+  <div class="what">מה הקוראן אומר עליהם</div>
+  <div class="say quote"><span class="who">הקוראן · 5:82</span>
+    <p>״האומרים נוצרים אנו, אהבתם למאמינים גדולה מכל, זאת כי יש כמרים ונזירים ביניהם, ואין שחץ בלבם.“<span class="ref">§24</span></p></div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>פרשני הקוראן מסבירים כי כאשר הגיעה למכה משלחת של נוצרים מחבש, הם התרגשו כשמוחמד החל להקריא להם פסוקים מהקוראן — והפסוק משבח אותם על כך.<span class="ref">§25</span></p></div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה שביעית</span>אברהה</h2>
+
+<div class="beat w"><div class="id">W 12<small>12ש׳</small></div><div>
+  <div class="what">יציאה מהמנזר — אבק באופק</div>
+  <div class="see">ההר יורד אל מישור. בקצה האופק חומת אבק שלא הייתה שם קודם. המוזיקה והסאונד משתנים.</div>
+</div></div>
+
+<div class="beat f"><div class="id">CIN 2<small>קולנועי</small></div><div>
+  <div class="what">לפי המסורת המוסלמית</div>
+  <div class="see">מופיע על המסך במפורש, לפני שהסיפור מתחיל: <strong>„לפי המסורת המוסלמית“</strong>.</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>גם מדרום למכה, באזור תימן, שלטה ממלכה נוצרית.<span class="ref">§26</span></p>
+    <p>המסורת המוסלמית מספרת כי אברהה, שליט אקסום ששלט בתימן ובחבש ממערב לים האדום, הצפין לעבר מכה — ותכנן להרוס את הכעבה ולבנות שם כנסייה נוצרית.<span class="ref">§27</span></p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 13<small>10ש׳</small></div><div>
+  <div class="what">נקודת תצפית מעל העמק</div>
+  <div class="see">הצבא בתנועה למטה. פילים. השחקן צופה, לא משתתף.</div>
+</div></div>
+
+<div class="beat f"><div class="id">CIN 3<small>קולנועי</small></div><div>
+  <div class="what">הצבא מתקרב</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>חרף התנגדותו של עבד אל־מטלב, סבו של מוחמד, התקרב אברהה עם צבאו — כשהם רכובים על פיל, או מספר פילים.<span class="ref">§28</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>כאן המקור נעצר. על עבד אל־מטלב נאמר רק שהוא <strong>התנגד</strong> — ותו לא. אין לנו את מילותיו, אין נאום, אין סצנה.<span class="ref">§28</span></p>
+    <p>וגם על הפילים המסורת לא מסכימה עם עצמה: פיל אחד, או מספר פילים.</p></div>
+</div></div>
+
+<div class="beat f"><div class="id">CIN 4<small>קולנועי</small></div><div>
+  <div class="what">הציפורים</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>כאשר הגיע לשערי מכה, עטו עליו ציפורים כשבמקורן וברגליהן אבני חמר, והשליכו אותן על צבאו — וכך הכשילו את מזימתו.<span class="ref">§29</span></p>
+    <p>הקוראן מתייחס לכך בסורה 105 — <em>הפיל</em>. סורה שעד היום מהדהדת בתודעתם של מוסלמים רבים בעומדם בפני אתגרים צבאיים.<span class="ref">§30</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 15<small>עצירה</small></div><div>
+  <div class="what">1,400 שנה קדימה</div>
+  <div class="see">העולם משתתק. רקע כהה.</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>הסיפור לא נשאר בעבר. מוחמד אלצ׳יף, רמטכ״ל חמאס, כינה את צה״ל ״אברהה של זמננו“ במבצע צוק איתן, 2014 — מבצע שכונה בפי חמאס ״אלעצף אלמאכול“, המוץ הנאכל, על בסיס הכתוב בסורת אלפיל.<span class="ref">§31</span></p></div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה שמינית</span>הדרך חזרה</h2>
+
+<div class="beat w"><div class="id">W 14<small>12ש׳</small></div><div>
+  <div class="what">מחנה לילה</div>
+  <div class="see">מדבר בלילה. מדורה, אוהלים, גמלים רובצים, שמי כוכבים. הרגע השקט היחיד בפרק, ובכוונה מיד אחרי אברהה.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 16<small>מפה</small></div><div>
+  <div class="what">המפה כמעט מלאה</div>
+  <div class="see">אימפריות, נתיבי סחר, שבטים, קהילות, אקסום. במרכז — מכה, ועדיין כמעט בלי כלום סביבה. <strong>זו ההתקדמות. לא אחוזים.</strong></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 15<small>12ש׳</small></div><div>
+  <div class="what">שחר — חזרה למכה</div>
+  <div class="see">הדרך במעלה השחר, ומכה נפתחת בעמק מלפנים. אותו נוף מ־CIN 1, מכיוון הפוך.</div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה תשיעית</span>מכה — ביקור שני</h2>
+<p class="small">המערכה הכבדה בפרק. כאן מוסבר כל מה שנראה בהתחלה בלי הסבר.</p>
+
+<div class="beat w"><div class="id">W 16<small>12ש׳</small></div><div>
+  <div class="what">אותו שער, אותה סמטה</div>
+  <div class="see">בדיוק המסלול של W 1, שעה אחרת ביום. אותם כדים, אותם סוככים, אותו סוחר. <strong>הזיהוי הזה הוא כל העניין.</strong></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 17<small>עצירה</small></div><div>
+  <div class="what">אותו מקום, עיניים אחרות</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>העיר לא השתנתה. אתה השתנית.</p>
+    <p>לצד ההיכרות של תושבי חצי האי עם היהדות והנצרות, הערבים היו עובדי אלילים — פוליתיאיסטיים, מאמינים בריבוי אלילים.<span class="ref">§32</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>המסורות החוץ־אסלאמיות, כאמור, דלות. ממה שמשתקף מזווית הראייה של האסלאם נראה כי עבודת האלילים הייתה חזון נפרץ בחצי האי.<span class="ref">§33</span></p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 17<small>10ש׳</small></div><div>
+  <div class="what">אל שולי הכיכר — האנצאב</div>
+  <div class="see">אותן אבנים ניצבות שעברנו לידן ב־W 2 בלי לעצור. עכשיו מתקרבים: שמן משיחה זולג עליהן, קערות מנחה, קטורת.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 18<small>עצירה</small></div><div>
+  <div class="what">הבל</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>בעיר מכה היה אליל ששמו <em>הבל</em> — אולי שיבוש השם בעל, האליל התנ״כי — שלפי המסורת היה אלילם של שבט קוריש, שבטו של מוחמד.<span class="ref">§35</span></p>
+    <p>הפסל היה בתוך הכעבה, יחד עם פסלים נוספים, ויוחסו לו סגולות כגון פתרון גורלות.<span class="ref">§36</span></p></div>
+</div></div>
+
+<div class="beat i"><div class="id">IN 1<small>פעולה</small></div><div>
+  <div class="what">הטלת חץ הגורל</div>
+  <div class="see">מופיע <code>E — הטילו חץ</code>. השחקן מטיל, החץ נופל, דמות מגיבה. <strong>אין תשובה נכונה ואין ניקוד.</strong> הפעולה עצמה היא הלמידה.</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>הפרקטיקה הייתה יידוי חיצים ליד הפסל, ובהתאם לנפילת החץ היו מפרשים את התוצאה.<span class="ref">§37</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 19<small>עצירה</small></div><div>
+  <div class="what">מי הביא אותו לכאן</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>אבן השאם, עורך הביוגרפיה של מוחמד, בן המאה התשיעית לספירה, ציין כי מי שהביא את הבל למכה היה גבר תקיף בשם <em>עמרו בן לחי</em>, בן שבט ח׳זאעה.<span class="ref">§38</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>חוקרים גורסים כי מסורת זו נועדה להרחיק את חטא האלילות משבטו של נביא האסלאם — ולהדגיש כי הנביא לא הביא בשורה חדשה, אלא החזיר עטרה ליושנה.<span class="ref">§39</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 20<small>עצירה</small></div><div>
+  <div class="what">דת אברהם</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>לפי מסורת זו מוחמד התחבר לדת אברהם — דת אבותיו הקדמונים, אשר התמסרו לאל אחד ויחיד.<span class="ref">§40</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>בכך, למעשה, טוען האסלאם כי הוא קדם ליהדות ולנצרות — כשהוא ״מלבין“ טקסים פגאניים, באומרו כי אלה ריטואלים מונותאיסטיים עתיקים.<span class="ref">§41</span></p></div>
+</div></div>
+
+<div class="beat w"><div class="id">W 18<small>12ש׳</small></div><div>
+  <div class="what">אל הכעבה וההקפה</div>
+  <div class="see">מתקרבים לקובייה. אנשים מקיפים אותה. פינת האבן השחורה, אדם מושיט יד ונוגע.</div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 21<small>עצירה</small></div><div>
+  <div class="what">ההקפה, האבן, והבנות</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>האבן השחורה — <em>אלחג׳ר אלאסוד</em> — הטבועה בפינת הכעבה, הייתה קדושה ונערצת שנים רבות לפני עלות האסלאם על בימת ההיסטוריה.<span class="ref">§34</span></p>
+    <p>ומנהג הקפת הכעבה אינו פגאני באמת — אלא מנהגו המקורי של אברהם, שהיה מוסלמי, מתמסר לאל האחד והיחיד.<span class="ref">§42</span></p>
+    <p>הקוראן מציין אלילים אחרים שהיו מפורסמים במכה — האלילות <em>אללאת, אלעזה ומנאת</em>, שנחשבו לבנותיו של אללה, ראש פנתיאון האלים.<span class="ref">§43</span></p></div>
+  <div class="say quote"><span class="who">הקוראן · 71:23</span>
+    <p>״הם המרו את פי ואמרו, אל תיטשו את אליליכם, אל תיטשו את וד, סואע, יגות׳, יעוק ולא את נשר.“<span class="ref">§44</span></p></div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">מערכה עשירית</span>הטרנספורמציה והסיום</h2>
+
+<div class="beat w"><div class="id">W 19<small>12ש׳</small></div><div>
+  <div class="what">עלייה לנקודת התצפית מעל מכה</div>
+  <div class="see">טיפוס במדרון. מכה נפרסת מתחת, הקובייה במרכז, העיר חיה סביבה.</div>
+</div></div>
+
+<div class="beat f"><div class="id">CIN 5<small>שיא</small></div><div>
+  <div class="what">האלילים נעלמים</div>
+  <div class="see">ה־HUD נעלם. הסאונד נחלש. המצלמה מתייצבת על הקובייה. האלילים מודגשים לרגע — ואז אחד נעלם, עוד אחד, עוד אחד. <strong>הכעבה נשארת.</strong></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 22<small>הקול הראשון</small></div><div>
+  <div class="what">לפי המסורת האסלאמית</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>מוחמד אינו מוצג כמי שמביא דת חדשה לעולם ריק, אלא כמי שמחזיר את דת אברהם — ההתמסרות לאל האחד.<span class="ref">§40 · §42</span></p></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 23<small>הקול השני</small></div><div>
+  <div class="what">חובה. אחרי רגע של שקט.</div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>כך מפרשת המסורת האסלאמית את העבר.</p>
+    <p>והמחקר בוחן גם כיצד מסורת כזו מעצבת מחדש את העבר — מעניקה משמעות מונותאיסטית למנהגים קדומים, ומרחיקה את עבודת האלילים מסביבתו של מוחמד.<span class="ref">§39 · §41</span></p>
+    <p><strong>המסורת מפרשת. המחקר שואל.</strong></p></div>
+</div></div>
+
+<div class="beat f"><div class="id">CIN 6<small>מפה</small></div><div>
+  <div class="what">המפה המלאה</div>
+  <div class="see">המצלמה עולה מהכעבה והעולם הופך למפה. הכל מסומן, והקווים מתחברים. <strong>המפה היא הסיכום.</strong></div>
+</div></div>
+
+<div class="beat s"><div class="id">ST 24<small>סיום</small></div><div>
+  <div class="what">ערב עליית האסלאם</div>
+  <div class="say rawi"><span class="who">הראוי</span>
+    <p>ערב עליית האסלאם, הערבים בחצי האי לא היוו איום על אף אימפריה — לא הסאסאנית מצפון־מזרח ולא הביזנטית מצפון־מערב.<span class="ref">§45</span></p>
+    <p>וחרף התחרות ביניהן, אף אחת מהן לא שאפה לכבוש חלקים מחצי האי.<span class="ref">§46</span></p>
+    <p>הביזנטים לא הצליחו להשליט את דתם שם. ההשפעה נשארה במקום אחר — בשפה. ״מבצר“ הוא <em>קצר</em>, ״מגדל“ הוא <em>ברג׳</em>, ועט כתיבה הוא <em>קלם</em>, דהיינו קולמוס.<span class="ref">§47</span></p></div>
+  <div class="say note"><span class="who">הערת שוליים</span>
+    <p>יחד עם זאת, חוקרים מצביעים על רעיונות ומושגים נוצריים אשר הופיעו בקוראן — לצד הדהודים מהדת היהודית, שמקורם בתנ״ך ובספרות חז״ל.<span class="ref">§48</span></p></div>
+</div></div>
+
+<div class="beat f"><div class="id">CIN 7<small>מעבר</small></div><div>
+  <div class="what">אל הפרק הבא</div>
+  <div class="see">חזרה למכה בשקיעה. הקובייה במרכז. מופיע: <strong>„זה העולם שבו הופיע האסלאם.“</strong> ואז: <strong>„ומי יוביל את השינוי?“</strong> — <em>מוחמד</em>.</div>
+</div></div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>מה זה מסתכם</h2>
+
+<div class="scroller">
+<table>
+  <thead><tr><th>סוג</th><th>כמות</th><th>אורך</th><th>הערה</th></tr></thead>
+  <tbody>
+    <tr><td>הליכה (W)</td><td>19</td><td>≈ 3:40</td><td>קליפים שצריך לייצר ולשרשר</td></tr>
+    <tr><td>מסך עצירה (ST)</td><td>24</td><td>—</td><td>פריים מוקפא או סטיל, כמעט בלי עלות</td></tr>
+    <tr><td>שיחה (CV)</td><td>6</td><td>—</td><td>קליפ קצר של דמות</td></tr>
+    <tr><td>קולנועי (CIN)</td><td>7</td><td>≈ 1:10</td><td>פתיחה, אברהה, טרנספורמציה, סיום</td></tr>
+    <tr><td>אינטראקציה (IN)</td><td>1</td><td>—</td><td>הטלת החץ</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p><strong>סך הווידאו: בערך חמש דקות.</strong> לא ארבעים. הזמן במשחק נמצא במסכי העצירה ובקצב של השחקן, לא באורך הקליפים — ולכן זה בכלל אפשרי.</p>
+
+<div class="note-box">
+  <h4>כיסוי המקור</h4>
+  <p>כל <strong>49 הסעיפים</strong> נמצאים כאן, §0 עד §48, בלי אף חריגה מהמקור. הרשימה השחורה נשמרת: אין „שנת הפיל“, אין תאריך, אין פינוי מכה, אין נאום לעבד אל־מטלב, אין כיפות וצריחים.</p>
+</div>
+
+<div class="note-box w">
+  <h4>מה שצריך להחליט לפני שמייצרים</h4>
+  <p><strong>משקל.</strong> חמש דקות ב־1080p ובאיכות מלאה = בערך 450MB. ב־CRF 21 זה יורד ל־300MB וההבדל כמעט לא נראה. צריך לבחור.</p>
+  <p><strong>סדר הייצור.</strong> חייבים לייצר לפי הסדר — פריים הסיום של כל קטע הוא פריים הפתיחה של הבא. קטע שנוסיף באמצע אחר כך ישבור את השרשרת אחריו.</p>
+  <p><strong>בקרת איכות.</strong> כל קטע נבדק לפני שממשיכים: אנשים שנכנסים לתוך חפצים, קירות שנמסים, מצלמה שסוחפת. עם Unlimited זה חינם — פשוט מייצרים שוב.</p>
+</div>
+
+<footer>
+  נגזר מ־<code>SOURCE-TEXT.md</code> · 49/49 סעיפים · 19.8.2026
+</footer>
+
+</div>
+</body>
+</html>

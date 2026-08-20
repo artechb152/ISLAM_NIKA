@@ -17,7 +17,12 @@ import unicodedata
 from mathutils import Vector
 
 WEB = os.environ["CH1_WEB"]
-LAYOUT = os.path.join(WEB, "src", "lib", "chapter1", "camp-layout.json")
+# איזה אזור עורכים. camp.mjs מעביר את זה; ברירת המחדל היא המחנה,
+# כך שכל קריאה ישנה לסקריפט ממשיכה לעבוד בדיוק כמו קודם.
+LAYOUT = os.environ.get(
+    "CH1_LAYOUT",
+    os.path.join(WEB, "src", "lib", "chapter1", "camp-layout.json"),
+)
 MODELS = os.path.join(WEB, "public", "assets", "chapter1", "models")
 MAX_TEX = 1024
 # CH1_REFRESH=1 re-exports every model, so material and texture edits you made
@@ -420,7 +425,11 @@ if terrain is not None:
     t["model"] = "terrain"
     t["baked"] = True  # already scaled, positioned and flattened in Blender
     t["hasImage"] = bool(has_image)
-    if tint:
+    # גוון הקרקע הוא החלטת צבע של האזור, לא תכונה של קובץ ה-blend.
+    # ה-BSDF בבלנדר חוזר כמעט לבן, ולכן ייבוא היה מלבין את הקרקע
+    # ומוחק כיול שנעשה במשחק — מכה חזרה #e6e6e6 במקום #c19d7a.
+    # מכבדים גוון שכבר קיים ב-JSON, וכותבים מבלנדר רק כשאין אחד.
+    if tint and not t.get("tint"):
         t["tint"] = tint
     out["terrain"] = t
 
@@ -451,4 +460,4 @@ with open(LAYOUT, "w", encoding="utf-8") as fh:
 if renamed:
     bpy.ops.wm.save_mainfile()
     print("BLEND-RESAVED (new objects renamed to ch1.*)")
-print("LAYOUT-OK", len(props), "props written to camp-layout.json")
+print("LAYOUT-OK", len(props), "props written to", os.path.basename(LAYOUT))

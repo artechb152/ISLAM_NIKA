@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>עשר דרכים ללמד את פרק 1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    /* the chapter's own palette: cream parchment, maroon ink, gold rule */
+    --paper:#f5ecd6;
+    --surface:#efe3c6;
+    --rule:#ddcba2;
+    --ink:#2a1a14;
+    --ink-soft:#6b5541;
+    --maroon:#8a2733;
+    --maroon-deep:#571820;
+    --gold:#a67c22;
+    --gold-soft:#c79a3c;
+    --shadow:rgba(42,26,20,.10);
+
+    --measure:63ch;
+    --step:clamp(1rem,.72rem + .9vw,1.15rem);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#181110;
+      --surface:#221715;
+      --rule:#3d2a24;
+      --ink:#efe1c4;
+      --ink-soft:#a89073;
+      --maroon:#d4707d;
+      --maroon-deep:#e79aa3;
+      --gold:#d9ab4c;
+      --gold-soft:#e6c274;
+      --shadow:rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#181110;
+    --surface:#221715;
+    --rule:#3d2a24;
+    --ink:#efe1c4;
+    --ink-soft:#a89073;
+    --maroon:#d4707d;
+    --maroon-deep:#e79aa3;
+    --gold:#d9ab4c;
+    --gold-soft:#e6c274;
+    --shadow:rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Assistant","Segoe UI",system-ui,sans-serif;
+    font-size:var(--step);
+    font-weight:400;
+    line-height:1.75;
+    direction:rtl;
+  }
+  .wrap{max-width:var(--measure);margin:0 auto;padding:clamp(2.5rem,6vw,5.5rem) clamp(1.15rem,5vw,2rem) 6rem}
+
+  /* ── opening ─────────────────────────────────────────────── */
+  .eyebrow{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--gold);margin:0 0 1.6rem;
+  }
+  .thesis{
+    font-family:"Frank Ruhl Libre",Georgia,serif;
+    font-weight:500;
+    font-size:clamp(1.5rem,1.05rem + 2.1vw,2.35rem);
+    line-height:1.42;
+    text-wrap:balance;
+    margin:0 0 1.1rem;
+    color:var(--ink);
+  }
+  .thesis b{font-weight:900;color:var(--maroon)}
+  .thesis-src{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.78rem;
+    color:var(--ink-soft);margin:0 0 3.2rem;
+  }
+  .lede{
+    font-size:1.06em;color:var(--ink-soft);margin:0 0 1.1rem;
+  }
+  .lede strong{color:var(--ink);font-weight:600}
+
+  /* ── section headings ────────────────────────────────────── */
+  h2{
+    font-family:"Frank Ruhl Libre",Georgia,serif;
+    font-weight:700;
+    font-size:clamp(1.32rem,1.05rem + 1.1vw,1.72rem);
+    line-height:1.3;text-wrap:balance;
+    margin:4.5rem 0 .35rem;
+    padding-top:1.5rem;
+    border-top:2px solid var(--maroon);
+  }
+  h2 .n{
+    display:block;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.72rem;font-weight:400;letter-spacing:.16em;
+    color:var(--gold);margin-bottom:.5rem;
+  }
+  h3{
+    font-family:"Frank Ruhl Libre",Georgia,serif;
+    font-weight:700;font-size:1.16em;line-height:1.4;
+    margin:2.4rem 0 .4rem;
+  }
+  p{margin:0 0 1.05rem}
+
+  /* ── the four moves ──────────────────────────────────────── */
+  .moves{list-style:none;margin:2rem 0 0;padding:0;display:flex;flex-direction:column;gap:1.9rem}
+  .move{display:grid;grid-template-columns:2.4rem 1fr;gap:0 1.1rem;align-items:start}
+  .move-mark{
+    font-family:"Frank Ruhl Libre",Georgia,serif;
+    font-size:1.75rem;font-weight:900;line-height:1;
+    color:var(--gold-soft);padding-top:.15rem;
+  }
+  .move h3{margin:0 0 .3rem;font-size:1.1em}
+  .move p{margin:0 0 .45rem;color:var(--ink-soft)}
+  .move p.hit{color:var(--ink)}
+
+  /* ── § citations ─────────────────────────────────────────── */
+  .cites{display:flex;flex-wrap:wrap;gap:.32rem;margin:.55rem 0 0;padding:0;list-style:none}
+  .cite{
+    direction:ltr;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.7rem;line-height:1;
+    padding:.3rem .42rem;border-radius:3px;
+    background:var(--surface);border:1px solid var(--rule);
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* ── what must be learned ────────────────────────────────── */
+  .goals{list-style:none;margin:1.8rem 0 0;padding:0;counter-reset:g}
+  .goals li{
+    position:relative;padding:0 2.5rem .1rem 0;margin-bottom:1.25rem;
+    counter-increment:g;
+  }
+  .goals li::before{
+    content:counter(g);
+    position:absolute;inset-inline-start:0;top:.18rem;
+    width:1.7rem;height:1.7rem;border-radius:50%;
+    display:grid;place-items:center;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.76rem;color:var(--paper);background:var(--maroon);
+  }
+  .goals strong{font-weight:700}
+
+  /* ── the ten ─────────────────────────────────────────────── */
+  .ideas{margin:2.2rem 0 0;display:flex;flex-direction:column;gap:0}
+  .idea{
+    padding:2.1rem 0;
+    border-bottom:1px solid var(--rule);
+  }
+  .idea:first-child{border-top:1px solid var(--rule)}
+  .idea-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.1rem .75rem;margin-bottom:.7rem}
+  .verb{
+    font-family:"Frank Ruhl Libre",Georgia,serif;
+    font-weight:900;font-size:clamp(1.5rem,1.2rem + 1.3vw,2rem);
+    line-height:1.1;color:var(--maroon);
+  }
+  .idea-name{
+    font-family:"Frank Ruhl Libre",Georgia,serif;
+    font-weight:400;font-size:1.08em;color:var(--ink-soft);
+  }
+  .idea p{margin:0 0 .8rem}
+  .learn{
+    margin:.9rem 0 0;padding:.85rem 1rem;
+    background:var(--surface);
+    border-inline-start:3px solid var(--gold-soft);
+    border-radius:0 5px 5px 0;
+  }
+  .learn b{
+    display:block;font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--gold);margin-bottom:.35rem;font-weight:500;
+  }
+  .learn p{margin:0;font-size:.96em}
+  .meta{
+    display:flex;flex-wrap:wrap;align-items:center;gap:.55rem;
+    margin-top:.95rem;
+  }
+  .cost{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.7rem;letter-spacing:.08em;
+    padding:.3rem .5rem;border-radius:3px;
+    border:1px solid currentColor;
+  }
+  .cost.low{color:#4f7a3f}
+  .cost.mid{color:var(--gold)}
+  .cost.high{color:var(--maroon)}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .cost.low{color:#8fc27a}
+  }
+  :root[data-theme="dark"] .cost.low{color:#8fc27a}
+
+  /* ── closing recommendation ──────────────────────────────── */
+  .rec{
+    margin-top:3.4rem;padding:1.7rem 1.6rem;
+    background:var(--surface);
+    border:1px solid var(--rule);border-radius:6px;
+    box-shadow:0 2px 14px var(--shadow);
+  }
+  .rec h3{margin-top:0}
+  .rec ol{margin:.6rem 0 .2rem;padding-inline-start:1.3rem}
+  .rec li{margin-bottom:.5rem}
+  .rec .why{color:var(--ink-soft);font-size:.97em}
+
+  .note{
+    margin-top:2.6rem;font-size:.94em;color:var(--ink-soft);
+    border-top:1px solid var(--rule);padding-top:1.2rem;
+  }
+
+  a{color:var(--maroon);text-underline-offset:.18em}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">פרק 1 · טרום האסלאם · מסמך עבודה</p>
+
+  <p class="thesis">„רוב הריטואלים הפולחניים הקיימים היום בדת האסלאם <b>מקורם בדתות שקדמו לה</b>.“</p>
+  <p class="thesis-src">§23 — משפט אחד באמצע הטקסט, וכל הפרק נשען עליו</p>
+
+  <p class="lede">
+    קראתי את כל 49 הסעיפים מחדש. הפרק הזה הוא <strong>לא רשימת עובדות על ערב לפני האסלאם</strong> —
+    הוא טענה, והיא נבנית בארבעה מהלכים. כל עוד המשחק מלמד את העובדות ולא את הטענה,
+    אפשר לסיים אותו ולא ללמוד כלום. זה בדיוק מה שקרה.
+  </p>
+
+  <h2><span class="n">חלק א</span>הטענה, בארבעה מהלכים</h2>
+
+  <ol class="moves">
+    <li class="move">
+      <span class="move-mark">א</span>
+      <div>
+        <h3>המסגרת: אנחנו כמעט לא יודעים</h3>
+        <p>המידע דל, ורובו הגיע דרך הספרות והמסורת המוסלמית — כלומר דרך העיניים של מה שבא
+          <em>אחרי</em> התקופה שאותה הוא מתאר. הטקסט חוזר על זה שלוש פעמים.</p>
+        <p class="hit">זה לא הסתייגות בשוליים. זו המסגרת שכל השאר יושב בתוכה.</p>
+        <ul class="cites"><li class="cite">§1</li><li class="cite">§33</li><li class="cite">§39</li></ul>
+      </div>
+    </li>
+    <li class="move">
+      <span class="move-mark">ב</span>
+      <div>
+        <h3>המפה: שתי אימפריות, ורווח ביניהן</h3>
+        <p>ביזנטיון מצפון־מערב, סאסאן מצפון־מזרח, ושבטים נוודים כבני חסות שלהן — גסאן מול לח׳ם —
+          ששומרים על נתיבי הסחר מתימן צפונה.</p>
+        <p class="hit">והנקודה שקל לפספס: החג׳אז היה <em>חבוי</em>. אף אימפריה לא רצתה אותו,
+          אף אחת לא שאפה לכבוש. הרווח הזה הוא התנאי לכל מה שקרה שם אחר כך.</p>
+        <ul class="cites"><li class="cite">§2–§8</li><li class="cite">§45</li><li class="cite">§46</li><li class="cite">§47</li></ul>
+      </div>
+    </li>
+    <li class="move">
+      <span class="move-mark">ג</span>
+      <div>
+        <h3>החלחול: רעיונות נסעו במקום שצבאות לא</h3>
+        <p>יהודים בצפון מאז חורבן בית שני — ח׳יבר, תימא, ית׳רב. שלום, מסחר, שירה משותפת —
+          וחוקים נפרדים. נצרות מאקסום בדרום ומארם נהריים בצפון. תושבי מכה ידעו מעט על
+          <em>שורשי</em> הנצרות, אבל ספגו את <em>אורחות החיים</em> של הנזירים.</p>
+        <p class="hit">המנגנון הוא מגע, לא כיבוש. „בתהליך איטי ומדורג“ — זו הפעולה המרכזית של הפרק.</p>
+        <ul class="cites"><li class="cite">§9–§25</li><li class="cite">§48</li></ul>
+      </div>
+    </li>
+    <li class="move">
+      <span class="move-mark">ד</span>
+      <div>
+        <h3>מכה: מה שהיה שם קודם, ומי סיפר עליו</h3>
+        <p>האבן השחורה הייתה קדושה שנים רבות לפני האסלאם. הבל — אולי שיבוש של בעל — עמד בתוך
+          הכעבה, וייעדו בו גורלות בחיצים. אבן השאם מספר שעמרו בן לחי הביא אותו.</p>
+        <p class="hit">וכאן הטקסט עושה את המהלך החד ביותר שלו: <em>החוקרים גורסים</em> שהמסורת הזו
+          נועדה להרחיק את חטא האלילות משבטו של מוחמד, ולומר שהוא לא הביא בשורה חדשה אלא
+          החזיר עטרה ליושנה. סיפור מסופר מסיבה.</p>
+        <ul class="cites"><li class="cite">§23</li><li class="cite">§32–§44</li></ul>
+      </div>
+    </li>
+  </ol>
+
+  <h2><span class="n">חלק ב</span>מה חייב להישאר אצל הלומד</h2>
+
+  <p>חמישה דברים. אם המשחק לא מעביר אותם — הוא לא לימד, גם אם סיימו אותו ב־27 מתוך 27.</p>
+
+  <ol class="goals">
+    <li><strong>אנחנו מכירים את התקופה דרך העיניים של מה שבא אחריה.</strong>
+      לכל טענה יש מקור, ולמקור יש אינטרס.</li>
+    <li><strong>ערב ישבה בין שתי אימפריות שלא רצו אותה.</strong>
+      זה לא רקע — זה הסיבה שהיה שם מקום למשהו חדש.</li>
+    <li><strong>רעיונות עברו במקום שצבאות לא עברו.</strong>
+      איטי, מדורג, דרך מסחר ומגע יומיומי.</li>
+    <li><strong>רוב הריטואלים קדמו לאסלאם.</strong>
+      הכעבה, ההקפה, האבן — כולם כבר היו שם. האסלאם פירש מחדש.</li>
+    <li><strong>מסורת מסופרת מסיבה.</strong>
+      השאלה „מי מרוויח מהסיפור הזה“ היא המיומנות שהפרק באמת מלמד.</li>
+  </ol>
+
+  <h2><span class="n">חלק ג</span>עשר דרכים — והיכן הלמידה יושבת בכל אחת</h2>
+
+  <p>כל רעיון מסומן ב<strong>פועל</strong>: מה הלומד עושה בפועל. זה הדבר שקובע אם למדו,
+    לא כמה טקסט הופיע על המסך.</p>
+
+  <div class="ideas">
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לְמַיֵּן</span><span class="idea-name">המחברת של ראווי</span></div>
+      <p>כל טענה שאוספים מגיעה עם חותמת מקור: מסורת מוסלמית מאוחרת, קוראן, מקור חיצוני בן־הזמן,
+        או ממצא שאפשר לגעת בו. כדי לסגור עמוד במחברת צריך למקם את הטענה ולקבוע כמה סומכים עליה.
+        ראווי מגיב — לפעמים מסכים, לפעמים מתווכח.</p>
+      <div class="learn"><b>הלמידה</b><p>הלומד מתרגל את מה שהפרק עצמו עושה: קורא מקור כטענה של מישהו,
+        לא כעובדה. „עירבון מוגבל“ מפסיק להיות ציטוט והופך לפעולה.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§1</li><li class="cite">§33</li><li class="cite">§38</li><li class="cite">§39</li></ul>
+        <span class="cost mid">בינוני</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לִשְׁקֹל</span><span class="idea-name">שני טורים</span></div>
+      <p>לוח שנמצא לאורך כל הפרק: „כך מספרת המסורת“ מול „כך אפשר לבדוק“. כל דבר שדמות אומרת
+        נופל לאחד מהם. בסוף כל אזור רואים את היחס בין הטורים — והוא לא מאוזן.</p>
+      <div class="learn"><b>הלמידה</b><p>§1 מוכח ויזואלית במקום להיאמר. הלומד רואה במו עיניו
+        שהטור השמאלי מתמלא הרבה יותר מהר, ומבין למה זה משנה.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§1</li><li class="cite">§33</li><li class="cite">§39</li></ul>
+        <span class="cost low">זול</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לְשַׂרְטֵט</span><span class="idea-name">המסלול</span></div>
+      <p>לא הולכים בדרך קבועה — משרטטים אותה. מים, הרים, ובעיקר <em>של מי החסות</em> קובעים לאן
+        אפשר. מסלול שעובר בשטח של לח׳ם עם ליווי גסאני נגמר רע.</p>
+      <div class="learn"><b>הלמידה</b><p>הגיאוגרפיה והפוליטיקה נלמדות כמכשולים, לא כרשימה.
+        למה הדרך עוברת דרך ית׳רב זה משהו שמגלים בניסיון, לא שקוראים.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§6</li><li class="cite">§7</li><li class="cite">§8</li><li class="cite">§9</li></ul>
+        <span class="cost high">יקר</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לְשַׁלֵּם</span><span class="idea-name">המכס והחסות</span></div>
+      <p>יש לך סחורה, כסף וימי מים. במחסום משלמים במטבע הנכון, או קונים ליווי מהשבט הנכון,
+        או עוקפים במדבר ומשלמים במים. טעות עולה — לא נכשלים, אבל מגיעים למכה עם פחות.</p>
+      <div class="learn"><b>הלמידה</b><p>„מי שולט במה“ מפסיק להיות עובדה לשינון. מטבע ביזנטי
+        לא עוזר בשטח סאסאני, וזה נלמד דרך הארנק.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§3</li><li class="cite">§4</li><li class="cite">§6</li><li class="cite">§8</li></ul>
+        <span class="cost mid">בינוני</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לֶאֱרֹז</span><span class="idea-name">מה נכנס לארגז</span></div>
+      <p>מעמיסים גמל. משי, תבלינים ולבונה נכנסים. „רעיונות“ מסרב להיכנס — ובכל זאת, כשמגיעים
+        למכה, הוא שם. מי הביא אותו? האנשים, לא המטען.</p>
+      <div class="learn"><b>הלמידה</b><p>§9 הופך למכניקה: החלחול הוא תופעת לוואי שאי אפשר לשלוט בה.
+        זה הרעיון המרכזי של הפרק, ואי אפשר לשכוח אותו אחרי שניסית לארוז אותו.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§7</li><li class="cite">§9</li><li class="cite">§48</li></ul>
+        <span class="cost low">זול</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לְקַלֵּף</span><span class="idea-name">שכבות של טקס</span></div>
+      <p>בוחרים טקס — הקפת הכעבה, האבן השחורה — ומקלפים אותו אחורה בזמן. מה עשו כאן לפני
+        האסלאם? ולפני זה? כל שכבה חושפת שם אחר ובעלים אחרים לאותה פעולה בדיוק.</p>
+      <div class="learn"><b>הלמידה</b><p>§23 הופך לחוויה: הלומד <em>רואה</em> שהטקס קדם לדת שמקיימת
+        אותו היום, ומבין מה זה „הלבנת“ טקסים פגאניים.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§23</li><li class="cite">§34</li><li class="cite">§40</li><li class="cite">§41</li><li class="cite">§42</li></ul>
+        <span class="cost mid">בינוני</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לִשְׁאֹל</span><span class="idea-name">מי מרוויח מהסיפור</span></div>
+      <p>מוצגת מסורת — עמרו בן לחי הביא את הבל למכה. השאלה היחידה: מי יוצא מזה טוב? השבט של
+        מוחמד? הנביא עצמו? מי שסיפר? אין תשובה „נכונה“ אחת — יש נימוק שצריך לבחור.</p>
+      <div class="learn"><b>הלמידה</b><p>זו המיומנות החדה ביותר בפרק (§39), והיא לא ניתנת ללימוד
+        בהרצאה. חייבים להפעיל אותה על מקרה אמיתי.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§38</li><li class="cite">§39</li><li class="cite">§40</li><li class="cite">§41</li></ul>
+        <span class="cost low">זול</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לְהַשְׁווֹת</span><span class="idea-name">אברהה, ומה שנשאר ממנו</span></div>
+      <p>שלוש שכבות של אותו אירוע על מסך אחד: מה שהמסורת מספרת, מה שכתוב בסורה 105, ומה
+        שאמר רמטכ״ל חמאס ב־2014 כשקרא לצה״ל „אברהה של זמננו“.</p>
+      <div class="learn"><b>הלמידה</b><p>סיפור בן 1400 שנה עדיין בשימוש. הלומד רואה שהיסטוריה
+        היא לא מה שהיה — היא מה שממשיכים לספר, ולמה.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§27–§31</li></ul>
+        <span class="cost low">זול</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לְהִתְחַקּוֹת</span><span class="idea-name">המילון</span></div>
+      <p>שומעים מילה בערבית — קצר, ברג׳, קלם — ומחזירים אותה לשורש: castrum, pyrgos, calamus.
+        אוסף קטן של מילים שנוסעות.</p>
+      <div class="learn"><b>הלמידה</b><p>§47 בשורה אחת: הביזנטים השפיעו על השפה ולא הצליחו להשליט
+        את דתם. השפעה בלי המרה — בדיוק ההבחנה שהפרק רוצה.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">§47</li><li class="cite">§48</li></ul>
+        <span class="cost low">זול</span>
+      </div>
+    </article>
+
+    <article class="idea">
+      <div class="idea-head"><span class="verb">לְהַצִּיג</span><span class="idea-name">התערוכה</span></div>
+      <p>בסוף הפרק מרכיבים תצוגה מכל מה שנאסף: מה נכנס, באיזה סדר, ומה כתוב בתווית של כל פריט.
+        התווית היא שורה שהלומד כותב בעצמו.</p>
+      <div class="learn"><b>הלמידה</b><p>זו ההערכה, בלי מבחן. מה שנכנס לתערוכה ומה שנשאר בחוץ
+        מראה בדיוק מה הובן — וגם למורה.</p></div>
+      <div class="meta">
+        <ul class="cites"><li class="cite">כל הפרק</li></ul>
+        <span class="cost mid">בינוני</span>
+      </div>
+    </article>
+
+  </div>
+
+  <div class="rec">
+    <h3>מה הייתי בונה, ולמה</h3>
+    <p class="why">שלושה מהם ביחד מכסים את כל חמש המטרות, וכל אחד מהם זול או בינוני:</p>
+    <ol>
+      <li><strong>לֶאֱרֹז</strong> — הארגז. המנגנון המרכזי של הפרק, במכניקה אחת.</li>
+      <li><strong>לְמַיֵּן</strong> — המחברת עם חותמות מקור. המסגרת האפיסטמולוגית, לאורך כל הדרך.</li>
+      <li><strong>לִשְׁאֹל</strong> — מי מרוויח מהסיפור. המיומנות החדה, על מקרה אמיתי.</li>
+    </ol>
+    <p class="why">ואם יש מקום לרביעי — <strong>לְשַׁלֵּם</strong>, כי הוא הופך את המפה
+      הפוליטית לדבר שמרגישים בארנק ולא זוכרים בעל־פה.</p>
+  </div>
+
+  <p class="note">
+    כל שורה שתיאמר במשחק חייבת להישאר ציטוט או פרפרזה צמודה מהטקסט, כולל ההסתייגויות
+    („עירבון מוגבל“, „אולי שיבוש“, „לא מן הנמנע“, „חוקרים גורסים“). המכניקות למעלה לא מוסיפות
+    תוכן — הן רק קובעות מה הלומד <em>עושה</em> איתו.
+  </p>
+
+</div>
+
+</body>
+</html>

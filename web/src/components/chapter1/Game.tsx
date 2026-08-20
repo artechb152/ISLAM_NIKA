@@ -7,16 +7,53 @@
    screen positions are written imperatively each frame (no per-frame React
    state) — the same discipline as the chapter 6 scroll engine. */
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
-import { STATIONS, STATION_COUNT_PLANNED, type Poi } from '@/lib/chapter1/stations'
-import campLayout from '@/lib/chapter1/camp-layout.json'
-import { markPoiDone, markStationDone, poiKey, readStore } from '@/lib/chapter1/progress'
+import { LAYOUTS, PLAYABLE, type Layout } from '@/lib/chapter1/worlds'
+import { FINDS_TOTAL, FIND_RANGE, findsIn, type Find } from '@/lib/chapter1/finds'
+import { TASK_RANGE, taskIn } from '@/lib/chapter1/tasks'
+import { FindCard } from './FindCard'
+import { wrapPi } from '@/lib/chapter1/angles'
+import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
+import { TaskPanel } from './TaskPanel'
+import { ContactShadow, Npc, Rawi, type RawiClip } from './Characters'
+import { DialogueHud } from './DialogueHud'
+import { Notebook } from './Notebook'
+import { WorldMap } from './WorldMap'
+import { NOTEBOOK_TOTAL, SPEAKERS, regionById, type Encounter } from '@/lib/chapter1/dialogue'
+import { PLACEMENTS, type Placement } from '@/lib/chapter1/placements'
+import { notebookCount, readNotebook, recordEncounter, recordFind, recordTask, setRegion } from '@/lib/chapter1/notebook'
 
-const station = STATIONS[0]
+/* The open world, one region at a time. There are no stations and no info
+   cards: every word taught here is spoken by somebody, and lives in
+   dialogue.json where each line carries the §N of the source passage it
+   paraphrases.
+
+   The region comes from the URL (?region=border-post). Module scope is safe
+   ground for reading location: this file is loaded via dynamic(ssr:false), so
+   it only ever evaluates in the browser. A region that has no authored layout
+   falls back to the camp instead of crashing — the journey grows one region at
+   a time and half-built regions are the normal state of the world. */
+/* The chapter opens where the road opens. The default used to be the night
+   camp — the second region — so anyone starting the chapter normally skipped
+   the Yemen heights entirely, and with them the narrator's opening line: one of
+   the twenty-seven notebook entries was unreachable in ordinary play. */
+const FIRST_REGION = PLAYABLE[0]
+function requestedRegion(): string {
+  if (typeof window === 'undefined') return FIRST_REGION
+  const wanted = new URLSearchParams(window.location.search).get('region')
+  return wanted && LAYOUTS[wanted] ? wanted : FIRST_REGION
+}
+const REGION = regionById(requestedRegion())
+
+/** Who stands where in this region. Empty until the region's cast is placed.
+    Defined further down, once the region's world has been built. */
+
+/** How close you must stand before a character will talk to you, in metres. */
+const TALK_RANGE = 3.6
 
 /* ---------------- shared mutable channel between canvas and HUD ---------------- */
 
@@ -28,71 +65,226 @@ interface Collider {
 }
 
 interface Live {
-  /** DOM node of the speech bubble, positioned on the active speaker */
-  bubbleEl: HTMLElement | null
-  bubblePoi: Poi | null
   player: THREE.Vector3
   yaw: number
   keys: Set<string>
+  /** approach rings, keyed by the id of the character they belong to */
   markerEls: Map<string, HTMLElement>
-  nearPoiId: string | null
+  /** the character close enough to talk to, if any */
+  nearWho: string | null
+  /** the piece of evidence close enough to pick up, if any */
+  nearFind: string | null
+  /** true when standing at this region's task station */
+  atTask: boolean
   /** static props (tents, palms, well…) */
   colliders: Collider[]
   /** moving props (wandering camels) — mutated in place each frame */
   dynamic: Collider[]
+  /** performance.now() of the last look-drag, so the camera knows when it is
+      allowed to steer itself and when the player is steering it */
+  lastDrag: number
+}
+
+/* Where the traveller is standing when this region opens. Normally the layout's
+   own spawn — but arriving on foot from a neighbour means arriving at the gate
+   that faces them, a few metres inside it, already looking into the new place.
+   That is what makes the road continuous rather than a set of front doors. */
+function entryPoint(): { x: number; z: number; yaw: number } {
+  const spawn = WORLD.layout.player ?? { x: 0, z: 4 }
+  if (typeof window === 'undefined') return { ...spawn, yaw: 0 }
+  const from = new URLSearchParams(window.location.search).get('from')
+  const gate = from && WORLD.layout.exits?.find((e) => e.to === from)
+  if (!gate) return { ...spawn, yaw: 0 }
+  /* Step in from the gate toward the middle of the region, and face that way.
+     Forward at yaw y is (sin y, −cos y), so to look along (−gx, −gz) the yaw is
+     atan2(−gx, gz) — NOT atan2(−gx, −gz), which points you back out through the
+     gate you just walked in by. With the sign wrong, pressing forward on
+     arrival returns you to the region you came from, and the journey becomes a
+     loop between two neighbours that you cannot escape by walking. */
+  const d = Math.hypot(gate.x, gate.z) || 1
+  const inward = gate.r + 2.2
+  return {
+    x: +(gate.x - (gate.x / d) * inward).toFixed(2),
+    z: +(gate.z - (gate.z / d) * inward).toFixed(2),
+    yaw: Math.atan2(-gate.x, gate.z),
+  }
 }
 
 function makeLive(): Live {
+  const spawn = entryPoint()
   return {
-    player: new THREE.Vector3(0, 0, 4),
-    yaw: 0,
+    player: new THREE.Vector3(spawn.x, 0, spawn.z),
+    yaw: spawn.yaw,
     keys: new Set(),
     markerEls: new Map(),
-    bubbleEl: null,
-    bubblePoi: null,
-    nearPoiId: null,
+    nearWho: null,
+    nearFind: null,
+    atTask: false,
     colliders: [],
     dynamic: [],
+    lastDrag: 0,
   }
 }
 
 /* ---------------- 3D world ---------------- */
 
-/* Painted 360° dawn panorama as the scene background — this single texture does
-   most of the visual heavy lifting (mountains, sun glow, sky gradient). */
+/* Painted 360° panorama as the scene background — this single texture does most
+   of the visual heavy lifting (mountains, sun glow, sky gradient). Which one
+   plays, and how hard it lights the scene, is the region's own choice. */
 function Sky() {
-  const tex = useLoader(THREE.TextureLoader, '/assets/chapter1/tex/sky-dawn.png')
+  const mood = WORLD.layout.mood
+  const tex = useLoader(THREE.TextureLoader, `/assets/chapter1/tex/${mood?.sky ?? 'sky-dawn.png'}`)
   const scene = useThree((s) => s.scene)
+  const gl = useThree((s) => s.gl)
   useEffect(() => {
     tex.mapping = THREE.EquirectangularReflectionMapping
     tex.colorSpace = THREE.SRGBColorSpace
     scene.background = tex
     scene.environment = tex
+    /* the painted panorama is LDR — at full strength it acts as a second sun
+       from everywhere and flattens all form; the directional must dominate */
+    scene.environmentIntensity = mood?.skyLight ?? 0.7
+    gl.toneMappingExposure = mood?.exposure ?? 1.1
+    if (process.env.NODE_ENV !== 'production') {
+      ;(window as unknown as Record<string, unknown>).__ch1Gl = gl
+      ;(window as unknown as Record<string, unknown>).__ch1Scene = scene
+      ;(window as unknown as Record<string, unknown>).__ch1Env = () => ({
+        fog: scene.fog ? { color: (scene.fog as THREE.Fog).color.getHexString(), near: (scene.fog as THREE.Fog).near, far: (scene.fog as THREE.Fog).far } : null,
+        envInt: scene.environmentIntensity,
+      })
+    }
     return () => {
       scene.background = null
       scene.environment = null
+      scene.environmentIntensity = 1
     }
-  }, [scene, tex])
+  }, [scene, tex, gl, mood])
   return null
 }
-
-/* ONE continuous terrain: the user's "Canyon Desert Landscape" Blender asset,
-   scaled to ~600 m, positioned so the camp sits in a wide canyon-floor basin,
-   and with its vertices FLATTENED around the camp with a smooth falloff. There
-   is no separate sand disc any more — a single mesh means no seam and no colour
-   mismatch between clearing and canyon. */
-const TERRAIN_SPAN = 600
-const CAMP_LOCAL = { x: 180, z: -20 } // basin found by height-map analysis
-const FLAT_INNER = 30 // metres of perfectly level ground around the camp
-const FLAT_OUTER = 85 // fade-out distance back to the original relief
 
 /* Terrain baked in Blender: already scaled, positioned and flattened there, so
    the game only has to give it a material. A procedural Blender material cannot
    survive glTF, so when the export carries no image we keep the tiling sand and
    tint it with the material's base colour. */
+/* The land beyond the walk.
+ *
+ * Chapter 1 was played on a plate. The shared terrain mesh is dead level for
+ * its first hundred metres and only begins to move at two hundred, so every
+ * one of the nine regions — the Yemen highlands, a pass through the hills,
+ * Mecca in its bowl of mountains — presented the same flat table with props
+ * standing on it, and no amount of dressing fixed that read.
+ *
+ * This raises the ground outside the region's own walkable circle. Inside it,
+ * nothing changes: the player, the props and the roads all stand on y = 0 and
+ * none of them need to know about this. Immediately past the boundary the land
+ * begins to rise, and how hard it rises, and at what wavelength, is the
+ * region's own — the pass gets close ridges, the oasis a low basin, Mecca a
+ * ring of hills. It is the silhouette that tells you where you are.
+ */
+function reliefAt(x: number, z: number, inner: number, amp: number, wave: number) {
+  const d = Math.hypot(x, z)
+  if (d <= inner) return 0
+  /* smoothstep out of the flat, so the seam at the boundary is not a step */
+  const t = Math.min(1, (d - inner) / 55)
+  const ease = t * t * (3 - 2 * t)
+  /* three octaves of ridged sine — cheap, seamless and deterministic */
+  const w = (2 * Math.PI) / wave
+  const n =
+    Math.sin(x * w + Math.cos(z * w * 0.7) * 1.7) * 0.6 +
+    Math.sin(z * w * 1.31 - x * w * 0.4) * 0.3 +
+    Math.sin((x + z) * w * 2.7) * 0.12
+  /* keep the far field climbing so the horizon closes rather than falling away */
+  const climb = Math.min(1, (d - inner) / 240)
+  return ease * amp * (n + climb * 1.3)
+}
+
+/* גובה פני הקרקע בנקודה.
+
+   הטרסה האפויה אינה יושבת על y=0 — ליד נקודת ההתחלה של מחנה
+   הלילה פניה נמצאים ב-0.17, ולכן כל דמות שהוצבה על אפס נראתה
+   שקועה עד הקרסול בחול. הגמלים לא סבלו מזה כי העדר ממוקם בנפרד.
+
+   הפתרון הוא קרן אחת כלפי מטה אל רשת הטרסה. היא נשמרת במטמון
+   לפי רבע מטר, כך שהליכה לא משלמת קרן בכל פריים, והתוצאה עוקבת
+   גם אחרי התבליט שמורם בקוד ולא רק אחרי הקובץ. */
+const groundRay = new THREE.Raycaster()
+const GROUND_DOWN = new THREE.Vector3(0, -1, 0)
+const groundCache = new Map<string, number>()
+let terrainMesh: THREE.Mesh | null = null
+
+/* הטרסה נטענת אחרי חלק מהפרופים, ואלה מחשבים את גובהם פעם אחת
+   בלבד. בלי הודעה על כך שהקרקע הגיעה, כל מה שנבנה לפניה נשאר
+   תקוע על אפס — מרחף מעל הקרקע במעבר הצר ושקוע בחול במחנה.
+   המנוי הזה מרנדר אותם מחדש ברגע שיש במה לפגוע. */
+let terrainVersion = 0
+const terrainSubs = new Set<() => void>()
+function subscribeTerrain(cb: () => void) {
+  terrainSubs.add(cb)
+  return () => { terrainSubs.delete(cb) }
+}
+function terrainSnapshot() {
+  return terrainVersion
+}
+/** מרנדר מחדש כל מה שתלוי בגובה הקרקע. */
+export function useGroundReady() {
+  return useSyncExternalStore(subscribeTerrain, terrainSnapshot, terrainSnapshot)
+}
+
+function registerTerrain(obj: THREE.Object3D) {
+  /* הרשת הרחבה ביותר היא הקרקע — אבל רק בתוך הטרסה עצמה. חיפוש
+     בכל הסצנה היה עלול לבחור סלע ענק, ואז כל גובה בעולם נמדד
+     ביחס לסלע. */
+  let best: THREE.Mesh | null = null
+  let bestArea = 0
+  obj.traverse((o) => {
+    const m = o as THREE.Mesh
+    if (!m.isMesh || !m.geometry) return
+    m.geometry.computeBoundingBox()
+    const bb = m.geometry.boundingBox
+    if (!bb) return
+    const a = (bb.max.x - bb.min.x) * (bb.max.z - bb.min.z)
+    if (a > bestArea) { bestArea = a; best = m }
+  })
+  terrainMesh = best
+  groundCache.clear()
+  terrainVersion++
+  /* מחוץ לשלב הרינדור, אחרת React מתלונן על עדכון בזמן רינדור */
+  queueMicrotask(() => { for (const cb of terrainSubs) cb() })
+}
+
+const GROUND_UP = new THREE.Vector3(0, 1, 0)
+const groundOrigin = new THREE.Vector3()
+
+export function groundYAt(x: number, z: number): number {
+  if (!terrainMesh) return 0
+  const key = `${Math.round(x * 4)},${Math.round(z * 4)}`
+  const hit = groundCache.get(key)
+  if (hit !== undefined) return hit
+
+  /* מטריצת העולם של הטרסה מתעדכנת רק כשהיא נכנסת לגרף; קרן
+     שנורית לפני כן מפספסת בשקט ומחזירה אפס — וזה בדיוק מה
+     שהשאיר אבנים באוויר. */
+  terrainMesh.updateMatrixWorld(true)
+  groundRay.set(groundOrigin.set(x, 400, z), GROUND_DOWN)
+  let res = groundRay.intersectObject(terrainMesh, true)
+  if (!res.length) {
+    /* גם מלמטה: פרופ שמונח על מדרון תלול יכול לשבת מתחת לפני
+       הקרקע, ואז הקרן היורדת עוברת מעליו בלי לפגוע. */
+    groundRay.set(groundOrigin.set(x, -400, z), GROUND_UP)
+    res = groundRay.intersectObject(terrainMesh, true)
+  }
+  /* כישלון אמיתי לא נכנס למטמון: הטרסה עוד עשויה להגיע. */
+  if (!res.length) return 0
+  const y = res[0].point.y
+  groundCache.set(key, y)
+  return y
+}
+
 function BakedTerrain({ url, hasImage, tint }: { url: string; hasImage: boolean; tint?: string }) {
   const { scene } = useGLTF(url)
-  const sandSrc = useLoader(THREE.TextureLoader, '/assets/chapter1/tex/sand.jpg')
+  const ground = campLayout.terrain?.ground ?? 'sand.jpg'
+  const tiles = campLayout.terrain?.repeat ?? 90
+  const sandSrc = useLoader(THREE.TextureLoader, `/assets/chapter1/tex/${ground}`)
   const obj = useMemo(() => {
     const c = scene.clone(true)
     if (!hasImage) {
@@ -100,128 +292,112 @@ function BakedTerrain({ url, hasImage, tint }: { url: string; hasImage: boolean;
       sand.needsUpdate = true
       sand.wrapS = sand.wrapT = THREE.RepeatWrapping
       sand.colorSpace = THREE.SRGBColorSpace
-      sand.repeat.set(90, 90)
-      sand.anisotropy = 8
+      sand.repeat.set(tiles, tiles)
+      sand.anisotropy = 16 // grazing-angle speckle in the foreground otherwise
       c.traverse((o) => {
         const m = o as THREE.Mesh
         if (!m.isMesh) return
         const src = m.material as THREE.MeshStandardMaterial
+        /* The tint MULTIPLIES the ground texture, so a dark tint over an
+           already-dark surface lands at a few percent reflectance — the scree
+           and soil grounds were measuring darker than coal.
+
+           The fix for that was to drop the tint entirely whenever a region
+           named its own ground texture, which every region now does — so the
+           tint was dead code and all nine regions stood on the same neutral
+           #e8e2d8. What the tint is for is the region's HOUR: the ground under
+           a first-light sky leans cool, the same gravel at gold hour leans
+           warm, and scripts/grade-regions.mjs derives that lean from the very
+           panorama hanging behind it. It is written at a fixed brightness so it
+           can only change which way the ground leans, never how dark it is. */
         const mat = new THREE.MeshStandardMaterial({
-          color: tint ?? '#e9c9a4',
+          color: tint ?? (campLayout.terrain?.ground ? '#e8e2d8' : '#e9c9a4'),
           map: sand,
           normalMap: src?.normalMap ?? null,
           roughness: 1,
           metalness: 0,
           side: THREE.FrontSide,
         })
-        mat.normalScale = new THREE.Vector2(0.3, 0.3)
+        /* 0.3 השאיר את הקרקע כמעט שטוחה, וקרקע שטוחה שתופסת שני
+           שלישים מהפריים היא רוב מה שנקרא כ״לא גמור״. בערך גבוה
+           יותר השמש הנמוכה מייצרת אור וצל על אותה חול עצמה, וזה
+           מה שנותן לרצפה חומר במקום צבע. */
+        mat.normalScale = new THREE.Vector2(0.55, 0.55)
         m.material = mat
+      })
+    }
+    /* Raise the land outside the walkable circle. Done on the geometry rather
+       than in a shader so the shadows, the fog and the silhouette against the
+       painted sky all agree with it. */
+    const relief = campLayout.terrain?.relief
+    if (relief) {
+      const inner = (campLayout.bound ?? 24) + 6
+      c.traverse((o) => {
+        const m = o as THREE.Mesh
+        if (!m.isMesh) return
+        const g = (m.geometry = m.geometry.clone())
+        const pos = g.attributes.position as THREE.BufferAttribute
+        for (let i = 0; i < pos.count; i++) {
+          const x = pos.getX(i)
+          const z = pos.getZ(i)
+          pos.setY(i, pos.getY(i) + reliefAt(x, z, inner, relief.amp, relief.wave))
+        }
+        pos.needsUpdate = true
+        g.computeVertexNormals()
       })
     }
     c.traverse((o) => {
       const m = o as THREE.Mesh
       if (m.isMesh) m.receiveShadow = true
     })
+    /* מרגע זה אפשר לשאול את הקרקע לגובהה בכל נקודה */
+    c.updateMatrixWorld(true)
+    registerTerrain(c)
     return c
   }, [scene, sandSrc, hasImage, tint])
   return <primitive object={obj} />
 }
 
-function Terrain() {
-  const { scene } = useGLTF(MODEL_CANYON)
-  const sandSrc = useLoader(THREE.TextureLoader, '/assets/chapter1/tex/sand.jpg')
-  const obj = useMemo(() => {
-    const sand = sandSrc.clone()
-    sand.needsUpdate = true
-    sand.wrapS = sand.wrapT = THREE.RepeatWrapping
-    sand.colorSpace = THREE.SRGBColorSpace
-    sand.repeat.set(90, 90)
-    sand.anisotropy = 8
-
-    const c = scene.clone(true)
-    const box0 = new THREE.Box3().setFromObject(c)
-    const size = new THREE.Vector3()
-    box0.getSize(size)
-    const s = Math.max(size.x, size.z) > 0 ? TERRAIN_SPAN / Math.max(size.x, size.z) : 1
-    const inner = FLAT_INNER / s
-    const outer = FLAT_OUTER / s
-
-    c.traverse((o) => {
-      const m = o as THREE.Mesh
-      if (!m.isMesh) return
-      m.receiveShadow = true
-
-      /* The Blender export wired the normal map into baseColor too, so the
-         cliffs render bone-white. Rebuild the material: keep the exported
-         normal map for surface relief, drive colour from the sand texture. */
-      const src = m.material as THREE.MeshStandardMaterial
-      const mat = new THREE.MeshStandardMaterial({
-        color: '#e9c9a4',
-        map: sand,
-        normalMap: src?.normalMap ?? null,
-        roughness: 1,
-        metalness: 0,
-        side: THREE.FrontSide,
-      })
-      /* The baked normal map is authored for a close-up cliff render; at full
-         strength it breaks the dunes into pale streaks. Softening it keeps the
-         relief but gives the even sand colour the desert should read as. */
-      mat.normalScale = new THREE.Vector2(0.3, 0.3)
-      m.material = mat
-
-      // flatten the basin — geometry must be owned, clone() shares it
-      const geo = m.geometry.clone()
-      const pos = geo.attributes.position as THREE.BufferAttribute
-      let sum = 0
-      let n = 0
-      for (let i = 0; i < pos.count; i++) {
-        const d = Math.hypot(pos.getX(i) - CAMP_LOCAL.x, pos.getZ(i) - CAMP_LOCAL.z)
-        if (d < inner) {
-          sum += pos.getY(i)
-          n++
-        }
-      }
-      const targetY = n ? sum / n : 0
-      for (let i = 0; i < pos.count; i++) {
-        const d = Math.hypot(pos.getX(i) - CAMP_LOCAL.x, pos.getZ(i) - CAMP_LOCAL.z)
-        if (d >= outer) continue
-        const t = THREE.MathUtils.smoothstep(d, inner, outer)
-        pos.setY(i, THREE.MathUtils.lerp(targetY, pos.getY(i), t))
-      }
-      pos.needsUpdate = true
-      geo.computeVertexNormals()
-      geo.computeBoundingSphere()
-      m.geometry = geo
-      m.userData.flatY = targetY
-    })
-
-    c.scale.setScalar(s)
-    c.position.x = -CAMP_LOCAL.x * s
-    c.position.z = -CAMP_LOCAL.z * s
-    let flatY = 0
-    c.traverse((o) => {
-      if (typeof o.userData.flatY === 'number') flatY = o.userData.flatY
-    })
-    c.position.y = -flatY * s // the flattened basin now sits exactly at y = 0
-    return c
-  }, [scene, sandSrc])
-  return <primitive object={obj} />
-}
-
 /* Generic GLB prop, normalized so `height` is its world height and it sits on the
    ground regardless of how the source model was scaled or centered. */
-function Prop({ url, x, z, ry = 0, height, liner, tint }: {
+/* A slow whole-tree lean, phase-shifted by position — the cheapest wind there
+   is. Its own component so only the palms pay for a per-frame subscription;
+   putting the hook in Prop signed all 149 props up for it. */
+function Sway({ x, z, children }: { x: number; z: number; children: React.ReactNode }) {
+  const ref = useRef<THREE.Group>(null)
+  useFrame(({ clock }) => {
+    const g = ref.current
+    if (!g) return
+    const t = clock.elapsedTime
+    g.rotation.z = Math.sin(t * 0.7 + x * 1.3) * 0.015
+    g.rotation.x = Math.sin(t * 0.53 + z * 1.1) * 0.01
+  })
+  return <group ref={ref}>{children}</group>
+}
+
+function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1 }: {
   url: string
   x: number
   z: number
   ry?: number
   height: number
+  /** Stretch across the model's own x only. A gate is the one prop whose
+      opening is load-bearing on the game: gate-post's archway is 1.8 m in the
+      mesh, which leaves a 90 cm lane once the player's own radius is taken off
+      both piers — passable on paper and a scrape in practice. Widening the
+      gate is the honest fix; scaling it uniformly would put a 10 m tower on a
+      mudbrick frontier wall. */
+  widen?: number
   /** dark inner shell — hides gaps in generated meshes (tent canvas) */
   liner?: boolean
   /** Optional fallback tint for exported assets whose procedural colour was lost. */
   tint?: string
+  /** bury the base this many metres — beds ridges/props into the sand */
+  sink?: number
 }) {
   const { scene } = useGLTF(url)
+  /* מרנדר מחדש כשהקרקע מגיעה, אחרת הגובה נשאר על אפס לנצח */
+  useGroundReady()
   const { object, dims } = useMemo(() => {
     const c = scene.clone(true)
     const box = new THREE.Box3().setFromObject(c)
@@ -229,6 +405,7 @@ function Prop({ url, x, z, ry = 0, height, liner, tint }: {
     box.getSize(size)
     const s = size.y > 0 ? height / size.y : 1
     c.scale.setScalar(s)
+    c.scale.x = s * widen
     const box2 = new THREE.Box3().setFromObject(c)
     c.position.y = -box2.min.y
 
@@ -267,15 +444,34 @@ function Prop({ url, x, z, ry = 0, height, liner, tint }: {
     c.traverse((o) => {
       const m = o as THREE.Mesh
       if (!m.isMesh) return
-      m.castShadow = true
+      /* Horizon rock is background: it can never cast a shadow anyone sees,
+         but it is huge, so putting it in the shadow pass costs a full extra
+         render of the biggest meshes in the scene every frame. */
+      m.castShadow = height < 18
       m.receiveShadow = true
-      /* Generated meshes are single-sided, so thin surfaces (tent canvas,
-         palm fronds) vanish when seen from behind and read as holes. */
+      /* Thin surfaces (tent cloth, palm fronds, thatch) need DoubleSide or they
+         vanish from behind. So do the baked buildings: their wall geometry is
+         single-sided, so with back-face culling on you look straight through
+         the near wall and see only the far one — a solid house reads as a lone
+         leaning panel out in the sand. Rock and terrain stay culled. */
+      const thin = /palm|tent|pergola|shrub|desert-bush|fodder|house|tower|wall/.test(url)
+      /* Foliage is the one case DoubleSide alone doesn't solve: a frond's back
+         face points away from the sun, so against a bright sky it renders pure
+         black and the crown reads as torn paper. A little self-illumination in
+         the leaf's own colour is the cheap standard fix. */
+      const foliage = /palm|shrub|desert-bush/.test(url)
       const prepareMaterial = (mat: THREE.Material) => {
-        const owned = tint ? mat.clone() : mat
-        owned.side = THREE.DoubleSide
+        const owned = tint || foliage ? mat.clone() : mat
+        if (thin) owned.side = THREE.DoubleSide
         const colourMaterial = owned as THREE.Material & { color?: THREE.Color }
         if (tint && colourMaterial.color) colourMaterial.color.set(tint)
+        if (foliage) {
+          const std = owned as THREE.MeshStandardMaterial
+          if (std.isMeshStandardMaterial) {
+            std.emissive = new THREE.Color('#5c5a2e')
+            std.emissiveIntensity = 0.22
+          }
+        }
         return owned
       }
       m.material = Array.isArray(m.material)
@@ -283,10 +479,20 @@ function Prop({ url, x, z, ry = 0, height, liner, tint }: {
         : prepareMaterial(m.material)
     })
     return { object: c, dims }
-  }, [scene, height, liner, tint])
+  }, [scene, height, liner, tint, url])
+  /* הפרופים הוצבו על y=0, אבל הטרסה האפויה אינה יושבת על אפס:
+     במחנה פניה גבוהים ממנו וכלים נראו שקועים בחול, ובמעבר הצר
+     נמוכים ממנו וכדים ריחפו באוויר. הצבה על פני הקרקע עצמם פותרת
+     את שני הכיוונים באותו שינוי. */
   return (
-    <group position={[x, 0, z]} rotation={[0, ry, 0]}>
-      <primitive object={object} />
+    <group position={[x, groundYAt(x, z) - sink, z]} rotation={[0, ry, 0]}>
+      {url.includes('palm') ? (
+        <Sway x={x} z={z}>
+          <primitive object={object} />
+        </Sway>
+      ) : (
+        <primitive object={object} />
+      )}
       {/* Rendered back-faces only: invisible from outside where the canvas is
           intact, and where the mesh has a gap you see dark tent interior
           instead of straight through to the desert. */}
@@ -301,25 +507,21 @@ function Prop({ url, x, z, ry = 0, height, liner, tint }: {
 }
 
 /** hand-authored camp assets supplied by the author (Blender → GLB) */
-const MODEL_TENT = '/assets/chapter1/models/tent2.glb'
+const MODEL_TENT = '/assets/chapter1/models/blacktent.glb'
 const MODEL_FIREPIT = '/assets/chapter1/models/firepit.glb'
 const MODEL_TORCH = '/assets/chapter1/models/torch.glb'
 const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
 const MODEL_TRAVELER_STAND = '/assets/chapter1/models/traveler-stand.glb'
 const MODEL_TRAVELER_STRIDE = '/assets/chapter1/models/traveler-stride.glb'
-const MODEL_TRAVELER_SIT = '/assets/chapter1/models/traveler-sit.glb'
-const MODEL_TRAVELER_WATER = '/assets/chapter1/models/traveler-water.glb'
-const MODEL_CONCEPT_BOARD = '/assets/chapter1/models/concept-board.glb'
 const MODEL_PALM = '/assets/chapter1/models/palm.glb'
 const MODEL_WELL = '/assets/chapter1/models/well.glb'
 const MODEL_ROCKS = '/assets/chapter1/models/rocks.glb'
 const MODEL_JARS = '/assets/chapter1/models/jars.glb'
 const MODEL_FIREWOOD = '/assets/chapter1/models/firewood.glb'
 const MODEL_SHRUB = '/assets/chapter1/models/shrub.glb'
-const MODEL_CANYON = '/assets/chapter1/models/canyon.glb'
 /** same camel, split into body + four hip-pivoted legs for the walk cycle */
 const MODEL_CAMEL_PARTS = '/assets/chapter1/models/camel-parts.glb'
-for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_STRIDE, MODEL_TRAVELER_SIT, MODEL_TRAVELER_WATER, MODEL_CONCEPT_BOARD, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
+for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_STRIDE, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
   useGLTF.preload(m)
 }
 
@@ -388,11 +590,14 @@ function FireSprite({ y, size, fps = 20, phase = 0 }: { y: number; size: number;
 }
 
 function Campfire({ x, z }: { x: number; z: number }) {
+  useGroundReady()
   const light = useRef<THREE.PointLight>(null)
   const smoke = useRef<THREE.Group>(null)
   useFrame(({ clock }) => {
     const t = clock.elapsedTime
-    if (light.current) light.current.intensity = 11 + Math.sin(t * 7) * 2 + Math.sin(t * 13) * 1.2
+    /* the fire has to compete with a 3.6-intensity dawn sun or it lights
+       nothing and the flame reads as a decal pinned in front of the camp */
+    if (light.current) light.current.intensity = 30 + Math.sin(t * 7) * 5 + Math.sin(t * 13) * 3
     if (smoke.current) {
       smoke.current.children.forEach((p, i) => {
         const ph = (t * 0.35 + i / 3) % 1
@@ -404,7 +609,7 @@ function Campfire({ x, z }: { x: number; z: number }) {
     }
   })
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, groundYAt(x, z), z]}>
       {/* authored fire pit: stone ring, logs and scorched ground */}
       <Prop url={MODEL_FIREPIT} x={0} z={0} ry={0.4} height={0.75} />
       {/* warm glow on the ground under the fire */}
@@ -423,44 +628,212 @@ function Campfire({ x, z }: { x: number; z: number }) {
           </mesh>
         ))}
       </group>
-      {/* cooking tripod — each stick leans from its foot to a shared apex */}
+      {/* An iron tripod with a chain-hung cauldron is a northern-European camp
+          trope and was also the darkest object in the region. The Arabian
+          hearth is three stones with the pot resting on them. */}
       {[0, 1, 2].map((i) => {
         const a = (i / 3) * Math.PI * 2 + 0.5
-        const foot = new THREE.Vector3(Math.cos(a) * 0.85, 0.02, Math.sin(a) * 0.85)
-        const apex = new THREE.Vector3(0, 1.7, 0)
-        const dir = apex.clone().sub(foot)
-        const len = dir.length()
-        const mid = foot.clone().lerp(apex, 0.5)
-        const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize())
         return (
-          <mesh key={i} position={[mid.x, mid.y, mid.z]} quaternion={q} castShadow>
-            <cylinderGeometry args={[0.024, 0.032, len + 0.15]} />
-            <meshStandardMaterial color="#5a4530" roughness={1} />
+          <mesh key={i} position={[Math.cos(a) * 0.52, 0.13, Math.sin(a) * 0.52]} rotation={[a, a * 1.7, 0.3]} castShadow>
+            <dodecahedronGeometry args={[0.2, 0]} />
+            <meshStandardMaterial color="#8d7a60" roughness={1} />
           </mesh>
         )
       })}
-      <mesh position={[0, 1.42, 0]} castShadow>
-        <cylinderGeometry args={[0.01, 0.01, 0.42]} />
-        <meshStandardMaterial color="#2c2620" roughness={1} />
+      <mesh position={[0, 0.36, 0]} castShadow>
+        <sphereGeometry args={[0.26, 14, 10]} />
+        <meshStandardMaterial color="#6d4f36" roughness={1} />
       </mesh>
-      <mesh position={[0, 1.12, 0]} castShadow>
-        <cylinderGeometry args={[0.2, 0.16, 0.22, 14]} />
-        <meshStandardMaterial color="#3a3a3c" roughness={0.7} metalness={0.5} />
-      </mesh>
-      <pointLight ref={light} position={[0, 0.9, 0]} color="#ff9a3d" distance={15} decay={2} />
+      <pointLight ref={light} position={[0, 0.9, 0]} color="#ff9a3d" distance={22} decay={1.6} />
     </group>
   )
 }
 
 /* ------- camp set-dressing ------- */
 
+/* The caravan track. A road is what turns scattered buildings into a place —
+   everything in the region hangs off this line, and the player reads it as
+   "the way through" long before reaching the gate. Rendered as darker,
+   compacted sand: the same texture as the ground, tighter repeat, warm-brown
+   multiply, faded edges via an alpha gradient so it sinks into the terrain
+   instead of sitting on it like tape. */
+/* A cross-road alpha ramp: transparent edges, translucent middle. Shared by
+   both road shapes — the road is something you sense, not a stripe you see. */
+function roadAlpha() {
+  const c = document.createElement('canvas')
+  c.width = 64
+  c.height = 4
+  const g = c.getContext('2d')!
+  const grad = g.createLinearGradient(0, 0, 64, 0)
+  grad.addColorStop(0, 'rgba(255,255,255,0)')
+  grad.addColorStop(0.42, 'rgba(255,255,255,0.42)')
+  grad.addColorStop(0.58, 'rgba(255,255,255,0.42)')
+  grad.addColorStop(1, 'rgba(255,255,255,0)')
+  g.fillStyle = grad
+  g.fillRect(0, 0, 64, 4)
+  return new THREE.CanvasTexture(c)
+}
+
+
+function Road({ x, z, ry = 0, len, w }: { x: number; z: number; ry?: number; len: number; w: number }) {
+  useGroundReady()
+  const sand = useLoader(THREE.TextureLoader, `/assets/chapter1/tex/${ROAD_GROUND}`)
+  const { tex, alpha } = useMemo(() => {
+    const tex = sand.clone()
+    tex.needsUpdate = true
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+    tex.colorSpace = THREE.SRGBColorSpace
+    tex.repeat.set(w / 2.5, len / 2.5)
+    return { tex, alpha: roadAlpha() }
+  }, [sand, len, w])
+  return (
+    <mesh position={[x, groundYAt(x, z) + 0.015, z]} rotation={[-Math.PI / 2, 0, ry]} receiveShadow>
+      <planeGeometry args={[w, len]} />
+      <meshStandardMaterial map={tex} alphaMap={alpha} {...ROAD_MAT} />
+    </mesh>
+  )
+}
+
+/* The real thing: a trampled track that wanders. Built as a ribbon along a
+   Catmull-Rom centreline — width wobbles a little, and both ends taper to
+   nothing so the road is born from the sand and dies into it, never cut off
+   by a straight edge. Straight rectangles read as carpets; this reads as use. */
+function ribbonGeometry(
+  pts: { x: number; z: number }[],
+  w: number,
+  side: number, // lateral offset of the centreline, metres
+  y: number,
+  broken = false, // ruts: organic alpha breaks so the line never reads machine-drawn
+) {
+  const curve = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(p.x, 0, p.z)))
+  const len = curve.getLength()
+  const N = Math.max(24, Math.round(len / 1.2))
+  /* four columns across: edges carry alpha 0, the inner pair alpha 1 — the
+     cross-fade lives in RGBA vertex colours, NOT in an alphaMap. (three.js
+     shares one uv-transform across map+alphaMap, so a repeating sand map
+     dragged the alpha ramp with it and cut the edge hard.) */
+  /* left column first — the triangle winding below assumes it, and flipping
+     the order flips the face normals underground (invisible road, learned twice) */
+  const ACROSS = [0.5, 0.22, -0.22, -0.5]
+  const ALPHA = [0, 1, 1, 0]
+  const pos: number[] = []
+  const uv: number[] = []
+  const col: number[] = []
+  const idx: number[] = []
+  for (let i = 0; i <= N; i++) {
+    const t = i / N
+    const p = curve.getPointAt(t)
+    const tan = curve.getTangentAt(t)
+    /* ground-plane left normal */
+    const nx = tan.z
+    const nz = -tan.x
+    const fade = Math.min(1, Math.min(t, 1 - t) / 0.09)
+    const wobble = 1 + 0.13 * Math.sin(i * 1.7) + 0.08 * Math.sin(i * 3.1 + 1.3)
+    const cx = p.x + nx * side
+    const cz = p.z + nz * side
+    const v = (t * len) / 2.5
+    const rowA = broken ? 0.45 + 0.55 * Math.abs(Math.sin(i * 0.83 + side * 7)) : 1
+    for (let c = 0; c < 4; c++) {
+      const off = ACROSS[c] * w * fade * wobble
+      pos.push(cx + nx * off, y, cz + nz * off)
+      uv.push(ACROSS[c] + 0.5, v)
+      col.push(1, 1, 1, ALPHA[c] * rowA)
+    }
+    if (i < N) {
+      const a = i * 4
+      for (let c = 0; c < 3; c++) {
+        idx.push(a + c, a + c + 1, a + c + 4, a + c + 1, a + c + 5, a + c + 4)
+      }
+    }
+  }
+  const geo = new THREE.BufferGeometry()
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2))
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 4))
+  geo.setIndex(idx)
+  geo.computeVertexNormals()
+  return { geo, len }
+}
+
+function RoadRibbon({ pts, w }: { pts: { x: number; z: number }[]; w: number }) {
+  const sand = useLoader(THREE.TextureLoader, '/assets/chapter1/tex/sand.jpg'
+  )
+  const parts = useMemo(() => {
+    const mk = (repeatW: number) => {
+      const tex = sand.clone()
+      tex.needsUpdate = true
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.repeat.set(repeatW, 1)
+      return tex
+    }
+    /* the track itself, plus two softer camel ruts riding it — the ground
+       story that says "caravans pass here". The committee read v1's ruts as
+       tire skid-marks: near-black, unbroken, parallel forever. Lighter tone,
+       lower opacity, and organic alpha breaks fix the read. */
+    return [
+      { ...ribbonGeometry(pts, w, 0, 0.015), tex: mk(w / 2.5), color: ROAD_TINT, o: 0.5 },
+      { ...ribbonGeometry(pts, 0.34, -0.55, 0.022, true), tex: mk(0.2), color: ROAD_TINT, o: 0.42 },
+      { ...ribbonGeometry(pts, 0.3, 0.62, 0.022, true), tex: mk(0.2), color: ROAD_TINT, o: 0.36 },
+    ]
+  }, [sand, pts, w])
+  return (
+    <>
+      {parts.map((p, i) => (
+        <mesh key={i} geometry={p.geo} receiveShadow>
+          <meshStandardMaterial map={p.tex} {...ROAD_MAT} color={p.color} vertexColors opacity={p.o} />
+        </mesh>
+      ))}
+    </>
+  )
+}
+
+/* A trampled dark patch — the ground's memory of feet and hooves: under the
+   well mouth, around the fire. A soft radial alpha disc, nothing more. */
+/* Trampled desert ground goes LIGHTER, not darker — feet break the dark
+   surface crust and expose pale dry sand underneath. The first version darkened
+   it, which read as a hard grey plate laid on the dune. */
+function WornPatch({ x, z, r, tone = '#bd9a78' }: { x: number; z: number; r: number; tone?: string }) {
+  useGroundReady()
+  const alpha = useMemo(() => {
+    const c = document.createElement('canvas')
+    c.width = c.height = 128
+    const g = c.getContext('2d')!
+    const grad = g.createRadialGradient(64, 64, 8, 64, 64, 62)
+    /* a long soft tail — a hard-edged disc reads as a plate lying on the dune,
+       which is exactly how the first version looked */
+    grad.addColorStop(0, 'rgba(255,255,255,0.1)')
+    grad.addColorStop(0.35, 'rgba(255,255,255,0.07)')
+    grad.addColorStop(0.75, 'rgba(255,255,255,0.025)')
+    grad.addColorStop(1, 'rgba(255,255,255,0)')
+    g.fillStyle = grad
+    g.fillRect(0, 0, 128, 128)
+    return new THREE.CanvasTexture(c)
+  }, [])
+  return (
+    <mesh position={[x, groundYAt(x, z) + 0.012, z]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <circleGeometry args={[r, 28]} />
+      <meshStandardMaterial
+        color={tone}
+        alphaMap={alpha}
+        transparent
+        depthWrite={false}
+        roughness={1}
+        polygonOffset
+        polygonOffsetFactor={-1}
+      />
+    </mesh>
+  )
+}
+
 function Rug({ x, z, ry = 0 }: { x: number; z: number; ry?: number }) {
+  useGroundReady()
   const weave = useLoader(THREE.TextureLoader, '/assets/chapter1/tex/tent-weave.jpg')
   useEffect(() => {
     weave.colorSpace = THREE.SRGBColorSpace
   }, [weave])
   return (
-    <mesh position={[x, 0.02, z]} rotation={[-Math.PI / 2, 0, ry]} receiveShadow>
+    <mesh position={[x, groundYAt(x, z) + 0.02, z]} rotation={[-Math.PI / 2, 0, ry]} receiveShadow>
       <planeGeometry args={[1.7, 1.05]} />
       <meshStandardMaterial map={weave} color="#b98a6a" roughness={1} />
     </mesh>
@@ -468,8 +841,9 @@ function Rug({ x, z, ry = 0 }: { x: number; z: number; ry?: number }) {
 }
 
 function Scrolls({ x, z }: { x: number; z: number }) {
+  useGroundReady()
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, groundYAt(x, z), z]}>
       {[0, 1, 2].map((i) => (
         <mesh key={i} position={[i * 0.12 - 0.12, 0.06, (i % 2) * 0.14]} rotation={[Math.PI / 2, 0, 0.4 + i * 0.9]} castShadow>
           <cylinderGeometry args={[0.05, 0.05, 0.52, 8]} />
@@ -482,8 +856,9 @@ function Scrolls({ x, z }: { x: number; z: number }) {
 
 /* The author's Medieval Torch Stand, topped with the same rendered flame. */
 function Torch({ x, z, ry = 0 }: { x: number; z: number; ry?: number }) {
+  useGroundReady()
   return (
-    <group position={[x, 0, z]} rotation={[0, ry, 0]}>
+    <group position={[x, groundYAt(x, z), z]} rotation={[0, ry, 0]}>
       <Prop url={MODEL_TORCH} x={0} z={0} height={1.85} />
       <FireSprite y={1.95} size={0.85} fps={24} phase={x * 7} />
       <pointLight position={[0, 2, 0]} color="#ff9a3d" intensity={5} distance={8} decay={2} />
@@ -500,12 +875,74 @@ function scatterRing(count: number, rMin: number, rMax: number, seed: number) {
   })
 }
 
+/* Dust on the wind. Without it the air is dead — every frame identical to the
+   last — and the desert reads as a photograph. One additive point cloud drifting
+   downwind and recycling at the far edge costs a single draw call. */
+function DustMotes({ count = 55 }: { count?: number }) {
+  const pts = useRef<THREE.Points>(null)
+  const { geo, mat } = useMemo(() => {
+    const pos = new Float32Array(count * 3)
+    const seed = new Float32Array(count)
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 80
+      pos[i * 3 + 1] = 0.3 + Math.random() * 4.5
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 80
+      seed[i] = Math.random()
+    }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    geo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1))
+    const mat = new THREE.PointsMaterial({
+      color: '#e8cda6',
+      /* additive transparency is the most expensive thing a software or
+         integrated renderer draws — this field is deliberately small */
+      size: 0.055,
+      sizeAttenuation: true,
+      transparent: true,
+      /* faint enough to read as haze in the light, not as white specks on the
+         sky — dust you notice only once you stop walking */
+      opacity: 0.26,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    })
+    return { geo, mat }
+  }, [count])
+
+  useFrame(({ clock }, dt) => {
+    if (!pts.current) return
+    const t = clock.elapsedTime
+    const p = geo.attributes.position as THREE.BufferAttribute
+    const s = geo.attributes.aSeed as THREE.BufferAttribute
+    for (let i = 0; i < p.count; i++) {
+      const k = s.getX(i)
+      /* downwind drift plus a slow bob, so the field never reads as a grid */
+      let x = p.getX(i) + dt * (0.55 + k * 0.5)
+      const y = p.getY(i) + Math.sin(t * (0.4 + k) + k * 9) * dt * 0.22
+      if (x > 40) x -= 80
+      p.setX(i, x)
+      p.setY(i, y)
+    }
+    p.needsUpdate = true
+    /* re-centre in 80 m steps so the field always surrounds the player without
+       the motes visibly jumping under them */
+    pts.current.position.x = Math.round(livePlayerX / 80) * 80
+    pts.current.position.z = Math.round(livePlayerZ / 80) * 80
+  })
+  return <points ref={pts} geometry={geo} material={mat} frustumCulled={false} />
+}
+
+/* the dust field needs the player's position without threading `live` through
+   every layer; the World writes it once per frame */
+let livePlayerX = 0
+let livePlayerZ = 0
+
 function Pebbles() {
+  useGroundReady()
   const items = useMemo(() => scatterRing(64, 3.5, 23, 7), [])
   return (
     <group>
       {items.map((p, i) => (
-        <mesh key={i} position={[p.x, 0.045, p.z]} rotation={[p.k * 3, p.k * 6, 0]}>
+        <mesh key={i} position={[p.x, groundYAt(p.x, p.z) + 0.045, p.z]} rotation={[p.k * 3, p.k * 6, 0]}>
           <dodecahedronGeometry args={[0.055 + p.k * 0.075, 0]} />
           <meshStandardMaterial color={p.k > 0.5 ? '#a08765' : '#8d7a5e'} roughness={1} />
         </mesh>
@@ -515,15 +952,16 @@ function Pebbles() {
 }
 
 function GrassTufts() {
+  useGroundReady()
   const items = useMemo(() => scatterRing(26, 5, 22, 3), [])
   return (
     <group>
       {items.map((p, i) => (
-        <group key={i} position={[p.x, 0, p.z]}>
+        <group key={i} position={[p.x, groundYAt(p.x, p.z), p.z]}>
           {[0, 1, 2, 3].map((j) => (
             <mesh key={j} position={[Math.sin(j * 1.7) * 0.06, 0.16, Math.cos(j * 2.3) * 0.06]} rotation={[Math.sin(j) * 0.35, j * 1.6, Math.cos(j) * 0.3]}>
               <coneGeometry args={[0.02, 0.4 + p.k * 0.25, 4]} />
-              <meshStandardMaterial color="#8f8a55" roughness={1} />
+              <meshStandardMaterial color="#a08f5c" roughness={1} />
             </mesh>
           ))}
         </group>
@@ -531,6 +969,7 @@ function GrassTufts() {
     </group>
   )
 }
+
 
 /* Normalize a GLB to `height` meters with feet on the ground. The cached GLTF
    scene is NEVER mutated — all transforms go on a fresh wrapper group, so the
@@ -551,7 +990,11 @@ function useNormalizedGLB(url: string, height: number, tint?: string) {
       const m = o as THREE.Mesh
       if (!m.isMesh) return
       m.castShadow = true
-      m.receiveShadow = true
+      /* הדמות אינה מקבלת צל על עצמה. הרשת מחוספסת מהדצימציה,
+         ועל משטח כזה כל פאה מצלה על שכנתה — מה שמצייר פסים
+         שחורים על הגלימה ומכסה את הפנים. הצל שהיא מטילה על
+         הקרקע נשאר, וזה מה שקושר אותה למקום. */
+      m.receiveShadow = false
       m.frustumCulled = false
       const prepareMaterial = (mat: THREE.Material) => {
         const owned = tint ? mat.clone() : mat
@@ -574,13 +1017,27 @@ function Player({ live }: { live: Live }) {
   const strideRef = useRef<THREE.Group>(null)
   const heading = useRef(0)
   const walkT = useRef(0)
+  const lastStep = useRef(0)
+  const speed = useRef(0)
+  const runBlend = useRef(0)
+  const idleT = useRef(0)
 
-  useFrame(({ camera }, dt) => {
+  useFrame(({ camera }, rawDt) => {
     const g = group.current
     if (!g) return
+    /* A long frame — a texture decode, a tab regaining focus — used to move the
+       player its full duration in one step: 28 metres at once in testing, which
+       walks straight through walls and over the gate that carries you to the
+       next region. Cap the step so one slow frame costs speed, never position. */
+    const dt = Math.min(rawDt, 0.1)
+    livePlayerX = live.player.x
+    livePlayerZ = live.player.z
     const k = live.keys
     const running = k.has('shift')
-    const run = running ? 8 : 4
+    /* 4 m/s is a jog: it crosses the whole 687 m chapter in three minutes and
+       gives the learner no time to look at anything on the way. 2.6 is a
+       purposeful walk, and Shift is there when the road is long. */
+    const run = running ? 6 : 2.6
     let mx = 0
     let mz = 0
     if (k.has('w')) mz -= 1
@@ -588,10 +1045,27 @@ function Player({ live }: { live: Live }) {
     if (k.has('a')) mx -= 1
     if (k.has('d')) mx += 1
     const moving = mx !== 0 || mz !== 0
+    /* המהירות הייתה בינארית: מקש למטה = מהירות מלאה בפריים הראשון,
+       מקש למעלה = עצירה מוחלטת בפריים הראשון. גוף שמגיע למהירותו
+       המלאה באפס זמן נקרא כאיקון שנגרר על מפה, לא כאדם שהולך —
+       וזה גם מה שגרם לנדנוד ולנטייה להידלק ולכבות בבת אחת. עלייה
+       ברבע שנייה ועצירה מהירה ממנה קצת. */
+    const targetSpeed = moving ? run : 0
+    const ramp = moving ? 14 : 20
+    speed.current += (targetSpeed - speed.current) * Math.min(1, dt * ramp)
+    if (speed.current < 0.02) speed.current = 0
+    const gait = speed.current / 2.6
+    /* כיוון ההליכה נשמר, כדי שהעצירה תהיה אמיתית ולא רק קוסמטית:
+       ההאטה נהגה מ-`speed`, אבל ההזזה עצמה ישבה בתוך `if (moving)`,
+       ולכן הגוף נעצר בפריים אחד בזמן שהרגליים המשיכו לצעוד עוד
+       ארבעה — כולל צליל צעד של אדם שעומד במקום. */
     if (moving) {
-      const yaw = live.yaw
-      const dir = new THREE.Vector3(mx, 0, mz).normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), -yaw)
-      live.player.addScaledVector(dir, run * dt)
+      MOVE_DIR.set(mx, 0, mz).normalize().applyAxisAngle(WORLD_UP, -live.yaw)
+    }
+    if (speed.current > 0) {
+      live.player.addScaledVector(MOVE_DIR, speed.current * dt)
+    }
+    if (moving || speed.current > 0) {
 
       /* Solid props: push the player back out of any footprint they entered, so
          you can't walk through the well, a tent or a camel. Two passes settle
@@ -614,40 +1088,147 @@ function Player({ live }: { live: Live }) {
         }
       }
 
-      // keep the player inside the camp clearing
+      // keep the player inside the region's walkable circle — each layout
+      // declares its own radius (the camp's old hardcoded 24 leaked into the
+      // border post and stopped travellers dead in the middle of the road)
       const dist = Math.hypot(live.player.x, live.player.z)
-      const MAX = 24
+      const MAX = WORLD.layout.bound ?? 24
       if (dist > MAX) live.player.multiplyScalar(MAX / dist)
-      heading.current = Math.atan2(dir.x, dir.z)
-      walkT.current += dt * (running ? 13 : 9)
+      if (moving) heading.current = Math.atan2(MOVE_DIR.x, MOVE_DIR.z)
+
+      /* המצלמה מסתובבת רק בגרירת עכבר, ב-0.005 רדיאן לפיקסל — פנייה
+         של 90° היא 314 פיקסלים של גרירה, ו-180° היא 628. מי שמשחק
+         במקלדת בלבד לא יכול לסובב אותה בכלל: A ו-D מזיזים הצידה,
+         והחצים ממופים עליהם. לכן כשהולכים קדימה בלי לגעת בעכבר,
+         המצלמה מיישרת את עצמה לאט לכיוון ההליכה — מספיק איטי כדי
+         לא להילחם ביד, ומספיק כדי ש-W+A יהיה פנייה שמאלה.
+         היא מוותרת מיד ברגע שנוגעים בעכבר. */
+      if (moving && mz < 0 && performance.now() - live.lastDrag > 1200) {
+        /* הקשר בין הזווית לכיוון ההליכה הוא `heading = π − yaw`, לא
+           `yaw + π`: הקלט מסובב ב-`-yaw`, ולכן זווית מקומית α נותנת
+           `heading = α − yaw`, ועבור W (כלומר α = π) יוצא π − yaw.
+           הזווית שמעמידה את המצלמה מאחורי כיוון נתון היא לכן
+           `π − heading`. הגרסה הקודמת גררה את ה-yaw אל אפס במקום אל
+           כיוון ההליכה — וזה נראה תקין רק כי כל תשעת האזורים פרושים
+           על ציר ה-Z, כך שהדרך הראשית עוברת בדיוק דרך אפס. */
+        live.yaw += wrapPi(Math.PI - heading.current - live.yaw) * Math.min(1, dt * 1.2)
+      }
     }
+    if (speed.current > 0.05) walkT.current += dt * 9 * Math.sqrt(gait)
     // two-pose walk: the character is a plain static mesh (no skeleton — the
     // rigged model rendered T-pose on some GPUs). While moving we alternate
     // between the standing and mid-stride meshes at gait frequency, mirroring
     // the stride for the opposite step — deterministic on every machine.
+    /* שתי תנוחות אמיתיות: העמידה והצעד הם שתי רשתות שונות — הצעד
+       פורש את הרגליים קדימה ואחורה — והחלפה ביניהן בתדר ההליכה עם
+       שיקוף לצעד הנגדי היא מה שקורא כהליכה.
+
+       שתי הרשתות עצמן נבנו מחדש מרשת ה-NPC, ששומרת טקסטורה 2048
+       שלמה, אחרי שהתברר שהאטלס של הנוסע הישן — 123KB של WebP —
+       דחוס עד שהאיים שלו נמרחים זה לתוך זה, וזה מה שצייר את הפסים
+       השחורים על הגלימה. התנוחות מופקות בשלד קטן של שלוש עצמות
+       ונאפות לרשת סטטית, כך שהמנגנון כאן לא השתנה בכלל. */
     const s = Math.sin(walkT.current)
-    const showStride = moving && Math.abs(s) > 0.25
+    const showStride = speed.current > 0.35 && Math.abs(s) > 0.25
     if (standRef.current) standRef.current.visible = !showStride
     if (strideRef.current) {
       strideRef.current.visible = showStride
       strideRef.current.scale.x = s >= 0 ? 1 : -1
     }
+    /* רגל נוגעת בקרקע בכל חצי מחזור. שעון ההליכה כבר סופר את זה,
+       ולכן הצעד נשמע מאותו מקור שמצייר אותו — בלי טיימר נפרד
+       שיכול להיסחף ממנו. */
+    const step = Math.floor(walkT.current / Math.PI)
+    if (speed.current > 0.5 && step !== lastStep.current) footstep(gait > 1.6)
+    lastStep.current = step
 
     // body motion: vertical bob + slight sway/lean while moving
-    const bob = moving ? Math.abs(Math.cos(walkT.current)) * 0.06 : 0
-    const sway = moving ? Math.sin(walkT.current) * 0.035 : 0
-    g.position.set(live.player.x, live.player.y + bob, live.player.z)
+    const ease = Math.min(1, gait)
+    const bob = Math.abs(Math.cos(walkT.current)) * 0.06 * ease
+    const sway = Math.sin(walkT.current) * 0.035 * ease
+    g.position.set(live.player.x, groundYAt(live.player.x, live.player.z) + live.player.y + bob, live.player.z)
     g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, heading.current, Math.min(1, dt * 10))
     g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, sway, Math.min(1, dt * 8))
-    g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, moving ? 0.06 : 0, Math.min(1, dt * 6))
+    g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, 0.06 * ease, Math.min(1, dt * 6))
 
-    // third-person camera: lower and closer for depth, rotated by yaw
-    const camOffset = new THREE.Vector3(0, 2.35, 4.4).applyAxisAngle(new THREE.Vector3(0, 1, 0), -live.yaw)
+    /* Third-person camera, framed high and close so the player is read from the
+       waist up. The player mesh has no real gait (it swaps between two static
+       poses — its source robe fuses the arms into the cloth, which every
+       auto-rigger refuses), so keeping the feet at the very bottom of frame
+       stops that flipbook from competing with Rawi's actual walk cycle beside
+       you. Rawi, who is animated, stays fully visible. */
+    /* 3.05 kept the player at 56% of frame height — a portrait, not a world.
+       Pulled back + slightly up so the region does the talking. */
+    /* ריצה והליכה נראו זהות לחלוטין: אותו מרחק, אותו גובה, אותו שדה
+       ראייה — ההבדל היחיד היה תדר החלפת התנוחות. מצלמה שנסוגה מעט
+       ושדה ראייה שנפתח בשבע מעלות הם ההבדל בין „המספר השתנה“ לבין
+       „אני רץ“. הבלנד מוחלק בנפרד מהמהירות עצמה, כדי שהעדשה לא
+       תנשום בכל תיקון קטן של הג׳ויסטיק. */
+    runBlend.current += (Math.min(1, Math.max(0, (gait - 1) / 1.31)) - runBlend.current) * Math.min(1, dt * 2.5)
+    const rb = runBlend.current
+    const CAM_DIST = 3.7 + rb * 0.65
+    const camOffset = new THREE.Vector3(0, 2.45 - rb * 0.15, CAM_DIST).applyAxisAngle(new THREE.Vector3(0, 1, 0), -live.yaw)
+    const wantFov = 55 + rb * 7
+    if (Math.abs((camera as THREE.PerspectiveCamera).fov - wantFov) > 0.01) {
+      ;(camera as THREE.PerspectiveCamera).fov = wantFov
+      ;(camera as THREE.PerspectiveCamera).updateProjectionMatrix()
+    }
+
+    /* Pull in when a trunk or tent would sit between us and the player. The
+       colliders are circles on the ground plane, so this is a 2-D ray/circle
+       test rather than a scene raycast — cheap enough to run every frame. */
+    const ox = camOffset.x / CAM_DIST
+    const oz = camOffset.z / CAM_DIST
+    let dist = CAM_DIST
+    for (const c of [...STATIC_COLLIDERS, ...live.dynamic]) {
+      const fx = live.player.x - c.x
+      const fz = live.player.z - c.z
+      const r = c.r + 0.12
+      const b = fx * ox + fz * oz
+      const cc = fx * fx + fz * fz - r * r
+      const disc = b * b - cc
+      if (disc <= 0) continue
+      const s = Math.sqrt(disc)
+      const enter = -b - s
+      const exit = -b + s
+      // the camera only clips if the prop lies between the player and it.
+      // 2.2 m is the floor: any closer and the player's back fills the screen.
+      if (exit > 0 && enter < dist) dist = Math.max(2.2, Math.min(dist, enter - 0.1))
+    }
+    camOffset.multiplyScalar(dist / CAM_DIST)
+    camOffset.y = 2.45 - rb * 0.15 - (CAM_DIST - dist) * 0.15 // dip when tucked in, and when running
+
     const target = live.player.clone().add(camOffset)
+    /* עומדים במקום, והפריים קפוא לגמרי: המצלמה נעולה, השחקן סטטי,
+       ורק גרגרי האבק זזים. נשימה איטית מתחת לסף המודע היא ההבדל
+       בין „המשחק רץ“ לבין „זה צילום מסך“. היא נכבית ברגע שזזים. */
+    const still = 1 - Math.min(1, gait * 3)
+    if (still > 0.01) {
+      idleT.current += dt
+      target.y += Math.sin(idleT.current * 0.45) * 0.035 * still
+      target.x += Math.sin(idleT.current * 0.31) * 0.02 * still
+    }
     camera.position.lerp(target, Math.min(1, dt * 5))
-    camera.lookAt(live.player.x, live.player.y + 1.45, live.player.z)
+    /* הפריים נפתח לכיוון ההליכה במקום להיות ממורכז על הגב, וככל
+       שרצים מהר יותר — יותר. */
+    const lead = 0.9 * rb
+    camera.lookAt(
+      live.player.x + Math.sin(heading.current) * lead,
+      live.player.y + 1.5,
+      live.player.z + Math.cos(heading.current) * lead,
+    )
   })
 
+  /* Undyed wool, not bleached cotton. The model's robe and head cloth are pure
+     white, which reads as a modern Gulf thobe and ghutra — the wrong century
+     entirely — and under a midday sun it clipped to a flat white silhouette
+     with no folds left in it. Multiplying the texture by the colour undyed
+     sheep's wool actually is puts the century back and keeps the cloth inside
+     the exposure. */
+  /* בלי tint. ב-three.js material.color מכפיל את טקסטורת הבסיס, ולכן
+     ה-'#d6c5a6' שישב כאן הכהה כל פיקסל של השחקן ב-16%-35% ודחף אותו
+     לצהוב — הוא היה הדמות היחידה במשחק שהוכהתה ידנית, מול NPC-ים
+     שמוצגים בצבעם המלא. */
   const stand = useNormalizedGLB(MODEL_TRAVELER_STAND, 1.78)
   const stride = useNormalizedGLB(MODEL_TRAVELER_STRIDE, 1.78)
 
@@ -676,170 +1257,199 @@ function Player({ live }: { live: Live }) {
       <group ref={strideRef} visible={false}>
         <primitive object={stride} />
       </group>
+      {/* הכתם שאומר שהשחקן נוגע בקרקע ולא שקוע בה */}
+      <ContactShadow radius={0.5} />
     </group>
   )
 }
 
-/* Projects POI world positions to screen space and writes them straight to the
-   marker DOM nodes; also detects the nearest interactable POI. */
-/* A person standing at a point of interest. They are who the dialogue bubble
-   quotes, so a point without a speaker simply has nobody there and shows no
-   bubble. Placed a step to the side of the marker so they never cover it. */
-export function speakerSpot(poi: Poi) {
-  if (poi.speaker?.x != null && poi.speaker.z != null) {
-    return { x: poi.speaker.x, z: poi.speaker.z }
-  }
-  const ry = poi.speaker?.ry ?? 0
-  const off = 1.15
-  return { x: poi.x + Math.sin(ry + Math.PI / 2) * off, z: poi.z + Math.cos(ry + Math.PI / 2) * off }
-}
 
-function Speaker({ poi }: { poi: Poi }) {
-  const idle = useRef<THREE.Group>(null)
-  const standRef = useRef<THREE.Group>(null)
-  const strideRef = useRef<THREE.Group>(null)
-  const speaker = poi.speaker
-  const pose = speaker?.pose ?? 'stand'
-  const model = useNormalizedGLB(speaker?.model ?? MODEL_TRAVELER_STAND, speaker?.height ?? 1.74, speaker?.tint)
-  const actionModel = useNormalizedGLB(pose === 'water' ? MODEL_TRAVELER_WATER : MODEL_TRAVELER_STRIDE, speaker?.height ?? 1.74, speaker?.tint)
-  const ry = speaker?.ry ?? 0
-  const build = speaker?.build ?? 1
-  const accent = speaker?.accent ?? '#d8c79f'
-  const { x, z } = speakerSpot(poi)
-  const phase = useMemo(
-    () => [...poi.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) * 0.37,
-    [poi.id],
-  )
-  useFrame(({ clock }) => {
-    if (!idle.current) return
-    const t = clock.elapsedTime + phase
-    const pacing = pose === 'pace'
-    const paceSpeed = Math.cos(t * 0.48)
-    const drawingWater = pose === 'water'
-    const waterCycle = Math.sin(t * 0.82)
-    /* Each role has a restrained, local performance. Even the pacing guide
-       stays within half a metre of the fixed interaction point. */
-    idle.current.position.x = pacing ? Math.sin(t * 0.48) * 0.55 : 0
-    idle.current.position.z = drawingWater ? Math.max(0, waterCycle) * 0.1 : 0
-    idle.current.position.y = Math.sin(t * 1.25) * 0.014
-    idle.current.rotation.x = (pose === 'work' ? 0.1 : drawingWater ? 0.035 + Math.max(0, waterCycle) * 0.035 : 0)
-      + Math.sin(t * 0.72) * (pose === 'work' ? 0.018 : 0.006)
-    idle.current.rotation.y = pacing ? (paceSpeed >= 0 ? Math.PI / 2 : -Math.PI / 2) : 0
-    idle.current.rotation.z = Math.sin(t * 0.58 + 1.4) * 0.009
-    const showAction = (pacing && Math.abs(paceSpeed) > 0.12 && Math.sin(t * 7) > -0.15)
-      || (drawingWater && waterCycle > -0.45)
-    if (standRef.current) standRef.current.visible = !showAction
-    if (strideRef.current) strideRef.current.visible = showAction
-  })
-  return (
-    <group position={[x, 0, z]} rotation={[0, ry, 0]}>
-      <group ref={idle} scale={[build, 1, build]}>
-        <group ref={standRef}>
-          <primitive object={model} />
-        </group>
-        <group ref={strideRef} visible={false}>
-          <primitive object={actionModel} />
-        </group>
-        {speaker?.accessory === 'cap' && (
-          <mesh position={[0, pose === 'sit' ? 1.19 : 1.61, 0]} castShadow>
-            <cylinderGeometry args={[0.1, 0.115, 0.075, 20]} />
-            <meshStandardMaterial color={accent} roughness={0.95} />
-          </mesh>
-        )}
-        {speaker?.accessory === 'turban' && (
-          <group position={[0, 1.69, 0]}>
-            <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
-              <torusGeometry args={[0.115, 0.045, 8, 24]} />
-              <meshStandardMaterial color={accent} roughness={1} />
-            </mesh>
-            <mesh position={[0, 0.025, 0]} castShadow>
-              <sphereGeometry args={[0.115, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
-              <meshStandardMaterial color={accent} roughness={1} />
-            </mesh>
-          </group>
-        )}
-        {speaker?.accessory === 'staff' && (
-          <mesh position={[-0.34, 0.78, 0.02]} rotation={[0, 0, -0.08]} castShadow>
-            <cylinderGeometry args={[0.025, 0.035, 1.58, 10]} />
-            <meshStandardMaterial color={accent} roughness={1} />
-          </mesh>
-        )}
-      </group>
-      {pose === 'sit' && (
-        <group position={[-0.14, 0, 0]}>
-          <mesh position={[0, 0.43, 0]} castShadow receiveShadow>
-            <boxGeometry args={[0.46, 0.09, 0.4]} />
-            <meshStandardMaterial color="#76502e" roughness={1} />
-          </mesh>
-          {[-1, 1].flatMap((sx) => [-1, 1].map((sz) => (
-            <mesh key={`${sx}:${sz}`} position={[sx * 0.17, 0.21, sz * 0.14]} castShadow>
-              <boxGeometry args={[0.055, 0.42, 0.055]} />
-              <meshStandardMaterial color="#4f321d" roughness={1} />
-            </mesh>
-          )))}
-        </group>
-      )}
-    </group>
-  )
-}
-
-/** Authored, textured 3D teaching board. The full lesson opens on interaction. */
-function ConceptBoard({ poi }: { poi: Poi }) {
-  return <Prop url={MODEL_CONCEPT_BOARD} x={poi.x} z={poi.z} ry={0.55} height={1.95} />
-}
-
-function MarkerProjector({ live, done, onNearChange }: {
+/* Projects each placed character's approach ring to screen space and writes it
+   straight to the DOM node — no per-frame React state. Also reports who is
+   close enough to talk to. */
+function MarkerProjector({ live, onNearChange, onNearFind, onAtTask, met, found, solved }: {
   live: Live
-  done: Set<string>
-  onNearChange: (id: string | null) => void
+  onNearChange: (who: string | null) => void
+  onNearFind: (id: string | null) => void
+  onAtTask: (at: boolean) => void
+  /** has this character said everything they have to say? */
+  met: (who: string) => boolean
+  found: string[]
+  solved: string[]
 }) {
   const { camera, size } = useThree()
   const v = useMemo(() => new THREE.Vector3(), [])
+  /* read through refs: the frame loop must never act on a stale render */
+  const foundRef = useRef(found)
+  foundRef.current = found
+  const solvedRef = useRef(solved)
+  solvedRef.current = solved
 
   useFrame(() => {
-    let nearest: string | null = null
-    let nearestDist = 3.6
-    for (const poi of station.pois) {
-      const el = live.markerEls.get(poi.id)
-      if (!el) continue
-      const interactionSpot = poi.speaker ? speakerSpot(poi) : { x: poi.x, z: poi.z }
-      const markerY = poi.speaker?.pose === 'sit' ? 1.58 : poi.speaker ? 2.1 : 0
-      v.set(interactionSpot.x, markerY, interactionSpot.z)
+    /* The gate onward, marked in the world itself. Every region has two ways
+       out and nothing on screen said which one continued the journey, so the
+       only way to find the road was to walk the whole boundary. The pin fades
+       in past talking distance so it never sits on top of a conversation. */
+    const gateEl = live.markerEls.get('__gate')
+    const gate = ONWARD ? campLayout.exits?.find((e) => e.to === ONWARD) : null
+    if (gateEl && gate) {
+      /* Anchored above head height, and above the character bubbles too: at
+         2.6 m the distance sat behind whoever happened to be standing between
+         you and the gate. */
+      v.set(gate.x, 5.2, gate.z)
       v.project(camera)
+      const away = Math.hypot(live.player.x - gate.x, live.player.z - gate.z)
       const behind = v.z > 1
-      const x = (v.x * 0.5 + 0.5) * size.width
-      const y = (-v.y * 0.5 + 0.5) * size.height
-      el.style.display = behind ? 'none' : ''
-      if (!behind) el.style.transform = `translate(-50%,-100%) translate(${x}px,${y}px)`
-      const d = Math.hypot(live.player.x - interactionSpot.x, live.player.z - interactionSpot.z)
-      el.classList.toggle('is-near', d < 3.6)
-      if (d < nearestDist) {
-        nearestDist = d
-        nearest = poi.id
+      gateEl.style.display = behind || away < 5 ? 'none' : ''
+      if (!behind) {
+        gateEl.style.transform = `translate(-50%,-100%) translate(${(v.x * 0.5 + 0.5) * size.width}px,${(-v.y * 0.5 + 0.5) * size.height}px)`
+        const m = gateEl.querySelector('.poi-gate-dist')
+        if (m) m.textContent = `${Math.round(away)} מ׳`
       }
     }
-    if (nearest !== live.nearPoiId) {
-      live.nearPoiId = nearest
-      onNearChange(nearest)
+    /* (המרחק אל הדמות הקרובה נמדד כאן פעם, כדי להכריע בין E של
+       שיחה ל-E של תחנת משימה. ההכרעה עברה לסדר הטיפול במקש, ולכן
+       הלולאה על כל הדמויות בכל פריים נמחקה איתה.) */
+
+    /* What is within reach on the ground. Same frame as the character check,
+       so a find, a task station and a person all decide together which prompt
+       the HUD is allowed to show — two prompts at once reads as a bug. */
+    let bestFind: string | null = null
+    let bestFindDist = FIND_RANGE
+    for (const fd of REGION_FINDS) {
+      /* עדות שכבר נבדקה עדיין מקבלת סמן — כבוי, בזית, בלי תווית.
+         עד עכשיו הסמן פשוט נעלם, וחזרה למקום נראתה כמו סמן שנשבר
+         במקום כמו „את זה כבר ראיתי“. הוא רק לא נספר יותר בתור
+         הדבר הקרוב שאפשר ללחוץ עליו. */
+      const done = foundRef.current.includes(fd.id)
+      const d = Math.hypot(live.player.x - fd.x, live.player.z - fd.z)
+      if (!done && d < bestFindDist) { bestFindDist = d; bestFind = fd.id }
+      const el = live.markerEls.get('find:' + fd.id)
+      if (el) {
+        v.set(fd.x, groundYAt(fd.x, fd.z) + fd.h + 0.55, fd.z)
+        v.project(camera)
+        const behind = v.z > 1
+        el.style.display = behind ? 'none' : ''
+        if (!behind)
+          el.style.transform = `translate(-50%,-100%) translate(${(v.x * 0.5 + 0.5) * size.width}px,${(-v.y * 0.5 + 0.5) * size.height}px)`
+        el.classList.toggle('is-near', !done && d < FIND_RANGE)
+        el.classList.toggle('is-done', done)
+      }
+    }
+    if (bestFind !== live.nearFind) {
+      live.nearFind = bestFind
+      onNearFind(bestFind)
     }
 
-    /* Anchor the speech bubble over the speaker's head. A fixed bar at the
-       bottom of the screen never told you WHO was talking; sitting on the
-       character does. */
-    const bubble = live.bubbleEl
-    const target = live.bubblePoi
-    if (bubble && target) {
-      const spot = speakerSpot(target)
-      v.set(spot.x, target.speaker?.pose === 'sit' ? 1.62 : 2.15, spot.z)
+    if (REGION_TASK) {
+      const d = Math.hypot(live.player.x - REGION_TASK.x, live.player.z - REGION_TASK.z)
+      /* The station and the person who sets the task stand in the same corner of
+         the region — the envoy is two metres from his own toll scale. Both want
+         E, so E goes to whichever you are actually closer to; otherwise the
+         person wins every time and the station can never be used at all. */
+      /* היה כאן גם `d < taskVsPerson`, כלומר המשימה נחשבת בהישג יד
+         רק כשעומדים קרוב אליה יותר מאשר לאדם. במעבר הגבול מאזני
+         המכס עומדים 2.25 מטר מהשליח, ולכן ההנחיה הבהבה עם כל תזוזה
+         קטנה — ובמעבר מלא של הפרק המשימה הזאת פשוט לא נפתחה. הטווח
+         עומד עכשיו בפני עצמו, וההכרעה בין השניים עברה למקום שבו היא
+         שייכת: סדר הטיפול במקש. */
+      const at = d < TASK_RANGE && !solvedRef.current.includes(REGION_TASK.id)
+      if (at !== live.atTask) { live.atTask = at; onAtTask(at) }
+      const el = live.markerEls.get('task')
+      if (el) {
+        v.set(REGION_TASK.x, groundYAt(REGION_TASK.x, REGION_TASK.z) + REGION_TASK.h + 0.9, REGION_TASK.z)
+        v.project(camera)
+        const behind = v.z > 1 || solvedRef.current.includes(REGION_TASK.id)
+        el.style.display = behind ? 'none' : ''
+        if (!behind)
+          el.style.transform = `translate(-50%,-100%) translate(${(v.x * 0.5 + 0.5) * size.width}px,${(-v.y * 0.5 + 0.5) * size.height}px)`
+        el.classList.toggle('is-near', at)
+      }
+    }
+
+    let nearest: string | null = null
+    let nearestDist = TALK_RANGE
+    for (const c of CAST) {
+      const el = live.markerEls.get(c.who)
+      if (!el) continue
+      v.set(c.x, 2.1, c.z)
       v.project(camera)
       const behind = v.z > 1
-      bubble.style.visibility = behind ? 'hidden' : ''
+      el.style.display = behind ? 'none' : ''
       if (!behind) {
-        const edge = bubble.classList.contains('is-open') ? 200 : 36
-        const bx = THREE.MathUtils.clamp((v.x * 0.5 + 0.5) * size.width, edge, size.width - edge)
-        const by = THREE.MathUtils.clamp((-v.y * 0.5 + 0.5) * size.height, 90, size.height - 120)
-        bubble.style.transform = `translate(-50%,-100%) translate(${bx}px,${by}px)`
+        const x = (v.x * 0.5 + 0.5) * size.width
+        const y = (-v.y * 0.5 + 0.5) * size.height
+        el.style.transform = `translate(-50%,-100%) translate(${x}px,${y}px)`
       }
+      const d = Math.hypot(live.player.x - c.x, live.player.z - c.z)
+      /* A speaker with nothing left to say must stop calling you over — the
+         bubble hanging above a finished conversation reads as an unfinished
+         one, and sends the learner back across the region for nothing. */
+      const done = met(c.who)
+      el.classList.toggle('is-done', done)
+      el.classList.toggle('is-near', !done && d < TALK_RANGE)
+      if (!done && d < nearestDist) {
+        nearestDist = d
+        nearest = c.who
+      }
+    }
+    if (nearest !== live.nearWho) {
+      live.nearWho = nearest
+      onNearChange(nearest)
+    }
+  })
+  return null
+}
+
+/* The seam between regions. The chapter is one journey along one road, so the
+   road's ends are doors: stand in one and the next region opens with you
+   already inside its matching gate, facing in. Watched here rather than in the
+   movement code so it stays a property of the world, not of walking. */
+/** Closest approach of the step a→b to the point c. */
+function segmentHitsCircle(a: { x: number; z: number }, b: { x: number; z: number }, c: { x: number; z: number }) {
+  const dx = b.x - a.x
+  const dz = b.z - a.z
+  const len2 = dx * dx + dz * dz
+  if (len2 < 1e-8) return Math.hypot(a.x - c.x, a.z - c.z)
+  const t = Math.max(0, Math.min(1, ((c.x - a.x) * dx + (c.z - a.z) * dz) / len2))
+  return Math.hypot(a.x + dx * t - c.x, a.z + dz * t - c.z)
+}
+
+function ExitWatcher({ live, onReach }: { live: Live; onReach: (to: string, label: string) => void }) {
+  /* Undefined until the first frame, then true if the traveller BEGAN inside a
+     gate. Four regions spawn their player within their own back-gate circle, and
+     you always arrive standing in the gate you came through — in both cases
+     firing on contact would eject the player on the frame the region loads.
+     A gate only triggers once you have stepped out of it and back in. */
+  const armed = useRef<boolean | null>(null)
+  const was = useRef<{ x: number; z: number } | null>(null)
+  useFrame(() => {
+    const exits = WORLD.layout.exits
+    if (!exits?.length) return
+    const prev = was.current ?? { x: live.player.x, z: live.player.z }
+    was.current = { x: live.player.x, z: live.player.z }
+    let inside: { to: string; label: string } | null = null
+    for (const e of exits) {
+      /* Test the whole step, not just where the frame ended: at low frame rates
+         a stride can clear the gate entirely, and a crossing you can run past
+         is a crossing that looks broken. */
+      if (segmentHitsCircle(prev, live.player, e) < e.r) {
+        inside = { to: e.to, label: e.label }
+        break
+      }
+    }
+    /* fire once on entering, and re-arm only after leaving — otherwise the
+       crossing retriggers every frame you stand in the gate */
+    if (armed.current === null) {
+      /* first frame: if we start in a gate, hold it disarmed until we leave */
+      armed.current = !!inside
+      return
+    }
+    if (inside && !armed.current) {
+      armed.current = true
+      onReach(inside.to, inside.label)
+    } else if (!inside) {
+      armed.current = false
     }
   })
   return null
@@ -859,14 +1469,14 @@ interface CampProp {
   h: number
   r: number
   tint?: string
+  sink?: number
+  widen?: number
 }
 
-/* Placement comes from camp-layout.json, which round-trips through Blender:
-   `npm run camp:export` writes blender/camp.blend, you edit it visually, and
-   `npm run camp:import` writes the JSON back. Model names in the JSON map to
-   the GLB files by filename. */
+/* Model names inside a layout map to the GLB files by filename; the handful
+   that were imported under a different name are listed here. */
 const MODEL_BY_NAME: Record<string, string> = {
-  tent2: MODEL_TENT,
+  blacktent: MODEL_TENT,
   firepit: MODEL_FIREPIT,
   torch: MODEL_TORCH,
   palm: MODEL_PALM,
@@ -878,34 +1488,181 @@ const MODEL_BY_NAME: Record<string, string> = {
   camel: MODEL_CAMEL,
 }
 
-const CAMP: CampProp[] = campLayout.props.map((p) => ({
-  url: MODEL_BY_NAME[p.model] ?? `/assets/chapter1/models/${p.model}.glb`,
-  x: p.x,
-  z: p.z,
-  ry: p.ry,
-  h: p.h,
-  r: p.r,
-  tint: p.model === 'cactus' || p.model === 'cactus-2' ? '#4f7d3a' : undefined,
-  role: (p as { role?: string }).role,
-}))
+/** Everything the engine needs to stand a region up, derived from its layout. */
+interface WorldDef {
+  layout: Layout
+  props: CampProp[]
+  colliders: Collider[]
+  herd: Layout['herd']
+  cast: Placement[]
+}
 
-/* Derived at module scope from CAMP itself. This used to be copied into mutable
-   state inside an effect, which meant a hot reload (or any change to CAMP that
-   did not remount the World) left the OLD footprints in place — invisible walls
-   where props used to stand, and no collision on the ones actually rendered. */
-const STATIC_COLLIDERS: Collider[] = [
-  ...CAMP.map((p) => ({ x: p.x, z: p.z, r: p.r })),
-  { ...campLayout.campfire }, // campfire hearth
-]
+function buildWorld(regionId: string, layout: Layout): WorldDef {
+  /* `worn-patch` is a ground decal drawn by <WornPatch/>, and `collider` is
+     pure footprint — an invisible circle for masonry the walk-through models
+     don't describe (the gate piers). Neither is a GLB. */
+  const props: CampProp[] = layout.props
+    .filter((p) => p.model !== 'worn-patch' && p.model !== 'collider')
+    .map((p) => ({
+    url: MODEL_BY_NAME[p.model] ?? `/assets/chapter1/models/${p.model}.glb`,
+    x: p.x,
+    z: p.z,
+    ry: p.ry,
+    h: p.h,
+    r: p.r,
+    tint: p.tint,
+    sink: p.sink,
+    widen: p.widen,
+    role: p.role,
+  }))
+  return {
+    layout,
+    props,
+    /* Derived from the props themselves, once. This used to be copied into
+       mutable state inside an effect, which meant a hot reload (or any change
+       that did not remount the World) left the OLD footprints in place —
+       invisible walls where props used to stand, and no collision on the ones
+       actually rendered. */
+    /* `r: 0` means "no footprint", and it has to mean that here too. Without
+       this filter every zero-radius prop still blocked a circle the width of
+       the player: an invisible post under each pergola and inside each desert
+       bush — and, worst of all, one dead in the middle of the gate-post's
+       archway, which sealed the only opening in the border wall and made the
+       chapter impossible to finish on foot. */
+    colliders: [
+      ...props.filter((p) => p.r > 0).map((p) => ({ x: p.x, z: p.z, r: p.r })),
+      ...layout.props
+        .filter((p) => p.model === 'collider' && p.r > 0)
+        .map((p) => ({ x: p.x, z: p.z, r: p.r })),
+      { ...layout.campfire },
+    ],
+    herd: layout.herd,
+    cast: PLACEMENTS[regionId] ?? [],
+  }
+}
 
-/** Elliptical patrol routes, kept clear of every CAMP entry. */
-const HERD = campLayout.herd
+/* Built once per region at module load, so a region's footprints can never go
+   stale and switching regions is a lookup rather than a rebuild. */
+const WORLDS: Record<string, WorldDef> = Object.fromEntries(
+  Object.entries(LAYOUTS).map(([id, layout]) => [id, buildWorld(id, layout)]),
+)
 
-/** Drop scattered spots that would clash with a prop or a point of interest. */
+/* The region being played. Everything below reads the world through this, so
+   the engine no longer knows the name of any particular place. */
+const WORLD: WorldDef = WORLDS[REGION.id]
+
+/* Warm the cache for every model this region actually stands on. Without this,
+   models the preload list above doesn't know about (anything that exists only
+   in a layout) decode mid-walk — a multi-second frame freeze the first time
+   the player turns toward them. */
+for (const url of new Set(WORLD.props.map((p) => p.url))) useGLTF.preload(url)
+const CAMP = WORLD.props
+const STATIC_COLLIDERS = WORLD.colliders
+const HERD = WORLD.herd
+const campLayout = WORLD.layout
+const CAST = WORLD.cast
+
+/* A track is not a different material from the ground it is worn into — it is
+   the same earth, trodden flat and a shade darker. Painting every region's road
+   in the same pale sand put a bright yellow stripe across the grey scree of the
+   pass and the black soil of Mecca; both read as something spilled rather than
+   something walked. Both the texture and the colour now come from whatever the
+   region itself is standing on. */
+const ROAD_GROUND = campLayout.terrain?.ground ?? 'sand.jpg'
+const ROAD_TINT = (() => {
+  const t = campLayout.terrain?.tint ?? '#cbb083'
+  const rgb = (t.slice(1).match(/../g) ?? ['cb', 'b0', '83']).map((h) => parseInt(h, 16))
+  return '#' + rgb.map((v) => Math.round(v * 0.72).toString(16).padStart(2, '0')).join('')
+})()
+const ROAD_MAT = {
+  transparent: true,
+  depthWrite: false,
+  color: ROAD_TINT,
+  roughness: 1,
+  polygonOffset: true,
+  polygonOffsetFactor: -1,
+} as const
+
+/* אור מילוי שנוסע עם המצלמה.
+
+   השמש באזורים רבים עומדת מאחורי השחקן או מהצד, ולכן פנים של דמות
+   שמסתובבת אליו נופלות לצל מלא. הורדת האור העקיף שהחזירה נפח לנוף
+   העמיקה בדיוק את הבעיה הזאת. אור חלש מכיוון הצופה מחזיר קריאוּת
+   לפנים ולידיים בלי לשנות מאיפה נופלים הצללים בעולם — ולכן הוא
+   לא מטיל צל בעצמו.*/
+/* מוקצים פעם אחת: כל אלה רצים בכל פריים */
+const FILL_FWD = new THREE.Vector3()
+const MOVE_DIR = new THREE.Vector3(0, 0, -1)
+const WORLD_UP = new THREE.Vector3(0, 1, 0)
+
+function ViewerFill({ intensity }: { intensity: number }) {
+  const ref = useRef<THREE.DirectionalLight>(null)
+  const { camera } = useThree()
+  useFrame(() => {
+    const l = ref.current
+    if (!l) return
+    /* מעט מעל ומימין לצופה, כדי שהמילוי ייקרא כאור סביבה ולא
+       כפנס שמוצמד לפנים.
+
+       המקור והמטרה חלקו קודם את אותם x ו-z, ולכן הכיוון היה בדיוק
+       (0,-1,0) — אור מלמעלה שנגרר אחרי המצלמה. ב-DirectionalLight
+       רק הכיוון קובע, ופנים הן משטח אנכי, ולכן N·L היה כמעט אפס:
+       האור האיר חול וכתפיים ולא נגע בדבר היחיד שבשבילו הוא קיים.
+       עכשיו הוא מכוון קדימה אל תוך הסצנה, ומוסט הצידה כדי שיישאר
+       מילוי ולא פנס חזיתי. */
+    FILL_FWD.set(0, 0, -1).applyQuaternion(camera.quaternion)
+    FILL_FWD.y = 0
+    if (FILL_FWD.lengthSq() < 1e-6) FILL_FWD.set(0, 0, -1)
+    FILL_FWD.normalize()
+    l.position.copy(camera.position)
+    l.position.y += 2.2
+    l.position.x -= FILL_FWD.z * 2.6
+    l.position.z += FILL_FWD.x * 2.6
+    l.target.position.set(
+      camera.position.x + FILL_FWD.x * 7,
+      0.95,
+      camera.position.z + FILL_FWD.z * 7,
+    )
+    l.target.updateMatrixWorld()
+  })
+  return (
+    <directionalLight ref={ref} intensity={intensity} color="#fff0e0" castShadow={false} />
+  )
+}
+
+/* The hour this region is played at. The default is the low dusk the desert
+   regions were lit for; a region that wants its own time of day says so in its
+   layout and everything downstream — sky, fog, sun, fill, exposure — follows. */
+const MOOD = {
+  fog: campLayout.mood?.fog ?? { color: '#e2b285', near: 60, far: 460 },
+  fill: campLayout.mood?.fill ?? { sky: '#ffeeda', ground: '#c2a687', intensity: 1.28 },
+  sun: campLayout.mood?.sun ?? { position: [-18, 9, -14], color: '#ffd9a0', intensity: 3.6 },
+  /* כמה אור מגיע מכיוון הצופה. זה היה מספר קבוע וגבוה — 1.55 — בכל
+     תשעת האזורים, כלומר פי 3.7 עד 7.8 מהאור העקיף שכל אזור מגדיר
+     לעצמו. אור מילוי שגדול פי כמה מהתאורה שהוא אמור להשלים אינו
+     משלים אותה אלא מוחק אותה: הוא שיטח את כל תשעת העולמות לאותו
+     תצלום שטוח, והתגובה לזה הייתה להעלות את השמש בכל אזור בנפרד —
+     מה שרק העלה את הכל יחד. עכשיו זה שייך ל-mood כמו כל השאר. */
+  viewerFill: campLayout.mood?.viewerFill ?? 0.42,
+}
+const SUN_POS = MOOD.sun.position as [number, number, number]
+
+/* The next region on the road, or null at the overlook where it ends. The
+   minimap marks this gate in gold: a region you can walk out of in two
+   directions and no sign of which one is onward is a region you get lost in. */
+const ONWARD: string | null = PLAYABLE[PLAYABLE.indexOf(REGION.id) + 1] ?? null
+
+/* What there is to do here besides listen: the evidence lying about, and the
+   one thing this region asks you to work out. Both are data — adding either to
+   a region is an edit to finds.ts or tasks.ts, never to this file. */
+const REGION_FINDS = findsIn(REGION.id)
+const REGION_TASK = taskIn(REGION.id)
+
+/** Drop scattered spots that would clash with a prop or a person standing there. */
 function filterFree(spots: { x: number; z: number; k: number }[], pad: number) {
   return spots.filter((p) => {
     for (const c of CAMP) if (Math.hypot(p.x - c.x, p.z - c.z) < c.r + pad) return false
-    for (const poi of station.pois) if (Math.hypot(p.x - poi.x, p.z - poi.z) < 1.6 + pad) return false
+    for (const c of CAST) if (Math.hypot(p.x - c.x, p.z - c.z) < 1.6 + pad) return false
     return Math.hypot(p.x, p.z + 6) > 2.4 // campfire
   })
 }
@@ -1003,48 +1760,160 @@ function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
   )
 }
 
-function World({ live, done, onNearChange }: {
+/* Rawi walks the whole journey at the player's shoulder. His spot is anchored
+   to the direction the player is TRAVELLING, never to the camera: looking
+   around should not make your companion scurry in a circle around you. While
+   the player stands still the target stays put, so a mouse drag leaves Rawi
+   exactly where he was — he only turns his body to keep facing you. */
+const RAWI_SIDE = 1.45
+const RAWI_SPEED = 3.4
+const RAWI_WALK_GAP = 0.45
+const PLAYER_MOVE_EPS = 0.004
+
+function RawiCompanion({ live, talking, gesture }: {
   live: Live
-  done: Set<string>
-  onNearChange: (id: string | null) => void
+  talking: boolean
+  gesture: RawiClip
+}) {
+  /* המדריך התחיל בנקודה קבועה שהיא נקודת הפתיחה של המחנה — באזור
+     הראשון היא 21 מטר קדימה, ולכן הוא עמד באמצע השדה עד הצעד
+     הראשון של השחקן ואז זינק אחורה. הוא מתחיל ליד מי שהוא מלווה. */
+  const spawn = useMemo(entryPoint, [])
+  const pos = useRef(new THREE.Vector3(spawn.x + RAWI_SIDE, 0, spawn.z))
+  const look = useRef(new THREE.Vector3())
+  const target = useRef(new THREE.Vector3(spawn.x + RAWI_SIDE, 0, spawn.z))
+  const prevPlayer = useRef(new THREE.Vector3(spawn.x, 0, spawn.z))
+  const [clip, setClip] = useState<RawiClip>('idle')
+  const clipRef = useRef<RawiClip>('idle')
+
+  useFrame((_, dt) => {
+    const p = live.player
+    const dx = p.x - prevPlayer.current.x
+    const dz = p.z - prevPlayer.current.z
+    const stepped = Math.hypot(dx, dz)
+
+    // re-anchor only while actually walking, using the travel heading
+    if (stepped > PLAYER_MOVE_EPS) {
+      const heading = Math.atan2(dx, dz)
+      target.current.set(
+        p.x + Math.sin(heading + Math.PI / 2) * RAWI_SIDE,
+        0,
+        p.z + Math.cos(heading + Math.PI / 2) * RAWI_SIDE,
+      )
+    }
+    prevPlayer.current.set(p.x, 0, p.z)
+
+    const gap = pos.current.distanceTo(target.current)
+    const moving = gap > RAWI_WALK_GAP && !talking
+    if (moving) {
+      /* הראוי הלך ב-3.4 מ״ש בזמן שהריצה היא 6, ובלי שום איבר של
+         השגה — כלומר ספרינט אחד לרוחב האזור הראשון השאיר את המדריך
+         כ-21 מטר מאחור, ומשם הוא כבר לא היה במסך בכלל. מדריך שאפשר
+         לאבד הוא לא מדריך. הפער עצמו קובע את המהירות: קרוב — הליכה,
+         רחוק — הוא מדלג חזרה לכתף ומתייצב. */
+      const speed = gap > 4 ? 6.6 : gap > 2 ? 4.6 : RAWI_SPEED
+      const stepLen = Math.min(speed * dt, gap - RAWI_WALK_GAP * 0.5)
+      pos.current.lerp(target.current, stepLen / gap)
+      look.current.copy(target.current)
+    } else {
+      look.current.set(p.x, 0, p.z)
+    }
+    const want: RawiClip = talking ? gesture : moving ? 'walk' : 'idle'
+    if (want !== clipRef.current) {
+      clipRef.current = want
+      setClip(want)
+    }
+  })
+
+  return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} />
+}
+
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, onExit, met, found, solved }: {
+  live: Live
+  onNearChange: (who: string | null) => void
+  onNearFind: (id: string | null) => void
+  onAtTask: (at: boolean) => void
+  met: (who: string) => boolean
+  found: string[]
+  solved: string[]
+  talking: boolean
+  gesture: RawiClip
+  /** which placed character is mid-sentence, so only they gesture */
+  speakingWho: string | null
+  onExit: (to: string, label: string) => void
 }) {
   /* Scatter rocks and shrubs only where they don't intersect a placed prop or
-     a point of interest — this is what stops models growing through each other. */
-  const rockSpots = useMemo(() => filterFree(scatterRing(11, 10, 23, 11), 1.6), [])
-  const shrubSpots = useMemo(() => filterFree(scatterRing(18, 6, 23, 5), 1.1), [])
+     a person standing there — this is what stops models growing through each other.
+     The ring is the night-camp's dressing; other regions place everything through
+     their layout, so the ring must not leak into them (the agave shrub is also a
+     New-World plant — period-wrong everywhere but grandfathered in the camp). */
+  const scattered = WORLD.layout.scatter !== false && REGION.id === 'night-camp'
+  const rockSpots = useMemo(() => (scattered ? filterFree(scatterRing(11, 10, 23, 11), 1.6) : []), [scattered])
+  const shrubSpots = useMemo(() => (scattered ? filterFree(scatterRing(18, 6, 23, 5), 1.1) : []), [scattered])
 
   return (
     <>
       <Sky />
-      <fog attach="fog" args={['#eec9a4', 80, 380]} />
-      <hemisphereLight args={['#fff6ea', '#b39a7c', 1.35]} />
-      {/* sun matches the panorama's glow (low, warm, from -x) */}
+      {/* Fog colour tracks the panorama's horizon band so distance melts into
+          sky instead of cutting out against it. Every value here is the
+          region's own — see `mood` in worlds.ts — with the border post's dusk
+          as the default any region can simply not override. */}
+      <fog attach="fog" args={[MOOD.fog.color, MOOD.fog.near, MOOD.fog.far]} />
+      {/* fill low enough for form, high enough that the shadow side of rock
+          reads as stone rather than a black cut-out */}
+      <hemisphereLight args={[MOOD.fill.sky, MOOD.fill.ground, MOOD.fill.intensity]} />
+      {/* מילוי מכיוון הצופה. בלעדיו כל פנים שהשמש מאחוריהן נקראות
+          כחור שחור מתחת לכיסוי הראש — וזה מה שגורם לדמות טובה
+          להיראות שבורה. הוא חלש בכוונה ולא מטיל צל: תפקידו רק
+          להרים את הצד המוצל של פנים וידיים, בלי לשטח את העולם
+          ובלי להתחרות בשמש שקובעת את הכיוון. */}
+      <ViewerFill intensity={MOOD.viewerFill} />
+      {/* sun agrees with the painted glow, so shadows fall where the sky says
+          they should */}
       <directionalLight
-        position={[-24, 12, 6]}
-        intensity={3.1}
-        color="#ffeacb"
+        position={SUN_POS}
+        intensity={MOOD.sun.intensity}
+        color={MOOD.sun.color}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
-        shadow-camera-left={-30}
-        shadow-camera-right={30}
-        shadow-camera-top={30}
-        shadow-camera-bottom={-30}
-        shadow-camera-far={80}
+        /* 60 m of frustum stopped every shadow ~30 m out, so the walls, tower
+           and outlying rocks stood on unshadowed sand. 100 m covers the whole
+           dressed compound and the road beads either side of it. */
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
+        shadow-camera-far={140}
         shadow-bias={-0.0004}
+        /* המרווח לאורך הנורמל הוגדל: על רשתות מחוספסות ערך נמוך
+           הותיר פסים שחורים לאורך כל פאה. */
+        shadow-normalBias={0.09}
       />
-      {campLayout.terrain?.baked ? (
-        <BakedTerrain
-          url={`/assets/chapter1/models/${campLayout.terrain.model}.glb`}
-          hasImage={!!campLayout.terrain.hasImage}
-          tint={(campLayout.terrain as { tint?: string }).tint}
+      {campLayout.terrain && (
+          <BakedTerrain
+            url={`/assets/chapter1/models/${campLayout.terrain.model}.glb`}
+            hasImage={!!campLayout.terrain.hasImage}
+            tint={(campLayout.terrain as { tint?: string }).tint}
+          />
+        )}
+      {/* evidence lying where it would lie, and the region's task station */}
+      {REGION_FINDS.map((fd) => (
+        <Prop key={fd.id} url={`/assets/chapter1/models/${fd.model}.glb`} x={fd.x} z={fd.z} ry={fd.ry ?? 0} height={fd.h} />
+      ))}
+      {REGION_TASK && (
+        <Prop
+          url={`/assets/chapter1/models/${REGION_TASK.model}.glb`}
+          x={REGION_TASK.x}
+          z={REGION_TASK.z}
+          ry={REGION_TASK.ry ?? 0}
+          height={REGION_TASK.h}
         />
-      ) : (
-        <Terrain />
       )}
+
       {/* every placed prop comes from one spacing-checked layout table */}
       {CAMP.filter((p) => !p.role).map((p, i) => (
-        <Prop key={i} url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} />
+        <Prop key={i} url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} />
       ))}
       {CAMP.filter((p) => p.role === 'campfire').map((p, i) => (
         <Campfire key={i} x={p.x} z={p.z} />
@@ -1059,8 +1928,18 @@ function World({ live, done, onNearChange }: {
       {shrubSpots.map((p, i) => (
         <Prop key={`s${i}`} url={MODEL_SHRUB} x={p.x} z={p.z} ry={p.k * 6.28} height={0.4 + p.k * 0.35} />
       ))}
+      {(campLayout.roads ?? []).map((r, i) =>
+        r.pts ? (
+          <RoadRibbon key={`road${i}`} pts={r.pts} w={r.w} />
+        ) : (
+          <Road key={`road${i}`} x={r.x!} z={r.z!} ry={r.ry} len={r.len!} w={r.w} />
+        ),
+      )}
       {campLayout.rugs.map((r, i) => (
         <Rug key={i} x={r.x} z={r.z} ry={r.ry} />
+      ))}
+      {campLayout.props.filter((p) => p.model === 'worn-patch').map((p, i) => (
+        <WornPatch key={`wp${i}`} x={p.x} z={p.z} r={p.h} />
       ))}
       {campLayout.scrolls.map((r, i) => (
         <Scrolls key={i} x={r.x} z={r.z} />
@@ -1070,219 +1949,267 @@ function World({ live, done, onNearChange }: {
       ))}
       <Pebbles />
       <GrassTufts />
-      {station.pois.filter((p) => p.speaker).map((p) => (
-        <Speaker key={p.id} poi={p} />
-      ))}
-      {station.pois.filter((p) => p.sceneObject === 'concept-board').map((p) => (
-        <ConceptBoard key={p.id} poi={p} />
+      <DustMotes />
+      {CAST.map((c) => (
+        <Npc key={c.who} who={c.who} position={[c.x, groundYAt(c.x, c.z), c.z]} rotationY={c.ry ?? 0} speaking={speakingWho === c.who} playerRef={{ current: live.player }} />
       ))}
       <Player live={live} />
-      <MarkerProjector live={live} done={done} onNearChange={onNearChange} />
+      <RawiCompanion live={live} talking={talking} gesture={gesture} />
+      <MarkerProjector
+        live={live}
+        onNearChange={onNearChange}
+        onNearFind={onNearFind}
+        onAtTask={onAtTask}
+        met={met}
+        found={found}
+        solved={solved}
+      />
+      <ExitWatcher live={live} onReach={onExit} />
     </>
   )
 }
 
 /* ---------------- HUD ---------------- */
 
-function StationPanel({ done, onOpen }: { done: Set<string>; onOpen: (poi: Poi) => void }) {
-  return (
-    <section className="hud-panel hud-station" aria-label="התחנה הנוכחית">
-      <div className="hud-station-head">
-        <span className="hud-station-icon" aria-hidden="true">⛺</span>
-        <div>
-          <p className="hud-station-eyebrow">תחנה {station.number} מתוך {STATION_COUNT_PLANNED}</p>
-          <h2 className="hud-title">{station.name}</h2>
-        </div>
-      </div>
-      <p className="hud-station-desc">{station.short}</p>
-      <div className="hud-progress-row">
-        <span>התקדמות</span>
-        <span className="hud-progress"><i style={{ width: `${(done.size / station.pois.length) * 100}%` }} /></span>
-        <span>{done.size}/{station.pois.length}</span>
-      </div>
-      <ul className="hud-checklist">
-        {station.pois.map((poi) => (
-          <li key={poi.id} className={done.has(poi.id) ? 'is-done' : ''}>
-            <span className="hud-check" aria-hidden="true">{done.has(poi.id) ? '✓' : ''}</span>
-            {done.has(poi.id) || poi.autoDialogue ? (
-              <button type="button" className="hud-reread" onClick={() => onOpen(poi)}>
-                {poi.label}
-                <span className="hud-reread-hint">{done.has(poi.id) ? 'קראו שוב' : 'פתחו'}</span>
-              </button>
-            ) : (
-              poi.label
-            )}
-            {poi.kind === 'required' && <span className="hud-req">חובה</span>}
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
-}
 
 function ControlsPanel({ pressed }: { pressed: Set<string> }) {
+  /* לוח המקשים תפס רבע מהמסך לאורך כל המשחק. הוא נחוץ בדקה
+     הראשונה ומיותר אחריה, ונוכחות קבועה שלו היא מה שגורם למסך
+     להיקרא כהדגמה טכנית ולא כמשחק. הוא נסגר מעצמו ברגע שברור
+     שהשחקן הבין — כלומר אחרי שהוא זז — ונפתח שוב ב-H. */
+  const [open, setOpen] = useState(true)
+  const movedAt = useRef<number | null>(null)
+
+  useEffect(() => {
+    const moving = ['w', 'a', 's', 'd'].some((k) => pressed.has(k))
+    if (moving && movedAt.current === null) movedAt.current = Date.now()
+  }, [pressed])
+
+  /* השעון נמדד מרגע שהלוח נראה, לא מטעינת המסמך. `performance.now()`
+     נספר מתחילת הניווט, ולכן טעינה איטית של האזור ועוד קריינות פתיחה
+     יכלו לבלוע כמעט את כל עשרים ושתיים השניות — והלוח נסגר לפני
+     שהשחקן קיבל שליטה. */
+  const shownAt = useRef(Date.now())
+  useEffect(() => {
+    if (!open) return
+    const t = window.setInterval(() => {
+      /* נסגר 6 שניות אחרי הצעד הראשון, או אחרי 25 שניות בכל מקרה —
+         מי שעומד ולא זז עדיין צריך לראות מה ללחוץ. */
+      const since = movedAt.current ? Date.now() - movedAt.current : 0
+      if ((movedAt.current && since > 6000) || Date.now() - shownAt.current > 25000) setOpen(false)
+    }, 500)
+    return () => window.clearInterval(t)
+  }, [open])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === 'KeyH') setOpen((v) => !v)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   const key = (id: string, label: string) => (
     <i className={'hud-key' + (pressed.has(id) ? ' is-down' : '')}>{label}</i>
   )
+
+  if (!open) {
+    return (
+      <button className="hud-controls-peek" onClick={() => setOpen(true)}>
+        <i className="hud-key">H</i> מקשים
+      </button>
+    )
+  }
+
   return (
-    <section className="hud-panel hud-controls" aria-label="שליטה בתנועה">
-      <h2 className="hud-title">שליטה בתנועה <span className="hud-ver">v8</span></h2>
+    <section className="hud-panel hud-controls" aria-labelledby="ch1-keys-title">
+      <h2 className="hud-title" id="ch1-keys-title">מקשים
+        <button className="hud-controls-close" onClick={() => setOpen(false)} aria-label="לסגור">×</button>
+      </h2>
       <div className="hud-keys">
         <span>{key('w', 'W')} קדימה</span>
         <span>{key('s', 'S')} אחורה</span>
         <span>{key('a', 'A')} שמאלה</span>
         <span>{key('d', 'D')} ימינה</span>
-        <span>{key('shift', 'Shift')} הליכה מהירה</span>
-        <span><i className="hud-key">E</i> חקירה</span>
+        <span>{key('shift', 'Shift')} ריצה</span>
+        {/* מקש שמלמדים אותו ואין לו יעד באזור הזה נקרא כמשחק שבור,
+            לא כאזור ריק: ברמות תימן אין דמויות ואין לראוי מה לומר,
+            ומי שילחץ E או R יקבל שום דבר. המקשים מופיעים היכן
+            שאפשר להשתמש בהם. */}
+        {CAST.length > 0 && <span><i className="hud-key">E</i> שיחה עם דמות</span>}
+        {REGION_TASK && <span><i className="hud-key">E</i> {REGION_TASK.prompt}</span>}
+        <span><i className="hud-key">F</i> להביט מקרוב</span>
+        {REGION.encounters.some((e) => e.speaker === 'rawi') && (
+          <span><i className="hud-key">R</i> שיחה עם רָאוִי</span>
+        )}
+        <span><i className="hud-key">J</i> מחברת</span>
+        <span><i className="hud-key">M</i> מפה</span>
         <span>גרירת עכבר — סיבוב מבט</span>
       </div>
     </section>
   )
 }
 
-/* Speech bubble for the guide — portrait, speaker name, one line of narration
-   and a replay button, matching the reference layout. */
-/** Everything a point of interest teaches, said one line at a time. */
-export function poiScript(poi: Poi): string[] {
-  return [poi.lead, ...poi.bullets]
+
+
+
+/* How each model reads from above. A minimap that shows only people and the
+   player is a compass with no landmarks on it — you cannot tell the market from
+   the pass, and you certainly cannot tell where the road leaves. Everything
+   here is derived from the layout the region is actually built from, so the map
+   can never drift out of step with the world. */
+function planKind(model: string): 'built' | 'stone' | 'green' | 'water' | null {
+  if (/tent|house|tower|wall|gate|way|shrine|kaaba|altar|stall|pergola|ruin/.test(model)) return 'built'
+  if (/rock|boulder|butte|mesa|scree|cliff|stone/.test(model)) return 'stone'
+  if (/palm|shrub|bush|tree|grape|vine|fodder/.test(model)) return 'green'
+  if (/well|cistern|trough|water/.test(model)) return 'water'
+  return null
+}
+const PLAN_FILL: Record<string, string> = {
+  built: 'rgba(96,66,40,.85)',
+  stone: 'rgba(120,110,96,.7)',
+  green: 'rgba(96,116,64,.8)',
+  water: 'rgba(84,124,140,.9)',
 }
 
-/* The bubble IS the teaching surface — there is no separate card. Standing next
-   to a speaker shows their opening line; pressing E walks through the rest one
-   line at a time, and the last line offers the journal. */
-function DialogueBar({ live, poi, open, step, collected, onAdvance, onCollect, onClose }: {
-  live: Live
-  poi: Poi | null
-  open: boolean
-  step: number
-  collected: boolean
-  onAdvance: () => void
-  onCollect: () => void
-  onClose: () => void
-}) {
-  /* Once you have heard someone out, their bubble goes quiet — the camp should
-     not shout its lessons at you forever. Walking up still shows the E prompt,
-     so every character can be asked again. */
-  live.bubblePoi = poi?.speaker && open ? poi : null
-  if (!poi || (!poi.speaker && !poi.autoDialogue)) return null
-  if (!open) return null
-  const script = poiScript(poi)
-  const last = step >= script.length - 1
-  const text = open ? script[Math.min(step, script.length - 1)] : script[0]
-
-  return (
-    <section
-      ref={(el) => {
-        live.bubbleEl = el
-      }}
-      className={'hud-panel hud-dialogue is-open' + (poi.autoDialogue ? ' is-station-intro' : '')}
-      aria-live="polite"
-      aria-label={poi.speaker ? `שיחה עם ${poi.speaker.name}` : poi.title}
-    >
-      <>
-          {poi.speaker?.portrait ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img className="hud-portrait" src={poi.speaker.portrait} alt="" />
-          ) : poi.speaker ? (
-            <span
-              className="hud-portrait hud-speaker-avatar"
-              style={{ borderColor: poi.speaker.accent ?? undefined }}
-              aria-hidden="true"
-            >
-              {poi.speaker.name.trim().charAt(0)}
-            </span>
-          ) : null}
-          <div className="hud-dialogue-body">
-        <h2 className="hud-title">
-          {poi.speaker?.name ?? poi.title}
-          {open && poi.speaker && <span className="hud-dialogue-topic"> · {poi.title}</span>}
-        </h2>
-        {poi.tag && <span className="hud-card-tag">{poi.tag}</span>}
-        <p className={open ? 'is-full' : ''}>{text}</p>
-        <div className="hud-dialogue-actions">
-            <span className="hud-dialogue-count">
-              {Math.min(step + 1, script.length)}/{script.length}
-            </span>
-            {!last ? (
-              <button type="button" className="hud-card-btn" onClick={onAdvance}>המשך</button>
-            ) : !collected ? (
-              <button type="button" className="hud-card-btn is-primary" onClick={onCollect}>הוסיפו למחברת</button>
-            ) : null}
-            <button type="button" className="hud-card-btn" onClick={onClose}>סגירה</button>
-        </div>
-          </div>
-          <button type="button" className="hud-speak" aria-label="השמעת הקריינות">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 9v6h4l5 4V5L8 9H4z" />
-          <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8 8 0 0 1 0 12" />
-        </svg>
-          </button>
-      </>
-    </section>
+/* Drawn once per region: the ground plan never changes while you walk it, and
+   re-deriving it on every position tick was the whole map's cost. */
+const PLAN = (() => {
+  const bound = campLayout.bound ?? 24
+  const shapes = campLayout.props
+    .map((p) => ({ kind: planKind(p.model), x: p.x, z: p.z, r: Math.max(p.r, 0.5) }))
+    .filter((p): p is { kind: 'built' | 'stone' | 'green' | 'water'; x: number; z: number; r: number } => !!p.kind)
+  const roads = (campLayout.roads ?? []).map((r) =>
+    r.pts?.length
+      ? r.pts.map((p) => `${p.x},${p.z}`).join(' ')
+      : (() => {
+          const half = (r.len ?? 0) / 2
+          const s = Math.sin(r.ry ?? 0)
+          const c = Math.cos(r.ry ?? 0)
+          return `${(r.x ?? 0) - s * half},${(r.z ?? 0) - c * half} ${(r.x ?? 0) + s * half},${(r.z ?? 0) + c * half}`
+        })(),
   )
-}
+  return { bound, shapes, roads, exits: campLayout.exits ?? [] }
+})()
 
-function InfoCard({ poi, onCollect, onClose, collected }: {
-  poi: Poi
-  collected: boolean
-  onCollect: () => void
-  onClose: () => void
+function MiniMap({ pos, yaw, met, found, solved }: {
+  pos: { x: number; z: number }
+  yaw: number
+  met: (who: string) => boolean
+  /** ids already collected / already worked out, so the map can grey them out */
+  found: string[]
+  solved: string[]
 }) {
-  return (
-    <section className="hud-panel hud-card" role="dialog" aria-label={poi.title}>
-      {poi.tag && <span className="hud-card-tag">{poi.tag}</span>}
-      <h2 className="hud-title">{poi.title}</h2>
-      <p className="hud-card-lead">{poi.lead}</p>
-      <ul>
-        {poi.bullets.map((b) => (
-          <li key={b}>{b}</li>
-        ))}
-      </ul>
-      <div className="hud-card-actions">
-        {!collected && (
-          <button type="button" className="hud-card-btn is-primary" onClick={onCollect}>הוסיפו למחברת</button>
-        )}
-        <button type="button" className="hud-card-btn" onClick={onClose}>סגירה</button>
-      </div>
-    </section>
-  )
-}
-
-function MiniMap({ pos, yaw, done }: { pos: { x: number; z: number }; yaw: number; done: Set<string> }) {
   const R = 78 // map radius in viewBox units
-  const RANGE = 28 // metres shown from the centre
-  const S = R / RANGE
+  /* The whole region, not a fixed 28 m window. Every layout declares its own
+     walkable radius — Yathrib's is 46 — so a fixed window drew the player
+     walking off the edge of their own map and losing the road entirely. */
+  const S = R / (PLAN.bound + 2)
   const cx = 84
   const cy = 84
+  const onward = PLAN.exits.find((e) => e.to === ONWARD)
   return (
     <div className="hud-panel hud-map" aria-hidden="true">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="hud-map-image" src="/assets/chapter1/tex/camp-map.jpg" alt="" />
       <svg viewBox="0 0 168 168">
         <defs>
           <clipPath id="mapClip">
             <circle cx={cx} cy={cy} r={R} />
           </clipPath>
         </defs>
+        <circle cx={cx} cy={cy} r={R} fill="rgba(36,25,16,.62)" />
         <g clipPath="url(#mapClip)">
-          {/* points of interest sit on top of everything */}
-          {station.pois.filter((p) => !p.autoDialogue).map((p) => (
-            <g key={p.id}>
+          {/* the ground the region stands on */}
+          <circle cx={cx} cy={cy} r={PLAN.bound * S} fill="rgba(214,186,140,.16)" />
+          {/* the worn road, which is the thing you are meant to follow */}
+          {PLAN.roads.map((pts, i) => (
+            <polyline
+              key={`road${i}`}
+              points={pts
+                .split(' ')
+                .map((p) => {
+                  const [px, pz] = p.split(',').map(Number)
+                  return `${cx + px * S},${cy + pz * S}`
+                })
+                .join(' ')}
+              fill="none"
+              stroke="rgba(226,200,150,.32)"
+              strokeWidth="5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+          {PLAN.shapes.map((p, i) => (
+            <circle key={i} cx={cx + p.x * S} cy={cy + p.z * S} r={Math.max(1.1, p.r * S)} fill={PLAN_FILL[p.kind]} />
+          ))}
+          {/* the gates: the road out, and the road back */}
+          {PLAN.exits.map((e) => (
+            <g key={e.to}>
               <circle
-                cx={cx + p.x * S}
-                cy={cy + p.z * S}
-                r="6"
-                fill={done.has(p.id) ? 'rgba(124,138,79,.95)' : 'rgba(199,154,60,.95)'}
-                stroke="rgba(24,15,9,.9)"
-                strokeWidth="1.5"
+                cx={cx + e.x * S}
+                cy={cy + e.z * S}
+                r={Math.max(4, e.r * S)}
+                fill={e === onward ? 'rgba(199,154,60,.3)' : 'rgba(210,210,210,.12)'}
+                stroke={e === onward ? 'rgba(226,182,84,.95)' : 'rgba(226,220,206,.4)'}
+                strokeWidth="1.6"
               />
-              {!done.has(p.id) && (
-                <circle cx={cx + p.x * S} cy={cy + p.z * S} r="10" fill="none" stroke="rgba(199,154,60,.35)" />
+              {e === onward && (
+                <circle cx={cx + e.x * S} cy={cy + e.z * S} r="2" fill="rgba(240,206,124,1)" />
+              )}
+            </g>
+          ))}
+          {/* Evidence and the region's task. These were the only two things the
+              map left out — and they are exactly the two the player has to go
+              looking for, up to 16 m off the road. A detour you can see on the
+              map is a decision; the same detour unmarked is just an empty
+              stretch of sand you never walk into. */}
+          {REGION_FINDS.map((fd) => (
+            <g key={fd.id} opacity={found.includes(fd.id) ? 0.5 : 1}>
+              <circle
+                cx={cx + fd.x * S}
+                cy={cy + fd.z * S}
+                r="3.2"
+                fill={found.includes(fd.id) ? 'rgba(124,138,79,.9)' : 'rgba(232,191,118,.95)'}
+                stroke="rgba(24,15,9,.85)"
+                strokeWidth="1.2"
+              />
+            </g>
+          ))}
+          {REGION_TASK && (
+            <g opacity={solved.includes(REGION_TASK.id) ? 0.5 : 1}>
+              <circle
+                cx={cx + REGION_TASK.x * S}
+                cy={cy + REGION_TASK.z * S}
+                r="4.2"
+                fill="none"
+                stroke={solved.includes(REGION_TASK.id) ? 'rgba(124,138,79,.95)' : 'rgba(240,206,124,.95)'}
+                strokeWidth="1.8"
+              />
+              <circle
+                cx={cx + REGION_TASK.x * S}
+                cy={cy + REGION_TASK.z * S}
+                r="1.4"
+                fill={solved.includes(REGION_TASK.id) ? 'rgba(124,138,79,.95)' : 'rgba(240,206,124,.95)'}
+              />
+            </g>
+          )}
+          {/* the people of this region sit on top of everything */}
+          {CAST.map((c) => (
+            <g key={c.who}>
+              <circle
+                cx={cx + c.x * S}
+                cy={cy + c.z * S}
+                r="5"
+                fill={met(c.who) ? 'rgba(124,138,79,.95)' : 'rgba(199,154,60,.95)'}
+                stroke="rgba(24,15,9,.9)"
+                strokeWidth="1.4"
+              />
+              {!met(c.who) && (
+                <circle cx={cx + c.x * S} cy={cy + c.z * S} r="9" fill="none" stroke="rgba(199,154,60,.35)" />
               )}
             </g>
           ))}
           {/* the player, as an arrow pointing where the camera looks */}
-          <g transform={`translate(${cx + pos.x * S} ${cy + pos.z * S}) rotate(${(-yaw * 180) / Math.PI})`}>
+          <g transform={`translate(${cx + pos.x * S} ${cy + pos.z * S}) rotate(${(yaw * 180) / Math.PI})`}>
             <path d="M0,-8 L5.5,6 L0,3 L-5.5,6 Z" fill="var(--cream)" stroke="var(--maroon)" strokeWidth="1.4" />
           </g>
         </g>
@@ -1294,46 +2221,245 @@ function MiniMap({ pos, yaw, done }: { pos: { x: number; z: number }; yaw: numbe
   )
 }
 
+/* The end of the road.
+ *
+ * The chapter had no close: you walked the last stretch to the overlook, heard
+ * Rawi's last line, and were left standing in the sand with nothing to say the
+ * journey was over and no way out but the browser's back button. A journey that
+ * does not end does not read as a journey.
+ *
+ * It appears only where the road actually stops, and only once everything that
+ * region has to say has been said. */
+function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave }: {
+  done: number
+  /** how much of the evidence was actually picked up along the way */
+  evidence: number
+  onNotebook: () => void
+  onMap: () => void
+  onLeave: () => void
+}) {
+  /* הרגע היחיד בפרק שאומר „סיימת“. עד עכשיו הוא הופיע בשקט מוחלט. */
+  useEffect(() => { cue('find') }, [])
+  return (
+    <div className="ch1-end" role="dialog" aria-labelledby="ch1-end-title">
+      <div className="ch1-end-card">
+        <p className="ch1-end-eyebrow">סוף המסע</p>
+        <h2 id="ch1-end-title">ערב עליית האסלאם</h2>
+        <p className="ch1-end-body">
+          הלכתם מרמות תימן עד מכה — תשע תחנות, דרך אחת. פגשתם שליח של אימפריה,
+          ראש שבט, סוחר יהודי, נזיר וסוחר מכי, וכל אחד מהם סיפר לכם על העולם
+          שלו במילים שלו.
+        </p>
+        <p className="ch1-end-count">
+          נרשמו במחברת {done} מתוך {NOTEBOOK_TOTAL} רשומות
+          {' · '}
+          נאספו {evidence} מתוך {FINDS_TOTAL} עדויות
+        </p>
+        <div className="ch1-end-actions">
+          <button type="button" className="hud-card-btn is-primary" onClick={onNotebook}>
+            פתחו את המחברת
+          </button>
+          <button type="button" className="hud-card-btn" onClick={onMap}>
+            מפת המסע
+          </button>
+          <button type="button" className="hud-card-btn" onClick={onLeave}>
+            לכל הפרקים
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function SceneReady({ onReady }: { onReady: () => void }) {
+  useEffect(() => {
+    /* שני פריימים אחרי שה-Suspense נפתר: הראשון הוא זה שבו הסצנה
+       נצבעת לראשונה, והמתנה לו מונעת הבזק של מסך ריק בין הלוח
+       שנעלם לבין התמונה שמופיעה.
+
+       שני המזהים נתפסים. קודם רק החיצוני נשמר, והפנימי היה בלתי
+       ניתן לביטול — מה שמסתדר רק כל עוד האפקט רץ פעם אחת, והוא רץ
+       שוב בכל רינדור של המשחק (חזרת מקש היא כ-30 פעם בשנייה). */
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(onReady)
+    })
+    return () => {
+      cancelAnimationFrame(outer)
+      if (inner) cancelAnimationFrame(inner)
+    }
+  }, [onReady])
+  return null
+}
+
 /* ---------------- game shell ---------------- */
 
 export default function Game() {
   const router = useRouter()
   const live = useMemo(makeLive, [])
-  const [done, setDone] = useState<Set<string>>(() => new Set())
-  const [nearId, setNearId] = useState<string | null>(null)
-  const [openPoi, setOpenPoi] = useState<Poi | null>(null)
-  const [step, setStep] = useState(0)
+  const [nearWho, setNearWho] = useState<string | null>(null)
+  /* What is under the traveller's hand right now, and what they have already
+     written down. Evidence and tasks live in the same store as the encounters,
+     so the notebook is still the one progress surface the chapter has. */
+  const [nearFind, setNearFind] = useState<string | null>(null)
+  const [atTask, setAtTask] = useState(false)
+  const [found, setFound] = useState<string[]>([])
+  const [solved, setSolved] = useState<string[]>([])
+  const [openFind, setOpenFind] = useState<Find | null>(null)
+  const [openTask, setOpenTask] = useState(false)
+  const [soundOff, setSoundOff] = useState(false)
+  const [sceneReady, setSceneReady] = useState(false)
+  const onSceneReady = useCallback(() => setSceneReady(true), [])
   const [mapPos, setMapPos] = useState({ x: 0, z: 4 })
   const [mapYaw, setMapYaw] = useState(0)
   const [pressed, setPressed] = useState<Set<string>>(() => new Set())
-  const openRef = useRef<Poi | null>(null)
-  openRef.current = openPoi
 
-  // dev-only hook so automated tests (and DevTools) can inspect the live state
-  useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      const g = window as unknown as Record<string, unknown>
-      g.__ch1Live = live
-      g.__ch1Statics = STATIC_COLLIDERS
-    }
-  }, [live])
+  /* Region dialogue. `encounter` is whoever is speaking right now; `notebook`
+     counts the 26 things Rawi has written down so far. */
+  const [encounter, setEncounter] = useState<Encounter | null>(null)
+  const [notebook, setNotebook] = useState(() => notebookCount())
+  const [seen, setSeen] = useState<string[]>([])
+  const encounterRef = useRef<Encounter | null>(null)
+  encounterRef.current = encounter
 
-  // restore saved progress
+  /* The notebook (J) and the map (M) are full surfaces, not HUD panels: while
+     one is open the world below is frozen, so the key handler reads this ref
+     rather than the state it closes over. */
+  const [overlay, setOverlay] = useState<'notebook' | 'map' | null>(null)
+
+  /* Crossing into the next region. The world is built at module scope, so the
+     handover is a navigation rather than a rebuild — but the learner should
+     read it as walking on, so the road's name appears, the screen holds it for
+     a beat, and the next region opens with them already inside its gate. */
+  const [travelTo, setTravelTo] = useState<{ to: string; label: string } | null>(null)
+  const travelling = useRef(false)
+  const travel = useCallback(
+    (to: string, label: string) => {
+      if (travelling.current) return
+      travelling.current = true
+      live.keys.clear()
+      cue('gate')
+      setTravelTo({ to, label })
+      window.setTimeout(() => {
+        /* A full document load, not router.push: the region, its world and its
+           colliders are all built once at module scope, so a soft navigation
+           would change the URL and leave the traveller standing in the old
+           region's geometry. The dimmed banner covers the reload. */
+        window.location.assign(`${window.location.pathname}?region=${to}&from=${REGION.id}`)
+      }, 1250)
+    },
+    [live],
+  )
+  const overlayRef = useRef<'notebook' | 'map' | null>(null)
+  overlayRef.current = overlay
+  /* one gate for "something is already on screen", so a keypress cannot open a
+     second panel behind the first */
+  const openRef = useRef(false)
+  openRef.current = !!openFind || openTask
+
+  /* מקש שהוחזק לחוץ ברגע שנפתחה שיחה נשאר לחוץ — ה-keydown הבא הוא
+     שמנקה אותו, ועד אז השחקן ממשיך ללכת מתחת לחלון. הדרך היחידה
+     לעצור אותו היא לנקות ברגע הפתיחה עצמו. */
   useEffect(() => {
-    const store = readStore()
-    const restored = new Set<string>()
-    for (const poi of station.pois) {
-      if (store.pois.includes(poiKey(station.id, poi.id))) restored.add(poi.id)
+    if (encounter || openFind || openTask) {
+      live.keys.clear()
+      setPressed(new Set())
     }
-    if (restored.size) setDone(restored)
-    const intro = station.pois.find((poi) => poi.autoDialogue)
-    if (intro) {
-      setOpenPoi(intro)
-      setStep(0)
-    }
+  }, [encounter, openFind, openTask, live])
+
+  useEffect(() => {
+    const store = readNotebook()
+    setSeen(store.seen)
+    setFound(store.found)
+    setSolved(store.solved)
+    setNotebook(notebookCount(store))
+    /* The map has to know which pin is „you are here“ even on a cold start. */
+    setRegion(REGION.id)
   }, [])
 
-  // keyboard: movement keys into the live channel, E opens the near POI.
+  /** The next thing Rawi himself has to say here, or null when he is done. */
+  const pendingEncounter = useMemo(
+    () => REGION.encounters.find((e) => e.speaker === 'rawi' && !seen.includes(e.id)) ?? null,
+    [seen],
+  )
+
+  /** The next thing a placed character has to say, in dialogue.json order. */
+  const nextFrom = useCallback(
+    (who: string) => REGION.encounters.find((e) => e.speaker === who && !seen.includes(e.id)) ?? null,
+    [seen],
+  )
+
+  /** Has this character said everything they have to say? Drives the map dot. */
+  const met = useCallback((who: string) => !nextFrom(who), [nextFrom])
+
+  const finishEncounter = useCallback((e: Encounter) => {
+    const store = recordEncounter(e.id, e.notebook)
+    setSeen(store.seen)
+    setNotebook(notebookCount(store))
+  }, [])
+
+  /* The narrator has no body to stand next to and no key of his own, so the two
+     encounters he carries — the chapter's opening line and the birds over
+     Abraha's army — had no way to fire at all. The notebook could never fill,
+     and the very first thing the chapter says was unreachable.
+
+     They play as the region opens: a beat you walk into rather than press. */
+  useEffect(() => {
+    /* הטיימר נספר קודם מרגע ההרכבה, בזמן שלוח ההגעה עדיין מכסה את
+       המסך — והלוח יושב ב-z-index 39 מול 10 של החלונית. כלומר
+       המשפט הראשון של הפרק נפתח מאחורי מסך אטום והקלדתו הסתיימה
+       לפני שמישהו ראה אותו. הוא מחכה עכשיו לרגע שבו האזור באמת
+       על המסך. */
+    if (!sceneReady) return
+    const heard = readNotebook().seen
+    const cine = REGION.encounters.find(
+      (e) => e.speaker === 'narrator' && !heard.includes(e.id),
+    )
+    if (!cine) return
+    const t = window.setTimeout(() => setEncounter(cine), 1100)
+    return () => window.clearTimeout(t)
+  }, [sceneReady])
+
+  /* A read-only handle on where the traveller is standing. This used to be
+     dev-only, which meant the built chapter — the one people actually play —
+     was the one build no test could steer through, and the walkthrough that
+     caught the sealed border gate could not be run against it. Exposing the
+     live position costs nothing and makes the shipped game checkable. */
+  /* הקריאה ל-localStorage חייבת לקרות אחרי ההרכבה: הדף עובר
+     prerender, ורינדור ראשון שחולק על השרת הוא אי-התאמת hydration. */
+  useEffect(() => { setSoundOff(isMuted() || localStorage.getItem('ch1:muted') === '1') }, [])
+
+  /* רשת חובה ללוח ההגעה: אם נכס אחד לא נטען, ה-Suspense לא נפתר
+     לעולם — והלוח שאמור להיעלם היה נשאר על המסך ומסתיר משחק שרץ
+     מתחתיו. עדיף להיכנס לאזור חסר-נכס מאשר למסך שחור. */
+  useEffect(() => {
+    const t = window.setTimeout(() => setSceneReady(true), 9000)
+    return () => window.clearTimeout(t)
+  }, [])
+
+  /* מעבר אזור טוען מסמך חדש, ולכן גרף האודיו נהרס איתו ממילא. זה
+     קיים בשביל המקרה השני: React בפיתוח מרכיב פעמיים, והטיימר של
+     האש הוא הדבר היחיד כאן שממשיך לרוץ בלי שאיש מחזיק בו. */
+  useEffect(() => stopAmbience, [])
+
+  /* הרוח מתחילה עם האזור ולא עם המקש הראשון. הלחיצה על „התחילו
+     במסע“ כבר נתנה למסמך את ההרשאה שהדפדפן דורש, אבל היא קרתה
+     בקומפוננטה אחרת — ולכן כל זמן הטעינה והקריינות הראשונה היו
+     אילמים לגמרי. אחרי מעבר שער אין הרשאה כזאת, ושם עדיין המקש
+     הראשון הוא שמעיר את הגרף. */
+  useEffect(() => {
+    unlock()
+    startAmbience(REGION.id)
+  }, [])
+
+  useEffect(() => {
+    const g = window as unknown as Record<string, unknown>
+    g.__ch1Live = live
+    g.__ch1Statics = STATIC_COLLIDERS
+    g.__ch1Region = REGION.id
+  }, [live])
+
+  // keyboard: movement keys into the live channel, E talks to whoever is near.
   // e.code (physical key) — NOT e.key — so WASD works on Hebrew/any keyboard layout.
   useEffect(() => {
     const codeMap: Record<string, string> = {
@@ -1341,16 +2467,81 @@ export default function Game() {
       ArrowUp: 'w', ArrowDown: 's', ArrowLeft: 'a', ArrowRight: 'd',
       ShiftLeft: 'shift', ShiftRight: 'shift',
     }
+    const openOverlay = (which: 'notebook' | 'map') => {
+      /* Drop every held key on the way in, or the player keeps walking behind
+         the parchment and comes back somewhere else entirely. */
+      live.keys.clear()
+      setPressed(new Set())
+      setOverlay((cur) => (cur === which ? null : which))
+    }
     const down = (e: KeyboardEvent) => {
-      if (e.code === 'KeyE' && live.nearPoiId && !openRef.current) {
-        const poi = station.pois.find((p) => p.id === live.nearPoiId)
-        if (poi) {
-          setOpenPoi(poi)
-          setStep(0)
+      /* Browsers will not let a page make a sound until someone touches it,
+         and every gate crossing loads a fresh document — so the bed starts on
+         the first key of each region rather than on mount. `startAmbience`
+         guards itself, so calling it on every keystroke costs nothing. */
+      unlock()
+      startAmbience(REGION.id)
+      /* J and M open the two surfaces — but never over a conversation, which
+         owns the keyboard while it is running. An open surface swallows
+         everything else: no walking, no talking, until it closes. */
+      if ((e.code === 'KeyJ' || e.code === 'KeyM') && !encounterRef.current) {
+        e.preventDefault()
+        cue('page')
+        openOverlay(e.code === 'KeyJ' ? 'notebook' : 'map')
+        return
+      }
+      if (overlayRef.current) return
+      /* R talks to Rawi, who walks beside the player the whole way; E talks to
+         whoever you are standing next to. Both read the store rather than the
+         `seen` state so a keypress can never act on a stale render. */
+      if (e.code === 'KeyR' && !encounterRef.current) {
+        const heard = readNotebook().seen
+        const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.includes(x.id))
+        if (next) setEncounter(next)
+        return
+      }
+      /* F picks a thing up off the ground. It is deliberately not E: E is for
+         people, and a learner who has just been told "E talks" should not find
+         that the same key sometimes means "kneel down and look at a stone". */
+      if (e.code === 'KeyF' && live.nearFind && !encounterRef.current && !openRef.current) {
+        const fd = REGION_FINDS.find((x) => x.id === live.nearFind)
+        if (fd) {
+          const store = recordFind(fd.id)
+          setFound(store.found)
+          cue('find')
+          setOpenFind(fd)
         }
         return
       }
-      if (e.code === 'Escape') setOpenPoi(null)
+      /* E מטפל בשניים — אדם ותחנת משימה — ובמעבר הגבול הם עומדים
+         2.25 מטר זה מזה. האדם קודם כל עוד נשאר לו מה לומר, ורק
+         כשנגמרו דבריו המקש נופל דרכו אל התחנה. זה גם הסדר הנכון
+         מבחינת התוכן: קודם שומעים למה גובים מכס, אחר כך שוקלים. */
+      if (e.code === 'KeyE' && live.nearWho && !encounterRef.current && !openRef.current) {
+        const heard = readNotebook().seen
+        const next = REGION.encounters.find((x) => x.speaker === live.nearWho && !heard.includes(x.id))
+        if (next) {
+          setEncounter(next)
+          return
+        }
+        /* אין לו יותר מה לומר — נופלים דרך אל התחנה במקום לבלוע
+           את הלחיצה, שזה מה שהפך את משימת המכס לבלתי ניתנת לפתיחה. */
+      }
+      if (e.code === 'KeyE' && live.atTask && !encounterRef.current && !openRef.current) {
+        cue('task')
+        setOpenTask(true)
+        return
+      }
+      /* לא הולכים בזמן שיחה או כרטיס. עד עכשיו רק המחברת והמפה חסמו
+         תנועה, ולכן אפשר היה לצאת מטווח השיחה תוך כדי שהדמות מדברת —
+         או להיכנס לשער המעבר באמצע משפט ולעבור אזור. */
+      if (encounterRef.current || openRef.current) {
+        if (live.keys.size) {
+          live.keys.clear()
+          setPressed(new Set())
+        }
+        return
+      }
       const k = codeMap[e.code]
       if (k) {
         live.keys.add(k)
@@ -1383,6 +2574,11 @@ export default function Game() {
   const dragging = useRef(false)
   const lastX = useRef(0)
   const onPointerDown = useCallback((e: React.PointerEvent) => {
+    unlock()
+    startAmbience(REGION.id)
+    /* יד על המצלמה היא יד על המצלמה גם כשהיא לא זזה — בלי זה
+       המצלמה מתחילה ליישר את עצמה מתחת לסמן אחרי 1.2 שניות. */
+    live.lastDrag = performance.now()
     dragging.current = true
     lastX.current = e.clientX
   }, [])
@@ -1391,12 +2587,15 @@ export default function Game() {
       if (!dragging.current) return
       live.yaw += (e.clientX - lastX.current) * 0.005
       lastX.current = e.clientX
+      /* היד קיבלה את ההגה — המצלמה מפסיקה ליישר את עצמה */
+      live.lastDrag = performance.now()
     },
     [live],
   )
   const onPointerUp = useCallback(() => {
     dragging.current = false
-  }, [])
+    live.lastDrag = performance.now()
+  }, [live])
 
   // low-frequency minimap refresh
   useEffect(() => {
@@ -1407,31 +2606,8 @@ export default function Game() {
     return () => window.clearInterval(t)
   }, [live])
 
-  const collect = useCallback(() => {
-    if (!openPoi) return
-    markPoiDone(station.id, openPoi.id)
-    setDone((prev) => {
-      const next = new Set(prev)
-      next.add(openPoi.id)
-      const required = station.pois.filter((p) => p.kind === 'required').every((p) => next.has(p.id))
-      if (next.size >= station.quota && required) markStationDone(station.id)
-      return next
-    })
-    setOpenPoi(null)
-  }, [openPoi])
-
-  const requiredMet = station.pois.filter((p) => p.kind === 'required').every((p) => done.has(p.id))
-  const complete = done.size >= station.quota && requiredMet
-  const nearPoi = nearId ? station.pois.find((p) => p.id === nearId) : null
-  /* what the guide is saying right now: the nearby point of interest if there
-     is one, otherwise the station briefing */
-  /* The bubble is the voice of the person standing at the point you are next
-     to. Away from any speaker there is nothing being explained, so it hides
-     rather than repeating the station blurb. */
-  const line = useMemo(() => {
-    if (nearPoi?.speaker) return { who: nearPoi.speaker.name, text: nearPoi.lead }
-    return null
-  }, [nearPoi])
+  /** The person you are standing next to who still has something to say. */
+  const nearPending = nearWho ? nextFrom(nearWho) : null
 
   return (
     <div className="ch1-page">
@@ -1443,10 +2619,46 @@ export default function Game() {
               <img src="/assets/logo-cream.png" alt="אסלאם" />
             </button>
           </div>
-          <button type="button" className="ch1-journal-btn" onClick={() => { /* journal — milestone 2 */ }}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4zM5 4v14M9 8h6M9 12h6" /></svg>
-            מחברת המסע
-          </button>
+          <div className="ch1-topbar-actions">
+            {/* קול שאי אפשר לכבות הוא בעיה בכיתה, ולכן הבחירה נשמרת —
+                המעבר בין אזורים טוען מסמך חדש לגמרי, וכיבוי שלא שורד
+                אותו נקרא כתקלה. */}
+            <button
+              type="button"
+              className="ch1-sound-btn"
+              aria-pressed={soundOff}
+              aria-label={soundOff ? 'הפעילו צליל' : 'השתיקו צליל'}
+              title={soundOff ? 'הפעילו צליל' : 'השתיקו צליל'}
+              onClick={() => {
+                const next = !soundOff
+                setSoundOff(next)
+                unlock()
+                setMuted(next)
+                if (!next) {
+                  startAmbience(REGION.id)
+                  cue('ui')
+                }
+              }}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 9v6h4l5 4V5L8 9H4z" />
+                {soundOff ? (
+                  <path d="M16 9l5 6M21 9l-5 6" />
+                ) : (
+                  <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
+                )}
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="ch1-journal-btn"
+              aria-expanded={overlay === 'notebook'}
+              onClick={() => setOverlay((cur) => (cur === 'notebook' ? null : 'notebook'))}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4zM5 4v14M9 8h6M9 12h6" /></svg>
+              מחברת המסע
+            </button>
+          </div>
         </div>
       </header>
 
@@ -1457,79 +2669,215 @@ export default function Game() {
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
       >
-        <Canvas shadows camera={{ position: [0, 3.4, 10], fov: 55 }} dpr={[1, 1.75]}>
+        {/* אין toneMappingExposure כאן בכוונה: r3f מחיל מחדש את מאפייני
+            gl בכל רינדור, ולכן ערך קבוע כאן דרס את החשיפה שהאזור מגדיר
+            ב-mood — וכל כיול חשיפה פר-אזור פשוט לא הגיע למסך. החשיפה
+            נקבעת ב-<Sky>, שם היא נגזרת מה-layout. */}
+        <Canvas shadows camera={{ position: [0, 3.4, 10], fov: 55 }} dpr={[1, 2]}>
           <Suspense fallback={null}>
-            <World live={live} done={done} onNearChange={setNearId} />
+            <World
+              live={live}
+              onNearChange={setNearWho}
+              onNearFind={setNearFind}
+              onAtTask={setAtTask}
+              found={found}
+              solved={solved}
+              talking={!!encounter}
+              gesture={encounter?.gesture ?? 'talk'}
+              speakingWho={encounter && encounter.speaker !== 'rawi' ? encounter.speaker : null}
+              onExit={travel}
+              met={met}
+            />
+            <SceneReady onReady={onSceneReady} />
           </Suspense>
         </Canvas>
 
-        {/* world markers (projected each frame) */}
-        {station.pois.filter((poi) => !poi.autoDialogue).map((poi) => (
+        {/* Leaving a region took 900 ms behind a banner; arriving took none.
+            The new document rendered a bare plate, then a loading line, then a
+            canvas drawing nothing while up to 193 props decoded, and then the
+            region simply appeared, fully lit, mid-stride. That asymmetry is
+            what made a gate read as a crash and a recovery rather than as a
+            walk. It is the same journey in both directions now: the plate
+            holds until the scene is actually ready, the region names itself,
+            and then it fades. */}
+        <div className={`ch1-arrive${sceneReady ? ' is-gone' : ''}`} aria-hidden={sceneReady}>
+          <span>{REGION.name}</span>
+        </div>
+
+        {/* the road handing you on to the next region */}
+        {travelTo && (
+          <div className="ch1-travel" role="status" aria-live="polite">
+            <span>{travelTo.label}</span>
+          </div>
+        )}
+
+        {/* approach rings, projected onto each placed character every frame */}
+        {CAST.map((c) => (
           <div
-            key={poi.id}
-            className={
-              'poi-marker'
-              + (poi.speaker ? ' is-dialogue-marker' : '')
-              + (poi.sceneObject === 'concept-board' ? ' is-board-marker' : '')
-              + (done.has(poi.id) ? ' is-done' : '')
-            }
+            key={c.who}
+            className="poi-marker is-dialogue-marker"
             ref={(el) => {
-              if (el) live.markerEls.set(poi.id, el)
-              else live.markerEls.delete(poi.id)
+              if (el) live.markerEls.set(c.who, el)
+              else live.markerEls.delete(c.who)
             }}
           >
-            {poi.speaker ? (
-              <>
-                <span className="poi-dialogue-bubble" aria-hidden="true">...</span>
-                <span className="ch1-visually-hidden">שיחה עם {poi.speaker.name}</span>
-              </>
-            ) : (
-              <>
-                <span className="poi-marker-ring">{done.has(poi.id) ? '✓' : poi.icon ?? '✦'}</span>
-                <span className="poi-marker-label">{poi.label}</span>
-                <span className="poi-marker-stem" />
-                <span className="poi-marker-foot" />
-              </>
-            )}
+            <span className="poi-dialogue-bubble" aria-hidden="true">...</span>
+            <span className="poi-act" aria-hidden="true"><b>E</b> · שיחה עם {SPEAKERS[c.who]}</span>
+            <span className="ch1-visually-hidden">שיחה עם {SPEAKERS[c.who]}</span>
           </div>
         ))}
 
-        <StationPanel done={done} onOpen={(p) => { setOpenPoi(p); setStep(0) }} />
-        <ControlsPanel pressed={pressed} />
-        {nearPoi && !openPoi && (
-          <div className="hud-panel poi-hint">
-            <i className="hud-key">E</i>
-            <span>חקרו את {nearPoi.label}</span>
+        {/* where the road leaves this region.
+            מחנה הלילה הוא האזור הפותח והשקט, ושלט צף באמצע הנוף
+            שבר את הרגע הזה — שם המצפן והדרך עצמה מספיקים. */}
+        {ONWARD && REGION.id !== 'night-camp' && (
+          <div
+            className="poi-marker is-gate-marker"
+            ref={(el) => {
+              if (el) live.markerEls.set('__gate', el)
+              else live.markerEls.delete('__gate')
+            }}
+          >
+            <span className="poi-gate-label">
+              {campLayout.exits?.find((e) => e.to === ONWARD)?.label ?? ''}
+            </span>
+            <span className="poi-gate-dist" />
           </div>
         )}
-        <DialogueBar
-          live={live}
-          poi={openPoi ?? nearPoi ?? null}
-          open={!!openPoi}
-          step={step}
-          collected={done.has((openPoi ?? nearPoi)?.id ?? '')}
-          onAdvance={() => setStep((n) => n + 1)}
-          onCollect={collect}
-          onClose={() => setOpenPoi(null)}
-        />
-        {openPoi && !openPoi.speaker && (
-          <InfoCard
-            poi={openPoi}
-            collected={done.has(openPoi.id)}
-            onCollect={collect}
-            onClose={() => setOpenPoi(null)}
+
+        {/* a pin over each piece of evidence — lit while it is still there to
+            be looked at, dimmed to olive once it is in the notebook */}
+        {REGION_FINDS.map((fd) => (
+          <div
+            key={fd.id}
+            className="poi-marker is-find-marker"
+            ref={(el) => {
+              if (el) live.markerEls.set('find:' + fd.id, el)
+              else live.markerEls.delete('find:' + fd.id)
+            }}
+          >
+            <span className="poi-find-pin" aria-hidden="true">✦</span>
+            <span className="poi-act" aria-hidden="true">
+              הביטו מקרוב · <b>F</b>
+            </span>
+            <span className="poi-marker-stem" aria-hidden="true" />
+            <span className="poi-marker-foot" aria-hidden="true" />
+            <span className="ch1-visually-hidden">{fd.title}</span>
+          </div>
+        ))}
+        {REGION_TASK && !solved.includes(REGION_TASK.id) && (
+          <div
+            className="poi-marker is-task-marker"
+            ref={(el) => {
+              if (el) live.markerEls.set('task', el)
+              else live.markerEls.delete('task')
+            }}
+          >
+            <span className="poi-task-badge" aria-hidden="true">?</span>
+            <span className="poi-act" aria-hidden="true">
+              {REGION_TASK.prompt} · <b>E</b>
+            </span>
+            <span className="poi-marker-stem" aria-hidden="true" />
+            <span className="poi-marker-foot" aria-hidden="true" />
+            <span className="ch1-visually-hidden">{REGION_TASK.title}</span>
+          </div>
+        )}
+
+        <ControlsPanel pressed={pressed} />
+        {/* One slot used to hold all four prompts, so standing where a find and
+            a person overlap — which is where the border post puts you, 1.9 m
+            from both — drew two panels on top of each other. They stack now
+            instead of suppressing one another: F and E are different keys, and
+            a player standing between a stone and a stranger really can do both.
+            column-reverse keeps the first one lowest, nearest the eye. */}
+        <div className="poi-hints">
+          {nearFind && !encounter && !openFind && !openTask && (
+            <div className="hud-panel poi-hint is-find-hint">
+              <i className="hud-key">F</i>
+              <span>הביטו מקרוב</span>
+            </div>
+          )}
+          {atTask && !encounter && !openTask && !openFind && REGION_TASK && (
+            <div className="hud-panel poi-hint is-task-hint">
+              <i className="hud-key">E</i>
+              <span>{REGION_TASK.prompt}</span>
+            </div>
+          )}
+          {nearPending && !encounter && (
+            <div className="hud-panel poi-hint">
+              <i className="hud-key">E</i>
+              <span>דברו עם {SPEAKERS[nearPending.speaker]}</span>
+            </div>
+          )}
+          {pendingEncounter && !encounter && !nearPending && (
+            <div className="hud-panel poi-hint is-rawi-hint">
+              <i className="hud-key">R</i>
+              <span>דברו עם רָאוִי</span>
+            </div>
+          )}
+        </div>
+        {encounter && (
+          <DialogueHud
+            encounter={encounter}
+            notebookDone={notebook.done}
+            notebookTotal={NOTEBOOK_TOTAL}
+            onFinished={finishEncounter}
+            onClose={() => setEncounter(null)}
           />
         )}
+        {/* the notebook is the only progress surface: no score, no failure */}
         <div className="hud-panel hud-goal">
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {complete
-              ? 'התחנה הושלמה! בהמשך: יציאה אל שתי האימפריות'
-              : `מטרה בתחנה: גלו לפחות ${station.quota} מתוך ${station.pois.length} נקודות עניין`}
+          <span style={{ whiteSpace: 'nowrap' }}>{REGION.name}</span>
+          <span className="hud-progress">
+            <i style={{ width: `${Math.min(100, (notebook.done / NOTEBOOK_TOTAL) * 100)}%` }} />
           </span>
-          <span className="hud-progress"><i style={{ width: `${Math.min(100, (done.size / station.quota) * 100)}%` }} /></span>
-          <span>{done.size}/{station.quota}</span>
+          <span style={{ whiteSpace: 'nowrap' }}>
+            מחברת: {notebook.done} מתוך {NOTEBOOK_TOTAL}
+          </span>
+          {/* עד עכשיו המונה היחיד על המסך ספר רק ערכי מחברת, ולכן כל 17
+              העדויות ו-6 המשימות — הדבר התובעני ביותר במשחק — לא הזיזו
+              שום מספר. פעולה שלא נרשמת בשום מקום נקראת כפעולה שלא קרתה. */}
+          <span className="hud-goal-evidence" style={{ whiteSpace: 'nowrap' }}>
+            עדויות: {found.length} מתוך {FINDS_TOTAL}
+          </span>
         </div>
-        <MiniMap pos={mapPos} yaw={mapYaw} done={done} />
+        <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />
+
+        {/* the road stops here, and everything this place had to say is said */}
+        {!ONWARD && !encounter && REGION.encounters.every((e) => seen.includes(e.id)) && !overlay && (
+          <ChapterEnd
+            done={notebook.done}
+            evidence={found.length}
+            onNotebook={() => setOverlay('notebook')}
+            onMap={() => setOverlay('map')}
+            onLeave={() => router.push('/chapters')}
+          />
+        )}
+
+        {openFind && (
+          <FindCard
+            find={openFind}
+            index={found.length}
+            total={FINDS_TOTAL}
+            onClose={() => setOpenFind(null)}
+            onNotebook={() => {
+              setOpenFind(null)
+              setOverlay('notebook')
+            }}
+          />
+        )}
+        {openTask && REGION_TASK && (
+          <TaskPanel
+            task={REGION_TASK}
+            onSolved={() => setSolved(recordTask(REGION_TASK.id).solved)}
+            onClose={() => setOpenTask(false)}
+          />
+        )}
+
+        {overlay === 'notebook' && <Notebook seen={seen} found={found} solved={solved} onClose={() => setOverlay(null)} />}
+        {overlay === 'map' && (
+          <WorldMap seen={seen} currentRegion={REGION.id} onClose={() => setOverlay(null)} />
+        )}
       </div>
     </div>
   )

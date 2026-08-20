@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מכה החיה</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%95%8B%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════
+   מכה — עולם מבוסס צמתים.
+
+   העולם הזה לא מרונדר. הוא מצולם. כל עמדה היא לולאה של וידאו
+   שנוצר ב־Higgsfield, והיא רצה תמיד — אנשים הולכים, אבק נע,
+   בד זז — בין אם השחקן עושה משהו ובין אם לא.
+
+   שתי הפעולות: להסתכל, ולהתקדם. ההסתכלות היא תזוזה בתוך הפריים,
+   וההתקדמות היא דחיפה קדימה שנמסכת אל העמדה הבאה.
+
+   המחיר: אי אפשר ללכת לאן שרוצים. התמורה: זה נראה בדיוק כמו
+   הסרטון, כי זה הסרטון.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --wine:#4a1220;--gold:#d9a441;--gold-2:#f0cd85;--sand:#e8dcc4;--ink:#0b0705;
+  --sans:'Heebo',system-ui,sans-serif;--serif:'Frank Ruhl Libre',serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--ink)}
+body{color:var(--sand);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+
+#stage{position:fixed;inset:0;overflow:hidden;cursor:crosshair;background:var(--ink)}
+video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;
+  width:auto;height:auto;transform-origin:center;
+  transform:translate(-50%,-50%) scale(1.18);
+  opacity:0;transition:opacity .55s var(--ease);will-change:transform,opacity}
+video.on{opacity:1}
+
+/* ויניאטה — מרכזת את המבט ומחזיקה את ה־HUD */
+#vig{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 92% at 50% 46%,transparent 42%,rgba(8,5,3,.34) 76%,rgba(8,5,3,.6) 100%)}
+
+/* ── HUD ─────────────────────────────────────────────────── */
+#hud{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .8s}
+body.playing #hud{opacity:1}
+#obj{position:absolute;top:38px;right:34px;text-align:right;max-width:46vw}
+#obj .lbl{font-family:var(--sans);font-weight:400;font-size:.62rem;letter-spacing:.3em;
+  color:var(--gold);margin-bottom:7px;text-shadow:0 2px 10px rgba(0,0,0,.95)}
+#obj .txt{font-weight:400;font-size:clamp(1.05rem,.95rem + .5vw,1.35rem);
+  text-shadow:0 2px 16px rgba(0,0,0,1)}
+#obj .rule{height:1px;margin-top:10px;background:linear-gradient(to left,var(--gold),transparent)}
+
+#place{position:absolute;bottom:34px;left:32px;font-family:var(--sans);font-weight:300;
+  font-size:.72rem;letter-spacing:.22em;color:rgba(232,220,196,.6);
+  text-shadow:0 2px 10px rgba(0,0,0,1)}
+#place b{display:block;font-weight:500;font-size:.94rem;letter-spacing:.1em;
+  color:var(--sand);margin-top:5px}
+
+#keys{position:absolute;bottom:34px;right:34px;display:flex;gap:15px;
+  font-family:var(--sans);font-weight:200;font-size:.66rem;letter-spacing:.14em;
+  color:rgba(232,220,196,.45);text-shadow:0 2px 8px rgba(0,0,0,1)}
+#keys b{font-weight:500;color:rgba(217,164,65,.9)}
+
+/* ── סמני מעבר ומיקוד ────────────────────────────────────── */
+.hot{position:absolute;pointer-events:auto;cursor:pointer;
+  transform:translate(-50%,-50%);opacity:0;transition:opacity .6s,transform .3s var(--ease)}
+body.playing .hot{opacity:1}
+.hot:hover{transform:translate(-50%,-50%) scale(1.12)}
+.hot .ring{width:46px;height:46px;border:1px solid rgba(232,220,196,.55);border-radius:50%;
+  display:grid;place-content:center;background:rgba(11,7,5,.28);
+  backdrop-filter:blur(2px)}
+.hot .ring i{width:9px;height:9px;border-top:2px solid var(--gold-2);
+  border-right:2px solid var(--gold-2);transform:rotate(-45deg);display:block;
+  animation:nudge 2.4s ease-in-out infinite}
+.hot.look .ring i{transform:rotate(45deg)}
+.hot.back .ring i{transform:rotate(135deg)}
+@keyframes nudge{0%,100%{opacity:.5;margin-top:0}50%{opacity:1;margin-top:-3px}}
+.hot .lab{position:absolute;top:52px;right:50%;transform:translateX(50%);white-space:nowrap;
+  font-family:var(--sans);font-weight:300;font-size:.7rem;letter-spacing:.1em;
+  color:var(--sand);text-shadow:0 2px 10px rgba(0,0,0,1);opacity:0;transition:opacity .25s}
+.hot:hover .lab{opacity:1}
+.hot.eye .ring{border-color:rgba(217,164,65,.75)}
+.hot.eye .ring i{width:7px;height:7px;border:0;border-radius:50%;background:var(--gold);
+  animation:pulse 2.4s ease-in-out infinite;transform:none}
+@keyframes pulse{0%,100%{transform:scale(.72);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+
+/* ── כרטיס ידע ───────────────────────────────────────────── */
+#card{position:absolute;bottom:0;right:0;left:0;z-index:6;
+  padding:0 clamp(26px,6vw,90px) clamp(84px,10vh,120px);
+  display:flex;justify-content:flex-start;pointer-events:none;
+  opacity:0;transform:translateY(12px);transition:.5s var(--ease)}
+#card.on{opacity:1;transform:none}
+#card .box{width:min(54ch,100%);background:rgba(9,6,4,.88);
+  border-inline-start:2px solid var(--gold);padding:20px 24px;backdrop-filter:blur(3px)}
+#card .h{font-family:var(--sans);font-weight:500;font-size:.68rem;letter-spacing:.24em;
+  color:var(--gold);margin-bottom:11px}
+#card .b{font-weight:300;font-size:clamp(1rem,.95rem + .45vw,1.2rem);line-height:1.75}
+#card .r{display:inline-block;margin-inline-start:9px;font-family:var(--sans);font-weight:300;
+  font-size:.6rem;letter-spacing:.14em;color:rgba(232,220,196,.4);
+  direction:ltr;unicode-bidi:isolate;vertical-align:.25em}
+
+/* ── שער ופס טעינה ──────────────────────────────────────── */
+#gate{position:absolute;inset:0;z-index:9;display:grid;place-content:center;text-align:center;
+  background:rgba(7,4,3,.9);transition:opacity .8s}
+body.playing #gate{opacity:0;pointer-events:none}
+#gate .a{font-weight:300;font-size:clamp(1.7rem,1.2rem + 2.4vw,2.9rem);letter-spacing:.03em}
+#gate .b{font-family:var(--sans);font-weight:200;font-size:.78rem;letter-spacing:.28em;
+  color:var(--gold);margin-top:18px}
+#gate .c{font-family:var(--sans);font-weight:200;font-size:.72rem;letter-spacing:.1em;
+  color:rgba(232,220,196,.42);margin-top:30px;line-height:2.1}
+#bar{width:220px;height:2px;background:rgba(232,220,196,.14);margin:26px auto 0}
+#bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+#go{margin-top:24px;font-family:var(--sans);font-weight:300;font-size:.76rem;letter-spacing:.2em;
+  color:var(--sand);background:none;border:1px solid rgba(232,220,196,.24);padding:12px 30px;
+  cursor:pointer;transition:.3s;opacity:.35;pointer-events:none}
+#go.ready{opacity:1;pointer-events:auto}
+#go.ready:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="videos"></div>
+  <div id="vig"></div>
+  <div id="hots"></div>
+
+  <div id="hud">
+    <div id="obj"><div class="lbl">משימה</div><div class="txt">הגיעו אל הכעבה</div><div class="rule"></div></div>
+    <div id="place"><span>מכה</span><b></b></div>
+    <div id="keys"><span><b>עכבר</b> להסתכל</span><span><b>W</b> קדימה</span><span><b>E</b> להתבונן</span><span><b>S</b> אחורה</span></div>
+  </div>
+
+  <div id="card"><div class="box"><div class="h"></div><div class="b"></div></div></div>
+
+  <div id="gate">
+    <div>
+      <div class="a">מכה החיה</div>
+      <div class="b">עולם מבוסס צמתים</div>
+      <div id="bar"><i></i></div>
+      <div class="c">עכבר להסתכל · W להתקדם · S לחזור · E להתבונן<br>
+        כל עמדה היא לולאה חיה — העולם ממשיך גם כשלא נוגעים בכלום</div>
+      <button id="go" type="button">להיכנס</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── העולם ────────────────────────────────────────────────
+   כל צומת: קליפ, שם, ומה אפשר לעשות ממנו. */
+const W = {
+  alley: { src:'nodes/V2-alley.mp4', name:'סמטה מזרחית',
+    hots:[ {t:'go', to:'camel', x:50, y:56, lab:'להמשיך בסמטה'} ] },
+
+  camel: { src:'nodes/V3-camel.mp4', name:'פריקת שיירה',
+    hots:[ {t:'go', to:'reveal', x:52, y:58, lab:'אל הכיכר'},
+           {t:'back', to:'alley', x:50, y:88, lab:'לחזור'},
+           {t:'eye', x:63, y:52, lab:'הסחורה',
+             h:'משי ותבלינים', r:'§7',
+             b:'השבטים נדדו צפונה מאזור תימן ושימשו מתווכים בין האימפריות — בעיקר לטובת שמירה על נתיבי הסחר של סחורות כדוגמת משי, תבלינים ועוד.'} ] },
+
+  reveal: { src:'nodes/V4-reveal.mp4', name:'פתח הכיכר',
+    hots:[ {t:'go', to:'plaza', x:50, y:58, lab:'להיכנס לכיכר'},
+           {t:'back', to:'camel', x:50, y:88, lab:'לחזור'} ] },
+
+  plaza: { src:'nodes/V5-plaza.mp4', name:'הכיכר',
+    hots:[ {t:'go', to:'stone', x:44, y:56, lab:'אל הכעבה'},
+           {t:'look', to:'ansab', x:76, y:60, lab:'להסתכל ימינה'},
+           {t:'back', to:'reveal', x:50, y:88, lab:'לחזור'},
+           {t:'eye', x:33, y:52, lab:'הכעבה',
+             h:'הכעבה', r:'§34',
+             b:'מקדש בצורת קובייה בעיר מכה. האבן השחורה — אלחג׳ר אלאסוד — הטבועה בפינתה, הייתה קדושה ונערצת שנים רבות לפני עלות האסלאם על בימת ההיסטוריה.'} ] },
+
+  ansab: { src:'nodes/V6-ansab.mp4', name:'האנצאב',
+    hots:[ {t:'back', to:'plaza', x:50, y:88, lab:'לחזור לכיכר'},
+           {t:'eye', x:46, y:48, lab:'האבנים',
+             h:'עבודת האלילים', r:'§32 · §36',
+             b:'הערבים היו עובדי אלילים — פוליתיאיסטיים, מאמינים בריבוי אלילים. לפסלים יוחסו סגולות כגון פתרון גורלות.'} ] },
+
+  stone: { src:'nodes/V7-stone.mp4', name:'פינת האבן השחורה',
+    hots:[ {t:'back', to:'plaza', x:50, y:88, lab:'לחזור לכיכר'},
+           {t:'eye', x:50, y:40, lab:'האבן השחורה',
+             h:'אלחג׳ר אלאסוד', r:'§34',
+             b:'האבן השחורה הטבועה בפינת הכעבה הייתה קדושה ונערצת שנים רבות לפני עלות האסלאם על בימת ההיסטוריה.'},
+           {t:'go', to:'map', x:78, y:78, lab:'לפתוח את המפה'} ] },
+
+  map: { src:'nodes/V8-map.mp4', name:'המפה',
+    hots:[ {t:'back', to:'stone', x:50, y:88, lab:'לסגור'},
+           {t:'eye', x:50, y:46, lab:'מה ידוע',
+             h:'העולם שעוד לא מוכר', r:'§0',
+             b:'סימן אחד על העור: מכה. כל השאר עדיין ריק — וזה בדיוק מה שהמסע ימלא.'} ] },
+}
+const ORDER = ['alley','camel','reveal','plaza','ansab','stone','map']
+
+const $ = s => document.querySelector(s)
+const stage = $('#stage'), vids = $('#videos'), hots = $('#hots'), card = $('#card')
+
+/* ── טעינה ──────────────────────────────────────────────── */
+const EL = {}
+let loaded = 0
+for (const k of ORDER){
+  const v = document.createElement('video')
+  v.src = W[k].src
+  v.loop = true; v.muted = true; v.playsInline = true; v.preload = 'auto'
+  v.addEventListener('canplaythrough', once, { once:true })
+  v.addEventListener('error', once, { once:true })
+  vids.appendChild(v)
+  EL[k] = v
+}
+function once(){
+  loaded++
+  $('#bar i').style.width = Math.round(100 * loaded / ORDER.length) + '%'
+  if (loaded >= ORDER.length) $('#go').classList.add('ready')
+}
+
+/* ── מצב ────────────────────────────────────────────────── */
+let cur = null
+let mx = 0, my = 0, tx = 0, ty = 0, zoom = 1
+
+/* ── מעבר בין צמתים ──────────────────────────────────────
+   התקדמות = דחיפה קדימה שנמסכת. הזום של היוצא ממשיך לגדול
+   בזמן שהנכנס מתחיל גדול ומתיישב — ככה זה נקרא כצעד ולא כחיתוך. */
+let moving = false
+function go(k, kind = 'go'){
+  if (moving || k === cur) return
+  const next = EL[k]
+  const prev = cur ? EL[cur] : null
+  moving = true
+  hideCard()
+
+  next.currentTime = 0
+  next.play().catch(() => {})
+  const inFrom = kind === 'back' ? 0.86 : (kind === 'look' ? 1.06 : 1.34)
+  next.style.transition = 'none'
+  next.style.transform = `translate(-50%,-50%) scale(${inFrom * 1.18})`
+  next.style.opacity = '0'
+  void next.offsetWidth
+  next.style.transition = 'opacity .5s var(--ease), transform .78s var(--ease)'
+  next.classList.add('on')
+  next.style.opacity = '1'
+  next.style.transform = 'translate(-50%,-50%) scale(1.18)'
+
+  if (prev){
+    const outTo = kind === 'back' ? 1.34 : (kind === 'look' ? 1.24 : 0.84)
+    prev.style.transition = 'opacity .5s var(--ease), transform .78s var(--ease)'
+    prev.style.transform = `translate(-50%,-50%) scale(${outTo * 1.18})`
+    prev.style.opacity = '0'
+  }
+
+  cur = k
+  buildHots(k)
+  $('#place b').textContent = W[k].name
+  setTimeout(() => {
+    if (prev && prev !== next){ prev.classList.remove('on'); prev.pause() }
+    moving = false
+  }, 800)
+}
+
+/* ── נקודות ─────────────────────────────────────────────── */
+function buildHots(k){
+  hots.innerHTML = ''
+  for (const h of W[k].hots){
+    const el = document.createElement('div')
+    el.className = 'hot ' + h.t
+    el.style.left = h.x + '%'; el.style.top = h.y + '%'
+    el.innerHTML = '<div class="ring"><i></i></div><div class="lab">' + h.lab + '</div>'
+    el.addEventListener('click', e => {
+      e.stopPropagation()
+      if (h.t === 'eye') showCard(h); else go(h.to, h.t)
+    })
+    hots.appendChild(el)
+  }
+}
+function showCard(h){
+  card.querySelector('.h').textContent = h.h
+  card.querySelector('.b').innerHTML = h.b + '<span class="r">' + h.r + '</span>'
+  card.classList.add('on')
+}
+function hideCard(){ card.classList.remove('on') }
+
+/* ── להסתכל ──────────────────────────────────────────────
+   הפריים גדול מהמסך ב־18%, והעכבר מזיז אותו בתוכו. זה לא
+   מצלמה אמיתית, אבל זה מספיק כדי שהראש יאמין שהוא מסתובב. */
+stage.addEventListener('pointermove', e => {
+  const r = stage.getBoundingClientRect()
+  tx = ((e.clientX - r.left) / r.width - .5) * -2
+  ty = ((e.clientY - r.top) / r.height - .5) * -2
+})
+stage.addEventListener('click', e => {
+  if (e.target.closest('.hot')) return
+  if (card.classList.contains('on')) hideCard()
+})
+
+function frame(){
+  requestAnimationFrame(frame)
+  mx += (tx - mx) * .07
+  my += (ty - my) * .07
+  const v = cur && EL[cur]
+  if (v && !moving){
+    v.style.transition = 'opacity .5s var(--ease)'
+    v.style.transform =
+      `translate(calc(-50% + ${(mx * 4.2).toFixed(2)}%), calc(-50% + ${(my * 2.6).toFixed(2)}%)) scale(1.18)`
+  }
+}
+frame()
+
+/* ── מקלדת ──────────────────────────────────────────────── */
+const first = (k, t) => (W[k].hots.find(h => h.t === t) || {}).to
+addEventListener('keydown', e => {
+  if (!cur) return
+  const K = e.code
+  if (K === 'KeyW' || K === 'ArrowUp'){ const t = first(cur,'go'); if (t) go(t,'go') }
+  else if (K === 'KeyS' || K === 'ArrowDown'){ const t = first(cur,'back'); if (t) go(t,'back') }
+  else if (K === 'KeyD' || K === 'ArrowLeft'){ const t = first(cur,'look'); if (t) go(t,'look') }
+  else if (K === 'KeyE'){ const h = W[cur].hots.find(h => h.t === 'eye'); if (h) showCard(h) }
+  else if (K === 'Escape') hideCard()
+})
+
+$('#go').addEventListener('click', () => {
+  document.body.classList.add('playing')
+  for (const k of ORDER) EL[k].muted = false
+  go('alley')
+})
+
+window.__world = { go, at: () => cur }
+</script>
+</body>
+</html>

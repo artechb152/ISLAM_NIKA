@@ -18,9 +18,9 @@ import {
   type ChapterDef,
 } from '@/lib/chapters-data'
 import { CH6 } from '@/lib/chapter6/data'
-import { STORE_KEY as CH1_STORE_KEY } from '@/lib/chapter1/progress'
-import { STATION_COUNT_PLANNED as CH1_STATION_COUNT } from '@/lib/chapter1/stations'
-
+import { NOTEBOOK_KEY as CH1_STORE_KEY } from '@/lib/chapter1/notebook'
+import { NOTEBOOK_TOTAL as CH1_NOTEBOOK_TOTAL } from '@/lib/chapter1/dialogue'
+import { SECTION_ORDER as CH2_SECTIONS, STORE_KEY as CH2_STORE_KEY } from '@/lib/chapter2/progress'
 /* the number of chapter-6 screens progress is measured against (derived, not hardcoded) */
 const CH6_SCREEN_COUNT = CH6.screens.length
 
@@ -64,6 +64,9 @@ const IF_BOOKS = 'M3.6 15.3H16.4V19.7H3.6Z|M5.2 10.9H18V15.3H5.2Z|M3.6 6.5H16.4V
 const IF_SOURCES =
   'M6.5 2.5A2 2 0 0 0 4.5 4.5V19.5A2 2 0 0 0 6.5 21.5H16.5A2 2 0 0 0 18.5 19.5V8H13.5V2.5ZM8 11.5H15V13H8ZM8 15H15V16.5H8ZM8 8H11V9.5H8Z|M14.8 3 18.4 6.6H14.8Z'
 const IF_MAP = 'M8.7 3.3 3 5.6V20.7L8.7 18.4V3.3Z|M10.1 3.4V18.5L14.9 20.2V5.1Z|M16.3 5.1V20.2L21 18V3.4Z'
+/* exams → a clipboard with a marked answer cut out of it */
+const IF_EXAM =
+  'M9.6 2.2H14.4A1 1 0 0 1 15.4 3.2V4.8A1 1 0 0 1 14.4 5.8H9.6A1 1 0 0 1 8.6 4.8V3.2A1 1 0 0 1 9.6 2.2Z|M6.4 3.6H8.1V4.8A1.5 1.5 0 0 0 9.6 6.3H14.4A1.5 1.5 0 0 0 15.9 4.8V3.6H17.6A1.9 1.9 0 0 1 19.5 5.5V20.1A1.9 1.9 0 0 1 17.6 22H6.4A1.9 1.9 0 0 1 4.5 20.1V5.5A1.9 1.9 0 0 1 6.4 3.6Z M7.4 12.6 10.4 15.6 16 9.4 17.4 10.7 10.5 18.4 6 13.9Z'
 
 const CAT_ICON: Record<string, ReactNode> = {
   clock: <FIcon d={IF_HISTORY} />, // history → book with crescent & star
@@ -76,6 +79,7 @@ const CAT_ICON: Record<string, ReactNode> = {
   books: <FIcon d={IF_BOOKS} />, // recommended reading → book stack
   sources: <FIcon d={IF_SOURCES} />, // sources → document
   map: <FIcon d={IF_MAP} />, // maps → folded map
+  exam: <FIcon d={IF_EXAM} />, // exam room → clipboard with a marked answer
 }
 const SEARCH_D = 'M10.5 4.5a6 6 0 1 1 0 12 6 6 0 0 1 0-12Z M15 15l4.5 4.5'
 const CLOSE_D = 'M6 6l12 12M18 6 6 18'
@@ -131,13 +135,23 @@ export default function ChaptersScreen() {
             if (n > 0) progress = Math.min(99, Math.round((n / CH6_SCREEN_COUNT) * 100))
           }
         }
-        /* chapter 1 is the exploration game: progress is stations completed */
+        /* chapter 2 is a reading chapter: progress is how many of its sections
+           were scrolled through to the end. 100% belongs to its practice. */
+        if (chp.number === 2 && !done) {
+          const raw = localStorage.getItem(CH2_STORE_KEY)
+          if (raw) {
+            const p = JSON.parse(raw) as { sections?: string[] } | null
+            const n = Array.isArray(p?.sections) ? p.sections.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH2_SECTIONS.length) * 100))
+          }
+        }
+        /* chapter 1 is the open world: progress is how full the notebook is */
         if (chp.number === 1 && !done) {
           const raw = localStorage.getItem(CH1_STORE_KEY)
           if (raw) {
-            const p = JSON.parse(raw) as { stationsDone?: string[] } | null
-            const n = Array.isArray(p?.stationsDone) ? p.stationsDone.length : 0
-            if (n > 0) progress = Math.min(99, Math.round((n / CH1_STATION_COUNT) * 100))
+            const p = JSON.parse(raw) as { entries?: number[] } | null
+            const n = Array.isArray(p?.entries) ? p.entries.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH1_NOTEBOOK_TOTAL) * 100))
           }
         }
         st[chp.number] = { completed: done, progress }
@@ -284,7 +298,25 @@ export default function ChaptersScreen() {
 
   /* The sidebar holds only the study tools (glossary, reading, sources, maps), moved to the
      top, each on its own row with a divider between them. The subject categories live in the
-     chip filter under the cards, not here. */
+     chip filter under the cards, not here.
+
+     The exam room is pulled out of that list and pinned to the foot of the panel in an area of
+     its own: it is not something to read but something to sit down and do, and it stays out of
+     reach until every chapter has a question bank. */
+  const tools = secondaryItems.filter((s) => s.id !== 'exams')
+  const examItem = secondaryItems.find((s) => s.id === 'exams')
+
+  function toolRow(s: { id: string; title: string; icon: string }) {
+    return (
+      <span className="m-item x-item is-locked" key={s.id} title="יעלה בקרוב">
+        <span className="x-ico" aria-hidden="true">
+          {CAT_ICON[s.icon]}
+        </span>
+        <span className="m-name">{s.title}</span>
+      </span>
+    )
+  }
+
   function menuBody() {
     return (
       <>
@@ -295,15 +327,13 @@ export default function ChaptersScreen() {
           <h2 className="menu-title">כלי עזר</h2>
         </div>
         <nav className="menu-extra menu-tools" aria-label="כלי עזר והעמקה">
-          {secondaryItems.map((s) => (
-            <span className="m-item x-item is-locked" key={s.id} title="יעלה בקרוב">
-              <span className="x-ico" aria-hidden="true">
-                {CAT_ICON[s.icon]}
-              </span>
-              <span className="m-name">{s.title}</span>
-            </span>
-          ))}
+          {tools.map((s) => toolRow(s))}
         </nav>
+        {examItem && (
+          <nav className="menu-extra menu-exam" aria-label="מבחנים">
+            {toolRow(examItem)}
+          </nav>
+        )}
       </>
     )
   }
@@ -415,8 +445,8 @@ export default function ChaptersScreen() {
               )}
             </div>
             <div className="hero-copy">
-              <h1 id="hero-title" className="hero-title">מסע אל העולם<br />האסלאמי</h1>
-              <p className="hero-sub">גלו עולם חדש של היסטוריה, תרבות ומורשת אסלאמית.</p>
+              <h1 id="hero-title" className="hero-title">מסע אל<br />עולם האסלאם</h1>
+              <p className="hero-sub">מה שעיצב את האסלאם: היסטוריה, אמונה, הלכה וסמלים.</p>
             </div>
           </section>
 

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>תשעת האזורים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f7f2e8;--paper-2:#efe8da;--ink:#241d16;--ink-2:#5b5044;--ink-3:#8b7f70;
+  --rule:#ded3c0;--gold:#a8762a;--cool:#3f6d8c;--warn:#9c4a2f;--ok:#2f6b52;
+  --serif:'Frank Ruhl Libre','David Libre',serif;--sans:'Heebo',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--ok:#6dbf9a}}
+:root[data-theme="dark"]{
+  --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--ok:#6dbf9a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.72;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:clamp(26px,5vw,64px) clamp(18px,4vw,44px) 110px}
+header{border-bottom:1px solid var(--rule);padding-bottom:30px;margin-bottom:10px}
+.kick{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.32em;
+  color:var(--gold);margin-bottom:14px}
+h1{font-weight:300;font-size:clamp(1.9rem,1.3rem + 3vw,3.2rem);line-height:1.14;
+  text-wrap:balance;margin-bottom:14px}
+.lede{font-weight:300;font-size:clamp(1rem,.96rem + .4vw,1.2rem);color:var(--ink-2);max-width:62ch}
+h2{font-weight:400;font-size:clamp(1.2rem,1.05rem + .8vw,1.6rem);margin:48px 0 10px;
+  padding-top:26px;border-top:1px solid var(--rule)}
+h2 .n{font-family:var(--sans);font-weight:700;font-size:.68rem;letter-spacing:.2em;
+  color:var(--gold);display:block;margin-bottom:8px}
+p{max-width:66ch;margin-bottom:12px;font-weight:300}
+strong{font-weight:500}
+em{font-style:normal;color:var(--gold);font-weight:400}
+code{font-family:ui-monospace,monospace;font-size:.84em;background:var(--paper-2);
+  padding:1px 6px;border-radius:3px;direction:ltr;unicode-bidi:isolate;display:inline-block}
+ul{margin:0 0 14px;padding-inline-start:20px;max-width:66ch}
+li{margin-bottom:7px;font-weight:300}
+
+.world{border:1px solid var(--rule);border-radius:5px;background:var(--paper-2);
+  padding:18px 21px;margin:16px 0}
+.world.p1{border-inline-start:4px solid var(--warn)}
+.world.p2{border-inline-start:4px solid var(--gold)}
+.world.p3{border-inline-start:4px solid var(--ink-3)}
+.wh{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:9px}
+.wn{font-family:var(--sans);font-weight:700;font-size:.72rem;letter-spacing:.14em;
+  color:var(--gold);font-variant-numeric:tabular-nums}
+.wt{font-weight:500;font-size:1.18rem}
+.wf{font-family:var(--sans);font-weight:300;font-size:.68rem;letter-spacing:.08em;
+  color:var(--ink-3);direction:ltr;unicode-bidi:isolate}
+.stats{display:flex;flex-wrap:wrap;gap:16px;margin:10px 0 2px;
+  font-family:var(--sans);font-size:.72rem;font-weight:300;color:var(--ink-2)}
+.stats b{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink)}
+.stats .bad b{color:var(--warn)}
+.wrow{display:grid;grid-template-columns:74px 1fr;gap:12px;margin-top:11px;
+  padding-top:10px;border-top:1px solid var(--rule)}
+.wk{font-family:var(--sans);font-weight:500;font-size:.62rem;letter-spacing:.16em;
+  color:var(--ink-3);padding-top:4px}
+.wv{font-size:.96rem;font-weight:300}
+
+.note-box{border-inline-start:3px solid var(--cool);background:var(--paper-2);
+  padding:16px 19px;margin:22px 0;border-radius:0 3px 3px 0}
+.note-box.w{border-color:var(--warn)}
+.note-box.g{border-color:var(--ok)}
+.note-box h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--cool);margin-bottom:9px}
+.note-box.w h4{color:var(--warn)}
+.note-box.g h4{color:var(--ok)}
+.note-box p{font-size:.95rem;margin:0 0 8px;max-width:none}
+.note-box p:last-child{margin-bottom:0}
+.scroller{overflow-x:auto;margin:16px 0;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.85rem;
+  font-weight:300;min-width:560px}
+th{background:var(--paper-2);font-weight:500;font-size:.66rem;letter-spacing:.14em;
+  color:var(--ink-2);text-align:right;padding:10px 13px;white-space:nowrap}
+td{padding:9px 13px;border-top:1px solid var(--rule);font-variant-numeric:tabular-nums}
+td.bad{color:var(--warn);font-weight:500}
+td.good{color:var(--ok);font-weight:500}
+footer{margin-top:56px;padding-top:24px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kick">פרק 1 · אבחון ורשימת עבודה</div>
+  <h1>תשעת האזורים</h1>
+  <p class="lede">מה באמת לא בסדר בעולמות של פרק 1, נמדד מקבצי הפריסה ולא מהעין — ומה לעשות בכל אזור בבלנדר.</p>
+</header>
+
+<div class="note-box g">
+  <h4>מה כבר תוקן בקוד — בלי לגעת במודל אחד</h4>
+  <p><strong>ההארה.</strong> יחס האור העקיף לשמש עמד על 0.72–0.98 בכל תשעת האזורים. במדבר פתוח הוא צריך לעמוד על 0.20–0.35. ביחס כזה השמש כמעט לא תרמה מעבר לאור הסביבתי — ולכן <em>לא היה אף צל בשום אזור</em>. הורד ל־0.28–0.32.</p>
+  <p><strong>גווני הקרקע.</strong> כל תשעת הגוונים התחילו ב־<code>#f6</code> — הערוץ האדום ננעל על 246 בכולם, ולכן כל אזור יצא אותו סלמון־חום בדיוק. עכשיו לכל אזור גוון משלו: בזלת אפורה במעבר, ירוק־חול בית׳רב, דמדומים קרים ביציאה.</p>
+  <p><strong>הצינור לבלנדר.</strong> <code>camp:export</code> היה נעול על <code>camp-layout.json</code> — כלומר <em>שמונה מתשעת האזורים לא היו ניתנים לעריכה בבלנדר בכלל</em>. עכשיו הוא מקבל שם אזור.</p>
+  <p><strong>בדיקת הפריסה.</strong> קרסה על שני אזורים ודרשה עדר גמלים שלשישה אזורים אין. עכשיו היא רצה על כל התשעה — <strong>ומצאה 79 חפיפות</strong>.</p>
+</div>
+
+<h2><span class="n">הממצא</span>79 מקומות שבהם מודלים גדלים אחד בתוך השני</h2>
+<p>זו כנראה תחושת ה„שבור“. הרשימה המלאה, עם קואורדינטות, ב־<code>concept/chapter1/חפיפות.txt</code>.</p>
+
+<div class="scroller"><table>
+<tr><th>אזור</th><th>חפיפות</th><th>פרופים</th><th>דגמים</th><th>צפיפות /100מ״ר</th><th>הבעיה העיקרית</th></tr>
+<tr><td>המעבר הצר</td><td class="bad">16</td><td>74</td><td>19</td><td class="bad">2.0</td><td>הכי הרבה חפיפות בפרק</td></tr>
+<tr><td>המנזר</td><td class="bad">14</td><td>56</td><td>20</td><td class="bad">1.7</td><td>לא נבדק מעולם — הבדיקה קרסה</td></tr>
+<tr><td>תחנת הגבול</td><td class="bad">11</td><td>169</td><td>40</td><td>3.4</td><td>לא נבדק מעולם — הבדיקה קרסה</td></tr>
+<tr><td>ית׳רב</td><td class="bad">11</td><td>147</td><td>28</td><td>2.2</td><td>בתים חותכים סככות</td></tr>
+<tr><td>רמות תימן</td><td class="bad">10</td><td>99</td><td>16</td><td>2.2</td><td>רק 16 דגמים — הכי מונוטוני</td></tr>
+<tr><td>מכה</td><td class="bad">9</td><td>105</td><td>29</td><td class="bad">1.7</td><td>שיא הפרק, וכמעט הריק ביותר</td></tr>
+<tr><td>דרך הטעינה</td><td>4</td><td>64</td><td>21</td><td class="bad">1.6</td><td>הכי ריק בפרק</td></tr>
+<tr><td>היציאה</td><td>3</td><td>52</td><td>13</td><td class="bad">1.8</td><td>הכי מעט דגמים — 13</td></tr>
+<tr><td>מחנה הלילה</td><td class="good">1</td><td>70</td><td>14</td><td class="good">3.9</td><td>הכי נקי והכי צפוף</td></tr>
+</table></div>
+
+<div class="note-box w">
+  <h4>שתי מסקנות שהמספרים אומרים במפורש</h4>
+  <p><strong>מחנה הלילה הוא אמת המידה.</strong> חפיפה אחת, צפיפות 3.9 — כפול מרוב האזורים. הוא היחיד שעבר סבב בלנדר אמיתי, כי הוא היחיד שהצינור תמך בו. זה בדיוק ההבדל שרואים.</p>
+  <p><strong>מכה היא הבעיה הכואבת ביותר.</strong> היא שיא הפרק — הכעבה, האנצאב, ההקפה, היעלמות האלילים — ובצפיפות 1.7 היא כמעט הריקה ביותר. אם יש זמן לאזור אחד, זה הוא.</p>
+</div>
+
+<h2><span class="n">סדר עבודה</span>מאיפה להתחיל</h2>
+
+<div class="world p1">
+  <div class="wh"><span class="wn">1</span><span class="wt">מכה</span><span class="wf">mecca</span></div>
+  <div class="stats"><span class="bad">חפיפות <b>9</b></span><span class="bad">צפיפות <b>1.7</b></span><span>פרופים <b>105</b></span><span>דגמים <b>29</b></span></div>
+  <div class="wrow"><div class="wk">למה ראשון</div><div class="wv">שיא הפרק, והשחקן רואה אותו פעמיים — בביקור הראשון ובשני. כמעט הריק ביותר מתשעת האזורים.</div></div>
+  <div class="wrow"><div class="wk">להוסיף</div><div class="wv">דוכני שוק, כדים, סלים, חבלים, גמלים טעונים — צפיפות עירונית סביב הכיכר. <strong>והאנצאב חייבות לבלוט</strong>: אבנים ניצבות בגובה אדם בשולי הכיכר, שרואים אותן במעבר הראשון בלי הסבר.</div></div>
+  <div class="wrow"><div class="wk">פקודה</div><div class="wv"><code>npm run camp:export mecca</code></div></div>
+</div>
+
+<div class="world p1">
+  <div class="wh"><span class="wn">2</span><span class="wt">המעבר הצר</span><span class="wf">narrow-pass</span></div>
+  <div class="stats"><span class="bad">חפיפות <b>16</b></span><span class="bad">צפיפות <b>2.0</b></span><span>פרופים <b>74</b></span><span>דגמים <b>19</b></span></div>
+  <div class="wrow"><div class="wk">למה שני</div><div class="wv">הכי הרבה חפיפות בפרק — 16. <code>MUDTOWER</code> חותך את <code>BAYT</code>, וכן הלאה.</div></div>
+  <div class="wrow"><div class="wk">להוסיף</div><div class="wv">קירות בזלת גבוהים משני הצדדים שיוצרים מסדרון אמיתי. הגוון החדש כבר אפור — צריך שהגאומטריה תסכים איתו.</div></div>
+  <div class="wrow"><div class="wk">פקודה</div><div class="wv"><code>npm run camp:export narrow-pass</code></div></div>
+</div>
+
+<div class="world p1">
+  <div class="wh"><span class="wn">3</span><span class="wt">המנזר</span><span class="wf">monastery</span></div>
+  <div class="stats"><span class="bad">חפיפות <b>14</b></span><span class="bad">צפיפות <b>1.7</b></span><span>פרופים <b>56</b></span><span>דגמים <b>20</b></span></div>
+  <div class="wrow"><div class="wk">למה שלישי</div><div class="wv">אחד משני האזורים שהבדיקה קרסה עליהם, ולכן <strong>אף אחד מעולם לא ראה את 14 החפיפות שלו</strong>.</div></div>
+  <div class="wrow"><div class="wk">לתקן</div><div class="wv">גם שני פרופים שמצביעים על <code>collider.glb</code> — מודל שלא קיים בספרייה.</div></div>
+  <div class="wrow"><div class="wk">פקודה</div><div class="wv"><code>npm run camp:export monastery</code></div></div>
+</div>
+
+<div class="world p2">
+  <div class="wh"><span class="wn">4</span><span class="wt">תחנת הגבול</span><span class="wf">border-post</span></div>
+  <div class="stats"><span class="bad">חפיפות <b>11</b></span><span>צפיפות <b>3.4</b></span><span>פרופים <b>169</b></span><span>דגמים <b>40</b></span></div>
+  <div class="wrow"><div class="wk">מצב</div><div class="wv">האזור העשיר בפרק — 169 פרופים, 40 דגמים. גם הוא לא נבדק מעולם. בעיקר <strong>ניקוי</strong>, לא בנייה.</div></div>
+</div>
+
+<div class="world p2">
+  <div class="wh"><span class="wn">5</span><span class="wt">דרך הטעינה</span><span class="wf">loading-road</span></div>
+  <div class="stats"><span>חפיפות <b>4</b></span><span class="bad">צפיפות <b>1.6</b></span><span>פרופים <b>64</b></span><span>דגמים <b>21</b></span></div>
+  <div class="wrow"><div class="wk">מצב</div><div class="wv">הכי ריק בפרק. 64 פרופים על 4072 מ״ר. דרך במדבר יכולה להיות דלילה — אבל לא ריקה.</div></div>
+</div>
+
+<div class="world p2">
+  <div class="wh"><span class="wn">6</span><span class="wt">רמות תימן</span><span class="wf">yemen-heights</span></div>
+  <div class="stats"><span class="bad">חפיפות <b>10</b></span><span>צפיפות <b>2.2</b></span><span>פרופים <b>99</b></span><span class="bad">דגמים <b>16</b></span></div>
+  <div class="wrow"><div class="wk">מצב</div><div class="wv">99 פרופים אבל רק 16 דגמים שונים — הכי חוזר על עצמו. זה האזור הראשון שרואים.</div></div>
+</div>
+
+<div class="world p3">
+  <div class="wh"><span class="wn">7–8</span><span class="wt">ית׳רב · היציאה</span><span class="wf">yathrib · exit</span></div>
+  <div class="stats"><span>חפיפות <b>11 · 3</b></span><span>צפיפות <b>2.2 · 1.8</b></span><span>דגמים <b>28 · 13</b></span></div>
+  <div class="wrow"><div class="wk">מצב</div><div class="wv">ית׳רב צריכה בעיקר ניקוי חפיפות. ליציאה יש רק 13 דגמים — הכי מעט בפרק.</div></div>
+</div>
+
+<div class="world p3">
+  <div class="wh"><span class="wn">9</span><span class="wt">מחנה הלילה</span><span class="wf">night-camp</span></div>
+  <div class="stats"><span class="good">חפיפות <b>1</b></span><span class="good">צפיפות <b>3.9</b></span><span>פרופים <b>70</b></span><span>דגמים <b>14</b></span></div>
+  <div class="wrow"><div class="wk">מצב</div><div class="wv"><strong>אל תיגעי בו.</strong> הוא אמת המידה — השווי אליו את השאר.</div></div>
+</div>
+
+<h2><span class="n">משאבים</span>שבעה מודלים שכבר יש לך ולא בשימוש</h2>
+<p>בספרייה 72 מודלים. אף פריסה לא משתמשת בשבעה מהם:</p>
+<p><code>blacktent</code> · <code>cart</code> · <code>house2</code> · <code>pergola</code> · <code>ridge</code> · <code>ruinwall</code> · <code>wayhouse</code></p>
+<p>עגלה, אוהל שחור, בית נוסף, פרגולה, רכס, קיר חורבה ובית דרכים — בדיוק מה שחסר באזורים הדלילים, ובלי לדגמן דבר.</p>
+
+<h2><span class="n">איך</span>הצינור לבלנדר</h2>
+<div class="scroller"><table>
+<tr><th>שלב</th><th>פקודה</th></tr>
+<tr><td>ייצוא אזור לבלנדר</td><td><code>npm run camp:export &lt;אזור&gt;</code></td></tr>
+<tr><td>לערוך</td><td>פותחים <code>web/blender/&lt;אזור&gt;.blend</code>, מזיזים, שומרים</td></tr>
+<tr><td>חזרה למשחק</td><td><code>npm run camp:import &lt;אזור&gt;</code></td></tr>
+</table></div>
+<p>שמות האזורים: <code>mecca</code> · <code>narrow-pass</code> · <code>monastery</code> · <code>border-post</code> · <code>loading-road</code> · <code>yemen-heights</code> · <code>yathrib</code> · <code>exit</code> · <code>night-camp</code></p>
+<p>כל אזור מקבל קובץ <code>.blend</code> משלו, כך שעבודה על אחד לא דורסת את השני. הייבוא מריץ אוטומטית את בדיקת החפיפות ואומר מה עדיין מתנגש.</p>
+
+<div class="note-box w">
+  <h4>שתי מלכודות שכבר שרפו לנו זמן</h4>
+  <p><strong>חומרים פרוצדורליים חייבים אפייה.</strong> נכסי BlenderKit ו־shader nodes מתייצאים כשיש מרוח. תאפי diffuse לתמונה לפני ייצוא.</p>
+  <p><strong>עריכת חומרים בבלנדר לא שורדת ייצוא.</strong> תיקונים ברמת ה־glTF צריכים לרוץ אחרי כל ייצוא.</p>
+</div>
+
+<footer>פרק 1 · 9 אזורים · 79 חפיפות · 836 פרופים · 19.8.2026</footer>
+
+</div>
+</body>
+</html>

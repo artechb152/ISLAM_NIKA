@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מכה — ביקור ראשון</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%95%8B%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════
+   POC — מכה, ביקור ראשון · גוף ראשון
+
+   שמונה תמונות מפתח שנוצרו ב־Higgsfield, עם ה־HUD מולבש מעליהן
+   ב־CSS ולא מצויר בתוך התמונה — כדי שהטיפוגרפיה תהיה נקייה
+   ושיהיה אפשר לשנות אותה בלי לייצר מחדש.
+
+   בורדו עמוק · זהב · גווני חול.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --wine:#4a1220;
+  --wine-2:#6d1b2c;
+  --gold:#d9a441;
+  --gold-2:#f0cd85;
+  --sand:#e8dcc4;
+  --ink:#0b0705;
+  --sans:'Heebo','Segoe UI',system-ui,sans-serif;
+  --serif:'Frank Ruhl Libre','David Libre',serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--ink);color:var(--sand);font-family:var(--serif);overflow:hidden;
+  -webkit-font-smoothing:antialiased}
+
+#stage{position:fixed;inset:0;cursor:pointer;overflow:hidden;background:var(--ink)}
+.shot{position:absolute;inset:0;opacity:0;transition:opacity .9s cubic-bezier(.22,.61,.36,1)}
+.shot.on{opacity:1}
+.shot img{width:100%;height:100%;object-fit:cover;display:block}
+/* נשימה איטית — כדי שזה לא יקרא כמו תמונה סטטית */
+.shot.on img{animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{from{transform:scale(1.03) translate(0,0)}to{transform:scale(1.09) translate(-1.2%,-.8%)}}
+
+/* ── HUD ─────────────────────────────────────────────────── */
+#hud{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .7s}
+#hud.on{opacity:1}
+
+/* משימה — למעלה מימין */
+#obj{position:absolute;top:30px;right:34px;text-align:right}
+#obj .lbl{font-family:var(--sans);font-weight:400;font-size:.62rem;letter-spacing:.3em;
+  color:var(--gold);margin-bottom:8px;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+#obj .txt{font-weight:400;font-size:clamp(1.05rem,.95rem + .6vw,1.45rem);
+  text-shadow:0 2px 16px rgba(0,0,0,.95)}
+#obj .rule{height:1px;width:100%;margin-top:11px;
+  background:linear-gradient(to left,var(--gold),transparent)}
+
+/* מיני־מפה — למטה משמאל */
+#mini{position:absolute;bottom:34px;left:34px;width:132px;height:132px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,rgba(74,18,32,.82),rgba(11,7,5,.88));
+  border:1px solid rgba(217,164,65,.5);
+  box-shadow:0 8px 30px rgba(0,0,0,.6),inset 0 0 22px rgba(0,0,0,.5);
+  overflow:hidden}
+#mini .ring{position:absolute;inset:9px;border-radius:50%;border:1px solid rgba(217,164,65,.16)}
+#mini .n{position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  font-family:var(--sans);font-weight:700;font-size:.54rem;letter-spacing:.16em;color:var(--gold)}
+#mini .me{position:absolute;top:50%;left:50%;width:0;height:0;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-bottom:11px solid var(--gold-2);transform:translate(-50%,-60%)}
+#mini .cone{position:absolute;top:50%;left:50%;width:62px;height:62px;
+  transform:translate(-50%,-100%);
+  background:conic-gradient(from -32deg,rgba(240,205,133,.22),transparent 64deg);
+  border-radius:50% 50% 0 0}
+#mini .poi{position:absolute;width:7px;height:7px;background:var(--gold);
+  border-radius:1px;transform:rotate(45deg);box-shadow:0 0 8px rgba(217,164,65,.9)}
+#mini .npc{position:absolute;width:4px;height:4px;background:rgba(232,220,196,.62);border-radius:50%}
+
+/* פרומפט אינטראקציה — למטה במרכז */
+#prompt{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:11px;
+  background:linear-gradient(to right,rgba(74,18,32,.0),rgba(74,18,32,.78),rgba(74,18,32,.0));
+  padding:9px 30px;opacity:0;transition:opacity .5s}
+#prompt.on{opacity:1}
+#prompt .key{font-family:var(--sans);font-weight:700;font-size:.72rem;
+  width:24px;height:24px;display:grid;place-content:center;color:var(--ink);
+  background:var(--gold);border-radius:3px}
+#prompt .what{font-family:var(--sans);font-weight:300;font-size:.9rem;letter-spacing:.1em;
+  text-shadow:0 2px 10px rgba(0,0,0,.9)}
+
+/* מקשים — למטה מימין */
+#keys{position:absolute;bottom:36px;right:34px;display:flex;gap:16px;
+  font-family:var(--sans);font-weight:200;font-size:.64rem;letter-spacing:.14em;
+  color:rgba(232,220,196,.42);text-shadow:0 2px 8px rgba(0,0,0,.9)}
+#keys b{font-weight:500;color:rgba(217,164,65,.85)}
+
+/* ── כרטיסי כותרת ───────────────────────────────────────── */
+#title{position:absolute;inset:0;display:grid;place-content:center;text-align:center;
+  background:rgba(6,4,3,.62);opacity:0;transition:opacity 1s;pointer-events:none}
+#title.on{opacity:1}
+#title .a{font-weight:300;font-size:clamp(1.9rem,1.3rem + 3vw,3.6rem);letter-spacing:.04em}
+#title .b{font-family:var(--sans);font-weight:200;font-size:clamp(.85rem,.8rem + .5vw,1.1rem);
+  letter-spacing:.3em;color:var(--gold);margin-top:20px}
+
+/* ── שורת ביאור למטה (מחוץ למשחק) ───────────────────────── */
+#note{position:absolute;bottom:0;left:0;right:0;padding:14px 34px;
+  background:linear-gradient(to top,rgba(6,4,3,.94),transparent);
+  font-family:var(--sans);font-weight:200;font-size:.76rem;letter-spacing:.06em;
+  color:rgba(232,220,196,.55);text-align:center;pointer-events:none;
+  transition:opacity .4s}
+#note b{font-weight:500;color:var(--gold)}
+body.clean #note{opacity:0}
+
+/* ── פס התקדמות של השוטים ───────────────────────────────── */
+#bar{position:absolute;top:0;left:0;right:0;display:flex;gap:2px;z-index:9}
+#bar i{flex:1;height:2px;background:rgba(232,220,196,.14)}
+#bar i.done{background:var(--gold)}
+
+#help{position:absolute;top:14px;left:24px;z-index:9;
+  font-family:var(--sans);font-weight:200;font-size:.64rem;letter-spacing:.18em;
+  color:rgba(232,220,196,.34)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="shots"></div>
+
+  <div id="hud">
+    <div id="obj"><div class="lbl">משימה</div><div class="txt"></div><div class="rule"></div></div>
+    <div id="mini">
+      <div class="ring"></div><div class="n">צ</div>
+      <div class="cone"></div><div class="me"></div>
+    </div>
+    <div id="prompt"><span class="key">E</span><span class="what"></span></div>
+    <div id="keys"><span><b>WASD</b> תנועה</span><span><b>E</b> פעולה</span><span><b>M</b> מפה</span><span><b>J</b> מחברת</span></div>
+  </div>
+
+  <div id="title"><div><div class="a"></div><div class="b"></div></div></div>
+
+  <div id="bar"></div>
+  <div id="help">רווח / קליק — הלאה · ← אחורה · H — להסתיר ביאור</div>
+  <div id="note"></div>
+</div>
+
+<script>
+/* שמונת השוטים, לפי הסדר שבפרומפט */
+const SHOTS = [
+  { img:'poc/D-descent.jpg', hud:false,
+    title:['חצי האי ערב','רגע לפני הופעת האסלאם'],
+    note:'<b>שוט 1 · פתיחה קולנועית.</b> המצלמה יורדת אל העמק. זה הרגע היחיד בסרטון שהוא לא גוף ראשון.' },
+
+  { img:'poc/A-alley.jpg', hud:true, obj:'הגיעו אל הכעבה', poi:[[74,26]], npc:[[58,44],[46,62],[64,70]],
+    note:'<b>שוט 2 · השחקן מקבל שליטה.</b> סמטה, גובה עיניים 1.6 מ׳. אין חץ שמוביל — רק העיר.' },
+
+  { img:'poc/E-camel.jpg', hud:true, obj:'הגיעו אל הכעבה', poi:[[74,26]], npc:[[52,38],[60,50],[40,56],[68,64]],
+    note:'<b>שוט 3 · העולם חי בלי קשר לשחקן.</b> סוחר פורק שק מגמל כורע. אף אחד לא מחכה שילחצו עליו E.' },
+
+  { img:'poc/B-kaaba.jpg', hud:true, obj:'הגיעו אל הכעבה', poi:[[62,30]], npc:[[50,40],[57,47],[44,52],[66,58],[38,64]],
+    note:'<b>שוט 4 · הרגע שבו הכעבה נכנסת לפריים.</b> Landmark, לא סמן. השחקן מבין לבד לאן ללכת.' },
+
+  { img:'poc/F-plaza.jpg', hud:true, obj:'הגיעו אל הכעבה', poi:[[54,34]], npc:[[48,42],[52,46],[56,44],[44,50],[60,52],[40,58],[64,60]],
+    note:'<b>שוט 5 · הכיכר.</b> הקפה, שוק, שיירה נכנסת מימין, מדורה. זה הצפיפות שהעולם הקיים לא מגיע אליה.' },
+
+  { img:'poc/C2-ansab.jpg', hud:true, obj:'הגיעו אל הכעבה', poi:[[54,34]], npc:[[50,46],[58,50]],
+    note:'<b>שוט 6 · האנצאב.</b> אבנים ניצבות מרוחות שמן, קערות מנחה וקטורת — לא פסלים יווניים. בביקור הראשון עוברים לידם בלי הסבר.' },
+
+  { img:'poc/G-stone.jpg', hud:true, obj:'הגיעו אל הכעבה', prompt:'התבוננו', poi:[[52,40]], npc:[[54,48],[58,52],[62,50]],
+    note:'<b>שוט 7 · האבן השחורה.</b> הידיים בפריים הן מה שמחזיר את הגוף בגוף ראשון. זה השוט שהכי נראה כמו משחק אמיתי.' },
+
+  { img:'poc/H-map.jpg', hud:false,
+    note:'<b>שוט 8 · המפה.</b> כמעט ריקה — סימן אחד בעיגול. זו ההתקדמות של הפרק: לא אחוזים, אלא מפה שמתמלאת.' },
+]
+
+const $ = (s) => document.querySelector(s)
+const shotsEl = $('#shots'), hud = $('#hud'), bar = $('#bar')
+const objTxt = $('#obj .txt'), promptEl = $('#prompt'), promptWhat = $('#prompt .what')
+const mini = $('#mini'), titleEl = $('#title'), noteEl = $('#note')
+
+SHOTS.forEach((s, i) => {
+  const d = document.createElement('div')
+  d.className = 'shot'
+  d.innerHTML = '<img src="' + s.img + '" alt="">'
+  shotsEl.appendChild(d)
+  const b = document.createElement('i')
+  bar.appendChild(b)
+})
+
+let i = -1
+function show(n){
+  if (n < 0 || n >= SHOTS.length) return
+  i = n
+  const s = SHOTS[i]
+  ;[...shotsEl.children].forEach((el, k) => el.classList.toggle('on', k === i))
+  ;[...bar.children].forEach((el, k) => el.classList.toggle('done', k <= i))
+
+  hud.classList.toggle('on', !!s.hud)
+  if (s.obj) objTxt.textContent = s.obj
+  promptEl.classList.toggle('on', !!s.prompt)
+  if (s.prompt) promptWhat.textContent = s.prompt
+
+  /* סימונים על המיני־מפה */
+  mini.querySelectorAll('.poi,.npc').forEach(e => e.remove())
+  for (const [x, y] of (s.poi || [])) add('poi', x, y)
+  for (const [x, y] of (s.npc || [])) add('npc', x, y)
+
+  if (s.title){
+    $('#title .a').textContent = s.title[0]
+    $('#title .b').textContent = s.title[1]
+    titleEl.classList.add('on')
+  } else titleEl.classList.remove('on')
+
+  noteEl.innerHTML = s.note || ''
+}
+function add(cls, x, y){
+  const e = document.createElement('div')
+  e.className = cls
+  e.style.left = x + '%'; e.style.top = y + '%'
+  mini.appendChild(e)
+}
+
+addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'ArrowLeft' || e.code === 'Enter'){ e.preventDefault(); show(i + 1) }
+  else if (e.code === 'ArrowRight'){ e.preventDefault(); show(i - 1) }
+  else if (e.code === 'KeyH'){ document.body.classList.toggle('clean') }
+})
+$('#stage').addEventListener('click', () => show(i + 1))
+show(0)
+</script>
+</body>
+</html>

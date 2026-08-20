@@ -187,6 +187,10 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
 .menu-extra.menu-tools{flex:1;border-top:none;gap:0;padding:8px 14px 24px}
 .menu-tools .m-item{border-radius:0;padding-block:16px;border-bottom:1px solid var(--edge-soft)}
 .menu-tools .m-item:last-child{border-bottom:none}
+/* the exam room is not reference material: it gets its own area at the foot of the panel,
+   fenced off by a full-strength rule and a faint maroon wash so it reads as a destination */
+.menu-extra.menu-exam{margin-block-start:auto;border-top:1px solid var(--edge);background:rgba(165,50,47,.055);padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px))}
+.menu-exam .m-item{border-radius:10px;padding-block:14px}
 .x-item{flex-direction:row-reverse;justify-content:space-between}
 .x-ico{width:23px;height:23px;color:var(--maroon);flex:none}
 .x-ico svg{width:23px;height:23px}

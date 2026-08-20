@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>דמויות פרק 1 — תצוגה מונפשת</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎭</text></svg>" />
+<style>
+  :root { --maroon:#8a2733; --maroon-deep:#571820; --gold:#c79a3c; --cream:#f5ecd6; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body { font-family:'Ploni','Segoe UI',system-ui,sans-serif; background:#241610; color:var(--cream); display:flex; flex-direction:column; }
+  header { background:var(--maroon-deep); border-bottom:2px solid var(--gold); padding:.7rem 1.2rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+  header h1 { font-size:1rem; font-weight:600; }
+  .who { display:flex; gap:.4rem; flex-wrap:wrap; }
+  .clips { display:flex; gap:.4rem; margin-inline-start:auto; }
+  button { font:inherit; font-size:.85rem; padding:.35rem .8rem; border-radius:.45rem; cursor:pointer;
+    background:rgba(0,0,0,.35); color:var(--cream); border:1px solid rgba(199,154,60,.45); }
+  button.active { background:var(--maroon); border-color:var(--gold); }
+  #stage { flex:1; position:relative; }
+  canvas { display:block; }
+  #hint { position:absolute; top:.6rem; inset-inline-end:1rem; font-size:.75rem; opacity:.55; }
+  #err { position:absolute; inset-block-start:40%; inset-inline:0; text-align:center; color:#e08a8a; font-size:.9rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>דמויות פרק 1</h1>
+  <div class="who" id="who"></div>
+  <div class="clips" id="clips"></div>
+</header>
+<div id="stage"><div id="hint">גרירה לסיבוב · גלגלת לזום</div><div id="err"></div></div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.185.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.185.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+
+// Rawi is skeletally animated (Mixamo). The five NPCs are NOT: their robes
+// fuse the arms into the cloth, so every auto-rigger either refuses them or
+// shreds the mesh. They never walk — they stand and talk — so they get
+// skeleton-free motion in the vertex shader instead, and the mesh stays intact.
+const CHARS = [
+  ['rawi', 'רָאוִי', '../rawi-poc/rawi-mixamo.glb', 'rig'],
+  ['envoy', 'שליח האימפריה', './envoy.glb', 'proc'],
+  ['chief', 'ראש השבט', './chief.glb', 'proc'],
+  ['merchant', 'הסוחר', './merchant.glb', 'proc'],
+  ['jewish', 'הסוחר היהודי', './jewish.glb', 'proc'],
+  ['monk', 'הנזיר', './monk.glb', 'proc'],
+]
+const stage = document.getElementById('stage')
+const renderer = new THREE.WebGLRenderer({ antialias: true })
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+renderer.shadowMap.enabled = true
+stage.appendChild(renderer.domElement)
+const scene = new THREE.Scene()
+scene.background = new THREE.Color(0x241610)
+const camera = new THREE.PerspectiveCamera(35, 1, .1, 100)
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.target.set(0, .95, 0)
+camera.position.set(0, 1.15, 3.4)
+
+scene.add(new THREE.HemisphereLight(0xffe8c0, 0x2a1a10, 1.5))
+const key = new THREE.DirectionalLight(0xffd9a0, 2.4)
+key.position.set(2.5, 4, 2.5); key.castShadow = true
+key.shadow.mapSize.set(1024, 1024); scene.add(key)
+const rim = new THREE.DirectionalLight(0xc79a3c, 1.1)
+rim.position.set(-2.5, 2, -2); scene.add(rim)
+const floor = new THREE.Mesh(new THREE.CircleGeometry(6, 48),
+  new THREE.ShadowMaterial({ opacity: .38 }))
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
+
+const resize = () => {
+  const w = stage.clientWidth, h = stage.clientHeight
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix()
+}
+addEventListener('resize', resize); resize()
+
+const loader = new GLTFLoader()
+const load = (u) => new Promise((res, rej) => loader.load(u, res, undefined, rej))
+let model = null, mixer = null, actions = {}, current = null
+let procUniforms = null   // skeleton-free motion for the robed NPCs
+
+/* Skeleton-free life: a height-weighted sway (cloth catches the air, feet stay
+   planted), a breathing swell around the chest, and a talk layer that adds a
+   head bob plus a little extra shoulder motion. All in the vertex shader, so
+   the reconstructed mesh is never re-weighted or torn. */
+function makeProcedural(root, height) {
+  const u = { uTime: { value: 0 }, uTalk: { value: 0 }, uH: { value: height } }
+  root.traverse((o) => {
+    if (!o.isMesh) return
+    o.material = o.material.clone()
+    o.material.onBeforeCompile = (shader) => {
+      shader.uniforms.uTime = u.uTime
+      shader.uniforms.uTalk = u.uTalk
+      shader.uniforms.uH = u.uH
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', `#include <common>
+          uniform float uTime; uniform float uTalk; uniform float uH;`)
+        .replace('#include <begin_vertex>', `#include <begin_vertex>
+          float h = clamp(transformed.y / uH, 0.0, 1.0);
+          float t = uTime;
+          // idle sway — quadratic in height so the hem barely moves
+          transformed.x += sin(t * 0.9 + h * 1.8) * 0.010 * h * h;
+          transformed.z += cos(t * 0.7 + h * 1.4) * 0.007 * h * h;
+          // breathing — a swell centred on the chest
+          float chest = exp(-pow((h - 0.72) * 5.0, 2.0));
+          transformed.z += sin(t * 1.6) * 0.006 * chest;
+          transformed.y += sin(t * 1.6) * 0.004 * chest;
+          // talk layer — head bob and a touch more upper-body motion
+          float head = smoothstep(0.80, 0.97, h);
+          transformed.y -= abs(sin(t * 3.4)) * 0.012 * head * uTalk;
+          transformed.x += sin(t * 2.6 + 1.0) * 0.016 * h * h * uTalk;
+          transformed.z += sin(t * 3.0) * 0.010 * head * uTalk;`)
+    }
+    o.material.needsUpdate = true
+  })
+  return u
+}
+
+async function show(id) {
+  const entry = CHARS.find((c) => c[0] === id)
+  document.getElementById('err').textContent = ''
+  if (model) { scene.remove(model); model = null }
+  mixer = null; actions = {}; current = null; procUniforms = null
+  document.querySelectorAll('#who button').forEach((b) =>
+    b.classList.toggle('active', b.dataset.id === id))
+  let gltf
+  try { gltf = await load(entry[2]) }
+  catch { document.getElementById('err').textContent = 'הדמות עוד לא נבנתה — ' + entry[1]; document.getElementById('clips').innerHTML = ''; return }
+  model = gltf.scene
+  model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false } })
+  // FBX/Blender round-trips arrive in cm — normalize to 1.7m, feet on ground
+  const bb = new THREE.Box3().setFromObject(model)
+  model.scale.setScalar(1.7 / (bb.max.y - bb.min.y))
+  const bb2 = new THREE.Box3().setFromObject(model)
+  model.position.y -= bb2.min.y
+  scene.add(model)
+  const clips = document.getElementById('clips')
+  clips.innerHTML = ''
+  const LABEL = { idle: 'עמידה', walk: 'הליכה', talk: 'דיבור', 'talk-nod': 'הנהון', 'talk-ack': 'הכרה', 'talk-happy': 'יד שמחה' }
+
+  if (entry[3] === 'proc') {
+    const local = new THREE.Box3().setFromObject(model)
+    procUniforms = makeProcedural(model, (local.max.y - local.min.y) / model.scale.y)
+    for (const [key, label] of [['idle', 'עמידה'], ['talk', 'דיבור']]) {
+      const b = document.createElement('button')
+      b.textContent = label; b.dataset.clip = key
+      b.onclick = () => play(key)
+      clips.appendChild(b)
+    }
+    play('idle')
+  } else {
+    mixer = new THREE.AnimationMixer(model)
+    for (const c of gltf.animations) {
+      actions[c.name] = mixer.clipAction(c)
+      const b = document.createElement('button')
+      b.textContent = LABEL[c.name] ?? c.name
+      b.dataset.clip = c.name
+      b.onclick = () => play(c.name)
+      clips.appendChild(b)
+    }
+    play(gltf.animations.find((a) => a.name === 'idle')?.name ?? gltf.animations[0].name)
+  }
+  window.__ready = true
+}
+function play(n) {
+  if (n === current) return
+  if (procUniforms) {
+    current = n   // the talk layer eases in from the render loop
+  } else {
+    if (!actions[n]) return
+    if (current) actions[current].fadeOut(.35)
+    actions[n].reset().fadeIn(.35).play()
+    current = n
+  }
+  document.querySelectorAll('#clips button').forEach((b) =>
+    b.classList.toggle('active', b.dataset.clip === n))
+}
+const who = document.getElementById('who')
+for (const [id, label] of CHARS) {
+  const b = document.createElement('button')
+  b.textContent = label; b.dataset.id = id
+  b.onclick = () => show(id)
+  who.appendChild(b)
+}
+const clock = new THREE.Clock()
+renderer.setAnimationLoop(() => {
+  const dt = clock.getDelta()
+  mixer?.update(dt)
+  if (procUniforms) {
+    procUniforms.uTime.value += dt
+    const want = current === 'talk' ? 1 : 0
+    procUniforms.uTalk.value += (want - procUniforms.uTalk.value) * Math.min(dt * 3.5, 1)
+  }
+  controls.update()
+  renderer.render(scene, camera)
+})
+show(new URLSearchParams(location.search).get('c') ?? 'chief')
+</script>
+</body>
+</html>

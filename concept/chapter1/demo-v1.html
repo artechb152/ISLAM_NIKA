@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>דרך הבשמים · דמו</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Assistant:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+  :root{
+    --paper:#f5ecd6; --ink:#2a1a14; --ink-soft:#6b5541;
+    --maroon:#8a2733; --maroon-deep:#571820;
+    --gold:#c79a3c; --gold-deep:#a67c22;
+    --glass:rgba(28,18,12,.90); --edge:rgba(199,154,60,.42);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    background:#1a1210;color:var(--paper);
+    font-family:"Assistant","Segoe UI",system-ui,sans-serif;
+    overflow:hidden;direction:rtl;
+  }
+
+  /* ── the world ─────────────────────────────────────────── */
+  #stage{position:fixed;inset:0;overflow:hidden;cursor:default}
+  #scene{
+    position:absolute;top:0;bottom:0;left:0;
+    /* three copies of the same plate, mirrored, so the street runs long
+       enough to walk down. A real build gets separate painted layers. */
+    display:flex;will-change:transform;
+  }
+  #scene img{height:100%;display:block;image-rendering:auto}
+  #scene img:nth-child(2){transform:scaleX(-1)}
+
+  /* a warm wash so the composited figures sit in the same light */
+  #grade{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(60,25,10,.18),rgba(20,10,6,.05) 40%,rgba(30,14,8,.30));
+    mix-blend-mode:multiply}
+  #vignette{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 45%,transparent 40%,rgba(20,10,6,.55))}
+
+  .figure{
+    position:absolute;bottom:11%;left:0;will-change:transform;
+    filter:drop-shadow(0 12px 18px rgba(20,10,6,.55));
+    transition:filter .2s ease;
+  }
+  .figure img{display:block;height:100%;width:auto}
+  .figure.lit{filter:drop-shadow(0 12px 18px rgba(20,10,6,.55)) drop-shadow(0 0 14px rgba(199,154,60,.5))}
+
+  /* ── prompt over a person ──────────────────────────────── */
+  #prompt{
+    position:absolute;transform:translate(-50%,-100%);
+    background:var(--glass);border:1px solid var(--edge);border-radius:999px;
+    padding:.4rem .95rem;font-size:.9rem;white-space:nowrap;
+    display:none;align-items:center;gap:.5rem;pointer-events:none;
+    box-shadow:0 6px 20px rgba(0,0,0,.5);
+  }
+  .key{
+    display:inline-grid;place-items:center;min-width:1.4rem;height:1.4rem;
+    border:1px solid var(--gold);border-radius:4px;color:var(--gold);
+    font-family:"IBM Plex Mono",monospace;font-size:.76rem;
+  }
+
+  /* ── HUD ───────────────────────────────────────────────── */
+  #hud{
+    position:fixed;inset-inline:0;bottom:0;padding:.7rem 1rem 1rem;
+    display:flex;justify-content:center;pointer-events:none;
+  }
+  #ledger{
+    background:var(--glass);border:1px solid var(--edge);border-radius:10px;
+    padding:.6rem .9rem;display:grid;gap:.28rem;min-width:19rem;
+    font-size:.78rem;box-shadow:0 8px 26px rgba(0,0,0,.5);
+  }
+  .row{display:grid;grid-template-columns:9.5rem 1fr 1.6rem;align-items:center;gap:.5rem}
+  .bar{height:7px;border-radius:4px;background:rgba(245,236,214,.13);overflow:hidden}
+  .bar i{display:block;height:100%;width:0;transition:width .5s cubic-bezier(.4,0,.2,1)}
+  .bar.trad i{background:var(--maroon)}
+  .bar.check i{background:#7c9a5a}
+  .num{font-family:"IBM Plex Mono",monospace;text-align:center;color:var(--gold)}
+
+  #hint{
+    position:fixed;top:1rem;inset-inline-start:1rem;
+    background:var(--glass);border:1px solid var(--edge);border-radius:8px;
+    padding:.5rem .8rem;font-size:.78rem;color:rgba(245,236,214,.8);
+    display:flex;gap:.9rem;align-items:center;
+  }
+
+  /* ── panels ────────────────────────────────────────────── */
+  .panel{
+    position:fixed;inset:0;display:none;place-items:center;
+    background:rgba(18,10,6,.62);padding:1.2rem;z-index:20;
+  }
+  .panel.on{display:grid}
+  .card{
+    width:min(560px,100%);
+    background:linear-gradient(180deg,rgba(48,32,20,.98),rgba(30,20,12,.99));
+    border:1px solid var(--edge);border-radius:14px;
+    padding:1.5rem 1.6rem;box-shadow:0 30px 70px rgba(0,0,0,.6);
+    animation:rise .3s cubic-bezier(.2,.7,.3,1) both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.card{animation:none}}
+
+  .who{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;
+    color:var(--gold);margin:0 0 .5rem}
+  .said{font-family:"Frank Ruhl Libre",Georgia,serif;font-size:1.22rem;line-height:1.62;
+    margin:0 0 1.1rem;color:var(--paper)}
+  .said .q{color:var(--gold)}
+  .ask{font-size:.96rem;color:rgba(245,236,214,.8);margin:0 0 .9rem}
+
+  .btns{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.9rem}
+  button{
+    font-family:inherit;font-size:.92rem;color:var(--paper);
+    background:rgba(245,236,214,.07);border:1px solid var(--edge);
+    border-radius:8px;padding:.55rem .9rem;cursor:pointer;
+    transition:background .15s ease,border-color .15s ease,transform .1s ease;
+  }
+  button:hover{background:rgba(199,154,60,.16)}
+  button:active{transform:translateY(1px)}
+  button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  button.primary{background:var(--maroon);border-color:var(--maroon)}
+  button.primary:hover{background:#a1303d}
+  button.picked{border-color:var(--gold);background:rgba(199,154,60,.22)}
+
+  .lbl{font-family:"IBM Plex Mono",monospace;font-size:.68rem;letter-spacing:.12em;
+    color:var(--gold);margin:.2rem 0 .45rem}
+  .rawi{
+    margin-top:1rem;padding:.8rem 1rem;background:rgba(0,0,0,.3);
+    border-inline-start:3px solid var(--gold);border-radius:0 7px 7px 0;
+    font-size:.96rem;line-height:1.65;display:none;
+  }
+  .rawi.on{display:block;animation:rise .3s ease both}
+  .rawi b{display:block;font-family:"IBM Plex Mono",monospace;font-size:.66rem;
+    letter-spacing:.14em;color:var(--gold);margin-bottom:.3rem;font-weight:400}
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-top:1.1rem}
+  .src{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:rgba(245,236,214,.45)}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="scene">
+    <img src="plates/mecca.jpg" alt="">
+    <img src="plates/mecca.jpg" alt="">
+    <img src="plates/mecca.jpg" alt="">
+  </div>
+  <div class="figure" id="merchant" data-x="1560"><img src="chars/merchant.png" alt=""></div>
+  <div class="figure" id="rawi" data-x="1880"><img src="chars/rawi.png" alt=""></div>
+  <div id="grade"></div>
+  <div id="vignette"></div>
+  <div id="prompt"><span class="key">E</span><span id="prompt-text"></span></div>
+</div>
+
+<div id="hint">
+  <span><span class="key">A</span> <span class="key">D</span> ללכת</span>
+  <span><span class="key">E</span> לדבר</span>
+</div>
+
+<div id="hud">
+  <div id="ledger">
+    <div class="row"><span>כך מספרת המסורת</span><span class="bar trad"><i id="bar-t"></i></span><span class="num" id="n-t">0</span></div>
+    <div class="row"><span>כך אפשר לבדוק</span><span class="bar check"><i id="bar-c"></i></span><span class="num" id="n-c">0</span></div>
+  </div>
+</div>
+
+<!-- the claim -->
+<div class="panel" id="p-say">
+  <div class="card">
+    <p class="who" id="say-who">הסוחר המכי</p>
+    <p class="said" id="say-text"></p>
+    <div class="foot">
+      <span class="src" id="say-src"></span>
+      <button class="primary" id="say-next">לרשום במחברת</button>
+    </div>
+  </div>
+</div>
+
+<!-- the notebook -->
+<div class="panel" id="p-note">
+  <div class="card">
+    <p class="who">המחברת · רושמים טענה</p>
+    <p class="said" id="note-claim"></p>
+
+    <p class="lbl">מאיפה זה הגיע?</p>
+    <div class="btns" id="stamps"></div>
+
+    <p class="lbl">כמה את סומכת על זה?</p>
+    <div class="btns" id="trusts"></div>
+
+    <div class="rawi" id="rawi-say"><b>ראווי</b><span id="rawi-text"></span></div>
+
+    <div class="foot">
+      <span class="src" id="note-src"></span>
+      <button class="primary" id="note-done" style="display:none">להמשיך בדרך</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────────
+   One minute of the game, so the idea can be looked at instead
+   of described. The painted plate stands in for the layered
+   scene a real build would use; everything else is the real
+   mechanic — a person says a thing, you decide where it came
+   from and how far you trust it, and Rawi answers you back.
+   Every line below is from the chapter's own source text.
+   ───────────────────────────────────────────────────────────── */
+
+const CLAIM = {
+  who:  'הסוחר המכי',
+  text: 'מי שהביא את הבל למכה היה גבר תקיף בשם עמרו בן לחי, בן שבט ח׳זאעה. כך כתב אבן השאם, עורך הביוגרפיה של מוחמד.',
+  src:  '§38',
+  short:'עמרו בן לחי הביא את הבל למכה',
+  right:'tradition',
+};
+
+const STAMPS = [
+  { id:'tradition', label:'מסורת מוסלמית מאוחרת' },
+  { id:'quran',     label:'הקוראן' },
+  { id:'external',  label:'מקור חיצוני בן־הזמן' },
+  { id:'find',      label:'ממצא שאפשר לגעת בו' },
+];
+
+const STAMP_REPLY = {
+  tradition:'נכון. אבן השאם חי במאה התשיעית — שלוש מאות שנה אחרי. הוא לא ראה, הוא שמע.',
+  quran:    'הקוראן מזכיר אלילים אחרים, אבל את הסיפור הזה הוא לא מספר. זה בא ממקום אחר.',
+  external: 'הלוואי. אין לנו כאן מקור חיצוני בן־הזמן — וזה בדיוק החלל שהפרק מדבר עליו.',
+  find:     'אין אבן שכתוב עליה מי הביא אותה. יש רק מי שסיפר.',
+};
+
+const TRUSTS = [
+  { id:'sure',  label:'ודאי' },
+  { id:'likely',label:'סביר' },
+  { id:'ltd',   label:'עירבון מוגבל' },
+  { id:'disp',  label:'שנוי במחלוקת' },
+];
+
+const TRUST_REPLY = {
+  sure:  'זהירה. זו העדות היחידה שיש, והיא מאוחרת בשלוש מאות שנה. „ודאי“ זו מילה גדולה.',
+  likely:'סביר, אולי. אבל שימי לב מי מרוויח מהסיפור הזה — שבטו של מוחמד יוצא ממנו נקי מחטא האלילות.',
+  ltd:   'זה בדיוק הביטוי שהטקסט עצמו משתמש בו. „עירבון מוגבל“ — ובצדק.',
+  disp:  'יש על מה. חוקרים גורסים שהמסורת הזו נועדה להרחיק את חטא האלילות משבטו של הנביא.',
+};
+
+/* ── the world ───────────────────────────────────────────── */
+const scene   = document.getElementById('scene');
+const stage   = document.getElementById('stage');
+const prompt  = document.getElementById('prompt');
+const ptext   = document.getElementById('prompt-text');
+const figures = [...document.querySelectorAll('.figure')];
+
+let camera = 0;                 // metres walked, in scene pixels
+let worldW = 3000;              // set once the plate has loaded
+const keys = new Set();
+let done = false;
+
+function layout(){
+  /* Measured after the plates decode, not at parse time — a guessed world width
+     let the camera run past the end and carried the merchant off the screen. */
+  worldW = scene.getBoundingClientRect().width || scene.scrollWidth || 3000;
+  for (const f of figures) f.style.height = Math.round(stage.clientHeight * 0.40) + 'px';
+  /* the two figures stand a third and a half of the way along the street */
+  document.getElementById('merchant').dataset.x = Math.round(worldW * 0.42);
+  document.getElementById('rawi').dataset.x     = Math.round(worldW * 0.47);
+  camera = Math.min(camera, Math.max(0, worldW - stage.clientWidth));
+}
+for (const img of scene.querySelectorAll('img')) img.addEventListener('load', layout);
+window.addEventListener('resize', layout);
+window.addEventListener('load', layout);
+layout();
+
+addEventListener('keydown', e => {
+  const k = { KeyA:'a', KeyD:'d', ArrowLeft:'a', ArrowRight:'d' }[e.code];
+  if (k){ keys.add(k); e.preventDefault(); }
+  if (e.code === 'KeyE' && near() && !anyPanel()) openSay();
+});
+addEventListener('keyup', e => {
+  const k = { KeyA:'a', KeyD:'d', ArrowLeft:'a', ArrowRight:'d' }[e.code];
+  if (k) keys.delete(k);
+});
+
+const anyPanel = () => !!document.querySelector('.panel.on');
+
+function near(){
+  if (done) return null;
+  const m = document.getElementById('merchant');
+  const mx = +m.dataset.x;
+  const centre = camera + stage.clientWidth / 2;
+  return Math.abs(mx - centre) < 240 ? m : null;
+}
+
+let last = performance.now();
+function frame(now){
+  /* Metres per second, not pixels per frame — tied to the frame rate the walk
+     crossed the whole street in under four seconds, which gives nobody time to
+     look at it. */
+  const dt = Math.min(0.05, ((now ?? performance.now()) - last) / 1000);
+  last = now ?? performance.now();
+  if (!anyPanel()){
+    const speed = 330 * dt;
+    if (keys.has('a')) camera -= speed;
+    if (keys.has('d')) camera += speed;
+    camera = Math.max(0, Math.min(camera, worldW - stage.clientWidth));
+  }
+  scene.style.transform = `translateX(${-camera}px)`;
+  for (const f of figures) f.style.transform = `translateX(${+f.dataset.x - camera}px)`;
+
+  const n = near();
+  const m = document.getElementById('merchant');
+  m.classList.toggle('lit', !!n);
+  if (n && !anyPanel()){
+    prompt.style.display = 'flex';
+    prompt.style.left = (+m.dataset.x - camera + 55) + 'px';
+    prompt.style.top  = (stage.clientHeight * 0.50) + 'px';
+    ptext.textContent = 'לדבר עם הסוחר';
+  } else prompt.style.display = 'none';
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ── the claim ───────────────────────────────────────────── */
+const pSay = document.getElementById('p-say');
+function openSay(){
+  document.getElementById('say-who').textContent  = CLAIM.who;
+  document.getElementById('say-text').textContent = '„' + CLAIM.text + '“';
+  document.getElementById('say-src').textContent  = CLAIM.src;
+  pSay.classList.add('on');
+}
+document.getElementById('say-next').onclick = () => {
+  pSay.classList.remove('on');
+  openNote();
+};
+
+/* ── the notebook ────────────────────────────────────────── */
+const pNote = document.getElementById('p-note');
+const rawiBox = document.getElementById('rawi-say');
+const rawiTxt = document.getElementById('rawi-text');
+let stamped = null, trusted = null;
+
+function openNote(){
+  document.getElementById('note-claim').textContent = '„' + CLAIM.short + '“';
+  document.getElementById('note-src').textContent = CLAIM.src;
+
+  const sBox = document.getElementById('stamps');
+  sBox.innerHTML = '';
+  for (const s of STAMPS){
+    const b = document.createElement('button');
+    b.textContent = s.label;
+    b.onclick = () => {
+      stamped = s.id;
+      [...sBox.children].forEach(c => c.classList.remove('picked'));
+      b.classList.add('picked');
+      say(STAMP_REPLY[s.id]);
+      check();
+    };
+    sBox.appendChild(b);
+  }
+
+  const tBox = document.getElementById('trusts');
+  tBox.innerHTML = '';
+  for (const t of TRUSTS){
+    const b = document.createElement('button');
+    b.textContent = t.label;
+    b.onclick = () => {
+      trusted = t.id;
+      [...tBox.children].forEach(c => c.classList.remove('picked'));
+      b.classList.add('picked');
+      say(TRUST_REPLY[t.id]);
+      check();
+    };
+    tBox.appendChild(b);
+  }
+  pNote.classList.add('on');
+}
+
+function say(text){
+  rawiTxt.textContent = text;
+  rawiBox.classList.add('on');
+}
+function check(){
+  if (stamped && trusted) document.getElementById('note-done').style.display = '';
+}
+
+document.getElementById('note-done').onclick = () => {
+  pNote.classList.remove('on');
+  done = true;
+  /* the ledger moves — and this claim goes to the side it belongs on */
+  const t = stamped === 'tradition' || stamped === 'quran' ? 1 : 0;
+  bump(t ? 'trad' : 'check');
+};
+
+/* ── the ledger ──────────────────────────────────────────── */
+let nT = 0, nC = 0;
+function bump(side){
+  if (side === 'trad') nT++; else nC++;
+  const max = Math.max(4, nT + nC);
+  document.getElementById('bar-t').style.width = (nT / max * 100) + '%';
+  document.getElementById('bar-c').style.width = (nC / max * 100) + '%';
+  document.getElementById('n-t').textContent = nT;
+  document.getElementById('n-c').textContent = nC;
+}
+</script>
+</body>
+</html>

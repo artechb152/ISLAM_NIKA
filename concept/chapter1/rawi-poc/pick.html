@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>בחירת תנועות לראוי</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐪</text></svg>" />
+<style>
+  :root { --maroon:#8a2733; --maroon-deep:#571820; --gold:#c79a3c; --cream:#f5ecd6; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Ploni','Segoe UI',system-ui,sans-serif; background:#241610; color:var(--cream); padding-bottom:5rem; }
+  header { background:var(--maroon-deep); border-bottom:2px solid var(--gold); padding:.8rem 1.2rem; position:sticky; top:0; z-index:5; }
+  header h1 { font-size:1.05rem; font-weight:600; }
+  header p { font-size:.8rem; opacity:.7; margin-top:.15rem; }
+  section { max-width:1080px; margin:1.6rem auto 0; padding:0 1.2rem; }
+  h2 { color:var(--gold); font-size:1.05rem; margin-bottom:.2rem; }
+  .note { font-size:.8rem; opacity:.65; margin-bottom:.8rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:.8rem; }
+  label.card { display:block; background:rgba(0,0,0,.35); border:2px solid rgba(199,154,60,.3); border-radius:.6rem; overflow:hidden; cursor:pointer; transition:border-color .15s; }
+  label.card:hover { border-color:rgba(199,154,60,.7); }
+  label.card:has(input:checked) { border-color:var(--gold); background:rgba(138,39,51,.35); }
+  label.card img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#333; }
+  .cap { display:flex; align-items:center; gap:.5rem; padding:.5rem .6rem; font-size:.8rem; }
+  .cap input { accent-color:var(--gold); }
+  .tried { font-size:.68rem; color:#e08a8a; }
+  #result { position:fixed; bottom:0; inset-inline:0; background:var(--maroon-deep); border-top:2px solid var(--gold); padding:.7rem 1.2rem; font-size:.9rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+  #result b { color:var(--gold); }
+  #summary { direction:ltr; font-family:monospace; background:rgba(0,0,0,.3); padding:.25rem .6rem; border-radius:.4rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>איזו תנועה מרגישה כמו רָאוִי?</h1>
+  <p>הדגמים הם בובה גנרית של ספריית התנועה — מה שחשוב זה האנרגיה והקצב, לא המראה. סמני אחת מכל קבוצה (אפשר גם יותר, נשווה). למטה נבנית הרשימה — פשוט תקריאי לי אותה.</p>
+</header>
+
+<section>
+  <h2>עמידה (idle) — הוא מחכה לידך במחנה</h2>
+  <p class="note">מה שהיה עד עכשיו: „Idle" הבסיסי — זה שהרגיש לך תפוס־על־חם.</p>
+  <div class="grid" data-group="עמידה">
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle.gif"><span class="cap"><input type="checkbox" value="Idle (0)"><span>Idle <span class="tried">← מה שראית</span></span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle_02.gif"><span class="cap"><input type="checkbox" value="Idle_02 (11)"><span>Idle 02</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle_03.gif"><span class="cap"><input type="checkbox" value="Idle_03 (12)"><span>Idle 03</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle_3.gif"><span class="cap"><input type="checkbox" value="Idle_3 (243)"><span>Idle 3</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle_4.gif"><span class="cap"><input type="checkbox" value="Idle_4 (244)"><span>Idle 4</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle_5.gif"><span class="cap"><input type="checkbox" value="Idle_5 (245)"><span>Idle 5</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle_7.gif"><span class="cap"><input type="checkbox" value="Idle_7 (247)"><span>Idle 7</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Idle_15.gif"><span class="cap"><input type="checkbox" value="Idle_15 (599)"><span>Idle 15</span></span></label>
+  </div>
+</section>
+
+<section>
+  <h2>הליכה — לצדך לאורך כל הדרך</h2>
+  <p class="note">נוסו: Casual Walk (הרגליים נתקעו) ו־Thoughtful Walk (צר מדי). זכרי: הגלימה צרה — הליכות רחבות מאוד ידקרו אותה.</p>
+  <div class="grid" data-group="הליכה">
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Casual_Walk.gif"><span class="cap"><input type="checkbox" value="Casual_Walk (30)"><span>Casual Walk <span class="tried">← נוסה</span></span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Thoughtful_Walk.gif"><span class="cap"><input type="checkbox" value="Thoughtful_Walk (121)"><span>Thoughtful Walk <span class="tried">← נוסה</span></span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Confident_Walk.gif"><span class="cap"><input type="checkbox" value="Confident_Walk (106)"><span>Confident Walk</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Quick_Walk.gif"><span class="cap"><input type="checkbox" value="Quick_Walk (115)"><span>Quick Walk</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Walking_Woman_woman.gif"><span class="cap"><input type="checkbox" value="Walking_Woman (1)"><span>Walking (soft)</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Discuss_While_Moving.gif"><span class="cap"><input type="checkbox" value="Discuss_While_Moving (37)"><span>הליכה תוך שיחה</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Stage_Walk.gif"><span class="cap"><input type="checkbox" value="Stage_Walk (55)"><span>Stage Walk</span></span></label>
+  </div>
+</section>
+
+<section>
+  <h2>דיבור — כשהוא מסביר לך את העולם</h2>
+  <p class="note">נוסו: Talk Passionately (מוגזם) ו־Talk with Right Hand (יד אחת — מוזר). </p>
+  <div class="grid" data-group="דיבור">
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Talk_Passionately.gif"><span class="cap"><input type="checkbox" value="Talk_Passionately (308)"><span>Talk Passionately <span class="tried">← נוסה</span></span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Talk_with_Right_Hand_Open.gif"><span class="cap"><input type="checkbox" value="Talk_with_Right_Hand_Open (314)"><span>Talk, Right Hand <span class="tried">← נוסה</span></span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Talk_with_Hands_Open.gif"><span class="cap"><input type="checkbox" value="Talk_with_Hands_Open (313)"><span>Talk, Hands Open</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Talk_with_Left_Hand_Raised.gif"><span class="cap"><input type="checkbox" value="Talk_with_Left_Hand_Raised (310)"><span>Talk, Left Hand Raised</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Stand_and_Chat.gif"><span class="cap"><input type="checkbox" value="Stand_and_Chat (56)"><span>Stand & Chat</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Agree_Gesture.gif"><span class="cap"><input type="checkbox" value="Agree_Gesture (25)"><span>Agree (הנהון)</span></span></label>
+    <label class="card"><img loading="lazy" src="https://cdn.meshy.ai/webapp-assets/feature-demo/animation/preview/biped/Listening_Gesture.gif"><span class="cap"><input type="checkbox" value="Listening_Gesture (47)"><span>Listening (הקשבה)</span></span></label>
+  </div>
+</section>
+
+<div id="result"><b>הבחירה שלך:</b> <span id="summary">—</span></div>
+<script>
+  const upd = () => {
+    const groups = [...document.querySelectorAll('.grid')].map(g => {
+      const picked = [...g.querySelectorAll('input:checked')].map(i => i.value)
+      return picked.length ? g.dataset.group + ': ' + picked.join(', ') : null
+    }).filter(Boolean)
+    document.getElementById('summary').textContent = groups.length ? groups.join(' · ') : '—'
+  }
+  document.addEventListener('change', upd)
+</script>
+</body>
+</html>

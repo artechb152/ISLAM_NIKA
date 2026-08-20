@@ -63,6 +63,27 @@ function assertQuoted(label, screenIds, where) {
   }
 }
 
+/* Cues and after-captions come in two kinds and the data does not say which.
+   Some are quotations — the time sign a prayer is matched against, the sentence
+   revealed as the reward — and some are composed for this screen: a caption
+   naming what is in a photograph („המואזין על הצריח“), a two-part label joined
+   with a bullet („האסכולה הסעודית · ראיית המולד בטלסקופ“). Only the first kind
+   can be checked against the source, and length separates them reliably: a
+   composed label is a phrase, a quotation is a sentence.
+
+   This distinction is worth drawing rather than skipping, because leaving these
+   fields unchecked is exactly how „כשצלו של חפץ והחפץ עצמו באותו הגודל“ and the
+   ablution caption listing a beard survived a source revision that replaced
+   both — the run came back clean while the practice screen contradicted the
+   article it was quoting. */
+const QUOTATION_MIN = 40
+function assertIfQuotation(text, screenIds, where) {
+  if (!text) return
+  const bare = text.replace(/^["„]|["“]$/g, '').trim()
+  if (bare.length < QUOTATION_MIN) return
+  assertQuoted(bare, screenIds, where)
+}
+
 /* ---- the five commandment names ---- */
 for (const p of D.PILLARS) assertQuoted(p.name, ['01'], `שם המצווה · ${p.key}`)
 
@@ -76,16 +97,21 @@ for (const ex of D.EXERCISES) {
   for (const d of ex.decoys) assertQuoted(d, ex.sources, `${w} · מסיח`)
   assertQuoted(ex.done, ex.sources, `${w} · סיום`)
 
+  for (const slot of ex.slots) assertIfQuotation(slot.cue, ex.sources, `${w} · כיתוב משבצת ${slot.n}`)
+
   const b = ex.beat
   const bw = `פעימה ${ex.key}`
   for (const slot of b.slots) assertQuoted(slot.answer, b.sources, `${bw} · משבצת ${slot.n}`)
   for (const item of b.bank) assertQuoted(item, b.sources, `${bw} · מגש`)
   if (b.arabic) assertQuoted(b.arabic, b.sources, `${bw} · ערבית`)
-  /* the sentence with its gaps filled back in must read as the source reads */
+  /* the sentence with its gaps filled back in must leave no gap unanswered */
   if (b.sentence) {
     let filled = b.sentence
     for (const slot of b.slots) filled = filled.replace(`[${slot.n}]`, slot.answer)
     if (/\[\d\]/.test(filled)) failures.push(`${bw}: נותרה משבצת בלי תשובה במשפט`)
+  }
+  for (const item of b.after ?? []) {
+    assertIfQuotation(item.caption, b.sources, `${bw} · כיתוב תמונה`)
   }
 }
 

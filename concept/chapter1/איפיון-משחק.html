@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>דרך הבשמים · איפיון</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    --paper:#f5ecd6; --surface:#efe3c6; --surface-2:#e8dab8; --rule:#ddcba2;
+    --ink:#2a1a14; --ink-soft:#6b5541;
+    --maroon:#8a2733; --gold:#a67c22; --gold-soft:#c79a3c;
+    --green:#4f7a3f; --shadow:rgba(42,26,20,.10);
+    --measure:70ch; --step:clamp(1rem,.74rem + .8vw,1.12rem);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#181110; --surface:#221715; --surface-2:#2b1d1a; --rule:#3d2a24;
+      --ink:#efe1c4; --ink-soft:#a89073;
+      --maroon:#d4707d; --gold:#d9ab4c; --gold-soft:#e6c274;
+      --green:#8fc27a; --shadow:rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#181110; --surface:#221715; --surface-2:#2b1d1a; --rule:#3d2a24;
+    --ink:#efe1c4; --ink-soft:#a89073;
+    --maroon:#d4707d; --gold:#d9ab4c; --gold-soft:#e6c274;
+    --green:#8fc27a; --shadow:rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Assistant","Segoe UI",system-ui,sans-serif;
+    font-size:var(--step);line-height:1.72;direction:rtl;
+  }
+  .wrap{max-width:var(--measure);margin:0 auto;padding:clamp(2.2rem,5vw,4.5rem) clamp(1.1rem,4vw,2rem) 6rem}
+
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--gold);margin:0 0 1.4rem}
+  h1{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;
+    font-size:clamp(2rem,1.4rem + 2.6vw,3.1rem);line-height:1.14;margin:0 0 .7rem;text-wrap:balance}
+  .sub{font-size:1.1em;color:var(--ink-soft);margin:0 0 2.6rem;max-width:52ch}
+
+  h2{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;
+    font-size:clamp(1.3rem,1.05rem + 1vw,1.66rem);line-height:1.3;text-wrap:balance;
+    margin:4rem 0 .3rem;padding-top:1.3rem;border-top:2px solid var(--maroon)}
+  h2 .n{display:block;font-family:"IBM Plex Mono",monospace;font-size:.7rem;font-weight:400;
+    letter-spacing:.16em;color:var(--gold);margin-bottom:.45rem}
+  h3{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:700;font-size:1.14em;
+    line-height:1.38;margin:2.1rem 0 .35rem}
+  h4{font-family:"Assistant",sans-serif;font-weight:700;font-size:1em;margin:1.3rem 0 .3rem}
+  p{margin:0 0 1rem}
+  ul,ol{margin:0 0 1rem;padding-inline-start:1.25rem}
+  li{margin-bottom:.42rem}
+  em{font-style:italic}
+  strong{font-weight:700}
+
+  .cites{display:flex;flex-wrap:wrap;gap:.3rem;margin:.5rem 0 0;padding:0;list-style:none}
+  .cite{direction:ltr;font-family:"IBM Plex Mono",monospace;font-size:.68rem;line-height:1;
+    padding:.28rem .4rem;border-radius:3px;background:var(--surface);border:1px solid var(--rule);
+    color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+  .card{background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+    padding:1.2rem 1.3rem;margin:1.3rem 0}
+  .card h3,.card h4{margin-top:0}
+  .card p:last-child,.card ul:last-child,.card ol:last-child{margin-bottom:0}
+
+  .rule{border:0;border-top:1px solid var(--rule);margin:2.4rem 0}
+
+  code,.mono{font-family:"IBM Plex Mono",monospace;font-size:.86em;direction:ltr;
+    unicode-bidi:embed;display:inline-block}
+  pre{background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;
+    padding:1rem 1.1rem;overflow-x:auto;direction:ltr;text-align:left;
+    font-family:"IBM Plex Mono",monospace;font-size:.8rem;line-height:1.65;margin:1rem 0}
+
+  table{width:100%;border-collapse:collapse;margin:1.1rem 0;font-size:.95em}
+  .scroll{overflow-x:auto;margin:1.1rem 0}
+  .scroll table{margin:0;min-width:34rem}
+  th,td{text-align:start;padding:.52rem .6rem;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:700;font-size:.86em;letter-spacing:.03em;color:var(--ink-soft);
+    border-bottom:2px solid var(--rule)}
+  td.mono-cell{font-family:"IBM Plex Mono",monospace;font-size:.76rem;direction:ltr;
+    white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  .verb{font-family:"Frank Ruhl Libre",Georgia,serif;font-weight:900;color:var(--maroon)}
+  .idea{padding:1.5rem 0;border-bottom:1px solid var(--rule)}
+  .idea:first-of-type{border-top:1px solid var(--rule)}
+  .idea-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.15rem .7rem;margin-bottom:.5rem}
+  .idea-head .verb{font-size:1.42em;line-height:1.15}
+  .idea-name{font-family:"Frank Ruhl Libre",Georgia,serif;color:var(--ink-soft);font-size:1.03em}
+  .idea p{margin:0 0 .55rem}
+
+  .screen{background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;
+    padding:1rem 1.1rem;margin:.9rem 0;direction:ltr;text-align:left;
+    font-family:"IBM Plex Mono",monospace;font-size:.74rem;line-height:1.6;
+    white-space:pre;overflow-x:auto;color:var(--ink-soft)}
+
+  .tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.68rem;
+    letter-spacing:.06em;padding:.24rem .45rem;border-radius:3px;border:1px solid currentColor}
+  .tag.keep{color:var(--green)} .tag.drop{color:var(--maroon)} .tag.new{color:var(--gold)}
+
+  .lead{font-size:1.05em;color:var(--ink-soft)}
+  .callout{border-inline-start:3px solid var(--gold-soft);padding:.75rem 1rem;
+    background:var(--surface);border-radius:0 5px 5px 0;margin:1.1rem 0}
+  .callout p:last-child{margin-bottom:0}
+  a{color:var(--maroon)}
+  a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<p class="eyebrow">פרק 1 · אסלאם · איפיון מלא · גרסה 4</p>
+<h1>דרך הבשמים</h1>
+<p class="sub">
+  עולם מצויר בעומק, מתימן למכה. השחקן אינו הולך כדי להגיע — הוא הולך כדי לחזור עם מחברת
+  שאפשר לסמוך עליה.
+</p>
+
+<div class="callout">
+  <p><strong>מה השתנה מהגרסה הקודמת.</strong> העולם יוצא מתלת־ממד ועובר לציור עם עומק —
+    כי 18 התמונות שכבר קיימות בריפו טובות פי כמה מכל מה שאפשר לבנות במודלים. והלמידה
+    יוצאת מקופסאות טקסט ועוברת למכניקה — כי אפשר היה לסיים את הגרסה הקודמת ב־27 מתוך 27
+    בלי ללמוד דבר.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק א</span>עוד עשרה רעיונות</h2>
+
+<p class="lead">מעבר לעשרה הקודמים. כל אחד מסומן בפועל — מה הלומד עושה בפועל.</p>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְתַאֵם</span><span class="idea-name">ציר הזמן</span></div>
+  <p>אירועים מגיעים מעורבבים — חורבן בית שני, יהודים בצפון, אקסום בתימן, אברהה, ערב עליית
+    האסלאם — והלומד מסדר אותם. אירוע שמקורו במסורת בלבד מסומן אחרת מאירוע מתוארך.</p>
+  <p class="lead">הלמידה: הפרק מכסה שבע מאות שנה בלי לומר את זה במפורש. הציר אומר.</p>
+  <ul class="cites"><li class="cite">§10</li><li class="cite">§12</li><li class="cite">§18</li><li class="cite">§26–§31</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְפַעְנֵחַ</span><span class="idea-name">הכתובת</span></div>
+  <p>כתובת סבאית חרוטה באבן. חלק מהאותיות שחוקות. הלומד משלים מה שאפשר — ומה שלא אפשר
+    נשאר ריק לתמיד, גם אחרי שממשיכים.</p>
+  <p class="lead">הלמידה: „דלות המקורות“ מפסיקה להיות משפט. יש חור בעדות ואי אפשר לסגור אותו.</p>
+  <ul class="cites"><li class="cite">§1</li><li class="cite">§33</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְנַהֵל</span><span class="idea-name">ימי מים</span></div>
+  <p>לשיירה יש ימי מים, לא נקודות חיים. כל החלטה במסלול עולה ימים. באר יבשה משנה הכול.</p>
+  <p class="lead">הלמידה: למה הדרך עוברת דווקא שם. גיאוגרפיה כאילוץ, לא כרשימה.</p>
+  <ul class="cites"><li class="cite">§7</li><li class="cite">§9</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְהַרְאוֹת</span><span class="idea-name">מקור שני</span></div>
+  <p>שמעת טענה מאדם אחד. אפשר להראות אותה לאדם אחר ולראות אם היא שורדת. לפעמים היא
+    מתחזקת, לפעמים מתפרקת, ולפעמים השני פשוט לא יודע.</p>
+  <p class="lead">הלמידה: אישוש הצלבתי, כפעולה. וגם: הרבה טענות בפרק הזה אין להן מקור שני.</p>
+  <ul class="cites"><li class="cite">§1</li><li class="cite">§38</li><li class="cite">§39</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לִבְחֹר</span><span class="idea-name">שלוש שאלות</span></div>
+  <p>לכל דמות מותר לשאול שלוש שאלות מתוך שבע. מה שלא נשאל נשאר לא ידוע — ורואים את זה
+    במחברת כשורה ריקה עם שם.</p>
+  <p class="lead">הלמידה: מקור עונה רק על מה ששואלים אותו. חוסר הידע נעשה אישי.</p>
+  <ul class="cites"><li class="cite">§1</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְמַפּוֹת</span><span class="idea-name">מאיפה לאן</span></div>
+  <p>מפה ריקה של האזור. הלומד מותח חצים: מאיפה הגיע רעיון, לאן הגיע, ובאיזה אמצעי —
+    סוחר, נזיר, שבט, שבוי.</p>
+  <p class="lead">הלמידה: „חלחול איטי ומדורג“ נעשה תרשים שהלומד צייר בעצמו.</p>
+  <ul class="cites"><li class="cite">§9</li><li class="cite">§18</li><li class="cite">§48</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְהַצְבִּיעַ</span><span class="idea-name">מועצת השבט</span></div>
+  <p>השבט מתלבט: לקבל חסות ביזנטית, סאסאנית, או להישאר בלי. הלומד מנמק — והשבט מחליט,
+    לא בהכרח כמוהו.</p>
+  <p class="lead">הלמידה: בני חסות לא היו קורבנות. זו הייתה בחירה, ולכל צד היה מחיר.</p>
+  <ul class="cites"><li class="cite">§6</li><li class="cite">§8</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְהַשְׁלִים</span><span class="idea-name">השיר</span></div>
+  <p>שיר ערבי קדם־אסלאמי חסר שורה. משלימים מתוך שלוש אפשרויות — ואז מגלים שהשירה היא
+    כמעט המקור הפנימי היחיד שיש לנו מהתקופה עצמה.</p>
+  <p class="lead">הלמידה: יש מקור אחד שאינו מאוחר ואינו זר. שירה — וגם היא הועברה בעל־פה.</p>
+  <ul class="cites"><li class="cite">§1</li><li class="cite">§13</li><li class="cite">§22</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְהַפְרִיד</span><span class="idea-name">משותף ונפרד</span></div>
+  <p>לוח דו־צדדי בית׳רב: מה חלקו היהודים והערבים בפועל — שוק, שירה, שכנות — ומה נשאר
+    לחוד: חוק, מנהג, אמונה, ציפייה למשיח.</p>
+  <p class="lead">הלמידה: דו־קיום אינו הטמעה. הפרק אומר את זה במשפט אחד (§13); הלוח מראה.</p>
+  <ul class="cites"><li class="cite">§13</li><li class="cite">§14</li><li class="cite">§16</li></ul>
+</div>
+
+<div class="idea">
+  <div class="idea-head"><span class="verb">לְהַחְלִיט</span><span class="idea-name">מה נשאר בחוץ</span></div>
+  <p>בסוף הפרק המחברת מלאה מדי. יש מקום לשתים־עשרה רשומות בלבד. מה נכנס לגרסה הסופית —
+    ומה נמחק?</p>
+  <p class="lead">הלמידה: היסטוריה היא גם בחירה מה לא לספר. הלומד עושה בדיוק את מה שעשו
+    המקורות שהוא קרא.</p>
+  <ul class="cites"><li class="cite">§1</li><li class="cite">§39</li></ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ב</span>מה נבחר, ולמה</h2>
+
+<p>עשרים רעיונות זה תפריט, לא משחק. מה שנבנה הוא <strong>שלוש מכניקות ליבה</strong>
+  שנוכחות לאורך כל הפרק, <strong>שתי מכניקות מקום</strong> שמופיעות פעם אחת כל אחת,
+  ו<strong>שכבה אחת</strong> שרצה מתחת להכול.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>תפקיד</th><th>מכניקה</th><th>מופיעה</th><th>מלמדת</th></tr></thead>
+  <tbody>
+    <tr><td>ליבה</td><td><span class="verb">לְמַיֵּן</span> המחברת</td><td>בכל אזור</td><td>מקור ואינטרס</td></tr>
+    <tr><td>ליבה</td><td><span class="verb">לִשְׁאֹל</span> מי מרוויח</td><td>3 פעמים</td><td>קריאה ביקורתית</td></tr>
+    <tr><td>ליבה</td><td><span class="verb">לְשַׁלֵּם</span> המכס והחסות</td><td>4 פעמים</td><td>המפה הפוליטית</td></tr>
+    <tr><td>מקום</td><td><span class="verb">לֶאֱרֹז</span> הארגז</td><td>הדרך וההעמסה</td><td>מנגנון החלחול</td></tr>
+    <tr><td>מקום</td><td><span class="verb">לְקַלֵּף</span> שכבות טקס</td><td>מכה</td><td>§23 — הריטואלים קדמו</td></tr>
+    <tr><td>שכבה</td><td><span class="verb">לִשְׁקֹל</span> שני טורים</td><td>תמיד על המסך</td><td>דלות המקורות</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>שש. לא עשרים. מכניקה שמופיעה פעם אחת ונעלמת היא גימיק; מכניקה שחוזרת הופכת להרגל חשיבה.</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ג</span>העולם — ציור עם עומק</h2>
+
+<h3>איך סצנה בנויה</h3>
+<p>כל תחנה היא תמונה מצוירת אחת, שנחתכת לארבע שכבות שקופות. השכבות זזות בקצב שונה
+  כשהשחקן הולך, וזה מה שיוצר עומק בלי שום מודל תלת־ממדי.</p>
+
+<div class="screen">┌──────────────────────────────────────────────┐
+│  שמיים        ×0.05  ← כמעט לא זז            │
+│  הרים רחוקים  ×0.25                          │
+│  העיר / האוהלים ×0.60  ← הדמויות עומדות פה   │
+│  קדמת הבמה    ×1.00  ← אבנים, שיחים          │
+└──────────────────────────────────────────────┘
+        A / D  →  המצלמה גוללת לצדדים</div>
+
+<h4>מאיפה מגיעות השכבות</h4>
+<ul>
+  <li><span class="tag keep">קיים</span> 18 לוחות ב־<code>concept/chapter1/plates/</code>, ו־6 דמויות
+    חתוכות ב־<code>chars/</code>.</li>
+  <li><span class="tag new">חדש</span> לכל לוח מייצרים 3–4 שכבות: אותה סצנה, אותה שעה, פעם
+    „רק ההרים הרחוקים“, פעם „רק העיר“, פעם „רק קדמת הבמה“ — ומסירים רקע.</li>
+  <li>רוחב לוח: 2600px לפחות, כדי שתהיה לאן לגלול.</li>
+</ul>
+
+<h4>מה בסצנה מלבד הרקע</h4>
+<ul>
+  <li><strong>דמויות</strong> — PNG חתוך, ממוקם בעומק. נשימה קלה, לא אנימציה מלאה.</li>
+  <li><strong>נקודות עניין</strong> — לא נקודת זהב מרחפת. אזור בתמונה שמתבהר קלות במעבר עכבר,
+    עם קו דק שמצביע עליו.</li>
+  <li><strong>אווירה</strong> — אבק, ניצוצות מדורה, תנועת בד. שכבת canvas אחת מעל הכול.</li>
+</ul>
+
+<div class="callout">
+  <p><strong>למה זה עדיף.</strong> איכות התמונה מנותקת מהיכולת שלי לבנות מודלים. אותו מאמץ
+    שהפיק פרגולה שנראית כמו שולחן פיקניק מפיק כאן סצנה ברמה של הלוחות שכבר יש לך.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ד</span>הלולאה — דקה של משחק</h2>
+
+<ol>
+  <li>נכנסים לסצנה מצוירת. ראווי אומר משפט אחד על המקום.</li>
+  <li>הולכים ימינה/שמאלה. המצלמה גוללת, השכבות נעות, מתגלים דברים.</li>
+  <li>עוצרים ליד אדם. שואלים — ומקבלים <strong>טענה</strong>, לא הרצאה.</li>
+  <li>הטענה נופלת למחברת עם <strong>חותמת מקור</strong>. מחליטים כמה סומכים עליה.</li>
+  <li>הטור „מה שמספרים / מה שאפשר לבדוק“ בתחתית המסך זז.</li>
+  <li>בנקודת החלטה משתמשים במה שנאסף — משלמים, אורזים, מנמקים.</li>
+  <li>ממשיכים. הדרך נמשכת.</li>
+</ol>
+
+<p class="lead">שלוש עד חמש דקות לאזור. תשע תחנות. שלושים עד ארבעים דקות לפרק.</p>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ה</span>המכניקות — חוקים</h2>
+
+<h3><span class="verb">לְמַיֵּן</span> · המחברת</h3>
+<p>כל טענה נכנסת עם חותמת אחת מארבע:</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>חותמת</th><th>מה זה אומר</th><th>דוגמה</th></tr></thead>
+  <tbody>
+    <tr><td>מסורת</td><td>ספרות מוסלמית מאוחרת</td><td>עמרו בן לחי הביא את הבל</td></tr>
+    <tr><td>קוראן</td><td>טקסט מקודש, לא תיאור היסטורי</td><td>2:94 · 5:82 · 71:23 · סורה 105</td></tr>
+    <tr><td>מקור חיצוני</td><td>לא־מוסלמי, בן־הזמן</td><td>אקסום · השפעה ביזנטית בשפה</td></tr>
+    <tr><td>ממצא</td><td>אבן, מטבע, כתובת</td><td>האבן השחורה · דרהם סאסאני</td></tr>
+  </tbody>
+</table>
+</div>
+<p>אחרי החותמת בוחרים ודאות: <strong>ודאי · סביר · עירבון מוגבל · שנוי במחלוקת</strong>.
+  ראווי מגיב לבחירה — לפעמים מאשר, לפעמים חולק ומנמק. <strong>אין ציון ואין כישלון</strong>,
+  אבל יש התנגדות.</p>
+
+<div class="screen">┌─ המחברת ─────────────────────────────────────┐
+│  "עמרו בן לחי הביא את הבל למכה"              │
+│                                              │
+│  חותמת:  [מסורת] [קוראן] [חיצוני] [ממצא]     │
+│  ודאות:  ▮▮▯▯  עירבון מוגבל                  │
+│                                              │
+│  ראווי: "אבן השאם כתב את זה במאה התשיעית.    │
+│   שלוש מאות שנה אחרי. מי סיפר לו?"           │
+└──────────────────────────────────────────────┘</div>
+
+<h3><span class="verb">לִשְׁאֹל</span> · מי מרוויח מהסיפור</h3>
+<p>שלוש פעמים בפרק, אחרי שנאספה מסורת משמעותית, המסך נעצר על שאלה אחת: מי יוצא מזה טוב?</p>
+<ul>
+  <li><strong>מכה</strong> — עמרו בן לחי הביא את האלילות. מי מרוויח? <em>שבטו של מוחמד יוצא נקי.</em></li>
+  <li><strong>מכה</strong> — ההקפה היא מנהגו של אברהם. מי מרוויח? <em>האסלאם קדם ליהדות ולנצרות.</em></li>
+  <li><strong>ית׳רב</strong> — היהודים יטו אוזן לבשורה. מי מרוויח? <em>הטקסט עצמו מסייג: „לא מן הנמנע“.</em></li>
+</ul>
+<p>אין תשובה נכונה יחידה. יש נימוקים, וראווי מגיב לנימוק שנבחר.</p>
+
+<h3><span class="verb">לְשַׁלֵּם</span> · המכס והחסות</h3>
+<p>לשיירה שלושה משאבים: <strong>סחורה · כסף · ימי מים</strong>. ארבעה מחסומים לאורך הדרך.
+  בכל אחד שלוש דרכים לעבור:</p>
+<ul>
+  <li><strong>לשלם</strong> — במטבע הנכון לאזור. ביזנטי בצפון־מערב, סאסאני בצפון־מזרח.</li>
+  <li><strong>לקנות חסות</strong> — מגסאן או מלח׳ם, לפי מי שולט שם.</li>
+  <li><strong>לעקוף</strong> — במדבר. עולה ימי מים.</li>
+</ul>
+<p>טעות לא מכשילה — היא מגיעה למכה עם פחות. ובסוף רואים כמה נשאר, וזה חלק מהתערוכה.</p>
+
+<h3><span class="verb">לֶאֱרֹז</span> · הארגז</h3>
+<p>פעם אחת, בדרך וההעמסה. גוררים פריטים לארגז. משי, תבלינים ולבונה נכנסים. „רעיונות“
+  מסרב — הארגז דוחה אותו בכל פעם. ואז ממשיכים, ובמכה הרעיון כבר שם.</p>
+<p class="lead">זו המכניקה היחידה בפרק שמלמדת דבר בכך שהיא <em>מסרבת</em> לעבוד.</p>
+
+<h3><span class="verb">לְקַלֵּף</span> · שכבות של טקס</h3>
+<p>במכה, מול הכעבה. בוחרים טקס ומקלפים אותו אחורה — כל קילוף חושף מי עשה את זה קודם
+  ובאיזה שם. ההקפה, האבן השחורה, יידוי החיצים.</p>
+
+<h3><span class="verb">לִשְׁקֹל</span> · שני הטורים</h3>
+<p>לא מסך — פס דק בתחתית שנמצא שם תמיד. כל טענה שנאספת מוסיפה למקום שלה. בסוף כל אזור
+  הפס מתרחב לרגע ומראה את היחס.</p>
+
+<div class="screen">┌──────────────────────────────────────────────┐
+│ כך מספרת המסורת  ▓▓▓▓▓▓▓▓▓▓▓▓  12            │
+│ כך אפשר לבדוק    ▓▓▓▓  4                     │
+└──────────────────────────────────────────────┘</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ו</span>המסע — תשע תחנות</h2>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>תחנה</th><th>מי מדבר</th><th>מה קורה</th><th class="mono-cell">סעיפים</th></tr></thead>
+  <tbody>
+    <tr><td>רמות תימן</td><td>קריין</td><td>פתיחה. המחברת נפתחת ריקה.</td><td class="mono-cell">§0 §1</td></tr>
+    <tr><td>מחנה הלילה</td><td>ראווי</td><td>ג׳אהליה. החותמת הראשונה נלמדת.</td><td class="mono-cell">§0 §1</td></tr>
+    <tr><td>תחנת הגבול</td><td>שליח האימפריה</td><td>מכס ①. שתי האימפריות.</td><td class="mono-cell">§2–§5</td></tr>
+    <tr><td>המעבר הצר</td><td>ראש השבט</td><td>מכס ②. חסות, גסאן ולח׳ם.</td><td class="mono-cell">§6–§8</td></tr>
+    <tr><td>הדרך וההעמסה</td><td>הסוחר</td><td><strong>הארגז.</strong> מכס ③.</td><td class="mono-cell">§7 §9</td></tr>
+    <tr><td>ית׳רב</td><td>הסוחר היהודי</td><td>משותף/נפרד. <strong>מי מרוויח ①</strong>.</td><td class="mono-cell">§10–§17</td></tr>
+    <tr><td>המנזר</td><td>הנזיר</td><td>אורחות חיים. מכס ④.</td><td class="mono-cell">§18–§25</td></tr>
+    <tr><td>מכה</td><td>הסוחר המכי</td><td><strong>לקלף.</strong> <strong>מי מרוויח ②③</strong>. אברהה.</td><td class="mono-cell">§26–§44</td></tr>
+    <tr><td>המשקיף</td><td>ראווי</td><td><strong>התערוכה.</strong> סיום.</td><td class="mono-cell">§45–§48</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ז</span>הסיום — התערוכה</h2>
+
+<p>במשקיף המחברת מלאה. ראווי אומר שיש מקום לשתים־עשרה רשומות בלבד בגרסה שתישלח.
+  הלומד בוחר מה נכנס, ולכל אחת כותב <strong>תווית של שורה אחת</strong>.</p>
+<p>אין ציון. יש דף מודפס עם התוויות שהלומד כתב, החותמות שבחר ורמות הוודאות. זה מה
+  שהמורה רואה, וזה מלמד יותר מכל מבחן.</p>
+
+<div class="screen">┌─ מה נכנס לגרסה הסופית ────────── 9 / 12 ─────┐
+│ ▣ האבן השחורה קדמה לאסלאם        [ממצא]      │
+│ ▣ שתי אימפריות, ורווח ביניהן     [חיצוני]    │
+│ ▣ עמרו בן לחי — מסורת מאוחרת     [מסורת]     │
+│ ▢ אברהה והפיל                     [מסורת]    │
+│ …                                            │
+│                       [ להדפיס את המחברת ]   │
+└──────────────────────────────────────────────┘</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ח</span>מודל התוכן</h2>
+
+<p>כל התוכן נתונים. הוספת טענה, דמות או מחסום היא עריכת JSON, לא קוד.</p>
+
+<pre>// claim — the unit the whole game is built from
+{
+  id: "hubal-amr",
+  region: "mecca",
+  speaker: "merchant",
+  text: "מי שהביא את הבל למכה היה עמרו בן לחי, בן שבט ח׳זאעה.",
+  stamp: "tradition",          // tradition | quran | external | find
+  source: "§38",
+  rawi: "אבן השאם כתב את זה במאה התשיעית. שלוש מאות שנה אחרי.",
+  whoBenefits: "quraysh"       // opens the "who gains" beat
+}
+
+// scene — one painted station
+{
+  id: "mecca",
+  plate: "mecca",
+  layers: [
+    { img: "mecca-sky.png",  speed: 0.05 },
+    { img: "mecca-far.png",  speed: 0.25 },
+    { img: "mecca-mid.png",  speed: 0.60 },
+    { img: "mecca-near.png", speed: 1.00 }
+  ],
+  width: 2600,
+  cast:  [{ who: "merchant", x: 1180, depth: 0.60 }],
+  spots: [{ id: "black-stone", x: 1460, y: 430, r: 70, claim: "black-stone" }],
+  toll:  null,
+  ritual: ["tawaf", "black-stone", "arrows"]
+}</pre>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק ט</span>מה נשמר ומה נזרק</h2>
+
+<div class="scroll">
+<table>
+  <thead><tr><th></th><th>מה</th><th>למה</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tag keep">נשמר</span></td><td>כל הדיאלוגים ועוגני ה־§</td><td>נבדקו מול המקור, 27 רשומות</td></tr>
+    <tr><td><span class="tag keep">נשמר</span></td><td>המחברת, מפת העולם, ה־HUD</td><td>עובדים ומעוצבים</td></tr>
+    <tr><td><span class="tag keep">נשמר</span></td><td>הלוחות והדמויות החתוכות</td><td>הם הבסיס של העולם החדש</td></tr>
+    <tr><td><span class="tag keep">נשמר</span></td><td>מערך הבדיקות</td><td>עובר התאמה, לא נמחק</td></tr>
+    <tr><td><span class="tag drop">נזרק</span></td><td>המנוע התלת־ממדי, 53 מודלים</td><td>זה מה שנראה רע</td></tr>
+    <tr><td><span class="tag drop">נזרק</span></td><td>העדויות והמשימות בגרסה הנוכחית</td><td>שאלות אמריקאיות בתחפושת</td></tr>
+    <tr><td><span class="tag new">חדש</span></td><td>מנוע שכבות מצויר</td><td>~400 שורות, בלי three.js</td></tr>
+    <tr><td><span class="tag new">חדש</span></td><td>36 שכבות תמונה</td><td>9 סצנות × 4</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2><span class="n">חלק י</span>תוכנית בנייה</h2>
+
+<ol>
+  <li><strong>אזור אחד מקצה לקצה.</strong> מכה — הכי עשירה. שכבות, הליכה, שיחה, מחברת, „מי מרוויח“.
+    זה מוכיח או מפריך את כל האיפיון.</li>
+  <li><strong>שאר השכבות.</strong> שמונה סצנות נוספות.</li>
+  <li><strong>מכניקות הליבה.</strong> המכס בארבע נקודות, הארגז, הקילוף.</li>
+  <li><strong>הסיום.</strong> התערוכה והדף המודפס.</li>
+  <li><strong>בדיקה.</strong> אותו שער כמו קודם: ריצה אוטומטית שעוברת את כל תשע התחנות
+    ומפעילה כל מכניקה.</li>
+</ol>
+
+<div class="callout">
+  <p><strong>נקודת עצירה אחרי שלב 1.</strong> אזור אחד גמור הוא הדבר היחיד שמוכיח שהאיפיון
+    הזה עובד. עדיף לגלות שהוא לא — על אזור אחד.</p>
+</div>
+
+</div>
+
+</body>
+</html>

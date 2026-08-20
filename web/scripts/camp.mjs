@@ -14,7 +14,7 @@ import path from 'node:path'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const WEB = path.resolve(HERE, '..')
-const BLEND = path.join(WEB, 'blender', 'camp.blend')
+
 
 function findBlender() {
   if (process.env.BLENDER) return process.env.BLENDER
@@ -30,9 +30,35 @@ function findBlender() {
 
 const mode = process.argv[2]
 if (mode !== 'export' && mode !== 'import') {
-  console.error('usage: node scripts/camp.mjs <export|import>')
+  console.error('usage: node scripts/camp.mjs <export|import> [region]')
   process.exit(1)
 }
+
+/* איזה אזור עורכים. הסקריפט נכתב כשהמחנה היה „העולם“ ולא „אזור“,
+   ולכן הוא היה נעול על camp-layout.json — כלומר שמונה מתשעת האזורים
+   לא היו ניתנים לעריכה ב-Blender בכלל. השם נשאר ברירת מחדל כדי
+   שכל קריאה ישנה תמשיך לעבוד. */
+const REGIONS = {
+  'yemen-heights': 'yemen-heights-layout.json',
+  'night-camp': 'camp-layout.json',
+  camp: 'camp-layout.json',
+  'border-post': 'border-layout.json',
+  'narrow-pass': 'narrow-pass-layout.json',
+  'loading-road': 'loading-road-layout.json',
+  yathrib: 'yathrib-layout.json',
+  monastery: 'monastery-layout.json',
+  mecca: 'mecca-layout.json',
+  exit: 'exit-layout.json',
+}
+const region = process.argv[3] && !process.argv[3].startsWith('--') ? process.argv[3] : 'camp'
+if (!REGIONS[region]) {
+  console.error(`אזור לא מוכר: ${region}`)
+  console.error(`אפשרויות: ${Object.keys(REGIONS).join(', ')}`)
+  process.exit(1)
+}
+const LAYOUT = path.join(WEB, 'src', 'lib', 'chapter1', REGIONS[region])
+/* קובץ .blend נפרד לכל אזור — אחרת ייצוא של אזור אחד דורס את עבודת השני. */
+const BLEND = path.join(WEB, 'blender', region === 'camp' ? 'camp.blend' : region + '.blend')
 const blender = findBlender()
 if (!blender) {
   console.error('לא נמצאה התקנת Blender. הגדירו BLENDER לנתיב blender.exe')
@@ -40,7 +66,7 @@ if (!blender) {
 }
 
 const refresh = process.argv.includes('--refresh')
-const env = { ...process.env, CH1_WEB: WEB, CH1_BLEND: BLEND, CH1_REFRESH: refresh ? '1' : '' }
+const env = { ...process.env, CH1_WEB: WEB, CH1_BLEND: BLEND, CH1_LAYOUT: LAYOUT, CH1_REFRESH: refresh ? '1' : '' }
 
 if (mode === 'export') {
   console.log('בונה את הסצנה ל-Blender…')

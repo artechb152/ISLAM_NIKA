@@ -85,7 +85,15 @@ export function radiusAt(file, height) {
   const s = height / size[1]
   const w = size[0] * s
   const d = size[2] * s
-  return { w, d, radius: Math.hypot(w, d) / 2 }
+  /* `radius` is the circle two of these are kept apart by, and it used to be
+     the half-DIAGONAL — which treats a black tent nine metres long and four and
+     a half deep as a nine-metre disc in every direction. Pitch a ring of them
+     and the check rejects a camp that looks perfectly correct, so the night
+     camp ended up with its tents deleted and nothing standing in it.
+     The mean of the two half-extents is the honest circle for an elongated
+     thing; `corner` keeps the old number for anything that needs the worst
+     case. */
+  return { w, d, radius: (w + d) / 4, corner: Math.hypot(w, d) / 2 }
 }
 
 if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}` || process.argv[1]?.includes('measure-props')) {

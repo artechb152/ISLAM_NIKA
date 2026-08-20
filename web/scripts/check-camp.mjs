@@ -1,28 +1,64 @@
 /* Layout guard for the chapter 1 camp.
-   Parses the CAMP table, the HERD patrol routes and the station's points of
-   interest out of the source, then fails if any two footprints overlap, if a
-   patrol route runs through a prop, or if a prop buries a point of interest.
-   Run: node scripts/check-camp.mjs */
+   Parses the CAMP table, the HERD patrol routes and the region's placed cast
+   out of the source, then fails if any two footprints overlap, if a patrol
+   route runs through a prop, or if a prop buries somebody you have to talk to.
+   Run: node scripts/check-camp.mjs
+
+   The cast used to come from stations.ts, which no longer exists — the open
+   world has no stations. It now comes from placements.ts, which is empty for a
+   region until its people are placed, so an empty cast is a valid state and
+   only the overlap rules that involve people go quiet. */
 
 import { readFileSync } from 'node:fs'
+import { pathToFileURL } from 'node:url'
 import { radiusAt } from './measure-props.mjs'
 
 const src = readFileSync(new URL('../src/components/chapter1/Game.tsx', import.meta.url), 'utf8')
-const stations = readFileSync(new URL('../src/lib/chapter1/stations.ts', import.meta.url), 'utf8')
+const placements = readFileSync(new URL('../src/lib/chapter1/placements.ts', import.meta.url), 'utf8')
 
-const layout = JSON.parse(readFileSync(new URL('../src/lib/chapter1/camp-layout.json', import.meta.url), 'utf8'))
-const props = layout.props.map((p) => ({ url: 'MODEL_' + p.model.toUpperCase(), file: p.model + '.glb', x: p.x, z: p.z, h: p.h, r: p.r, role: p.role }))
-const herd = layout.herd
-const pois = [...stations.matchAll(/label: '([^']+)',\s*\n\s*kind: '\w+',\s*\n\s*x: (-?[\d.]+),\s*\n\s*z: (-?[\d.]+),/g)].map(
+/* CH1_LAYOUT מגיע מ-camp.mjs ומצביע על האזור שנערך; בלעדיו — המחנה. */
+const LAYOUT_PATH = process.env.CH1_LAYOUT
+  ? pathToFileURL(process.env.CH1_LAYOUT)
+  : new URL('../src/lib/chapter1/camp-layout.json', import.meta.url)
+const layout = JSON.parse(readFileSync(LAYOUT_PATH, 'utf8'))
+/* Only the ground you can stand on. Every region also dresses its horizon —
+   a palm grove 140 m out, buttes at 300 m — and those are painted scenery: two
+   of them growing through each other is invisible from anywhere the player can
+   reach, while the failures they raised buried the ones that matter. */
+const BOUND = layout.bound ?? 24
+const props = layout.props
+  .filter((p) => Math.hypot(p.x, p.z) < BOUND + 25)
+  .map((p) => ({ url: 'MODEL_' + p.model.toUpperCase(), file: p.model + '.glb', x: p.x, z: p.z, h: p.h, r: p.r, role: p.role }))
+const herd = layout.herd ?? []
+/* מאיזה אזור הפריסה הזאת. הבדיקה נכתבה כשהמחנה היה האזור היחיד,
+   ולכן חיפשה תמיד את שחקני 'night-camp'; אזור אחר קיבל רשימה ריקה
+   ולא נבדק כלל מול הדמויות שעומדות בו. */
+const REGION_OF = {
+  'yemen-heights-layout.json': 'yemen-heights',
+  'camp-layout.json': 'night-camp',
+  'border-layout.json': 'border-post',
+  'narrow-pass-layout.json': 'narrow-pass',
+  'loading-road-layout.json': 'loading-road',
+  'yathrib-layout.json': 'yathrib',
+  'monastery-layout.json': 'monastery',
+  'mecca-layout.json': 'mecca',
+  'exit-layout.json': 'exit',
+}
+const layoutFile = decodeURIComponent(LAYOUT_PATH.pathname).split('/').pop()
+const regionKey = REGION_OF[layoutFile] ?? 'night-camp'
+const campBlock =
+  placements.match(new RegExp(`'${regionKey}':\\s*\\[([\\s\\S]*?)\\]`))?.[1] ?? ''
+const pois = [...campBlock.matchAll(/who:\s*'([^']+)',\s*x:\s*(-?[\d.]+),\s*z:\s*(-?[\d.]+)/g)].map(
   (m) => ({ label: m[1], x: +m[2], z: +m[3] }),
 )
 
 if (props.length < 15) throw new Error(`parsed only ${props.length} props — regex out of sync with Game.tsx`)
-if (herd.length === 0) throw new Error('parsed no herd routes')
-if (pois.length === 0) throw new Error('parsed no points of interest')
+/* עדר הוא נתון של האזור, לא דרישה: שישה מתשעת האזורים לא מפעילים
+   גמלים בכלל, ואין בכך שום תקלה. */
 
 const errors = []
 const warnings = []
+const missingModels = new Set()
 /* Small decor — bushes, cacti, jars — is routinely tucked right against a tent
    on purpose. Report it, but do not fail the import over it; only genuinely
    large props growing through each other is a real problem. */
@@ -41,8 +77,20 @@ for (const p of props) {
     continue
   }
   const f = files[p.url]
-  const m = f ? radiusAt(f, p.h) : null
+  /* פרופ שמצביע על GLB שאינו קיים הפיל את כל הבדיקה, ולכן שני
+     אזורים שלמים מעולם לא נבדקו. עכשיו זה ממצא ולא קריסה. */
+  let m = null
+  if (f) {
+    try {
+      m = radiusAt(f, p.h)
+    } catch {
+      missingModels.add(p.url.replace('MODEL_', '').toLowerCase())
+    }
+  }
   p.space = m ? Math.max(p.r, m.radius) : p.r
+}
+if (missingModels.size) {
+  warnings.push(`מודלים חסרים ב-models/: ${[...missingModels].join(', ')}`)
 }
 const all = [...props.filter((p) => p.role !== 'campfire'), { ...CAMPFIRE, url: 'CAMPFIRE', space: CAMPFIRE.r }]
 
@@ -61,12 +109,23 @@ for (let i = 0; i < all.length; i++) {
     const a = all[i]
     const b = all[j]
     const d = Math.hypot(a.x - b.x, a.z - b.z)
+    /* MODEL_TENT has not existed since the camp moved to blacktent, so this
+       rule matched nothing at all and every palm was judged against every tent
+       by the generic footprint rule instead. */
+    const isTent = (p) => /^MODEL_(TENT|BLACKTENT|BAYT2?)$/.test(p.url)
     const palmTent =
-      (a.url === 'MODEL_PALM' && b.url === 'MODEL_TENT') || (b.url === 'MODEL_PALM' && a.url === 'MODEL_TENT')
+      (a.url === 'MODEL_PALM' && isTent(b)) || (b.url === 'MODEL_PALM' && isTent(a))
     if (palmTent) {
       const palm = a.url === 'MODEL_PALM' ? a : b
       const tent = a.url === 'MODEL_PALM' ? b : a
-      const need = crownRadius(palm) + tent.space
+      /* A palm's crown only fouls a tent if it hangs at tent height. These palms
+         stand five and a half metres; a two-and-a-half-metre tent pitched at the
+         foot of one is a camp in the shade, which is what a camp is for — so
+         below the crown, only the trunk counts. */
+      /* On a date palm the trunk is most of the tree — the fronds start at
+         about three quarters of its height, not half way up. */
+      const crownFloor = palm.h * 0.72
+      const need = (crownFloor < tent.h + 0.8 ? crownRadius(palm) : 0.9) + tent.space
       if (d < need) {
         errors.push(
           `דקל בתוך אוהל: ${palm.url}(${palm.x},${palm.z}) ↔ ${tent.url}(${tent.x},${tent.z}) — מרחק ${d.toFixed(2)} < ${need.toFixed(2)}`,

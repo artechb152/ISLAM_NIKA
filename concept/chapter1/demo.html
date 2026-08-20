@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>מכה, לפנות ערב</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@300;400;600&display=swap">
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;overflow:hidden;background:#0d0806}
+  body{font-family:"Assistant","Segoe UI",system-ui,sans-serif;direction:rtl;color:#f5ecd6;
+       user-select:none;-webkit-user-select:none}
+
+  #stage{position:fixed;inset:0;overflow:hidden}
+
+  /* the painted world, redrawn every frame so the painting itself can move */
+  #world{position:absolute;inset:0;display:block}
+
+  #life{position:absolute;inset:0;pointer-events:none}
+  .walker{position:absolute;bottom:0;will-change:transform}
+  .walker img{display:block;height:100%;width:auto;transform-origin:50% 100%;will-change:transform}
+
+  #dust{position:absolute;inset:0;pointer-events:none;opacity:.6}
+  #air{position:absolute;inset:0;pointer-events:none}
+
+  /* light: a low sun, and dusk closing in */
+  #sun{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;
+       background:radial-gradient(38% 46% at 50% 30%,rgba(255,196,110,.28),transparent 62%)}
+  #dusk{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;
+        background:linear-gradient(180deg,rgba(70,32,12,.30),rgba(24,12,8,.05) 45%,rgba(28,12,6,.40))}
+  #vig{position:absolute;inset:0;pointer-events:none;
+       background:radial-gradient(115% 88% at 50% 46%,transparent 38%,rgba(12,6,4,.62))}
+  #fade{position:fixed;inset:0;background:#0d0806;pointer-events:none;
+        transition:opacity 2.6s ease;z-index:40}
+
+  #you{position:absolute;bottom:7%;left:34%;will-change:transform;
+       filter:drop-shadow(0 14px 22px rgba(20,10,6,.62))}
+  #you img{display:block;height:100%;width:auto}
+
+  /* words live ON the world, never over it */
+  #sub{position:fixed;inset-inline:0;bottom:8.5vh;display:flex;justify-content:center;
+       padding:0 1.2rem;pointer-events:none;z-index:20}
+  #sub .line{max-width:44ch;text-align:center;opacity:0;transform:translateY(9px);
+             transition:opacity .6s ease,transform .6s ease}
+  #sub .line.on{opacity:1;transform:none}
+  #sub .who{display:none;font-size:.74rem;letter-spacing:.16em;color:#e0b45f;
+            margin-bottom:.4rem;text-shadow:0 2px 10px rgba(0,0,0,.9)}
+  #sub .who.on{display:block}
+  #sub .txt{font-family:"Frank Ruhl Libre",Georgia,serif;
+            font-size:clamp(1.05rem,.85rem + .8vw,1.42rem);line-height:1.55;
+            text-shadow:0 2px 14px rgba(0,0,0,.95),0 0 34px rgba(0,0,0,.75)}
+
+  #hint{position:fixed;top:1.1rem;inset-inline-start:1.1rem;font-size:.76rem;
+        color:rgba(245,236,214,.5);letter-spacing:.05em;z-index:20;
+        transition:opacity 1.2s ease;text-shadow:0 1px 6px rgba(0,0,0,.9)}
+  #hint.gone{opacity:0}
+
+  #near{position:fixed;inset-inline:0;bottom:3.2vh;text-align:center;z-index:20;
+        font-size:.8rem;color:rgba(245,236,214,.6);opacity:0;transition:opacity .5s ease;
+        text-shadow:0 1px 8px rgba(0,0,0,.95);pointer-events:none}
+  #near.on{opacity:1}
+  @media (prefers-reduced-motion:reduce){#fade{transition:none}}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="world"></canvas>
+  <div id="life"></div>
+  <canvas id="air"></canvas>
+  <canvas id="dust"></canvas>
+  <div id="sun"></div>
+  <div id="dusk"></div>
+  <div id="vig"></div>
+  <div id="you"><img src="chars/rawi.png" alt=""></div>
+</div>
+
+<div id="hint">← → ללכת</div>
+<div id="near"></div>
+<div id="sub"><div class="line"><span class="who"></span><span class="txt"></span></div></div>
+<div id="fade"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   מכה, לפנות ערב.
+
+   Not a mechanic with a world around it — a place that is already
+   happening when you get there. People cross the square whether you
+   press anything or not; two men argue by the Kaaba and walk off
+   mid-sentence; the words appear over the painting instead of on top
+   of a panel that hides it.
+
+   Every spoken line comes from the chapter's own source text (§35–§38).
+   ══════════════════════════════════════════════════════════════ */
+
+const stage = document.getElementById('stage')
+const life  = document.getElementById('life')
+const you   = document.getElementById('you')
+
+/* ── the painting, and how it breathes ────────────────────────
+   A still photograph slid sideways is still a still photograph — that is what
+   read as static. So the plate is not an <img> any more: it is redrawn every
+   frame as a stack of thin horizontal slices, each one nudged a little. High up
+   the sky drifts; at the horizon the hot air shivers; at our feet almost
+   nothing moves. It is the same trick a theatre uses with a painted backcloth
+   and a fan, and it costs nothing. */
+const world = document.getElementById('world')
+const wctx = world.getContext('2d')
+const plate = new Image()
+let sheet = null, sheetW = 0, sheetH = 0, ready = false
+
+plate.onload = () => {
+  /* one offscreen strip, three copies wide, the middle one mirrored so the
+     street reads as a street and not as a repeating tile */
+  sheetH = 1024
+  const one = Math.round(plate.width * (sheetH / plate.height))
+  sheetW = one * 3
+  sheet = document.createElement('canvas')
+  sheet.width = sheetW
+  sheet.height = sheetH
+  const c = sheet.getContext('2d')
+  for (let i = 0; i < 3; i++){
+    c.save()
+    if (i === 1){ c.translate(one * (i + 1), 0); c.scale(-1, 1) }
+    else c.translate(one * i, 0)
+    c.drawImage(plate, 0, 0, one, sheetH)
+    c.restore()
+  }
+  ready = true
+  measure()
+}
+plate.src = 'plates-bright/mecca.jpg'
+
+const SLICES = 150
+function paint(now, camera, drift, push){
+  if (!ready) return
+  const H = world.height, Wv = world.width
+  const scale = H / sheetH
+  const zoom = 1 + push * 0.10
+  const sliceH = sheetH / SLICES
+  wctx.clearRect(0, 0, Wv, H)
+  for (let i = 0; i < SLICES; i++){
+    const sy = i * sliceH
+    const v = i / SLICES                       // 0 = sky, 1 = our feet
+    /* how much this band of the painting moves, and how */
+    const skyBand  = Math.max(0, 1 - v / 0.30)          // clouds, high up
+    const heatBand = Math.exp(-Math.pow((v - 0.52) / 0.13, 2))  // shimmer at the horizon
+    const wobble =
+      skyBand * (Math.sin(now / 9000 + v * 3) * 9 + now / 1000 * 1.6 % 40 - 20) * 0.35 +
+      heatBand * Math.sin(now / 260 + i * 0.55) * 2.4 +
+      Math.sin(now / 3400 + v * 8) * 0.8
+    const px = (camera + drift) * scale - wobble
+    /* wrap into the strip so we never run off its end */
+    let srcX = px % sheetW
+    if (srcX < 0) srcX += sheetW
+    const dw = Wv / zoom
+    const cx = Wv / 2, cy = H * 0.56
+    const dy = cy + (i * sliceH * scale - cy) * zoom
+    const dh = sliceH * scale * zoom + 1
+    const need = dw / scale
+    if (srcX + need <= sheetW){
+      wctx.drawImage(sheet, srcX, sy, need, sliceH + 1, cx - Wv / 2 * 1, dy, Wv, dh)
+    } else {
+      const first = sheetW - srcX
+      const w1 = first * scale * zoom
+      wctx.drawImage(sheet, srcX, sy, first, sliceH + 1, 0, dy, w1, dh)
+      wctx.drawImage(sheet, 0, sy, need - first, sliceH + 1, w1, dy, Wv - w1, dh)
+    }
+  }
+}
+
+let W = 3800, camera = 0
+const keys = new Set()
+const walkers = []
+
+/* ── the crowd ─────────────────────────────────────────────── */
+const CUTS = ['chars/merchant.png','chars/monk.png','chars/chief.png','chars/envoy.png','chars/scholar.png']
+
+function addWalker(depth, x, dir, speed, src){
+  const el = document.createElement('div')
+  el.className = 'walker'
+  const img = document.createElement('img')
+  img.src = src || CUTS[walkers.length % CUTS.length]
+  el.appendChild(img)
+  /* depth 0 = far, small, dim · 1 = near, large, warm */
+  el.style.bottom = (6 + (1 - depth) * 15) + '%'
+  el.style.filter =
+    `drop-shadow(0 6px 12px rgba(20,10,6,.5)) brightness(${(0.5 + depth * 0.5).toFixed(2)}) ` +
+    `saturate(${(0.55 + depth * 0.45).toFixed(2)}) contrast(${(0.9 + depth * 0.1).toFixed(2)})`
+  el.style.opacity = (0.42 + depth * 0.58).toFixed(2)
+  life.appendChild(el)
+  const w = { el, img, x, dir, speed, depth, bob: Math.random() * 6.28 }
+  walkers.push(w)
+  return w
+}
+
+for (let i = 0; i < 18; i++){
+  const depth = [0.12, 0.12, 0.12, 0.34, 0.34, 0.58][i % 6]
+  addWalker(depth, Math.random() * 3800, Math.random() < 0.5 ? 1 : -1, 10 + Math.random() * 24)
+}
+
+/* two men by the Kaaba — here before you, and they leave without you */
+const manA = addWalker(0.62, 1620, 1, 0, 'chars/merchant.png')
+const manB = addWalker(0.62, 1810, -1, 0, 'chars/chief.png')
+
+function measure(){
+  world.width = stage.clientWidth
+  world.height = stage.clientHeight
+  W = ready ? (sheetW / sheetH) * stage.clientHeight : 3800
+  you.style.height = Math.round(stage.clientHeight * 0.29) + 'px'
+  for (const w of walkers) w.el.style.height = Math.round(stage.clientHeight * (0.11 + w.depth * 0.22)) + 'px'
+  sizeDust()
+}
+addEventListener('resize', measure)
+
+addEventListener('keydown', e => {
+  const k = { ArrowRight:'r', ArrowLeft:'l', KeyD:'r', KeyA:'l' }[e.code]
+  if (k){ keys.add(k); e.preventDefault(); document.getElementById('hint').classList.add('gone') }
+})
+addEventListener('keyup', e => {
+  const k = { ArrowRight:'r', ArrowLeft:'l', KeyD:'r', KeyA:'l' }[e.code]
+  if (k) keys.delete(k)
+})
+
+/* ── smoke, fires and birds ───────────────────────────────────
+   The plate is a still photograph, and sliding it sideways does not make it
+   move. What moves is what is drawn ON it: cooking smoke off the roofs, fires
+   breathing as the light fails, birds crossing the valley. */
+const air = document.getElementById('air')
+const actx = air.getContext('2d')
+
+const PLUMES = [
+  { x: 640,  y: 0.60, w: 46, h: 210, rate: 0.9 },
+  { x: 1520, y: 0.55, w: 34, h: 160, rate: 1.3 },
+  { x: 2260, y: 0.58, w: 52, h: 240, rate: 0.7 },
+  { x: 3050, y: 0.62, w: 38, h: 180, rate: 1.1 },
+]
+const FIRES = [
+  { x: 980,  y: 0.74, r: 46 },
+  { x: 1990, y: 0.71, r: 34 },
+  { x: 2740, y: 0.76, r: 52 },
+]
+let birds = []
+function launchBirds(){
+  const n = 4 + Math.floor(Math.random() * 5)
+  const y0 = 0.10 + Math.random() * 0.18
+  const dir = Math.random() < 0.5 ? 1 : -1
+  const speed = 26 + Math.random() * 22
+  birds = Array.from({ length: n }, (_, i) => ({
+    x: dir > 0 ? -60 - i * 26 : air.width + 60 + i * 26,
+    y: y0 * air.height + (Math.random() - 0.5) * 34,
+    dir, speed: speed + Math.random() * 8, ph: Math.random() * 6.28,
+  }))
+}
+setTimeout(launchBirds, 6000)
+setInterval(() => { if (Math.random() < 0.55) launchBirds() }, 17000)
+
+/* ── dust in the last light ────────────────────────────────── */
+const dust = document.getElementById('dust')
+const dctx = dust.getContext('2d')
+let motes = []
+function sizeDust(){
+  dust.width = air.width = stage.clientWidth
+  dust.height = air.height = stage.clientHeight
+  motes = Array.from({ length: 100 }, () => ({
+    x: Math.random() * dust.width, y: Math.random() * dust.height,
+    r: 0.6 + Math.random() * 2, s: 0.06 + Math.random() * 0.4,
+    d: Math.random(), a: 0.1 + Math.random() * 0.32,
+  }))
+}
+
+/* ── subtitles ─────────────────────────────────────────────── */
+const subLine = document.querySelector('#sub .line')
+const subWho  = document.querySelector('#sub .who')
+const subTxt  = document.querySelector('#sub .txt')
+let subTimer = null
+function say(who, text, ms){
+  clearTimeout(subTimer)
+  subWho.textContent = who || ''
+  subWho.classList.toggle('on', !!who)
+  subTxt.textContent = text
+  subLine.classList.add('on')
+  subTimer = setTimeout(() => subLine.classList.remove('on'), ms || 4400)
+}
+
+/* ── the scene runs on its own clock ───────────────────────── */
+const SCRIPT = [
+  { t: 2800,  run: () => say('', 'מכה. השמש יורדת מאחורי ההרים.', 4400) },
+  { t: 9000,  run: () => say('ראווי', 'הכעבה כבר עומדת כאן. היא לא נבנתה בשביל מה שיבוא אחר כך.', 5200) },
+  { t: 16000, run: () => { manA.speed = 8; manB.speed = 8; pushTarget = 1 } },
+  { t: 18000, run: () => say('סוחר', 'החץ נפל שמאלה. הבל אמר לא.', 4200) },
+  { t: 23200, run: () => say('הולך רגל', 'הבל אמר — או מי שמפרש את החץ אמר?', 4600) },
+  { t: 28800, run: () => say('סוחר', 'עמרו בן לחי הביא אותו הנה. כך מספרים.', 4400) },
+  { t: 34500, run: () => { manA.speed = 30; manB.speed = 30; manA.dir = 1; manB.dir = 1; pushTarget = 0 } },
+  { t: 36200, run: () => say('ראווי', 'שמעת? „כך מספרים.“ הוא לא היה שם — וגם מי שסיפר לו לא.', 5600) },
+  { t: 44500, run: () => say('ראווי', 'כל מה שנשאר לנו מהמקום הזה עבר קודם דרך מישהו.', 5200) },
+]
+let cursor = 0
+let push = 0, pushTarget = 0
+const t0 = performance.now()
+
+/* ── frame ─────────────────────────────────────────────────── */
+let last = performance.now()
+function frame(now){
+  const dt = Math.min(0.05, (now - last) / 1000)
+  last = now
+  const elapsed = now - t0
+  while (cursor < SCRIPT.length && elapsed >= SCRIPT[cursor].t) SCRIPT[cursor++].run()
+
+  const speed = 200 * dt
+  if (keys.has('r')) camera += speed
+  if (keys.has('l')) camera -= speed
+  camera = Math.max(0, Math.min(camera, Math.max(0, W - stage.clientWidth)))
+
+  /* the camera breathes even when you stand still */
+  const drift = Math.sin(now / 5200) * 10 + Math.sin(now / 2300) * 3.5
+
+  /* and it leans in while the two men talk */
+  push += (pushTarget - push) * Math.min(1, dt * 1.3)
+  paint(now, camera, drift, push)
+
+  for (const w of walkers){
+    w.x += w.dir * w.speed * dt
+    if (w.x < -400) w.x = W + 250
+    if (w.x > W + 400) w.x = -250
+    w.bob += dt * (2.4 + w.depth * 1.6)
+    const par = 0.40 + w.depth * 0.60
+    const sx = w.x - camera * par - drift * par
+    /* A bob is not a walk. Rocking the figure about its feet, squashing it on
+       the down-beat and swinging it back on the up, reads as a gait at this
+       size — and its absence is why the crowd looked like paper sliding across
+       a photograph. */
+    const moving = w.speed > 1
+    const step = Math.sin(w.bob)
+    const bob  = moving ? Math.abs(step) * (2 + w.depth * 3.4) : Math.sin(now / 2600 + w.bob) * 0.7
+    const tilt = moving ? step * (1.6 + w.depth * 1.4) : Math.sin(now / 3100 + w.bob) * 0.35
+    const sq   = moving ? 1 - Math.abs(step) * 0.028 : 1 + Math.sin(now / 2400 + w.bob) * 0.006
+    w.el.style.transform = `translate(${sx}px, ${-bob}px)`
+    w.img.style.transform =
+      (w.dir < 0 ? 'scaleX(-1) ' : '') +
+      `rotate(${(w.dir < 0 ? -tilt : tilt).toFixed(2)}deg) scaleY(${sq.toFixed(4)})`
+  }
+
+  you.style.transform = `translateX(-50%) translateY(${Math.sin(now / 1400) * 2.6}px)`
+
+  /* the light fails over the first minute — the scene is called dusk */
+  const night = Math.min(1, elapsed / 62000)
+  document.getElementById('dusk').style.opacity = (0.75 + night * 0.55).toFixed(3)
+  document.getElementById('sun').style.opacity  = (1 - night * 0.45).toFixed(3)
+
+  actx.clearRect(0, 0, air.width, air.height)
+  for (const pl of PLUMES){
+    const sx = pl.x - camera - drift
+    if (sx < -170 || sx > air.width + 170) continue
+    const base = pl.y * air.height
+    for (let i = 0; i < 9; i++){
+      const t = ((now / 1000) * pl.rate * 0.26 + i / 9) % 1
+      const yy = base - t * pl.h
+      const spread = pl.w * (0.35 + t * 1.5)
+      const wob = Math.sin(now / 1400 + i * 1.7 + pl.x) * 14 * t
+      const rr = spread * 0.62
+      const a = (0.13 * (1 - t) * (1 - night * 0.4)).toFixed(3)
+      const gp = actx.createRadialGradient(sx + wob, yy, 0, sx + wob, yy, rr)
+      gp.addColorStop(0, 'rgba(232,212,184,' + a + ')')
+      gp.addColorStop(0.55, 'rgba(228,206,176,' + (a * 0.5).toFixed(3) + ')')
+      gp.addColorStop(1, 'rgba(220,198,168,0)')
+      actx.fillStyle = gp
+      actx.beginPath(); actx.arc(sx + wob, yy, rr, 0, 6.283); actx.fill()
+    }
+  }
+  for (const fr of FIRES){
+    const sx = fr.x - camera - drift
+    if (sx < -130 || sx > air.width + 130) continue
+    const puls = 0.72 + 0.28 * Math.sin(now / 190 + fr.x) + 0.12 * Math.sin(now / 77 + fr.x)
+    const yy = fr.y * air.height
+    const rad = fr.r * puls * (1 + night * 0.5)
+    const g = actx.createRadialGradient(sx, yy, 0, sx, yy, rad)
+    g.addColorStop(0, 'rgba(255,176,86,' + (0.40 * puls * (0.45 + night)).toFixed(3) + ')')
+    g.addColorStop(1, 'rgba(255,140,60,0)')
+    actx.fillStyle = g
+    actx.beginPath(); actx.arc(sx, yy, rad, 0, 6.283); actx.fill()
+  }
+  for (const bd of birds){
+    bd.x += bd.dir * bd.speed * dt
+    bd.ph += dt * 11
+    const flap = Math.sin(bd.ph)
+    actx.strokeStyle = 'rgba(38,24,16,' + (0.5 * (1 - night * 0.5)).toFixed(2) + ')'
+    actx.lineWidth = 1.4
+    actx.beginPath()
+    actx.moveTo(bd.x - 5, bd.y + flap * 2.6)
+    actx.quadraticCurveTo(bd.x, bd.y - 2 - flap * 2, bd.x + 5, bd.y + flap * 2.6)
+    actx.stroke()
+  }
+  birds = birds.filter(bd => bd.x > -140 && bd.x < air.width + 140)
+
+  dctx.clearRect(0, 0, dust.width, dust.height)
+  for (const m of motes){
+    m.x -= (m.s * 32 + 5) * dt
+    m.y -= m.s * 9 * dt
+    if (m.x < -6){ m.x = dust.width + 6; m.y = Math.random() * dust.height }
+    if (m.y < -6) m.y = dust.height + 6
+    dctx.beginPath()
+    dctx.arc(m.x, m.y, m.r, 0, 6.283)
+    dctx.fillStyle = `rgba(255,214,150,${(m.a * (0.55 + 0.45 * Math.sin(now / 900 + m.d * 9))).toFixed(3)})`
+    dctx.fill()
+  }
+
+  const nearEl = document.getElementById('near')
+  const centre = camera + stage.clientWidth / 2
+  const listening = manA.speed > 1 && manA.speed < 20 &&
+    (Math.abs(manA.x - centre) < 300 || Math.abs(manB.x - centre) < 300)
+  nearEl.classList.toggle('on', listening)
+  if (listening) nearEl.textContent = 'הם לא מדברים אליך. אפשר לעמוד ולהקשיב.'
+
+  requestAnimationFrame(frame)
+}
+
+measure()
+requestAnimationFrame(frame)
+setTimeout(() => { document.getElementById('fade').style.opacity = '0' }, 150)
+</script>
+</body>
+</html>

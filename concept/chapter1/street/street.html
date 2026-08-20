@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מכה — POC טכני</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{--wine:#4a1220;--gold:#d9a441;--gold-2:#f0cd85;--sand:#e8dcc4;
+  --sans:'Heebo',sans-serif;--serif:'Frank Ruhl Libre',serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#0b0705}
+body{color:var(--sand);font-family:var(--serif)}
+#app{position:fixed;inset:0;cursor:pointer}
+#app canvas{display:block}
+
+/* ── HUD ─────────────────────────────────────────────────── */
+#hud{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .8s}
+body.playing #hud{opacity:1}
+
+#obj{position:absolute;top:38px;right:32px;text-align:right}
+#obj .lbl{font-family:var(--sans);font-weight:400;font-size:.62rem;letter-spacing:.3em;
+  color:var(--gold);margin-bottom:7px;text-shadow:0 2px 10px rgba(0,0,0,.95)}
+#obj .txt{font-weight:400;font-size:1.3rem;text-shadow:0 2px 16px rgba(0,0,0,1)}
+#obj .rule{height:1px;margin-top:10px;background:linear-gradient(to left,var(--gold),transparent)}
+
+#mini{position:absolute;bottom:30px;left:32px;width:118px;height:118px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,rgba(74,18,32,.80),rgba(11,7,5,.86));
+  border:1px solid rgba(217,164,65,.5);
+  box-shadow:0 8px 26px rgba(0,0,0,.7),inset 0 0 18px rgba(0,0,0,.55)}
+#mini .ring{position:absolute;inset:9px;border-radius:50%;border:1px solid rgba(217,164,65,.16)}
+#mini .n{position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  font-family:var(--sans);font-weight:700;font-size:.55rem;letter-spacing:.16em;color:var(--gold)}
+#mini .cone{position:absolute;top:50%;left:50%;width:58px;height:58px;transform:translate(-50%,-100%);
+  background:conic-gradient(from -32deg,rgba(240,205,133,.2),transparent 64deg);border-radius:50% 50% 0 0}
+#mini .me{position:absolute;top:50%;left:50%;width:0;height:0;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-bottom:10px solid var(--gold-2);transform:translate(-50%,-60%)}
+#mini .poi{position:absolute;top:22%;left:50%;width:7px;height:7px;background:var(--gold);
+  border-radius:1px;transform:translate(-50%,-50%) rotate(45deg);box-shadow:0 0 8px rgba(217,164,65,.9)}
+
+#keys{position:absolute;bottom:32px;right:32px;display:flex;gap:14px;
+  font-family:var(--sans);font-weight:200;font-size:.66rem;letter-spacing:.14em;
+  color:rgba(232,220,196,.45);text-shadow:0 2px 8px rgba(0,0,0,1)}
+#keys b{font-weight:500;color:rgba(217,164,65,.9)}
+
+/* ── מסך פתיחה ───────────────────────────────────────────── */
+#gate{position:fixed;inset:0;z-index:9;display:grid;place-content:center;text-align:center;
+  background:rgba(8,5,4,.86);transition:opacity .7s}
+body.playing #gate{opacity:0;pointer-events:none}
+#gate .a{font-weight:300;font-size:clamp(1.5rem,1.1rem + 2vw,2.4rem);margin-bottom:16px}
+#gate .b{font-family:var(--sans);font-weight:200;font-size:.8rem;letter-spacing:.24em;
+  color:var(--gold)}
+#gate .c{font-family:var(--sans);font-weight:200;font-size:.72rem;letter-spacing:.1em;
+  color:rgba(232,220,196,.4);margin-top:26px;line-height:2}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="hud">
+  <div id="obj"><div class="lbl">משימה</div><div class="txt">הגיעו אל הכעבה</div><div class="rule"></div></div>
+  <div id="mini"><div class="ring"></div><div class="n">צ</div><div class="cone"></div>
+    <div class="me"></div><div class="poi"></div></div>
+  <div id="keys"><span><b>WASD</b> תנועה</span><span><b>SHIFT</b> ריצה</span><span><b>ESC</b> יציאה</span></div>
+</div>
+
+<div id="gate">
+  <div>
+    <div class="a">מכה — פינת רחוב</div>
+    <div class="b">לחצו כדי להיכנס</div>
+    <div class="c">WASD להליכה · עכבר להסתכלות · SHIFT לריצה · ESC לצאת<br>
+      זמן אמת בדפדפן — לא סרטון</div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+    "three": "./lib/three.module.js",
+    "three/webgpu": "./lib/three.module.js",
+    "three/tsl": "./lib/three.module.js"
+} }
+</script>
+<script type="module" src="street.js"></script>
+</body>
+</html>

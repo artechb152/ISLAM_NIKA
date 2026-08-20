@@ -1,0 +1,97 @@
+===== yemen-heights =====
+  • חפיפה: MODEL_MUDTOWER(-17.03,-6.06) ↔ MODEL_DRYWALL3(-19.51,-10.71) — מרחק 5.27 < 5.38
+  • חפיפה: MODEL_HOUSE-A(-13.43,2.54) ↔ MODEL_ROCKS(-12.22,4.2) — מרחק 2.05 < 2.15
+  • חפיפה: MODEL_HOUSE-A(-13.43,2.54) ↔ MODEL_ROCKS(-14.55,0.95) — מרחק 1.94 < 2.17
+  • חפיפה: MODEL_ROCKS(-8.41,-25.17) ↔ MODEL_DRYWALL(-9.64,-24.74) — מרחק 1.30 < 2.22
+  • חפיפה: MODEL_DESERT-BUSH(-11.91,-11.39) ↔ MODEL_DRYWALL2(-9.86,-10.91) — מרחק 2.11 < 2.60
+  • חפיפה: MODEL_DRYWALL3(-13.35,1.89) ↔ MODEL_ROCKS(-14.55,0.95) — מרחק 1.52 < 1.53
+  • חפיפה: MODEL_ROCKS(-19.02,4.23) ↔ MODEL_BIGJAR(-19.38,4.41) — מרחק 0.40 < 0.64
+  • חפיפה: MODEL_MUDTOWER(-17.03,-6.06) ↔ MODEL_DRYWALL3(-14.92,-10.91) — מרחק 5.29 < 5.77
+  • חפיפה: MODEL_HOUSE-A(-13.43,2.54) ↔ MODEL_DRYWALL3(-13.35,1.89) — מרחק 0.65 < 3.04
+  • חפיפה: MODEL_BOULDER4(-9.19,-10.71) ↔ MODEL_DRYWALL2(-9.86,-10.91) — מרחק 0.70 < 3.05
+
+===== camp =====
+  • חפיפה: MODEL_BAYT(-6.8,-10.49) ↔ MODEL_JARS(-4.25,-9.38) — מרחק 2.78 < 3.00
+
+===== border =====
+  • חפיפה: MODEL_GATE-POST(0,-8) ↔ MODEL_COLLIDER(-2,-8) — מרחק 2.00 < 2.55
+  • חפיפה: MODEL_GATE-POST(0,-8) ↔ MODEL_COLLIDER(2,-8) — מרחק 2.00 < 2.55
+  • חפיפה: MODEL_ROCKS(6.3,-5.3) ↔ MODEL_DRYWALL3(7.32,-6.83) — מרחק 1.84 < 2.03
+  • חפיפה: MODEL_ROCKS(25.78,-5.26) ↔ MODEL_HOUSE-D(26.7177484619675,-7.623165469156723) — מרחק 2.54 < 2.56
+  • חפיפה: MODEL_ROCKS(25.78,-5.26) ↔ MODEL_DRYWALL2(23.97,-5.51) — מרחק 1.83 < 2.25
+  • חפיפה: MODEL_BIGJAR(7.13,-5.07) ↔ MODEL_DRYWALL3(7.32,-6.83) — מרחק 1.77 < 1.87
+  • חפיפה: MODEL_AMPHORA(7.72,-5.14) ↔ MODEL_DRYWALL3(7.32,-6.83) — מרחק 1.74 < 1.82
+  • חפיפה: MODEL_MUDTOWER(9.59,-10.4) ↔ MODEL_DRYWALL3(7.32,-6.83) — מרחק 4.23 < 4.45
+  • חפיפה: MODEL_BOULDER3(-25.83,-9.57) ↔ MODEL_DRYWALL3(-24.93,-6.95) — מרחק 2.77 < 2.83
+  • חפיפה: MODEL_HOUSE-D(26.7177484619675,-7.623165469156723) ↔ MODEL_DRYWALL2(23.97,-5.51) — מרחק 3.47 < 3.90
+  • חפיפה: MODEL_DRYWALL2(16.09,-7.75) ↔ MODEL_DRYWALL2(13.55,-7.11) — מרחק 2.62 < 3.49
+
+===== narrow-pass =====
+  • חפיפה: MODEL_BOULDER1(6.38,6.14) ↔ MODEL_DRYWALL2(8.34,7.92) — מרחק 2.65 < 4.01
+  • חפיפה: MODEL_BOULDER1(-7.36,13.64) ↔ MODEL_WAYMARK(-3.21,11.53) — מרחק 4.66 < 5.34
+  • חפיפה: MODEL_BASALT2(6.95,-15.52) ↔ MODEL_CAMEL(9.37,-12.47) — מרחק 3.89 < 4.41
+  • חפיפה: MODEL_MUDTOWER(3.4077768044229493,-7.353069922616655) ↔ MODEL_FIREWOOD(6.62,-9.1) — מרחק 3.66 < 3.79
+  • חפיפה: MODEL_DRYWALL2(-2.69,0.32) ↔ MODEL_DRYWALL3(-3.94,-0.69) — מרחק 1.61 < 1.95
+  • חפיפה: MODEL_DRYWALL3(-3.94,-0.69) ↔ CAMPFIRE(-6.1,-1.06) — מרחק 2.19 < 2.31
+  • חפיפה: MODEL_BAYT(7.2,13.34) ↔ MODEL_JARS(9.79,13.73) — מרחק 2.62 < 3.31
+  • חפיפה: MODEL_BAYT(8.61,-8.01) ↔ MODEL_FIREWOOD(6.62,-9.1) — מרחק 2.27 < 3.05
+  • חפיפה: MODEL_BOULDER2(-14.51,-18.31) ↔ MODEL_BOULDER2(-6.54,-5.87) — מרחק 14.77 < 17.17
+  • חפיפה: MODEL_BOULDER1(6.38,6.14) ↔ MODEL_BASALT2(9.86,1.3) — מרחק 5.96 < 8.39
+  • חפיפה: MODEL_BOULDER2(-18.06,19.9) ↔ MODEL_BOULDER1(-7.36,13.64) — מרחק 12.40 < 14.57
+  • חפיפה: MODEL_BASALT2(-10.28,-2.65) ↔ MODEL_BOULDER2(-6.54,-5.87) — מרחק 4.94 < 7.68
+  • חפיפה: MODEL_BOULDER2(1.93,-34.82) ↔ MODEL_BOULDER2(16.46,-40.18) — מרחק 15.49 < 15.61
+  • חפיפה: MODEL_BOULDER2(1.93,-34.82) ↔ MODEL_BOULDER1(-2.25,-45.57) — מרחק 11.53 < 13.63
+  • חפיפה: MODEL_BOULDER2(-6.54,-5.87) ↔ CAMPFIRE(-6.1,-1.06) — מרחק 4.83 < 5.87
+  • חפיפה: MODEL_MUDTOWER(3.4077768044229493,-7.353069922616655) ↔ MODEL_BAYT(8.61,-8.01) — מרחק 5.24 < 5.65
+
+===== loading-road =====
+  • חפיפה: MODEL_DRYWALL(-7.29,20.23) ↔ MODEL_BOULDER3(-5.69,18.23) — מרחק 2.56 < 3.46
+  • חפיפה: MODEL_CAMEL(5.93,3.37) ↔ CAMPFIRE(8.15,3.99) — מרחק 2.30 < 2.44
+  • חפיפה: MODEL_AWNING(-4.81,2.23) ↔ MODEL_WATERSKIN(-4.58,3.63) — מרחק 1.42 < 2.30
+  • חפיפה: MODEL_BAYT(-7.38,14.25) ↔ MODEL_BOULDER3(-5.69,18.23) — מרחק 4.32 < 5.31
+
+===== yathrib =====
+  • חפיפה: MODEL_HOUSE-B(7.86,-4.76) ↔ MODEL_STONE-BENCH(5.59,-4.21) — מרחק 2.34 < 2.59
+  • חפיפה: MODEL_AWNING(-5.78,1.17) ↔ MODEL_CRATE(-4.72,0.13) — מרחק 1.48 < 2.27
+  • חפיפה: MODEL_AWNING(-5.78,1.17) ↔ MODEL_CLAYPOT(-4.72,2.2) — מרחק 1.48 < 2.27
+  • חפיפה: MODEL_AWNING(-5.78,1.17) ↔ MODEL_STONE-BENCH(-5.58,1.22) — מרחק 0.21 < 2.32
+  • חפיפה: MODEL_AWNING(-5.78,-4.18) ↔ MODEL_JARS(-4.73,-5.27) — מרחק 1.51 < 2.52
+  • חפיפה: MODEL_AWNING(-5.78,-4.18) ↔ MODEL_BASKET(-4.7,-3.22) — מרחק 1.44 < 2.38
+  • חפיפה: MODEL_AWNING(-5.78,-4.18) ↔ MODEL_STONE-BENCH(-5.63,-4.19) — מרחק 0.15 < 2.44
+  • חפיפה: MODEL_AWNING(5.82,12.02) ↔ MODEL_SACKPILE(4.71,10.87) — מרחק 1.60 < 2.22
+  • חפיפה: MODEL_HOUSE-C(9.77,-22.44) ↔ MODEL_DRYWALL2(6.46,-24.19) — מרחק 3.74 < 4.25
+  • חפיפה: MODEL_HOUSE-C(9.33,3.49) ↔ MODEL_AWNING(5.81,6.61) — מרחק 4.70 < 4.92
+  • חפיפה: MODEL_HOUSE-D(10.16,11.72) ↔ MODEL_AWNING(5.82,12.02) — מרחק 4.35 < 4.40
+
+===== monastery =====
+  • חפיפה: MODEL_DRYWALL2(-9.32,-14.34) ↔ MODEL_ROCKS(-8.51,-15.43) — מרחק 1.36 < 2.89
+  • חפיפה: MODEL_MUDTOWER(-8.81,-7.03) ↔ MODEL_WAYMARK(-6.92,-10.58) — מרחק 4.02 < 4.45
+  • חפיפה: MODEL_DRYWALL2(-2.46,11.01) ↔ MODEL_COLLIDER(-2.05,11) — מרחק 0.41 < 1.91
+  • חפיפה: MODEL_DRYWALL2(2.41,10.98) ↔ MODEL_COLLIDER(2.05,11) — מרחק 0.36 < 1.88
+  • חפיפה: MODEL_GATE-POST(-0.02,10.99) ↔ MODEL_COLLIDER(-2.05,11) — מרחק 2.03 < 2.06
+  • חפיפה: MODEL_DRYWALL3(-7.91,13.24) ↔ MODEL_HOUSE-C(-7.24,10.65) — מרחק 2.68 < 5.12
+  • חפיפה: MODEL_MUDTOWER(-8.81,-7.03) ↔ MODEL_DRYWALL(-11.03,-3.14) — מרחק 4.48 < 5.08
+  • חפיפה: MODEL_HOUSE-D(-8.73,2.28) ↔ MODEL_DRYWALL(-10.97,0.03) — מרחק 3.17 < 3.57
+  • חפיפה: MODEL_HOUSE-C(-7.24,10.65) ↔ MODEL_DRYWALL2(-2.46,11.01) — מרחק 4.79 < 5.12
+  • חפיפה: MODEL_HOUSE-F(6.46,5.96) ↔ MODEL_DRYWALL2(7.31,10.99) — מרחק 5.10 < 5.11
+  • חפיפה: MODEL_HOUSE-D(1.22,-9.66) ↔ MODEL_DRYWALL3(4.9,-11) — מרחק 3.92 < 4.39
+  • חפיפה: MODEL_DRYWALL2(-2.46,11.01) ↔ MODEL_GATE-POST(-0.02,10.99) — מרחק 2.44 < 3.28
+  • חפיפה: MODEL_DRYWALL2(2.41,10.98) ↔ MODEL_GATE-POST(-0.02,10.99) — מרחק 2.43 < 3.26
+  • חפיפה: MODEL_DRYWALL3(4.9,-11) ↔ MODEL_DRYWALL3(7.36,-11.02) — מרחק 2.46 < 3.07
+
+===== mecca =====
+  • חפיפה: MODEL_KAABA(8.85,-8.86) ↔ MODEL_IDOL(11.34,-14.63) — מרחק 6.28 < 6.53
+  • חפיפה: MODEL_HOUSE-D(20.08,5.97) ↔ MODEL_DRYWALL2(20.83,9.03) — מרחק 3.15 < 3.23
+  • חפיפה: MODEL_HOUSE-D(8,15) ↔ MODEL_DRYWALL3(5.83,15.1) — מרחק 2.17 < 3.16
+  • חפיפה: MODEL_HOUSE-D(8,15) ↔ MODEL_BASKET(8.95,12.74) — מרחק 2.45 < 2.46
+  • חפיפה: MODEL_DRYWALL2(20.83,9.03) ↔ MODEL_AWNING(23.63,8.79) — מרחק 2.81 < 2.98
+  • חפיפה: MODEL_AWNING(3.37,7.89) ↔ MODEL_BIGJAR(3.89,6.46) — מרחק 1.52 < 2.19
+  • חפיפה: MODEL_AWNING(-6.8,-0.84) ↔ MODEL_CRATE(-5.51,-1.58) — מרחק 1.49 < 2.25
+  • חפיפה: MODEL_HOUSE-A(-7.13,10.6) ↔ MODEL_DRYWALL2(-6.42,13.89) — מרחק 3.37 < 3.71
+  • חפיפה: MODEL_MUDTOWER(-19,12) ↔ CAMPFIRE(-17.17,14.37) — מרחק 2.99 < 3.13
+
+===== exit =====
+  • חפיפה: MODEL_BAYT2(-4.53,8.39) ↔ MODEL_BOULDER2(-7.02,6.69) — מרחק 3.01 < 3.85
+  • חפיפה: MODEL_BOULDER2(-7.02,6.69) ↔ CAMPFIRE(-7.16,4.56) — מרחק 2.13 < 2.23
+  • חפיפה: MODEL_MUDTOWER(-8.11,-6.27) ↔ MODEL_BOULDER2(-14.3,-6.23) — מרחק 6.19 < 6.37
+

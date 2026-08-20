@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>פרק 1 — הסצנה הראשונה עם קול</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔊</text></svg>" />
+<style>
+  :root { --maroon:#8a2733; --maroon-deep:#571820; --gold:#c79a3c; --cream:#f5ecd6;
+          --glass:rgba(30,20,12,.86); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body { font-family:'Ploni','Segoe UI',system-ui,sans-serif; background:#160d08; color:var(--cream);
+         display:flex; flex-direction:column; overflow:hidden; }
+  header { background:var(--maroon-deep); border-bottom:2px solid var(--gold); padding:.6rem 1.2rem;
+           display:flex; align-items:center; gap:1rem; z-index:3; }
+  header h1 { font-size:.95rem; font-weight:600; }
+  header .sub { font-size:.78rem; opacity:.65; }
+  header .steps { margin-inline-start:auto; font-size:.78rem; opacity:.75; }
+  #stage { flex:1; position:relative; background-size:cover; background-position:center;
+           transition:background-image .6s ease; }
+  #stage::after { content:''; position:absolute; inset:0; background:linear-gradient(to top,
+    rgba(12,7,4,.92) 0%, rgba(12,7,4,.35) 38%, rgba(12,7,4,.1) 70%); pointer-events:none; }
+
+  .bubble { position:absolute; inset-inline:0; bottom:1.6rem; margin-inline:auto; max-width:760px;
+            background:var(--glass); border:1px solid rgba(199,154,60,.55); border-radius:.9rem;
+            padding:1rem 1.1rem; display:flex; gap:.9rem; z-index:2;
+            box-shadow:0 12px 40px rgba(0,0,0,.55); }
+  .bubble .face { width:72px; height:72px; border-radius:.55rem; object-fit:cover; flex-shrink:0;
+                  border:1px solid var(--gold); background:#2a1a10; }
+  .bubble .who { color:var(--gold); font-size:.85rem; font-weight:600; margin-bottom:.25rem;
+                 display:flex; align-items:center; gap:.5rem; }
+  .bubble .who .src { font-size:.7rem; opacity:.6; font-weight:400; }
+  .bubble .text { font-size:1.06rem; line-height:1.62; }
+  .bubble .cin { font-style:italic; opacity:.92; }
+  /* text is the only channel now — reveal it at reading pace so the eye has
+     somewhere to land, and let a click finish the line instantly */
+  .bubble .text .rest { opacity:0; }
+  .choices { position:absolute; inset-inline:0; bottom:1.6rem; margin-inline:auto; max-width:760px;
+             display:flex; flex-direction:column; gap:.5rem; z-index:2; }
+  .choices button { text-align:start; font:inherit; font-size:.95rem; padding:.7rem .9rem;
+    background:var(--glass); color:var(--cream); border:1px solid rgba(199,154,60,.5);
+    border-radius:.7rem; cursor:pointer; }
+  .choices button:hover { border-color:var(--gold); background:rgba(138,39,51,.55); }
+  #next { position:absolute; inset-inline-start:1.4rem; bottom:1.6rem; z-index:3;
+    font:inherit; font-size:.9rem; padding:.6rem 1.1rem; border-radius:.6rem; cursor:pointer;
+    background:var(--maroon); color:var(--cream); border:1px solid var(--gold); }
+  #note { position:absolute; top:.8rem; inset-inline-end:1.2rem; z-index:2; font-size:.75rem;
+    background:rgba(0,0,0,.45); padding:.35rem .7rem; border-radius:.5rem; opacity:.8; }
+  .book { position:absolute; top:.8rem; inset-inline-start:1.2rem; z-index:2; font-size:.78rem;
+    background:rgba(0,0,0,.45); padding:.35rem .7rem; border-radius:.5rem; color:var(--gold); }
+</style>
+</head>
+<body>
+<header>
+  <h1>פרק 1 · דרך הבשמים</h1>
+  <span class="sub">הסצנה הראשונה — טקסט אמיתי מהמקור · ללא קול</span>
+  <span class="steps" id="steps"></span>
+</header>
+<div id="stage">
+  <div class="book" id="book">מחברת: 0 מתוך 26</div>
+  <div id="note">כל שורה = ציטוט מהטקסט · לחיצה משלימה את השורה מיד</div>
+  <div id="ui"></div>
+  <button id="next">המשך ←</button>
+</div>
+<script>
+const SCENE = [
+  { plate:'./plates/title.jpg', who:'קריין', face:null, src:'§0', kind:'cin', book:1,
+    text:'כדי להבין כיצד התפתחה דת האסלאם — איך רעיון המונותאיזם, האמונה באל אחד ויחיד, עלה בדעתו של מוחמד, ומהי הדרך שבה תיווך אותה לבני עמו — יש להבין את התרבות, הציוויליזציה והחיים בחצי האי ערב שלפני עליית האסלאם.' },
+  { plate:'./plates/title.jpg', who:'קריין', face:null, src:'§0', kind:'cin', book:1,
+    text:'תקופה המכונה ג׳אהליה — תקופת הבערות והברבריות.' },
+  { plate:'./plates/camp.jpg', who:'רָאוִי', face:'./faces/rawi.jpg', src:'§1', book:2,
+    text:'המידע על החיים בחצי האי ערב לפני האסלאם דל מאוד. את רובו אנחנו יודעים מהספרות ומהמסורת המוסלמית.' },
+  { plate:'./plates/camp.jpg', who:'רָאוִי', face:'./faces/rawi.jpg', src:'§1', book:2,
+    text:'ואת המסורת הזאת, אם מתבוננים בה במבט ביקורתי — יש לקחת בעירבון מוגבל.' },
+  { choices:[
+      { prompt:'מה זה ג׳אהליה?', src:'§0',
+        text:'כך המוסלמים מכנים את התקופה שלפני האסלאם — ג׳אהליה, תקופת הבערות והברבריות.' },
+      { prompt:'אז איך יודעים מה באמת קרה?', src:'§1',
+        text:'בזהירות. רוב מה שידוע מגיע מהמסורת המוסלמית עצמה — ולכן מבט ביקורתי הוא חובה.' },
+    ], plate:'./plates/camp.jpg', who:'רָאוִי', face:'./faces/rawi.jpg', book:2 },
+  { plate:'./plates/camp.jpg', who:'רָאוִי', face:'./faces/rawi.jpg', src:'✓', book:2, done:true,
+    text:'✓ נרשם במחברת — „דלות המקורות״' },
+]
+let i = 0, asked = new Set(), reveal = null
+
+const stage = document.getElementById('stage')
+const ui = document.getElementById('ui')
+
+function bubble(s, text, srcTag) {
+  return `<div class="bubble">
+    ${s.face ? `<img class="face" src="${s.face}" alt="">` : ''}
+    <div style="flex:1">
+      <div class="who">${s.who}${srcTag ? `<span class="src">${srcTag}</span>` : ''}</div>
+      <div class="text ${s.kind === 'cin' ? 'cin' : ''}"></div>
+    </div>
+  </div>`
+}
+
+/* Reveal at a readable pace. The full text is laid out immediately (so the
+   bubble never resizes mid-line) and characters simply fade in. */
+function typeInto(el, text) {
+  clearInterval(reveal)
+  el.innerHTML = [...text].map((c) => `<span class="rest">${c === ' ' ? '&nbsp;' : c}</span>`).join('')
+  const spans = el.querySelectorAll('span')
+  let n = 0
+  reveal = setInterval(() => {
+    for (let k = 0; k < 2 && n < spans.length; k++, n++) spans[n].style.opacity = 1
+    if (n >= spans.length) clearInterval(reveal)
+  }, 18)
+  el.dataset.full = '1'
+}
+function finishLine() {
+  const el = ui.querySelector('.bubble .text')
+  if (!el) return false
+  const hidden = [...el.querySelectorAll('span')].filter((s) => s.style.opacity !== '1')
+  if (!hidden.length) return false
+  clearInterval(reveal)
+  hidden.forEach((s) => (s.style.opacity = 1))
+  return true
+}
+
+function render() {
+  const s = SCENE[i]
+  stage.style.backgroundImage = `url(${s.plate})`
+  document.getElementById('book').textContent = `מחברת: ${s.book ?? 0} מתוך 26`
+  document.getElementById('steps').textContent = `${i + 1} / ${SCENE.length}`
+  if (s.choices) {
+    const left = s.choices.filter((c) => !asked.has(c.prompt))
+    if (!left.length) { i++; return render() }
+    ui.innerHTML = `<div class="choices">${left.map((c, n) =>
+      `<button data-c="${s.choices.indexOf(c)}">${c.prompt}</button>`).join('')}</div>`
+    return
+  }
+  ui.innerHTML = bubble(s, s.text, s.src)
+  typeInto(ui.querySelector('.bubble .text'), s.text)
+}
+document.getElementById('next').onclick = (e) => {
+  e.stopPropagation()
+  if (finishLine()) return
+  i = Math.min(i + 1, SCENE.length - 1); render()
+}
+document.addEventListener('click', (e) => {
+  const ch = e.target.closest('[data-c]')
+  if (ch) {
+    const s = SCENE[i], c = s.choices[+ch.dataset.c]
+    asked.add(c.prompt)
+    ui.innerHTML = bubble(s, c.text, c.src) +
+      `<div class="choices" style="bottom:9.5rem"><button id="back">← לשאלות</button></div>`
+    typeInto(ui.querySelector('.bubble .text'), c.text)
+    document.getElementById('back').onclick = render
+    return
+  }
+  if (e.target.closest('#next') || e.target.closest('button')) return
+  finishLine()
+})
+render()
+</script>
+</body>
+</html>

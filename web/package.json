@@ -9,17 +9,26 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "verify": "tsc --noEmit && node scripts/check-summary-sources.mjs && node scripts/check-camp.mjs",
+    "verify": "tsc --noEmit && node scripts/check-summary-sources.mjs && node scripts/check-camp.mjs && node scripts/check-layouts.mjs && node scripts/check-journey.mjs && node scripts/check-interactions.mjs && node scripts/check-walkable.mjs && node scripts/check-playable.mjs",
     "add-model": "node scripts/import-blend.mjs",
     "check-camp": "node scripts/check-camp.mjs",
     "measure-props": "node scripts/measure-props.mjs",
     "camp:export": "node scripts/camp.mjs export",
-    "camp:import": "node scripts/camp.mjs import"
+    "camp:import": "node scripts/camp.mjs import",
+    "ch2:verify": "node ../concept/chapter2/verify-chapter2.mjs",
+    "ch2:audit": "node ../concept/chapter2/audit.mjs",
+    "check-journey": "node scripts/check-journey.mjs",
+    "check-walkable": "node scripts/check-walkable.mjs",
+    "check-playable": "node scripts/check-playable.mjs",
+    "check-layouts": "node scripts/check-layouts.mjs",
+    "check-interactions": "node scripts/check-interactions.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.7.0",
+    "@react-three/postprocessing": "^3.0.5",
     "next": "^16.2.10",
+    "postprocessing": "^6.39.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "three": "^0.185.1"

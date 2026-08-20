@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>הפרומפטים — המשך</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8E%9E%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f7f2e8;--paper-2:#efe8da;--code:#1d1a15;--code-ink:#e8ddc8;
+  --ink:#241d16;--ink-2:#5b5044;--ink-3:#8b7f70;
+  --rule:#ded3c0;--gold:#a8762a;--cool:#3f6d8c;--warn:#9c4a2f;--ok:#2f6b52;
+  --serif:'Frank Ruhl Libre','David Libre',serif;--sans:'Heebo',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#15120e;--paper-2:#1d1913;--code:#0d0b08;--code-ink:#e8ddc8;
+  --ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--ok:#6dbf9a}}
+:root[data-theme="dark"]{
+  --paper:#15120e;--paper-2:#1d1913;--code:#0d0b08;--code-ink:#e8ddc8;
+  --ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--ok:#6dbf9a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.72;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 100px}
+
+/* ניווט דביק בין המערכות */
+nav{position:sticky;top:0;z-index:5;background:var(--paper);
+  border-bottom:1px solid var(--rule);margin:0 calc(-1 * clamp(16px,4vw,40px)) 30px;
+  padding:11px clamp(16px,4vw,40px);display:flex;gap:6px;overflow-x:auto;
+  scrollbar-width:thin}
+nav a{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.06em;
+  color:var(--ink-2);text-decoration:none;white-space:nowrap;
+  padding:5px 11px;border:1px solid var(--rule);border-radius:99px;background:var(--paper-2)}
+nav a:hover{border-color:var(--gold);color:var(--gold)}
+
+header{padding-top:clamp(26px,5vw,54px);border-bottom:1px solid var(--rule);
+  padding-bottom:26px;margin-bottom:0}
+.kick{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.32em;
+  color:var(--gold);margin-bottom:13px}
+h1{font-weight:300;font-size:clamp(1.9rem,1.3rem + 3vw,3rem);line-height:1.14;margin-bottom:13px}
+.lede{font-weight:300;font-size:clamp(1rem,.96rem + .4vw,1.16rem);color:var(--ink-2);max-width:62ch}
+h2{font-weight:400;font-size:clamp(1.2rem,1.05rem + .8vw,1.55rem);margin:46px 0 10px;
+  padding-top:26px;border-top:1px solid var(--rule);scroll-margin-top:64px}
+h2 .n{font-family:var(--sans);font-weight:700;font-size:.66rem;letter-spacing:.2em;
+  color:var(--gold);display:block;margin-bottom:7px}
+p{max-width:66ch;margin-bottom:12px;font-weight:300}
+p.small{font-size:.92rem;color:var(--ink-2)}
+strong{font-weight:500} em{font-style:normal;color:var(--gold);font-weight:400}
+ul{margin:0 0 14px;padding-inline-start:20px;max-width:66ch}
+li{margin-bottom:7px;font-weight:300}
+code{font-family:ui-monospace,'Cascadia Mono',monospace;font-size:.84em;
+  background:var(--paper-2);padding:1px 6px;border-radius:3px;
+  direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+.gen{border:1px solid var(--rule);border-radius:5px;margin:18px 0;overflow:hidden;
+  background:var(--paper-2)}
+.gen > .top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;padding:14px 18px 0}
+.tag{font-family:var(--sans);font-weight:700;font-size:.66rem;letter-spacing:.12em;
+  color:var(--paper);background:var(--ok);padding:3px 10px;border-radius:3px}
+.tag.ing{background:var(--cool)} .tag.ext{background:var(--gold)}
+.tag.cin{background:var(--warn)}
+.name{font-weight:400;font-size:1.02rem}
+.gen .set{padding:10px 18px 0;display:flex;flex-wrap:wrap;gap:6px}
+.s{font-family:var(--sans);font-weight:300;font-size:.69rem;padding:4px 10px;
+  border:1px solid var(--rule);border-radius:3px;color:var(--ink-2);background:var(--paper)}
+.s b{font-weight:600;color:var(--ink)}
+.s code{background:none;padding:0;font-size:.95em}
+.gen .why{padding:10px 18px 0;font-size:.89rem;color:var(--ink-2);font-weight:300;max-width:64ch}
+.lab{font-family:var(--sans);font-weight:500;font-size:.58rem;letter-spacing:.2em;
+  color:var(--ink-3);margin:13px 18px -5px}
+.box{position:relative;margin:8px 18px 15px;background:var(--code);border-radius:4px}
+.box pre{margin:0;padding:15px 17px;color:var(--code-ink);
+  font-family:ui-monospace,'Cascadia Mono',monospace;font-size:.77rem;line-height:1.6;
+  white-space:pre-wrap;word-break:break-word;direction:ltr;text-align:left}
+.copy{position:absolute;top:8px;left:8px;font-family:var(--sans);font-weight:400;
+  font-size:.62rem;letter-spacing:.12em;color:var(--code-ink);
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+  padding:5px 11px;border-radius:3px;cursor:pointer;transition:.2s}
+.copy:hover{background:rgba(255,255,255,.18)}
+.copy.done{color:#8fe0b4;border-color:#8fe0b4}
+
+.note{border-inline-start:3px solid var(--cool);background:var(--paper-2);
+  padding:15px 18px;margin:20px 0;border-radius:0 3px 3px 0}
+.note.w{border-color:var(--warn)} .note.g{border-color:var(--ok)}
+.note h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--cool);margin-bottom:9px}
+.note.w h4{color:var(--warn)} .note.g h4{color:var(--ok)}
+.note p{font-size:.94rem;margin:0 0 8px;max-width:none}
+.note p:last-child{margin-bottom:0}
+footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kick">פרק 1 · הפקה · Veo 3.1 Quality</div>
+  <h1>הפרומפטים — המשך</h1>
+  <p class="lede">מערכות שלוש עד עשר. הכל כאן, בלי לקצץ — עם Ultra אין סיבה לחכות ביניהן. הסדר עדיין מחייב, כי Extend ממשיך מהקטע הקודם.</p>
+</header>
+
+<nav>
+  <a href="#a3">ג׳ · האימפריות</a><a href="#a4">ד׳ · הגבול</a><a href="#a5">ה׳ · ית׳רב</a>
+  <a href="#a6">ו׳ · המנזר</a><a href="#a7">ז׳ · אברהה</a><a href="#a8">ח׳ · חזרה</a>
+  <a href="#a9">ט׳ · מכה 2</a><a href="#a10">י׳ · הסיום</a><a href="#neg">שלילי</a>
+</nav>
+
+<div class="note g">
+  <h4>מה Ultra משנה</h4>
+  <p><strong>Quality בכל קטע, אף פעם לא Fast.</strong> מייצרים פעם אחת ומשתמשים לנצח — אין סיבה לחסוך.</p>
+  <p><strong>קטעי הליכה ארוכים יותר.</strong> 8 שניות ואז Extend פעם או פעמיים — 16 עד 24 שניות לקטע, וזה מרגיש כמו הליכה אמיתית ולא כמו הצצה.</p>
+  <p><strong>ותייצרי כל דבר פעמיים־שלוש ותבחרי.</strong> בקטעים המסומנים בכתום זה כמעט הכרחי.</p>
+</div>
+
+<div class="note w" id="neg">
+  <h4>הפרומפט השלילי הבסיסי — מדביקים בכל ייצור</h4>
+  <p>במקום לחזור עליו בכל כרטיס, הוא כאן פעם אחת. בכרטיסים שצריכים תוספת — היא רשומה בנפרד ומוסיפים אותה בסוף.</p>
+  <div class="box" style="margin:12px 0 0"><button class="copy">העתק</button><pre>dialogue, speech, voices, talking, narration, singing, chanting, music, text, titles, subtitles, captions, watermark, logo, user interface, domes, minarets, arches, Islamic geometric ornament, calligraphy, modern buildings, roads, cars, power lines, cactus, people clipping through objects, floating objects, melting walls, camera turning around, backwards motion</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a3"><span class="n">מערכה שלישית</span>שתי האימפריות</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 6 — עלייה לנקודת התצפית</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W5</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward, now leaving the caravan behind and climbing a stony ridge path at the same eye height with the same subtle handheld sway. The ground rises and the walls of the pass fall away below. The climb is steady and continuous — no stopping, no turning.
+
+As the camera nears the crest, a vast open landscape begins to appear beyond it: layered ochre and rust-coloured ridges receding into pale haze in every direction, immense and empty.
+
+Late afternoon, low warm sun, long shadows across broken rock.
+
+Audio: footsteps on loose stone, wind rising and becoming stronger and cleaner as the climb continues. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag cin">Extend</span><span class="name">ST 5 + ST 6 — המבט לשני הכיוונים</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W6</span><span class="s"><b>8s</b></span><span class="s"><b>לייצר 3 פעמים</b></span></div>
+  <div class="why">קטע אחד שסורק את כל האופק. אני עוצר אותו בשני המקומות ומכניס שם את הטקסט על ביזנטיון והסאסאנים — <strong>ולכן הסריקה חייבת להיות איטית ורציפה</strong>, בלי קפיצות. זה קטע שכדאי לייצר כמה פעמים ולבחור.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>The camera has reached the crest and stops walking. It now stands still and pans very slowly and smoothly from left to right across the entire horizon, one single continuous unbroken pan, gentle and even, like someone slowly turning their head to take in the whole world.
+
+Below and far away in every direction: immense layered desert ridges in ochre and rust fading into pale distance haze, dry riverbeds, and at the very edges of visibility the faintest suggestion of distant settled land — greener, flatter, unreachable.
+
+Nothing in the foreground. No people. Late afternoon, low sun, enormous scale, deep atmospheric perspective.
+
+Audio: steady high wind across an exposed ridge. Nothing else. Ambient only.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>fast pan, whip pan, jerky movement, camera walking, foreground objects, people, buildings in foreground</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">CV 2 — נוסע פרסי ליד מדורה</span></div>
+  <div class="set"><span class="s"><b>First frame</b> פריים מסוף W6</span><span class="s"><b>8s</b></span></div>
+  <div class="why">שיחה = מצלמה נייחת. שימי לב שהוא <strong>לא מדבר בקול</strong> — הטקסט שלו נכנס אצלי.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view. The camera is completely static and does not move, pan, zoom or sway at all — the traveller has sat down.
+
+A traveller from the north sits across a small fire a few metres ahead, facing the camera. His clothing is different from the desert robes seen so far: a fitted long coat over trousers, a soft cap, richer dyed cloth, a patterned sash. He warms his hands, looks up, and speaks calmly — his mouth moves but no words are heard. He gestures once with two open palms held apart, as if weighing two things against each other, then lowers them.
+
+Behind him, dusk over the ridge, a tethered mule, a rolled travelling pack. The fire lights his face from below.
+
+Photorealistic, cinematic, natural understated performance, high detail.
+
+Audio: fire crackling, wind, distant animal. No voice, no words.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>camera movement, panning, zooming, character walking toward camera, character leaving frame</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a4"><span class="n">מערכה רביעית</span>הגבול והסחורות</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag ing">Ingredients</span><span class="name">W 7 — תחנת הגבול</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> <code>W1-start.jpg</code> + פריים מ־W2</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="why">מקום חדש → Ingredients, כדי שהחומרים והאור יישארו של אותו עולם.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Match the architecture, materials, colour palette and warm light of the reference images — the same mud-brick and stone world, the same dusty golden light.
+
+First-person point of view at human eye height, walking steadily forward with a subtle handheld sway, continuous forward motion.
+
+A busy frontier way-station on the caravan road: a low mud-brick and stone compound with a plain rectangular gateway of heavy timber posts, no arch. Cloth pennants on poles snapping in the wind. A queue of laden camels waiting. Rope-bound crates, stacked sacks and sealed clay amphorae piled by the road. A large wooden balance scale on a stone base where an official weighs goods while a scribe marks a wax tablet. Guards leaning on staffs, watching without hostility. Water troughs, fodder, a well.
+
+Hard mid-morning light, sharp shadows, dust hanging at knee height from the animals.
+
+Photorealistic, cinematic, high detail, busy but orderly.
+
+Audio: camel grunts, crowd murmur without distinct words, wooden creaking, ropes, wind, a bell. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">CV 3 — סוחר ליד הארגזים</span></div>
+  <div class="set"><span class="s"><b>First frame</b> פריים מסוף W7</span><span class="s"><b>8s</b></span></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view. The camera is completely static — no movement, no pan, no sway.
+
+A merchant stands a few metres ahead beside stacked rope-bound crates, facing the camera. He lifts the corner of a cloth covering one crate to show folded bolts of fine cloth beneath, then lets it fall. He opens a small linen pouch and tips a little of its contents into his palm — dried spice, dark and fragrant — holds it out toward the camera briefly, then closes his hand. His mouth moves as he talks but no words are heard.
+
+Behind him the busy way-station continues: camels, sacks, the balance scale, drifting dust. Hard bright daylight.
+
+Photorealistic, cinematic, natural performance, high detail.
+
+Audio: crowd murmur, camels, cloth and rope. No voice, no words.</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a5"><span class="n">מערכה חמישית</span>ית׳רב</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag ing">Ingredients</span><span class="name">W 8 — הכניסה לית׳רב</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> פריים מ־W7</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="why">השינוי הוויזואלי החד בפרק — אחרי המדבר, פתאום ירוק ומים. <strong>אל תרככי אותו.</strong> הוא אמור להרגיש כמו לנשום.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Keep the same photographic style, materials and camera behaviour as the reference, but the landscape changes completely.
+
+First-person point of view at human eye height, walking steadily forward with a subtle handheld sway, continuous forward motion.
+
+The dry track descends into a thriving oasis settlement. Dense date palms close overhead and throw dappled shade across the path. Irrigation channels of running water beside the track, small green plots of barley and vegetables, fig trees. Mud-brick houses with palm-trunk beams, low stone walls, a stone well with women drawing water. The air is visibly cooler and moister — the dust is gone.
+
+Late afternoon, low golden light broken into patches by the palm fronds.
+
+Photorealistic, cinematic, high detail, lush after emptiness.
+
+Audio: running water, palm fronds rustling, birds, distant voices without distinct words, a bucket on stone. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 9 — השוק של ית׳רב</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W8</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="why">כאן העולם צריך להיות הכי חי בפרק. <strong>שני סוגי אנשים באותו מרחב</strong> — זה מה שמלמד את §13 בלי מילה.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward at the same pace and eye height into the settlement's market lane.
+
+Ground-cloths and low wooden stalls under palm shade: dates in woven trays, grain, folded cloth, clay lamps, rope, dried figs. Traders and buyers mixed together, some in plain desert robes and headcloths, others in longer draped garments with fringed hems and small caps — visibly different dress, clearly the same street and the same daily life, dealing with each other easily. Two men clasp hands over a completed sale. A man sits in the shade of a wall reciting to a small group who listen, one of them beating time softly on his knee. Children run past. A donkey with panniers.
+
+Late afternoon, dappled golden light, dust motes in the light shafts.
+
+Photorealistic, cinematic, high detail, warm and busy. Everyone keeps clear of the stalls and of each other.
+
+Audio: market murmur without distinct words, dates and grain poured, footsteps, palm fronds, a donkey. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">CV 4 + CV 5 — הסוחר והחכם</span></div>
+  <div class="set"><span class="s"><b>First frame</b> פריים מסוף W9</span><span class="s"><b>8s</b></span><span class="s"><b>לייצר פעמיים בנפרד</b></span></div>
+  <div class="why">שתי שיחות שונות באותו מקום. תריצי את הפרומפט פעמיים עם שינוי הדמות — הסוחר, ואז החכם.</div>
+  <div class="lab">פרומפט · הסוחר</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view. The camera is completely static — no movement, no pan, no sway.
+
+A trader stands a few metres ahead behind his ground-cloth of dates and folded cloth, facing the camera. He is dressed in a long draped garment with a fringed hem and a small soft cap. He gestures easily around at the market and at his neighbours, then places a hand briefly on his own chest. His mouth moves as he talks but no words are heard.
+
+Behind him the market continues under palm shade — other traders, buyers, running children. Late afternoon dappled light.
+
+Photorealistic, cinematic, natural warm performance, high detail.
+
+Audio: market murmur, palm fronds, footsteps. No voice, no words.</pre></div>
+  <div class="lab">פרומפט · החכם</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view. The camera is completely static — no movement, no pan, no sway.
+
+An elderly scholar sits a few metres ahead in the shade of a mud-brick wall, facing the camera, an open scroll weighted on his knees. He is dressed in a long draped garment with a fringed shawl over his shoulders. He looks up from the scroll, speaks quietly, and lifts one hand with the palm turned upward and slightly outward — the gesture of someone describing something still to come. Then he lowers it and looks back down. His mouth moves but no words are heard.
+
+Behind him, the quieter edge of the market. Low golden light.
+
+Photorealistic, cinematic, restrained and dignified performance, high detail.
+
+Audio: distant market murmur, palm fronds, wind. No voice, no words.</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a6"><span class="n">מערכה שישית</span>הנזירים</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag ing">Ingredients</span><span class="name">W 10 — הדרך אל המנזר</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> פריים מ־W8</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="why">הקטע היחיד שבו <strong>הסאונד הוא השיעור</strong>. אם הרעש לא נחלש בהדרגה — תייצרי שוב. זה מה שמלמד פרישות לפני שנאמרת המילה.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Keep the same photographic style and camera behaviour as the reference.
+
+First-person point of view at human eye height, walking steadily forward with a subtle handheld sway, continuous forward motion.
+
+The path leaves the settled valley and climbs a bare limestone slope. The greenery thins and disappears. Fewer and fewer people — first a couple walking down, then a single figure far ahead, then nobody at all. Terraced dry-stone walls, a rough cut-stone stair worn hollow by feet, a plain wooden cross fixed on a rock beside the path. High above, a small stone building on a shoulder of the cliff.
+
+Cool late light, long blue shadows on pale stone, very still air.
+
+Photorealistic, cinematic, high detail, austere and quiet.
+
+Audio: this is the most important part of the shot. Begin with the faint murmur of the valley below and steadily fade it away as the climb continues, until almost nothing remains but wind and footsteps on stone. End in near silence.</pre></div>
+  <div class="lab">תוספת לשלייי</div>
+  <div class="box"><button class="copy">העתק</button><pre>crowds, market sounds at the end, busy street, domes, bell towers, ornate church architecture, stained glass</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 11 — בתוך המנזר</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W10</span><span class="s"><b>8s</b></span></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward, now entering a small austere stone hermitage through a plain rectangular doorway with a timber lintel — no arch.
+
+A bare stone courtyard. One monk in an undyed rough wool habit tends a tiny walled vegetable plot, drawing water from a jar. Another sits alone against a wall, completely still, eyes lowered. A third sets a bowl of food and a folded cloth down beside the gate for whoever comes. A plain wooden cross on the wall. A single oil lamp burning in a niche. Rolled scrolls on a stone shelf. Nothing decorated, nothing gilded, nothing carved.
+
+Cool low light, long shadows, dust motes.
+
+Photorealistic, cinematic, high detail, poor and orderly and calm.
+
+Audio: wind, water poured, a scuff of sandal on stone. Near silence otherwise. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">CV 6 — הנזיר</span></div>
+  <div class="set"><span class="s"><b>First frame</b> פריים מסוף W11</span><span class="s"><b>8s</b></span></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view. The camera is completely static — no movement, no pan, no sway.
+
+A monk in an undyed rough wool habit stands a few metres ahead in the stone courtyard, facing the camera, hands loosely clasped. He is thin and weathered. He speaks quietly and briefly, then turns his head to glance toward the bowl of food left beside the gate, then back. His mouth moves but no words are heard. He does not approach the camera.
+
+Behind him the bare courtyard, the plain cross, the lamp in the niche. Cool low light.
+
+Photorealistic, cinematic, restrained and humble performance, high detail.
+
+Audio: wind, distant birds. Near silence. No voice, no words.</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a7"><span class="n">מערכה שביעית</span>אברהה</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 12 — אבק באופק</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W11</span><span class="s"><b>8s</b></span></div>
+  <div class="why">הרגע שבו הטון של הפרק משתנה. הסאונד עולה מהשקט של המנזר.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward, now back out of the hermitage and along the shoulder of the ridge, looking out over a vast plain far below.
+
+On the distant horizon a wall of ochre dust is rising — enormous, slow, spanning the whole width of the plain, unlike any natural weather. Beneath it, too far to resolve, a dark mass moves. Everything else is still.
+
+The light dims slightly as the dust begins to catch the sun. Long shadows.
+
+Photorealistic, cinematic, high detail, ominous but quiet.
+
+Audio: the near silence of the monastery gives way to a low rising rumble carried on the wind, felt more than heard. Wind. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag cin">Ingredients</span><span class="name">CIN 3 — הצבא והפילים</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> פריים מסוף W12</span><span class="s"><b>8s ×3</b></span><span class="s"><b>לייצר 3 פעמים</b></span></div>
+  <div class="why">אחד הקטעים הכי קשים למודל — פילים בסביבה מדברית נוטים לצאת מעוותים. <strong>תייצרי כמה פעמים ותבחרי.</strong></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Match the light, palette and photographic style of the reference exactly.
+
+A distant elevated vantage looking down over a wide desert plain. A large army is advancing across it in a long column, raising an enormous dust cloud behind them. Ranks of foot soldiers with spears and oval shields, mounted riders, baggage animals. At the head of the column walk war elephants draped in heavy cloth trappings, enormous beside the men, moving slowly and steadily.
+
+The camera drifts very slowly forward and slightly downward, observing. It does not descend into the army and does not follow any individual.
+
+Late afternoon, heavy dust, the sun a pale disc through it, everything ochre and desaturated.
+
+Photorealistic, cinematic, epic scale, high detail. Anatomically correct elephants with natural proportions and natural gait.
+
+Audio: a deep distant rumble of thousands of feet, dust wind, a low animal call. No music. Ambient only.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>deformed elephants, extra limbs, malformed animals, fantasy creatures, armour anachronism, plate armour, medieval European knights, guns, cannons, battle, fighting, blood, war cries</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag cin">Ingredients</span><span class="name">CIN 4 — הציפורים</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> פריים מ־CIN3</span><span class="s"><b>8s ×3</b></span><span class="s"><b>לייצר 3 פעמים</b></span></div>
+  <div class="why">הרגע המכונן של הסיפור. שימי לב — <strong>לא רואים פגיעה ולא רואים מוות.</strong> רואים את הלהקה, את האבנים באוויר, ואת הטור נעצר.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Match the light, palette and photographic style of the reference.
+
+The same dusty plain, closer now, the head of the army approaching a gap between low rocky hills. Above them the sky darkens — not with cloud but with an immense flock of small birds arriving from the horizon, thousands of them, moving as one dense shifting mass. Each bird carries a small baked clay pebble.
+
+The flock passes low over the column. Small stones fall through the dust in streaks. The advancing column falters and stops; the dust cloud behind it thins and settles. The camera holds still and watches from a distance.
+
+No injury is shown, no bodies, no blood, no impact on any person or animal — only the birds, the falling stones, the stopped column and the settling dust.
+
+Late afternoon, heavy ochre dust, low sun. Photorealistic, cinematic, awe rather than horror.
+
+Audio: an overwhelming rush of thousands of wings, rising and then passing; wind; then a strange settling quiet. No music. Ambient only.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>gore, blood, injury, bodies, death, violence, screaming, deformed elephants, fantasy creatures, meteors, fire from the sky, explosions</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a8"><span class="n">מערכה שמינית</span>הדרך חזרה</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag ing">Ingredients</span><span class="name">W 14 — מחנה הלילה</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> פריים מ־W4</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="why">הרגע השקט היחיד בפרק, ובכוונה מיד אחרי אברהה. <strong>שינוי תאורה חד</strong> — לילה אמיתי, לא דמדומים.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Keep the same desert world and materials as the reference, but now it is deep night.
+
+First-person point of view at human eye height, walking slowly forward with a subtle handheld sway, into a caravan camp pitched for the night.
+
+Low black goat-hair tents, camels couched and chewing, bundles and saddles stacked. A single fire burns in a shallow pit, and figures sit around it wrapped in cloaks, hands to the warmth. Beyond the firelight there is nothing but darkness and an immense field of stars, the milky way clearly visible across the whole sky. A crescent moon low on the horizon.
+
+Only the fire is warm; everything outside its circle is cold blue and silver. Very high contrast between firelight and starlight.
+
+Photorealistic, cinematic, high detail, intimate and vast at once.
+
+Audio: fire crackling, a camel shifting, soft wind, a very distant animal call. Deep quiet. Ambient only.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>daylight, dusk, sunset, bright sky, torches everywhere, lanterns, artificial light, campfire too large, flat lighting</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 15 — שחר, חזרה למכה</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W14</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="why">סוגר מעגל עם CIN 1 — <strong>אותו עמק, מכיוון הפוך ובשעה אחרת.</strong></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward, but the night has passed and it is now first light. The stars are gone and the eastern sky is pale gold; the land is still cool and blue in the shadows.
+
+The camera walks up the last rise of a stony road. As it crests, the valley opens ahead and below: the mud-brick town, and at its centre the plain stone cube draped in dark cloth. Thin threads of morning cooking smoke rise from the rooftops. The town is small and quiet from here.
+
+The camera keeps walking forward toward it, descending.
+
+Photorealistic, cinematic, high detail, cool dawn light warming.
+
+Audio: footsteps on stone, dawn wind, the first birds, a very faint distant call from the town. Ambient only.</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a9"><span class="n">מערכה תשיעית</span>מכה — ביקור שני</h2>
+
+<div class="note w">
+  <h4>המערכה הזאת חייבת להיראות מוכרת</h4>
+  <p>W 16 ו־W 17 הם <strong>אותו מסלול בדיוק</strong> של W 1 ו־W 2, בשעה אחרת ביום. אותם כדים, אותם סוככים, אותו חבל על הקיר.</p>
+  <p>לכן ב־Ingredients שלהם <strong>חייבים להעלות את הפריימים של W 1 ו־W 2 עצמם.</strong> אם הסמטה תיראה אחרת — כל הפואנטה של הפרק נופלת.</p>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ing">Ingredients</span><span class="name">W 16 — אותה סמטה, אור אחר</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> <code>W1-start.jpg</code> + <code>W1-end.jpg</code></span><span class="s"><b>8s ×2</b></span><span class="s"><b>לייצר 3 פעמים</b></span></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Recreate the exact same alley as the reference images — the same mud-brick walls, the same linen awnings overhead, the same clay jars and woven baskets, the same coiled rope on the wall, the same doorways, the same layout and proportions. This must be recognisably the identical street.
+
+Change one thing only: the time of day. It is now early morning instead of late golden hour. The light comes from the opposite side, the shadows fall the other way, the air is cool and clear rather than hot and dusty. The awnings hang still in the calm morning air.
+
+First-person point of view at human eye height, walking steadily forward down the middle of the same street with a subtle handheld sway, continuous forward motion toward the opening at the far end.
+
+A few townspeople beginning the day: a woman sweeping a doorstep, a man carrying a water jar, a boy driving two goats. Fewer people than before, unhurried.
+
+Photorealistic, cinematic, high detail.
+
+Audio: footsteps, a broom on packed earth, goats, a distant call, morning birds. Ambient only.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>different street, different architecture, different layout, new buildings, rearranged objects, missing awnings, night, midday harsh sun</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 17 — האנצאב, הפעם עוצרים</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W16</span><span class="s"><b>8s</b></span></div>
+  <div class="why">ב־W 2 עברנו לידם בלי לעצור. <strong>עכשיו המצלמה מתקרבת ונעצרת מולם</strong> — וזה „אותו מקום, עיניים אחרות“ ברמת האובייקט הבודד.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward into the plaza, but this time turn toward the row of standing stones at its edge, approach them closely, and come to a complete stop facing them. The camera settles and holds still.
+
+Four or five rough upright standing stones and betyls, one to two metres tall, plain undressed slabs of dark and pale rock, a few with a simple schematic incised face of two eyes and a line for a nose. Poured anointing oil has run down them in dark glossy streaks. At their bases, small clay bowls of grain, bundles of incense smoking thinly, cloth-wrapped offerings, and a scatter of thin wooden arrow shafts. A man stands beside one with his head lowered.
+
+Early morning light, long soft shadows.
+
+Photorealistic, cinematic, high detail, unsettling and ordinary at the same time.
+
+Audio: footsteps slowing and stopping, incense-quiet, morning wind, distant plaza murmur. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">IN 1 — הטלת חץ הגורל</span></div>
+  <div class="set"><span class="s"><b>First frame</b> פריים מסוף W17</span><span class="s"><b>8s</b></span></div>
+  <div class="why">האינטראקציה היחידה בפרק. <strong>הידיים בפריים</strong> — כמו בשוט האבן השחורה. אין תשובה נכונה, ולכן הקטע חייב להיגמר בלי שום סימן של הצלחה או כישלון.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view. The camera is static at eye height, looking down slightly at the ground before the standing stones.
+
+The traveller's own weathered hands enter the bottom of the frame from below, the frayed cuffs of a plain sand-coloured linen sleeve visible. The hands hold three plain thin wooden arrow shafts without heads or fletching. They lift them, then let them fall onto the packed earth in front of the stones. The shafts scatter and come to rest at angles.
+
+An older man crouches into frame from the side and studies how they have fallen, turning his head, but gives no reaction of joy or alarm — simply reads them.
+
+Early morning light, long shadows across the sand, incense smoke drifting.
+
+Photorealistic, cinematic, high detail, hands realistic with correct anatomy and five fingers.
+
+Audio: wooden shafts clattering on packed earth, incense-quiet, morning wind. No voice, no words.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>deformed hands, extra fingers, missing fingers, arrowheads, feathers, bow, weapon, celebration, cheering, disappointment, dramatic reaction</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 18 — אל הכעבה וההקפה</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W17</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward, leaving the standing stones and crossing the plaza toward the plain stone cube draped in heavy dark charcoal cloth.
+
+People in undyed linen robes walk slowly around it in a circle, unhurried, some with a hand raised toward it. The camera joins the outer edge of that slow circle and moves with it around the corner of the cube, coming close to the stonework.
+
+Set into the corner at chest height is a dark, almost black stone, worn glossy smooth by centuries of touching, held in the plain masonry — no gold, no silver frame, no ornament of any kind. An elderly man reaches out and touches it, then steps aside; others wait behind him.
+
+Early morning light raking across the stone, the heavy dark cloth stirring above.
+
+Photorealistic, cinematic, high detail.
+
+Audio: many soft footsteps on sand, cloth in wind, a low collective murmur without distinct words. Ambient only.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>gold frame, silver frame, ornate metalwork, calligraphy on the cloth, embroidery, modern crowd, modern clothing</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2 id="a10"><span class="n">מערכה עשירית</span>הטרנספורמציה והסיום</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 19 — עלייה לנקודת התצפית מעל מכה</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W18</span><span class="s"><b>8s ×2</b></span></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking, leaving the plaza and climbing a rocky slope at the edge of the town, at the same eye height with the same subtle sway.
+
+As the climb continues the whole town opens out below — the packed mud-brick roofs, the lanes, the open plaza, and at its centre the dark cloth-draped cube with the slow circle of people still moving around it. Threads of cooking smoke. The bare mountains ringing the valley beyond.
+
+The camera reaches a shoulder of rock, slows, and comes to rest looking down over the whole town.
+
+Morning light, clear air, long shadows.
+
+Photorealistic, cinematic, high detail, a sense of arrival and overview.
+
+Audio: footsteps on loose stone slowing to a stop, wind, the town's murmur rising faintly from below. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag cin">Frames to Video</span><span class="name">CIN 5 — הטרנספורמציה</span></div>
+  <div class="set"><span class="s"><b>First frame</b> פריים מסוף W19</span><span class="s"><b>8s ×5</b></span><span class="s"><b>הכי קשה בפרק</b></span></div>
+  <div class="why">רגע השיא. זה הקטע שהכי סביר שיצא לא נכון — <strong>תייצרי אותו הרבה פעמים.</strong> ואם המודל לא מצליח להעלים את האלילים בצורה נקייה, תגידי לי: אני יכול לעשות את ההיעלמות אצלי בעריכה על גבי קטע יציב.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>The camera is completely static, looking down from the ridge over the town, with the dark cloth-draped stone cube at the centre of the plaza below.
+
+Everything gradually stills. The moving people fade softly away until the plaza is empty. Then, one by one, the standing idol stones at the edges of the plaza dissolve quietly into nothing — not exploding, not falling, simply thinning away like dust taken by wind, each a few seconds after the last.
+
+When they are all gone, the plain stone cube remains, alone in the empty plaza, unchanged and untouched.
+
+The light shifts imperceptibly warmer as this happens. No other movement.
+
+Photorealistic, cinematic, restrained, contemplative. Slow and quiet, not dramatic.
+
+Audio: the town's murmur fades to nothing. Only wind remains. No music, no voice.</pre></div>
+  <div class="lab">תוספת לשלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>explosion, fire, destruction, collapse, lightning, magic sparkles, glowing effects, particle effects, dramatic music, camera movement, zoom, people remaining</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag cin">Extend</span><span class="name">CIN 6 — המצלמה עולה אל המפה</span></div>
+  <div class="set"><span class="s"><b>Extend</b> CIN5</span><span class="s"><b>8s</b></span></div>
+  <div class="why">המעבר למפה עצמה נעשה אצלי בעריכה. מ־Flow אני צריך רק את <strong>ההתרוממות</strong>, שתיגמר גבוה מספיק כדי שאוכל להמיס אותה לתוך המפה.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>The camera begins to rise slowly and steadily straight upward from the ridge, pulling back and up away from the town, the plaza and the dark cube growing smaller below.
+
+It keeps rising until the whole valley is visible, then the ranges beyond it, then the desert stretching away in every direction to a hazy horizon. The rise is smooth, continuous and unhurried, and does not stop.
+
+The image becomes progressively flatter, hazier and more abstract as height increases — like a landscape becoming a drawing.
+
+Photorealistic becoming atmospheric, cinematic, high detail, contemplative.
+
+Audio: wind thinning into near silence as the camera rises. No music, no voice.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag cin">Ingredients</span><span class="name">CIN 7 — הסגירה בשקיעה</span></div>
+  <div class="set"><span class="s"><b>Ingredients</b> <code>CIN1-start.jpg</code></span><span class="s"><b>8s</b></span></div>
+  <div class="why">הפריים האחרון של הפרק, ומראה־ראי של CIN 1 — <strong>אותו עמק, סוף היום במקום תחילתו.</strong> על גביו נכנס „ומי יוביל את השינוי?“</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Match the valley, the town and the composition of the reference image exactly — the same place from the same high vantage.
+
+Change the time: it is now late sunset, almost dusk. The sun has just gone behind the mountains, the sky is deep orange fading to violet at the top, and the valley is in cool shadow. Lamps and small fires are beginning to appear one by one among the mud-brick houses below. The dark cloth-draped cube at the centre of the plaza is the darkest thing in the valley.
+
+The camera holds almost still, drifting very slightly and slowly downward toward the town.
+
+Photorealistic, cinematic, high detail, quiet and final.
+
+Audio: evening wind, very distant town sounds settling, one dog barking far away. No music, no voice.</pre></div>
+</div>
+
+
+<h2>סדר הריצה</h2>
+<p>המערכות רצות לפי הסדר, אבל <strong>בתוך כל מערכה את חופשייה</strong> — Extend ממשיך מהקטע הקודם, אז מערכה שלמה היא רצף אחד שאת מריצה בלי לעצור.</p>
+<ul>
+  <li><strong>מערכה ג׳</strong> · W6 → ST5/6 → CV2 — הכל Extend מ־W5</li>
+  <li><strong>מערכה ד׳</strong> · W7 (Ingredients) → CV3</li>
+  <li><strong>מערכה ה׳</strong> · W8 (Ingredients) → W9 → CV4 → CV5</li>
+  <li><strong>מערכה ו׳</strong> · W10 (Ingredients) → W11 → CV6</li>
+  <li><strong>מערכה ז׳</strong> · W12 → CIN3 → CIN4</li>
+  <li><strong>מערכה ח׳</strong> · W14 (Ingredients) → W15</li>
+  <li><strong>מערכה ט׳</strong> · W16 (Ingredients) → W17 → IN1 → W18</li>
+  <li><strong>מערכה י׳</strong> · W19 → CIN5 → CIN6 → CIN7</li>
+</ul>
+<p class="small">אחרי כל מערכה תשלחי לי את הקבצים ואני בודק, מקודד ומרכיב. אין צורך לחכות לי בין קטעים בתוך מערכה.</p>
+
+<div class="note">
+  <h4>איפה לשמור</h4>
+  <p><code>concept/chapter1/film/</code> · שם לכל קטע: <code>W6.mp4</code>, <code>ST5-6.mp4</code>, <code>CV2.mp4</code>, <code>CIN3.mp4</code> וכן הלאה. אם יש כמה גרסאות שאת מתלבטת ביניהן — <code>CIN5-a.mp4</code>, <code>CIN5-b.mp4</code>, ואני אעזור לבחור.</p>
+</div>
+
+<footer>
+  Veo 3.1 Quality · 16:9 · 8s + Extend · אודיו מופעל, דיבור חסום · 19.8.2026
+</footer>
+
+</div>
+
+<script>
+for (const b of document.querySelectorAll('.copy')){
+  b.addEventListener('click', async () => {
+    const t = b.parentElement.querySelector('pre').textContent
+    try { await navigator.clipboard.writeText(t) }
+    catch { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a)
+            a.select(); document.execCommand('copy'); a.remove() }
+    const o = b.textContent; b.textContent = 'הועתק'; b.classList.add('done')
+    setTimeout(() => { b.textContent = o; b.classList.remove('done') }, 1600)
+  })
+}
+</script>
+</body>
+</html>

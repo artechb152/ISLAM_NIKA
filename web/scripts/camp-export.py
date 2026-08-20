@@ -16,7 +16,12 @@ import os
 from mathutils import Quaternion, Vector
 
 WEB = os.environ["CH1_WEB"]
-LAYOUT = os.path.join(WEB, "src", "lib", "chapter1", "camp-layout.json")
+# איזה אזור עורכים. camp.mjs מעביר את זה; ברירת המחדל היא המחנה,
+# כך שכל קריאה ישנה לסקריפט ממשיכה לעבוד בדיוק כמו קודם.
+LAYOUT = os.environ.get(
+    "CH1_LAYOUT",
+    os.path.join(WEB, "src", "lib", "chapter1", "camp-layout.json"),
+)
 MODELS = os.path.join(WEB, "public", "assets", "chapter1", "models")
 OUT = os.environ["CH1_BLEND"]
 

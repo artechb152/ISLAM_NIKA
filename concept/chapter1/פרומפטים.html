@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>גיליון הפרומפטים</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8E%9E%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f7f2e8;--paper-2:#efe8da;--code:#1d1a15;--code-ink:#e8ddc8;
+  --ink:#241d16;--ink-2:#5b5044;--ink-3:#8b7f70;
+  --rule:#ded3c0;--gold:#a8762a;--cool:#3f6d8c;--warn:#9c4a2f;--ok:#2f6b52;
+  --serif:'Frank Ruhl Libre','David Libre',serif;--sans:'Heebo',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#15120e;--paper-2:#1d1913;--code:#0d0b08;--code-ink:#e8ddc8;
+  --ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--ok:#6dbf9a}}
+:root[data-theme="dark"]{
+  --paper:#15120e;--paper-2:#1d1913;--code:#0d0b08;--code-ink:#e8ddc8;
+  --ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;--ok:#6dbf9a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.72;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:clamp(26px,5vw,60px) clamp(16px,4vw,40px) 100px}
+header{border-bottom:1px solid var(--rule);padding-bottom:28px;margin-bottom:32px}
+.kick{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.32em;
+  color:var(--gold);margin-bottom:13px}
+h1{font-weight:300;font-size:clamp(1.9rem,1.3rem + 3vw,3rem);line-height:1.14;margin-bottom:13px}
+.lede{font-weight:300;font-size:clamp(1rem,.96rem + .4vw,1.16rem);color:var(--ink-2);max-width:62ch}
+h2{font-weight:400;font-size:clamp(1.2rem,1.05rem + .8vw,1.55rem);margin:44px 0 12px;
+  padding-top:26px;border-top:1px solid var(--rule)}
+p{max-width:66ch;margin-bottom:12px;font-weight:300}
+p.small{font-size:.92rem;color:var(--ink-2)}
+strong{font-weight:500}
+em{font-style:normal;color:var(--gold);font-weight:400}
+ul,ol{margin:0 0 14px;padding-inline-start:20px;max-width:66ch}
+li{margin-bottom:7px;font-weight:300}
+code{font-family:ui-monospace,'Cascadia Mono',monospace;font-size:.84em;
+  background:var(--paper-2);padding:1px 6px;border-radius:3px;
+  direction:ltr;unicode-bidi:isolate;display:inline-block}
+a{color:var(--gold)}
+
+.gen{border:1px solid var(--rule);border-radius:5px;margin:20px 0;overflow:hidden;
+  background:var(--paper-2)}
+.gen > .top{display:flex;flex-wrap:wrap;align-items:baseline;gap:11px;padding:15px 18px 0}
+.tag{font-family:var(--sans);font-weight:700;font-size:.68rem;letter-spacing:.12em;
+  color:var(--paper);background:var(--ok);padding:3px 10px;border-radius:3px}
+.tag.img{background:var(--cool)}
+.tag.ext{background:var(--gold)}
+.name{font-weight:400;font-size:1.05rem}
+.gen .set{padding:11px 18px 0;display:flex;flex-wrap:wrap;gap:7px}
+.s{font-family:var(--sans);font-weight:300;font-size:.7rem;padding:4px 10px;
+  border:1px solid var(--rule);border-radius:3px;color:var(--ink-2);background:var(--paper);
+  direction:ltr;unicode-bidi:isolate}
+.s b{font-weight:600;color:var(--ink)}
+.s.he{direction:rtl}
+.gen .why{padding:11px 18px 0;font-size:.9rem;color:var(--ink-2);font-weight:300;max-width:64ch}
+.lab{font-family:var(--sans);font-weight:500;font-size:.6rem;letter-spacing:.2em;
+  color:var(--ink-3);margin:14px 18px -6px}
+.box{position:relative;margin:9px 18px 16px;background:var(--code);border-radius:4px}
+.box pre{margin:0;padding:16px 18px;color:var(--code-ink);
+  font-family:ui-monospace,'Cascadia Mono',monospace;font-size:.78rem;line-height:1.62;
+  white-space:pre-wrap;word-break:break-word;direction:ltr;text-align:left}
+.copy{position:absolute;top:9px;left:9px;font-family:var(--sans);font-weight:400;
+  font-size:.64rem;letter-spacing:.12em;color:var(--code-ink);
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.2s}
+.copy:hover{background:rgba(255,255,255,.18)}
+.copy.done{color:#8fe0b4;border-color:#8fe0b4}
+
+.note{border-inline-start:3px solid var(--cool);background:var(--paper-2);
+  padding:15px 18px;margin:20px 0;border-radius:0 3px 3px 0}
+.note.w{border-color:var(--warn)} .note.g{border-color:var(--ok)}
+.note h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--cool);margin-bottom:9px}
+.note.w h4{color:var(--warn)} .note.g h4{color:var(--ok)}
+.note p{font-size:.95rem;margin:0 0 8px;max-width:none}
+.note p:last-child{margin-bottom:0}
+.scroller{overflow-x:auto;margin:16px 0;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.85rem;
+  font-weight:300;min-width:460px}
+th{background:var(--paper-2);font-weight:500;font-size:.66rem;letter-spacing:.14em;
+  color:var(--ink-2);text-align:right;padding:10px 13px;white-space:nowrap}
+td{padding:9px 13px;border-top:1px solid var(--rule)}
+td.ok{color:var(--ok);font-weight:500} td.no{color:var(--warn);font-weight:500}
+footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kick">פרק 1 · הפקה · Google Flow</div>
+  <h1>גיליון הפרומפטים</h1>
+  <p class="lede">משוכתב ל־Flow ול־Veo 3.1. כל כרטיס הוא ייצור אחד: המצב והקבצים למעלה, הפרומפט למטה עם כפתור העתקה, ומתחתיו הפרומפט השלילי בנפרד.</p>
+</header>
+
+<div class="note g">
+  <h4>שלושה הבדלים מ־Magnific — ושניים מהם לטובתנו</h4>
+  <p><strong>Frames to Video תומך בפריים ראשון וגם אחרון.</strong> בדיוק מה שתכננו — נשמר במלואו.</p>
+  <p><strong>Extend מחליף את השרשור הידני.</strong> במקום לשלוף פריים אחרון ולהעלות אותו מחדש, Flow ממשיך את הקליפ מעצמו. <em>זה טוב יותר</em> — אין אובדן איכות בדרך, ואת לא צריכה לחכות לי בין קטעים.</p>
+  <p><strong>אבל כל ייצור הוא 8 שניות.</strong> לא 12 ולא 14. לכן הקטעים הארוכים נבנים כ־8 שניות ואז Extend.</p>
+</div>
+
+<div class="note w">
+  <h4>המלכודת הגדולה של Veo — קראי את זה לפני שאת מריצה</h4>
+  <p><strong>Veo מייצר דיבור מעצמו.</strong> ברגע שיש אדם בפריים הוא ימציא לו שורות, בדרך כלל באנגלית. אצלנו כל הדיאלוג הוא טקסט עברי שנכנס מעל הווידאו — ודיבור מומצא ברקע יהרוס הכל.</p>
+  <p>לכן בכל פרומפט יש שורת <code>Audio:</code> שמבקשת <strong>אמביאנס בלבד</strong>, ובפרומפט השלילי כתוב <code>dialogue, speech, voices, narration</code>. אל תמחקי אותן.</p>
+</div>
+
+<h2>הגדרות קבועות</h2>
+<div class="scroller">
+<table>
+  <thead><tr><th>שדה</th><th>ערך</th><th>הערה</th></tr></thead>
+  <tbody>
+    <tr><td>מודל</td><td><code>Veo 3.1</code></td><td>איכות, לא Fast — אנחנו מייצרים פעם אחת ומשתמשים לנצח</td></tr>
+    <tr><td>יחס</td><td><code>16:9</code></td><td>—</td></tr>
+    <tr><td>אורך</td><td><code>8s</code></td><td>קבוע. אורך נוסף דרך Extend</td></tr>
+    <tr><td>אודיו</td><td class="ok">מופעל</td><td>נותן רוח, צעדים ורחש שוק בחינם</td></tr>
+    <tr><td>דיבור</td><td class="no">חסום בפרומפט</td><td>ראי האזהרה למעלה</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <h4>בדיקה לפני שממשיכים לכרטיס הבא</h4>
+  <p>ב־Flow כל ייצור מייצר כמה אפשרויות — <strong>תבחרי, אל תתפשרי.</strong> חמישה דברים לפסול עליהם:</p>
+  <p><strong>אנשים שנכנסים לתוך חפצים</strong> · <strong>קירות שנמסים</strong> תוך כדי תנועה · <strong>מצלמה שסוחפת</strong> לצדדים במקום ללכת ישר · <strong>כיפות, קשתות או צריחים</strong> · <strong>קול של מישהו מדבר</strong>.</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>מערכה אפס · פתיחה</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">CIN 1 — ירידה אל עמק מכה</span></div>
+  <div class="set">
+    <span class="s"><b>First frame</b> CIN1-start.jpg</span><span class="s"><b>Last frame</b> —</span>
+    <span class="s"><b>8s</b></span>
+  </div>
+  <div class="why">הקטע הקולנועי היחיד שאינו גוף ראשון. אין פריים אחרון — הוא נגמר גבוה מעל העיר, ובינו לבין W 1 יש חיתוך מכוון.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Aerial establishing shot descending slowly and steadily into a wide desert valley ringed by bare rocky reddish mountains. The camera glides downward and gently forward the entire time, never stopping and never rising.
+
+In the valley floor sits a dense town of flat-roofed sun-dried mud-brick houses. At its centre, in an open sandy plaza, stands a single plain stone cube draped in heavy dark charcoal cloth, with tiny robed figures moving slowly in a circle around it. Thin threads of cooking smoke rise from the rooftops and bend in the wind. Clusters of date palms. Caravan tracks running out of the valley into the open desert.
+
+Arabian Peninsula, 6th century CE, before Islam. Late golden hour, low warm sun, long shadows, drifting dust haze.
+
+Photorealistic, cinematic, shallow atmospheric depth, high detail, filmic colour.
+
+Audio: low desert wind, faint distant murmur of a town, a single distant bird. Ambient only.</pre></div>
+  <div class="lab">פרומפט שלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>dialogue, speech, voices, narration, singing, music, text, titles, subtitles, captions, watermark, logo, user interface, domes, minarets, arches, Islamic geometric ornament, calligraphy, modern buildings, roads, cars, power lines, cactus</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>מערכה ראשונה · מכה, ביקור ראשון</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">W 1 — הסמטה המזרחית אל הכיכר</span></div>
+  <div class="set">
+    <span class="s"><b>First frame</b> W1-start.jpg</span><span class="s"><b>Last frame</b> W1-end.jpg</span>
+    <span class="s"><b>8s</b></span>
+  </div>
+  <div class="why">כאן <strong>כן</strong> שמים פריים אחרון — הוא מחייב את הקליפ להגיע בדיוק לרגע שבו הכעבה נכנסת לפריים. זה הרגע החשוב במערכה.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view, camera at human eye height, walking steadily forward down the middle of a narrow street at a natural walking pace with a subtle handheld sway. Continuous straight forward motion the whole time — never stopping, never turning around, never drifting into the walls.
+
+A shaded alley of sun-dried mud-brick houses with flat roofs, protruding wooden palm-trunk beams and small square windows. Undyed linen awnings stretched overhead throw striped shadows across the packed-earth street. Large clay jars, woven baskets and coiled rope along the walls.
+
+The street is alive and unhurried: two robed townspeople walk away from the camera further down the alley, a merchant crouches beside his jars and lifts one, a woman crosses from one doorway to another. Everyone keeps clear of the objects around them — nobody walks into a jar, a basket or a wall. The awnings stir in the breeze and dust drifts through shafts of low sunlight. At the far end the alley opens into a bright sandy plaza.
+
+Arabian Peninsula, 6th century CE, before Islam. Golden hour, long warm shadows.
+
+Photorealistic, cinematic, high detail, filmic colour.
+
+Audio: footsteps on packed earth, cloth flapping softly in wind, distant market murmur, a goat somewhere far off. Ambient only.</pre></div>
+  <div class="lab">פרומפט שלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>dialogue, speech, voices, narration, singing, music, text, titles, subtitles, captions, watermark, logo, user interface, domes, minarets, arches, Islamic geometric ornament, calligraphy, people clipping through objects, floating objects, melting walls, camera turning around, backwards motion</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 1 — המשך, אם 8 שניות קצר מדי</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W1</span><span class="s"><b>+8s</b></span></div>
+  <div class="why">רק אם ההליכה מרגישה חטופה. Extend ממשיך מהקליפ עצמו, בלי אובדן איכות ובלי להעלות פריים מחדש.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward at the same steady pace and the same eye height, deeper into the alley toward the bright opening at the far end. The same townspeople continue about their business ahead. Same lighting, same style, same camera behaviour. No turning, no stopping.
+
+Audio: continue the same ambient bed — footsteps, cloth in wind, distant market murmur. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">W 2 — חציית הכיכר אל השער</span></div>
+  <div class="set">
+    <span class="s"><b>First frame</b> W1-end.jpg</span><span class="s"><b>Last frame</b> —</span>
+    <span class="s"><b>8s</b></span>
+  </div>
+  <div class="why">כאן עוברים ליד האנצאב <strong>בלי לעצור ובלי הסבר</strong>. זה הזרע שנקטוף ב־W 17 — חשוב שייראו, וחשוב שלא יקבלו שום דגש.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view, camera at human eye height, walking steadily forward across an open space at a natural walking pace with a subtle handheld sway. Continuous forward motion the whole time — never stopping, never turning around.
+
+A wide sandy plaza. To the left stands a plain windowless stone cube about ten metres tall, draped in heavy dark charcoal cloth, completely undecorated, on a pale rough stone base; people in undyed linen robes walk slowly in a circle around it. The camera walks diagonally past it toward a plain mud-brick gateway at the far side.
+
+On the right it passes a row of rough upright standing stones about one and a half metres tall with crude schematic carved faces, stained dark with poured oil, small clay offering bowls at their bases — the camera simply passes them without stopping and without emphasis. Market ground-cloths with dates and folded cloth, two men bargaining, four laden camels led across, cooking smoke rising.
+
+Arabian Peninsula, 6th century CE, before Islam. Golden hour, long shadows raking across the sand, warm dust. People keep clear of objects and of each other.
+
+Photorealistic, cinematic, high detail, filmic colour.
+
+Audio: footsteps on sand, crowd murmur without distinct words, camel grunts, cloth in wind. Ambient only.</pre></div>
+  <div class="lab">פרומפט שלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>dialogue, speech, voices, narration, singing, music, text, titles, subtitles, captions, watermark, logo, user interface, domes, minarets, arches, Islamic geometric ornament, calligraphy, gold decoration on the cube, people clipping through objects, melting walls, camera turning around</pre></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════ -->
+<h2>מערכה שנייה · היציאה והדרך</h2>
+
+<div class="gen">
+  <div class="top"><span class="tag img">Ingredients to Video</span><span class="name">W 3 — יציאה מהשער, ומבט לאחור</span></div>
+  <div class="set">
+    <span class="s"><b>Ingredients</b> W1-start.jpg + W1-end.jpg</span><span class="s"><b>8s</b></span>
+  </div>
+  <div class="why">מקום חדש שאין לו פריים פתיחה. ב־Flow זה נפתר במצב <strong>Ingredients</strong> — מעלים את שתי התמונות כהפניות סגנון, והמודל בונה את השער באותו עולם. <em>זה מייתר את שלב „צור קודם תמונה“ שהיה נחוץ ב־Magnific.</em></div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Match the architecture, materials, colour palette and golden-hour light of the reference images exactly — the same mud-brick town, the same warm dusty light.
+
+First-person point of view, camera at human eye height with a subtle handheld sway. The camera walks forward out through a plain mud-brick town gateway — a simple rectangular opening with heavy wooden posts and a wooden lintel, no arch — and onto the desert road beside a caravan of laden camels being roped together.
+
+After a few seconds of walking the camera turns smoothly around ONCE to look back: the mud-brick town and the dark cloth-draped stone cube at its centre are seen receding behind, small in the valley. It holds that view briefly, then turns smoothly back to face forward and continues walking away down the road. One single slow turn only — no whip pan, no repeated turning.
+
+Arabian Peninsula, 6th century CE. Bare rocky hills, packed sand road, caravan tracks, drifting dust, date palms near the town. Golden hour, long shadows, warm haze.
+
+Photorealistic, cinematic, high detail, filmic colour.
+
+Audio: footsteps on sand, camel bells and grunts, rope creaking, wind. Ambient only.</pre></div>
+  <div class="lab">פרומפט שלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>dialogue, speech, voices, narration, singing, music, text, titles, subtitles, captions, watermark, logo, user interface, domes, minarets, arches, Islamic ornament, calligraphy, spinning camera, repeated turning, people clipping through objects</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 4 — הדרך במדבר</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W3</span><span class="s"><b>8s</b></span></div>
+  <div class="why">כאן Extend עדיף על קליפ חדש: הוא ממשיך את אותה שיירה ואותו אור בלי תפר בכלל.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward at the same steady pace and eye height, now out in open desert on the caravan track. The line of laden camels walks alongside, roped nose to tail, loads wrapped in undyed cloth. Drivers in plain linen robes walk with them. Stone waymarkers along the track. Bare ochre hills on both sides, wide open sky, heat haze on the horizon.
+
+The light becomes higher and harder than in the town — bleached, hot, short shadows. Same camera behaviour, no turning, no stopping.
+
+Audio: footsteps on grit, camel bells, wind across open ground. Ambient only.</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag ext">Extend</span><span class="name">W 5 — המעבר הצר, הרוכבים מצטרפים</span></div>
+  <div class="set"><span class="s"><b>Extend</b> W4</span><span class="s"><b>8s</b></span></div>
+  <div class="why">הביט החשוב במערכה. <strong>השחקן רואה מה בני חסות עושים לפני שמישהו מסביר.</strong> אם הרוכבים לא נקראים ברור — תייצרי שוב עד שכן.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>Continue walking forward. The caravan track narrows into a rocky defile between high dark basalt walls, deep shadow on one side and hard sunlight on the other.
+
+Ahead, at the mouth of the pass, a small group of mounted riders in plain robes and headcloths waits on camelback, still and silhouetted against the light — for a moment it is unclear whether they are a threat. As the caravan reaches them the riders turn their mounts and fall in alongside it, escorting it through the pass. No weapons drawn, no violence, no fighting.
+
+Dark basalt rock, high contrast, dust hanging in the shafts of light between the walls. Same camera behaviour and eye height, no turning, no stopping.
+
+Audio: footsteps echoing between rock walls, camel bells, low wind funnelled through the pass. Ambient only.</pre></div>
+  <div class="lab">פרומפט שלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>dialogue, speech, voices, shouting, narration, music, text, subtitles, watermark, user interface, weapons drawn, swords, fighting, violence, blood, domes, minarets, arches, people clipping through rock</pre></div>
+</div>
+
+<div class="gen">
+  <div class="top"><span class="tag">Frames to Video</span><span class="name">CV 1 — מלווה השיירה מדבר</span></div>
+  <div class="set">
+    <span class="s"><b>First frame</b> הפריים האחרון של W 5</span><span class="s"><b>8s</b></span>
+  </div>
+  <div class="why">שיחה = <strong>מצלמה נייחת</strong>. השחקן עצר, אז העולם לא זז. הטקסט שלו נכנס אצלי מעל — ולכן חשוב במיוחד שהוא <strong>לא ישמיע קול</strong>.</div>
+  <div class="lab">פרומפט</div>
+  <div class="box"><button class="copy">העתק</button><pre>First-person point of view. The camera is completely static and does not move, pan, zoom or sway at all — the traveller has stopped walking.
+
+A weathered caravan leader in a plain undyed linen robe and headcloth stands a few metres ahead, facing the camera, one hand resting on a camel's rope. He speaks calmly and gestures once northward with an open hand, then lowers it. He does not walk toward the camera and does not leave the frame.
+
+Behind him the caravan waits: camels standing, drivers adjusting loads, dust drifting, riders on camelback further back. Warm late afternoon light, long shadows, rocky ground.
+
+Photorealistic, cinematic, natural understated performance, high detail.
+
+Audio: wind, camel bells, distant shifting of loads. No voice, no words — the man's mouth moves but no speech is heard.</pre></div>
+  <div class="lab">פרומפט שלילי</div>
+  <div class="box"><button class="copy">העתק</button><pre>dialogue, speech, voices, talking, narration, singing, music, text, subtitles, captions, watermark, user interface, camera movement, panning, zooming, handheld shake, character walking toward camera, domes, minarets</pre></div>
+</div>
+
+
+<h2>מה השתנה בתוכנית בגלל Flow</h2>
+<ul>
+  <li><strong>כל קטע הוא 8 שניות</strong>, לא 12–14. הקטעים הארוכים נבנים בשרשרת Extend.</li>
+  <li><strong>Extend מחליף את מסירת הפריים האחרון.</strong> במקום שתעצרי אחרי כל קטע ותחכי לי — את יכולה לרוץ W 3 → W 4 → W 5 ברצף. זה חוסך לנו סבבים.</li>
+  <li><strong>Ingredients מייתר את שלב יצירת התמונה</strong> לכל מקום חדש. במקום „תמונה ואז וידאו“, זה ייצור אחד.</li>
+</ul>
+<p class="small">שאלה אחת שתקבע כמה נוכל לדחוף: <strong>איזו תוכנית Flow יש לך, וכמה ייצורים היא נותנת?</strong> אם זה מוגבל — נעבוד ב־Fast לטיוטות וב־Quality רק לקטעים שנעולים.</p>
+
+<div class="note">
+  <h4>איפה לשמור</h4>
+  <p>תיקייה אחת: <code>concept/chapter1/film/</code>, קובץ לכל כרטיס בשמו — <code>CIN1.mp4</code>, <code>W1.mp4</code>, <code>W2.mp4</code> וכן הלאה. הפריימים האחרונים כבר לא נחוצים ממך אם את משתמשת ב־Extend.</p>
+</div>
+
+<footer>
+  Veo 3.1 · Flow · 16:9 · 8s · אודיו מופעל, דיבור חסום · 19.8.2026
+</footer>
+
+</div>
+
+<script>
+for (const b of document.querySelectorAll('.copy')){
+  b.addEventListener('click', async () => {
+    const t = b.parentElement.querySelector('pre').textContent
+    try { await navigator.clipboard.writeText(t) }
+    catch { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a)
+            a.select(); document.execCommand('copy'); a.remove() }
+    const o = b.textContent; b.textContent = 'הועתק'; b.classList.add('done')
+    setTimeout(() => { b.textContent = o; b.classList.remove('done') }, 1600)
+  })
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>סרטון מול דפדפן</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9A%96%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f6f1e7;--paper-2:#efe8da;--ink:#241d16;--ink-2:#5b5044;--ink-3:#8b7f70;
+  --rule:#ded3c0;--gold:#a8762a;--cool:#3f6d8c;--warn:#9c4a2f;
+  --serif:'Frank Ruhl Libre','David Libre',serif;--sans:'Heebo',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68}}
+:root[data-theme="dark"]{
+  --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.7;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:clamp(26px,5vw,64px) clamp(18px,4vw,44px) 90px}
+
+header{border-bottom:1px solid var(--rule);padding-bottom:30px;margin-bottom:40px}
+.kick{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.32em;
+  color:var(--gold);margin-bottom:14px}
+h1{font-weight:300;font-size:clamp(1.9rem,1.3rem + 3vw,3.2rem);line-height:1.15;
+  text-wrap:balance;margin-bottom:14px}
+.lede{font-weight:300;font-size:clamp(1rem,.96rem + .4vw,1.2rem);color:var(--ink-2);max-width:60ch}
+
+h2{font-weight:400;font-size:clamp(1.25rem,1.05rem + .9vw,1.7rem);margin:50px 0 14px;
+  padding-top:30px;border-top:1px solid var(--rule)}
+p{max-width:64ch;margin-bottom:13px;font-weight:300}
+p.small{font-size:.94rem;color:var(--ink-2)}
+strong{font-weight:500}
+em{font-style:normal;color:var(--gold);font-weight:400}
+ul{margin:0 0 16px;padding-inline-start:20px;max-width:64ch}
+li{margin-bottom:7px;font-weight:300}
+code{font-family:ui-monospace,monospace;font-size:.84em;background:var(--paper-2);
+  padding:1px 6px;border-radius:3px;direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+/* ── המחוון ────────────────────────────────────────────── */
+.cmp{position:relative;margin:20px 0 8px;border:1px solid var(--rule);border-radius:5px;
+  overflow:hidden;background:#000;cursor:ew-resize;user-select:none;touch-action:none}
+.cmp img{display:block;width:100%;height:auto}
+.cmp .over{position:absolute;inset:0;overflow:hidden;width:50%}
+.cmp .over img{position:absolute;top:0;right:0;height:100%;width:auto;max-width:none}
+.cmp .bar{position:absolute;top:0;bottom:0;width:2px;background:var(--gold);
+  right:50%;pointer-events:none;box-shadow:0 0 14px rgba(0,0,0,.6)}
+.cmp .bar::after{content:'';position:absolute;top:50%;right:50%;width:34px;height:34px;
+  transform:translate(50%,-50%);border:2px solid var(--gold);border-radius:50%;
+  background:rgba(0,0,0,.35)}
+.tag{position:absolute;top:12px;font-family:var(--sans);font-weight:500;font-size:.66rem;
+  letter-spacing:.2em;padding:5px 12px;border-radius:3px;pointer-events:none;color:#fff}
+.tag.r{right:14px;background:rgba(168,118,42,.9)}
+.tag.l{left:14px;background:rgba(63,109,140,.9)}
+.cap{font-family:var(--sans);font-weight:300;font-size:.8rem;color:var(--ink-3);
+  margin-bottom:26px;text-align:center}
+
+.note{border-inline-start:3px solid var(--cool);background:var(--paper-2);
+  padding:15px 18px;margin:22px 0;border-radius:0 3px 3px 0}
+.note h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--cool);margin-bottom:9px}
+.note.w{border-color:var(--warn)}
+.note.w h4{color:var(--warn)}
+.note p{font-size:.96rem;margin:0 0 8px;max-width:none}
+.note p:last-child{margin-bottom:0}
+
+.cta{display:inline-block;font-family:var(--sans);font-weight:400;font-size:.82rem;
+  letter-spacing:.12em;color:var(--paper);background:var(--gold);text-decoration:none;
+  padding:13px 28px;border-radius:3px;margin-top:8px}
+.cta:hover{filter:brightness(1.1)}
+.cta.ghost{background:none;color:var(--gold);border:1px solid var(--rule);margin-inline-start:10px}
+
+.scroller{overflow-x:auto;margin:18px 0;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.88rem;
+  font-weight:300;min-width:520px}
+th{background:var(--paper-2);font-weight:500;font-size:.68rem;letter-spacing:.14em;
+  color:var(--ink-2);text-align:right;padding:11px 14px;white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--rule)}
+td.y{color:var(--cool);font-weight:500}
+td.n{color:var(--warn);font-weight:500}
+
+footer{margin-top:54px;padding-top:24px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kick">פרק 1 · POC טכני</div>
+  <h1>סרטון מול דפדפן</h1>
+  <p class="lede">משמאל — פריים מסרטון הקונספט, שנוצר במודל וידאו קולנועי. מימין — צילום מסך מסצנה שרצה <strong>בזמן אמת בדפדפן</strong>, עם WASD, עכבר ו־HUD. גררו את המחוון.</p>
+</header>
+
+<h2>הסמטה</h2>
+<div class="cmp" data-a="poc/cmp/rt-alley.jpg" data-b="poc/cmp/vid-alley.jpg">
+  <img src="poc/cmp/rt-alley.jpg" alt="">
+  <div class="over"><img src="poc/cmp/vid-alley.jpg" alt=""></div>
+  <div class="bar"></div>
+  <span class="tag r">סרטון</span><span class="tag l">דפדפן · זמן אמת</span>
+</div>
+<p class="cap">גררו ימינה ושמאלה כדי להשוות</p>
+
+<h2>הכיכר והכעבה</h2>
+<div class="cmp" data-a="poc/cmp/rt-plaza.jpg" data-b="poc/cmp/vid-plaza.jpg">
+  <img src="poc/cmp/rt-plaza.jpg" alt="">
+  <div class="over"><img src="poc/cmp/vid-plaza.jpg" alt=""></div>
+  <div class="bar"></div>
+  <span class="tag r">סרטון</span><span class="tag l">דפדפן · זמן אמת</span>
+</div>
+<p class="cap">גררו ימינה ושמאלה כדי להשוות</p>
+
+<h2>מה עבר ומה לא</h2>
+<div class="scroller">
+<table>
+  <thead><tr><th>מרכיב</th><th>הגיע?</th><th>למה</th></tr></thead>
+  <tbody>
+    <tr><td>חומר הקירות</td><td class="y">כן</td><td>אותה טקסטורה שנוצרה ב־AI, בקנה מידה עולמי</td></tr>
+    <tr><td>אור שעת זהב וצללים ארוכים</td><td class="y">כן</td><td>שמש נמוכה + אור חצי־כדור שממלא את הצללים בחום</td></tr>
+    <tr><td>קרקע, אבק, אובך</td><td class="y">כן</td><td>ערפל אקספוננציאלי + חלקיקים</td></tr>
+    <tr><td>הרים ושמיים</td><td class="y">כן</td><td>הפנורמה מצוירת על גליל — לא גיאומטריה</td></tr>
+    <tr><td>אנשים במרחק</td><td class="y">כן</td><td>לוחות שפונים למצלמה, מתוך גיליון שנוצר ב־AI</td></tr>
+    <tr><td>אנשים מקרוב</td><td class="n">לא</td><td>לוח שטוח נשבר בקלוז־אפ — צריך מודל אמיתי</td></tr>
+    <tr><td>בד שמתנופף</td><td class="n">לא</td><td>הסוככים קשיחים; דורש סימולציית בד</td></tr>
+    <tr><td>עומק ופרטי־פרטים</td><td class="n">חלקית</td><td>אין AO, אין תאורה אפויה — עוד לא</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <h4>ההערכה שלי</h4>
+  <p>זה מגיע לבערך <strong>65–70% מהמראה של הסרטון</strong> — בערך מה שהערכתי, ובלי אף טריק שלא יעבוד גם על מחשב בית ספר.</p>
+  <p>הפער הגדול ביותר הוא <em>עושר</em>: לסרטון יש אלפי פרטים קטנים בכל פריים. אבל שלושה דברים שעוד לא נעשו סוגרים חלק גדול ממנו — <strong>תאורה אפויה</strong> (הכי משמעותי), <strong>AO</strong>, ועוד נכסים קטנים על הקרקע.</p>
+</div>
+
+<div class="note w">
+  <h4>מה שראיתי ולא הסתרתי</h4>
+  <p>הכעבה עדיין קוראת כמלבן כהה ולא כבד. הסוככים נראים כמו לוחות ולא כאריג. הכדים לא יושבים על הקרקע בצורה משכנעת. ומספר הבתים עדיין קטן מכדי שהעיר תרגיש צפופה.</p>
+  <p>אלה פגמי כיוונון ונכסים, לא פגמי גישה. אף אחד מהם לא דורש מנוע אחר.</p>
+</div>
+
+<h2>אפשר להיכנס ולהסתובב</h2>
+<p>זו לא תמונה. זו סצנה שרצה, עם הליכה חופשית והסתכלות. פותחים, לוחצים, ומהלכים ב־WASD.</p>
+<p class="small">רץ ישירות מהדיסק — אין צורך בשרת ואין תלות באינטרנט חוץ מהגופנים. הכל שוקל 4.7MB.</p>
+<a class="cta" href="street/street.html">להיכנס לרחוב</a>
+<a class="cta ghost" href="מכה-ביקור-ראשון.mp4">לצפות בסרטון</a>
+
+<footer>
+  נבנה מ־three.js r185 · טקסטורות, פנורמה ודמויות נוצרו ב־Higgsfield · 19.8.2026
+</footer>
+
+</div>
+
+<script>
+/* מחוון השוואה — גרירה, מגע ומקלדת */
+for (const c of document.querySelectorAll('.cmp')){
+  const over = c.querySelector('.over'), bar = c.querySelector('.bar')
+  let p = 50
+  const set = (v) => {
+    p = Math.max(0, Math.min(100, v))
+    over.style.width = p + '%'
+    bar.style.right = p + '%'
+  }
+  const from = (e) => {
+    const r = c.getBoundingClientRect()
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left
+    /* המסמך RTL — האחוזים נמדדים מימין */
+    set((1 - x / r.width) * 100)
+  }
+  let down = false
+  c.addEventListener('pointerdown', e => { down = true; from(e)
+    try { c.setPointerCapture(e.pointerId) } catch {} })
+  c.addEventListener('pointermove', e => { if (down) from(e) })
+  c.addEventListener('pointerup', () => { down = false })
+  c.addEventListener('pointercancel', () => { down = false })
+  set(50)
+}
+</script>
+</body>
+</html>

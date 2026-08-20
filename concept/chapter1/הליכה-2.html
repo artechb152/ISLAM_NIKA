@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>הליכה בשתי שכבות</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%9A%B6%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════
+   הליכה בשתי שכבות.
+
+   הבעיה שסימנת: כשגוללים וידאו אחורה, כל מה שזז בו הולך אחורה
+   — כי הווידאו מקודד זמן, לא מרחב.
+
+   הפתרון: להוציא את הזמן מהרקע. המסלול צולם ריק מאנשים, ולכן
+   הוא ניטרלי בזמן — אפשר לגלול אותו לשני הכיוונים והוא תמיד נכון.
+   האנשים הם שכבה נפרדת של וידאו שקוף, והם **תמיד רצים קדימה**,
+   בלי קשר לאן השחקן הולך. ולכן העולם גם חי כשעוצרים.
+
+   כל דמות יושבת במרחק מסוים על הדרך. ככל שמתקרבים אליה היא
+   גדלה ונעה החוצה מנקודת המגוז — פרספקטיבה בשתי שורות חשבון.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --gold:#d9a441;--gold-2:#f0cd85;--sand:#e8dcc4;--ink:#0b0705;
+  --sans:'Heebo',system-ui,sans-serif;--serif:'Frank Ruhl Libre',serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--ink)}
+body{color:var(--sand);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+#stage{position:fixed;inset:0;overflow:hidden;background:var(--ink);cursor:crosshair}
+
+/* שכבת הרקע — המסלול הריק */
+#road{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;width:auto;height:auto;
+  transform:translate(-50%,-50%) scale(1.14);will-change:transform}
+
+/* שכבת החיים — כל דמות וידאו שקוף */
+#life{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#life video{position:absolute;bottom:0;left:0;transform-origin:50% 100%;
+  will-change:transform,opacity;filter:drop-shadow(0 8px 16px rgba(30,16,8,.45))}
+
+#vig{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(122% 94% at 50% 46%,transparent 46%,rgba(8,5,3,.30) 78%,rgba(8,5,3,.58) 100%)}
+
+/* ── HUD ─────────────────────────────────────────────────── */
+#hud{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .8s}
+body.playing #hud{opacity:1}
+#obj{position:absolute;top:38px;right:34px;text-align:right}
+#obj .lbl{font-family:var(--sans);font-weight:400;font-size:.62rem;letter-spacing:.3em;
+  color:var(--gold);margin-bottom:7px;text-shadow:0 2px 10px rgba(0,0,0,.95)}
+#obj .txt{font-weight:400;font-size:1.28rem;text-shadow:0 2px 16px rgba(0,0,0,1)}
+#obj .rule{height:1px;margin-top:10px;background:linear-gradient(to left,var(--gold),transparent)}
+#trail{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);
+  width:min(44vw,400px);height:2px;background:rgba(232,220,196,.16)}
+#trail i{display:block;height:100%;width:0;background:var(--gold)}
+#trail b{position:absolute;top:-9px;width:8px;height:20px;margin-right:-4px;
+  background:var(--gold-2);border-radius:1px;box-shadow:0 0 10px rgba(217,164,65,.8)}
+#trail span{position:absolute;top:14px;right:0;left:0;text-align:center;
+  font-family:var(--sans);font-weight:200;font-size:.62rem;letter-spacing:.24em;
+  color:rgba(232,220,196,.42)}
+#keys{position:absolute;bottom:36px;right:34px;display:flex;gap:15px;
+  font-family:var(--sans);font-weight:200;font-size:.66rem;letter-spacing:.14em;
+  color:rgba(232,220,196,.45);text-shadow:0 2px 8px rgba(0,0,0,1)}
+#keys b{font-weight:500;color:rgba(217,164,65,.9)}
+#dbg{position:absolute;bottom:36px;left:34px;font-family:ui-monospace,monospace;
+  font-size:.66rem;color:rgba(232,220,196,.36);direction:ltr;line-height:1.6}
+
+#gate{position:absolute;inset:0;z-index:9;display:grid;place-content:center;text-align:center;
+  background:rgba(7,4,3,.92);transition:opacity .8s}
+body.playing #gate{opacity:0;pointer-events:none}
+#gate .a{font-weight:300;font-size:clamp(1.6rem,1.2rem + 2.2vw,2.7rem)}
+#gate .b{font-family:var(--sans);font-weight:200;font-size:.76rem;letter-spacing:.28em;
+  color:var(--gold);margin-top:16px}
+#gate .c{font-family:var(--sans);font-weight:200;font-size:.73rem;letter-spacing:.08em;
+  color:rgba(232,220,196,.45);margin-top:28px;line-height:2.1}
+#gate .c em{font-style:normal;color:var(--gold-2)}
+#go{margin-top:26px;font-family:var(--sans);font-weight:300;font-size:.76rem;letter-spacing:.2em;
+  color:var(--sand);background:none;border:1px solid rgba(232,220,196,.24);padding:12px 30px;
+  cursor:pointer;transition:.3s}
+#go:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="road" src="walk/path-hq.mp4" muted playsinline preload="auto"></video>
+  <div id="life">
+    <video data-who="walk1" src="walk/walk1.webm" muted playsinline loop preload="auto"></video>
+    <video data-who="stand" src="walk/stand.webm"  muted playsinline loop preload="auto"></video>
+    <video data-who="walk2" src="walk/walk2.webm"  muted playsinline loop preload="auto"></video>
+  </div>
+  <div id="vig"></div>
+
+  <div id="hud">
+    <div id="obj"><div class="lbl">משימה</div><div class="txt">הגיעו אל הכעבה</div><div class="rule"></div></div>
+    <div id="trail"><i></i><b></b><span>הדרך</span></div>
+    <div id="keys"><span><b>W</b> קדימה</span><span><b>S</b> אחורה</span><span><b>SHIFT</b> מהר</span><span><b>עכבר</b> להסתכל</span></div>
+    <div id="dbg"></div>
+  </div>
+
+  <div id="gate">
+    <div>
+      <div class="a">הליכה בשתי שכבות</div>
+      <div class="b">הרקע ריק · האנשים חיים</div>
+      <div class="c">החזיקו <b>W</b> · <b>S</b> לחזור · העכבר מזיז את המבט<br><br>
+        לכו קדימה, ואז חזרו אחורה — <em>האנשים ימשיכו ללכת קדימה</em>.<br>
+        עצרו לגמרי — <em>העולם ימשיך לזוז בלעדיכם</em>.</div>
+      <button id="go" type="button">להתחיל ללכת</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const road = document.getElementById('road')
+const stage = document.getElementById('stage')
+const bar = document.querySelector('#trail i')
+const pip = document.querySelector('#trail b')
+const dbg = document.getElementById('dbg')
+
+/* ── מי עומד איפה על הדרך ─────────────────────────────────
+   z   = מרחק קדימה, בשניות של המסלול
+   lat = סטייה לרוחב במטרים, שלילי = שמאל
+   spd = כמה מהר הוא עצמו מתקדם (0 = עומד)
+   tall= גובה האדם במטרים */
+const CAST = [
+  { who:'walk1', z: 2.4, lat: -1.15, spd: 0.055, tall: 1.74 },
+  { who:'stand', z: 4.6, lat:  1.45, spd: 0.0,   tall: 1.66 },
+  { who:'walk2', z: 6.9, lat: -0.45, spd: 0.032, tall: 1.72 },
+]
+
+/* המסלול מכסה בערך 24 מטר בשמונה שניות → 3 מטר לשנייה.
+   כל השאר הוא פרספקטיבה של מצלמת חור־סיכה, בלי מקדמים מומצאים:
+   גובה על המסך = גובה אמיתי / (מרחק · 2·tan(חצי שדה ראייה)). */
+const MPS = 3.0                 /* מטרים לשנייה של מסלול */
+const CAM_H = 1.62              /* גובה העין */
+const VFOV = 62 * Math.PI / 180
+const TAN_V = Math.tan(VFOV / 2)
+const TAN_H = TAN_V * (16 / 9)
+const VP = { x: 0.5, y: 0.50 }  /* קו האופק בפריים */
+const NEAR = 1.15, FAR = 9.0
+
+for (const c of CAST) c.el = document.querySelector(`#life video[data-who="${c.who}"]`)
+
+/* ── מצב ────────────────────────────────────────────────── */
+let pos = 0, dur = 8
+road.addEventListener('loadedmetadata', () => { dur = road.duration || 8 })
+
+const keys = new Set()
+addEventListener('keydown', e => { keys.add(e.code); if (/^(KeyW|KeyS|Arrow)/.test(e.code)) e.preventDefault() })
+addEventListener('keyup', e => keys.delete(e.code))
+
+let tx = 0, ty = 0, mx = 0, my = 0
+stage.addEventListener('pointermove', e => {
+  const r = stage.getBoundingClientRect()
+  tx = ((e.clientX - r.left) / r.width - .5) * -2
+  ty = ((e.clientY - r.top) / r.height - .5) * -2
+})
+
+/* ── הלולאה ─────────────────────────────────────────────── */
+let prev = performance.now()
+function frame(now){
+  requestAnimationFrame(frame)
+  const dt = Math.min(.05, Math.max(0, (now - prev) / 1000)) || 0; prev = now
+  const W = stage.clientWidth, H = stage.clientHeight
+
+  /* התקדמות על הדרך */
+  const fast = keys.has('ShiftLeft') || keys.has('ShiftRight')
+  const spd = fast ? 1.7 : 0.8
+  let d = 0
+  if (keys.has('KeyW') || keys.has('ArrowUp')) d += 1
+  if (keys.has('KeyS') || keys.has('ArrowDown')) d -= 1
+  if (d !== 0){
+    pos = Math.max(0, Math.min(dur - .05, pos + d * spd * dt))
+    if (Math.abs(road.currentTime - pos) > .004) road.currentTime = pos
+  }
+
+  /* המבט */
+  mx += (tx - mx) * .07
+  my += (ty - my) * .07
+  const px = mx * 3.2, py = my * 2.0
+  road.style.transform =
+    `translate(calc(-50% + ${px.toFixed(2)}%), calc(-50% + ${py.toFixed(2)}%)) scale(1.14)`
+
+  /* ── האנשים ───────────────────────────────────────────
+     הם מתקדמים בזמן שלהם, לא בזמן שלנו. */
+  let seen = 0
+  for (const c of CAST){
+    c.z += c.spd * dt                       /* הוא הולך, גם אם אנחנו לא */
+    if (c.z > dur + 2) c.z -= dur + 3       /* ומתחיל מחדש מהרחוק */
+    const dist = c.z - pos
+    const el = c.el
+    if (!(dist >= NEAR && dist <= FAR)){ el.style.opacity = '0'; continue }
+    seen++
+
+    const D = dist * MPS                              /* מרחק במטרים */
+    const hFrac = c.tall / (D * 2 * TAN_V)            /* חלק מגובה המסך */
+    const vh0 = el.videoHeight || 734
+    const vw0 = el.videoWidth || 600
+    const sc = (hFrac * H) / vh0
+    /* הרגליים יושבות מתחת לקו האופק, ככל שקרוב יותר — נמוך יותר */
+    const feetY = (VP.y + CAM_H / (D * 2 * TAN_V)) * H + py * H / 100
+    const cx = (VP.x + c.lat / (D * 2 * TAN_H)) * W + px * W / 100
+
+    el.style.opacity = String(
+      Math.min(1, (dist - NEAR) / .55) * Math.min(1, (FAR - dist) / 1.8))
+    el.style.transformOrigin = '0 0'
+    el.style.transform =
+      `translate(${(cx - vw0 * sc / 2).toFixed(1)}px, ${(feetY - vh0 * sc).toFixed(1)}px) scale(${sc.toFixed(4)})`
+  }
+
+  const p = pos / dur
+  bar.style.width = (p * 100) + '%'
+  pip.style.right = (p * 100) + '%'
+  dbg.textContent = `pos ${pos.toFixed(2)}s / ${dur.toFixed(1)}s · people visible ${seen}/${CAST.length}`
+}
+requestAnimationFrame(frame)
+
+document.getElementById('go').addEventListener('click', () => {
+  document.body.classList.add('playing')
+  road.pause(); road.currentTime = 0
+  for (const c of CAST) c.el.play().catch(() => {})
+})
+
+window.__walk2 = {
+  at: () => pos,
+  cast: () => CAST.map(c => ({ who: c.who, z: Number(c.z).toFixed(2),
+    t: Number(c.el.currentTime || 0).toFixed(2),
+    on: c.el.style.opacity || '(unset)',
+    box: c.el.getBoundingClientRect().height.toFixed(0) })),
+}
+</script>
+</body>
+</html>

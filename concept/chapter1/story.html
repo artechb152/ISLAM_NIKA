@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ג׳אהליה</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8F%9C%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Heebo:wght@200;300;400;700&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   ג׳אהליה — פרק 1, סיפור אינטראקטיבי
+
+   לא משחק. התוכן של הפרק הוא תיאור, לא סדרת החלטות — ולכן הוא
+   נבנה כאן כמקום שעוברים בו, ולא כמשימות שפותרים.
+
+   הרעיון המארגן: הפרק מסופר בשני קולות. הקול הראשי מוסר את
+   הסיפור כפי שהוא נמסר; הערות השוליים עוצרות אותו בכל מקום שבו
+   המקור עצמו מסתייג — „עירבון מוגבל“, „אולי שיבוש“, „לא מן הנמנע“,
+   „חוקרים גורסים“. הספק הוא חלק מהעיצוב, לא הערה בשוליו.
+
+   כל מילה מגיעה מ־SOURCE-TEXT.md. מספר הסעיף מוצג ליד כל שורה.
+   ══════════════════════════════════════════════════════════════ */
+
+:root{
+  --ink:#0d0a07;
+  --parch:#f2e8d5;
+  --parch-dim:#c9bda6;
+  --gold:#e8b356;          /* קול המסורת · ציטוטים */
+  --cool:#8fb8d0;          /* קול ההסתייגות */
+  --rule:rgba(242,232,213,.16);
+  --band:cubic-bezier(.22,.61,.36,1);
+  --serif:'Frank Ruhl Libre','David Libre','Times New Roman',serif;
+  --sans:'Heebo','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--ink);color:var(--parch);
+  font-family:var(--serif);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── הבמה ──────────────────────────────────────────────────── */
+#stage{position:fixed;inset:0;cursor:pointer;overflow:hidden;background:var(--ink)}
+#world,#air{position:absolute;inset:0;display:block}
+#air{pointer-events:none}
+
+/* ויניאטה — מרכזת את המבט ומחזיקה את הטקסט */
+#vig{position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(115% 88% at 50% 42%, transparent 38%, rgba(8,5,3,.30) 74%, rgba(8,5,3,.62) 100%),
+    linear-gradient(to top, rgba(8,5,3,.90) 0%, rgba(8,5,3,.62) 17%, rgba(8,5,3,.12) 40%, transparent 58%);
+}
+
+/* ── פס המערכות ────────────────────────────────────────────── */
+#rail{position:absolute;top:0;left:0;right:0;display:flex;gap:2px;padding:0;z-index:6;
+  opacity:.85;transition:opacity .5s}
+#rail .seg{flex:1;height:2px;background:rgba(242,232,213,.13);overflow:hidden}
+#rail .seg i{display:block;height:100%;width:0;background:var(--gold);
+  transition:width .6s var(--band)}
+#rail .seg.done i{width:100%;background:rgba(232,179,86,.42)}
+
+#actname{position:absolute;top:20px;right:26px;z-index:6;max-width:60vw;
+  font-family:var(--sans);font-weight:300;font-size:.72rem;letter-spacing:.22em;
+  text-align:right;white-space:nowrap;overflow:visible;
+  color:rgba(242,232,213,.5);transition:opacity .6s}
+
+/* ── רצועת הטקסט ───────────────────────────────────────────── */
+#band{position:absolute;bottom:0;right:0;left:0;z-index:5;
+  padding:0 clamp(26px,6vw,88px) clamp(34px,7vh,74px);
+  display:flex;justify-content:flex-start;pointer-events:none}
+#col{width:min(58ch,100%)}
+
+.beat{opacity:0;transform:translateY(14px);
+  transition:opacity .7s var(--band),transform .7s var(--band)}
+.beat.in{opacity:1;transform:none}
+
+/* קול ראשי — בלי תווית. זה פשוט הסיפור. */
+.line{
+  font-weight:300;font-size:clamp(1.12rem,1.05rem + .68vw,1.62rem);
+  line-height:1.78;letter-spacing:.004em;
+  text-shadow:0 2px 22px rgba(6,4,2,.92),0 1px 4px rgba(6,4,2,.8);
+  text-wrap:pretty;
+}
+.line em{font-style:normal;color:var(--gold);font-weight:400}
+
+/* הערת שוליים — הקול שעוצר את הסיפור */
+.note{
+  border-right:2px solid rgba(143,184,208,.55);
+  padding-right:18px;margin-right:-20px;
+  font-family:var(--sans);font-weight:200;
+  font-size:clamp(.95rem,.9rem + .42vw,1.22rem);line-height:1.72;
+  color:var(--cool);
+  text-shadow:0 2px 20px rgba(6,4,2,.95);
+}
+.note .lbl{display:block;font-size:.66rem;font-weight:400;letter-spacing:.26em;
+  color:rgba(143,184,208,.72);margin-bottom:9px}
+
+/* ציטוט — לא מדובר, כתוב */
+.quote{padding-right:6px}
+.quote .txt{
+  font-weight:400;font-size:clamp(1.18rem,1.1rem + .8vw,1.78rem);
+  line-height:1.7;color:var(--gold);
+  text-shadow:0 2px 24px rgba(6,4,2,.95);
+}
+.quote .src{display:block;margin-top:12px;font-family:var(--sans);font-weight:300;
+  font-size:.72rem;letter-spacing:.2em;color:rgba(232,179,86,.62)}
+
+.ref{display:inline-block;margin-inline-start:10px;vertical-align:.28em;
+  font-family:var(--sans);font-weight:300;font-size:.6rem;letter-spacing:.14em;
+  color:rgba(242,232,213,.34);white-space:nowrap;
+  direction:ltr;unicode-bidi:isolate}
+
+/* ── כרטיס מערכה ───────────────────────────────────────────── */
+#card{position:absolute;inset:0;z-index:8;display:grid;place-content:center;
+  text-align:center;background:rgba(9,6,4,.72);
+  opacity:0;pointer-events:none;transition:opacity .9s var(--band)}
+#card.on{opacity:1}
+#card .kick{font-family:var(--sans);font-weight:300;font-size:.72rem;
+  letter-spacing:.42em;color:var(--gold);margin-bottom:20px}
+#card .ttl{font-weight:300;font-size:clamp(2rem,1.4rem + 3.4vw,4rem);
+  letter-spacing:.02em;line-height:1.2}
+#card .rule{width:52px;height:1px;background:var(--rule);margin:26px auto 0}
+
+/* ── נקודות התבוננות ───────────────────────────────────────── */
+.spot{position:absolute;z-index:4;width:34px;height:34px;margin:-17px 0 0 -17px;
+  border:1px solid rgba(232,179,86,.5);border-radius:50%;
+  cursor:pointer;pointer-events:auto;opacity:0;
+  transition:opacity .6s,transform .35s var(--band),border-color .3s,background .3s}
+.spot.on{opacity:1}
+.spot::after{content:'';position:absolute;inset:11px;border-radius:50%;
+  background:rgba(232,179,86,.75);
+  animation:pulse 2.8s ease-in-out infinite}
+.spot:hover{transform:scale(1.22);border-color:var(--gold);background:rgba(232,179,86,.1)}
+.spot.seen{border-color:rgba(242,232,213,.24)}
+.spot.seen::after{animation:none;background:rgba(242,232,213,.3)}
+@keyframes pulse{0%,100%{transform:scale(.7);opacity:.55}50%{transform:scale(1.1);opacity:1}}
+.spot .tag{position:absolute;top:-34px;right:50%;transform:translateX(50%);
+  font-family:var(--sans);font-weight:300;font-size:.68rem;letter-spacing:.1em;
+  white-space:nowrap;color:var(--parch);background:rgba(9,6,4,.8);
+  padding:4px 10px;border-radius:2px;opacity:0;transition:opacity .25s;pointer-events:none}
+.spot:hover .tag{opacity:1}
+
+/* חלונית הצצה שנפתחת מנקודת התבוננות */
+#peek{position:absolute;z-index:7;bottom:0;right:0;left:0;
+  padding:0 clamp(26px,6vw,88px) clamp(34px,7vh,74px);
+  display:flex;justify-content:flex-start;pointer-events:none;
+  opacity:0;transition:opacity .5s var(--band)}
+#peek.on{opacity:1}
+#peek .box{width:min(52ch,100%);background:rgba(9,6,4,.9);
+  border-right:2px solid var(--gold);padding:20px 22px}
+#peek .h{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.22em;
+  color:var(--gold);margin-bottom:10px}
+#peek .b{font-weight:300;font-size:clamp(1rem,.95rem + .45vw,1.22rem);line-height:1.72}
+
+/* ── רמז וניווט ────────────────────────────────────────────── */
+#hint{position:absolute;bottom:clamp(14px,2.4vh,22px);left:0;right:0;z-index:6;
+  text-align:center;font-family:var(--sans);font-weight:200;font-size:.68rem;
+  letter-spacing:.24em;color:rgba(242,232,213,.34);pointer-events:none;
+  transition:opacity .6s}
+#hint.dim{opacity:.22}
+
+#back{position:absolute;top:16px;left:22px;z-index:6;pointer-events:auto;
+  font-family:var(--sans);font-weight:300;font-size:.7rem;letter-spacing:.18em;
+  color:rgba(242,232,213,.4);background:none;border:0;cursor:pointer;padding:8px 4px}
+#back:hover{color:var(--parch)}
+#back:focus-visible,.spot:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
+
+/* ── סיום ──────────────────────────────────────────────────── */
+#fin{position:absolute;inset:0;z-index:9;display:grid;place-content:center;
+  text-align:center;background:rgba(9,6,4,.86);gap:0;
+  opacity:0;pointer-events:none;transition:opacity 1.1s var(--band)}
+#fin.on{opacity:1;pointer-events:auto}
+#fin .k{font-family:var(--sans);font-weight:300;font-size:.7rem;letter-spacing:.4em;
+  color:var(--gold);margin-bottom:22px}
+#fin .t{font-weight:300;font-size:clamp(1.5rem,1.1rem + 2.2vw,2.6rem);line-height:1.5;
+  max-width:26ch;margin:0 auto}
+#fin button{margin-top:34px;font-family:var(--sans);font-weight:300;font-size:.74rem;
+  letter-spacing:.2em;color:var(--parch);background:none;
+  border:1px solid var(--rule);padding:12px 26px;cursor:pointer;transition:.3s}
+#fin button:hover{border-color:var(--gold);color:var(--gold)}
+
+#load{position:absolute;inset:0;z-index:10;display:grid;place-content:center;
+  background:var(--ink);font-family:var(--sans);font-weight:200;font-size:.72rem;
+  letter-spacing:.34em;color:rgba(242,232,213,.4);transition:opacity .9s}
+#load.gone{opacity:0;pointer-events:none}
+
+@media (prefers-reduced-motion:reduce){
+  .beat,#card,#peek,#fin{transition-duration:.01ms}
+  .spot::after{animation:none}
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="world"></canvas>
+  <canvas id="air"></canvas>
+  <div id="vig"></div>
+  <div id="spots"></div>
+
+  <div id="rail"></div>
+  <div id="actname"></div>
+  <button id="back" type="button">◀ אחורה</button>
+
+  <div id="band"><div id="col"></div></div>
+  <div id="peek"><div class="box"><div class="h"></div><div class="b"></div></div></div>
+
+  <div id="card"><div><div class="kick"></div><div class="ttl"></div><div class="rule"></div></div></div>
+
+  <div id="fin">
+    <div>
+      <div class="k">סוף פרק ראשון</div>
+      <div class="t">וזה חצי האי ערב שאליו נולד האסלאם — לא ריק, ולא בור. מלא.</div>
+      <div style="text-align:center"><button type="button" id="again">מהתחלה</button></div>
+    </div>
+  </div>
+
+  <div id="hint">לחצו כדי להמשיך</div>
+  <div id="load">טוען</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   הסיפור. כל שורה — סעיף מ־SOURCE-TEXT.md.
+   n = הקול הראשי · m = הערת שוליים · q = ציטוט
+   ══════════════════════════════════════════════════════════════ */
+
+const ACTS = [
+  'ג׳אהליה', 'שתי אימפריות', 'השבטים והדרך', 'היהודים בחצי האי',
+  'הנזירים', 'אברהה', 'האלילים', 'ערב עליית האסלאם',
+]
+
+const S = (o) => o
+
+const SCENES = [
+
+/* ── מערכה א׳ ─────────────────────────────────────────────── */
+S({ act:0, plate:'title', card:{kick:'מערכה ראשונה', ttl:'ג׳אהליה'},
+  cam:{x0:.62,x1:.40,z0:1.14,z1:1.05}, mood:{warp:1,dust:.35,sun:[.78,.20]},
+  beats:[
+    {v:'n', t:'כדי להבין כיצד התפתחה דת האסלאם — איך עלה בדעתו של מוחמד רעיון המונותאיזם, האמונה באל אחד ויחיד, ומהי הדרך שבה תיווך אותה לבני עמו — יש להבין קודם את המקום שאליו נולד.', r:'§0'},
+    {v:'n', t:'את התרבות, הציוויליזציה והחיים בחצי האי ערב טרום עליית האסלאם. תקופה המכונה <em>ג׳אהליה</em> — תקופת הבערות והברבריות.', r:'§0'},
+    {v:'m', t:'רק שהמידע על אודות החיים בחצי האי ערב טרום תקופת האסלאם דל. מרביתו ידוע לנו מהספרות והמסורת המוסלמית — ואותה יש לקחת ב״עירבון מוגבל“ אם מתבוננים בה במבט ביקורתי.<br><br>שימו לב היכן ההערות האלה חוזרות. הן חוזרות הרבה.', r:'§1'},
+  ]}),
+
+/* ── מערכה ב׳ ─────────────────────────────────────────────── */
+S({ act:1, plate:'worldmap', card:{kick:'מערכה שנייה', ttl:'שתי אימפריות מצפון'},
+  cam:{x0:.10,x1:.72,z0:1.10,z1:1.10}, mood:{warp:0},
+  beats:[
+    {v:'n', t:'במאות שקדמו לעליית האסלאם חיו שתי אימפריות מצפון לחצי האי ערב.', r:'§2'},
+    {v:'n', t:'מצפון־מערב — האימפריה הביזנטית, זו שהחליפה את האימפריה הרומית העתיקה. דתה הייתה נוצרית אורתודוקסית.', r:'§3'},
+    {v:'n', t:'מצפון־מזרח — האימפריה הסאסאנית־פרסית, שמשלה באזור איראן ועיראק. עיר בירתה הייתה <em>קטסיפון</em>, על גדת נהר החידקל.', r:'§4'},
+    {v:'n', t:'דתה של האליטה השלטונית הייתה זורואסטרית — אמונה באל טוב ובאל רע שנלחמים זה בזה. דואליות, שניות של האלוהות.', r:'§5'},
+  ]}),
+
+/* ── מערכה ג׳ ─────────────────────────────────────────────── */
+S({ act:2, plate:'camp', card:{kick:'מערכה שלישית', ttl:'השבטים והדרך'},
+  cam:{x0:.44,x1:.56,z0:1.06,z1:1.12}, mood:{warp:.4,stars:1,fire:[[.50,.665,60]],smoke:[[.50,.63,.7]]},
+  beats:[
+    {v:'n', t:'במאות הראשונות לספירה חיו שבטים נוודים בצפון חצי האי, והם היו בני חסות של האימפריות.', r:'§6'},
+  ]}),
+
+S({ act:2, plate:'mesa', cam:{x0:.34,x1:.60,z0:1.08,z1:1.14}, mood:{warp:1,dust:.85},
+  beats:[
+    {v:'n', t:'השבטים נדדו צפונה מאזור תימן שבדרום חצי האי, ושימשו מתווכים בין האימפריות.', r:'§7'},
+  ]}),
+
+S({ act:2, plate:'load', cam:{x0:.58,x1:.34,z0:1.12,z1:1.06}, mood:{warp:.7,dust:.5,sun:[.10,.15]},
+  beats:[
+    {v:'n', t:'בעיקר לטובת שמירה על נתיבי הסחר של סחורות כדוגמת <em>משי, תבלינים</em> ועוד.', r:'§7'},
+  ]}),
+
+S({ act:2, plate:'gate', cam:{x0:.30,x1:.62,z0:1.08,z1:1.10}, mood:{warp:.8,dust:.4},
+  beats:[
+    {v:'n', t:'שבט גסאן היה בן חסות של האימפריה הביזנטית, ושבט לח׳ם היה של זו הסאסאנית־פרסית.', r:'§8'},
+  ]}),
+
+S({ act:2, plate:'ridge', cam:{x0:.66,x1:.30,z0:1.12,z1:1.05}, mood:{warp:.9,birds:.5,smoke:[[.765,.30,.5]]},
+  beats:[
+    {v:'n', t:'אזור החג׳אז בחצי האי היה יחסית חבוי. האימפריות לא גילו בו עניין רב.', r:'§9'},
+    {v:'n', t:'ובכל זאת חלחלו לאזור הזה רעיונות ומושגים מונותאיסטים — הנובעים מאמונה באל אחד ויחיד — מהיהדות ומהנצרות, בתהליך איטי ומדורג. אלה הותירו רושם בארצם של הערבים.', r:'§9'},
+  ]}),
+
+/* ── מערכה ד׳ ─────────────────────────────────────────────── */
+S({ act:3, plate:'oasis', card:{kick:'מערכה רביעית', ttl:'היהודים בחצי האי'},
+  cam:{x0:.70,x1:.26,z0:1.14,z1:1.06}, mood:{warp:.5,birds:.3},
+  beats:[
+    {v:'n', t:'מקובל לומר כי יהודים חיו בחלקו הצפוני של חצי האי ערב לכל הפחות מאז המאה הראשונה לספירה, לאחר חורבן בית המקדש השני בידי הרומאים.', r:'§10'},
+    {v:'n', t:'ובעיקר ביישובים כמו <em>ח׳יבר, תימא</em> ו<em>ית׳רב</em> — שתכונה לימים ״אלמדינה“, העיר של הנביא.', r:'§10'},
+    {v:'n', t:'הם חיו בתצורה שבטית, והושפעו באופן טבעי מהתרבות הערבית.', r:'§11'},
+    {v:'n', t:'בדרום חצי האי יש עדויות על התיישבות יהודים מאז המאה החמישית לספירה.', r:'§12'},
+    {v:'n', t:'בחיי היום־יום היהודים חיו בשלום עם שכניהם הערבים. התקיימו יחסי מסחר, ואף גילו נושאי תרבות משותפים — כמו שירה. אך כל שבט חי עם החוקים והמנהגים שלו.', r:'§13'},
+  ]}),
+
+S({ act:3, plate:'study', cam:{x0:.60,x1:.34,z0:1.10,z1:1.16}, mood:{warp:.15,fire:[[.275,.655,46]],beam:[.755,.20]},
+  beats:[
+    {v:'n', t:'הערבים ידעו כי היהודים שונים בכך שיש להם דת משלהם, ואף היו מודעים לעליונות שהרגישו היהודים מכך.', r:'§14'},
+    {v:'q', t:'כי רק להם מכל האנשים נועדה נחלת העולם הבא אצל אללה.', src:'הקוראן · 2:94', r:'§15'},
+    {v:'n', t:'היהודים שיתפו את הערבים תושבי חצי האי באמונתם, במסורותיהם, ואף בציפייתם למשיח.', r:'§16'},
+    {v:'m', t:'לא מן הנמנע שכאשר מוחמד היגר לית׳רב, הוא קיווה שהיהודים יטו אוזן קשבת לבשורתו.', r:'§17'},
+  ]}),
+
+/* ── מערכה ה׳ ─────────────────────────────────────────────── */
+S({ act:4, plate:'cliff', card:{kick:'מערכה חמישית', ttl:'הנזירים'},
+  cam:{x0:.68,x1:.36,z0:1.12,z1:1.06}, mood:{warp:.35,stars:.8,fire:[[.575,.545,50]]},
+  beats:[
+    {v:'n', t:'גם הנצרות לא הייתה זרה לתושבי חצי האי — הן מהאזור הדרום־מערבי שבו משלה ממלכת אקסום הנוצרית, שחלשה גם על חלקים של תימן, והן מהאזור הצפוני המיושב בסביבות ארם נהריים, בין הפרת והחידקל — <em>בין אלראפדין</em>.', r:'§18'},
+    {v:'n', t:'שונים היו תושבי פרס, שדבקו באמונתם הזורואסטרית וכמעט שלא הושפעו מן הנצרות.', r:'§19'},
+    {v:'n', t:'תושבי מכה ידעו ככל הנראה מעט על השורשים של הנצרות — אך הושפעו במשך הזמן ממנהגי הנוצרים, מאורחות חייהם, ובעיקר מהליכותיהם של הנזירים.', r:'§20'},
+  ]}),
+
+S({ act:4, plate:'night', cam:{x0:.38,x1:.58,z0:1.08,z1:1.14}, mood:{warp:.2,stars:1,fire:[[.318,.775,44]]},
+  beats:[
+    {v:'n', t:'אלה היוו מקור השראה לתושבי מכה — בעיקר בענייני צניעות, חסידות ופרישות, דאגה לנזקקים וליתומים ועוד.', r:'§21'},
+    {v:'n', t:'הם הושפעו גם מאורחות חייהם, שכללו התבודדות, כתיבת שירה ומנהגים פולחניים.', r:'§22'},
+    {v:'m', t:'רוב הריטואלים הפולחניים הקיימים היום בדת האסלאם — מקורם בדתות שקדמו לה.', r:'§23'},
+  ]}),
+
+S({ act:4, plate:'street', cam:{x0:.34,x1:.62,z0:1.10,z1:1.08},
+  mood:{warp:.3,fire:[[.232,.445,34],[.432,.492,26],[.735,.505,30]],smoke:[[.23,.42,.35]]},
+  beats:[
+    {v:'q', t:'האומרים נוצרים אנו, אהבתם למאמינים גדולה מכל, זאת כי יש כמרים ונזירים ביניהם, ואין שחץ בלבם.', src:'הקוראן · 5:82', r:'§24'},
+    {v:'n', t:'פרשני הקוראן מסבירים בהקשר לפסוק זה כי כאשר הגיעה למכה משלחת של נוצרים מחבש, הם התרגשו כאשר מוחמד החל להקריא להם פסוקים מהקוראן — והקוראן בפסוק זה משבח אותם על כך.', r:'§25'},
+  ]}),
+
+/* ── מערכה ו׳ ─────────────────────────────────────────────── */
+S({ act:5, plate:'yemen', card:{kick:'מערכה שישית', ttl:'אברהה'},
+  cam:{x0:.30,x1:.66,z0:1.06,z1:1.14}, mood:{warp:.3,mist:1},
+  beats:[
+    {v:'n', t:'גם מדרום למכה, באזור תימן, שלטה ממלכה נוצרית.', r:'§26'},
+  ]}),
+
+S({ act:5, plate:'dust', cam:{x0:.20,x1:.70,z0:1.05,z1:1.15}, mood:{warp:1.2,dust:1.4},
+  beats:[
+    {v:'n', t:'המסורת המוסלמית מספרת כי אברהה, שליט אקסום ששלט בתימן ובחבש ממערב לים האדום, הצפין לעבר מכה — ותכנן להרוס את הכעבה ולבנות שם כנסייה נוצרית.', r:'§27'},
+  ]}),
+
+S({ act:5, plate:'army', cam:{x0:.52,x1:.48,z0:1.04,z1:1.22}, mood:{warp:1.1,dust:1.2,sun:[.36,.06]},
+  beats:[
+    {v:'n', t:'חרף התנגדותו של עבד אל־מטלב, סבו של מוחמד, התקרב אברהה עם צבאו — כשהם רכובים על פיל, או מספר פילים.', r:'§28'},
+    {v:'m', t:'כאן המקור נעצר. על עבד אל־מטלב נאמר רק שהוא <em style="color:inherit;font-weight:400">התנגד</em> — ותו לא. אין לנו את מילותיו, אין נאום, אין סצנה. וגם על הפילים המסורת לא מסכימה עם עצמה: פיל אחד, או מספר פילים.', r:'§28'},
+  ]}),
+
+S({ act:5, plate:'birds', cam:{x0:.56,x1:.40,z0:1.16,z1:1.04}, mood:{warp:.8,dust:.9,birds:1.6},
+  beats:[
+    {v:'n', t:'כאשר הגיע לשערי מכה, עטו עליו ציפורים כשבמקורן וברגליהן אבני חמר, והשליכו אותן על צבאו של אברהה — וכך הכשילו את מזימתו.', r:'§29'},
+    {v:'n', t:'הקוראן מתייחס לכך בסורה 105 — <em>הפיל</em>. סורה שעד היום מהדהדת בתודעתם של מוסלמים רבים בעומדם בפני אתגרים צבאיים.', r:'§30'},
+    {v:'n', t:'כך למשל, מוחמד אלצ׳יף, רמטכ״ל חמאס, כינה את צה״ל ״אברהה של זמננו“ במבצע צוק איתן, 2014 — מבצע שכונה בפי חמאס ״אלַעצף אלַמאּכול“, המוץ הנאכל, על בסיס הכתוב בסורת אלפיל.', r:'§31'},
+  ]}),
+
+/* ── מערכה ז׳ ─────────────────────────────────────────────── */
+S({ act:6, plate:'mecca', card:{kick:'מערכה שביעית', ttl:'האלילים'},
+  cam:{x0:.62,x1:.42,z0:1.14,z1:1.06}, mood:{warp:.9,sun:[.53,.12],smoke:[[.62,.30,.5],[.35,.33,.4]],dust:.4},
+  beats:[
+    {v:'n', t:'לצד ההיכרות של תושבי חצי האי עם היהדות והנצרות, הערבים היו עובדי אלילים — פוליתיאיסטיים, מאמינים בריבוי אלילים.', r:'§32'},
+    {v:'m', t:'המסורות החוץ־אסלאמיות, כאמור, דלות. ממה שמשתקף מזווית הראייה של האסלאם נראה כי עבודת האלילים הייתה חזון נפרץ בחצי האי ערב.', r:'§33'},
+    {v:'n', t:'האבן השחורה — <em>אלחג׳ר אלאסוד</em> — הטבועה בפינת הכעבה, מקדש בצורת קובייה בעיר מכה, הייתה קדושה ונערצת שנים רבות לפני עלות האסלאם על בימת ההיסטוריה.', r:'§34'},
+  ]}),
+
+S({ act:6, plate:'idols', cam:{x0:.50,x1:.46,z0:1.04,z1:1.14},
+  mood:{warp:.1,fire:[[.168,.855,54],[.632,.700,46]]},
+  spots:[
+    {x:.478,y:.32,tag:'הפסל', h:'הבל', b:'הפסל היה בתוך הכעבה, יחד עם פסלים נוספים, ויוחסו לו סגולות כגון פתרון גורלות.', r:'§36'},
+    {x:.615,y:.855,tag:'החיצים', h:'יידוי חיצים', b:'הפרקטיקה הייתה יידוי חיצים ליד הפסל, ובהתאם לנפילת החץ היו מפרשים את התוצאה.', r:'§37'},
+    {x:.145,y:.40,tag:'הגומחות', h:'פסלים נוספים', b:'הבל לא היה לבדו. הקוראן מציין אלילים אחרים שהיו מפורסמים במכה — כגון האלילות אללאת, אלעזה ומנאת.', r:'§43'},
+  ],
+  beats:[
+    {v:'n', t:'כמו כן, בעיר מכה היה אליל ששמו <em>הבל</em> — אולי שיבוש השם בעל, האליל התנ״כי — שלפי המסורת היה אלילם של שבט קוריש, שבטו של מוחמד.', r:'§35'},
+    {v:'n', t:'הפסל היה בתוך הכעבה, יחד עם פסלים נוספים, ויוחסו לו סגולות כגון פתרון גורלות.', r:'§36'},
+    {v:'n', t:'הפרקטיקה הייתה יידוי חיצים ליד הפסל, ובהתאם לנפילת החץ היו מפרשים את התוצאה.', r:'§37'},
+  ]}),
+
+S({ act:6, plate:'study', cam:{x0:.30,x1:.58,z0:1.16,z1:1.08}, mood:{warp:.15,fire:[[.275,.655,46]],beam:[.755,.20]},
+  beats:[
+    {v:'n', t:'אבן השאם, עורך הביוגרפיה של מוחמד, בן המאה התשיעית לספירה, ציין כי מי שהביא את הבל למכה היה גבר תקיף בשם <em>עמרו בן לחי</em>, בן שבט ח׳זאעה.', r:'§38'},
+    {v:'m', t:'חוקרים גורסים כי מסורת זו נועדה להרחיק את חטא האלילות משבטו של נביא האסלאם — וכדי להדגיש כי הנביא לא הביא בשורה חדשה, אלא החזיר עטרה ליושנה.', r:'§39'},
+    {v:'n', t:'לפי מסורת זו מוחמד התחבר לדת אברהם — הלוא היא דת אבותיו הקדמונים, אשר התמסרו לאל אחד ויחיד.', r:'§40'},
+    {v:'m', t:'בכך, למעשה, טוען האסלאם כי הוא קדם ליהדות ולנצרות — כשהוא ״מלבין“ טקסים פגאניים, באומרו כי אלה הם ריטואלים מונותאיסטיים עתיקים.', r:'§41'},
+  ]}),
+
+S({ act:6, plate:'mecca', cam:{x0:.44,x1:.52,z0:1.08,z1:1.20}, mood:{warp:.9,sun:[.53,.12],smoke:[[.62,.30,.4]],dust:.35},
+  beats:[
+    {v:'n', t:'למשל, מנהג הקפת הכעבה אינו פגאני באמת — אלא מדובר במנהגו המקורי של אברהם, שהיה מוסלמי, מתמסר לאל האחד והיחיד.', r:'§42'},
+    {v:'n', t:'הקוראן מציין אלילים אחרים שהיו מפורסמים במכה, כגון האלילות <em>אללאת, אלעזה ומנאת</em>, שנחשבו לבנותיו של אללה, ראש פנתיאון האלים.', r:'§43'},
+    {v:'q', t:'הם המרו את פי ואמרו, אל תיטשו את אליליכם, אל תיטשו את וד, סואע, יגות׳, יעוק ולא את נשר.', src:'הקוראן · 71:23', r:'§44'},
+  ]}),
+
+/* ── מערכה ח׳ ─────────────────────────────────────────────── */
+S({ act:7, plate:'worldmap', card:{kick:'מערכה שמינית', ttl:'ערב עליית האסלאם'},
+  cam:{x0:.72,x1:.10,z0:1.10,z1:1.10}, mood:{warp:0},
+  beats:[
+    {v:'n', t:'ערב עליית האסלאם, הערבים בחצי האי ערב לא היוו איום על אף אימפריה — לא הסאסאנית מצפון־מזרח ולא הביזנטית מצפון־מערב.', r:'§45'},
+    {v:'n', t:'בנוסף, חרף התחרות בין האימפריות, אף אחת מהן לא שאפה לכבוש חלקים מחצי האי ערב.', r:'§46'},
+  ]}),
+
+S({ act:7, plate:'gate', cam:{x0:.58,x1:.28,z0:1.10,z1:1.08}, mood:{warp:.8,dust:.4},
+  spots:[
+    {x:.44,y:.30,tag:'קצר', h:'קצר — מבצר', b:'מילים רבות בערבית מקורן לטיני ויווני. ״מבצר“ — קצר.', r:'§47'},
+    {x:.155,y:.12,tag:'ברג׳', h:'ברג׳ — מגדל', b:'ו״מגדל“ — ברג׳.', r:'§47'},
+    {x:.795,y:.68,tag:'קלם', h:'קלם — קולמוס', b:'ועט כתיבה — קלם, דהיינו קולמוס.', r:'§47'},
+  ],
+  beats:[
+    {v:'n', t:'כמו כן, הביזנטים לא הצליחו להשליט את דתם שם — למרות השפעתם על תושבי חצי האי.', r:'§47'},
+    {v:'n', t:'ההשפעה נשארה במקום אחר: בשפה. מילים רבות בערבית מקורן לטיני ויווני — ״מבצר“ הוא <em>קצר</em>, ״מגדל“ הוא <em>ברג׳</em>, ועט כתיבה הוא <em>קלם</em>, דהיינו קולמוס.', r:'§47'},
+  ]}),
+
+S({ act:7, plate:'title', cam:{x0:.40,x1:.66,z0:1.05,z1:1.16}, mood:{warp:1,dust:.4,sun:[.78,.20]},
+  beats:[
+    {v:'m', t:'יחד עם זאת, חוקרים מצביעים על רעיונות ומושגים נוצריים אשר הופיעו בקוראן — לצד הדהודים מהדת היהודית, שמקורם בתנ״ך ובספרות חז״ל.', r:'§48'},
+  ], end:true}),
+]
+
+/* ══════════════════════════════════════════════════════════════
+   המנוע
+   ══════════════════════════════════════════════════════════════ */
+
+const $ = (s) => document.querySelector(s)
+const stage = $('#stage')
+const world = $('#world'), wctx = world.getContext('2d')
+const air   = $('#air'),   actx = air.getContext('2d')
+const col   = $('#col'),   cardEl = $('#card'), peek = $('#peek')
+const rail  = $('#rail'),  actname = $('#actname'), hint = $('#hint')
+const spotsEl = $('#spots')
+
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches
+
+/* ── טעינת הלוחות ─────────────────────────────────────────── */
+const NAMES = [...new Set(SCENES.map(s => s.plate))]
+const IMG = {}
+let loaded = 0
+NAMES.forEach(n => {
+  const im = new Image()
+  im.onload = im.onerror = () => { if (++loaded === NAMES.length) start() }
+  im.src = 'plates-bright/' + n + '.jpg'
+  IMG[n] = im
+})
+
+/* ── מצב ──────────────────────────────────────────────────── */
+let si = 0            /* אינדקס סצנה */
+let bi = -1           /* אינדקס פסקה בתוך הסצנה; ‎-1 = כרטיס מערכה */
+let sceneT0 = 0       /* מתי נכנסנו לסצנה */
+let fade = 1          /* מעבר בין לוחות */
+let prevPlate = null, prevCam = null
+let panNow = 0, zoomNow = 1
+const seenSpots = new Set()
+
+/* ── פס המערכות ───────────────────────────────────────────── */
+ACTS.forEach(() => {
+  const d = document.createElement('div')
+  d.className = 'seg'; d.innerHTML = '<i></i>'
+  rail.appendChild(d)
+})
+function paintRail(){
+  const a = SCENES[si].act
+  /* כמה מהמערכה הנוכחית עברנו */
+  const inAct = SCENES.filter(s => s.act === a)
+  const idxInAct = inAct.indexOf(SCENES[si])
+  const total = inAct.reduce((n,s) => n + s.beats.length, 0)
+  const done = inAct.slice(0, idxInAct).reduce((n,s) => n + s.beats.length, 0) + Math.max(0, bi + 1)
+  ;[...rail.children].forEach((seg, i) => {
+    seg.classList.toggle('done', i < a)
+    seg.firstChild.style.width = i === a ? (100 * done / total) + '%' : ''
+  })
+  actname.textContent = ACTS[a]
+}
+
+/* ── ציור הלוח ────────────────────────────────────────────── */
+/* לוח דומם שמזיזים אותו הצידה נשאר לוח דומם. לכן הוא מצויר מחדש
+   בכל פריים כערימה של פרוסות אופקיות דקות, שכל אחת מהן מוזזת קצת:
+   למעלה השמיים נעים, בגובה האופק האוויר החם רועד, ולרגלינו כמעט
+   כלום. זה אותו תרגיל שתיאטרון עושה עם מסך מצויר ומאוורר. */
+const NSL = REDUCED ? 1 : 128
+
+/* הפרוסות חייבות להיות אטומות. אם מציירים אותן ישירות בשקיפות,
+   החפיפה של 1.2 פיקסל בין פרוסה לפרוסה נצבעת פעמיים — ומקבלים
+   פסים אופקיים על כל התמונה. לכן לוח דוהה מצויר קודם על קנבס
+   נסתר במלוא האטימות, ורק אחר כך מולבש כשלם. */
+const buf = document.createElement('canvas')
+const bufX = buf.getContext('2d')
+
+function drawPlate(ctx, img, pan, zoom, now, warp){
+  if (!img.width) return
+  const W = ctx.canvas.width, H = ctx.canvas.height
+  const s = (H / img.height) * zoom
+  const dW = img.width * s
+  const ox = -Math.max(0, dW - W) * pan
+  const oy = (H - img.height * s) / 2
+  if (NSL === 1 || warp === 0){
+    ctx.drawImage(img, ox, oy, dW, img.height * s)
+    return
+  }
+  const sh = img.height / NSL
+  for (let i = 0; i < NSL; i++){
+    const v = i / NSL
+    const sky  = Math.max(0, 1 - v / .34)
+    const heat = Math.exp(-Math.pow((v - .56) / .15, 2))
+    const wob = (
+      sky  * Math.sin(now / 5200 + v * 3.4) * 7 +
+      heat * Math.sin(now /  310 + i * .52) * 2.3 +
+      Math.sin(now / 3700 + v * 7.5) * .8
+    ) * warp
+    ctx.drawImage(img, 0, i * sh, img.width, sh + 1,
+                  ox + wob, oy + i * sh * s, dW, sh * s + 1.2)
+  }
+}
+
+function drawFaded(img, alpha, pan, zoom, now, warp){
+  if (buf.width !== world.width || buf.height !== world.height){
+    buf.width = world.width; buf.height = world.height
+  }
+  bufX.clearRect(0, 0, buf.width, buf.height)
+  drawPlate(bufX, img, pan, zoom, now, warp)
+  wctx.globalAlpha = alpha
+  wctx.drawImage(buf, 0, 0)
+  wctx.globalAlpha = 1
+}
+
+/* ── האוויר ───────────────────────────────────────────────── */
+/* מה שנע באמת הוא לא הלוח אלא מה שמצויר עליו: עשן מהגגות, אש
+   שנושמת, אבק, ציפורים, ערפל בהרים. */
+let motes = [], birdsArr = [], starSeed = []
+function seedAir(){
+  motes = Array.from({length: 90}, () => ({
+    x: Math.random(), y: Math.random(), z: .3 + Math.random() * .7,
+    ph: Math.random() * 6.28,
+  }))
+  starSeed = Array.from({length: 70}, () => ({
+    x: Math.random(), y: Math.random() * .5, ph: Math.random() * 6.28,
+    r: .6 + Math.random() * 1.1,
+  }))
+}
+seedAir()
+
+function launchBirds(n, dir){
+  const y0 = .08 + Math.random() * .2
+  const sp = 30 + Math.random() * 26
+  for (let i = 0; i < n; i++){
+    birdsArr.push({
+      x: dir > 0 ? -.06 - i * .022 : 1.06 + i * .022,
+      y: y0 + (Math.random() - .5) * .07,
+      dir, sp: sp + Math.random() * 12, ph: Math.random() * 6.28,
+    })
+  }
+}
+let nextBird = 3200
+
+function drawAir(now, dt, mood, pan, zoom, img){
+  const W = air.width, H = air.height
+  actx.clearRect(0, 0, W, H)
+  if (REDUCED) return
+
+  /* המרה מקואורדינטות הלוח לקואורדינטות המסך */
+  const s = (H / img.height) * zoom
+  const dW = img.width * s
+  const ox = -Math.max(0, dW - W) * pan
+  const oy = (H - img.height * s) / 2
+  const px = (u) => ox + u * dW
+  const py = (v) => oy + v * img.height * s
+
+  /* כוכבים */
+  if (mood.stars){
+    for (const st of starSeed){
+      const tw = .35 + .65 * (.5 + .5 * Math.sin(now / 900 + st.ph * 5))
+      actx.fillStyle = 'rgba(236,240,255,' + (tw * .5 * mood.stars).toFixed(3) + ')'
+      actx.beginPath(); actx.arc(px(st.x), py(st.y * .55), st.r, 0, 6.283); actx.fill()
+    }
+  }
+
+  /* זוהר אש — נושם, ומחזק ככל שהסצנה נמשכת */
+  if (mood.fire) for (const [u, v, r0] of mood.fire){
+    const pu = .74 + .26 * Math.sin(now / 185 + u * 40) + .12 * Math.sin(now / 71 + v * 30)
+    const X = px(u), Y = py(v), R = r0 * pu * (H / 720)
+    const g = actx.createRadialGradient(X, Y, 0, X, Y, R)
+    g.addColorStop(0,  'rgba(255,183,96,' + (.34 * pu).toFixed(3) + ')')
+    g.addColorStop(.45,'rgba(255,146,58,' + (.13 * pu).toFixed(3) + ')')
+    g.addColorStop(1,  'rgba(255,132,48,0)')
+    actx.fillStyle = g
+    actx.beginPath(); actx.arc(X, Y, R, 0, 6.283); actx.fill()
+  }
+
+  /* קרן אור מהחלון — אבק שנע בתוכה */
+  if (mood.beam){
+    const [u, v] = mood.beam
+    const X = px(u), Y = py(v)
+    const g = actx.createLinearGradient(X, Y, X - H * .5, Y + H * .8)
+    g.addColorStop(0, 'rgba(255,214,140,.13)')
+    g.addColorStop(1, 'rgba(255,214,140,0)')
+    actx.fillStyle = g
+    actx.beginPath()
+    actx.moveTo(X - H * .04, Y); actx.lineTo(X + H * .04, Y)
+    actx.lineTo(X - H * .40, Y + H * .78); actx.lineTo(X - H * .58, Y + H * .78)
+    actx.closePath(); actx.fill()
+  }
+
+  /* עשן */
+  if (mood.smoke) for (const [u, v, rate] of mood.smoke){
+    const X = px(u), Y = py(v), sc = H / 720
+    for (let i = 0; i < 10; i++){
+      const t = ((now / 1000) * rate * .22 + i / 10) % 1
+      const yy = Y - t * 190 * sc
+      const rr = (14 + t * 56) * sc
+      const wob = Math.sin(now / 1500 + i * 1.8 + u * 20) * 20 * t * sc
+      actx.beginPath(); actx.arc(X + wob, yy, rr, 0, 6.283)
+      actx.fillStyle = 'rgba(226,208,182,' + (.075 * (1 - t)).toFixed(3) + ')'
+      actx.fill()
+    }
+  }
+
+  /* ערפל הרים — פסים אופקיים איטיים */
+  if (mood.mist){
+    for (let i = 0; i < 4; i++){
+      const yy = py(.16 + i * .13)
+      const off = ((now / 1000) * (5 + i * 3)) % (W + 500) - 250
+      const g = actx.createLinearGradient(off - 260, 0, off + 260, 0)
+      g.addColorStop(0, 'rgba(228,236,240,0)')
+      g.addColorStop(.5,'rgba(228,236,240,' + (.11 * mood.mist).toFixed(3) + ')')
+      g.addColorStop(1, 'rgba(228,236,240,0)')
+      actx.fillStyle = g
+      actx.fillRect(off - 260, yy - 26, 520, 52)
+    }
+  }
+
+  /* אבק בקרן האור האחרונה */
+  if (mood.dust){
+    for (const m of motes){
+      const X = ((m.x + now / 90000 * (.4 + m.z)) % 1) * W
+      const Y = (m.y + Math.sin(now / 2600 + m.ph) * .012) * H
+      actx.fillStyle = 'rgba(250,232,198,' + (.05 + m.z * .13 * mood.dust).toFixed(3) + ')'
+      actx.fillRect(X, Y, 1 + m.z * 1.6, 1 + m.z * 1.6)
+    }
+  }
+
+  /* שמש — הילה שנושמת */
+  if (mood.sun){
+    const [u, v] = mood.sun
+    const X = px(u), Y = py(v)
+    const R = H * (.34 + .02 * Math.sin(now / 2600))
+    const g = actx.createRadialGradient(X, Y, 0, X, Y, R)
+    g.addColorStop(0, 'rgba(255,226,160,.16)')
+    g.addColorStop(1, 'rgba(255,196,110,0)')
+    actx.fillStyle = g
+    actx.beginPath(); actx.arc(X, Y, R, 0, 6.283); actx.fill()
+  }
+
+  /* ציפורים */
+  if (mood.birds){
+    nextBird -= dt * 1000
+    if (nextBird <= 0){
+      launchBirds(Math.round(4 + Math.random() * 6 * mood.birds), Math.random() < .5 ? 1 : -1)
+      nextBird = 5000 + Math.random() * 7000 / mood.birds
+    }
+  }
+  for (const b of birdsArr){
+    b.x += b.dir * b.sp * dt / 1000
+    b.ph += dt * 11
+    const f = Math.sin(b.ph)
+    const X = b.x * W, Y = b.y * H
+    actx.strokeStyle = 'rgba(34,22,14,.46)'
+    actx.lineWidth = 1.5
+    actx.beginPath()
+    actx.moveTo(X - 6, Y + f * 3)
+    actx.quadraticCurveTo(X, Y - 2.4 - f * 2.4, X + 6, Y + f * 3)
+    actx.stroke()
+  }
+  birdsArr = birdsArr.filter(b => b.x > -.15 && b.x < 1.15)
+}
+
+/* ── מיקום נקודות ההתבוננות ───────────────────────────────── */
+function placeSpots(pan, zoom, img){
+  const sc = SCENES[si]
+  if (!sc.spots) return
+  const H = air.height, W = air.width
+  const s = (H / img.height) * zoom
+  const dW = img.width * s
+  const ox = -Math.max(0, dW - W) * pan
+  const oy = (H - img.height * s) / 2
+  ;[...spotsEl.children].forEach((el, i) => {
+    const sp = sc.spots[i]
+    el.style.left = (ox + sp.x * dW) + 'px'
+    el.style.top  = (oy + sp.y * img.height * s) + 'px'
+  })
+}
+
+function buildSpots(){
+  spotsEl.innerHTML = ''
+  const sc = SCENES[si]
+  if (!sc.spots) return
+  sc.spots.forEach((sp, i) => {
+    const el = document.createElement('button')
+    el.type = 'button'; el.className = 'spot'
+    el.innerHTML = '<span class="tag">' + sp.tag + '</span>'
+    if (seenSpots.has(si + ':' + i)) el.classList.add('seen')
+    el.addEventListener('click', (e) => {
+      e.stopPropagation()
+      seenSpots.add(si + ':' + i)
+      el.classList.add('seen')
+      showPeek(sp)
+    })
+    spotsEl.appendChild(el)
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on')))
+  })
+}
+
+let peekTimer = 0
+function showPeek(sp){
+  peek.querySelector('.h').textContent = sp.h
+  peek.querySelector('.b').innerHTML = sp.b + '<span class="ref">' + sp.r + '</span>'
+  peek.classList.add('on')
+  col.style.opacity = '0'
+  clearTimeout(peekTimer)
+  peekTimer = setTimeout(hidePeek, 7000)
+}
+function hidePeek(){
+  if (!peek.classList.contains('on')) return
+  peek.classList.remove('on')
+  col.style.opacity = ''
+  clearTimeout(peekTimer)
+}
+
+/* ── הצגת פסקה ────────────────────────────────────────────── */
+function renderBeat(){
+  const sc = SCENES[si]
+  const b = sc.beats[bi]
+  col.innerHTML = ''
+  const wrap = document.createElement('div')
+  wrap.className = 'beat'
+  if (b.v === 'n'){
+    wrap.innerHTML = '<div class="line">' + b.t + '<span class="ref">' + b.r + '</span></div>'
+  } else if (b.v === 'm'){
+    wrap.innerHTML = '<div class="note"><span class="lbl">הערת שוליים</span>' +
+      b.t + '<span class="ref">' + b.r + '</span></div>'
+  } else {
+    wrap.innerHTML = '<div class="quote"><div class="txt">״' + b.t + '“</div>' +
+      '<span class="src">' + b.src + '<span class="ref">' + b.r + '</span></span></div>'
+  }
+  col.appendChild(wrap)
+  requestAnimationFrame(() => requestAnimationFrame(() => wrap.classList.add('in')))
+  paintRail()
+}
+
+/* ── מעבר סצנה ────────────────────────────────────────────── */
+function enterScene(i, showCard = true){
+  const old = SCENES[si]
+  if (i !== si || prevPlate === null){
+    prevPlate = old ? IMG[old.plate] : null
+    prevCam = { pan: panNow, zoom: zoomNow }
+    fade = 0
+  }
+  si = i
+  sceneT0 = performance.now()
+  hidePeek()
+  buildSpots()
+  const sc = SCENES[si]
+  if (sc.card && showCard){
+    bi = -1
+    col.innerHTML = ''
+    cardEl.querySelector('.kick').textContent = sc.card.kick
+    cardEl.querySelector('.ttl').textContent = sc.card.ttl
+    cardEl.classList.add('on')
+  } else {
+    cardEl.classList.remove('on')
+    bi = 0
+    renderBeat()
+  }
+  paintRail()
+}
+
+function next(){
+  hidePeek()
+  const sc = SCENES[si]
+  if (bi === -1){ cardEl.classList.remove('on'); bi = 0; renderBeat(); return }
+  if (bi < sc.beats.length - 1){ bi++; renderBeat(); return }
+  if (sc.end){ $('#fin').classList.add('on'); return }
+  if (si < SCENES.length - 1) enterScene(si + 1)
+}
+
+function prev(){
+  hidePeek()
+  $('#fin').classList.remove('on')
+  const sc = SCENES[si]
+  if (bi > 0){ bi--; renderBeat(); return }
+  if (si > 0){
+    enterScene(si - 1, false)
+    bi = SCENES[si].beats.length - 1
+    renderBeat()
+  }
+}
+
+/* ── קלט ──────────────────────────────────────────────────── */
+let touched = false
+stage.addEventListener('click', (e) => {
+  if (e.target.closest('.spot') || e.target.closest('button')) return
+  if (peek.classList.contains('on')){ hidePeek(); return }
+  mark(); next()
+})
+addEventListener('keydown', (e) => {
+  if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowLeft' ||
+      e.code === 'ArrowDown' || e.code === 'PageDown'){
+    e.preventDefault(); mark(); next()
+  } else if (e.code === 'ArrowRight' || e.code === 'ArrowUp' ||
+             e.code === 'Backspace' || e.code === 'PageUp'){
+    e.preventDefault(); mark(); prev()
+  }
+})
+$('#back').addEventListener('click', (e) => { e.stopPropagation(); mark(); prev() })
+$('#again').addEventListener('click', (e) => {
+  e.stopPropagation(); $('#fin').classList.remove('on')
+  seenSpots.clear(); si = 0; enterScene(0)
+})
+function mark(){
+  if (!touched){ touched = true; hint.classList.add('dim') }
+}
+
+/* ── מדידה ────────────────────────────────────────────────── */
+function measure(){
+  const r = stage.getBoundingClientRect()
+  const dpr = Math.min(2, devicePixelRatio || 1)
+  for (const c of [world, air]){
+    c.width  = Math.round(r.width  * dpr)
+    c.height = Math.round(r.height * dpr)
+    c.style.width = r.width + 'px'
+    c.style.height = r.height + 'px'
+  }
+}
+addEventListener('resize', measure)
+
+/* ── הלולאה ───────────────────────────────────────────────── */
+const ease = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2
+
+function frame(now){
+  const sc = SCENES[si]
+  const img = IMG[sc.plate]
+  const dt = Math.min(50, now - (frame.last || now)); frame.last = now
+
+  /* המצלמה זוחלת לאורך כל הסצנה — לאט, ותמיד. */
+  const span = 4000 + sc.beats.length * 9000
+  const t = ease(Math.min(1, (now - sceneT0) / span))
+  const cam = sc.cam || {x0:.5,x1:.5,z0:1.08,z1:1.08}
+  panNow  = cam.x0 + (cam.x1 - cam.x0) * t
+  zoomNow = cam.z0 + (cam.z1 - cam.z0) * t
+
+  const warp = (sc.mood && sc.mood.warp) ?? .8
+  wctx.clearRect(0, 0, world.width, world.height)
+  if (fade < 1){
+    fade = Math.min(1, fade + dt / 800)
+    /* הלוח היוצא — אטום, ולכן אפשר לצייר אותו ישר */
+    if (prevPlate) drawPlate(wctx, prevPlate, prevCam.pan, prevCam.zoom, now, 0)
+    drawFaded(img, fade, panNow, zoomNow, now, warp)
+  } else {
+    drawPlate(wctx, img, panNow, zoomNow, now, warp)
+  }
+
+  drawAir(now, dt, sc.mood || {}, panNow, zoomNow, img)
+  placeSpots(panNow, zoomNow, img)
+
+  requestAnimationFrame(frame)
+}
+
+function start(){
+  measure()
+  $('#load').classList.add('gone')
+  enterScene(0)
+  requestAnimationFrame(frame)
+}
+</script>
+</body>
+</html>

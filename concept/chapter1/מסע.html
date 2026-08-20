@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ג׳אהליה — המסע</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{
+  --sand:#e6d7b8; --sand-2:#c9b48c;
+  --ink:#0d0a06; --ink-2:#1a1410;
+  --gold:#d9a441; --cool:#8bb4cf; --warn:#cd7a52; --npc:#e2d3b4;
+  --serif:'Frank Ruhl Libre','David Libre',serif;
+  --sans:'Heebo',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--ink);color:var(--sand);font-family:var(--serif);
+  -webkit-font-smoothing:antialiased;user-select:none;cursor:default}
+
+/* ── הבמה ───────────────────────────────────────────────────
+   התמונה גדולה מהמסגרת בכוונה: זה מה שמאפשר להסתכל סביב
+   בלי שהקצה ייחשף. המסגרת היא העיניים, לא המסך. */
+#stage{position:fixed;inset:0;overflow:hidden;background:#000}
+#plate,#plate2{position:absolute;top:50%;left:50%;
+  width:118%;height:118%;object-fit:cover;
+  transform:translate(-50%,-50%);will-change:transform,opacity;
+  transform-origin:50% 52%}
+#plate2{opacity:0}
+#air{position:absolute;inset:0;pointer-events:none}
+#grain{position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")}
+#vig{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(128% 100% at 50% 46%,transparent 44%,rgba(8,5,3,.34) 78%,rgba(8,5,3,.7) 100%)}
+#dip{position:absolute;inset:0;background:#000;opacity:1;pointer-events:none;
+  transition:opacity 1.1s var(--ease);z-index:8}
+
+/* ── קריינות ────────────────────────────────────────────────
+   הטקסט חייב רקע אמיתי, לא רק צל: חול בהיר בולע כל אות.
+   הרצועה נמסכת מלמטה כך שהיא לא נקראת כמסגרת מודבקת. */
+#say{position:absolute;inset:auto 0 0 0;z-index:6;pointer-events:none;
+  padding:0 clamp(24px,5vw,86px) clamp(30px,7vh,74px);
+  display:flex;align-items:flex-end;min-height:46%}
+#say::before{content:'';position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(to top,rgba(7,5,3,.94) 0%,rgba(7,5,3,.8) 30%,
+    rgba(7,5,3,.42) 62%,rgba(7,5,3,0) 100%);
+  opacity:0;transition:opacity .9s var(--ease)}
+#say.on::before{opacity:1}
+#say .box{width:min(56ch,92%);opacity:0;transform:translateY(12px);
+  transition:opacity .75s var(--ease),transform .75s var(--ease)}
+#say.on .box{opacity:1;transform:none}
+.who{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.26em;
+  display:block;margin-bottom:10px;color:var(--gold)}
+.txt{font-weight:300;font-size:clamp(1.08rem,.98rem + .62vw,1.5rem);line-height:1.72;
+  color:#f7f0e2;text-wrap:pretty}
+.txt em{font-style:normal;color:var(--gold);font-weight:400}
+.ref{display:inline-block;margin-inline-start:10px;vertical-align:.26em;
+  font-family:var(--sans);font-weight:300;font-size:.6rem;letter-spacing:.12em;
+  color:rgba(230,215,184,.4);direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+
+/* שלושה קולות שאסור להם להתערבב */
+#say.note .box{border-inline-start:2px solid rgba(139,180,207,.55);padding-inline-start:18px}
+#say.note .who{color:var(--cool)}
+#say.note .txt{font-family:var(--sans);font-weight:300;color:#dceaf3;
+  font-size:clamp(1rem,.92rem + .5vw,1.3rem)}
+#say.quote .box{border-inline-start:2px solid rgba(205,122,82,.6);padding-inline-start:18px}
+#say.quote .who{color:var(--warn)}
+#say.quote .txt{font-style:italic;color:#f6e3d4}
+#say.npc .box{border-inline-start:2px solid rgba(226,211,180,.42);padding-inline-start:18px}
+#say.npc .who{color:var(--npc)}
+
+/* ── HUD ────────────────────────────────────────────────────
+   מינימלי בכוונה. הוא נעלם לגמרי בקטעים הקולנועיים. */
+#hud{position:absolute;inset:0;pointer-events:none;z-index:7;
+  transition:opacity .8s var(--ease)}
+#act{position:absolute;top:clamp(18px,3vh,34px);right:clamp(22px,4vw,52px);text-align:right}
+#act .k{font-family:var(--sans);font-weight:400;font-size:.6rem;letter-spacing:.3em;
+  color:rgba(217,164,65,.85);margin-bottom:5px}
+#act .t{font-weight:300;font-size:clamp(.95rem,.9rem + .3vw,1.2rem);color:rgba(247,240,226,.9)}
+#rail{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(230,215,184,.12)}
+#rail i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#f0c877);
+  width:0;transition:width .5s var(--ease)}
+
+/* ── הנחיה: מה ללחוץ ────────────────────────────────────────
+   מופיעה רק כשמשהו נדרש, ונעלמת ברגע שהשחקן עשה אותו. */
+#cue{position:absolute;bottom:clamp(16px,3.4vh,30px);left:50%;transform:translateX(-50%);
+  z-index:7;font-family:var(--sans);font-weight:300;font-size:.76rem;letter-spacing:.14em;
+  color:rgba(247,240,226,.72);opacity:0;transition:opacity .6s var(--ease);
+  pointer-events:none;display:flex;align-items:center;gap:10px;white-space:nowrap}
+#cue.on{opacity:1}
+kbd{font-family:var(--sans);font-weight:500;font-size:.68rem;letter-spacing:.08em;
+  border:1px solid rgba(230,215,184,.4);border-radius:4px;padding:4px 9px;
+  background:rgba(12,9,6,.55);color:var(--sand);direction:ltr;unicode-bidi:isolate}
+/* מד ההליכה — מתמלא כל עוד מחזיקים */
+#walkbar{width:82px;height:2px;background:rgba(230,215,184,.2);border-radius:2px;overflow:hidden}
+#walkbar i{display:block;height:100%;width:0;background:var(--gold)}
+
+/* ── המפה ───────────────────────────────────────────────────
+   מצוירת בקוד, לא תמונה. היא גדלה עם הפרק — וזאת ההתקדמות
+   האמיתית של השחקן, לא אחוזים ולא ניקוד. */
+#mapwrap{position:absolute;inset:0;z-index:5;display:none;
+  align-items:center;justify-content:center;background:rgba(7,5,3,.9)}
+#mapwrap.on{display:flex}
+#map{max-width:min(92vw,1080px);max-height:78vh;
+  box-shadow:0 30px 90px rgba(0,0,0,.7)}
+
+/* ── מסך פתיחה ופתיחים קולנועיים ────────────────────────── */
+#card{position:absolute;inset:0;z-index:9;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;gap:18px;
+  background:radial-gradient(70% 70% at 50% 46%,#17110b 0%,#080604 100%);
+  transition:opacity 1.1s var(--ease)}
+#card.off{opacity:0;pointer-events:none}
+#card .k{font-family:var(--sans);font-weight:300;font-size:.68rem;letter-spacing:.42em;
+  color:rgba(217,164,65,.9)}
+#card h1{font-weight:300;font-size:clamp(2.4rem,1.6rem + 4.4vw,4.6rem);line-height:1.06;
+  letter-spacing:.02em}
+#card p{font-weight:300;font-size:clamp(.95rem,.9rem + .35vw,1.15rem);
+  color:rgba(230,215,184,.72);max-width:44ch;line-height:1.8}
+#card .keys{display:flex;gap:26px;margin-top:14px;font-family:var(--sans);
+  font-size:.74rem;font-weight:300;color:rgba(230,215,184,.6);flex-wrap:wrap;
+  justify-content:center}
+#card .keys span{display:flex;align-items:center;gap:8px}
+#go{margin-top:22px;font-family:var(--sans);font-weight:400;font-size:.8rem;
+  letter-spacing:.24em;padding:14px 40px;border:1px solid rgba(217,164,65,.5);
+  background:transparent;color:var(--gold);cursor:pointer;border-radius:2px;
+  transition:background .4s var(--ease),border-color .4s var(--ease)}
+#go:hover,#go:focus-visible{background:rgba(217,164,65,.12);border-color:var(--gold);outline:none}
+
+/* טקסט קולנועי שמופיע על שחור */
+#slate{position:absolute;inset:0;z-index:7;display:flex;align-items:center;
+  justify-content:center;pointer-events:none;opacity:0;
+  transition:opacity 1s var(--ease);background:rgba(6,4,3,.72)}
+#slate.on{opacity:1}
+#slate div{font-weight:300;font-size:clamp(1.3rem,1.1rem + 1.4vw,2.2rem);
+  text-align:center;max-width:22ch;line-height:1.5;letter-spacing:.02em}
+
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <img id="plate" alt="">
+  <img id="plate2" alt="">
+  <canvas id="air"></canvas>
+  <div id="grain"></div>
+  <div id="vig"></div>
+
+  <div id="mapwrap"><canvas id="map" width="1400" height="900"></canvas></div>
+
+  <div id="say"><div class="box"></div></div>
+
+  <div id="hud">
+    <div id="act"><div class="k"></div><div class="t"></div></div>
+    <div id="rail"><i></i></div>
+  </div>
+
+  <div id="cue"></div>
+  <div id="slate"><div></div></div>
+  <div id="dip"></div>
+
+  <div id="card">
+    <div class="k">פרק ראשון</div>
+    <h1>ג׳אהליה</h1>
+    <p>חצי האי ערב, רגע לפני הופעת האסלאם. אתה הולך בעצמך — מה שתראה בדרך הוא מה שתדע.</p>
+    <div class="keys">
+      <span><kbd>W</kbd> להחזיק כדי ללכת</span>
+      <span><kbd>עכבר</kbd> להסתכל סביב</span>
+      <span><kbd>רווח</kbd> להמשיך</span>
+    </div>
+    <button id="go">להתחיל</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ג׳אהליה — המסע
+   גוף ראשון. אין דמות על המסך; המסגרת היא העיניים.
+   הסדר, הטקסטים והסעיפים לקוחים מ„הסדר המלא“ — 11 מערכות.
+   כל שורה היא ציטוט או פרפראזה קרובה מ־SOURCE-TEXT.md.
+   ═══════════════════════════════════════════════════════════ */
+
+const P = 'world/'   /* העולמות: פריימים מהסרט + פלטות מכוילות */
+
+/* ── המערכות ─────────────────────────────────────────────── */
+const ACTS = [
+  ['מערכה אפס','פתיחה'],
+  ['מערכה ראשונה','מכה — ביקור ראשון'],
+  ['מערכה שנייה','היציאה והדרך'],
+  ['מערכה שלישית','שתי האימפריות'],
+  ['מערכה רביעית','סחורות ורעיונות'],
+  ['מערכה חמישית','ית׳רב'],
+  ['מערכה שישית','הנזירים'],
+  ['מערכה שביעית','אברהה'],
+  ['מערכה שמינית','הדרך חזרה'],
+  ['מערכה תשיעית','מכה — ביקור שני'],
+  ['מערכה עשירית','הטרנספורמציה והסיום'],
+]
+
+/* קיצורים לקולות: r=הראוי · n=הערת שוליים · q=ציטוט · c=דמות */
+const r = (t, ref) => ({v:'r', who:'הראוי', t, r:ref})
+const n = (t, ref) => ({v:'n', who:'הערת שוליים', t, r:ref})
+const q = (who, t, ref) => ({v:'q', who, t, r:ref})
+const c = (who, t, ref) => ({v:'c', who, t, r:ref})
+
+/* ── הביטים ───────────────────────────────────────────────
+   k: W=הליכה · S=עצירה · C=שיחה · I=פעולה · F=קולנועי · M=מפה
+   d: כמה צריך ללכת · cam: מאיפה לאן המבט נע בתוך הפריים
+   air: מה חי בפריים גם כשעומדים במקום                     */
+const B = [
+
+/* ══ מערכה אפס ═════════════════════════════════════════ */
+{a:0, k:'F', p:'valley-far', slate:['חצי האי ערב','רגע לפני הופעת האסלאם'],
+ cam:[.5,.5,1.16,1.02], hold:7, air:{dust:.5,wind:1}},
+
+{a:0, k:'S', p:'valley-near', cam:[.46,.54,1.04,1.08], air:{dust:.45,wind:.8,birds:.3},
+ say:[
+  r('כדי להבין כיצד התפתחה דת האסלאם — איך עלה בדעתו של מוחמד רעיון המונותאיזם, האמונה באל אחד ויחיד — יש להבין קודם את המקום שאליו נולד.','§0'),
+  r('את התרבות והחיים בחצי האי ערב טרום עליית האסלאם. תקופה המכונה <em>ג׳אהליה</em> — תקופת הבערות והברבריות.','§0'),
+  n('המידע על אודות החיים בחצי האי ערב טרום תקופת האסלאם דל, ומרביתו ידוע לנו מהספרות והמסורת המוסלמית — אשר אותה יש לקחת ב״עירבון מוגבל“ במבט ביקורתי.','§1'),
+  n('שימו לב היכן ההערות האלה חוזרות. הן חוזרות הרבה.'),
+ ]},
+
+/* ══ מערכה ראשונה — מכה, ביקור ראשון ═══════════════════ */
+{a:1, k:'W', p:'alley-1', cap:'הסמטה המזרחית', d:100,
+ cam:[.44,.52,1.04,1.13], air:{dust:.6,shaft:.5}},
+{a:1, k:'W', p:'alley-2', cap:'הסמטה המזרחית', d:100,
+ cam:[.54,.46,1.02,1.14], air:{dust:.55,shaft:.6}},
+{a:1, k:'W', p:'alley-3', cap:'סוף הסמטה', d:90,
+ cam:[.5,.5,1.03,1.12], air:{dust:.5,shaft:.7}},
+{a:1, k:'W', p:'square-in', cap:'הכיכר נפתחת', d:80,
+ cam:[.52,.48,1.02,1.1], air:{dust:.4,shaft:.4}},
+
+{a:1, k:'S', p:'kaaba', cam:[.5,.46,1.06,1.11], air:{dust:.35,shaft:.3},
+ say:[
+  r('הכעבה. מקדש בצורת קובייה בעיר מכה.','§34'),
+  r('המסע עוד יחזיר אותך לכאן.'),
+ ]},
+
+{a:1, k:'W', p:'ansab', cap:'חציית הכיכר', d:90,
+ cam:[.42,.58,1.04,1.12], air:{dust:.4}},
+{a:1, k:'W', p:'market', cap:'דוכני השוק', d:90,
+ cam:[.56,.44,1.03,1.13], air:{dust:.45}},
+{a:1, k:'W', p:'gate-in', cap:'שער העיר', d:80,
+ cam:[.5,.5,1.02,1.14], air:{dust:.4}},
+
+/* ══ מערכה שנייה — היציאה והדרך ════════════════════════ */
+{a:2, k:'W', p:'gate-out', cap:'יציאה אל הדרך', d:90,
+ cam:[.5,.5,1.03,1.13], air:{dust:.5,wind:.6}},
+{a:2, k:'W', p:'town', cap:'מכה מאחור', d:80,
+ cam:[.58,.4,1.05,1.1], air:{dust:.5,wind:.7}, look:'מכה מתרחקת'},
+
+{a:2, k:'M', lvl:1, say:[ r('זה כל מה שידוע לך כרגע.') ]},
+
+{a:2, k:'W', p:'road', cap:'הדרך במדבר', d:110,
+ cam:[.48,.52,1.02,1.15], air:{dust:.8,wind:1,heat:.6}},
+{a:2, k:'W', p:'caravan', cap:'עם השיירה', d:90,
+ cam:[.54,.46,1.04,1.12], air:{dust:.85,wind:.9,heat:.5}},
+
+{a:2, k:'C', p:'caravan', cam:[.5,.48,1.08,1.12], air:{dust:.7,wind:.8},
+ say:[
+  c('מלווה השיירה','במאות הראשונות לספירה חיו שבטים נוודים בצפון חצי האי, והם היו בני חסות של האימפריות.','§6'),
+  c('מלווה השיירה','הם נדדו צפונה מאזור תימן, ושימשו מתווכים בין האימפריות.','§7'),
+ ]},
+
+{a:2, k:'W', p:'pass', cap:'המעבר הצר', d:100,
+ cam:[.44,.56,1.03,1.13], air:{dust:.6,wind:.7}},
+
+{a:2, k:'S', p:'pass', cam:[.56,.44,1.06,1.1], air:{dust:.5,wind:.6},
+ say:[
+  r('שבט גסאן היה בן חסות של האימפריה הביזנטית, ושבט לח׳ם היה של זו הסאסאנית־פרסית.','§8'),
+  r('אימפריה שרוצה שהדרך תישמר לא חייבת לכבוש אותה. מספיק שמישהו ישמור עליה בשבילה.'),
+ ]},
+
+/* ══ מערכה שלישית — שתי האימפריות ══════════════════════ */
+{a:3, k:'W', p:'ridge', cap:'עלייה לנקודת תצפית', d:120,
+ cam:[.5,.5,1.14,1.02], air:{dust:.4,wind:.9,birds:.4}},
+
+{a:3, k:'S', p:'ridge', cam:[.5,.14,1.04,1.06], air:{wind:.9,birds:.4},
+ say:[
+  r('במאות שקדמו לעליית האסלאם חיו שתי אימפריות מצפון לחצי האי ערב.','§2'),
+  r('מצפון־מערב — האימפריה הביזנטית, זו שהחליפה את האימפריה הרומית העתיקה. דתה הייתה נוצרית אורתודוקסית.','§3'),
+ ]},
+
+{a:3, k:'S', p:'ridge', cam:[.14,.86,1.06,1.06], air:{wind:.9},
+ say:[
+  r('מצפון־מזרח — האימפריה הסאסאנית־פרסית, שמשלה באזור איראן ועיראק. עיר בירתה הייתה <em>קטסיפון</em>, על גדת נהר החידקל.','§4'),
+ ]},
+
+{a:3, k:'C', p:'camp', cam:[.48,.52,1.06,1.1], air:{fire:.9,stars:.8},
+ say:[
+  c('נוסע פרסי','דתה של האליטה השלטונית אצלנו זורואסטרית — אמונה באל טוב ובאל רע שנלחמים זה בזה.','§5'),
+  r('דואליות. שניות של האלוהות.','§5'),
+ ]},
+
+{a:3, k:'M', lvl:2, say:[ r('העולם שלך הפסיק להיות „מכה ומדבר“.') ]},
+
+/* ══ מערכה רביעית — סחורות ורעיונות ════════════════════ */
+{a:4, k:'W', p:'border', cap:'תחנת הגבול', d:100,
+ cam:[.42,.58,1.03,1.12], air:{dust:.6}},
+
+{a:4, k:'C', p:'border', cam:[.54,.48,1.08,1.11], air:{dust:.5},
+ say:[
+  c('הסוחר','משי. תבלינים. הדרך הזאת שומרת על עצמה כי כולם צריכים אותה.','§7'),
+ ]},
+
+{a:4, k:'S', p:'border', cam:[.5,.5,1.05,1.09], air:{dust:.5},
+ say:[
+  r('אזור החג׳אז היה יחסית חבוי, והאימפריות לא גילו בו עניין רב.','§9'),
+  r('ובכל זאת חלחלו אליו רעיונות ומושגים מונותאיסטים — מהיהדות ומהנצרות — בתהליך איטי ומדורג. אלה הותירו רושם בארצם של הערבים.','§9'),
+ ]},
+
+/* ══ מערכה חמישית — ית׳רב ══════════════════════════════ */
+{a:5, k:'W', p:'yathrib', cap:'כניסה לית׳רב', d:110,
+ cam:[.46,.54,1.02,1.13], air:{birds:.7,leaf:.8}},
+
+{a:5, k:'S', p:'yathrib', cam:[.54,.46,1.06,1.1], air:{birds:.6,leaf:.7},
+ say:[
+  r('מקובל לומר כי יהודים חיו בחלקו הצפוני של חצי האי לכל הפחות מאז המאה הראשונה לספירה, לאחר חורבן בית המקדש השני בידי הרומאים — ובעיקר ביישובים כמו <em>ח׳יבר, תימא</em> ו<em>ית׳רב</em>, שתכונה לימים ״אלמדינה“, העיר של הנביא.','§10'),
+  r('בדרום חצי האי יש עדויות על התיישבות יהודים מאז המאה החמישית לספירה.','§12'),
+ ]},
+
+{a:5, k:'W', p:'terraces', cap:'השוק של ית׳רב', d:100,
+ cam:[.4,.6,1.04,1.12], air:{birds:.5,leaf:.6}},
+
+{a:5, k:'C', p:'terraces', cam:[.52,.5,1.07,1.1], air:{leaf:.5},
+ say:[
+  c('סוחר יהודי','אנחנו חיים כאן בתצורה שבטית, ומושפעים באופן טבעי מהתרבות הערבית.','§11'),
+  c('סוחר יהודי','בחיי היום־יום אנחנו חיים בשלום עם שכנינו. יש מסחר, ויש נושאי תרבות משותפים — כמו שירה. אבל כל שבט חי עם החוקים והמנהגים שלו.','§13'),
+ ]},
+
+{a:5, k:'S', p:'terraces', cam:[.5,.5,1.06,1.08], air:{leaf:.5},
+ say:[
+  r('הערבים ידעו כי היהודים שונים בכך שיש להם דת משלהם — ואף היו מודעים לעליונות שהרגישו היהודים מכך.','§14'),
+  q('הקוראן · 2:94','״כי רק להם מכל האנשים נועדה נחלת העולם הבא אצל אללה.“','§15'),
+ ]},
+
+{a:5, k:'C', p:'yathrib', cam:[.56,.46,1.08,1.11], air:{birds:.4,leaf:.5},
+ say:[
+  c('חכם יהודי','אנחנו משתפים את שכנינו באמונתנו, במסורותינו, ואף בציפייתנו למשיח.','§16'),
+  n('לא מן הנמנע שכאשר מוחמד היגר לית׳רב, הוא קיווה שהיהודים יטו אוזן קשבת לבשורתו.','§17'),
+ ]},
+
+{a:5, k:'M', lvl:3, say:[ r('לא התבקשת למקם אותן. פשוט למדת שהמרחב רחב מהעיר שבה ביקרת.') ]},
+
+/* ══ מערכה שישית — הנזירים ═════════════════════════════ */
+{a:6, k:'W', p:'monastery', cap:'הדרך אל המנזר', d:110,
+ cam:[.44,.54,1.02,1.12], air:{wind:.8,quiet:1}},
+
+{a:6, k:'S', p:'monastery', cam:[.54,.46,1.06,1.09], air:{wind:.7,quiet:1},
+ say:[
+  r('גם הנצרות לא הייתה זרה לתושבי חצי האי — הן מהאזור הדרום־מערבי שבו משלה ממלכת אקסום הנוצרית, שחלשה גם על חלקים של תימן, והן מהצפון, בסביבות ארם נהריים, בין הפרת והחידקל — <em>בין אלראפדין</em>.','§18'),
+  r('שונים היו תושבי פרס, שדבקו באמונתם הזורואסטרית וכמעט שלא הושפעו מן הנצרות.','§19'),
+ ]},
+
+{a:6, k:'W', p:'cell', cap:'בתוך המנזר', d:70,
+ cam:[.48,.52,1.04,1.1], air:{fire:.4,quiet:1,shaft:.8}},
+
+{a:6, k:'S', p:'cell', cam:[.52,.48,1.06,1.08], air:{fire:.4,shaft:.7,quiet:1},
+ say:[
+  r('תושבי מכה ידעו ככל הנראה מעט על השורשים של הנצרות — אך הושפעו במשך הזמן ממנהגי הנוצרים, מאורחות חייהם, ובעיקר מהליכותיהם של הנזירים.','§20'),
+ ]},
+
+{a:6, k:'C', p:'cell', cam:[.5,.5,1.07,1.09], air:{fire:.4,shaft:.6,quiet:1},
+ say:[
+  c('הנזיר','צניעות. חסידות. פרישות. דאגה לנזקקים וליתומים.','§21'),
+  c('הנזיר','ויש כאן גם התבודדות, כתיבת שירה, ומנהגים פולחניים.','§22'),
+  n('רוב הריטואלים הפולחניים הקיימים היום בדת האסלאם — מקורם בדתות שקדמו לה.','§23'),
+ ]},
+
+{a:6, k:'S', p:'cell', cam:[.46,.54,1.05,1.08], air:{fire:.4,shaft:.5,quiet:1},
+ say:[
+  q('הקוראן · 5:82','״האומרים נוצרים אנו, אהבתם למאמינים גדולה מכל, זאת כי יש כמרים ונזירים ביניהם, ואין שחץ בלבם.“','§24'),
+  r('פרשני הקוראן מסבירים כי כאשר הגיעה למכה משלחת של נוצרים מחבש, הם התרגשו כשמוחמד החל להקריא להם פסוקים מהקוראן — והפסוק משבח אותם על כך.','§25'),
+ ]},
+
+/* ══ מערכה שביעית — אברהה ══════════════════════════════ */
+{a:7, k:'W', p:'dustwall', cap:'אבק באופק', d:100,
+ cam:[.5,.5,1.02,1.14], air:{dust:1,wind:1.2}},
+
+{a:7, k:'F', p:'dustwall', slate:['לפי המסורת המוסלמית'],
+ cam:[.5,.5,1.06,1.1], hold:4, air:{dust:1,wind:1.2},
+ say:[
+  r('גם מדרום למכה, באזור תימן, שלטה ממלכה נוצרית.','§26'),
+  r('המסורת המוסלמית מספרת כי אברהה, שליט אקסום ששלט בתימן ובחבש ממערב לים האדום, הצפין לעבר מכה — ותכנן להרוס את הכעבה ולבנות שם כנסייה נוצרית.','§27'),
+ ]},
+
+{a:7, k:'W', p:'army', cap:'נקודת תצפית מעל העמק', d:90,
+ cam:[.42,.58,1.1,1.02], air:{dust:.9,wind:1}},
+
+{a:7, k:'F', p:'army', cam:[.5,.5,1.04,1.1], air:{dust:.9,wind:1},
+ say:[
+  r('חרף התנגדותו של עבד אל־מטלב, סבו של מוחמד, התקרב אברהה עם צבאו — כשהם רכובים על פיל, או מספר פילים.','§28'),
+  n('כאן המקור נעצר. על עבד אל־מטלב נאמר רק שהוא התנגד — ותו לא. אין לנו את מילותיו, אין נאום, אין סצנה.','§28'),
+  n('וגם על הפילים המסורת לא מסכימה עם עצמה: פיל אחד, או מספר פילים.'),
+ ]},
+
+{a:7, k:'F', p:'birds', cam:[.5,.5,1.08,1.02], air:{birds:1.4,dust:.7},
+ say:[
+  r('כאשר הגיע לשערי מכה, עטו עליו ציפורים כשבמקורן וברגליהן אבני חמר, והשליכו אותן על צבאו — וכך הכשילו את מזימתו.','§29'),
+  r('הקוראן מתייחס לכך בסורה 105 — <em>הפיל</em>. סורה שעד היום מהדהדת בתודעתם של מוסלמים רבים בעומדם בפני אתגרים צבאיים.','§30'),
+ ]},
+
+{a:7, k:'S', p:'birds', dark:1, cam:[.5,.5,1.04,1.04], air:{},
+ say:[
+  r('הסיפור לא נשאר בעבר. מוחמד אלצ׳יף, רמטכ״ל חמאס, כינה את צה״ל ״אברהה של זמננו“ במבצע צוק איתן, 2014 — מבצע שכונה בפי חמאס ״אלעצף אלמאכול“, המוץ הנאכל, על בסיס הכתוב בסורת אלפיל.','§31'),
+ ]},
+
+/* ══ מערכה שמינית — הדרך חזרה ══════════════════════════ */
+{a:8, k:'W', p:'nightcamp', cap:'מחנה לילה', d:90,
+ cam:[.46,.54,1.03,1.1], air:{fire:1,stars:1,quiet:1}},
+
+{a:8, k:'M', lvl:4, say:[ r('זו ההתקדמות. לא אחוזים.') ]},
+
+{a:8, k:'W', p:'valley-near', cap:'שחר — חזרה למכה', d:110, tint:'dawn',
+ cam:[.54,.46,1.12,1.02], air:{dust:.4,birds:.5,wind:.6}},
+
+/* ══ מערכה תשיעית — מכה, ביקור שני ═════════════════════ */
+{a:9, k:'W', p:'gate-in', cap:'אותו שער', d:80, tint:'eve',
+ cam:[.5,.5,1.03,1.12], air:{dust:.45,shaft:.5}},
+{a:9, k:'W', p:'alley-1', cap:'אותה סמטה', d:90, tint:'eve',
+ cam:[.44,.52,1.04,1.13], air:{dust:.5,shaft:.6}},
+
+{a:9, k:'S', p:'alley-2', tint:'eve', cam:[.52,.48,1.06,1.09], air:{dust:.5,shaft:.5},
+ say:[
+  r('העיר לא השתנתה. אתה השתנית.'),
+  r('לצד ההיכרות של תושבי חצי האי עם היהדות והנצרות, הערבים היו עובדי אלילים — פוליתיאיסטיים, מאמינים בריבוי אלילים.','§32'),
+  n('המסורות החוץ־אסלאמיות, כאמור, דלות. ממה שמשתקף מזווית הראייה של האסלאם נראה כי עבודת האלילים הייתה חזון נפרץ בחצי האי.','§33'),
+ ]},
+
+{a:9, k:'W', p:'ansab', cap:'אל שולי הכיכר', d:80, tint:'eve',
+ cam:[.56,.44,1.02,1.14], air:{dust:.4}},
+
+{a:9, k:'S', p:'ansab', tint:'eve', cam:[.5,.48,1.1,1.12], air:{dust:.35},
+ say:[
+  r('בעיר מכה היה אליל ששמו <em>הבל</em> — אולי שיבוש השם בעל, האליל התנ״כי — שלפי המסורת היה אלילם של שבט קוריש, שבטו של מוחמד.','§35'),
+  r('הפסל היה בתוך הכעבה, יחד עם פסלים נוספים, ויוחסו לו סגולות כגון פתרון גורלות.','§36'),
+ ]},
+
+{a:9, k:'I', p:'ansab', tint:'eve', cam:[.5,.5,1.1,1.1], air:{dust:.35},
+ pre:r('הפרקטיקה הייתה יידוי חיצים ליד הפסל, ובהתאם לנפילת החץ היו מפרשים את התוצאה.','§37'),
+ act:'להטיל את החץ',
+ post:[
+  n('אין כאן תשובה נכונה ואין ניקוד. הפעולה עצמה היא הידיעה.'),
+ ]},
+
+{a:9, k:'S', p:'ansab', tint:'eve', cam:[.46,.54,1.08,1.1], air:{dust:.35},
+ say:[
+  r('אבן השאם, עורך הביוגרפיה של מוחמד, בן המאה התשיעית לספירה, ציין כי מי שהביא את הבל למכה היה גבר תקיף בשם <em>עמרו בן לחי</em>, בן שבט ח׳זאעה.','§38'),
+  n('חוקרים גורסים כי מסורת זו נועדה להרחיק את חטא האלילות משבטו של נביא האסלאם — ולהדגיש כי הנביא לא הביא בשורה חדשה, אלא החזיר עטרה ליושנה.','§39'),
+ ]},
+
+{a:9, k:'S', p:'ansab', tint:'eve', cam:[.54,.46,1.06,1.08], air:{dust:.35},
+ say:[
+  r('לפי מסורת זו מוחמד התחבר לדת אברהם — דת אבותיו הקדמונים, אשר התמסרו לאל אחד ויחיד.','§40'),
+  n('בכך, למעשה, טוען האסלאם כי הוא קדם ליהדות ולנצרות — כשהוא ״מלבין“ טקסים פגאניים, באומרו כי אלה ריטואלים מונותאיסטיים עתיקים.','§41'),
+ ]},
+
+{a:9, k:'W', p:'kaaba', cap:'אל הכעבה', d:90, tint:'eve',
+ cam:[.5,.5,1.02,1.14], air:{dust:.35}},
+
+{a:9, k:'S', p:'kaaba', tint:'eve', cam:[.5,.5,1.12,1.14], air:{dust:.3},
+ say:[
+  r('האבן השחורה — <em>אלחג׳ר אלאסוד</em> — הטבועה בפינת הכעבה, הייתה קדושה ונערצת שנים רבות לפני עלות האסלאם על בימת ההיסטוריה.','§34'),
+  r('ומנהג הקפת הכעבה אינו פגאני באמת — אלא מנהגו המקורי של אברהם, שהיה מוסלמי, מתמסר לאל האחד והיחיד.','§42'),
+  r('הקוראן מציין אלילים אחרים שהיו מפורסמים במכה — האלילות <em>אללאת, אלעזה ומנאת</em>, שנחשבו לבנותיו של אללה, ראש פנתיאון האלים.','§43'),
+  q('הקוראן · 71:23','״הם המרו את פי ואמרו, אל תיטשו את אליליכם, אל תיטשו את וד, סואע, יגות׳, יעוק ולא את נשר.“','§44'),
+ ]},
+
+/* ══ מערכה עשירית — הטרנספורמציה והסיום ════════════════ */
+{a:10, k:'W', p:'overlook', cap:'עלייה לנקודת התצפית', d:120,
+ cam:[.5,.5,1.14,1.02], air:{dust:.4,birds:.4,wind:.7}},
+
+{a:10, k:'F', p:'overlook', cam:[.5,.5,1.04,1.09], hold:6, vanish:1, air:{dust:.3},
+ say:[
+  r('האלילים נעלמים, אחד אחרי השני. הכעבה נשארת.'),
+ ]},
+
+{a:10, k:'S', p:'idols', cam:[.5,.5,1.06,1.09], air:{fire:.5,quiet:1},
+ say:[
+  r('מוחמד אינו מוצג כמי שמביא דת חדשה לעולם ריק, אלא כמי שמחזיר את דת אברהם — ההתמסרות לאל האחד.','§40 · §42'),
+ ]},
+
+{a:10, k:'S', p:'idols', dark:1, cam:[.5,.5,1.05,1.07], air:{quiet:1},
+ say:[
+  n('כך מפרשת המסורת האסלאמית את העבר.'),
+  n('והמחקר בוחן גם כיצד מסורת כזו מעצבת מחדש את העבר — מעניקה משמעות מונותאיסטית למנהגים קדומים, ומרחיקה את עבודת האלילים מסביבתו של מוחמד.','§39 · §41'),
+  n('המסורת מפרשת. המחקר שואל.'),
+ ]},
+
+{a:10, k:'M', lvl:5, say:[ r('המפה היא הסיכום.') ]},
+
+{a:10, k:'S', p:'overlook', cam:[.5,.5,1.08,1.04], air:{dust:.35,birds:.3},
+ say:[
+  r('ערב עליית האסלאם, הערבים בחצי האי לא היוו איום על אף אימפריה — לא הסאסאנית מצפון־מזרח ולא הביזנטית מצפון־מערב.','§45'),
+  r('וחרף התחרות ביניהן, אף אחת מהן לא שאפה לכבוש חלקים מחצי האי.','§46'),
+  r('הביזנטים לא הצליחו להשליט את דתם שם. ההשפעה נשארה במקום אחר — בשפה. ״מבצר“ הוא <em>קצר</em>, ״מגדל“ הוא <em>ברג׳</em>, ועט כתיבה הוא <em>קלם</em>, דהיינו קולמוס.','§47'),
+  n('יחד עם זאת, חוקרים מצביעים על רעיונות ומושגים נוצריים אשר הופיעו בקוראן — לצד הדהודים מהדת היהודית, שמקורם בתנ״ך ובספרות חז״ל.','§48'),
+ ]},
+
+{a:10, k:'F', p:'overlook', tint:'eve', slate:['זה העולם שבו הופיע האסלאם.','ומי יוביל את השינוי? — מוחמד.'],
+ cam:[.5,.5,1.06,1.12], hold:9, air:{dust:.4}, last:1},
+
+]
+
+/* ═══ מנוע ═════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s)
+const stage=$('#stage'), plate=$('#plate'), plate2=$('#plate2'), air=$('#air')
+const sayBox=$('#say'), sayIn=sayBox.querySelector('.box')
+const hud=$('#hud'), actK=$('#act .k'), actT=$('#act .t'), railI=$('#rail i')
+const cue=$('#cue'), slate=$('#slate'), slateIn=slate.querySelector('div')
+const dip=$('#dip'), card=$('#card'), mapwrap=$('#mapwrap')
+
+const TINT = {
+  eve:  'saturate(.9) brightness(.82) sepia(.16) hue-rotate(-8deg)',
+  dawn: 'saturate(.86) brightness(1.04) sepia(.1) hue-rotate(6deg)',
+  none: 'none',
+}
+
+let i = -1          /* ביט נוכחי */
+let si = 0          /* שורת דיבור בתוך הביט */
+let walked = 0      /* כמה הלכנו בביט הזה */
+let holding = false /* מחזיקים W? */
+let speed = 0       /* מהירות מוחלקת — כדי שההליכה לא תתחיל ותיעצר כמו מתג */
+let bob = 0         /* פאזת הצעדים */
+let mx = 0, my = 0  /* המבט */
+let tx = 0, ty = 0
+let camP = .5, camZ = 1.06
+let busy = true     /* בזמן מעבר — לא מקבלים קלט */
+let t0 = performance.now()
+
+/* ── הטענה מראש: אסור שהעולם ייעצר כדי לחכות לתמונה ────── */
+const NEEDED = [...new Set(B.filter(b => b.p).map(b => b.p))]
+const CACHE = {}
+let ready = 0
+NEEDED.forEach(nm => {
+  const im = new Image()
+  im.onload = im.onerror = () => { ready++ }
+  im.src = P + nm + '.jpg'
+  CACHE[nm] = im
+})
+
+/* ── אוויר: מה שממשיך לחיות גם כשעומדים ────────────────────
+   זו הנקודה. בסרטון, עצירה הקפיאה את כל העולם — אנשים
+   באמצע צעד, אבק תלוי. כאן החלקיקים, האור והציפורים
+   רצים על שעון משלהם, בלי קשר לשאלה אם השחקן זז. */
+const actx = air.getContext('2d')
+let W = 0, H = 0
+function size(){
+  W = air.width = innerWidth; H = air.height = innerHeight
+}
+addEventListener('resize', size); size()
+
+const MOTES = Array.from({length:150}, () => ({
+  x:Math.random(), y:Math.random(), r:.4+Math.random()*1.9,
+  vx:.004+Math.random()*.02, vy:(Math.random()-.5)*.006,
+  a:.06+Math.random()*.3, ph:Math.random()*6.28,
+}))
+const STARS = Array.from({length:120}, () => ({
+  x:Math.random(), y:Math.random()*.6, r:.4+Math.random()*1.1, ph:Math.random()*6.28,
+}))
+let FLOCK = []
+function flock(n){
+  const y0 = .12+Math.random()*.2, dir = Math.random()<.5?1:-1
+  for (let k=0;k<n;k++) FLOCK.push({
+    x: dir>0? -.1-k*.02 : 1.1+k*.02, y:y0+ (Math.random()-.5)*.08,
+    v:(.05+Math.random()*.05)*dir, ph:Math.random()*6.28, s:2+Math.random()*2.4,
+  })
+}
+
+function drawAir(now, dt){
+  const A = (B[i] && B[i].air) || {}
+  actx.clearRect(0,0,W,H)
+
+  /* קרן אור — עדינה, מתנשמת, אף פעם לא סטטית */
+  if (A.shaft){
+    const g = actx.createLinearGradient(W*.72,0,W*.3,H)
+    const p = .1 + Math.sin(now/2600)*.03
+    g.addColorStop(0,'rgba(255,232,186,'+(p*A.shaft).toFixed(3)+')')
+    g.addColorStop(1,'rgba(255,232,186,0)')
+    actx.fillStyle=g; actx.fillRect(0,0,W,H)
+  }
+
+  /* חום מרצד מעל הקרקע */
+  if (A.heat){
+    const y = H*.62
+    actx.fillStyle = 'rgba(255,238,205,'+(.02*A.heat).toFixed(3)+')'
+    for (let k=0;k<8;k++){
+      const o = Math.sin(now/900 + k)*8
+      actx.fillRect(0, y + k*7 + o*.3, W, 2)
+    }
+  }
+
+  /* כוכבים */
+  if (A.stars) for (const s of STARS){
+    const tw = .4 + Math.sin(now/700 + s.ph)*.35
+    actx.fillStyle = 'rgba(238,242,255,'+(tw*A.stars*.7).toFixed(3)+')'
+    actx.beginPath(); actx.arc(s.x*W, s.y*H, s.r, 0, 6.283); actx.fill()
+  }
+
+  /* זוהר מדורה — פועם, כי אש לא עומדת */
+  if (A.fire){
+    const p = .5 + Math.sin(now/230)*.22 + Math.sin(now/97)*.1
+    const X = W*.5, Y = H*.68, R = H*(.28 + p*.06)
+    const g = actx.createRadialGradient(X,Y,0,X,Y,R)
+    g.addColorStop(0,'rgba(255,168,72,'+(.16*p*A.fire).toFixed(3)+')')
+    g.addColorStop(1,'rgba(255,140,50,0)')
+    actx.fillStyle=g; actx.beginPath(); actx.arc(X,Y,R,0,6.283); actx.fill()
+  }
+
+  /* אבק — הדבר שהכי מסגיר עולם קפוא כשהוא נעצר */
+  const d = (A.dust||0) + (A.leaf||0)*.5
+  if (d) for (const m of MOTES){
+    m.x += (m.vx*(.25 + speed*1.5) + (A.wind||0)*.004) * dt*60
+    m.y += (m.vy + Math.sin(now/1400 + m.ph)*.0016) * dt*60
+    if (m.x > 1.05) m.x = -.05
+    if (m.y > 1.05) m.y = -.05
+    if (m.y < -.05) m.y = 1.05
+    const tw = .55 + Math.sin(now/900 + m.ph)*.45
+    actx.fillStyle = 'rgba(250,236,206,'+(m.a*d*tw).toFixed(3)+')'
+    actx.beginPath(); actx.arc(m.x*W, m.y*H, m.r, 0, 6.283); actx.fill()
+  }
+
+  /* ציפורים — נכנסות מדי פעם מעצמן */
+  if (A.birds && Math.random() < .0016*A.birds) flock(3 + (Math.random()*6|0))
+  for (let k=FLOCK.length-1;k>=0;k--){
+    const b = FLOCK[k]
+    b.x += b.v*dt; b.ph += dt*9
+    if (b.x < -.15 || b.x > 1.15){ FLOCK.splice(k,1); continue }
+    const X=b.x*W, Y=b.y*H + Math.sin(b.ph*.4)*6
+    const w = Math.abs(Math.sin(b.ph))*b.s + 1.4
+    actx.strokeStyle='rgba(28,22,16,.5)'; actx.lineWidth=1.3
+    actx.beginPath()
+    actx.moveTo(X-w, Y); actx.quadraticCurveTo(X, Y-w*.62, X+w, Y)
+    actx.stroke()
+  }
+}
+
+/* ── הלולאה ─────────────────────────────────────────────── */
+let last = performance.now()
+/* עטוף: פריים אחד שנופל אסור לו לעצור את העולם לתמיד.
+   בלי זה, שגיאה בודדת מקפיאה את המשחק בלי שום סימן. */
+function frame(now){
+  try { tick(now) } catch(e){ console.error('frame', e) }
+  requestAnimationFrame(frame)
+}
+function tick(now){
+  const dt = Math.min(.05, (now - last)/1000); last = now
+
+  /* מהירות מוחלקת: מאיצים ובולמים, לא מדליקים ומכבים */
+  const b = B[i]
+  const canWalk = b && b.k === 'W' && !busy
+  const want = (canWalk && holding) ? 1 : 0
+  speed += (want - speed) * (want ? .06 : .09)
+  if (speed < .002) speed = 0
+
+  if (canWalk && speed > 0){
+    walked += speed * 34 * dt
+    bob += speed * dt * 7.4
+    if (walkI) walkI.style.width = Math.min(100, walked/b.d*100) + '%'
+    if (walked >= b.d){ walked = b.d; next() }
+  }
+
+  /* המצלמה: מתקדמת לפי המרחק שנצבר, לא לפי השעון */
+  if (b){
+    const prog = b.k === 'W' ? Math.min(1, walked/b.d) : Math.min(1, (now-t0)/9000)
+    const e = prog<.5 ? 2*prog*prog : 1-Math.pow(-2*prog+2,2)/2
+    const [x0,x1,z0,z1] = b.cam || [.5,.5,1.06,1.06]
+    camP = x0 + (x1-x0)*e
+    camZ = z0 + (z1-z0)*e
+  }
+
+  /* המבט — מוחלק, אף פעם לא נצמד לעכבר */
+  tx += (mx - tx) * .06
+  ty += (my - ty) * .06
+
+  /* נדנוד הליכה: קטן מאוד. יותר מזה וזה גורם לבחילה. */
+  const bx = Math.sin(bob*2)*1.3*speed
+  const by = Math.abs(Math.sin(bob))*2.2*speed
+
+  const px = (.5 - camP) * 9 + tx*3.4
+  const py = ty*2.2 + by*.14
+  const tf = 'translate(calc(-50% + '+px.toFixed(2)+'%), calc(-50% + '+py.toFixed(2)+'%)) '
+           + 'scale('+camZ.toFixed(4)+') translate('+bx.toFixed(2)+'px,'+by.toFixed(2)+'px)'
+  plate.style.transform = tf
+  plate2.style.transform = tf
+
+  drawAir(now, dt)
+}
+
+/* ── מעבר בין לוחות: הצלבה, לא חיתוך ────────────────────── */
+function show(name, tint){
+  const src = P + name + '.jpg'
+  const f = TINT[tint || 'none']
+  if (!plate.src){ plate.src = src; plate.style.filter = f; return Promise.resolve() }
+  if (plate.getAttribute('src') === src && plate.style.filter === f) return Promise.resolve()
+  plate2.src = src
+  plate2.style.filter = f
+  return new Promise(res => {
+    requestAnimationFrame(() => {
+      plate2.style.transition = 'opacity .9s var(--ease)'
+      plate2.style.opacity = 1
+      setTimeout(() => {
+        plate.src = src; plate.style.filter = f
+        plate2.style.transition = 'none'; plate2.style.opacity = 0
+        res()
+      }, 940)
+    })
+  })
+}
+
+/* ── טקסט ───────────────────────────────────────────────── */
+function speak(line){
+  sayBox.className = 'on ' + ({r:'',n:'note',q:'quote',c:'npc'}[line.v] || '')
+  sayIn.innerHTML =
+    '<span class="who">' + line.who + '</span>' +
+    '<div class="txt">' + line.t +
+    (line.r ? '<span class="ref">' + line.r + '</span>' : '') + '</div>'
+}
+function hush(){ sayBox.className = '' }
+
+/* walkI מוחזק בנפרד: הוא נקרא בכל פריים, וחיפוש שנכשל
+   באמצע הלולאה היה מפיל את כל האנימציה בבת אחת. */
+let walkI = null
+function setCue(html){
+  walkI = null
+  if (!html){ cue.className=''; cue.innerHTML=''; return }
+  cue.innerHTML = html
+  cue.className = 'on'
+  walkI = cue.querySelector('#walkbar i')
+}
+
+/* ── המפה ───────────────────────────────────────────────── */
+const mapc = $('#map').getContext('2d')
+/* מיקומים יחסיים על הלוח — לא מפה מדויקת, מפת ידע */
+const PLACES = [
+  {lvl:1, x:.40, y:.62, n:'מכה',            big:1},
+  {lvl:2, x:.20, y:.14, n:'ביזנטיון',       tag:'נוצרית אורתודוקסית'},
+  {lvl:2, x:.72, y:.16, n:'קטסיפון',        tag:'סאסאנית · זורואסטרית'},
+  {lvl:3, x:.42, y:.46, n:'ית׳רב',          tag:'לימים אלמדינה'},
+  {lvl:3, x:.36, y:.35, n:'ח׳יבר'},
+  {lvl:3, x:.31, y:.26, n:'תימא'},
+  {lvl:4, x:.30, y:.20, n:'גסאן',           tag:'בני חסות · ביזנטיון'},
+  {lvl:4, x:.63, y:.24, n:'לח׳ם',           tag:'בני חסות · פרס'},
+  {lvl:4, x:.50, y:.86, n:'תימן'},
+  {lvl:4, x:.24, y:.90, n:'אקסום',          tag:'ממלכה נוצרית'},
+  {lvl:5, x:.55, y:.70, n:'החג׳אז',         tag:'חבוי — ורעיונות חלחלו'},
+]
+const ROADS = [
+  {lvl:4, a:[.50,.86], b:[.40,.62]},
+  {lvl:4, a:[.40,.62], b:[.42,.46]},
+  {lvl:4, a:[.42,.46], b:[.31,.26]},
+  {lvl:4, a:[.31,.26], b:[.20,.14]},
+  {lvl:5, a:[.42,.46], b:[.63,.24]},
+  {lvl:5, a:[.63,.24], b:[.72,.16]},
+  {lvl:5, a:[.24,.90], b:[.50,.86]},
+]
+let mapLvl = 0, mapT = 0
+
+function drawMap(now){
+  const c = mapc, w = 1400, h = 900
+  c.clearRect(0,0,w,h)
+  /* קלף */
+  const g = c.createRadialGradient(w*.45,h*.42,60, w*.5,h*.5, w*.72)
+  g.addColorStop(0,'#efe3c6'); g.addColorStop(.62,'#e2d2ae'); g.addColorStop(1,'#c8b489')
+  c.fillStyle=g; c.fillRect(0,0,w,h)
+  /* סיבי הקלף */
+  c.globalAlpha=.05
+  for (let k=0;k<420;k++){
+    c.strokeStyle = k%3 ? '#8a7350' : '#5d4a2e'
+    c.lineWidth = Math.random()*1.1
+    const x=Math.random()*w, y=Math.random()*h, l=8+Math.random()*46, a=Math.random()*6.28
+    c.beginPath(); c.moveTo(x,y); c.lineTo(x+Math.cos(a)*l, y+Math.sin(a)*l); c.stroke()
+  }
+  c.globalAlpha=1
+  /* הים מצד מערב */
+  c.fillStyle='rgba(126,150,158,.34)'
+  c.beginPath(); c.moveTo(0,0)
+  for (let y=0;y<=h;y+=18){
+    const x = 172 + Math.sin(y/104)*30 + Math.sin(y/37)*9
+    c.lineTo(x,y)
+  }
+  c.lineTo(0,h); c.closePath(); c.fill()
+  c.strokeStyle='rgba(70,90,96,.45)'; c.lineWidth=1.6; c.stroke()
+  /* הרים כקווקוו */
+  c.strokeStyle='rgba(120,96,60,.34)'; c.lineWidth=1.4
+  for (let k=0;k<58;k++){
+    const x = 250 + (k%11)*96 + (k%3)*17, y = 110 + ((k*67)%720)
+    c.beginPath(); c.moveTo(x-16,y+9); c.lineTo(x,y-9); c.lineTo(x+16,y+9); c.stroke()
+  }
+
+  const on = p => p.lvl <= mapLvl
+  const fade = p => Math.min(1, Math.max(0, (mapT - (p.lvl===mapLvl?.25:0)) * 1.6))
+
+  /* נתיבים */
+  for (const rd of ROADS){
+    if (!on(rd)) continue
+    const al = fade(rd)
+    c.setLineDash([9,9]); c.lineWidth=2.4
+    c.strokeStyle='rgba(150,88,38,'+(al*.72).toFixed(2)+')'
+    c.beginPath(); c.moveTo(rd.a[0]*w, rd.a[1]*h)
+    const mxp=(rd.a[0]+rd.b[0])/2*w + 22, myp=(rd.a[1]+rd.b[1])/2*h - 18
+    c.quadraticCurveTo(mxp,myp, rd.b[0]*w, rd.b[1]*h); c.stroke()
+    c.setLineDash([])
+  }
+  /* מקומות */
+  for (const p of PLACES){
+    if (!on(p)) continue
+    const al = fade(p)
+    const X=p.x*w, Y=p.y*h
+    c.fillStyle='rgba(58,40,22,'+al.toFixed(2)+')'
+    c.beginPath(); c.arc(X,Y,p.big?9:5.5,0,6.283); c.fill()
+    if (p.big){
+      c.strokeStyle='rgba(150,88,38,'+(al*.8).toFixed(2)+')'; c.lineWidth=2
+      c.beginPath(); c.arc(X,Y,17 + Math.sin(now/900)*1.6,0,6.283); c.stroke()
+    }
+    c.direction='rtl'; c.textAlign='right'
+    c.fillStyle='rgba(46,32,18,'+al.toFixed(2)+')'
+    c.font = (p.big?'500 34px':'400 27px') + " 'Frank Ruhl Libre', serif"
+    c.fillText(p.n, X-15, Y+10)
+    if (p.tag){
+      c.fillStyle='rgba(96,76,50,'+(al*.9).toFixed(2)+')'
+      c.font="300 17px 'Heebo', sans-serif"
+      c.fillText(p.tag, X-15, Y+33)
+    }
+  }
+  if (mapT < 1) mapT += .012
+  if (mapwrap.classList.contains('on')) requestAnimationFrame(drawMap)
+}
+
+/* ── זרימת הביטים ───────────────────────────────────────── */
+async function go(k){
+  busy = true
+  i = k
+  const b = B[i]
+  si = 0; walked = 0; speed = 0; t0 = performance.now()
+  hush(); setCue(''); slate.className=''
+  mapwrap.classList.remove('on')
+
+  /* כותרת המערכה */
+  actK.textContent = ACTS[b.a][0]
+  actT.textContent = ACTS[b.a][1]
+  railI.style.width = ((i+1)/B.length*100).toFixed(1) + '%'
+
+  hud.style.opacity = (b.k==='F' || b.k==='M') ? 0 : 1
+  stage.style.background = b.dark ? '#050403' : '#000'
+
+  if (b.k === 'M'){ await openMap(b); return }
+
+  if (b.p) await show(b.p, b.tint)
+  if (b.dark) plate.style.filter = 'brightness(.28) saturate(.5)'
+
+  busy = false
+
+  if (b.k === 'W'){
+    setCue('החזק <kbd>W</kbd> <span id="walkbar"><i></i></span>')
+    if (b.cap){ /* כיתוב מקום קצר, נמוג מעצמו */
+      sayBox.className='on'
+      sayIn.innerHTML='<div class="txt" style="font-family:var(--sans);font-weight:200;font-size:1rem;letter-spacing:.16em;opacity:.85">'+b.cap+'</div>'
+      setTimeout(()=>{ if (B[i]===b) hush() }, 2600)
+    }
+    return
+  }
+
+  if (b.k === 'F'){
+    if (b.slate) runSlate(b)
+    else if (b.say){ speak(b.say[0]); si=0; setCue('<kbd>רווח</kbd> להמשיך') }
+    return
+  }
+
+  if (b.k === 'I'){ speak(b.pre); setCue('<kbd>E</kbd> ' + b.act); return }
+
+  /* S ו־C */
+  speak(b.say[0]); si = 0
+  setCue('<kbd>רווח</kbd> להמשיך')
+}
+
+function runSlate(b){
+  let k = 0
+  const step = () => {
+    if (k >= b.slate.length){
+      slate.className=''
+      if (b.say){ setTimeout(()=>{ speak(b.say[0]); si=0; setCue('<kbd>רווח</kbd> להמשיך') }, 700) }
+      else if (b.last){ setTimeout(fin, 1200) }
+      else setTimeout(next, 900)
+      return
+    }
+    slateIn.textContent = b.slate[k++]
+    slate.className='on'
+    setTimeout(()=>{ slate.className=""; setTimeout(step, 620) }, (b.hold||5)*420)
+  }
+  step()
+}
+
+async function openMap(b){
+  mapLvl = b.lvl; mapT = 0
+  mapwrap.classList.add('on')
+  requestAnimationFrame(drawMap)
+  busy = false
+  setTimeout(()=>{
+    if (b.say) speak(b.say[0])
+    setCue('<kbd>רווח</kbd> להמשיך')
+  }, 1500)
+}
+
+function next(){
+  if (i+1 >= B.length) return fin()
+  go(i+1)
+}
+
+function fin(){
+  dip.style.opacity = 1
+  setTimeout(()=>{
+    card.innerHTML =
+      '<div class="k">סוף הפרק הראשון</div>' +
+      '<h1>ג׳אהליה</h1>' +
+      '<p>זה העולם שבו הופיע האסלאם.<br>ומי יוביל את השינוי? — מוחמד.</p>' +
+      '<button id="go2">להתחיל מחדש</button>'
+    card.className = ''
+    card.querySelector('#go2').style.cssText =
+      "margin-top:22px;font-family:var(--sans);font-weight:400;font-size:.8rem;letter-spacing:.24em;padding:14px 40px;border:1px solid rgba(217,164,65,.5);background:transparent;color:var(--gold);cursor:pointer;border-radius:2px"
+    card.querySelector('#go2').onclick = () => location.reload()
+  }, 1200)
+}
+
+/* ── קלט ────────────────────────────────────────────────── */
+function advance(){
+  if (busy) return
+  const b = B[i]
+  if (!b || b.k === 'W') return
+
+  const lines = b.k === 'I' ? (b.thrown ? b.post : null) : b.say
+  if (!lines) return
+
+  if (si + 1 < lines.length){ si++; speak(lines[si]); return }
+  if (b.last) return fin()
+  hush(); setCue('')
+  setTimeout(next, 460)
+}
+
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase()
+  if (k === 'w'){ holding = true; e.preventDefault(); return }
+  if (e.code === 'Space' || k === 'enter'){ e.preventDefault(); advance(); return }
+  if (k === 'e'){
+    const b = B[i]
+    if (b && b.k === 'I' && !b.thrown){
+      b.thrown = true
+      throwArrow()
+    }
+  }
+})
+addEventListener('keyup', e => { if (e.key.toLowerCase() === 'w') holding = false })
+addEventListener('blur', () => { holding = false })
+
+addEventListener('mousemove', e => {
+  mx = (e.clientX / innerWidth - .5) * 2
+  my = (e.clientY / innerHeight - .5) * 2
+})
+addEventListener('click', () => { const b=B[i]; if (b && b.k!=='W' && b.k!=='I') advance() })
+
+/* ── הטלת החץ: קורית באמת, בקוד ───────────────────────── */
+function throwArrow(){
+  setCue('')
+  hush()
+  const el = document.createElement('canvas')
+  el.width = innerWidth; el.height = innerHeight
+  el.style.cssText = 'position:absolute;inset:0;z-index:6;pointer-events:none'
+  stage.appendChild(el)
+  const c = el.getContext('2d')
+  const x0 = innerWidth*.5, y0 = innerHeight*.86
+  const x1 = innerWidth*(.36 + Math.random()*.28), y1 = innerHeight*(.62 + Math.random()*.08)
+  const spin = (Math.random()-.5) * 1.4
+  let t = 0
+  const tick = () => {
+    t += .022
+    c.clearRect(0,0,el.width,el.height)
+    const p = Math.min(1, t)
+    const e = 1 - Math.pow(1-p, 2.4)
+    const X = x0 + (x1-x0)*e
+    const Y = y0 + (y1-y0)*e - Math.sin(p*Math.PI)*innerHeight*.22
+    const ang = p<1 ? Math.atan2((y1-y0)/1.6, x1-x0) - Math.cos(p*Math.PI)*.9
+                    : Math.PI*.5 + spin
+    c.save(); c.translate(X,Y); c.rotate(ang)
+    c.strokeStyle='#2b2016'; c.lineWidth=3; c.lineCap='round'
+    c.beginPath(); c.moveTo(-26,0); c.lineTo(26,0); c.stroke()
+    c.beginPath(); c.moveTo(26,0); c.lineTo(17,-6); c.moveTo(26,0); c.lineTo(17,6); c.stroke()
+    c.strokeStyle='rgba(232,220,190,.85)'; c.lineWidth=2
+    c.beginPath(); c.moveTo(-26,0); c.lineTo(-18,-5); c.moveTo(-26,0); c.lineTo(-18,5); c.stroke()
+    c.restore()
+    if (p < 1) requestAnimationFrame(tick)
+    else {
+      setTimeout(()=>{
+        el.style.transition='opacity 1s'; el.style.opacity=0
+        setTimeout(()=>el.remove(), 1100)
+        const b = B[i]; si = 0
+        speak(b.post[0]); setCue('<kbd>רווח</kbd> להמשיך')
+      }, 900)
+    }
+  }
+  tick()
+}
+
+/* ── התחלה ──────────────────────────────────────────────── */
+$('#go').onclick = () => {
+  card.className = 'off'
+  const wait = setInterval(() => {
+    if (ready >= NEEDED.length * .5){
+      clearInterval(wait)
+      dip.style.opacity = 0
+      go(0)
+    }
+  }, 120)
+}
+requestAnimationFrame(frame)
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ראוי — הוכחת אנימציה</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐪</text></svg>" />
+<style>
+  :root {
+    --maroon: #8a2733; --maroon-deep: #571820; --gold: #c79a3c;
+    --cream: #f5ecd6; --glass: rgba(30, 20, 12, .82);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Ploni', 'Segoe UI', system-ui, sans-serif;
+    background: radial-gradient(ellipse at 50% 30%, #3a2418 0%, #1e130c 70%);
+    color: var(--cream); min-height: 100vh; display: flex; flex-direction: column;
+  }
+  header {
+    background: var(--maroon-deep); padding: .7rem 1.2rem;
+    display: flex; align-items: center; gap: .8rem;
+    border-bottom: 2px solid var(--gold);
+  }
+  header h1 { font-size: 1.05rem; font-weight: 600; color: var(--cream); }
+  header .tag {
+    font-size: .72rem; color: var(--gold); border: 1px solid var(--gold);
+    border-radius: 999px; padding: .1rem .6rem;
+  }
+  main { flex: 1; display: flex; min-height: 0; }
+  #stage { flex: 1; position: relative; min-width: 0; }
+  #stage canvas { display: block; }
+  #hint {
+    position: absolute; top: .8rem; inset-inline-start: 1rem;
+    font-size: .75rem; opacity: .55;
+  }
+  aside {
+    width: 300px; background: var(--glass); backdrop-filter: blur(8px);
+    border-inline-start: 1px solid rgba(199, 154, 60, .35);
+    padding: 1.1rem; display: flex; flex-direction: column; gap: 1.1rem;
+    overflow-y: auto;
+  }
+  h2 { font-size: .8rem; color: var(--gold); letter-spacing: .05em; font-weight: 600; }
+  .clips { display: flex; gap: .5rem; }
+  .clips button {
+    flex: 1; padding: .55rem 0; border-radius: .6rem; cursor: pointer;
+    background: transparent; color: var(--cream);
+    border: 1px solid rgba(199, 154, 60, .5); font-family: inherit; font-size: .85rem;
+    transition: background .15s, border-color .15s;
+  }
+  .clips button:hover { border-color: var(--gold); }
+  .clips button.active { background: var(--maroon); border-color: var(--gold); }
+  .line {
+    background: rgba(0, 0, 0, .35); border-inline-start: 3px solid var(--gold);
+    border-radius: .4rem; padding: .7rem .8rem; font-size: .85rem; line-height: 1.6;
+  }
+  .line .who { color: var(--gold); font-size: .72rem; display: block; margin-bottom: .25rem; }
+  .voice { display: flex; flex-direction: column; gap: .45rem; }
+  .voice .row {
+    display: flex; align-items: center; gap: .6rem;
+    background: rgba(0, 0, 0, .3); border-radius: .5rem; padding: .5rem .7rem;
+  }
+  .voice .row.rec { outline: 1px solid rgba(199, 154, 60, .55); }
+  .voice .name { font-size: .8rem; flex: 1 }
+  .voice .name small { display: block; opacity: .55; font-size: .68rem; }
+  .voice button {
+    width: 2.1rem; height: 2.1rem; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--gold); color: var(--maroon-deep); font-size: .9rem;
+  }
+  footer-note { display: block; font-size: .7rem; opacity: .5; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header>
+  <h1>רָאוִי — הוכחת היתכנות</h1>
+  <span class="tag">ריג + קליפים מונפשים</span>
+</header>
+<main>
+  <div id="stage"><div id="hint">גרירה לסיבוב · גלגלת לזום</div></div>
+  <aside>
+    <div>
+      <h2>אנימציה</h2>
+      <div class="clips">
+        <button data-clip="idle" class="active">עמידה</button>
+        <button data-clip="walk">הליכה</button>
+      </div>
+      <h2 style="margin-top:.8rem">דיבור — הסט הסופי</h2>
+      <div class="clips" style="flex-wrap:wrap">
+        <button data-clip="talk">ידיים קדימה</button>
+        <button data-clip="talk-ack">הכרה</button>
+        <button data-clip="talk-happy">יד שמחה</button>
+        <button data-clip="talk-nod">הנהון מהורהר</button>
+      </div>
+    </div>
+    <div class="line">
+      <span class="who">רָאוִי · מחנה הלילה · ‎§1</span>
+      „המידע על החיים בחצי האי ערב לפני האסלאם דל מאוד. את רובו אנחנו יודעים
+      מהמסורת המוסלמית — ואותה יש לקחת בעירבון מוגבל."
+    </div>
+    <footer-note>
+      הדגם: תמונת הדמות הקיימת → ריג אוטומטי → קליפים מספריית תנועה.
+      אותו GLB ייטען ישירות למנוע המשחק (drei useAnimations).
+      מעבר בין קליפים = קרוספייד 0.35 שנ׳ — כמו במשחק.
+    </footer-note>
+  </aside>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.185.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.185.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js'
+
+const stage = document.getElementById('stage')
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+renderer.shadowMap.enabled = true
+renderer.outputColorSpace = THREE.SRGBColorSpace
+stage.appendChild(renderer.domElement)
+
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera(38, 1, .1, 100)
+camera.position.set(0, 1.35, 3.4)
+
+// lighting: warm key + gold rim, per the art direction
+scene.add(new THREE.HemisphereLight(0xffe8c0, 0x2a1a10, 1.1))
+const key = new THREE.DirectionalLight(0xffd9a0, 2.2)
+key.position.set(2.5, 4, 2); key.castShadow = true
+key.shadow.mapSize.set(1024, 1024)
+scene.add(key)
+const rim = new THREE.DirectionalLight(0xc79a3c, 1.4)
+rim.position.set(-2, 2.5, -2.5)
+scene.add(rim)
+
+const ground = new THREE.Mesh(
+  new THREE.CircleGeometry(2.2, 48),
+  new THREE.ShadowMaterial({ opacity: .35 }))
+ground.rotation.x = -Math.PI / 2
+ground.receiveShadow = true
+scene.add(ground)
+
+const controls = new OrbitControls(camera, renderer.domElement)
+controls.target.set(0, .95, 0)
+controls.enablePan = false
+controls.minDistance = 1.5; controls.maxDistance = 7
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight
+  renderer.setSize(w, h); renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+  camera.aspect = w / h; camera.updateProjectionMatrix()
+}
+addEventListener('resize', resize); resize()
+
+/* The full-quality mesh (30k tris, textured) lives in the base rigged GLB;
+   the animation exports carry a decimated preview mesh but the SAME skeleton
+   (24 joints). So: show the base model, steal only the AnimationClips from
+   the clip files. This mirrors the exact wiring Game.tsx will use. */
+const loader = new GLTFLoader()
+const load = (url) => new Promise((res, rej) => loader.load(url, res, undefined, rej))
+
+let current = 'idle'
+/* One GLB, one Mixamo skeleton, three mocap clips — real crossfades.
+   Built free via Mixamo (see README for the pipeline). */
+const gltf = await load('./rawi-mixamo.glb')
+const model = gltf.scene
+model.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false } })
+// FBX round-trip leaves cm units — normalize to 1.6m and plant feet on ground
+{
+  const bb = new THREE.Box3().setFromObject(model)
+  const h = bb.max.y - bb.min.y
+  const s = 1.6 / h
+  model.scale.setScalar(s)
+  const bb2 = new THREE.Box3().setFromObject(model)
+  model.position.y -= bb2.min.y
+}
+scene.add(model)
+const mixer = new THREE.AnimationMixer(model)
+const clipOf = (n) => gltf.animations.find((a) => a.name === n)
+const actions = {}
+for (const n of ['idle', 'walk', 'talk', 'talk-ack', 'talk-happy', 'talk-nod']) {
+  const c = clipOf(n)
+  if (c) actions[n] = mixer.clipAction(c)
+}
+actions.walk.timeScale = 0.95
+actions.idle.play()
+window.__ready = true
+
+function play(name) {
+  if (name === current) return
+  actions[current].fadeOut(0.35)
+  actions[name].reset().fadeIn(0.35).play()
+  current = name
+  document.querySelectorAll('.clips button').forEach(b =>
+    b.classList.toggle('active', b.dataset.clip === name))
+}
+document.querySelectorAll('.clips button').forEach(b =>
+  b.addEventListener('click', () => play(b.dataset.clip)))
+
+const clock = new THREE.Clock()
+renderer.setAnimationLoop(() => {
+  mixer.update(clock.getDelta())
+  controls.update()
+  renderer.render(scene, camera)
+})
+</script>
+</body>
+</html>

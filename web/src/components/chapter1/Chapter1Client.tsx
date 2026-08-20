@@ -6,7 +6,7 @@
 
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const Game = dynamic(() => import('@/components/chapter1/Game'), {
   ssr: false,
@@ -18,8 +18,30 @@ const Game = dynamic(() => import('@/components/chapter1/Game'), {
 })
 
 export default function Chapter1Client() {
-  const [started, setStarted] = useState(false)
+  /* Crossing a region boundary reloads the document, because the world is built
+     once at module scope. A traveller who is already walking must not be handed
+     the title page again at every gate — the `?from=` the crossing carries says
+     they are mid-journey, so the game starts straight away.
 
+     Read in an effect rather than in the initial state: the page is
+     prerendered, so a first render that disagrees with the server is a
+     hydration mismatch. */
+  const [started, setStarted] = useState(false)
+  /* עד שהאפקט רץ אי אפשר לדעת אם זו כניסה חדשה או מעבר תחנה,
+     ולכן רינדור מסך הפתיחה בינתיים גרם לו להבהב בכל שער —
+     כאילו המסע מתחיל מחדש בכל פעם. עד שיודעים, לא מציגים
+     אף אחד מהשניים. */
+  const [know, setKnow] = useState(false)
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has('from')) setStarted(true)
+    setKnow(true)
+    /* מושכים את צ׳אנק המשחק בזמן שקוראים את מסך הפתיחה. בלי זה
+       ההורדה מתחילה רק בלחיצה, ו„טוען את המסע…“ הוא המסך הראשון
+       שרואים אחריה. */
+    void import('@/components/chapter1/Game')
+  }, [])
+
+  if (!know) return <div className="ch1-loading" aria-hidden="true" />
   if (started) return <Game />
 
   return (
@@ -46,9 +68,11 @@ export default function Chapter1Client() {
 
       <section className="ch1-opening-content" aria-labelledby="ch1-opening-title">
         <h1 id="ch1-opening-title">טרום האסלאם</h1>
+        {/* „חקרו את המחנה“ עמד כאן, אבל המחנה הוא התחנה השנייה מתשע
+            והכפתור מוביל לרמות תימן — הבטחה שהמסך הבא סותר. */}
         <p className="ch1-opening-lead">
-          הצטרפו לשיירה, חקרו את המחנה ופגשו את האנשים, המקומות והמושגים
-          שעיצבו את חצי האי ערב ערב עליית האסלאם.
+          הצטרפו לשיירה, חצו תשעה מקומות מרמות תימן ועד מכה, ופגשו את האנשים,
+          המקומות והמושגים שעיצבו את חצי האי ערב ערב עליית האסלאם.
         </p>
 
         <button className="ch1-opening-start" type="button" onClick={() => setStarted(true)}>
@@ -57,8 +81,10 @@ export default function Chapter1Client() {
         </button>
       </section>
 
+      {/* נקודה לכל אזור. היו שבע לתשעה אזורים. */}
       <div className="ch1-opening-route" aria-hidden="true">
-        <span className="is-current" /><span /><span /><span /><span /><span /><span />
+        <span className="is-current" />
+        <span /><span /><span /><span /><span /><span /><span /><span />
       </div>
     </main>
   )

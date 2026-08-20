@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>מכה — הדרך</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%95%8B%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════
+   מכה — הדרך.
+
+   הסצנה היא וידאו שנוצר ב־Flow, והשחקן שולט בו: להחזיק W = ללכת,
+   לשחרר = לעצור. אין הליכה אחורה, ולכן אין גלילת וידאו ואין קרטוע.
+
+   בנקודות מסוימות על הדרך אפשר להסתכל אחורה — וזה קליפ נפרד
+   שמוחלף פנימה. הסיבוב הוא מכניקה, לא תנועת מצלמה מצולמת.
+   ══════════════════════════════════════════════════════════ */
+:root{
+  --gold:#d9a441;--gold-2:#f0cd85;--sand:#e8dcc4;--ink:#0b0705;
+  --sans:'Heebo',system-ui,sans-serif;--serif:'Frank Ruhl Libre',serif;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--ink)}
+body{color:var(--sand);font-family:var(--serif);-webkit-font-smoothing:antialiased}
+#stage{position:fixed;inset:0;overflow:hidden;background:var(--ink);cursor:crosshair}
+video{position:absolute;top:50%;left:50%;
+  width:min(92vw, calc(90vh * 16 / 9));height:min(90vh, calc(92vw * 9 / 16));max-width:none;max-height:none;object-fit:fill;
+  image-rendering:auto;
+  transform:translate(-50%,-50%);will-change:transform;
+  opacity:0;transition:opacity .5s var(--ease)}
+/* מסגרת שחורה סביב — מפרידה את התמונה מהמסך ומרכזת את המבט */
+#frame{position:absolute;inset:0;pointer-events:none;z-index:2;
+  box-shadow:inset 0 0 0 9999px rgba(0,0,0,0)}
+video.on{opacity:1}
+/* דהייה לשחור בנקודות המעבר — נעשית בנגן ולא בקידוד,
+   כדי שלא לגעת באיכות של הווידאו המקורי */
+#dip{position:absolute;top:50%;left:50%;width:min(92vw, calc(90vh * 16 / 9));height:min(90vh, calc(92vw * 9 / 16));
+  transform:translate(-50%,-50%);pointer-events:none;background:#000;opacity:0;z-index:3}
+#vig{position:absolute;top:50%;left:50%;width:min(92vw, calc(90vh * 16 / 9));height:min(90vh, calc(92vw * 9 / 16));
+  transform:translate(-50%,-50%);pointer-events:none;
+  background:radial-gradient(124% 96% at 50% 46%,transparent 52%,rgba(8,5,3,.22) 82%,rgba(8,5,3,.44) 100%)}
+
+/* ── קריינות ────────────────────────────────────────────
+   הטקסט יושב בתוך גבולות התמונה, לא על המסך — כדי שירגיש
+   חלק מהעולם ולא כתובית מודבקת. שני קולות: הראוי מוסר את
+   הסיפור, והערת השוליים עוצרת אותו איפה שהמקור מסתייג. */
+#say::before{content:'';position:absolute;inset:auto 0 0 0;height:46%;
+  background:linear-gradient(to top,rgba(6,4,3,.92) 0%,rgba(6,4,3,.78) 26%,
+    rgba(6,4,3,.42) 58%,rgba(6,4,3,0) 100%);
+  opacity:0;transition:opacity .8s var(--ease);pointer-events:none}
+#say.on::before{opacity:1}
+#say{position:absolute;top:50%;left:50%;width:min(92vw, calc(90vh * 16 / 9));height:min(90vh, calc(92vw * 9 / 16));
+  transform:translate(-50%,-50%);pointer-events:none;z-index:4;
+  display:flex;align-items:flex-end;justify-content:flex-start;
+  padding:0 clamp(22px,3.4vw,54px) clamp(26px,5vh,58px)}
+#say .inner{position:relative;width:min(50ch,90%);opacity:0;transform:translateY(10px);
+  transition:opacity .8s var(--ease),transform .8s var(--ease)}
+#say.on .inner{opacity:1;transform:none}
+#say .who{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.24em;
+  display:block;margin-bottom:8px;color:var(--gold);
+  text-shadow:0 2px 10px rgba(0,0,0,1)}
+#say .txt{font-weight:400;font-size:clamp(1.06rem,.96rem + .62vw,1.45rem);line-height:1.72;
+  color:#f6efe0;text-shadow:0 2px 14px rgba(4,3,2,.95);text-wrap:pretty}
+#say .txt em{font-style:normal;color:var(--gold);font-weight:400}
+#say .ref{display:inline-block;margin-inline-start:9px;vertical-align:.26em;
+  font-family:var(--sans);font-weight:300;font-size:.58rem;letter-spacing:.12em;
+  color:rgba(232,220,196,.42);direction:ltr;unicode-bidi:isolate}
+/* הערת שוליים — הקול שעוצר את הסיפור */
+#say.note .inner{border-inline-start:2px solid rgba(143,184,208,.6);
+  padding-inline-start:16px}
+#say.note .who{color:#8fb8d0}
+#say.npc .inner{border-inline-start:2px solid rgba(232,220,196,.45);padding-inline-start:16px}
+#say.npc .who{color:rgba(232,220,196,.8)}
+#say.note .txt{font-family:var(--sans);font-weight:300;color:#dcecf6;
+  font-size:clamp(1rem,.92rem + .5vw,1.28rem)}
+
+#hud{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .9s}
+body.playing #hud{opacity:1}
+#obj{position:absolute;top:38px;right:34px;text-align:right}
+#obj .lbl{font-family:var(--sans);font-weight:400;font-size:.62rem;letter-spacing:.3em;
+  color:var(--gold);margin-bottom:7px;text-shadow:0 2px 10px rgba(0,0,0,.95)}
+#obj .txt{font-weight:400;font-size:1.3rem;text-shadow:0 2px 16px rgba(0,0,0,1)}
+#obj .rule{height:1px;margin-top:10px;background:linear-gradient(to left,var(--gold),transparent)}
+
+#nudge{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:11px;
+  background:linear-gradient(to right,rgba(74,18,32,0),rgba(74,18,32,.7),rgba(74,18,32,0));
+  padding:9px 32px;transition:opacity .6s}
+#nudge.gone{opacity:0}
+#nudge .k{font-family:var(--sans);font-weight:700;font-size:.74rem;width:24px;height:24px;
+  display:grid;place-content:center;color:var(--ink);background:var(--gold);border-radius:3px}
+#nudge .w{font-family:var(--sans);font-weight:300;font-size:.92rem;letter-spacing:.1em;
+  text-shadow:0 2px 10px rgba(0,0,0,1)}
+
+/* רמז „הסתכלו אחורה“ — מופיע רק בנקודה הנכונה */
+#back{position:absolute;bottom:100px;right:44px;display:flex;align-items:center;gap:9px;
+  opacity:0;transition:opacity .5s;pointer-events:none}
+#back.on{opacity:1}
+#back .k{font-family:var(--sans);font-weight:700;font-size:.7rem;width:22px;height:22px;
+  display:grid;place-content:center;color:var(--ink);background:var(--gold-2);border-radius:3px}
+#back .w{font-family:var(--sans);font-weight:300;font-size:.84rem;letter-spacing:.08em;
+  text-shadow:0 2px 10px rgba(0,0,0,1)}
+
+#trail{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  width:min(42vw,380px);height:2px;background:rgba(232,220,196,.15)}
+#trail i{display:block;height:100%;width:0;background:var(--gold);transition:width .12s linear}
+#trail span{position:absolute;top:13px;right:0;left:0;text-align:center;
+  font-family:var(--sans);font-weight:200;font-size:.6rem;letter-spacing:.26em;
+  color:rgba(232,220,196,.36)}
+#keys{position:absolute;bottom:38px;right:34px;display:flex;gap:16px;
+  font-family:var(--sans);font-weight:200;font-size:.66rem;letter-spacing:.14em;
+  color:rgba(232,220,196,.42);text-shadow:0 2px 8px rgba(0,0,0,1)}
+#keys b{font-weight:500;color:rgba(217,164,65,.9)}
+#place{position:absolute;bottom:38px;left:34px;font-family:var(--sans);font-weight:300;
+  font-size:.68rem;letter-spacing:.2em;color:rgba(232,220,196,.5);
+  text-shadow:0 2px 10px rgba(0,0,0,1);transition:opacity .5s}
+
+#end{position:absolute;inset:0;z-index:7;display:grid;place-content:center;text-align:center;
+  background:linear-gradient(to top,rgba(7,4,3,.9),rgba(7,4,3,.55));
+  opacity:0;pointer-events:none;transition:opacity 1s var(--ease)}
+#end.on{opacity:1;pointer-events:auto}
+#end .a{font-weight:300;font-size:clamp(1.4rem,1.1rem + 1.8vw,2.2rem)}
+#end .b{font-family:var(--sans);font-weight:200;font-size:.74rem;letter-spacing:.22em;
+  color:var(--gold);margin-top:16px}
+#end button{margin-top:28px;font-family:var(--sans);font-weight:300;font-size:.74rem;
+  letter-spacing:.2em;color:var(--sand);background:none;
+  border:1px solid rgba(232,220,196,.24);padding:11px 28px;cursor:pointer}
+#end button:hover{border-color:var(--gold);color:var(--gold)}
+
+#gate{position:absolute;inset:0;z-index:9;display:grid;place-content:center;text-align:center;
+  background:rgba(7,4,3,.93);transition:opacity .9s}
+body.playing #gate{opacity:0;pointer-events:none}
+#gate .a{font-weight:300;font-size:clamp(1.6rem,1.2rem + 2.2vw,2.7rem)}
+#gate .b{font-family:var(--sans);font-weight:200;font-size:.76rem;letter-spacing:.28em;
+  color:var(--gold);margin-top:16px}
+#gate .c{font-family:var(--sans);font-weight:200;font-size:.73rem;letter-spacing:.08em;
+  color:rgba(232,220,196,.45);margin-top:26px;line-height:2.1}
+#go{margin-top:26px;font-family:var(--sans);font-weight:300;font-size:.76rem;letter-spacing:.2em;
+  color:var(--sand);background:none;border:1px solid rgba(232,220,196,.24);padding:12px 30px;
+  cursor:pointer}
+#go:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <video id="road" class="on" src="walk/scene-01.mp4" playsinline preload="auto"></video>
+  <video id="lookback" src="walk/look-back.mp4" playsinline preload="auto" loop muted></video>
+  <div id="vig"></div>
+  <div id="dip"></div>
+  <div id="frame"></div>
+
+  <div id="say"><div class="inner"></div></div>
+
+  <div id="hud">
+    <div id="obj"><div class="lbl">משימה</div><div class="txt">הגיעו אל הכעבה</div><div class="rule"></div></div>
+    <div id="nudge"><span class="k">W</span><span class="w">החזיקו כדי ללכת</span></div>
+    <div id="back"><span class="k">Q</span><span class="w">להסתכל אחורה</span></div>
+    <div id="trail"><i></i><span>הדרך</span></div>
+    <div id="place">מכה · הסמטה המזרחית</div>
+    <div id="keys"><span><b>W</b> ללכת</span><span><b>Q</b> להסתכל אחורה</span><span><b>עכבר</b> מבט</span></div>
+  </div>
+
+  <div id="end">
+    <div>
+      <div class="a">כאן נגמר מה שכבר צולם</div>
+      <div class="b">המשך הדרך בייצור</div>
+      <div><button id="again" type="button">מהתחלה</button></div>
+    </div>
+  </div>
+
+  <div id="gate">
+    <div>
+      <div class="a">הדרך אל הכעבה</div>
+      <div class="b">מכה · מערכות אפס עד שתיים</div>
+      <div class="c">החזיקו <b>W</b> כדי ללכת · שחררו כדי לעצור<br>
+        <b>Q</b> להסתכל אחורה — כשהאפשרות מופיעה<br>
+        העכבר מזיז את המבט</div>
+      <button id="go" type="button">להתחיל</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const road = document.getElementById('road')
+const lb   = document.getElementById('lookback')
+const stage = document.getElementById('stage')
+const bar = document.querySelector('#trail i')
+const nudge = document.getElementById('nudge')
+const backHint = document.getElementById('back')
+const place = document.getElementById('place')
+const end = document.getElementById('end')
+const sayBox = document.getElementById('say')
+const sayInner = sayBox.querySelector('.inner')
+
+/* איפה על הדרך אפשר להסתכל אחורה, ואיך המקום נקרא */
+const MARKS = [
+  { t: 0,    name: 'מכה · הסמטה המזרחית' },
+  { t: 16,   name: 'מכה · הכיכר' },
+  { t: 30,   name: 'מכה · השער' },
+  { t: 43,   name: 'הדרך צפונה', back: true },
+  { t: 58,   name: 'המעבר הצר' },
+]
+const BACK_FROM = 43, BACK_TO = 56
+
+/* חיתוכים בעריכה — נעשים בנגן, בלי לגעת בווידאו.
+   at = מתי להתחיל להחשיך · to = לאן לקפוץ · half = אורך הדהייה
+   ככה אפשר לקצץ קטעים איטיים בלי לקודד מחדש. */
+const CUTS = [{ at: 37.6, to: 42.7, half: 0.5 },
+              { at: 58.4, to: 58.4, half: 0.4 }]
+
+/* קטעי דיבור: כשמגיעים לשם הווידאו ממשיך לבד עד הסוף שלהם.
+   השחקן לא צריך להחזיק W כדי שמישהו ידבר אליו. */
+const TALKS = [{ from: 58.6, to: 72.4, who: 'מלווה השיירה' }]
+
+/* התאמת חשיפה וגוון לכל קטע. b=בהירות · c=ניגודיות · s=רוויה
+   הערכים מכוילים כך שכל הקטעים יישבו על אותו בסיס. */
+/* כל שורה מ־SOURCE-TEXT.md, עם מספר הסעיף.
+   v: 'r' = הראוי · 'n' = הערת שוליים */
+/* התזמונים נמדדו מול הפריימים עצמם, לא נוחשו:
+   0–10 ירידה אווירית · 10–17 הסמטה · 17–24 הכעבה בכיכר
+   24–37 השער · 43–50 המדבר · 50–58 המעבר · 58.4+ ראש השיירה */
+const SAYS = [
+  { at: 1.5,  to: 8.2,  v:'r', t:'כדי להבין כיצד התפתחה דת האסלאם — יש להבין קודם את המקום שאליו נולד.', r:'§0' },
+  { at: 9,    to: 15.5, v:'n', t:'המידע על התקופה הזאת דל, ומרביתו מגיע מהמסורת המוסלמית עצמה — ואותה יש לקחת ב״עירבון מוגבל“.', r:'§1' },
+  { at: 17.4, to: 23.4, v:'r', t:'הכעבה. מקדש בצורת קובייה בעיר מכה.', r:'§34' },
+  { at: 24,   to: 30,   v:'r', t:'המסע עוד יחזיר אותך לכאן.', r:'' },
+  { at: 44,   to: 50.5, v:'r', t:'השבטים נדדו צפונה מאזור תימן, ושימשו מתווכים בין האימפריות.', r:'§7' },
+  { at: 51,   to: 57,   v:'r', t:'בעיקר לטובת שמירה על נתיבי הסחר של סחורות כדוגמת <em>משי, תבלינים</em> ועוד.', r:'§7' },
+  { at: 60,   to: 66,   v:'c', t:'במאות הראשונות לספירה חיו שבטים נוודים בצפון חצי האי, והם היו בני חסות של האימפריות.', r:'§6' },
+  { at: 66.5, to: 72.4, v:'c', t:'שבט גסאן היה בן חסות של האימפריה הביזנטית, ושבט לח׳ם היה של זו הסאסאנית־פרסית.', r:'§8' },
+]
+let saying = null
+
+const GRADE = [
+  { from: 0,    b: 1.00, c: 1.00, s: 1.00 },   /* הירידה אל העמק */
+  { from: 10,   b: 1.02, c: 1.02, s: 1.02 },   /* הסמטה */
+  { from: 18,   b: 1.00, c: 1.03, s: 1.04 },   /* הכיכר */
+  { from: 30,   b: 0.97, c: 1.04, s: 1.05 },   /* השער — היה בהיר מדי */
+  { from: 42.7, b: 0.94, c: 1.06, s: 1.08 },   /* המדבר — היה שטוף */
+  { from: 50,   b: 0.97, c: 1.04, s: 1.05 },   /* המעבר הצר */
+  { from: 58.4, b: 1.00, c: 1.02, s: 1.02 },   /* ראש השיירה */
+]
+let gb = 1, gc = 1, gs = 1
+let talking = null
+const dip = document.getElementById("dip")
+let jumped = new Set()
+
+let walking = false, started = false, looking = false
+function setWalk(on){
+  if (looking || talking || on === walking) return
+  walking = on
+  if (on) road.play().catch(()=>{}) ; else road.pause()
+  if (on && !started){ started = true; nudge.classList.add('gone') }
+}
+const keys = new Set()
+addEventListener('keydown', e => {
+  if (e.code === 'KeyW' || e.code === 'ArrowUp'){ e.preventDefault(); keys.add('w'); setWalk(true) }
+  if (e.code === 'ShiftLeft') road.playbackRate = 1.5
+  if (e.code === 'KeyQ' && canLookBack() && !looking){ e.preventDefault(); lookBack(true) }
+})
+addEventListener('keyup', e => {
+  if (e.code === 'KeyW' || e.code === 'ArrowUp'){ keys.delete('w'); setWalk(false) }
+  if (e.code === 'ShiftLeft') road.playbackRate = 1
+  if (e.code === 'KeyQ' && looking) lookBack(false)
+})
+stage.addEventListener('pointerdown', () => setWalk(true))
+addEventListener('pointerup', () => { if (!keys.has('w')) setWalk(false) })
+
+const canLookBack = () => road.currentTime >= BACK_FROM && road.currentTime <= BACK_TO
+const talkAt = (t) => TALKS.find(k => t >= k.from && t < k.to) || null
+
+/* ההסתכלות לאחור — מחליפים קליפ, לא מסובבים מצלמה */
+function lookBack(on){
+  looking = on
+  if (on){
+    setWalk(false); road.pause()
+    lb.currentTime = 0; lb.play().catch(()=>{})
+    lb.classList.add('on'); road.classList.remove('on')
+    place.textContent = 'מכה, מאחור'
+  } else {
+    lb.pause(); lb.classList.remove('on'); road.classList.add('on')
+  }
+}
+
+/* המבט — הפריים גדול מהמסך והעכבר מזיז אותו בתוכו */
+let tx=0, ty=0, mx=0, my=0
+let zoom = 1.13, zoomWant = 1.13
+stage.addEventListener('pointermove', e => {
+  const r = stage.getBoundingClientRect()
+  tx = ((e.clientX - r.left) / r.width - .5) * -2
+  ty = ((e.clientY - r.top) / r.height - .5) * -2
+})
+
+road.addEventListener('ended', () => { setWalk(false); end.classList.add('on') })
+
+function frame(){
+  requestAnimationFrame(frame)
+  mx += (tx - mx) * .06
+  my += (ty - my) * .06
+  /* בקטע דיבור מקטינים את הזום — רואים יותר מהפריים,
+     והדמות מפסיקה להרגיש צמודה לעדשה */
+  /* בגודל מקורי אין מקום לזוז בתוך הפריים, אז המבט הוא הטיה עדינה בלבד */
+  const t = `translate(calc(-50% + ${(mx*0.6).toFixed(2)}%), calc(-50% + ${(my*0.4).toFixed(2)}%))`
+  road.style.transform = t; lb.style.transform = t
+
+  /* דהייה, קפיצה, ודהייה חזרה */
+  let a = 0
+  const now = road.currentTime
+  for (let i = 0; i < CUTS.length; i++){
+    const C = CUTS[i]
+    if (now >= C.at - C.half && now < C.at){
+      a = Math.max(a, (now - (C.at - C.half)) / C.half)
+      if (now >= C.at - 0.05 && !jumped.has(i)){ jumped.add(i); road.currentTime = C.to }
+    } else if (now >= C.at && now < C.to && !jumped.has(i)){
+      jumped.add(i); road.currentTime = C.to; a = 1
+    } else if (now >= C.to && now < C.to + C.half){
+      a = Math.max(a, 1 - (now - C.to) / C.half)
+    }
+  }
+  dip.style.opacity = a.toFixed(3)
+
+  /* מצב שיחה — נכנסים אליו לבד ויוצאים לבד */
+  const k = talkAt(now)
+  if (k && !talking){
+    talking = k
+    if (road.paused) road.play().catch(()=>{})
+    nudge.classList.add('gone')
+  } else if (!k && talking){
+    talking = null
+    if (!keys.has('w')) road.pause()
+  }
+  if (talking && road.paused) road.play().catch(()=>{})
+
+  /* גרייד — מחליק בין הערכים כדי שהמעבר לא ייראה כמדרגה */
+  let g = GRADE[0]
+  for (const G of GRADE) if (now >= G.from) g = G
+  gb += (g.b - gb) * .08
+  gc += (g.c - gc) * .08
+  gs += (g.s - gs) * .08
+  const fx = 'brightness(' + gb.toFixed(3) + ') contrast(' + gc.toFixed(3) +
+             ') saturate(' + gs.toFixed(3) + ')'
+  road.style.filter = fx; lb.style.filter = fx
+
+  /* קריינות — נכנסת ויוצאת לבד לפי הזמן */
+  const cur = SAYS.find(k => now >= k.at && now < k.to) || null
+  if (cur !== saying){
+    saying = cur
+    if (cur){
+      sayBox.className = 'on' + (cur.v === 'n' ? ' note' : cur.v === 'c' ? ' npc' : '')
+      const WHO = { n:'הערת שוליים', c:'מלווה השיירה', r:'הראוי' }
+      sayInner.innerHTML =
+        '<span class="who">' + WHO[cur.v] + '</span>' +
+        '<div class="txt">' + cur.t +
+        (cur.r ? '<span class="ref">' + cur.r + '</span>' : '') + '</div>'
+    } else sayBox.className = ''
+  }
+
+  const d = road.duration || 72
+  bar.style.width = ((road.currentTime / d) * 100).toFixed(1) + '%'
+
+  if (!looking){
+    let cur = MARKS[0]
+    for (const m of MARKS) if (road.currentTime >= m.t) cur = m
+    if (place.textContent !== cur.name) place.textContent = cur.name
+    backHint.classList.toggle('on', canLookBack() && started)
+  }
+}
+requestAnimationFrame(frame)
+
+document.getElementById('go').addEventListener('click', e => {
+  e.stopPropagation(); document.body.classList.add('playing')
+  road.currentTime = 0; road.pause(); jumped.clear()
+})
+document.getElementById('again').addEventListener('click', e => {
+  e.stopPropagation(); end.classList.remove('on'); road.currentTime = 0; road.pause(); jumped.clear()
+})
+
+window.__w = { t:()=>road.currentTime, dur:()=>road.duration,
+  walking:()=>!road.paused, looking:()=>looking, ended:()=>end.classList.contains('on') }
+</script>
+</body>
+</html>

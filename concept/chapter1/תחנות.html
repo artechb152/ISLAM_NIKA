@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>תשע התחנות</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%A7%AD%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Heebo:wght@200;300;400;500;700&display=swap">
+<style>
+:root{
+  --paper:#f6f1e7;
+  --paper-2:#efe8da;
+  --ink:#241d16;
+  --ink-2:#5b5044;
+  --ink-3:#8b7f70;
+  --rule:#ded3c0;
+  --gold:#a8762a;
+  --cool:#3f6d8c;
+  --warn:#9c4a2f;
+  --serif:'Frank Ruhl Libre','David Libre',serif;
+  --sans:'Heebo','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+    --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#15120e;--paper-2:#1d1913;--ink:#efe6d6;--ink-2:#b6a893;--ink-3:#8a7c6b;
+  --rule:#332b21;--gold:#dfa955;--cool:#83b3d2;--warn:#e08a68;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);
+  -webkit-font-smoothing:antialiased;line-height:1.7}
+.wrap{max-width:1060px;margin:0 auto;padding:clamp(28px,5vw,72px) clamp(20px,4vw,48px) 100px}
+
+/* ── כותרת ─────────────────────────────────────────────── */
+header{border-bottom:1px solid var(--rule);padding-bottom:34px;margin-bottom:46px}
+.kick{font-family:var(--sans);font-weight:400;font-size:.7rem;letter-spacing:.32em;
+  color:var(--gold);margin-bottom:16px}
+h1{font-weight:300;font-size:clamp(2rem,1.3rem + 3.2vw,3.4rem);letter-spacing:.01em;
+  line-height:1.15;text-wrap:balance;margin-bottom:16px}
+.lede{font-weight:300;font-size:clamp(1.02rem,.98rem + .4vw,1.24rem);color:var(--ink-2);
+  max-width:60ch;line-height:1.8}
+
+h2{font-weight:400;font-size:clamp(1.3rem,1.1rem + 1vw,1.85rem);margin:56px 0 18px;
+  padding-top:34px;border-top:1px solid var(--rule)}
+h2:first-of-type{border-top:0;padding-top:0}
+p{max-width:64ch;margin-bottom:14px;font-weight:300}
+p.small{font-size:.94rem;color:var(--ink-2)}
+strong{font-weight:500}
+em{font-style:normal;color:var(--gold);font-weight:400}
+code{font-family:ui-monospace,'Cascadia Mono',monospace;font-size:.84em;
+  background:var(--paper-2);padding:1px 6px;border-radius:3px;
+  direction:ltr;unicode-bidi:isolate;display:inline-block}
+
+/* ── טבלת האיזון ───────────────────────────────────────── */
+.scroller{overflow-x:auto;margin:22px 0 8px;border:1px solid var(--rule);border-radius:4px}
+table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:.9rem;
+  font-weight:300;min-width:640px}
+th{background:var(--paper-2);font-weight:500;font-size:.7rem;letter-spacing:.14em;
+  color:var(--ink-2);text-align:right;padding:12px 14px;white-space:nowrap}
+td{padding:11px 14px;border-top:1px solid var(--rule);vertical-align:middle}
+td.n{font-variant-numeric:tabular-nums;color:var(--ink-2);width:1%}
+.bar{display:inline-block;height:9px;border-radius:2px;background:var(--gold);
+  vertical-align:middle;margin-inline-end:9px;min-width:3px}
+.bar.old{background:var(--warn)}
+.was{color:var(--ink-3);font-size:.82rem}
+
+/* ── כרטיס תחנה ────────────────────────────────────────── */
+.station{border:1px solid var(--rule);border-radius:5px;margin-bottom:22px;
+  background:var(--paper-2);overflow:hidden}
+.swatch{height:6px;display:flex}
+.swatch i{flex:1}
+.st-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;
+  padding:20px 24px 0}
+.st-num{font-family:var(--sans);font-weight:700;font-size:.78rem;letter-spacing:.1em;
+  color:var(--gold);font-variant-numeric:tabular-nums}
+.st-name{font-weight:400;font-size:clamp(1.15rem,1rem + .7vw,1.5rem)}
+.st-id{font-family:ui-monospace,monospace;font-size:.74rem;color:var(--ink-3);
+  direction:ltr;unicode-bidi:isolate}
+.st-refs{margin-inline-start:auto;font-family:var(--sans);font-weight:500;font-size:.74rem;
+  letter-spacing:.08em;color:var(--ink-2);background:var(--paper);
+  border:1px solid var(--rule);border-radius:99px;padding:4px 13px;
+  direction:ltr;unicode-bidi:isolate}
+.st-body{padding:4px 24px 22px}
+.st-line{font-weight:300;font-size:1.04rem;color:var(--ink-2);margin:10px 0 20px;
+  max-width:62ch}
+
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.f{border-top:1px solid var(--rule);padding-top:13px}
+.f h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--ink-3);margin-bottom:9px}
+.f p{font-size:.93rem;font-weight:300;margin:0;max-width:none;line-height:1.68}
+.f p + p{margin-top:7px}
+.f .fix{color:var(--warn)}
+.f .keep{color:var(--cool)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.chip{font-family:var(--sans);font-weight:300;font-size:.72rem;padding:3px 9px;
+  border:1px solid var(--rule);border-radius:3px;color:var(--ink-2);background:var(--paper)}
+.chip b{font-weight:500;color:var(--ink)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:2px;
+  vertical-align:-1px;margin-inline-end:6px;border:1px solid rgba(0,0,0,.18)}
+
+/* ── מסך מעבר ──────────────────────────────────────────── */
+.screen{border-inline-start:3px solid var(--gold);background:var(--paper);
+  padding:14px 16px;margin-top:18px;border-radius:0 3px 3px 0}
+.screen h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--gold);margin-bottom:8px}
+.screen p{font-size:.95rem;margin:0;max-width:none}
+.screen .q{font-weight:300;color:var(--ink)}
+.screen .src{font-family:var(--sans);font-size:.7rem;color:var(--ink-3);
+  letter-spacing:.1em;margin-top:8px;display:block;direction:ltr;unicode-bidi:isolate;text-align:right}
+
+.note{border-inline-start:3px solid var(--cool);background:var(--paper-2);
+  padding:15px 18px;margin:22px 0;border-radius:0 3px 3px 0}
+.note h4{font-family:var(--sans);font-weight:500;font-size:.66rem;letter-spacing:.2em;
+  color:var(--cool);margin-bottom:9px}
+.note p{font-size:.96rem;margin:0 0 8px;max-width:none}
+.note p:last-child{margin-bottom:0}
+
+ul{margin:0 0 16px;padding-inline-start:20px;max-width:64ch}
+li{margin-bottom:8px;font-weight:300}
+
+footer{margin-top:60px;padding-top:26px;border-top:1px solid var(--rule);
+  font-family:var(--sans);font-size:.78rem;font-weight:300;color:var(--ink-3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kick">פרק 1 · אפיון עבודה</div>
+  <h1>תשע התחנות</h1>
+  <p class="lede">מה יש בכל תחנה, מה לומדים בה, ואיך היא אמורה להיראות — כדי שאפשר יהיה לעבור אזור־אזור ולשפץ. המצב הקיים נמדד מקבצי ה־layout וה־dialogue עצמם, לא מהזיכרון.</p>
+</header>
+
+<h2>שני ממצאים שמסבירים כמעט הכול</h2>
+
+<div class="note">
+  <h4>ממצא ראשון · הצבע</h4>
+  <p>הצלליות של תשעת האזורים <strong>כן</strong> שונות — טרסות אבן בתימן, 41 דקלים במחנה, בזלת במעבר, קובייה שחורה במכה. אבל גוון הקרקע בכולם זהה:</p>
+  <p>
+    <span class="chip"><span class="dot" style="background:#f6b595"></span>#f6b595</span>
+    <span class="chip"><span class="dot" style="background:#f6d3bf"></span>#f6d3bf</span>
+    <span class="chip"><span class="dot" style="background:#f6d2c4"></span>#f6d2c4</span>
+    <span class="chip"><span class="dot" style="background:#f6ceb8"></span>#f6ceb8</span>
+    <span class="chip"><span class="dot" style="background:#f6c9b1"></span>#f6c9b1</span>
+    <span class="chip"><span class="dot" style="background:#f6c9b2"></span>#f6c9b2</span>
+    <span class="chip"><span class="dot" style="background:#f6c1a9"></span>#f6c1a9</span>
+    <span class="chip"><span class="dot" style="background:#f6c8b3"></span>#f6c8b3</span>
+    <span class="chip"><span class="dot" style="background:#f6c6b2"></span>#f6c6b2</span>
+  </p>
+  <p>אותו בז׳־אפרסק תשע פעמים, ואותו כתום באור המילוי מהקרקע. <strong>זה ה„למה הכל נראה אותו דבר“</strong> — והוא ניתן לתיקון בלי לגעת באף מודל. בכל כרטיס למטה מופיע הגוון המוצע.</p>
+</div>
+
+<div class="note">
+  <h4>ממצא שני · חלוקת התוכן</h4>
+  <p>מכה לבדה נושאת <strong>19 מתוך 49 הסעיפים</strong>. חמש תחנות מלמדות סעיף אחד עד ארבעה. הולכים חמישה אזורים כמעט בלי תוכן ואז נחתים על קיר.</p>
+  <p>לכן החלוקה מוצעת מחדש למטה — <strong>בלי לשנות את סדר הסעיפים</strong>, שהוא גם סדר המסע וגם סדר המקור.</p>
+</div>
+
+<h2>איזון התוכן — לפני ואחרי</h2>
+
+<div class="scroller">
+<table>
+  <thead><tr><th>#</th><th>תחנה</th><th>היום</th><th>מוצע</th><th>נפח</th></tr></thead>
+  <tbody>
+    <tr><td class="n">1</td><td>רמות תימן</td><td class="was">§0</td><td>§0–1</td><td><span class="bar" style="width:16px"></span>2</td></tr>
+    <tr><td class="n">2</td><td>מחנה הלילה</td><td class="was">§0–1</td><td>§2–5</td><td><span class="bar" style="width:32px"></span>4</td></tr>
+    <tr><td class="n">3</td><td>תחנת הגבול</td><td class="was">§2–5</td><td>§6–8</td><td><span class="bar" style="width:24px"></span>3</td></tr>
+    <tr><td class="n">4</td><td>המעבר הצר</td><td class="was">§6–8</td><td>§9</td><td><span class="bar" style="width:8px"></span>1</td></tr>
+    <tr><td class="n">5</td><td>הדרך וההעמסה</td><td class="was">§9</td><td>§10–13</td><td><span class="bar" style="width:32px"></span>4</td></tr>
+    <tr><td class="n">6</td><td>ית׳רב</td><td class="was">§10–17</td><td>§14–17</td><td><span class="bar" style="width:32px"></span>4</td></tr>
+    <tr><td class="n">7</td><td>המנזר</td><td class="was">§18–25</td><td>§18–25</td><td><span class="bar" style="width:64px"></span>8</td></tr>
+    <tr><td class="n">—</td><td><em>מסך המעבר אל מכה</em></td><td class="was">—</td><td>§26–31</td><td><span class="bar" style="width:48px"></span>6</td></tr>
+    <tr><td class="n">8</td><td>מכה</td><td class="was">§26–44 <span class="bar old" style="width:152px"></span>19</td><td>§32–44</td><td><span class="bar" style="width:104px"></span>13</td></tr>
+    <tr><td class="n">9</td><td>ערב עליית האסלאם</td><td class="was">§45–48</td><td>§45–48</td><td><span class="bar" style="width:32px"></span>4</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="small">המהלך המרכזי: <strong>סיפור אברהה (§26–31) יוצא ממכה והופך למסך המעבר שנכנסים דרכו אליה.</strong> זה פותר את העומס בלי להוסיף אזור, וזה גם נכון דרמטית — שומעים מה קרה בשערים האלה לפני שמגיעים אליהם. מכה יורדת מ־19 ל־13, והיא עדיין הכבדה ביותר — כי היא השיא, וזה בסדר.</p>
+
+<p class="small">תחנה 4 נשארת עם סעיף אחד <strong>בכוונה</strong>. היא התחנה היחידה בפרק שהיא רק הליכה — ו־§9 מדבר בדיוק על זה: אזור „חבוי“ שרעיונות חלחלו אליו „בתהליך איטי ומדורג“.</p>
+
+<h2>קשת האור לאורך המסע</h2>
+<p>השמיים כבר שונים בכל אזור, וזה עובד. הבעיה היחידה: <strong>„מחנה הלילה“ משוחק בזריחה</strong> — ואין בפרויקט בכלל שמי לילה, <code>sky-dawn</code> היא הכהה ביותר. זה הנכס היחיד שחסר.</p>
+<ul>
+  <li><strong>שחר → לילה → בוקר → צהריים → אובך → אחה״צ → שעת זהב → ערב → דמדומים.</strong> לא יום אחד רצוף — מסע של כמה ימים, וזה נכון לשיירה.</li>
+</ul>
+
+<h2>התחנות</h2>
+
+
+<!-- 1 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#7d8f6a"></i><i style="background:#a8ab86"></i><i style="background:#cfd4b8"></i><i style="background:#e6e0c6"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 1</span>
+    <span class="st-name">רמות תימן</span>
+    <span class="st-id">yemen-heights</span>
+    <span class="st-refs">§0–1</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">כאן מתחילים. הרים ירוקים, טרסות אבן, ערפל בין הפסגות. השאלה שנפתחת: מה בכלל ידוע לנו על המקום הזה — ומאיפה.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>99 אובייקטים · 60 קטעי טרסה מאבן יבשה, מגדל בוץ, שני בתים, כלי אחסון</p>
+        <p class="keep">הצללית הזאת נכונה. לא לגעת.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">תימן היא האזור הירוק ביותר בחצי האי — והיא צבועה היום באותו אפרסק כמו המדבר.</p>
+        <p>קרקע <code>#cfd4b8</code> · אור מילוי מהקרקע ירוק־אפור במקום כתום · ערפל קר וגבוה בין הרכסים</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>קריר, לח, גבוה. השמש עוד לא עלתה מעל הרכס. זה המקום היחיד בפרק שבו רואים ירוק אמיתי — וזה בדיוק מה שיגרום למדבר שאחריו לעבוד.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-dawn</b></span><span class="chip">קרקע <b>ground-terrace</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך פתיחה · הראוי</h4>
+      <p class="q">המסך הראשון בפרק. הראוי מציג את עצמו ואת המסע: אנחנו הולכים מדרום לצפון, מתימן עד מכה, ובכל תחנה נבין חלק אחר מהעולם שאליו נולד האסלאם. ומיד אחריו — האזהרה: המידע על התקופה הזאת דל, ורובו מגיע מהמסורת המוסלמית עצמה.</p>
+      <span class="src">§0 · §1</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 2 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#1a2333"></i><i style="background:#31435c"></i><i style="background:#8fa0b8"></i><i style="background:#e08a3c"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 2</span>
+    <span class="st-name">מחנה הלילה</span>
+    <span class="st-id">night-camp</span>
+    <span class="st-refs">§2–5</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">עוצרים ללילה. סביב המדורה מדברים על מה שיש מעבר לאופק — שתי אימפריות ששולטות בעולם, ואף אחת מהן לא כאן.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>70 אובייקטים · 41 דקלים, 6 אוהלים, 4 לפידים, באר, שלושה גמלים</p>
+        <p class="keep">אוהלים ולפידים כבר במקום — כל מה שצריך ללילה קיים.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">התחנה קרויה „מחנה הלילה“ ומשוחקת בזריחה. זה הפער הכי בולט בפרק.</p>
+        <p>צריך נכס חדש: <code>sky-night</code>. קרקע <code>#8fa0b8</code> כחלחלה · אור המילוי מהירח, לא מהשמש · המדורה והלפידים הופכים למקור החום היחיד</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>חושך, כוכבים, מעגל אור אחד. הניגוד החד ביותר בפרק — ומיד אחרי הירוק של תימן. אחרי שתי התחנות האלה כבר אי אפשר להגיד „הכל נראה אותו דבר“.</p>
+        <div class="chips"><span class="chip">שמיים <b>חסר — sky-night</b></span><span class="chip">קרקע <b>sand</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך מעבר · לפני הכניסה</h4>
+      <p class="q">מה זו בכלל „אימפריה“ בהקשר הזה, ולמה חשוב מי שולט מצפון. ההסבר פותח את המושג <em>דואליות</em> — אל טוב ואל רע שנלחמים זה בזה — כי בלי זה §5 הוא רק צירוף מילים.</p>
+      <span class="src">§2 · §3 · §4 · §5</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 3 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#6e6357"></i><i style="background:#9c9184"></i><i style="background:#cfc6bb"></i><i style="background:#e8e2d6"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 3</span>
+    <span class="st-name">תחנת הגבול</span>
+    <span class="st-id">border-post</span>
+    <span class="st-refs">§6–8</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">האזור העמוס ביותר בפרק. שער, מאזני מכס, שמונה גמלים, סחורה. כאן מבינים מה זה שבט בן־חסות — ומי משלם למי.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>169 אובייקטים — הכי הרבה בפרק · שער, מאזני מכס, ספסל אבן, 6 בוצות סלע, 8 גמלים, מספוא, אמפורות</p>
+        <p class="keep">התוכן הוויזואלי כאן מצוין. זו התחנה שהכי קרובה להיות מוכנה.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">אבן אפורה בעולם אפרסק — הכל נראה כמו שכבה אחת.</p>
+        <p>קרקע <code>#cfc6bb</code> אבן ניטרלית · אור בוקר קשה עם צללים ארוכים · אבק על גובה הברכיים מהגמלים</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>עסוק, רשמי, קצת מאיים. זה המקום שבו האימפריות נוגעות בשבטים בפועל — ולכן צריך להיראות כמו מקום שיש בו סמכות ותור.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-morning</b></span><span class="chip">קרקע <b>ground-gravel</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך מעבר · לפני הכניסה</h4>
+      <p class="q">מה זה „בן חסות“ — למה אימפריה מעדיפה שבט שישמור לה על הדרך במקום לכבוש אותה בעצמה. ההסבר מפרק את הרעיון של תיווך: גסאן לביזנטים, לח׳ם לפרסים, ומשי ותבלינים שעוברים באמצע.</p>
+      <span class="src">§6 · §7 · §8</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 4 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#2e2a28"></i><i style="background:#5a524c"></i><i style="background:#b0a49c"></i><i style="background:#d8cec2"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 4</span>
+    <span class="st-name">המעבר הצר</span>
+    <span class="st-id">narrow-pass</span>
+    <span class="st-refs">§9</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">קירות בזלת משני הצדדים ורצועת שמיים למעלה. התחנה היחידה שהיא רק הליכה — וזו הכוונה.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>74 אובייקטים · 46 סלעי בזלת ובולדרים, שלושה אוהלים, מדורה, גמל</p>
+        <p class="keep">הצללית עובדת — מסדרון סלע צר.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">בזלת אמורה להיות שחורה־כחלחלה. היום היא בז׳ כמו כל השאר, ולכן „המעבר הצר“ נראה כמו „תחנת הגבול“.</p>
+        <p>קרקע <code>#b0a49c</code> כהה · ניגודיות גבוהה · ערפל קרוב (near 20) — כבר קיים, להשאיר</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>לחוץ, חם, סגור. צהריים מלמעלה בלי צל. אחרי המחנה החשוך והגבול הפתוח — זה האזור הקלסטרופובי, והוא צריך להיות קצר.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-midday</b></span><span class="chip">קרקע <b>ground-scree</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך מעבר · לפני הכניסה</h4>
+      <p class="q">קצר, כמו התחנה. מה זה „החג׳אז“ ולמה דווקא היותו חבוי הוא שאיפשר לרעיונות לחלחל אליו לאט — בלי שאימפריה תכפה עליו דת.</p>
+      <span class="src">§9</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 5 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#c9a86a"></i><i style="background:#dcc08c"></i><i style="background:#e8d4a8"></i><i style="background:#f2e6cb"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 5</span>
+    <span class="st-name">הדרך וההעמסה</span>
+    <span class="st-id">loading-road</span>
+    <span class="st-refs">§10–13</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">שיירה נטענת בשמש הגבוהה. כאן פוגשים לראשונה את היהודים של חצי האי — דרך מה שקושר בין כולם: מסחר.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>64 אובייקטים · 7 גמלים, 7 ארגזים, 5 ערמות שקים, סוכך, נאדות מים, 7 דקלים</p>
+        <p class="keep">סצנת ההעמסה בנויה. היא רק צריכה אור.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">היום זו התחנה שהכי דומה לשכנותיה — אותו חול, אותו כתום.</p>
+        <p>קרקע <code>#e8d4a8</code> — <strong>האזור הבהיר ביותר בפרק</strong> · אובך שמלבין את המרחק · חשיפה גבוהה, צללים קצרים</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>חם ומסונוור. אחרי המעבר הכהה — פיצוץ אור. ההיפך הגמור מתחנה 4, וזה מה שמייצר את הקצב.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-hazenoon</b></span><span class="chip">קרקע <b>sand</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך מעבר · לפני הכניסה</h4>
+      <p class="q">מאיפה הגיעו יהודים לחצי האי ומתי — ומה זה אומר ש„כל שבט חי עם החוקים והמנהגים שלו“. ההסבר מבהיר שאין כאן סיפור של נתינים ושליטים אלא של שכנים.</p>
+      <span class="src">§10 · §11 · §12 · §13</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 6 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#4d5c33"></i><i style="background:#878a4e"></i><i style="background:#b9a878"></i><i style="background:#ddd0a6"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 6</span>
+    <span class="st-name">ית׳רב</span>
+    <span class="st-id">yathrib</span>
+    <span class="st-refs">§14–17</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">נווה מדבר אמיתי — 53 דקלים, באר, אחת עשרה חצרות. העיר שתיקרא יום אחד אלמדינה, ובינתיים היא רק ית׳רב.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>147 אובייקטים · 53 דקלים, 11 בתים, באר, שוקת, סלעי בזלת</p>
+        <p class="keep">האזור הבנוי ביותר אחרי מכה.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">נווה מדבר בלי שום ירוק בקרקע. הדקלים ירוקים והאדמה מתחתם צבועה כמו חול מדברי.</p>
+        <p>קרקע <code>#b9a878</code> אדמה לחה · צל עמוק מתחת לדקלים · אור אחר הצהריים נמוך ומוזהב</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>מוצל, מיושב, שקט. מקום שחיים בו — לא שעוברים בו. זה גם המקום שבו הפרק אומר לראשונה משהו על יחסים בין קהילות, ולכן הוא צריך להרגיש כמו בית.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-lateday</b></span><span class="chip">קרקע <b>ground-soil</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך מעבר · לפני הכניסה</h4>
+      <p class="q">שם התחנה הוא כל ההסבר: ית׳רב תהיה אלמדינה. ההסבר פותח את הציטוט מ־2:94 — מה נאמר שם ועל מי — ואת ההסתייגות של §17, ש„לא מן הנמנע“ שמוחמד קיווה שיקשיבו לו כאן.</p>
+      <span class="src">§14 · §15 · §16 · §17</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 7 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#7a5c3a"></i><i style="background:#a8865a"></i><i style="background:#cbbfae"></i><i style="background:#ece0cb"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 7</span>
+    <span class="st-name">המנזר</span>
+    <span class="st-id">monastery</span>
+    <span class="st-refs">§18–25</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">מבנה אבן על מדרון, מזבח, שקט. שמונה סעיפים — התחנה הכי כבדה בתוכן אחרי מכה, וגם הכי שקטה.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>56 אובייקטים · מזבח, שישה מבנים, באר, שער, קירות אבן יבשה</p>
+        <p class="fix">הכי דל באובייקטים מבין האזורים המיושבים — ונושא הכי הרבה תוכן.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">צריך יותר סימני חיים של נזירים: כדים, גינת ירק, מדרגות, נר. היום זה נראה נטוש.</p>
+        <p>קרקע <code>#cbbfae</code> אבן גיר · שעת זהב חמה על האבן מול צללים קרים · ללא כיפות וללא צריחים</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>מבודד ומסודר. §21–22 מדברים על פרישות, התבודדות וכתיבת שירה — המקום צריך להיראות כמו מקום שאפשר להתבודד בו, ושמישהו מטפל בו.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-goldhour</b></span><span class="chip">קרקע <b>ground-gravel</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך מעבר · לפני הכניסה</h4>
+      <p class="q">מאיפה הגיעה הנצרות לחצי האי — אקסום מדרום, ארם נהריים מצפון. ההסבר מבהיר את ההבחנה החשובה של §20: תושבי מכה ידעו מעט על <em>העיקרון</em> הנוצרי, אבל הרבה על <em>ההתנהגות</em> של הנזירים — וזה מה שהשפיע.</p>
+      <span class="src">§18 · §19 · §20</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- מסך אברהה ══════════════════════════════════════════ -->
+<div class="station" style="border-color:#a8762a">
+  <div class="swatch"><i style="background:#7a3b18"></i><i style="background:#b8641f"></i><i style="background:#e0a03a"></i><i style="background:#f3d98a"></i></div>
+  <div class="st-head">
+    <span class="st-num" style="color:var(--warn)">מסך מעבר גדול</span>
+    <span class="st-name">הפיל</span>
+    <span class="st-id">→ mecca</span>
+    <span class="st-refs">§26–31</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">לא תחנה — המסך שנכנסים דרכו למכה. שישה סעיפים שיצאו ממכה כדי שהיא לא תקרוס תחת המשקל, והפכו לרגע הדרמטי היחיד בפרק.</p>
+    <div class="grid">
+      <div class="f"><h4>למה כאן</h4>
+        <p>שומעים מה קרה בשערים האלה לפני שמגיעים אליהם. כשנכנסים למכה אחר כך, כבר יודעים שהיא כמעט נחרבה.</p></div>
+      <div class="f"><h4>איך זה נראה</h4>
+        <p>המסך היחיד עם תמונות — הלוחות המצוירים כבר קיימים: <code>dust</code> (חומת אבק שמתקרבת), <code>army</code> (פילים בעמק), <code>birds</code> (הציפורים והאבנים).</p>
+        <p>אבק מתעבה, ואז נעצר.</p></div>
+      <div class="f"><h4>הכלל שאסור לשבור</h4>
+        <p class="fix">על עבד אל־מטלב נאמר במקור רק שהוא <strong>„התנגד“</strong>. אין לו נאום ואין דיאלוג. המסך אומר את זה במפורש — ההיעדר הוא התוכן.</p>
+        <p>וגם: פיל אחד <em>או</em> מספר פילים. המסורת לא מסכימה עם עצמה.</p></div>
+    </div>
+    <div class="screen">
+      <h4>אחרי הסיפור</h4>
+      <p class="q">§30–31 סוגרים אותו בהווה: סורת הפיל עדיין מהדהדת, ובצוק איתן 2014 כינה רמטכ״ל חמאס את צה״ל „אברהה של זמננו“. זה הרגע שבו הפרק נוגע בלומד ישירות — ולכן הוא צריך לעמוד בפני עצמו, לא להיבלע בין שאר השורות במכה.</p>
+      <span class="src">§26 · §27 · §28 · §29 · §30 · §31</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 8 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#4a2b1c"></i><i style="background:#8f4f2a"></i><i style="background:#c7a184"></i><i style="background:#e9c893"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 8</span>
+    <span class="st-name">מכה</span>
+    <span class="st-id">mecca</span>
+    <span class="st-refs">§32–44</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">השיא. עיר בוץ סביב קובייה שחורה, ששה פסלים, ערב. שלושה עשר סעיפים — עדיין הכבדה ביותר, וזה בסדר.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>105 אובייקטים · כעבה, 6 אלילים, 19 בתים, סוככים, חמישה גמלים, באר</p>
+        <p class="keep">הכעבה והאלילים קיימים כמודלים. זה החומר של §34–§37.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">התחנה הכי חשובה בפרק, והיא נראית כמו כל תחנה אחרת. גם 19 השורות שנשארו בה צריכות להיכתב מחדש — הן דחוסות.</p>
+        <p>קרקע <code>#c7a184</code> · <strong>האזור הרווי ביותר בפרק</strong> · ערב אדום־זהוב · הקובייה השחורה חייבת להיות הדבר הכהה היחיד בתמונה</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>עמוס, קדוש, ולא נוח. אחרי שקיבלנו את סיפור אברהה — נכנסים לעיר שכמעט נחרבה, ורואים בדיוק בשביל מה.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-evening</b></span><span class="chip">קרקע <b>ground-scree</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך מעבר · באמצע התחנה</h4>
+      <p class="q">התחנה היחידה שצריכה מסך <strong>בתוכה</strong> ולא רק לפניה — בין §38 ל־§40, בדיוק בנקודה שבה החוקרים חולקים על המסורת. ההסבר מפרק את הטיעון של §39–§41: מה זה „להרחיק את חטא האלילות משבטו של הנביא“, ומה בעצם נטען כשאומרים שהאסלאם „מלבין“ טקסים פגאניים.</p>
+      <span class="src">§39 · §40 · §41</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- 9 ═══════════════════════════════════════════════════ -->
+<div class="station">
+  <div class="swatch"><i style="background:#3b3b46"></i><i style="background:#6b6a72"></i><i style="background:#9a8d88"></i><i style="background:#c6bcb6"></i></div>
+  <div class="st-head">
+    <span class="st-num">תחנה 9</span>
+    <span class="st-name">ערב עליית האסלאם</span>
+    <span class="st-id">exit</span>
+    <span class="st-refs">§45–48</span>
+  </div>
+  <div class="st-body">
+    <p class="st-line">רכס ריק בדמדומים. יוצאים ממכה ומסתכלים אחורה על כל מה שעברנו — ומבינים שהעולם הזה עוד לא יודע מה עומד לקרות בו.</p>
+    <div class="grid">
+      <div class="f"><h4>מה יש שם היום</h4>
+        <p>52 אובייקטים · 30 סלעים ובולדרים, שלושה גמלים, חמישה אבני דרך, מדורה</p>
+        <p class="keep">ריק בכוונה — וזה נכון.</p></div>
+      <div class="f"><h4>מה לתקן</h4>
+        <p class="fix">היום הריקנות נקראת כמו אזור לא גמור. צריך שהיא תיקרא כמו סוף.</p>
+        <p>קרקע <code>#9a8d88</code> אפור־כחלחל · <strong>האזור הקר ביותר בפרק</strong> · אור נמוך ומתקרר · המדורה האחרונה כנקודת החום היחידה</p></div>
+      <div class="f"><h4>איך זה אמור להרגיש</h4>
+        <p>שקט אחרי רעש. אחרי הרוויה של מכה — קור וריקנות. זה מה שהופך „ערבים לא היוו איום על אף אימפריה“ מעובדה יבשה להרגשה.</p>
+        <div class="chips"><span class="chip">שמיים <b>sky-dusk</b></span><span class="chip">קרקע <b>ground-terrace</b></span></div></div>
+    </div>
+    <div class="screen">
+      <h4>מסך סיום</h4>
+      <p class="q">הראוי סוגר את המסע. §47 הוא ההסבר הכי יפה בפרק ואפשר לתת לו במה: הביזנטים לא הצליחו להשליט את דתם — אבל השאירו מילים. <em>קצר</em> — מבצר, <em>ברג׳</em> — מגדל, <em>קלם</em> — קולמוס. ואז ההסתייגות האחרונה של §48, ואחריה שקט.</p>
+      <span class="src">§45 · §46 · §47 · §48</span>
+    </div>
+  </div>
+</div>
+
+
+<h2>מה זה אומר בפועל</h2>
+<p>לכל תחנה ארבעה שלבים, בסדר הזה:</p>
+<ul>
+  <li><strong>תוכן</strong> — לאסוף את הסעיפים שלה לפי החלוקה החדשה, ולכתוב אותם מחדש בעברית קריאה. כל שורה מאומתת מול <code>SOURCE-TEXT.md</code>.</li>
+  <li><strong>מסך מעבר</strong> — ההסבר שלפני הכניסה. מפרק מושגים, לא מוסיף עובדות.</li>
+  <li><strong>מראה</strong> — הגוון, האור, הערפל, ותיקוני האובייקטים שרשומים בכרטיס.</li>
+  <li><strong>אימות</strong> — הרצת השערים הקיימים, ואז מעבר בפועל ברגל באזור. מסך יפה שאי אפשר לצאת ממנו זה לא אזור גמור.</li>
+</ul>
+
+<p>שתי עבודות שהן מחוץ למחזור הזה ומשרתות את כולן: <strong>נכס אחד חסר</strong> — שמי לילה לתחנה 2, ו<strong>מסך אברהה</strong>, שהוא הכי גדול ומשתמש בלוחות המצוירים שכבר קיימים.</p>
+
+<div class="note">
+  <h4>ההצעה שלי לסדר</h4>
+  <p>להתחיל ב<strong>מכה</strong>. היא 13 מתוך 49 הסעיפים, היא האזור הכי שבור, והיא זו שתוכיח אם השיטה עובדת. אם מכה יוצאת טוב — השאר הוא אותו מהלך שמונה פעמים.</p>
+  <p>אבל אם את מעדיפה לראות את הקשת מההתחלה, <strong>תימן ואז מחנה הלילה</strong> ביחד זו האפשרות השנייה הטובה — הן שתי התחנות שהכי רחוקות זו מזו ויוכיחו מיד שהאזורים כבר לא נראים אותו דבר.</p>
+</div>
+
+<footer>
+  נמדד מתוך <code>web/src/lib/chapter1/*-layout.json</code> ו־<code>dialogue.json</code> · 19.8.2026
+</footer>
+
+</div>
+</body>
+</html>
