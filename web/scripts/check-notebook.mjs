@@ -92,7 +92,19 @@ const launch = () => puppeteer.launch({
 })
 
 /* The notebook is the scoreboard and it lives in localStorage. Carrying it
-   between regions by hand is what a real player's browser does for them. */
+   between regions by hand is what a real player's browser does for them.
+
+   Accumulated rather than replaced: reading the store back can fail (a reload
+   can land mid-evaluate), and a single failed read used to hand the next
+   region an empty scoreboard, so the run lost evidence it had actually
+   collected and blamed the game for it. */
+const tally = { seen: [], entries: [], found: [], solved: [] }
+const merge = (s) => {
+  if (!s) return
+  for (const k of Object.keys(tally)) {
+    for (const v of s[k] || []) if (!tally[k].includes(v)) tally[k].push(v)
+  }
+}
 let carried = null
 
 for (const region of ORDER) {
@@ -255,7 +267,8 @@ for (const region of ORDER) {
 
   if (SHOTS) await pg.screenshot({ path: join(SHOTS, `pt-${region}.png`) })
   const after = await evalSafe(pg, () => JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}'))
-  carried = JSON.stringify(after)
+  merge(after)
+  carried = JSON.stringify({ ...tally, region })
 
   log.push({
     region,
@@ -270,10 +283,9 @@ for (const region of ORDER) {
 }
 
 console.table(log)
-const final = JSON.parse(carried || '{}')
-const seen = (final.seen || []).length
-const found = (final.found || []).length
-const solved = (final.solved || []).length
+const seen = tally.seen.length
+const found = tally.found.length
+const solved = tally.solved.length
 console.log('\nencounters heard: %d / 27', seen)
 console.log('evidence:         %d / %d', found, FINDS.length)
 console.log('tasks solved:     %d / %d', solved, TASKS.length)
