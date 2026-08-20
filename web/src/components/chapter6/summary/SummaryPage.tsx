@@ -29,6 +29,7 @@ import PillarSection, { beatSlotId, exSlotId, type SectionState } from './Pillar
 import { usePickPlace } from './usePickPlace'
 import {
   CLOSING,
+  END,
   EXERCISES,
   FEEDBACK,
   HERO,
@@ -282,7 +283,9 @@ export default function SummaryPage() {
     }))
     list.push({ id: 'gv-quiz', label: QUIZ_BLOCK.title, done: QUIZ.every((q) => progress.quizDone[q.id]) })
     list.push({ id: 'gv-closing', label: CLOSING.title, done: progress.closingDone })
-    if (progress.completed) list.push({ id: 'gv-end', label: 'סוף הפרק', done: true })
+    /* the label is the block's own title, like every other stop in this list — a hardcoded
+       „סוף הפרק“ here named the last stop something the page never says */
+    if (progress.completed) list.push({ id: 'gv-end', label: END.title, done: true })
     return list
   }, [progress])
 

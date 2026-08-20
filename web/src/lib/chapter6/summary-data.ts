@@ -155,7 +155,7 @@ const EX_SHAHADA: ExerciseDef = {
   beat: {
     title: 'ההצטרפות לאסלאם',
     ask: 'השלימו את שתי המשבצות במשפט.',
-    sentence: 'כאשר אדם מבקש לקבל על עצמו את דת האסלאם, יאמר את השהאדה [1] בפני [2].',
+    sentence: 'במרבית הקהילות באסלאם הדרך לעשות זאת היא אמירת השהאדה [1] בפני [2].',
     slots: [
       { n: 1, answer: 'שלוש פעמים' },
       { n: 2, answer: 'שני עדים כשרים' },
@@ -183,7 +183,7 @@ const EX_PRAYER: ExerciseDef = {
     {
       n: 3,
       answer: 'תפילת אחר הצהריים (צלאה אלעצר)',
-      cue: 'כשצלו של חפץ והחפץ עצמו באותו הגודל',
+      cue: 'כשאורכו של צל של עצם שווה לאורך העצם עצמו בתוספת צל השמש',
       photo: 'prayer-day-3.jpg',
     },
     { n: 4, answer: "תפילת הערב (צלאה אלמע'רב)", cue: 'בשקיעת השמש', photo: 'prayer-day-4.jpg' },
@@ -215,7 +215,7 @@ const EX_PRAYER: ExerciseDef = {
     after: [
       {
         src: 'prayer-wudu-real.jpg',
-        caption: 'שטיפת הידיים, הפנים, שיער הראש והזקן.',
+        caption: 'רחיצת הידיים והפנים, רחיצת הזרועות עד המרפקים, ניגוב הראש ושטיפת הרגליים עד הקרסוליים.',
       },
     ],
     sources: ['pr-3', 'pr-4', 'hj-2'],
@@ -258,7 +258,7 @@ const EX_CHARITY: ExerciseDef = {
     title: 'השכר והחובה',
     ask: 'השלימו את שתי המשבצות במשפט.',
     sentence:
-      'הקוראן מבטיח שנותן הצדקה יקבל שכר [1], ומצוות צדקה זו היא [2] — בשונה מן הצדקה שנותנים בעיד אלפטר ובמועדים נוספים.',
+      'הקוראן מבטיח שנותן הצדקה יקבל שכר [1], וה"זכאה" היא [2] — ושונה מן הצדקה הוולנטרית שאינה מוגבלת לשיעור קבוע.',
     slots: [
       { n: 1, answer: 'בכפליים' },
       { n: 2, answer: 'חובה' },
@@ -277,12 +277,16 @@ const EX_RAMADAN: ExerciseDef = {
   ask: 'סדרו את שלבי יום הצום לפי הסדר.',
   numbersAreOrder: true,
   layout: 'line',
+  /* Four stages, not five. The midday one („הימנעות מאכילה, משתייה ומעישון“) was
+     dropped from the article's day-strip by the author, and a practice screen
+     that still asks for it teaches a step the chapter no longer shows. The
+     abstention it named is not lost — it is what the whole stretch between the
+     first and second slot IS, and rm-4 says so in the sentence the beat quotes. */
   slots: [
     { n: 1, answer: 'עלות השחר', photo: 'ramadan-fast-dawn.jpg' },
-    { n: 2, answer: 'הימנעות מאכילה, משתייה ומעישון', photo: 'ramadan-fast-noon.jpg' },
-    { n: 3, answer: 'שקיעת החמה', photo: 'ramadan-fast-sunset.jpg' },
-    { n: 4, answer: 'אפטאר', photo: 'iftar-real.jpg' },
-    { n: 5, answer: 'תפילות תראויח', photo: 'ramadan-fast-night.jpg' },
+    { n: 2, answer: 'שקיעת החמה', photo: 'ramadan-fast-sunset.jpg' },
+    { n: 3, answer: 'אפטאר', photo: 'iftar-real.jpg' },
+    { n: 4, answer: 'תפילות תראויח', photo: 'ramadan-fast-night.jpg' },
   ],
   decoys: [],
   hint: 'היום מתחיל באור הראשון ונשבר עם השקיעה. כל מה שבא אחרי השקיעה שייך כבר ללילה.',
@@ -332,7 +336,7 @@ const EX_HAJJ: ExerciseDef = {
     { n: 1, answer: 'אחראם', x: 80, y: 19, photo: 'ihram-real.jpg', cue: 'המיקאת' },
     { n: 2, answer: 'טוואף', x: 80, y: 74, photo: 'tawaf-real.jpg', cue: 'מכה' },
     { n: 3, answer: 'סעי', x: 84, y: 80, photo: 'hajj-sai.jpg', cue: 'צפא ומרוה' },
-    { n: 4, answer: 'ערפה', x: 22, y: 24, photo: 'arafat-real.jpg', cue: 'הר ערפה' },
+    { n: 4, answer: 'ערפה', x: 22, y: 24, photo: 'arafat-real.jpg', cue: 'מישור ערפה' },
     { n: 5, answer: 'מוזדליפה ומינא', x: 44, y: 60, photo: 'hajj-muzdalifah.jpg', cue: 'רגימת השטן' },
     { n: 6, answer: 'חזרה למכה', x: 70, y: 86, photo: 'kaaba-real.jpg', cue: 'חג הקורבן' },
   ],
@@ -344,7 +348,7 @@ const EX_HAJJ: ExerciseDef = {
     title: 'מי עולה לרגל, ומתי',
     ask: 'השלימו את שתי המשבצות במשפט.',
     sentence:
-      'העלייה לרגל אינה חובה כמו שאר מצוות היסוד, אלא תלויה [1], והמוסלמי נדרש להתאמץ לשם כך עד גבול מסוים, [2].',
+      'העלייה לרגל, הגם והיא חובה דתית, אינה כמו שאר מצוות היסוד, אלא תלויה [1], והמוסלמי נדרש להתאמץ לשם כך עד גבול מסוים, [2].',
     slots: [
       { n: 1, answer: 'ביכולתו של האדם, הן בהיבט הכלכלי והן בהיבט הבריאותי' },
       { n: 2, answer: 'פעם אחת במהלך חייו' },
@@ -352,12 +356,12 @@ const EX_HAJJ: ExerciseDef = {
     bank: [
       'ביכולתו של האדם, הן בהיבט הכלכלי והן בהיבט הבריאותי',
       'פעם אחת במהלך חייו',
-      "ביום ה־8 לחודש ד'ו אלחג'ה",
+      "בין היום ה־8 ל־13 לחודש ד'ו אלחג'ה",
       'שבע פעמים',
     ],
     arabic: 'حج مبرور وسعي مشكور وذنب مغفور',
     hint: 'משבצת אחת אומרת במה זה תלוי, והשנייה כמה פעמים.',
-    after: [{ src: 'kaaba-real.jpg', caption: '"חג\' מקובל, טקס הריצה מבורך והחטא נמחל."' }],
+    after: [{ src: 'kaaba-real.jpg', caption: '"חג מקובל, טקס הריצה רצוי ומבורך והחטא נמחל."' }],
     sources: ['hj-1', 'hj-7', 'hj-3'],
   },
 }
@@ -386,10 +390,16 @@ export const QUIZ: McqDef[] = [
   {
     id: 'q-2',
     question: 'מתי, לפי המסורת, ירד הקוראן?',
-    options: ['בלילה ה־27 לחודש', "ביום ה־8 לחודש ד'ו אלחג'ה", "ביום השישי (יום אלג'מעה)"],
+    /* Every option has to answer „מתי?“ in the same grammatical shape, and every
+       option has to be a phrase the reader actually met. The friday-prayer decoy
+       satisfied the second rule and broke the first — after the source was
+       reworded the only quotable form of it began with ל, so the question read
+       „מתי? — לתפילת יום השישי“. Sunset is a real time from pr-2 and starts with
+       ב like the other two. */
+    options: ['בלילה ה־27 לחודש', "בין היום ה־8 ל־13 לחודש ד'ו אלחג'ה", 'בשקיעת השמש'],
     answer: 'בלילה ה־27 לחודש',
-    ok: 'נכון. זהו „ליל אלקדר“. שתי האפשרויות האחרות שייכות לעלייה לרגל ולתפילת יום השישי.',
-    sources: ['rm-3', 'hj-1', 'pr-4'],
+    ok: 'נכון. זהו „ליל אלקדר“. שתי האפשרויות האחרות שייכות לעלייה לרגל ולתפילת הערב.',
+    sources: ['rm-3', 'hj-1', 'pr-2'],
   },
 ]
 
@@ -406,35 +416,46 @@ export const CLOSING = {
      the article's own eyebrow/title/lead anatomy. As one string it was a 56px sentence where
      every other section has a two-word title. Not a word changed. */
   title: 'דבר אחרון',
-  ask: 'אחת מחמש המצוות איננה חובה גמורה. איזו?',
+  /* Rewritten 16.8.2026 with the revised source. The question used to be „אחת
+     מחמש המצוות איננה חובה גמורה. איזו?“ — but the new text says the pilgrimage
+     IS a religious duty, only one conditioned on ability, so the old question
+     asserted something the chapter now denies. The distinction the chapter
+     actually draws is duty-for-everyone vs duty-for-whoever-can. */
+  ask: 'ארבע מן המצוות חלות על כל מוסלמי. אחת חלה רק על מי שיכול. איזו?',
   answer: 'hajj' as PillarKey,
   /* the reward is the source's own clause, not a verdict — actionDetails[4].quote */
   ok: 'לעלות לרגל פעם בחיים, אם ביכולתך.',
   okNote:
     'בראשית תקופת האסלאם היה קושי גדול להתנייד לחצי האי ערב, והדבר היה כרוך בהליכה ימים רבים במדבריות תוך סכנה גדולה משודדים, חיות רעות, חום המדבר ועוד.',
-  miss: 'זו כן חובה גמורה. חפשו את זו שתלויה בנסיבותיו של האדם.',
+  miss: 'זו חלה על כל מוסלמי. חפשו את זו שתלויה ביכולתו הכלכלית והבריאותית של האדם.',
 }
 
 /* ------------------------------------------------------------------ the end ---- */
 
+/* THE CLOSING BLOCK IS THE CHAPTER'S OWN QUESTION, ANSWERED.
+
+   It used to be titled „סוף פרק שישי“ — a filing label, not a close — and it ran in an order
+   that asked the reader to do things in the wrong sequence: a lead about clicking icons, then
+   five names each carrying a summary of what had just been practised, and only at the very
+   bottom the sentence the whole chapter exists to explain.
+
+   The order now follows the chapter's own dramaturgy. The film that opens the chapter is a
+   stranger asking Muhammad „יא מוחמד, מהו האסלאם?“; that question is the title here, the answer
+   is the first thing on the block, and only then do the five icons appear — as the way back
+   into the chapter, directly above the way out of it. The summary line under each name is gone:
+   it re-taught, in one flat sentence, the thing the reader had just spent five exercises
+   working through. */
 export const END = {
-  title: 'סוף פרק שישי',
-  lead: 'חמש המצוות מלאות. לחיצה על מצווה מחזירה אל הנושא שלה בפרק.',
-  /* one short memory line per commandment — summarising the topic, never replacing it.
-     From sh-2/sh-3 · pr-2/pr-3/pr-5 · ch-1 · rm-4/rm-7 · hj-1 */
-  memory: {
-    shahada: 'אין אל מבלעדי אללה ושמוחמד הוא שליחו — בפני שני עדים כשרים.',
-    prayer: 'חמש תפילות ביום, בטהרה ובכוונה, לעבר מכה.',
-    charity: '2.5% מן המאזן השנתי — לעניים, לנזקקים, ליתומים ולבתי תמחוי.',
-    ramadan: 'מעלות השחר ועד השקיעה, חודש שנפתח ונסגר בראיית הירח.',
-    hajj: 'פעם אחת בחיים, אם ביכולתו של האדם.',
-  } as Record<PillarKey, string>,
+  title: 'מהו האסלאם?',
+  lead: 'בפתח הפרק שאל האיש הזר את מוחמד. אחרי חמש המצוות אפשר לקרוא את התשובה במלואה.',
   /* the one place the five VERBS come back — as the chapter's own sentence, drawerContent[2],
      read rather than operated */
-  quoteLead: 'וזו הייתה תשובתו של מוחמד לשאלה „מהו האסלאם?“',
+  quoteLead: 'כך ענה לו מוחמד:',
   quote:
     'האסלאם הוא שעליך להאמין שאין אל מבלעדי אללה, שמוחמד הוא שליחו, עליך להתפלל חמש תפילות ביום, לתת צדקה, לצום את צום הרמדאן ולעלות לרגל פעם בחיים אם ביכולתך.',
   finish: 'סיום הפרק',
+  /* the line above the five icons — they are navigation now, not a summary */
+  navLead: 'לחיצה על מצווה מחזירה אל הנושא שלה בפרק.',
   back: 'לחזרה לכל הפרקים',
   again: 'לחזרה על התרגול',
   againNote: 'הפרק מסומן כהושלם. חזרה על התרגול מאפסת את התרגול בלבד.',

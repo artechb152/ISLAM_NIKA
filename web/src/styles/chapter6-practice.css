@@ -25,7 +25,19 @@
      2. Selection is MAROON FILL on cream. Gold is a hairline and a ring around a number —
         never the state colour, and never gradient-clipped text (a technique the article
         never uses).
-     3. Headings are the article's `.section-heading`: start-aligned, ornament, muted lead. */
+     3. Headings are the article's `.section-heading`: start-aligned, ornament, muted lead.
+
+   THREE MORE, ADDED AFTER MEASURING THE TWO SHEETS AGAINST EACH OTHER (8.2026). Every size on
+   this page was checked against the set of sizes the article actually declares, and the ones
+   that were not in it are gone:
+     4. NO SIZE THAT THE CHAPTER DOES NOT USE. 17px appeared six times here and not once in
+        1487 lines of the article; every one of those six now carries the size of the article
+        element it is a copy of (`.chk-say`, `.chk-chip`, `.chk-opt`, `.sw-info p`, `.hjm-dot`).
+        Where a size had a token — body text is `--read` — it takes the token.
+     5. KEDEM IS NEVER LIGHTER THAN 700, anywhere in the chapter, and it is for names, titles
+        and quotations. A sentence is set in Ploni, whatever it sits inside.
+     6. A PHOTOGRAPH IS FRAMED: 1px `--edge`, the chapter's shadow. Paintings (the maps) are
+        not — their border is painted into the artwork. */
 
 /* ------------------------------------------------------------------ page shell ---- */
 .gv-page{background:var(--panel)}
@@ -55,23 +67,54 @@
    article's column because the surfaces inside it are five things across; text inside sets its
    own measure in `ch`. */
 .gv-ex{width:100%}
-/* the beat's instruction, in the article's lead shape — the same one `.section-heading > p`
-   gives the exercise's instruction directly above it */
-.gv-ask{
-  margin:0 0 clamp(16px,2vw,24px);width:min(820px,100%);
-  font-size:22px;line-height:1.65;color:var(--muted);
+/* THE READING MEASURE IS THE ARTICLE'S: `min(760px,100%)`.
+
+   It is the one width the chapter uses for a block of prose — `.explore`, `.explore-block`,
+   `.pillars-lead`, `.rm-dayline`, `.fast-day-head`, `.hijri-link`, `.check-wrap` all carry it.
+   Everything on this page that is a SENTENCE now carries it too. It used to run the full 1025px
+   column on the argument that a particular line then broke two words onto a second row; the
+   cost of that was a 95-character line under exercises whose captions are five words long, and
+   a page whose text was visibly longer-lined than the chapter it belongs to. The surfaces —
+   the five-across tracks, the painting, the tray — stay full width: they are not prose. */
+.gv-measure,.gv-ask,.gv-done,.gv-feedback,.gv-hint,.gv-sentence-text,.gv-closing-note{
+  width:min(760px,100%);
 }
 
-/* The closing line of an exercise — the source's own „ok“, with a tick.
+/* the beat's instruction: the article's line under a sub-heading, introducing what follows
+   (`.hjm-lead`). 22px muted is the chapter's SECTION lead and belongs only to a section
+   heading, which this is not — the beat is headed by its own `.scrolly-env` above it. */
+.gv-ask{
+  margin:0 0 22px;font-size:clamp(15px,1.6vw,18px);color:var(--muted);
+}
 
-   FULL COLUMN, not a 70ch measure. 70 characters is the right width for a paragraph somebody
-   reads for a minute; this is one sentence under a row of five photographs, and capping it
-   broke „…מעלות השחר, דרך חצות היום והצל המתארך, אל השקיעה“ onto a second line carrying two
-   words. It runs to the end of the column now and wraps only where the column genuinely
-   cannot hold it. */
+/* ================================================ THE ALTERNATION OF ALIGNMENTS ========
+   The chapter does not align everything one way, and that is a large part of why it reads the
+   way it does. Two rules run through all 1487 lines of it:
+
+     · RUNNING PROSE AND HEADINGS START AT THE EDGE. `.section-heading`, `.content-block p`,
+       `.stage-card`, `.rm-dayline`, `.explore-caption`, `.rm-tl-card` — every paragraph you
+       actually read begins at the start of the column.
+
+     · WHAT BELONGS TO A SYMMETRICAL ROW, AND WHAT IS CEREMONIAL, IS CENTRED. The lead above
+       the five-icon path (`.pillars-lead`), the statement under it (`.pillars-statement`), the
+       captions of an arch card (`.rm-day-card`), the testimony (`.shahada-quote p`), the
+       closing blessing (`.blessing`), the hint under the map (`.hjm-hint`), and — in the
+       chapter's own little practice — its prompt, its answer line and its completion line
+       (`.practice-head`, `.practice-say`, `.practice-finished`).
+
+   So on this page: an EXERCISE is a symmetrical row, and everything that answers it — the
+   count, the ✓, the hint, the labels — centres under it. A BEAT is a paragraph of the
+   chapter's own prose, and it starts at the edge like every paragraph in the article. */
+.gv-ex:not(.gv-beat) > .gv-feedback,
+.gv-ex:not(.gv-beat) > .gv-done{justify-content:center;text-align:center;margin-inline:auto}
+.gv-ex:not(.gv-beat) > .gv-hint{text-align:center;margin-inline:auto}
+.gv-ex:not(.gv-beat) > .gv-tray{justify-content:center}
+
+/* The closing line of an exercise — the source's own „ok“, with a tick. It reads at the
+   chapter's measure like every other sentence here; see the note above. */
 .gv-done{
   display:flex;align-items:flex-start;gap:11px;margin-top:clamp(18px,2.4vw,26px);
-  width:100%;font-size:var(--read);line-height:1.75;color:var(--ink);
+  font-size:var(--read);line-height:1.75;color:var(--ink);
 }
 .gv-done-mark{flex:none;width:22px;height:22px;color:var(--maroon);margin-top:3px}
 .gv-done-mark svg{width:100%;height:100%}
@@ -92,12 +135,14 @@
 .gv-slot:focus-visible .gv-slot-n{outline:2px solid var(--maroon);outline-offset:4px}
 .gv-slot.is-refused{animation:chk-bounce .3s ease}
 
-/* the medallion — the article's timeline node, one size down */
+/* the medallion — the article's timeline node, one size down. The numeral is the size the
+   article sets on the numeral inside its own map pin (`.hjm-dot`, 15px Kedem 800), which is the
+   only numbered disc the chapter draws; 17px was this page's own invention. */
 .gv-slot-n{
   position:relative;flex:none;width:42px;height:42px;border-radius:50%;
   display:grid;place-items:center;background:var(--paper);border:2px solid var(--gold);
   box-shadow:0 5px 13px rgba(60,35,18,.12);
-  font-family:var(--font-heading);font-weight:800;font-size:17px;color:var(--maroon);
+  font-family:var(--font-heading);font-weight:800;font-size:15px;color:var(--maroon);
   transition:transform .22s,background .22s,border-color .22s,color .22s;
 }
 .gv-slot-n::before{content:"";position:absolute;inset:4px;border-radius:50%;border:1px solid rgba(199,154,60,.5)}
@@ -114,17 +159,29 @@
 .gv-slot.is-full .gv-slot-n::before{border-color:rgba(245,236,214,.5)}
 
 /* the photograph — the chapter's mihrab arch */
+/* THE ARCH IS THE ARTICLE'S ARCH, at the article's size.
+
+   `.rm-day-arch` is `clamp(260px,25vw,360px)` tall with a `clamp(80px,10vw,140px)` dome, four
+   across the column — 349×360 on a 1920 screen, a portrait frame with a real mihrab head on it.
+   This page used to cap the same frame at 200px and give it a 100px dome, and on a wide monitor
+   that came out 479×200: a letterbox with rounded corners, nothing like the shape it is a copy
+   of. The height and the dome are the article's values now, verbatim. */
 .gv-slot-photo{
-  display:block;width:100%;height:var(--gv-arch,clamp(150px,15vw,210px));overflow:hidden;
-  border-radius:clamp(56px,7vw,100px) clamp(56px,7vw,100px) 14px 14px;
+  display:block;width:100%;height:var(--gv-arch,clamp(260px,25vw,360px));overflow:hidden;
+  border-radius:clamp(80px,10vw,140px) clamp(80px,10vw,140px) 14px 14px;
   border:1px solid var(--edge);box-shadow:0 14px 30px rgba(60,35,18,.17);
 }
 .gv-slot-photo img{width:100%;height:100%;object-fit:cover;display:block}
 
-/* the cue — the article's caption under an arch, not a label inside a box */
+/* the cue — the article's caption under an arch (`.rm-day-title`), not a label inside a box.
+   Kedem at 700: the chapter never sets its display face lighter than that, and this cue was
+   the one place on either sheet inheriting 400. ONE size for every track — the size the article
+   gives its own small captions, `clamp(15px,1.4vw,18px)`; the row used to carry that while the
+   five-across tracks carried a larger clamp of this page's own making, so one caption had two
+   sizes depending on which exercise you were looking at. */
 .gv-slot-cue{
-  font-family:var(--font-heading);color:var(--maroon-deep);
-  font-size:clamp(16px,1.6vw,20px);line-height:1.3;text-wrap:balance;
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(15px,1.4vw,17.5px);line-height:1.3;text-wrap:balance;
 }
 
 /* the blank. Dashed and empty, or a solid maroon rule with the answer on it — the difference
@@ -145,7 +202,21 @@
 .gv-slot.is-locked .gv-slot-n::before{display:none}
 
 /* ---- the shared axis: a row of medallions on one hairline (the article's .rm-tl-axis) ---- */
-.gv-track{position:relative;display:grid;gap:clamp(14px,2vw,28px);align-items:stretch}
+/* A CELL NEVER GROWS WIDER THAN THE ARTICLE'S. The chapter's own strip is four frames in the
+   same column, so its cell tops out around 350px; a three-across track left to fill the column
+   reached 479px on a 1920 screen and its frames stopped being portrait. The track takes the
+   width its cells need and no more, and — like every capped block in the chapter — it sits at
+   the start of the column rather than centred. */
+.gv-track{
+  --gv-gap:clamp(14px,2vw,28px);--gv-cell:360px;
+  position:relative;display:grid;gap:var(--gv-gap);align-items:stretch;
+  max-width:calc(var(--gv-cols,5) * var(--gv-cell) + (var(--gv-cols,5) - 1) * var(--gv-gap));
+  /* A CAPPED SURFACE IS CENTRED IN THE COLUMN, the way the chapter centres its own map
+     („.hajj-map{margin-inline:auto}“). It has to be: the count line, the ✓ and the labels are
+     centred under it, and a surface pinned to the edge while its answers centre on the column
+     puts the two on different axes — which reads as a mistake, because it is one. */
+  margin-inline:auto;
+}
 .gv-track::before{
   content:"";position:absolute;inset-inline:9%;top:21px;height:1px;background:var(--edge);z-index:0;
 }
@@ -170,14 +241,17 @@
 }
 .gv-track .gv-slot-n{grid-row:1;align-self:start}
 .gv-track .gv-slot-photo{grid-row:2;margin-top:12px}
-.gv-track .gv-slot-cue{grid-row:3;align-self:start;margin-top:11px}
+/* 17px under the frame is the article's own step from an arch to its caption (`.rm-day-title`) */
+.gv-track .gv-slot-cue{grid-row:3;align-self:start;margin-top:17px}
 .gv-track .gv-slot-line{grid-row:4;align-self:end;margin-top:12px}
 
 /* --------------------------------------------------------------- surface: LINE ----
    צום רמדאן. The same row, plus direction: this is a required sequence and the number IS the
    order, which is why its instruction says „סדרו“. */
-.gv-line .gv-track{grid-template-columns:repeat(5,1fr)}
-.gv-line{--gv-arch:clamp(130px,13vw,190px)}
+/* the column count comes from the DATA, like every other track. It was hardcoded to five while
+   the fast-day sequence has four stages, so the track carried a fifth, empty column and the row
+   sat pushed off the start of the page. */
+.gv-line .gv-track{grid-template-columns:repeat(var(--gv-cols,4),1fr)}
 /* the arrow between two stages. The page is RTL, so „next“ is to the LEFT. */
 .gv-line .gv-slot:not(:last-of-type)::after{
   content:"";position:absolute;inset-inline-end:calc(-1 * clamp(10px,1.4vw,17px));top:15px;
@@ -190,10 +264,7 @@
    They were arranged AROUND the testimony — three photographs at three heights with a
    gold-framed quotation between them — which was true to „they surround one sentence“ and
    unreadable as an exercise. No arrows: these three are not a sequence. */
-.gv-row{--gv-arch:clamp(130px,13vw,200px)}
 .gv-row .gv-track{grid-template-columns:repeat(var(--gv-cols,3),1fr)}
-/* the time signs are the longest cues on the page and they sit in a fifth of the row */
-.gv-row .gv-slot-cue{font-size:clamp(15px,1.4vw,18px)}
 /* a track with neither photographs nor cues — the charity vessels — is one line of medallions
    over one line of rules, and it should read as that rather than as a band of empty parchment.
    The blank sits close under its medallion so the two read as one thing. */
@@ -232,6 +303,8 @@
 .gv-map{
   position:relative;line-height:0;container-type:inline-size;
   width:min(100%,calc((100vh - 230px) * 1.5));
+  /* centred in the column, exactly like the chapter's own painting (`.hajj-map`) */
+  margin-inline:auto;
 }
 .gv-map-img{width:100%;height:auto;display:block;border-radius:16px;box-shadow:0 12px 30px rgba(60,35,18,.14)}
 .gv-map-pins{position:absolute;inset:0;line-height:1}
@@ -291,8 +364,11 @@
    „…יאמר את השהאדה שלוש פעמים בפני שני עדים כשרים.“ across two lines, the second carrying
    three words. `line-height` stays large — this paragraph has medallions and filled underlines
    riding in it and needs the room. */
+/* the size is `--read`, the chapter's ONE body token: this is the chapter's own sentence being
+   handed back, so it has to be set in the chapter's reading size and not a larger one of this
+   page's own. */
 .gv-sentence-text{
-  width:100%;margin:0;font-size:clamp(18px,1.8vw,22px);line-height:2.3;color:var(--ink);
+  margin:0;font-size:var(--read);line-height:2.3;color:var(--ink);
 }
 .gv-sentence .gv-slot{display:inline;gap:0}
 .gv-sentence .gv-slot-n{
@@ -312,7 +388,10 @@
   display:inline;min-height:0;margin:0;padding:2px 8px 2px 1px;
   border-bottom:2px dashed rgba(138,39,51,.42);
 }
-.gv-sentence .gv-slot.is-empty .gv-slot-line::before{content:"";display:inline-block;width:clamp(64px,12vw,140px)}
+/* the empty gap's reserved width. It is measured against the READING MEASURE now, not the full
+   column: at 140px two gaps took a third of a 760px line and pushed the sentence's last blank
+   onto a row of its own carrying nothing but a full stop. */
+.gv-sentence .gv-slot.is-empty .gv-slot-line::before{content:"";display:inline-block;width:clamp(64px,8vw,110px)}
 .gv-sentence .gv-slot.is-full .gv-slot-line{border-bottom:2px solid var(--maroon)}
 
 /* ------------------------------------------------------------------- the tray ----
@@ -325,10 +404,12 @@
   margin-top:clamp(18px,2.4vw,26px);
 }
 .gv-tray-empty{margin:0;font-size:var(--read);color:var(--muted)}
+/* 15px is the size the article gives the same object — `.chk-chip`, the word you pick up and
+   drop into a blank in the per-commandment check. */
 .gv-chip{
   cursor:grab;min-height:46px;padding:10px 20px;
   border:1px solid var(--edge);border-radius:999px;background:var(--mat);color:var(--maroon);
-  font-size:17px;font-weight:600;line-height:1.3;text-align:center;max-width:100%;
+  font-size:15px;font-weight:600;line-height:1.3;text-align:center;max-width:100%;
   transition:background .2s ease,border-color .2s ease,color .2s ease;
 }
 .gv-chip:hover{background:rgba(165,50,47,.1);border-color:var(--maroon)}
@@ -340,9 +421,14 @@
    different colour, different sentence shape. And the hint sits DIRECTLY under the feedback
    line that announced it — it used to open below a tall tray, off the bottom of the screen,
    under a message that said „פתחתי רמז מתחת“. */
+/* 14.5px is `.chk-say`, the line that answers a placement in the article's own check. The hint
+   under it is `.sw-info p` — 15px/1.65, the chapter's explanatory note. */
+/* the reserved height is ONE line plus its mark, the way the article reserves one line for its
+   own („.chk-say{min-height:1.4em}“). It used to hold 52px open under every exercise — a hole
+   sized for the 17px type that is no longer here, and bigger than any gap the chapter leaves. */
 .gv-feedback{
-  display:flex;align-items:flex-start;gap:10px;min-height:52px;
-  margin-top:clamp(16px,2vw,24px);font-size:17px;line-height:1.6;
+  display:flex;align-items:flex-start;gap:10px;min-height:26px;
+  margin-top:clamp(16px,2vw,24px);font-size:14.5px;line-height:1.6;
 }
 .gv-fb-mark{flex:none;width:22px;height:22px;display:grid;place-items:center;margin-top:2px}
 .gv-fb-mark svg{width:100%;height:100%}
@@ -351,9 +437,11 @@
 .gv-feedback.is-ok{color:var(--maroon-deep);font-weight:600}
 .gv-feedback.is-ok .gv-fb-mark{color:var(--maroon)}
 .gv-feedback.is-miss{color:var(--stamp);font-weight:600}
+/* NO GOLD BAR IN THE MARGIN. The chapter's gold is a frame around a quotation or a ring around
+   a number — it is never a rule standing beside a block, a shape the article does not have
+   anywhere in 1487 lines. The letterspaced gold label above the hint already marks it. */
 .gv-hint{
-  margin:2px 0 0;padding-inline-start:14px;border-inline-start:2px solid var(--gold);
-  font-size:17px;line-height:1.7;color:var(--ink);width:min(70ch,100%);
+  margin:2px 0 0;font-size:15px;line-height:1.65;color:var(--ink);
 }
 .gv-hint-label{
   display:block;font-size:12.5px;letter-spacing:.16em;font-weight:700;color:var(--gold-text);margin-bottom:3px;
@@ -365,13 +453,37 @@
    set off by 58px of blank parchment and nothing else, which reads as a gap rather than as a
    new thing. */
 .gv-beat{margin-top:clamp(26px,3.4vw,34px);padding-top:clamp(26px,3.4vw,34px);border-top:1px solid var(--rule)}
-.gv-beat-arabic{margin-top:14px}
-.gv-after{display:grid;gap:clamp(12px,1.8vw,22px);margin-top:clamp(18px,2.4vw,28px);width:min(820px,100%)}
+/* text on the start side, picture on the other — the article's own two-column reading block
+   (`.qibla-feature`, `.charity-layout`, `.prayer-cycle`), which is how the chapter keeps a
+   reading measure from leaving a third of the column bare. */
+.gv-beat.has-aside{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.72fr);
+  gap:clamp(24px,3.4vw,48px);align-items:center;
+}
+.gv-beat-main{min-width:0}
+.gv-beat-aside{margin-top:0}
+/* the Arabic blessing closes its beat the way the chapter's own blessing closes the chapter:
+   centred, with air above it (`.blessing`) */
+.gv-beat-arabic{margin-top:clamp(22px,3vw,34px);text-align:center}
+/* in the aside it fills its column; two pictures stack there rather than sitting side by side,
+   because the column is one picture wide */
+.gv-after{display:grid;gap:clamp(12px,1.8vw,22px);margin-top:clamp(18px,2.4vw,28px);width:100%}
 .gv-after.n2{grid-template-columns:1fr 1fr}
+.gv-beat-aside.n2{grid-template-columns:1fr}
+/* portrait crops in a narrow column: the 16:10 letterbox was cut for a full-width row */
+.gv-beat-aside img{aspect-ratio:4/3}
+.gv-beat-aside.n1 img{aspect-ratio:4/3}
 .gv-after figure{margin:0}
-.gv-after img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;display:block;box-shadow:0 12px 30px rgba(60,35,18,.14)}
+/* a PHOTOGRAPH is framed the way the chapter frames one — 1px `--edge`, 14px, the chapter's
+   shadow (`.scene-plate`, `.step-aside > img`, `.rm-day-arch`). Only the painted maps go
+   unframed, because their border is part of the painting. */
+.gv-after img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;display:block;
+  border:1px solid var(--edge);box-shadow:0 12px 30px rgba(60,35,18,.14)}
 .gv-after.n1 img{aspect-ratio:2/1}
-.gv-after figcaption{margin-top:9px;font-size:15.5px;color:var(--muted)}
+/* the caption under a 16:9 photograph is the article's `.explore-caption`: muted, 14px, and
+   start-aligned under the frame rather than centred — the chapter centres a caption only when
+   it is the little parchment pill that rides on the picture. */
+.gv-after figcaption{margin-top:9px;font-size:14px;line-height:1.6;color:var(--muted)}
 
 /* ------------------------------------------------------------ multiple choice ----
    Pill buttons on the parchment, in the article's button recipe. A wrong answer FADES and
@@ -387,8 +499,12 @@
   font-size:clamp(23px,2vw,30px);line-height:1.35;
 }
 .gv-mcq-opts{display:flex;flex-wrap:wrap;gap:11px;margin-top:clamp(16px,2vw,22px)}
-.gv-mcq .gv-feedback{min-height:38px;margin-top:10px}
-.gv-quiz .gv-pick{font-size:17px;padding:10px 18px}
+.gv-mcq .gv-feedback{margin-top:10px}
+/* These options are SENTENCES („בין היום ה־8 ל־13 לחודש ד׳ו אלחג׳ה“), not names, so they are
+   set in Ploni at the size the article gives the options of its own question, `.chk-opt`.
+   Kedem is the chapter's face for a name, a title or a quotation — the closing round below,
+   whose five options ARE the commandments' names, keeps it. */
+.gv-quiz .gv-pick{font-family:var(--font-body);font-size:16px;font-weight:600;padding:10px 18px}
 .gv-pick:disabled{cursor:default}
 .gv-pick.is-wrong{opacity:.38}
 /* the chosen answer stays, filled maroon — the article's one selection language */
@@ -398,10 +514,12 @@
 /* five inline buttons, in the article's button recipe. The previous version asked the reader
    to go back and click a sticky row at the top of the page. */
 .gv-closing-picks{display:flex;flex-wrap:wrap;gap:11px}
+/* 20px Kedem is the size the chapter sets a commandment's NAME at, in both places it prints
+   one as a label — `.pillars-path b` on the five-icon path and `.summary-band b` in the band. */
 .gv-pick{
   cursor:pointer;min-height:46px;padding:10px 24px;
   border:1px solid var(--edge);border-radius:999px;background:var(--mat);
-  font-family:var(--font-heading);font-size:19px;font-weight:700;color:var(--maroon);
+  font-family:var(--font-heading);font-size:20px;font-weight:700;color:var(--maroon);
   transition:background .2s ease,border-color .2s ease,color .2s ease;
 }
 /* `:not(:disabled)` MATTERS. Without it, the hover wash beat `.gv-pick.is-right` — same
@@ -411,17 +529,25 @@
 .gv-pick:hover:not(:disabled){background:rgba(165,50,47,.1);border-color:var(--maroon)}
 .gv-pick:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
 .gv-pick.is-wrong{opacity:.45}
-.gv-closing-miss{min-height:1.6em;margin:14px 0 0;font-size:17px;color:var(--stamp);font-weight:600}
-.gv-closing-quote{margin:0}
-.gv-closing-note{width:min(70ch,100%);margin:18px 0 0;font-size:var(--read);line-height:1.75;color:var(--ink)}
+.gv-closing-miss{min-height:1.6em;margin:14px 0 0;font-size:14.5px;color:var(--stamp);font-weight:600}
+/* the closing round's reward is the chapter's illuminated frame, and the note under it reads
+   like `.blessing-he` under the blessing: both centred, both closing something */
+.gv-closing-quote{margin-inline:auto}
+.gv-closing-note{margin:18px auto 0;text-align:center;font-size:var(--read);line-height:1.75;color:var(--ink)}
 
-/* ------------------------------------------------------------------- the end ---- */
-.gv-end h2{font-size:clamp(32px,3.8vw,52px);font-weight:900;color:var(--maroon);margin:0}
-.gv-end .title-ornament{margin:14px 0 18px}
-.gv-end-lead{width:min(70ch,100%);margin:0;font-size:var(--read);line-height:1.7;color:var(--muted)}
+/* ------------------------------------------------------------------- the end ----
+   Nothing here sets a heading: the block carries `.section-heading` in the markup now, so its
+   title, its ornament and its lead are the article's, at the article's sizes, like every other
+   section on the page. */
+/* the line that introduces the five icons — the chapter centres exactly this line above
+   exactly this row of five (`.pillars-lead`, over `.pillars-path`) */
+.gv-end-nav{
+  width:min(760px,100%);margin:clamp(30px,3.8vw,48px) auto 22px;text-align:center;
+  color:var(--muted);font-size:clamp(15px,1.6vw,18px);
+}
 .gv-end-frieze{
   position:relative;list-style:none;display:grid;grid-template-columns:repeat(5,1fr);
-  gap:clamp(14px,2vw,26px);margin:clamp(28px,3.6vw,46px) 0 0;padding:12px 0 0;
+  gap:clamp(14px,2vw,26px);margin:0;padding:12px 0 0;
 }
 .gv-end-frieze::before{content:"";position:absolute;inset-inline:9%;top:calc(12px + clamp(48px,5vw,72px) / 2);height:1px;background:var(--edge)}
 .gv-end-pillar{
@@ -434,23 +560,32 @@
 }
 .gv-end-ico img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(60,35,18,.2))}
 .gv-end-pillar:hover .gv-end-ico{transform:translateY(-4px)}
-.gv-end-pillar b{font-family:var(--font-heading);font-size:clamp(18px,1.9vw,23px);color:var(--maroon)}
-.gv-end-memory{font-size:15.5px;line-height:1.55;color:var(--muted);max-width:22ch}
-.gv-end-quote{margin:clamp(30px,3.8vw,48px) 0 0;width:min(700px,100%)}
+/* the same 20px Kedem the chapter prints a commandment's name at, on the five-icon path this
+   frieze is a copy of (`.pillars-path b`) */
+.gv-end-pillar b{font-family:var(--font-heading);font-size:20px;color:var(--maroon)}
+/* the quotation opens the block now, directly under the heading, so it takes no top margin of
+   its own — the heading's own step below it is the gap. It is CENTRED: every quotation the
+   chapter sets apart is (`.shahada-quote p`, `.blessing`), and this is the chapter's last
+   sentence. */
+.gv-end-quote{margin:0 auto;width:min(700px,100%);text-align:center}
 .gv-end-quote figcaption{font-size:16px;color:var(--muted);margin-bottom:12px}
+/* the answer carries itself: Kedem 700 in maroon-deep at the size the chapter sets its own
+   testimony at. No bar beside it — see the note on `.gv-hint`. */
 .gv-end-quote blockquote{
-  margin:0;padding-inline-start:18px;border-inline-start:2px solid var(--gold);
-  font-family:var(--font-heading);font-weight:700;font-size:clamp(19px,2vw,26px);
+  margin:0;
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(20px,2.3vw,28px);
   line-height:1.5;color:var(--maroon-deep);
 }
 .gv-revisit{
   display:flex;flex-wrap:wrap;align-items:center;gap:10px;width:fit-content;max-width:100%;
-  margin:clamp(24px,3vw,36px) 0 0;padding-inline-start:14px;border-inline-start:2px solid var(--gold);
-  font-size:16px;color:var(--muted);
+  margin:clamp(24px,3vw,36px) 0 0;font-size:16px;color:var(--muted);
 }
 .gv-revisit a{color:var(--maroon);font-weight:700}
-.gv-out{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:clamp(28px,3.6vw,44px)}
-.gv-out .chapter-end-back{font-size:clamp(15px,1.4vw,18px);padding:13px 32px}
+/* the way out is centred, like the chapter's own („.chapter-end{justify-content:center}“), and
+   it sits under a centred row of five icons */
+.gv-out{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px;margin-top:clamp(28px,3.6vw,44px)}
+/* the article's own back-button size, verbatim — only the padding is this page's */
+.gv-out .chapter-end-back{font-size:clamp(15px,1.3vw,18px);padding:13px 32px}
 .gv-secondary{
   cursor:pointer;min-height:46px;padding:11px 22px;border-radius:999px;
   border:1px solid var(--edge);background:var(--mat);color:var(--maroon);font-weight:600;font-size:16px;
@@ -459,7 +594,7 @@
 .gv-secondary:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
 .gv-reset-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:9px}
 .gv-reset-ask{font-size:16px;color:var(--muted)}
-.gv-out-note{margin-top:15px;font-size:14px;color:var(--muted)}
+.gv-out-note{margin-top:15px;text-align:center;font-size:14px;color:var(--muted)}
 @keyframes gv-settle{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .gv-fin.is-fresh{animation:gv-settle .6s ease both}
 
@@ -475,6 +610,11 @@
 @media (max-width:920px){
   /* the article shortens its banner's negative top margin with its own padding change */
   .gv-banner{height:290px}
+  /* no room for a column beside the text — the picture goes back under it, which is where the
+     article puts its own aside at this width (`.step-aside` stacks at 920 too) */
+  .gv-beat.has-aside{grid-template-columns:1fr}
+  .gv-beat-aside{margin-top:clamp(18px,2.4vw,28px)}
+  .gv-beat-aside img{aspect-ratio:16/10}
 }
 @media (max-width:720px){
   /* every horizontal surface becomes a vertical list: on a phone the row is the enemy */
@@ -505,17 +645,17 @@
      places they point at are still exact, the dots sit a pixel low. */
   .gv-map{min-width:620px;width:100%}
   .gv-map .gv-slot{gap:4px}
-  .gv-map .gv-slot-n{width:26px;height:26px;font-size:12.5px}
-  .gv-map .gv-slot-line{font-size:10.5px;padding:1px 5px;border-radius:6px}
+  /* the fixed sizes are the article's own narrow-screen pin (`.hjm-dot` 13px, `.hjm-plabel`
+     11px at ≤820px) rather than numbers near them */
+  .gv-map .gv-slot-n{width:26px;height:26px;font-size:13px}
+  .gv-map .gv-slot-line{font-size:11px;padding:1px 5px;border-radius:6px}
 
   .gv-end-pillar{flex-direction:row;text-align:start;gap:14px}
-  .gv-end-memory{max-width:none}
   .gv-after.n2{grid-template-columns:1fr}
   .gv-out{flex-direction:column;align-items:stretch}
 }
 @media (max-width:680px){
   .gv-banner{height:230px}
-  .gv-ask{font-size:19px}
   .gv-end-frieze::before{display:none}
 }
 

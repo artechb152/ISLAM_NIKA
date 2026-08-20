@@ -584,7 +584,7 @@ export default function Chapter6() {
                 <h1 id="chapter-title" className="ch6-hero-title">חמש מצוות היסוד</h1>
               </div>
             </div>
-            <p className="film-caption">עבדאללה בן עמר (הח'ליף השני)</p>
+            <p className="film-caption">עֻמַר בן אלח'טאב (הח'ליף השני)</p>
             <div className="film-wrap" ref={filmWrapRef}>
               <StoryFilm />
             </div>
@@ -661,11 +661,18 @@ export default function Chapter6() {
                   </h2>
                   <div className="title-ornament" aria-hidden="true"><span /></div>
                 </header>
-                {/* sh-1[0] — origin and meaning, verbatim; the source and the meaning are lit */}
+                {/* sh-1[0], verbatim. The revised source reverses the claim: the
+                    word is Arabic by root, and the Aramaic is raised only as a
+                    possibility — so the emphasis moves onto the root and its
+                    meaning, and the biblical citation stays as the aside it now
+                    is. Retyped here rather than read from data.ts because the
+                    sentence is set in three typographic registers; if it changes
+                    again, it changes in both places. */}
                 <p className="shahada-intro">
-                  המילה שהאדה מקורה ככל הנראה מארמית, ומוזכרת במקרא{' '}
-                  <em>(גל־עד; יגר שהדותא, בראשית לא:מז)</em>.<br />
-                  <b>משמעה – עדות.</b>
+                  המילה שהאדה נגזרת מן <b>השורש הערבי ש-ה-ד</b>, שמשמעותו{' '}
+                  <b>עדות / מתן עדות</b>.<br />
+                  יתכן ומילה זו מקורה מארמית, שכן היא מוזכרת במקרא{' '}
+                  <em>(גל-עד; יגר שהדותא, בראשית לא:מז)</em>.
                 </p>
                 {/* sh-2[0] — split into the lead-in and the testimony itself (verbatim) */}
                 <p className="shahada-lead">על המוסלמי להעיד</p>
@@ -692,7 +699,7 @@ export default function Chapter6() {
             {/* pr-1 — the night journey → five prayers, as regular parchment reading (like the
                 shahada): no immersive scene, just the text on the paper (sub-heading removed) */}
             <div className="prayer-block" data-reveal>
-              <KP text={para('pr-1', 0)} of={['במסע הלילי בשנת 621']} />
+              <KP text={para('pr-1', 0)} of={['למסע הלילי ולעלייה לשמים', 'לפי המסורת האסלאמית']} />
               <KP text={para('pr-1', 1)} of={['חמש תפילות']} />
             </div>
 
@@ -737,7 +744,7 @@ export default function Chapter6() {
             </div>
             <div className="prayer-block" data-reveal>
               <Env>{screen('pr-4').title}</Env>
-              <KP text={para('pr-4', 0)} of={['ביום השישי', "דרשה (ח'טבה)"]} />
+              <KP text={para('pr-4', 0)} of={["תפילת יום השישי (צלאת אלג'מעה)", "דרשה (ח'טבה)"]} />
               <KP text={para('pr-4', 1)} of={[]} />
               <KP text={para('pr-4', 2)} of={['אישה מחויבת להתפלל כמו גבר']} />
             </div>
@@ -814,7 +821,7 @@ export default function Chapter6() {
                   { label: 'טרום־אסלאם', title: 'מנהג מדברי קדום', paras: [kb(para('rm-1', 0), ['לצום במהלך השנה'])], icon: 'palm' },
                   { label: 'המעבר למדינה', title: 'הצום מתגבש', paras: [kb(para('rm-1', 1), ['בתקופת שהותו של מוחמד במדינה'])], icon: 'mosque' },
                   { label: "עאשוראא'", title: screen('rm-2').title, paras: [kb(para('rm-2', 0), ["עאשוראא'"]), kb(para('rm-2', 1)), kb(para('rm-2', 2))], icon: 'crescent' },
-                  { label: 'ליל אלקדר', title: screen('rm-3').title, paras: [kb(para('rm-3', 0), ['בחודש רמדאן']), kb(para('rm-3', 1), ['ליל אלקדר'])], icon: 'book' },
+                  { label: 'ליל אלקדר', title: screen('rm-3').title, paras: [kb(para('rm-3', 0), ['חודש רמדאן שבו ירד הקוראן']), kb(para('rm-3', 1), ['ליל אלקדר'])], icon: 'book' },
                 ]}
               />
             </div>
@@ -825,7 +832,6 @@ export default function Chapter6() {
               <div className="rm-day">
                 {[
                   { img: 'ramadan-fast-dawn.jpg', title: 'עלות השחר', sub: 'תחילת הצום' },
-                  { img: 'ramadan-fast-noon.jpg', title: 'חצות היום', sub: 'הימנעות' },
                   { img: 'ramadan-fast-sunset.jpg', title: 'שקיעה · אפטאר', sub: 'שבירת הצום' },
                   { img: 'ramadan-fast-night.jpg', title: 'תראויח', sub: 'תפילות הלילה' },
                 ].map((c) => (
@@ -839,7 +845,7 @@ export default function Chapter6() {
                   </div>
                 ))}
               </div>
-              <KP className="rm-dayline" text={para('rm-4', 0)} of={['מעלות השחר ועד לשקיעת החמה', 'אפטאר', 'תפילות התראויח']} />
+              <KP className="rm-dayline" text={para('rm-4', 0)} of={['מעלות השחר ועד לשקיעת החמה', 'אפטאר', 'תפילות תראויח']} />
             </div>
 
             {/* the close of the month — the last ten nights (Laylat al-Qadr), then Eid and the moon-sighting */}
@@ -871,10 +877,10 @@ export default function Chapter6() {
             <SectionHeading id="hajj-title" title="החג'" term="(الحج)" />
             <div className="hajj-intro content-block-wide" data-reveal>
               <Env>{screen('hj-1').title}</Env>
-              <KP text={para('hj-1', 0)} of={["ביום ה־8 לחודש ד'ו אלחג'ה"]} />
+              <KP text={para('hj-1', 0)} of={["בין היום ה־8 ל־13 לחודש ד'ו אלחג'ה"]} />
               <KP text={para('hj-1', 1)} of={[]} />
               <KP text={para('hj-1', 2)} of={[]} />
-              <KP text={para('hj-1', 3)} of={['אינה חובה', 'פעם אחת במהלך חייו']} />
+              <KP text={para('hj-1', 3)} of={['הגם והיא חובה דתית', 'תלויה ביכולתו של האדם', 'פעם אחת במהלך חייו']} />
             </div>
             {/* the journey itself: an interactive route map anchored on Mecca — six stations sit as
                 numbered stops along a trail; clicking one opens its scene and verbatim text. */}
@@ -885,17 +891,23 @@ export default function Chapter6() {
                   { label: 'אחראם', place: 'המיקאת', img: 'ihram-real.jpg', title: screen('hj-2').title, paras: [kb(para('hj-2', 0), ['(אחראם)']), kb(para('hj-2', 1)), kb(para('hj-2', 2)), kb(para('hj-2', 3), ['מיקאת'])], x: 80, y: 19 },
                   { label: 'טוואף', place: 'מכה', img: 'tawaf-real.jpg', title: screen('hj-3').title, paras: [kb(para('hj-3', 0), ['(טוואף) שבע פעמים'])], x: 80, y: 74 },
                   { label: 'סעי', place: 'מכה · צפא ומרוה', img: 'hajj-sai.jpg', title: screen('hj-4').title, paras: [kb(para('hj-4', 0), ['צפא ומרוה (סעי)']), kb(para('hj-4', 1), ['מעיין הזמזם'])], x: 84, y: 80 },
-                  { label: 'ערפה', place: 'הר ערפה', img: 'arafat-real.jpg', title: screen('hj-5').title, paras: [kb(para('hj-5', 0), ['יום ערפה']), kb(para('hj-5', 1)), kb(para('hj-5', 2), ['ה"עמידה" (וקוף)']), kb(para('hj-5', 3))], x: 22, y: 24 },
+                  { label: 'ערפה', place: 'מישור ערפה', img: 'arafat-real.jpg', title: screen('hj-5').title, paras: [kb(para('hj-5', 0), ['העמידה במישור ערפה']), kb(para('hj-5', 1)), kb(para('hj-5', 2), ['ה"עמידה" (וקוף)']), kb(para('hj-5', 3))], x: 22, y: 24 },
                   { label: 'מוזדליפה ומינא', place: 'מוזדליפה ומינא', img: 'hajj-muzdalifah.jpg', title: screen('hj-6').title, paras: [kb(para('hj-6', 0), ['מוזדליפה']), kb(para('hj-6', 1), ['"מינא"']), kb(para('hj-6', 2))], x: 44, y: 60 },
                   { label: 'הקפת הפרידה', place: 'מכה', img: 'kaaba-real.jpg', title: screen('hj-7').title, paras: [kb(para('hj-7', 0), ['חג הקורבן']), kb(para('hj-7', 1)), kb(para('hj-7', 2))], x: 70, y: 86 },
                 ]}
               />
             </div>
-            {/* the road's blessing closes the section */}
+            {/* The road's blessing closes the section: the lead-in, the Arabic,
+                its Hebrew transliteration, then what it means. The indices are
+                the last four entries of hj-7 and are counted from the end —
+                writing them as literals broke the moment the source gained the
+                transliteration line and silently printed it in place of the
+                translation. */}
             <div className="blessing" data-reveal>
               <P text={para('hj-7', 3)} />
               <blockquote className="arabic-quote" lang="ar" dir="rtl">{para('hj-7', 4)}</blockquote>
-              <P text={para('hj-7', 5)} className="blessing-he" />
+              <p className="blessing-translit">{para('hj-7', 5)}</p>
+              <P text={para('hj-7', 6)} className="blessing-he" />
             </div>
             {/* the close: the chapter hands off to its practice. Reaching this block records the
                 reading; the chapter itself is completed there. There is deliberately no second

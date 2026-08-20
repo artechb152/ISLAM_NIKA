@@ -148,12 +148,21 @@ export default function PillarSection({
           inside one section — the hairline `.charity-body .content-block + .content-block`
           draws — rather than by a large margin and nothing else. A hairline says „a new
           thing“; 58px of blank parchment says „something is missing here“. */}
+      {/* ONE picture goes beside the words; TWO go under them, side by side. A pair stacked
+          into a side column becomes two tall illustrations against two lines of text — the
+          column has to be wide enough for one picture, so a pair in it is taller than
+          everything it accompanies. Side by side under the text the pair already fills the
+          column, which is what the aside was for in the first place. */}
       {state.exerciseDone && (
-        <div className="gv-ex gv-beat">
-          {/* the heading stays in the document for anyone navigating by headings, but it is not
-              drawn: „החשבון“ above a question that reads „המאזן השנתי של אדם הוא 10,000
-              שקלים…“ was a label for something that already announces itself. */}
-          <h3 id={beatTitleId} className="sr-only">
+        <div className={'gv-ex gv-beat' + (state.beatDone && ex.beat.after?.length === 1 ? ' has-aside' : '')}>
+          <div className="gv-beat-main">
+          {/* THE SUB-HEAD IS DRAWN. It is the article's `Env` — `.scrolly-env`, Kedem at the
+              chapter's `--sub`, underlined, shrink-to-fit — and the chapter announces every
+              sub-block inside a section with one. It used to be here as `sr-only` on the
+              argument that the question below it announces itself; the cost was that this page
+              had no sub-heads at all, which is the single most visible way its structure read
+              as something other than the chapter's. */}
+          <h3 id={beatTitleId} className="scrolly-env">
             {ex.beat.title}
           </h3>
 
@@ -205,15 +214,22 @@ export default function PillarSection({
             </>
           )}
 
-          {/* the reward, shared by both kinds of beat: the Arabic blessing and the pictures
-              that only make sense once the answer is in */}
+          {/* the reward, shared by both kinds of beat: the Arabic blessing */}
           {state.beatDone && ex.beat.arabic && (
             <blockquote className="arabic-quote gv-beat-arabic" lang="ar" dir="rtl">
               {ex.beat.arabic}
             </blockquote>
           )}
+          </div>
+
+          {/* THE PICTURE SITS BESIDE THE WORDS, not under them.
+              A sentence set at the chapter's reading measure is about two thirds of the column,
+              and the chapter never leaves the remaining third as bare parchment: it fills it
+              with a painting (`.charity-hero`), a map (`.qibla-feature`) or a scene
+              (`.prayer-cycle`). Stacked under the text, this picture left a third of every
+              beat empty down the whole page. */}
           {state.beatDone && !!ex.beat.after?.length && (
-            <div className={'gv-after n' + ex.beat.after.length}>
+            <div className={(ex.beat.after.length === 1 ? 'gv-beat-aside ' : '') + 'gv-after n' + ex.beat.after.length}>
               {ex.beat.after.map((a) => (
                 <figure key={a.src}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}

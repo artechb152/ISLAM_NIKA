@@ -1,14 +1,20 @@
 'use client'
 
-/* Screen 30 — the chapter's close.
+/* Screen 30 — the chapter's close, and it closes on the question the chapter opened with.
 
-   The five commandments, full, with one short memory line under each that summarises its topic
-   without replacing it. Clicking one returns to that topic in the article. A central button
-   ends the chapter. If there were mistakes, a focused return is offered — and only then.
+   THE ORDER IS THE POINT. The film at the top of the chapter is a stranger asking Muhammad
+   „יא מוחמד, מהו האסלאם?“ — so that is this block's title, Muhammad's answer is the first thing
+   under it, and the five icons come after the words rather than before them. They are the way
+   BACK into the chapter, and they now sit directly above the way out of it, so everything that
+   takes the reader somewhere is in one place at the bottom.
 
-   THE VERBS COME BACK HERE, and only here: as the chapter's own sentence, Muhammad's answer to
-   „מהו האסלאם?“ (drawerContent[2]), read rather than operated. That is the right place for
-   them — a sentence to finish on, not an interface to work.
+   The order used to be the reverse of that, and each of the five names carried a one-line
+   summary of its topic underneath. Both are gone: a summary that re-states five exercises the
+   reader has just finished is teaching them what they have this second demonstrated they know,
+   and it buried the sentence the whole chapter exists to explain at the bottom of the screen.
+
+   THE VERBS COME BACK HERE, and only here: as the chapter's own sentence (drawerContent[2]),
+   read rather than operated. A sentence to finish on, not an interface to work.
 
    No score: the spec is explicit — „לא להציג ציון מספרי אלא סטטוס השלמה ומשוב ממוקד“. */
 
@@ -31,26 +37,20 @@ export default function ChapterEnd({
 }) {
   return (
     <section className="gv-end" aria-labelledby="gv-end-t">
-      <h2 id="gv-end-t">{END.title}</h2>
-      <div className="title-ornament" aria-hidden="true">
-        <span />
-      </div>
-      <p className="gv-end-lead">{END.lead}</p>
-
-      <ul className="gv-end-frieze">
-        {PILLARS.map((p) => (
-          <li key={p.key}>
-            <Link className="gv-end-pillar" href={p.anchor}>
-              <span className="gv-end-ico" aria-hidden="true">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/assets/anim-video/${p.icon}`} alt="" />
-              </span>
-              <b>{p.name}</b>
-              <span className="gv-end-memory">{END.memory[p.key]}</span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      {/* the article's heading, the same one the five commandments and the two questions above
+          it carry: Kedem h2 at the section size, the diamond ornament, and the muted lead in
+          the heading's own slot. This block used to announce itself in a smaller type size with
+          the lead as a loose paragraph beneath — the one section on the page in a different
+          voice, which is exactly what every other block here was rebuilt to stop doing. */}
+      <header className="section-heading gv-section-head">
+        <div>
+          <h2 id="gv-end-t">{END.title}</h2>
+        </div>
+        <div className="title-ornament section-ornament" aria-hidden="true">
+          <span />
+        </div>
+        <p>{END.lead}</p>
+      </header>
 
       {/* Not gold-framed. `.shahada-quote` is the chapter's ONE illuminated frame and it is
           already spent twice on this page — the testimony at the centre of the shahada exercise
@@ -60,6 +60,23 @@ export default function ChapterEnd({
         <figcaption>{END.quoteLead}</figcaption>
         <blockquote>{END.quote}</blockquote>
       </figure>
+
+      {/* the five, as the way back in — names only. What each one MEANS is the chapter, two
+          screens' worth of it, and a caption here could only be a worse version of it. */}
+      <p className="gv-end-nav">{END.navLead}</p>
+      <ul className="gv-end-frieze">
+        {PILLARS.map((p) => (
+          <li key={p.key}>
+            <Link className="gv-end-pillar" href={p.anchor}>
+              <span className="gv-end-ico" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/assets/anim-video/${p.icon}`} alt="" />
+              </span>
+              <b>{p.name}</b>
+            </Link>
+          </li>
+        ))}
+      </ul>
 
       {missed.length > 0 && (
         <p className="gv-revisit">
