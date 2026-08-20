@@ -1,0 +1,7 @@
+1:"$Sreact.fragment"
+2:I[586,["500","static/chunks/500-c99b8dfd3de17c86.js","875","static/chunks/875-e5a27e0be135e512.js","135","static/chunks/135-b6b58a383aecc572.js","543","static/chunks/app/(chapter6)/chapter6/practice/page-9280be3c945642d2.js"],"default"]
+3:I[484,[],"OutletBoundary"]
+4:"$Sreact.suspense"
+:HL["/ISLAM_NIKA/_next/static/css/570caa06229a11f9.css","style"]
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/570caa06229a11f9.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"lY1dWF1GCNLDc2ayRgLCM"}
+5:null
