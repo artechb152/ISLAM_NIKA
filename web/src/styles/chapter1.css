@@ -670,7 +670,8 @@ body{
   position:absolute;inset:0;z-index:40;
   display:grid;place-items:center;
   background:rgba(24,15,9,.86);
-  animation:ch1-travel-in .55s ease forwards;
+  /* מחכה למחוות העלייה של המצלמה, ומחשיך רק בסוף — רגע לפני הטעינה */
+  animation:ch1-travel-in .6s ease 1.35s both;
   pointer-events:none;
 }
 .ch1-travel span{

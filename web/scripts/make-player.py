@@ -300,6 +300,17 @@ print('STRIDE feet y: %.3f..%.3f span=%.3f' % evaluated_span())
 if EXPORT: export(os.path.join(MODELS, 'traveler-stride.glb'), arm)
 if RENDER: render('stride')
 
+# The passing phase — legs crossing, trailing heel lifting. Until now the walk
+# reused the neutral stand for this phase, which is what made it read as a
+# flipbook: a walker mid-cycle is never simply standing. Small angles on
+# purpose: this pose is on screen for a third of each step.
+PASS_DEG = 7.0
+set_pose([('thigh.L', -PASS_DEG), ('thigh.R', PASS_DEG),
+          ('shin.L', PASS_DEG * 2.6), ('shin.R', PASS_DEG * 0.5)])
+print('PASSING feet y: %.3f..%.3f span=%.3f' % evaluated_span())
+if EXPORT: export(os.path.join(MODELS, 'traveler-passing.glb'), arm)
+if RENDER: render('passing')
+
 print('DONE')
 
 # Run:

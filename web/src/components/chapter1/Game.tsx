@@ -83,6 +83,16 @@ interface Live {
   /** performance.now() of the last look-drag, so the camera knows when it is
       allowed to steer itself and when the player is steering it */
   lastDrag: number
+  /** where Rawi is standing right now — the companion writes it every frame,
+      so the talk camera can frame him without owning him */
+  rawiPos: { x: number; z: number }
+  /** the open conversation, if its speaker has a body in the world. The talk
+      camera reads this; `null` means follow the walk. */
+  talk: { who: string } | null
+  /** performance.now() of stepping through a gate, or 0. While set, the camera
+      rises away from the shoulder until the region reads as a model — the
+      leaving gesture. The travel banner waits for it before dimming. */
+  riseAt: number
 }
 
 /* Where the traveller is standing when this region opens. Normally the layout's
@@ -123,6 +133,9 @@ function makeLive(): Live {
     colliders: [],
     dynamic: [],
     lastDrag: 0,
+    rawiPos: { x: spawn.x, z: spawn.z },
+    talk: null,
+    riseAt: 0,
   }
 }
 
@@ -216,6 +229,76 @@ function Painterly({ strength }: { strength: number }) {
     })
   })
   return null
+}
+
+/* Footstep dust. The ground never acknowledged being walked on — the cheapest
+   "this place is real" signal a walk can get, proven live and recorded before
+   it was written (scratchpad/lab2.mjs `walkdust`). The player's step trigger
+   (the same boundary that fires the footstep sound) pushes here; a small pool
+   of billboard puffs rises, widens and fades in just over half a second.
+   Deliberately faint — in motion it should sit right under conscious notice. */
+const DUST_QUEUE: { x: number; z: number; big: boolean }[] = []
+const DUST_LIFE = 0.55
+function Dust({ groundAt }: { groundAt: (x: number, z: number) => number }) {
+  const meshes = useRef<(THREE.Mesh | null)[]>([])
+  const ages = useRef<number[]>(Array.from({ length: 10 }, () => -1))
+  const tex = useMemo(() => {
+    const cv = document.createElement('canvas')
+    cv.width = cv.height = 64
+    const g = cv.getContext('2d')!
+    const grad = g.createRadialGradient(32, 32, 2, 32, 32, 30)
+    grad.addColorStop(0, 'rgba(214,190,150,.85)')
+    grad.addColorStop(1, 'rgba(214,190,150,0)')
+    g.fillStyle = grad
+    g.fillRect(0, 0, 64, 64)
+    const t = new THREE.CanvasTexture(cv)
+    t.colorSpace = THREE.SRGBColorSpace
+    return t
+  }, [])
+  useFrame(({ camera }, dt) => {
+    while (DUST_QUEUE.length) {
+      const spawn = DUST_QUEUE.pop()!
+      const free = ages.current.findIndex((a) => a < 0)
+      if (free < 0) break
+      const m = meshes.current[free]
+      if (!m) break
+      ages.current[free] = 0
+      m.position.set(
+        spawn.x + (Math.random() - 0.5) * 0.3,
+        groundAt(spawn.x, spawn.z) + 0.12,
+        spawn.z + (Math.random() - 0.5) * 0.3,
+      )
+      m.scale.setScalar(spawn.big ? 0.7 : 0.5)
+      m.visible = true
+    }
+    for (let i = 0; i < ages.current.length; i++) {
+      if (ages.current[i] < 0) continue
+      const m = meshes.current[i]
+      if (!m) continue
+      ages.current[i] += dt
+      const a = ages.current[i]
+      if (a > DUST_LIFE) {
+        ages.current[i] = -1
+        m.visible = false
+        continue
+      }
+      m.position.y += dt * 0.35
+      const s = m.scale.x * (1 + dt * 2.2)
+      m.scale.setScalar(s)
+      ;(m.material as THREE.MeshBasicMaterial).opacity = 0.5 * (1 - a / DUST_LIFE)
+      m.quaternion.copy(camera.quaternion)
+    }
+  })
+  return (
+    <group>
+      {Array.from({ length: 10 }, (_, i) => (
+        <mesh key={i} ref={(el) => { meshes.current[i] = el }} visible={false}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial map={tex} transparent depthWrite={false} opacity={0} />
+        </mesh>
+      ))}
+    </group>
+  )
 }
 
 /* Terrain baked in Blender: already scaled, positioned and flattened there, so
@@ -569,6 +652,7 @@ const MODEL_TORCH = '/assets/chapter1/models/torch.glb'
 const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
 const MODEL_TRAVELER_STAND = '/assets/chapter1/models/traveler-stand.glb'
 const MODEL_TRAVELER_STRIDE = '/assets/chapter1/models/traveler-stride.glb'
+const MODEL_TRAVELER_PASSING = '/assets/chapter1/models/traveler-passing.glb'
 const MODEL_PALM = '/assets/chapter1/models/palm.glb'
 const MODEL_WELL = '/assets/chapter1/models/well.glb'
 const MODEL_ROCKS = '/assets/chapter1/models/rocks.glb'
@@ -577,7 +661,7 @@ const MODEL_FIREWOOD = '/assets/chapter1/models/firewood.glb'
 const MODEL_SHRUB = '/assets/chapter1/models/shrub.glb'
 /** same camel, split into body + four hip-pivoted legs for the walk cycle */
 const MODEL_CAMEL_PARTS = '/assets/chapter1/models/camel-parts.glb'
-for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_STRIDE, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
+for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_STRIDE, MODEL_TRAVELER_PASSING, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
   useGLTF.preload(m)
 }
 
@@ -1071,12 +1155,22 @@ function Player({ live }: { live: Live }) {
   const group = useRef<THREE.Group>(null)
   const standRef = useRef<THREE.Group>(null)
   const strideRef = useRef<THREE.Group>(null)
+  const passRef = useRef<THREE.Group>(null)
   const heading = useRef(0)
   const walkT = useRef(0)
   const lastStep = useRef(0)
   const speed = useRef(0)
   const runBlend = useRef(0)
   const idleT = useRef(0)
+  /* מצלמת השיחה. 27 המפגשים הם לב הפרק, וכולם נראו כמו עורף של
+     שחקן מול חזה של דמות — המצלמה נשארה דבוקה לגב גם כשמישהו דיבר.
+     כשנפתחת שיחה עם דובר שיש לו גוף בעולם, המצלמה מחליקה לצילום־
+     שניים צדי וחוזרת כשהשיחה נסגרת. הוכח חי לפני שנכתב:
+     scratchpad/lab2.mjs `twoshot`. */
+  const talkBlend = useRef(0)
+  const talkAnchor = useRef({ x: 0, z: 0 })
+  const twoShotV = useRef(new THREE.Vector3())
+  const lookV = useRef(new THREE.Vector3())
 
   useFrame(({ camera }, rawDt) => {
     const g = group.current
@@ -1185,17 +1279,31 @@ function Player({ live }: { live: Live }) {
        השחורים על הגלימה. התנוחות מופקות בשלד קטן של שלוש עצמות
        ונאפות לרשת סטטית, כך שהמנגנון כאן לא השתנה בכלל. */
     const s = Math.sin(walkT.current)
-    const showStride = speed.current > 0.35 && Math.abs(s) > 0.25
-    if (standRef.current) standRef.current.visible = !showStride
+    const walking = speed.current > 0.35
+    const showStride = walking && Math.abs(s) > 0.25
+    /* פאזת המעבר: עד עכשיו בין שני הצעדים הוצגה העמידה הניטרלית —
+       והולך שרגליו נחות פעמיים בכל מחזור נקרא כספר מתהפך. עכשיו יש
+       תנוחת מעבר אמיתית (עקב מתרומם, רגליים חולפות), משוקפת לפי
+       כיוון המחזור, והעמידה שמורה לעמידה. */
+    const showPassing = walking && !showStride
+    if (standRef.current) standRef.current.visible = !walking
     if (strideRef.current) {
       strideRef.current.visible = showStride
       strideRef.current.scale.x = s >= 0 ? 1 : -1
+    }
+    if (passRef.current) {
+      passRef.current.visible = showPassing
+      passRef.current.scale.x = Math.cos(walkT.current) >= 0 ? 1 : -1
     }
     /* רגל נוגעת בקרקע בכל חצי מחזור. שעון ההליכה כבר סופר את זה,
        ולכן הצעד נשמע מאותו מקור שמצייר אותו — בלי טיימר נפרד
        שיכול להיסחף ממנו. */
     const step = Math.floor(walkT.current / Math.PI)
-    if (speed.current > 0.5 && step !== lastStep.current) footstep(gait > 1.6)
+    if (speed.current > 0.5 && step !== lastStep.current) {
+      footstep(gait > 1.6)
+      /* כל צעד שנשמע גם נראה — פוך אבק קטן בכף הרגל */
+      DUST_QUEUE.push({ x: live.player.x, z: live.player.z, big: gait > 1.6 })
+    }
     lastStep.current = step
 
     // body motion: vertical bob + slight sway/lean while moving
@@ -1222,9 +1330,37 @@ function Player({ live }: { live: Live }) {
        תנשום בכל תיקון קטן של הג׳ויסטיק. */
     runBlend.current += (Math.min(1, Math.max(0, (gait - 1) / 1.31)) - runBlend.current) * Math.min(1, dt * 2.5)
     const rb = runBlend.current
+
+    /* מי הדובר, ואיפה הוא עומד. ראאווי זז — מיקומו נכתב כל פריים על
+       ידי המלווה; כל השאר עומדים היכן שה-placements שם אותם. קריין
+       אין לו גוף, ולכן אין לו זווית — המצלמה נשארת על ההליכה. */
+    const talk = live.talk
+    let speaker: { x: number; z: number } | null = null
+    if (talk) {
+      if (talk.who === 'rawi') speaker = live.rawiPos
+      else {
+        const placed = (PLACEMENTS[REGION.id] ?? []).find((c) => c.who === talk.who)
+        if (placed) speaker = placed
+      }
+    }
+    if (speaker) talkAnchor.current = { x: speaker.x, z: speaker.z }
+    /* הבלנד ממשיך לדעוך אל העוגן האחרון גם אחרי שהשיחה נסגרה, כדי
+       שהחזרה אל הגב תהיה נסיעה ולא קפיצה. */
+    talkBlend.current += ((speaker ? 1 : 0) - talkBlend.current) * Math.min(1, dt * 2.4)
+    const tb = talkBlend.current
+
+    /* מחוות היציאה — עלייה אל הדגם. easing כפול כדי שההמראה תתחיל
+       ברוך ותיגמר ברוך, על פני 1.5 שניות מתוך 2.1 של המעבר. */
+    let riseK = 0
+    if (live.riseAt) {
+      const rt = Math.max(0, Math.min(1, (performance.now() - live.riseAt) / 1500))
+      riseK = rt < 0.5 ? 2 * rt * rt : 1 - Math.pow(-2 * rt + 2, 2) / 2
+    }
+
     const CAM_DIST = 3.7 + rb * 0.65
     const camOffset = new THREE.Vector3(0, 2.45 - rb * 0.15, CAM_DIST).applyAxisAngle(new THREE.Vector3(0, 1, 0), -live.yaw)
-    const wantFov = 55 + rb * 7
+    const followFov = 55 + rb * 7 + (34 - (55 + rb * 7)) * tb
+    const wantFov = followFov + (28 - followFov) * riseK
     if (Math.abs((camera as THREE.PerspectiveCamera).fov - wantFov) > 0.01) {
       ;(camera as THREE.PerspectiveCamera).fov = wantFov
       ;(camera as THREE.PerspectiveCamera).updateProjectionMatrix()
@@ -1264,15 +1400,62 @@ function Player({ live }: { live: Live }) {
       target.y += Math.sin(idleT.current * 0.45) * 0.035 * still
       target.x += Math.sin(idleT.current * 0.31) * 0.02 * still
     }
-    camera.position.lerp(target, Math.min(1, dt * 5))
+
     /* הפריים נפתח לכיוון ההליכה במקום להיות ממורכז על הגב, וככל
        שרצים מהר יותר — יותר. */
     const lead = 0.9 * rb
-    camera.lookAt(
+    lookV.current.set(
       live.player.x + Math.sin(heading.current) * lead,
       live.player.y + 1.5,
       live.player.z + Math.cos(heading.current) * lead,
     )
+
+    if (tb > 0.002) {
+      /* צילום־שניים: המצלמה עומדת הצידה, ניצב לקו שבין השחקן לדובר,
+         בצד שבו היא כבר נמצאת — כדי לא לחצות את השיחה בדרך פנימה. */
+      const sp = talkAnchor.current
+      const mx = (live.player.x + sp.x) / 2
+      const mz = (live.player.z + sp.z) / 2
+      let ax = sp.z - live.player.z
+      let az = -(sp.x - live.player.x)
+      const al = Math.hypot(ax, az) || 1
+      ax /= al
+      az /= al
+      if (ax * (camera.position.x - mx) + az * (camera.position.z - mz) < 0) {
+        ax = -ax
+        az = -az
+      }
+      let side = Math.max(2.7, Math.hypot(sp.x - live.player.x, sp.z - live.player.z) * 1.1 + 1.5)
+      /* אותה בדיקת עיגולים כמו מצלמת ההליכה, הפעם על הקרן מן האמצע
+         החוצה — במעבדה קורת סוכך חצתה את הפריים, וזה הפתרון שכבר
+         קיים במשחק לבעיה הזאת. */
+      for (const c of [...STATIC_COLLIDERS, ...live.dynamic]) {
+        const fx = mx - c.x
+        const fz = mz - c.z
+        const r = c.r + 0.12
+        const b = fx * ax + fz * az
+        const cc = fx * fx + fz * fz - r * r
+        const disc = b * b - cc
+        if (disc <= 0) continue
+        const s = Math.sqrt(disc)
+        const enter = -b - s
+        if (-b + s > 0 && enter < side) side = Math.max(2.2, Math.min(side, enter - 0.1))
+      }
+      twoShotV.current.set(mx + ax * side, 1.9, mz + az * side)
+      target.lerp(twoShotV.current, tb)
+      /* המבט נודד אל נקודת האמצע, מעט מעל גובה החזה */
+      lookV.current.lerp(twoShotV.current.set(mx, 1.55, mz), tb)
+    }
+
+    if (riseK > 0.001) {
+      /* תנוחת הדגם מהמעבדה: הצידה, גבוה, מבט מטה אל ההולכים */
+      twoShotV.current.set(live.player.x + 5.5, 7, live.player.z + 7.5)
+      target.lerp(twoShotV.current, riseK)
+      lookV.current.lerp(twoShotV.current.set(live.player.x, 0.9, live.player.z - 1.5), riseK)
+    }
+
+    camera.position.lerp(target, Math.min(1, dt * (5 + riseK * 4)))
+    camera.lookAt(lookV.current)
   })
 
   /* Undyed wool, not bleached cotton. The model's robe and head cloth are pure
@@ -1287,6 +1470,7 @@ function Player({ live }: { live: Live }) {
      שמוצגים בצבעם המלא. */
   const stand = useNormalizedGLB(MODEL_TRAVELER_STAND, 1.78)
   const stride = useNormalizedGLB(MODEL_TRAVELER_STRIDE, 1.78)
+  const passing = useNormalizedGLB(MODEL_TRAVELER_PASSING, 1.78)
 
   // dev diagnostics: world-space bounds of the rendered figure
   useEffect(() => {
@@ -1312,6 +1496,9 @@ function Player({ live }: { live: Live }) {
       </group>
       <group ref={strideRef} visible={false}>
         <primitive object={stride} />
+      </group>
+      <group ref={passRef} visible={false}>
+        <primitive object={passing} />
       </group>
       {/* הכתם שאומר שהשחקן נוגע בקרקע ולא שקוע בה */}
       <ContactShadow radius={0.5} />
@@ -1886,6 +2073,9 @@ function RawiCompanion({ live, talking, gesture }: {
       clipRef.current = want
       setClip(want)
     }
+    /* מצלמת השיחה צריכה לדעת איפה ראאווי עומד — בלי להחזיק בו */
+    live.rawiPos.x = pos.current.x
+    live.rawiPos.z = pos.current.z
   })
 
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} />
@@ -2384,6 +2574,11 @@ export default function Game() {
   const [seen, setSeen] = useState<string[]>([])
   const encounterRef = useRef<Encounter | null>(null)
   encounterRef.current = encounter
+  /* מצלמת השיחה קוראת מ-live, לא מ-props — כמו כל מה שרץ בקצב פריימים.
+     קריין אין לו גוף בעולם, ולכן שיחה שלו לא מזיזה את המצלמה. */
+  useEffect(() => {
+    live.talk = encounter && encounter.speaker !== 'narrator' ? { who: encounter.speaker } : null
+  }, [encounter, live])
 
   /* The notebook (J) and the map (M) are full surfaces, not HUD panels: while
      one is open the world below is frozen, so the key handler reads this ref
@@ -2402,6 +2597,12 @@ export default function Game() {
       travelling.current = true
       live.keys.clear()
       cue('gate')
+      /* מחוות היציאה: המצלמה עוזבת את הכתף ומתרוממת עד שהאזור נקרא
+         כדגם — העולם של הפרק הוא הדגם שראאווי בונה בזיכרונו, ורגע
+         הפרידה מאזור הוא הרגע להגיד את זה. הבאנר מחכה לה (delay
+         ב-CSS) ומחשיך רק בסוף, רגע לפני טעינת המסמך הבא. נבחן חי:
+         scratchpad/lab3.mjs `rise`. */
+      live.riseAt = performance.now()
       setTravelTo({ to, label })
       window.setTimeout(() => {
         /* A full document load, not router.push: the region, its world and its
@@ -2409,7 +2610,7 @@ export default function Game() {
            would change the URL and leave the traveller standing in the old
            region's geometry. The dimmed banner covers the reload. */
         window.location.assign(`${window.location.pathname}?region=${to}&from=${REGION.id}`)
-      }, 1250)
+      }, 2100)
     },
     [live],
   )
@@ -2762,6 +2963,7 @@ export default function Game() {
             <SceneReady onReady={onSceneReady} />
           </Suspense>
           <Painterly strength={MOOD.paint} />
+          <Dust groundAt={groundYAt} />
         </Canvas>
         {/* המסגרת שסוגרת את הפריים — מתחת לכל שכבות ה-HUD, מעל הקנבס */}
         <div className="ch1-vignette" aria-hidden="true" />
