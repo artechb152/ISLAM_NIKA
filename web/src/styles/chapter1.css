@@ -828,6 +828,21 @@ body{
 .ch1-find-card h3,.ch1-task-card h3{
   margin:0 0 12px;font-family:var(--font-heading);font-size:23px;color:var(--cream);
 }
+/* תווית מעל חפץ-תשובה ליד תחנה — קטנה, בסגנון חלוניות ה-HUD */
+.ch1-prop-label{
+  display:inline-block;white-space:nowrap;pointer-events:none;
+  font-family:var(--font-body);font-size:12.5px;font-weight:600;color:#f6ecd8;
+  background:rgba(42,20,10,.82);border:1px solid rgba(232,191,118,.35);
+  padding:3px 10px;border-radius:99px;
+}
+
+/* במת העדות: קנבס קטן על רקע קלף רך; הגרירה שלו לא מזיזה את המצלמה */
+.ch1-find-view{
+  height:190px;margin:10px 0 2px;border-radius:10px;cursor:grab;
+  background:radial-gradient(ellipse at 50% 60%, rgba(232,191,118,.16), rgba(43,20,8,.28) 78%);
+}
+.ch1-find-view:active{cursor:grabbing}
+.ch1-find-view canvas{display:block}
 .ch1-find-body,.ch1-task-question{
   margin:0 0 18px;font-size:15.5px;line-height:1.85;color:rgba(245,236,214,.9);
 }

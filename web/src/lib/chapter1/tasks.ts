@@ -18,6 +18,10 @@
 export interface TaskOption {
   id: string
   label: string
+  /** the physical stand-in placed by the station: drag it onto the station
+      to give this answer with your hands. Absent = this option lives only in
+      the panel (keyboard and screen-reader users always have the buttons). */
+  prop?: { model: string; h: number; tint?: string }
   /** true for the answer the source text supports */
   right?: boolean
   /** what Rawi says when you choose this — right or wrong, it teaches */
@@ -60,6 +64,7 @@ export const TASKS: Task[] = [
       {
         id: 'sasanian',
         label: 'מטבע כסף סאסאני',
+        prop: { model: 'find-coin', h: 0.26, tint: '#dfe3ea' },
         right: true,
         note:
           'נכון. מצפון־מזרח לחצי האי יושבת האימפריה הסאסאנית־פרסית, ששולטת באזור איראן ' +
@@ -68,6 +73,7 @@ export const TASKS: Task[] = [
       {
         id: 'byzantine',
         label: 'מטבע ביזנטי',
+        prop: { model: 'find-coin', h: 0.26, tint: '#e0b34e' },
         note:
           'ביזנטיון יושבת מצפון־מערב, לא מצפון־מזרח. היא זו שהחליפה את האימפריה הרומית ' +
           'העתיקה, ודתה נוצרית אורתודוקסית — אבל לא כאן.',
@@ -75,6 +81,7 @@ export const TASKS: Task[] = [
       {
         id: 'barter',
         label: 'בלי מטבע — חליפין בסחורה',
+        prop: { model: 'basket', h: 0.42 },
         note:
           'בשוק, אולי. בגבול של אימפריה — לא. הגבול הזה קיים כדי לסמן של מי הדרך.',
       },
@@ -134,18 +141,21 @@ export const TASKS: Task[] = [
       {
         id: 'silk',
         label: 'משי',
+        prop: { model: 'fodder', h: 0.4 },
         right: true,
         note: 'נכנס. משי ותבלינים הם בדיוק מה שהדרך הזו קיימת בשבילו.',
       },
       {
         id: 'spice',
         label: 'תבלינים',
+        prop: { model: 'claypot', h: 0.36 },
         right: true,
         note: 'נכנס. עוד סחורה שהשבטים שמרו על נתיב המעבר שלה.',
       },
       {
         id: 'ideas',
         label: 'רעיונות',
+        prop: { model: 'find-scroll', h: 0.3 },
         note:
           'זה לא נכנס לארגז — ובכל זאת עבר כאן. רעיונות ומושגים מונותאיסטים חלחלו לחג׳אז ' +
           'מהיהדות ומהנצרות, בתהליך איטי ומדורג. הם נסעו עם האנשים, לא עם המטען.',
@@ -170,6 +180,7 @@ export const TASKS: Task[] = [
       {
         id: 'trade',
         label: 'מסחר ושירה',
+        prop: { model: 'find-scroll', h: 0.3, tint: '#d9c08a' },
         right: true,
         note:
           'כן. התקיימו יחסי מסחר, ואף נושאי תרבות משותפים — כמו שירה. בחיי היום־יום חיינו ' +
@@ -178,12 +189,14 @@ export const TASKS: Task[] = [
       {
         id: 'law',
         label: 'חוקים ומנהגים',
+        prop: { model: 'find-inscription', h: 0.34 },
         note:
           'לא. כל שבט חי עם החוקים והמנהגים שלו. זה מה שאִפשר לשכנוּת להחזיק כל כך הרבה זמן.',
       },
       {
         id: 'faith',
         label: 'אמונה',
+        prop: { model: 'ansab', h: 0.4 },
         note:
           'לא. ואת הציפייה שלנו למשיח השכנים הכירו — אבל היא נשארה שלנו.',
       },

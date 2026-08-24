@@ -10,7 +10,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
-import { useGLTF } from '@react-three/drei'
+import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { LAYOUTS, PLAYABLE, type Layout } from '@/lib/chapter1/worlds'
 import { FINDS_TOTAL, FIND_RANGE, findsIn, type Find } from '@/lib/chapter1/finds'
@@ -93,6 +93,8 @@ interface Live {
       rises away from the shoulder until the region reads as a model — the
       leaving gesture. The travel banner waits for it before dimming. */
   riseAt: number
+  /** a task prop is in hand — the camera's mouse-look must not fight the drag */
+  taskDrag: boolean
 }
 
 /* Where the traveller is standing when this region opens. Normally the layout's
@@ -136,6 +138,7 @@ function makeLive(): Live {
     rawiPos: { x: spawn.x, z: spawn.z },
     talk: null,
     riseAt: 0,
+    taskDrag: false,
   }
 }
 
@@ -149,6 +152,7 @@ function Sky() {
   const tex = useLoader(THREE.TextureLoader, `/assets/chapter1/tex/${mood?.sky ?? 'sky-dawn.png'}`)
   const scene = useThree((s) => s.scene)
   const gl = useThree((s) => s.gl)
+  const camera = useThree((s) => s.camera)
   useEffect(() => {
     tex.mapping = THREE.EquirectangularReflectionMapping
     tex.colorSpace = THREE.SRGBColorSpace
@@ -161,6 +165,7 @@ function Sky() {
     if (process.env.NODE_ENV !== 'production') {
       ;(window as unknown as Record<string, unknown>).__ch1Gl = gl
       ;(window as unknown as Record<string, unknown>).__ch1Scene = scene
+      ;(window as unknown as Record<string, unknown>).__ch1Cam = camera
       ;(window as unknown as Record<string, unknown>).__ch1Env = () => ({
         fog: scene.fog ? { color: (scene.fog as THREE.Fog).color.getHexString(), near: (scene.fog as THREE.Fog).near, far: (scene.fog as THREE.Fog).far } : null,
         envInt: scene.environmentIntensity,
@@ -171,7 +176,7 @@ function Sky() {
       scene.environment = null
       scene.environmentIntensity = 1
     }
-  }, [scene, tex, gl, mood])
+  }, [scene, tex, gl, camera, mood])
   return null
 }
 
@@ -1110,6 +1115,183 @@ function GrassTufts() {
   )
 }
 
+
+/* The physical answers. Each task option that carries a `prop` stands as a
+   real object beside its station; dragging it onto the station gives that
+   answer with your hands — the panel's buttons stay for keyboards, screen
+   readers and the harnesses, and both routes run the same choose logic.
+   The verb was proven live before it was written (scratchpad/lab4.mjs), and
+   its two hard-won rules are honoured here: the drop target is measured on
+   the drag plane itself, and while a prop is in hand the camera's own
+   mouse-look is locked out (`live.taskDrag`) — two hands on one mouse drag
+   each other. */
+const TASK_PROP_SPOTS = [
+  { dx: -1.5, dz: 0.7 },
+  { dx: -0.4, dz: 1.5 },
+  { dx: 1.2, dz: 1.0 },
+]
+function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
+  url: string
+  tint?: string
+  h: number
+  x: number
+  z: number
+  label: string
+  showLabel: boolean
+  taken: boolean
+}) {
+  const model = useNormalizedGLB(url, h, tint)
+  return (
+    <group position={[x, groundYAt(x, z), z]}>
+      <primitive object={model} />
+      {showLabel && !taken && (
+        <Html center position={[0, h + 0.42, 0]} zIndexRange={[4, 4]}>
+          <span className="ch1-prop-label">{label}</span>
+        </Html>
+      )}
+    </group>
+  )
+}
+function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
+  live: Live
+  atTask: boolean
+  chosen: string[]
+  solvedTask: boolean
+  onChoose: (id: string) => void
+}) {
+  const { camera, gl } = useThree()
+  const opts = useMemo(
+    () => (REGION_TASK ? REGION_TASK.options.filter((o) => o.prop) : []),
+    [],
+  )
+  /* מיקומים חיים — בית קבוע לכל חפץ, ומיקום נוכחי שהגרירה מזיזה */
+  const state = useRef(
+    opts.map((o, i) => {
+      const spot = TASK_PROP_SPOTS[i % TASK_PROP_SPOTS.length]
+      const home = { x: (REGION_TASK?.x ?? 0) + spot.dx, z: (REGION_TASK?.z ?? 0) + spot.dz }
+      return { id: o.id, home, cur: { ...home }, lift: 0, returning: false, placed: false }
+    }),
+  )
+  const dragging = useRef<number>(-1)
+  const [, force] = useState(0)
+
+  useEffect(() => {
+    if (!REGION_TASK || !opts.length) return
+    const v = new THREE.Vector3()
+    const project = (i: number) => {
+      const st = state.current[i]
+      v.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + 0.3, st.cur.z).project(camera)
+      const r = gl.domElement.getBoundingClientRect()
+      return {
+        x: (v.x * 0.5 + 0.5) * r.width + r.left,
+        y: (-v.y * 0.5 + 0.5) * r.height + r.top,
+        behind: v.z > 1,
+      }
+    }
+    const toPlane = (cx: number, cy: number, y: number) => {
+      const r = gl.domElement.getBoundingClientRect()
+      v.set(((cx - r.left) / r.width) * 2 - 1, -(((cy - r.top) / r.height) * 2 - 1), 0.5).unproject(camera)
+      const dir = v.sub(camera.position).normalize()
+      const t = (y - camera.position.y) / dir.y
+      return {
+        x: camera.position.x + dir.x * t,
+        z: camera.position.z + dir.z * t,
+      }
+    }
+    const down = (e: PointerEvent) => {
+      if (solvedTask || dragging.current >= 0) return
+      for (let i = 0; i < state.current.length; i++) {
+        if (state.current[i].placed || chosen.includes(state.current[i].id)) continue
+        const p = project(i)
+        if (!p.behind && Math.hypot(p.x - e.clientX, p.y - e.clientY) < 70) {
+          dragging.current = i
+          state.current[i].returning = false
+          live.taskDrag = true
+          break
+        }
+      }
+    }
+    const move = (e: PointerEvent) => {
+      const i = dragging.current
+      if (i < 0) return
+      const st = state.current[i]
+      const g = toPlane(e.clientX, e.clientY, groundYAt(st.home.x, st.home.z) + 0.3)
+      /* לא נותנים לסחוב את התשובה מחוץ לזירה */
+      const dx = g.x - (REGION_TASK?.x ?? 0)
+      const dz = g.z - (REGION_TASK?.z ?? 0)
+      const d = Math.hypot(dx, dz)
+      const cap = Math.min(1, 4.5 / Math.max(d, 1e-3))
+      st.cur.x = (REGION_TASK?.x ?? 0) + dx * cap
+      st.cur.z = (REGION_TASK?.z ?? 0) + dz * cap
+      st.lift = 0.55
+    }
+    const up = () => {
+      const i = dragging.current
+      if (i < 0) return
+      dragging.current = -1
+      live.taskDrag = false
+      const st = state.current[i]
+      st.lift = 0
+      const d = Math.hypot(st.cur.x - (REGION_TASK?.x ?? 0), st.cur.z - (REGION_TASK?.z ?? 0))
+      if (d < 1.05) {
+        const opt = opts[i]
+        if (opt.right) st.placed = true
+        else st.returning = true
+        onChoose(opt.id)
+      } else {
+        st.returning = true
+      }
+      force((n) => n + 1)
+    }
+    window.addEventListener('pointerdown', down, true)
+    window.addEventListener('pointermove', move, true)
+    window.addEventListener('pointerup', up, true)
+    return () => {
+      window.removeEventListener('pointerdown', down, true)
+      window.removeEventListener('pointermove', move, true)
+      window.removeEventListener('pointerup', up, true)
+      live.taskDrag = false
+    }
+  }, [camera, gl, live, opts, chosen, solvedTask, onChoose])
+
+  useFrame((_, dt) => {
+    for (let i = 0; i < state.current.length; i++) {
+      const st = state.current[i]
+      if (st.placed) {
+        /* תשובה נכונה נחה על התחנה ונשארת שם */
+        st.cur.x += ((REGION_TASK?.x ?? 0) - st.cur.x) * Math.min(1, dt * 6)
+        st.cur.z += ((REGION_TASK?.z ?? 0) - st.cur.z) * Math.min(1, dt * 6)
+      } else if (st.returning) {
+        st.cur.x += (st.home.x - st.cur.x) * Math.min(1, dt * 5)
+        st.cur.z += (st.home.z - st.cur.z) * Math.min(1, dt * 5)
+        if (Math.hypot(st.cur.x - st.home.x, st.cur.z - st.home.z) < 0.03) st.returning = false
+      }
+    }
+  })
+
+  if (!REGION_TASK || !opts.length) return null
+  return (
+    <group>
+      {opts.map((o, i) => {
+        const st = state.current[i]
+        return (
+          <group key={o.id} position={[st.cur.x - st.home.x, st.lift, st.cur.z - st.home.z]}>
+            <TaskProp
+              url={`/assets/chapter1/models/${o.prop!.model}.glb`}
+              tint={o.prop!.tint}
+              h={o.prop!.h}
+              x={st.home.x}
+              z={st.home.z}
+              label={o.label}
+              showLabel={atTask && !solvedTask}
+              taken={st.placed || chosen.includes(o.id)}
+            />
+          </group>
+        )
+      })}
+    </group>
+  )
+}
 
 /* Normalize a GLB to `height` meters with feet on the ground. The cached GLTF
    scene is NEVER mutated — all transforms go on a fresh wrapper group, so the
@@ -2560,6 +2742,37 @@ export default function Game() {
   const [solved, setSolved] = useState<string[]>([])
   const [openFind, setOpenFind] = useState<Find | null>(null)
   const [openTask, setOpenTask] = useState(false)
+  /* מצב המשימה חי כאן ולא בפאנל: גם הכפתורים וגם גרירת החפצים
+     עוברים דרך אותו chooseTask, וסגירת הפאנל לא מאבדת התקדמות —
+     בארגז ההעמסה שתי תשובות נכונות, וסגירה בין שתיהן היא לגיטימית. */
+  const [taskChosen, setTaskChosen] = useState<string[]>([])
+  const [taskLast, setTaskLast] = useState<string | null>(null)
+  const taskSolved = REGION_TASK ? solved.includes(REGION_TASK.id) : false
+  const chooseTask = useCallback(
+    (id: string) => {
+      if (!REGION_TASK) return
+      const opt = REGION_TASK.options.find((o) => o.id === id)
+      if (!opt) return
+      setTaskLast(id)
+      if (!opt.right) return
+      setTaskChosen((prev) => {
+        const next = prev.includes(id) ? prev : [...prev, id]
+        const needed = REGION_TASK.options.filter((o) => o.right).map((o) => o.id)
+        if (needed.every((n) => next.includes(n))) setSolved(recordTask(REGION_TASK.id).solved)
+        return next
+      })
+    },
+    [],
+  )
+  /* גרירה שנחתה על התחנה עונה — ופותחת את הפאנל כדי שההערה תיקרא */
+  const chooseByDrop = useCallback(
+    (id: string) => {
+      chooseTask(id)
+      cue('task')
+      setOpenTask(true)
+    },
+    [chooseTask],
+  )
   const [soundOff, setSoundOff] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
   const onSceneReady = useCallback(() => setSceneReady(true), [])
@@ -2838,6 +3051,8 @@ export default function Game() {
   const dragging = useRef(false)
   const lastX = useRef(0)
   const onPointerDown = useCallback((e: React.PointerEvent) => {
+    /* חפץ משימה ביד — העכבר שייך לגרירה, לא לסיבוב המבט */
+    if (live.taskDrag) return
     unlock()
     startAmbience(REGION.id)
     /* יד על המצלמה היא יד על המצלמה גם כשהיא לא זזה — בלי זה
@@ -2962,6 +3177,21 @@ export default function Game() {
             />
             <SceneReady onReady={onSceneReady} />
           </Suspense>
+          {/* גבול Suspense משלו, בכוונה: החפצים טוענים דגמים שלפעמים אינם
+              באזור (חותם, מצבה), ובתוך הגבול של העולם הטעינה שלהם החביאה
+              את העולם כולו — הפרוג'קטור מת לשניות ארוכות, ובאזור גדול
+              עדות נשארה בלי שם. בגבול משלהם הם מגיעים כשהם מגיעים. */}
+          {REGION_TASK && !taskSolved && (
+            <Suspense fallback={null}>
+              <TaskProps
+                live={live}
+                atTask={atTask}
+                chosen={taskChosen}
+                solvedTask={taskSolved}
+                onChoose={chooseByDrop}
+              />
+            </Suspense>
+          )}
           <Painterly strength={MOOD.paint} />
           <Dust groundAt={groundYAt} />
         </Canvas>
@@ -3145,7 +3375,10 @@ export default function Game() {
         {openTask && REGION_TASK && (
           <TaskPanel
             task={REGION_TASK}
-            onSolved={() => setSolved(recordTask(REGION_TASK.id).solved)}
+            chosen={taskChosen}
+            last={taskLast}
+            solved={taskSolved}
+            onChoose={chooseTask}
             onClose={() => setOpenTask(false)}
           />
         )}

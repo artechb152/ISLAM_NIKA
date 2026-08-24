@@ -8,6 +8,7 @@
  * source it rests on — because that is exactly what it becomes. */
 
 import type { Find } from '@/lib/chapter1/finds'
+import { FindView } from './FindView'
 
 export function FindCard({ find, index, total, onClose, onNotebook }: {
   find: Find
@@ -25,6 +26,9 @@ export function FindCard({ find, index, total, onClose, onNotebook }: {
           נמצא · <span>{find.source}</span>
         </p>
         <h3 id="ch1-find-title">{find.title}</h3>
+        {/* העדות עצמה, ביד: הדגם שכבר שכב על הקרקע מסתובב מול העיניים,
+            וגרירה מסובבת אותו — רואים את שני צידי הדרהמה במקום לקרוא עליהם */}
+        <FindView model={find.model} />
         <p className="ch1-find-body">{find.body}</p>
         <div className="ch1-find-foot">
           <span className="ch1-find-count">עדויות: {index} מתוך {total}</span>

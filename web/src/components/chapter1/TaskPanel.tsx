@@ -7,33 +7,27 @@
  * the cost of being wrong is that somebody tells you something you did not
  * know. Multi-answer tasks (the caravan crate) keep going until every right
  * answer is in, and the wrong one is left deliberately reachable because its
- * note is the lesson: some things travelled that nobody could pack. */
+ * note is the lesson: some things travelled that nobody could pack.
+ *
+ * The state lives in Game, not here: the same question can now also be
+ * answered with the hands — dragging the option's physical stand-in onto the
+ * station — and both routes must share one progress. The buttons stay for
+ * keyboards, screen readers and the harnesses. */
 
-import { useState } from 'react'
 import type { Task } from '@/lib/chapter1/tasks'
 
-export function TaskPanel({ task, onSolved, onClose }: {
+export function TaskPanel({ task, chosen, last, solved, onChoose, onClose }: {
   task: Task
-  onSolved: () => void
+  /** right answers already given, by either hand or button */
+  chosen: string[]
+  /** the most recent choice — its note is on display */
+  last: string | null
+  solved: boolean
+  onChoose: (id: string) => void
   onClose: () => void
 }) {
-  const needed = task.options.filter((o) => o.right).map((o) => o.id)
-  const [chosen, setChosen] = useState<string[]>([])
-  const [note, setNote] = useState<{ text: string; right: boolean } | null>(null)
-  const [solved, setSolved] = useState(false)
-
-  const choose = (id: string) => {
-    const opt = task.options.find((o) => o.id === id)
-    if (!opt || solved) return
-    setNote({ text: opt.note, right: !!opt.right })
-    if (!opt.right) return
-    const next = chosen.includes(id) ? chosen : [...chosen, id]
-    setChosen(next)
-    if (needed.every((n) => next.includes(n))) {
-      setSolved(true)
-      onSolved()
-    }
-  }
+  const needed = task.options.filter((o) => o.right)
+  const lastOpt = last ? task.options.find((o) => o.id === last) : null
 
   return (
     <div className="ch1-task" role="dialog" aria-labelledby="ch1-task-title">
@@ -51,16 +45,16 @@ export function TaskPanel({ task, onSolved, onClose }: {
               type="button"
               className={`hud-card-btn${chosen.includes(o.id) ? ' is-taken' : ''}`}
               disabled={chosen.includes(o.id) || solved}
-              onClick={() => choose(o.id)}
+              onClick={() => onChoose(o.id)}
             >
               {o.label}
             </button>
           ))}
         </div>
 
-        {note && (
-          <p className={`ch1-task-note${note.right ? ' is-right' : ''}`} role="status" aria-live="polite">
-            {note.text}
+        {lastOpt && (
+          <p className={`ch1-task-note${lastOpt.right ? ' is-right' : ''}`} role="status" aria-live="polite">
+            {lastOpt.note}
           </p>
         )}
 
