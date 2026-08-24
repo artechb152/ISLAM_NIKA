@@ -23,7 +23,7 @@ import { ContactShadow, Npc, Rawi, type RawiClip } from './Characters'
 import { DialogueHud } from './DialogueHud'
 import { Notebook } from './Notebook'
 import { WorldMap } from './WorldMap'
-import { NOTEBOOK_TOTAL, SPEAKERS, regionById, type Encounter } from '@/lib/chapter1/dialogue'
+import { MODEL, NOTEBOOK_TOTAL, SPEAKERS, regionById, type Encounter } from '@/lib/chapter1/dialogue'
 import { PLACEMENTS, type Placement } from '@/lib/chapter1/placements'
 import { notebookCount, readNotebook, recordEncounter, recordFind, recordTask, setRegion } from '@/lib/chapter1/notebook'
 
@@ -1293,6 +1293,30 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
   )
 }
 
+/* An extra: a cast model standing somewhere as somebody else. The collider is
+   the same shape a wandering camel registers, so the walk treats them as
+   people and not as scenery you pass through. JSON hands us `who` as a plain
+   string; it is narrowed here, at the point of use, as the sun's position is. */
+type ExtraWho = 'envoy' | 'chief' | 'merchant' | 'jewish' | 'monk'
+function Extra({ live, who, x, z, ry, tint }: {
+  live: Live
+  who: ExtraWho
+  x: number
+  z: number
+  ry: number
+  tint?: string
+}) {
+  const col = useMemo<Collider>(() => ({ x, z, r: 0.45 }), [x, z])
+  useEffect(() => {
+    live.dynamic.push(col)
+    return () => {
+      const i = live.dynamic.indexOf(col)
+      if (i >= 0) live.dynamic.splice(i, 1)
+    }
+  }, [live, col])
+  return <Npc who={who} position={[x, groundYAt(x, z), z]} rotationY={ry} speaking={false} tint={tint} />
+}
+
 /* Normalize a GLB to `height` meters with feet on the ground. The cached GLTF
    scene is NEVER mutated — all transforms go on a fresh wrapper group, so the
    math stays correct when React StrictMode re-runs the memo (mutating the
@@ -1984,6 +2008,12 @@ for (const url of new Set(WORLD.props.map((p) => p.url))) useGLTF.preload(url)
 const CAMP = WORLD.props
 const STATIC_COLLIDERS = WORLD.colliders
 const HERD = WORLD.herd
+/* Extras' models start downloading with the region's own, so an extra whose
+   model is not in the cast (a chief in Mecca) is not the last thing to arrive. */
+for (const e of WORLD.layout.extras ?? []) {
+  const extraUrl = MODEL[e.who as ExtraWho]
+  if (extraUrl) useGLTF.preload(extraUrl)
+}
 const campLayout = WORLD.layout
 const CAST = WORLD.cast
 
@@ -2387,6 +2417,16 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       <DustMotes />
       {CAST.map((c) => (
         <Npc key={c.who} who={c.who} position={[c.x, groundYAt(c.x, c.z), c.z]} rotationY={c.ry ?? 0} speaking={speakingWho === c.who} playerRef={{ current: live.player }} />
+      ))}
+      {/* הניצבים — אנשים שפשוט נמצאים שם. בלי שורות, בלי טבעת גישה, בלי
+          פנייה אל השחקן; רק נשימה, גוון משלהם, וקוליידר כדי שלא הולכים
+          דרכם. שוק בלי אנשים הוא תפאורה נטושה. */}
+      {(WORLD.layout.extras ?? []).map((e, i) => (
+        /* גבול משלו לכל ניצב: ניצב שמודל שלו אינו בין דמויות האזור טוען
+           אותו מחדש, ובתוך גבול העולם הטעינה הזאת החביאה את מכה כולה. */
+        <Suspense key={`x${i}`} fallback={null}>
+          <Extra live={live} who={e.who as ExtraWho} x={e.x} z={e.z} ry={e.ry ?? 0} tint={e.tint} />
+        </Suspense>
       ))}
       <Player live={live} />
       <RawiCompanion live={live} talking={talking} gesture={gesture} />

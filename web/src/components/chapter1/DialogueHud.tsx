@@ -155,6 +155,21 @@ export function DialogueHud({
         </div>
       )}
       <div className="hud-dialogue-body">
+        {/* סרט קצר לצד הטקסט — רק במפגשים שמצהירים עליו. חמישה סרטים
+            גמורים יושבים בנכסים; אחד בלבד נאמן לתקופה של הפרק, והשאר
+            מחכים לסרטים שייעשו לרגעים האלה. שקט ובלולאה: הקריינות
+            המוקלדת היא הקול. */}
+        {encounter.film && (
+          <video
+            className="hud-film"
+            src={`/assets/anim-video/${encounter.film}`}
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-hidden="true"
+          />
+        )}
         <h3 className="hud-title">
           {SPEAKERS[step.speaker]}
           {/* מספר הסעיף במקור הוא סימון של הכותבים, לא של הלומד.

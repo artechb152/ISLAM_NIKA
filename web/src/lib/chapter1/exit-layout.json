@@ -954,7 +954,26 @@
       "gen": "content-1"
     }
   ],
-  "herd": [],
+  "herd": [
+    {
+      "cx": -11,
+      "cz": -4,
+      "rx": 5,
+      "rz": 3,
+      "speed": 0.06,
+      "phase": 0,
+      "h": 2.1
+    },
+    {
+      "cx": -11,
+      "cz": -4,
+      "rx": 5,
+      "rz": 3,
+      "speed": 0.06,
+      "phase": 1.1,
+      "h": 2
+    }
+  ],
   "rugs": [],
   "scrolls": [],
   "terrain": {

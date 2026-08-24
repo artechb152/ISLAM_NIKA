@@ -106,6 +106,10 @@ export interface Layout {
       props; only the camp still opts in, so absence means "off". */
   scatter?: boolean
   herd: { cx: number; cz: number; rx: number; rz: number; speed: number; phase: number; h: number }[]
+  /** Extras — people who are simply there. Clones of the cast models, tinted
+      so no two read as the same person, with no lines and no approach ring:
+      a market with nobody in it is an abandoned set. */
+  extras?: { who: string; x: number; z: number; ry?: number; tint?: string }[]
   rugs: { x: number; z: number; ry: number }[]
   scrolls: { x: number; z: number }[]
   terrain?: {

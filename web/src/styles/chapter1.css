@@ -843,6 +843,13 @@ body{
 }
 .ch1-find-view:active{cursor:grabbing}
 .ch1-find-view canvas{display:block}
+/* סרט בתוך פאנל הדיאלוג — רצועה מעל הטקסט, בפינות של הפאנל */
+.hud-film{
+  display:block;width:100%;max-height:200px;object-fit:cover;
+  border-radius:8px;margin:0 0 10px;
+  box-shadow:0 2px 12px rgba(20,8,2,.45);
+}
+
 .ch1-find-body,.ch1-task-question{
   margin:0 0 18px;font-size:15.5px;line-height:1.85;color:rgba(245,236,214,.9);
 }

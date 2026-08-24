@@ -200,6 +200,7 @@ export function Npc({
   rotationY = 0,
   speaking,
   playerRef,
+  tint,
 }: {
   who: Exclude<SpeakerId, 'narrator' | 'rawi'>
   position: [number, number, number]
@@ -207,6 +208,9 @@ export function Npc({
   speaking: boolean
   /** מיקום השחקן, כדי שהדמות תפנה אליו כשהוא מתקרב */
   playerRef?: { current: { x: number; z: number } }
+  /** מכפיל צבע על הבגד — ניצב שנבנה מדגם של דמות מדברת חייב להיראות
+      כאדם אחר, לא כתאום שלה */
+  tint?: string
 }) {
   const { scene } = useGLTF(MODEL[who])
   const group = useRef<THREE.Group>(null)
@@ -224,6 +228,7 @@ export function Npc({
       m.castShadow = true
       m.receiveShadow = false
       const mat = (m.material as THREE.MeshStandardMaterial).clone()
+      if (tint) mat.color.set(tint)
       mat.onBeforeCompile = (shader) => {
         shader.uniforms.uTime = uniforms.current.uTime
         shader.uniforms.uTalk = uniforms.current.uTalk

@@ -18,6 +18,7 @@
           "id": "opening",
           "speaker": "narrator",
           "kind": "cinematic",
+          "film": "scene2.mp4",
           "notebook": 1,
           "lines": [
             {

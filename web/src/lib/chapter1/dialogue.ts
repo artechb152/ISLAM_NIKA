@@ -34,6 +34,10 @@ export interface Encounter {
   notebook: number
   gesture?: Gesture
   lines: Line[]
+  /** A short film that plays inside the panel for this encounter — a file
+      under /assets/anim-video. Only where the footage keeps faith with the
+      chapter's period: of the five finished films, one does. */
+  film?: string
   /** Rawi's sharpening remark after the character finishes. */
   rawi_followup?: Line[]
   choices?: Choice[]
