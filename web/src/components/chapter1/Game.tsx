@@ -10,7 +10,8 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
-import { Html, useGLTF } from '@react-three/drei'
+import { Html, useAnimations, useGLTF } from '@react-three/drei'
+import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import * as THREE from 'three'
 import { LAYOUTS, PLAYABLE, type Layout } from '@/lib/chapter1/worlds'
 import { FINDS_TOTAL, FIND_RANGE, findsIn, type Find } from '@/lib/chapter1/finds'
@@ -663,6 +664,7 @@ const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
 const MODEL_TRAVELER_STAND = '/assets/chapter1/models/traveler-stand.glb'
 const MODEL_TRAVELER_STRIDE = '/assets/chapter1/models/traveler-stride.glb'
 const MODEL_TRAVELER_PASSING = '/assets/chapter1/models/traveler-passing.glb'
+const MODEL_TRAVELER_WALK = '/assets/chapter1/models/traveler-walk.glb'
 const MODEL_PALM = '/assets/chapter1/models/palm.glb'
 const MODEL_WELL = '/assets/chapter1/models/well.glb'
 const MODEL_ROCKS = '/assets/chapter1/models/rocks.glb'
@@ -671,7 +673,7 @@ const MODEL_FIREWOOD = '/assets/chapter1/models/firewood.glb'
 const MODEL_SHRUB = '/assets/chapter1/models/shrub.glb'
 /** same camel, split into body + four hip-pivoted legs for the walk cycle */
 const MODEL_CAMEL_PARTS = '/assets/chapter1/models/camel-parts.glb'
-for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_STRIDE, MODEL_TRAVELER_PASSING, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
+for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_WALK, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
   useGLTF.preload(m)
 }
 
@@ -1313,14 +1315,40 @@ function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
   tint?: string
 }) {
   const g = useRef<THREE.Group>(null)
-  const standRef = useRef<THREE.Group>(null)
-  const strideRef = useRef<THREE.Group>(null)
-  const passRef = useRef<THREE.Group>(null)
-  const walkT = useRef(0)
-  const stand = useNormalizedGLB(MODEL_TRAVELER_STAND, 1.72, tint)
-  const stride = useNormalizedGLB(MODEL_TRAVELER_STRIDE, 1.72, tint)
-  const passing = useNormalizedGLB(MODEL_TRAVELER_PASSING, 1.72, tint)
+  /* אותו קליפ הליכה של השחקן, בגוון אחר ובקצב שנגזר ממהירות הקרקע */
+  const { scene: walkScene, animations: walkAnims } = useGLTF(MODEL_TRAVELER_WALK)
+  const model = useMemo(() => {
+    const c = cloneSkinned(walkScene)
+    const box = new THREE.Box3().setFromObject(c)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    const s = size.y > 0 ? 1.72 / size.y : 1
+    c.scale.setScalar(s)
+    c.position.y = -box.min.y * s
+    c.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh) return
+      m.castShadow = true
+      m.receiveShadow = false
+      m.frustumCulled = false
+      if (tint) {
+        const mat = (m.material as THREE.MeshStandardMaterial).clone()
+        mat.color.set(tint)
+        m.material = mat
+      }
+    })
+    return c
+  }, [walkScene, tint])
+  const { actions } = useAnimations(walkAnims, model)
   const col = useMemo<Collider>(() => ({ x: cx + rx, z: cz, r: 0.45 }), [cx, cz, rx])
+  useEffect(() => {
+    const a = actions['walk']
+    if (!a) return
+    const groundSpeed = Math.abs(speed) * ((rx + rz) / 2)
+    /* מחזור אחד = שני צעדים ≈ 1.24 מ׳ — רגליים שלא מחליקות */
+    a.setEffectiveTimeScale(groundSpeed / 1.24)
+    a.play()
+  }, [actions, speed, rx, rz])
   useEffect(() => {
     live.dynamic.push(col)
     return () => {
@@ -1328,7 +1356,7 @@ function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
       if (i >= 0) live.dynamic.splice(i, 1)
     }
   }, [live, col])
-  useFrame(({ clock }, dt) => {
+  useFrame(({ clock }) => {
     const el = g.current
     if (!el) return
     const t = clock.elapsedTime * speed + phase
@@ -1336,37 +1364,14 @@ function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
     const z = cz + Math.sin(t) * rz
     const dx = -Math.sin(t) * rx * Math.sign(speed)
     const dz = Math.cos(t) * rz * Math.sign(speed)
-    /* קצב הצעדים נגזר ממהירות הקרקע — רגליים שלא מחליקות */
-    const groundSpeed = Math.abs(speed) * ((rx + rz) / 2)
-    walkT.current += dt * (groundSpeed / 0.35) * Math.PI
-    const s = Math.sin(walkT.current)
-    const showStride = Math.abs(s) > 0.25
-    if (standRef.current) standRef.current.visible = false
-    if (strideRef.current) {
-      strideRef.current.visible = showStride
-      strideRef.current.scale.x = s >= 0 ? 1 : -1
-    }
-    if (passRef.current) {
-      passRef.current.visible = !showStride
-      passRef.current.scale.x = Math.cos(walkT.current) >= 0 ? 1 : -1
-    }
-    const bob = Math.abs(Math.cos(walkT.current)) * 0.05
-    el.position.set(x, groundYAt(x, z) + bob, z)
+    el.position.set(x, groundYAt(x, z), z)
     el.rotation.y = Math.atan2(dx, dz)
     col.x = x
     col.z = z
   })
   return (
     <group ref={g}>
-      <group ref={standRef}>
-        <primitive object={stand} />
-      </group>
-      <group ref={strideRef} visible={false}>
-        <primitive object={stride} />
-      </group>
-      <group ref={passRef} visible={false}>
-        <primitive object={passing} />
-      </group>
+      <primitive object={model} />
       <ContactShadow radius={0.42} />
     </group>
   )
@@ -1386,6 +1391,16 @@ function Extra({ live, who, x, z, ry, tint }: {
   tint?: string
 }) {
   const col = useMemo<Collider>(() => ({ x, z, r: 0.45 }), [x, z])
+  /* ניצב שמתקרבים אליו מפנה מבט ומברך במחווה — ההבדל בין פסל לאדם.
+     בדיקת מרחק בקצב נמוך, לא כל פריים: זו נימוסים, לא פיזיקה. */
+  const [greet, setGreet] = useState(false)
+  useEffect(() => {
+    const t = window.setInterval(() => {
+      const d = Math.hypot(live.player.x - x, live.player.z - z)
+      setGreet(d < 2.8)
+    }, 400)
+    return () => window.clearInterval(t)
+  }, [live, x, z])
   useEffect(() => {
     live.dynamic.push(col)
     return () => {
@@ -1393,7 +1408,16 @@ function Extra({ live, who, x, z, ry, tint }: {
       if (i >= 0) live.dynamic.splice(i, 1)
     }
   }, [live, col])
-  return <Npc who={who} position={[x, groundYAt(x, z), z]} rotationY={ry} speaking={false} tint={tint} />
+  return (
+    <Npc
+      who={who}
+      position={[x, groundYAt(x, z), z]}
+      rotationY={ry}
+      speaking={greet}
+      playerRef={{ current: live.player }}
+      tint={tint}
+    />
+  )
 }
 
 /* Normalize a GLB to `height` meters with feet on the ground. The cached GLTF
@@ -1438,9 +1462,11 @@ function useNormalizedGLB(url: string, height: number, tint?: string) {
 
 function Player({ live }: { live: Live }) {
   const group = useRef<THREE.Group>(null)
-  const standRef = useRef<THREE.Group>(null)
-  const strideRef = useRef<THREE.Group>(null)
-  const passRef = useRef<THREE.Group>(null)
+  /* ההליכה עצמה: קליפ שלד אמיתי, כמו של ראאווי. שלוש התנוחות הקפואות
+     נקראו כספר מתהפך לצידו — והשלד עם המשקולות ממילא קיים; ההבדל הוא
+     keyframes ו-mixer במקום החלפת רשתות. משקל הקליפ דועך לאפס בעמידה,
+     ותנוחת הכפיתה היא העמידה — כך שהעצירה עצמה היא האנימציה. */
+  const walkAction = useRef<THREE.AnimationAction | null>(null)
   const heading = useRef(0)
   const walkT = useRef(0)
   const lastStep = useRef(0)
@@ -1564,22 +1590,15 @@ function Player({ live }: { live: Live }) {
        דחוס עד שהאיים שלו נמרחים זה לתוך זה, וזה מה שצייר את הפסים
        השחורים על הגלימה. התנוחות מופקות בשלד קטן של שלוש עצמות
        ונאפות לרשת סטטית, כך שהמנגנון כאן לא השתנה בכלל. */
-    const s = Math.sin(walkT.current)
     const walking = speed.current > 0.35
-    const showStride = walking && Math.abs(s) > 0.25
-    /* פאזת המעבר: עד עכשיו בין שני הצעדים הוצגה העמידה הניטרלית —
-       והולך שרגליו נחות פעמיים בכל מחזור נקרא כספר מתהפך. עכשיו יש
-       תנוחת מעבר אמיתית (עקב מתרומם, רגליים חולפות), משוקפת לפי
-       כיוון המחזור, והעמידה שמורה לעמידה. */
-    const showPassing = walking && !showStride
-    if (standRef.current) standRef.current.visible = !walking
-    if (strideRef.current) {
-      strideRef.current.visible = showStride
-      strideRef.current.scale.x = s >= 0 ? 1 : -1
-    }
-    if (passRef.current) {
-      passRef.current.visible = showPassing
-      passRef.current.scale.x = Math.cos(walkT.current) >= 0 ? 1 : -1
+    const act = walkAction.current
+    if (act) {
+      /* המשקל נכנס ויוצא ברוך; הקצב צמוד לשעון ההליכה — אותו מקור
+         שמתזמן את הצליל והאבק, כדי שהרגליים לא יחליקו על הקרקע. */
+      const wantW = walking ? Math.min(1, gait * 2) : 0
+      const w = act.getEffectiveWeight()
+      act.setEffectiveWeight(w + (wantW - w) * Math.min(1, dt * 8))
+      act.setEffectiveTimeScale(1.43 * Math.sqrt(Math.max(gait, 0.4)))
     }
     /* רגל נוגעת בקרקע בכל חצי מחזור. שעון ההליכה כבר סופר את זה,
        ולכן הצעד נשמע מאותו מקור שמצייר אותו — בלי טיימר נפרד
@@ -1758,9 +1777,38 @@ function Player({ live }: { live: Live }) {
      ה-'#d6c5a6' שישב כאן הכהה כל פיקסל של השחקן ב-16%-35% ודחף אותו
      לצהוב — הוא היה הדמות היחידה במשחק שהוכהתה ידנית, מול NPC-ים
      שמוצגים בצבעם המלא. */
-  const stand = useNormalizedGLB(MODEL_TRAVELER_STAND, 1.78)
-  const stride = useNormalizedGLB(MODEL_TRAVELER_STRIDE, 1.78)
-  const passing = useNormalizedGLB(MODEL_TRAVELER_PASSING, 1.78)
+  /* הדגם המונפש: clone דרך SkeletonUtils — clone רגיל חולק שלד ומשאיר
+     את העותק לא-קשור, ודמות סקינית קורסת בשקט. מנורמל לגובה 1.78 כמו
+     קודמיו. */
+  const { scene: walkScene, animations: walkAnims } = useGLTF(MODEL_TRAVELER_WALK)
+  const model = useMemo(() => {
+    const c = cloneSkinned(walkScene)
+    const box = new THREE.Box3().setFromObject(c)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    const s = size.y > 0 ? 1.78 / size.y : 1
+    c.scale.setScalar(s)
+    c.position.y = -box.min.y * s
+    c.traverse((o) => {
+      const m = o as THREE.Mesh
+      if (!m.isMesh) return
+      m.castShadow = true
+      m.receiveShadow = false
+      m.frustumCulled = false // skinned bounds go stale during clips
+    })
+    return c
+  }, [walkScene])
+  const { actions } = useAnimations(walkAnims, model)
+  useEffect(() => {
+    const a = actions['walk']
+    if (!a) return
+    a.play()
+    a.setEffectiveWeight(0)
+    walkAction.current = a
+    return () => {
+      walkAction.current = null
+    }
+  }, [actions])
 
   // dev diagnostics: world-space bounds of the rendered figure
   useEffect(() => {
@@ -1771,25 +1819,15 @@ function Player({ live }: { live: Live }) {
       ;(window as unknown as Record<string, unknown>).__ch1Dbg = {
         min: box.min.toArray(),
         max: box.max.toArray(),
-        standChildren: stand.children.length,
-        strideChildren: stride.children.length,
-        standVisible: standRef.current?.visible,
+        walkWeight: walkAction.current?.getEffectiveWeight(),
       }
     }, 500)
     return () => window.clearInterval(t)
-  }, [stand, stride])
+  }, [])
 
   return (
     <group ref={group}>
-      <group ref={standRef}>
-        <primitive object={stand} />
-      </group>
-      <group ref={strideRef} visible={false}>
-        <primitive object={stride} />
-      </group>
-      <group ref={passRef} visible={false}>
-        <primitive object={passing} />
-      </group>
+      <primitive object={model} />
       {/* הכתם שאומר שהשחקן נוגע בקרקע ולא שקוע בה */}
       <ContactShadow radius={0.5} />
     </group>
