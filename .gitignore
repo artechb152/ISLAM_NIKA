@@ -11,3 +11,7 @@ web/waveletNoiseTile.bin
 web/layout-before.tmp.json
 *.tmp.json
 concept/chapter2/node_modules/
+
+# live-lab outputs — screenshots and recordings, regenerated on demand
+web/scratchpad/tour/
+web/scratchpad/imgs.json

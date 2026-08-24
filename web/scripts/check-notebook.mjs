@@ -195,22 +195,40 @@ for (const region of ORDER) {
   let gotFinds = 0
   for (const f of finds) {
     await teleport(f.x, f.z + 0.9)
-    if (!(await until(() => window.__ch1Live.nearFind))) {
+    /* Wait for the projector to name THIS find, not merely to name something.
+       nearFind keeps its previous value until a frame renders, and under
+       software rendering that is a long time — so a plain truthy check passed
+       instantly on the find we had just collected, pressed F on that one, and
+       recorded nothing. It still counted, because the card of an already-taken
+       find does re-open. Six of nine regions lost their second piece of
+       evidence that way and the fault was read as the game's. */
+    await evalSafe(pg, (id) => { window.__ch1Target = id }, f.id)
+    if (!(await until(() => window.__ch1Live.nearFind === window.__ch1Target, 15000))) {
       log.push({ region, what: 'find ' + f.id, status: 'OUT OF RANGE' })
       continue
     }
     await pg.keyboard.press('KeyF')
     const opened = await until(() => !!document.querySelector('.ch1-find'), 4000)
     await dismiss()
-    if (opened) gotFinds++
-    else log.push({ region, what: 'find ' + f.id, status: 'F DID NOTHING' })
+    /* The card opening is not proof the evidence was written down — the card of
+       an already-taken find opens too. Ask the notebook. This column read 2/2
+       in every region while the run totalled 10 of 17, and the contradiction
+       was what finally gave the harness away. */
+    const wrote = await evalSafe(pg, (id) =>
+      (JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}').found || []).includes(id), f.id)
+    if (wrote) gotFinds++
+    else log.push({ region, what: 'find ' + f.id, status: opened ? 'CARD OPENED, NOTHING WRITTEN' : 'F DID NOTHING' })
   }
 
   // ── the people ───────────────────────────────────────────────────────────
   let talks = 0
   for (const p of CAST.filter((c) => HOME[c.who] === region)) {
     await teleport(p.x, p.z + 1.6)
-    await until(() => window.__ch1Live.nearWho)
+    /* Same staleness as the finds above: wait for this person by name. The
+       talk loop re-reads nearWho each round and so recovered on its own, but
+       it burned a round doing it. */
+    await evalSafe(pg, (w) => { window.__ch1Who = w }, p.who)
+    await until(() => window.__ch1Live.nearWho === window.__ch1Who, 15000)
     for (let round = 0; round < 8; round++) {
       if (!(await evalSafe(pg, () => window.__ch1Live.nearWho))) break
       await pg.keyboard.press('KeyE')

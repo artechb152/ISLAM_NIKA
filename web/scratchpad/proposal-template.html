@@ -1,0 +1,412 @@
+<title>שבע דרכים לדרך הבשמים</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;700;900&family=Heebo:wght@400;500;700&display=swap">
+<style>
+:root{
+  --ground:#f2e7d2; --surface:#faf3e4; --surface2:#ece0c8; --ink:#2a1a10; --ink2:#6b5949;
+  --burgundy:#6d1f2c; --gold:#a87c2a; --gold-soft:#c9a25c; --line:#d9c9a8;
+  --good:#4a6b3a; --warn:#8a5a1e;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#191008; --surface:#241810; --surface2:#2e2015; --ink:#eadfc6; --ink2:#b3a186;
+    --burgundy:#d98d99; --gold:#d9a84e; --gold-soft:#a87c2a; --line:#45341f;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#191008; --surface:#241810; --surface2:#2e2015; --ink:#eadfc6; --ink2:#b3a186;
+  --burgundy:#d98d99; --gold:#d9a84e; --gold-soft:#a87c2a; --line:#45341f;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:'Heebo',system-ui,sans-serif; font-size:17px; line-height:1.75;
+}
+.wrap{max-width:960px; margin:0 auto; padding:0 22px 90px}
+header.hero{padding:72px 0 34px; text-align:right}
+.eyebrow{
+  font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--gold);
+  text-transform:uppercase; margin-bottom:14px;
+}
+h1{
+  font-family:'Frank Ruhl Libre',serif; font-weight:900; font-size:clamp(38px,6vw,62px);
+  line-height:1.12; margin:0 0 18px; color:var(--burgundy); text-wrap:balance;
+}
+.thesis{font-size:20px; line-height:1.7; max-width:34em; color:var(--ink)}
+.thesis b{color:var(--burgundy)}
+h2{
+  font-family:'Frank Ruhl Libre',serif; font-weight:700; font-size:30px; line-height:1.25;
+  margin:70px 0 10px; color:var(--ink); text-wrap:balance;
+}
+h3{font-family:'Frank Ruhl Libre',serif; font-weight:700; font-size:21px; margin:26px 0 8px}
+p{margin:10px 0; max-width:38em}
+.note{color:var(--ink2); font-size:15px}
+figure{margin:18px 0}
+figcaption{font-size:14px; color:var(--ink2); margin-top:6px}
+img{max-width:100%; display:block; border-radius:6px}
+.pair{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:16px 0}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.shot{position:relative}
+.shot img{width:100%}
+.tag{
+  position:absolute; top:10px; inset-inline-start:10px; font-size:12.5px; font-weight:700;
+  padding:3px 10px; border-radius:99px; color:#f6ecd8; background:rgba(42,20,10,.78);
+}
+.tag.after{background:var(--burgundy)}
+/* before/after slider */
+.ba{position:relative; border-radius:8px; overflow:hidden; touch-action:none; cursor:ew-resize; direction:ltr}
+.ba img{width:100%; display:block}
+.ba .top{position:absolute; inset:0; clip-path:inset(0 50% 0 0)}
+.ba .top img{position:absolute; inset:0; height:100%; object-fit:cover}
+.ba .handle{
+  position:absolute; top:0; bottom:0; left:50%; width:3px; background:#f6ecd8;
+  box-shadow:0 0 0 1px rgba(42,20,10,.5); pointer-events:none;
+}
+.ba .knob{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:40px; height:40px; border-radius:50%; background:#f6ecd8; color:#5a2230;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px;
+  box-shadow:0 2px 10px rgba(20,8,2,.45); pointer-events:none;
+}
+.ba .balabel{position:absolute; top:12px; font-size:13px; font-weight:700; padding:3px 11px; border-radius:99px; color:#f6ecd8; background:rgba(42,20,10,.78)}
+.card{
+  background:var(--surface); border:1px solid var(--line); border-radius:10px;
+  padding:26px 28px 22px; margin:26px 0;
+}
+.idea-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap}
+.idea-num{
+  font-family:'Frank Ruhl Libre',serif; font-weight:900; font-size:17px; color:var(--ground);
+  background:var(--burgundy); border-radius:50%; width:34px; height:34px; flex:none;
+  display:flex; align-items:center; justify-content:center; align-self:center;
+}
+.idea-head h2{margin:0; font-size:27px}
+.essence{font-size:18px; margin:12px 0 4px}
+.chips{display:flex; gap:8px; margin:14px 0 4px; flex-wrap:wrap}
+.chip{
+  font-size:13px; font-weight:700; padding:3px 12px; border-radius:99px;
+  background:var(--surface2); color:var(--ink2); border:1px solid var(--line);
+}
+.chip.rec{background:var(--burgundy); color:var(--ground); border-color:var(--burgundy)}
+.sub{
+  font-size:13.5px; font-weight:700; letter-spacing:.05em; color:var(--gold);
+  margin:20px 0 4px;
+}
+ul{padding-inline-start:20px; margin:8px 0}
+li{margin:5px 0; max-width:36em}
+.verdict{border-inline-start:3px solid var(--gold); padding:4px 18px 4px 0; margin:20px 0}
+.klist{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin:20px 0}
+.k{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:14px 16px; font-size:15px}
+.k b{display:block; color:var(--burgundy); font-size:16px; margin-bottom:3px}
+hr{border:none; border-top:1px solid var(--line); margin:60px 0 0}
+a{color:var(--burgundy)}
+code{background:var(--surface2); padding:1px 7px; border-radius:5px; font-size:14.5px; direction:ltr; unicode-bidi:embed}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+<div class="wrap" dir="rtl" lang="he">
+
+<header class="hero">
+  <div class="eyebrow">פרק 1 · דרך הבשמים · 24.8.2026</div>
+  <h1>שבע דרכים לדרך הבשמים</h1>
+  <p class="thesis">המשחק לא סובל ממחסור בגרפיקה — הוא סובל מהיעדר <b>החלטה אמנותית אחת</b>. כל אחת מההצעות כאן נבדקה על המשחק החי, על הסצנות האמיתיות, בכרטיס המסך האמיתי. גררו את הידית: משמאל המשחק של היום, מימין ניסוי חי — אותה סצנה, אותם מודלים, אפס נכסים חדשים.</p>
+</header>
+
+<div class="ba" id="ba1">
+  <img src="{{img:yemen-base}}" alt="רמות תימן היום">
+  <div class="top"><img src="{{img:yemen-combo}}" alt="רמות תימן אחרי הניסוי המשולב"></div>
+  <div class="handle"></div><div class="knob">⇄</div>
+  <span class="balabel" style="left:12px">הניסוי (3+2+1)</span>
+  <span class="balabel" style="right:12px">היום</span>
+</div>
+<p class="note">רמות תימן, הדקה הראשונה של המשחק. הצד המשופר הוא שילוב חי של הצעות 1–3: אובך, שעת זהב, והצללה מאוירת — שלושתן שינויי רינדור בלבד, בלי לגעת באף מודל.</p>
+
+<h2>האבחנה: למה זה נראה רע</h2>
+<p>עברתי על כל תשעת האזורים בדפדפן וצילמתי אותם כפי שהם. הבעיה אינה „מודלים זולים“ — היא שארבעה דברים צועקים זה על זה:</p>
+<ul>
+  <li><b>אור צהריים שטוח בכל מקום.</b> שמש לבנה מלמעלה, בלי אובך, בלי עומק — בדיוק האור שבו כל פגם בולט הכי הרבה. האזור היחיד שכבר קיבל שעה ביום — מחנה הלילה בשקיעה — הוא גם היחיד שנראה טוב.</li>
+  <li><b>החומרים לא מכירים זה את זה.</b> חומה אפורה-בטון ליד בית חמר כתום על קרקע הסוואה מנומרת. בקונספט המאושר יש פלטה אחת חמה.</li>
+  <li><b>האופק ריק.</b> בקצה כל אזור רואים את סוף העולם — גבעות חלקות ושמיים. אין שכבת ביניים.</li>
+  <li><b>הדמויות המצוירות זרות בעולם.</b> הן הדבר הכי יפה במשחק — סגנון גואש עם קו — אבל הן עומדות בתוך עולם שמנסה להיות ריאליסטי ונכשל. הפער הזה הוא מה שמרגיש „זול“.</li>
+</ul>
+<div class="pair">
+  <figure class="shot"><img src="{{img:concept}}" alt="קונספט מכה"><span class="tag">מה שאושר בקונספט</span></figure>
+  <figure class="shot"><img src="{{img:mecca-base}}" alt="מכה במשחק היום"><span class="tag">מה שרץ היום במכה</span></figure>
+</div>
+<div class="pair">
+  <figure class="shot"><img src="{{img:narrow-base}}" alt="המעבר הצר היום"><span class="tag">המעבר הצר — אפור על אפור</span></figure>
+  <figure class="shot"><img src="{{img:night-base}}" alt="מחנה הלילה"><span class="tag">מחנה הלילה — היוצא מן הכלל שמוכיח</span></figure>
+</div>
+
+<h2>איך בדקתי</h2>
+<p>בניתי מעבדה שנטענת לפני קוד המשחק ותופסת את הסצנה החיה דרך ה־hook שthree.js עצמו מציע (<code>__THREE_DEVTOOLS__</code>). דרכה הזרקתי לכל ניסוי ערפל, תאורה, שיידרים ומצלמות — על המשחק הרץ, בלי לשנות שורת קוד אחת בו. הכול רונדר בחומרה אמיתית (RTX 3070), לא ברינדור תוכנה. כל תמונה כאן היא צילום מסך אמיתי של המשחק. הכלים שמורים ב־<code>web/scratchpad</code> — כל ניסוי ניתן לשחזור בפקודה אחת.</p>
+
+<!-- ═══════════ 1 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">1</span><h2>שכבת האוויר</h2></div>
+  <p class="essence">ערפל עומק חם, גרייד צבע ווינייטה. המדבר מקבל אוויר, והאופק הריק נעלם מאחורי אובך של אבק.</p>
+  <div class="chips"><span class="chip rec">מומלץ · הבסיס להכול</span><span class="chip">יום–יומיים</span><span class="chip">סיכון נמוך</span><span class="chip">אפס נכסים חדשים</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:mecca-base}}" alt="מכה לפני"><span class="tag">לפני</span></figure>
+    <figure class="shot"><img src="{{img:mecca-atmo}}" alt="מכה עם אטמוספרה"><span class="tag after">אחרי — נבדק חי</span></figure>
+  </div>
+  <p>המרחק נמס לתוך אבק מוזהב במקום להיחתך אל שמיים; הצבע מתאחד; הפריים מקבל מסגרת. זה התיקון עם היחס הכי גבוה בין מאמץ לתוצאה — כמעט כל משחק מסחרי בנוי עליו.</p>
+  <div class="sub">מה בדקתי</div>
+  <p class="note">ערפל אקספוננציאלי + גרייד (רוויה, חום, וינייטה) הוזרקו לסצנת מכה החיה. כיפת השמיים הוחרגה מהערפל לפי שם. הצילום למעלה — התוצאה כפי שנלכדה.</p>
+  <div class="sub">איך זה נבנה באמת</div>
+  <p class="note"><code>scene.fog</code> עם צבע ודחיסות פר־אזור (מערכת ה־mood הפר־אזורית כבר קיימת ב־layout), והגרייד דרך ספריית <code>postprocessing</code> — שכבר מותקנת בפרויקט ולא מנוצלת.</p>
+</div>
+
+<!-- ═══════════ 2 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">2</span><h2>שעת זהב לכל אזור</h2></div>
+  <p class="essence">כל אזור מקבל שעה ביממה משלו: זריחה ברמות תימן, צהרי אובך במעבר הצר, ערב במנזר. השמש יורדת נמוך ומתחממת — והמסע נהיה גם מסע בזמן.</p>
+  <div class="chips"><span class="chip rec">מומלץ · עם 1</span><span class="chip">יומיים–שלושה</span><span class="chip">סיכון נמוך</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:mecca-base}}" alt="מכה בצהריים"><span class="tag">לפני — צהריים שטוחים</span></figure>
+    <figure class="shot"><img src="{{img:mecca-gold}}" alt="מכה בשעת זהב"><span class="tag after">אחרי — נבדק חי</span></figure>
+  </div>
+  <p>מחנה הלילה כבר הוכיח את זה: האזור היחיד עם שעה מוגדרת הוא היחיד שנראה מעוצב. הניסוי לקח את מכה — הנחיתי את השמש, חיממתי אותה, איזנתי את אור השמיים — והקופסאות נהיו רחוב בשעת ערב. עשר תמונות השמיים הקיימות (<code>sky-dawn</code> עד <code>sky-dusk</code>) כבר מכסות יממה שלמה.</p>
+  <div class="sub">מה עוד לא בדוק</div>
+  <p class="note">כיוון הצללים מול הפנורמות — צריך ליישר את אזימוט השמש לשמש המצוירת בכל תמונת שמיים (חצי יום עבודה מהעבודה המוערכת).</p>
+</div>
+
+<!-- ═══════════ 3 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">3</span><h2>העולם כאיור</h2></div>
+  <p class="essence">שיידר שמדרג את האור למדרגות — והעולם כולו נהיה מצויר באותו סגנון גואש של הדמויות. הפער בין דמות לעולם, הבעיה הכי עמוקה, נסגר מהצד של העולם.</p>
+  <div class="chips"><span class="chip rec">ההמלצה המרכזית</span><span class="chip">יומיים–שלושה</span><span class="chip">סיכון בינוני</span><span class="chip">387 חומרים בשורה אחת</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:mecca-base}}" alt="מכה רגילה"><span class="tag">לפני</span></figure>
+    <figure class="shot"><img src="{{img:mecca-paint}}" alt="מכה מאוירת"><span class="tag after">אחרי — עוצמה מלאה</span></figure>
+  </div>
+  <p>בעוצמה מלאה זה הדפס; בכוונון עדין (70%, כמו בסליידר שלמעלה) זה איור עדין שמשאיר את הטקסטורות לנשום. פתאום קרקע מנומרת נראית כמו החלטה של מאייר, לא כמו טעות של מנוע. זה הרעיון שהופך את „נראה זול“ ל„נראה מכוון“ — בקובץ אחד.</p>
+  <div class="sub">מה בדקתי</div>
+  <p class="note">הטלאתי חי את כל 387 החומרים בסצנת מכה (ואת 323 של רמות תימן בניסוי המשולב) עם דירוג אור ל־5–6 מדרגות דרך <code>onBeforeCompile</code>. הניסוי הראשון שבר את הקומפילציה של השיידרים — <code>#include</code> חייב שורה משלו — תוקן ואומת. ביצועים: תוספת חישוב זניחה, בלי טקסטורות חדשות.</p>
+  <div class="sub">איך זה נבנה באמת</div>
+  <p class="note">ווק אחד על הסצנה אחרי טעינת ה־GLB (הנקודה קיימת ב־World) שמזריק את הטלאי לכל חומר, עם מקדם עוצמה שמכוילים פעם אחת. עובד עם 1 ו־2 כמערכת אחת — זה בדיוק הצילום שבראש העמוד.</p>
+</div>
+
+<!-- ═══════════ 4 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">4</span><h2>המיניאטורה</h2></div>
+  <p class="essence">מצלמה גבוהה, פוקוס רדוד ורוויה גבוהה — והעולם נהיה דגם מלאכה מצולם, דיורמה של המסע על שולחנו של ראוי. הגיאומטריה הפשוטה הופכת מנקודת חולשה לשפה.</p>
+  <div class="chips"><span class="chip">כשבוע</span><span class="chip">סיכון בינוני–גבוה</span><span class="chip">משנה את תחושת המשחק</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:mecca-base}}" alt="מכה רגילה"><span class="tag">לפני</span></figure>
+    <figure class="shot"><img src="{{img:mecca-tilt}}" alt="מכה כמיניאטורה"><span class="tag after">אחרי — נבדק חי</span></figure>
+  </div>
+  <p>זה הרעיון הקונספטואלי היפה ביותר: הפרק כולו מסופר מהמחברת של ראוי — אז שהעולם ייראה כמו הדגם שהוא בונה בזיכרונו. חפצים שנראו „צעצוע“ בגובה עיניים נראים נכונים כשמצלמים אותם כצעצוע בכוונה.</p>
+  <div class="sub">מה בדקתי</div>
+  <p class="note">מצלמה עילית פר־פריים + טשטוש רצועות + רוויה — חי על מכה. הניסיון הראשון נכשל (שינוי חד־פעמי של FOV נדרס על ידי המנוע) — נלמד: כל שינוי מצלמה חייב להיות פר־פריים. גרסת האמת תשתמש ב־DepthOfField מספריית <code>postprocessing</code> המותקנת, לא בטשטוש CSS.</p>
+  <div class="sub">מה עוד לא בדוק</div>
+  <p class="note">קריאוּת הסמנים והכתוביות מהגובה החדש, וטווחי האינטראקציה — נדרש כיול משחקי, לא רק ויזואלי.</p>
+</div>
+
+<!-- ═══════════ 5 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">5</span><h2>המצלמה המביימת</h2></div>
+  <p class="essence">במקום מצלמת עקיבה אחת לכל דבר — מצלמה שמביימת: נמוכה וקרובה בהליכה, נפתחת לרוחב בכניסה לאזור, ננעלת על הפנים בשיחות. אותו עולם, קולנוע אחר.</p>
+  <div class="chips"><span class="chip">שלושה–ארבעה ימים</span><span class="chip">סיכון בינוני</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:mecca-cine}}" alt="מצלמה קולנועית"><span class="tag after">מצלמת כתף — נבדק חי</span></figure>
+    <figure class="shot"><img src="{{img:mecca-iso}}" alt="מבט איזומטרי"><span class="tag after">הקצה השני: מבט־על — נבדק חי</span></figure>
+  </div>
+  <p>שני הקצוות נבדקו חי. מצלמת הכתף (משמאל) עם עדשה צרה יותר גורמת לבניינים להתרומם ולדמויות למלא את הפריים — והיא מסתירה בדיוק את הזוויות שבהן הטקסטורות נמרחות. מבט־העל (מימין) מוחק את בעיית האופק כליל והופך את האזור למפה חיה — מתאים אולי לרגעי „סקירת אזור“, לא לכל המשחק.</p>
+  <div class="sub">מה עוד לא בדוק</div>
+  <p class="note">התנגשות מצלמה בקירות במעבר הצר, ומעברים חלקים בין מצבי המצלמה.</p>
+</div>
+
+<!-- ═══════════ 6 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">6</span><h2>עולם חי</h2></div>
+  <p class="essence">הדבר שהקונספט מלא בו והמשחק ריק ממנו: אנשים. ניצבים מצוירים שטוחים בסגנון הדמויות, שיירה שחולפת ברקע, גמלים ליד הבאר, בדים שזזים ברוח.</p>
+  <div class="chips"><span class="chip">כשבוע</span><span class="chip">סיכון נמוך</span><span class="chip">הנשמה החסרה</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:concept}}" alt="הקונספט מלא אנשים"><span class="tag">בקונספט: עשרות דמויות</span></figure>
+    <figure class="shot"><img src="{{img:yemen-base}}" alt="במשחק שני אנשים"><span class="tag">במשחק: שניים</span></figure>
+  </div>
+  <p>שוק בלי קונים הוא תפאורה נטושה. ניצבים לא צריכים להיות תלת־ממד: לוחות שטוחים מצוירים (כמו שהאש במשחק כבר עובדת היום — זו טכניקה שכבר רצה במנוע) עם שתי–שלוש תנוחות לדמות. וכאן היתרון הגדול: <b>אין צורך לג׳נרט כלום.</b> ציורי הקונספט המאושרים מלאים בדמויות בסגנון הנכון — גוזרים אותן משם. גם דגמי הגמלים ההולכים כבר קיימים בתיקיית המודלים.</p>
+  <div class="sub">מה בדקתי</div>
+  <p class="note">שהטכניקה כבר חיה במנוע (לוח האש), שהדמויות בקונספט חדות מספיק לגזירה בגודל ניצב, ושיש אנימציית הליכה לגמל (<code>camel-walk.glb</code>). את צפיפות הניצבים בפועל צריך לכייל בעין.</p>
+</div>
+
+<!-- ═══════════ 7 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">7</span><h2>איחוד החומרים</h2></div>
+  <p class="essence">הדרך השמרנית: בלי שינוי סגנון, רק מלאכה. פלטת חומרים אחת של חמר, אבן ועץ; החלפת ששת החומרים החריגים; ותיקון קני מידה. המשחק נשאר „ריאליסטי“ — אבל מוקפד.</p>
+  <div class="chips"><span class="chip">כשבוע, מפוזר</span><span class="chip">סיכון נמוך</span><span class="chip">משתלב עם כל השאר</span></div>
+  <p>סריקת הסצנה נתנה רשימה שמית מדויקת של האשמים: חומות ה־<code>drywall</code> האפורות (תשעה עותקים), שבעה־עשר קוביות <code>Cube</code> גנריות, קרקע ההסוואה של מכה, וסדרת בתי <code>house</code> שלא חולקים פלטה. צנרת הבלנדר של הפרויקט — ייבוא, אפייה, ייצוא — כבר קיימת ומתועדת, כולל הלקח על אפיית חומרים פרוצדורליים לפני ייצוא.</p>
+  <div class="sub">למה זה אחרון ברשימה</div>
+  <p class="note">כי זו הדרך היחידה שמתקנת את הסימפטומים בלי לתת למשחק זהות. היא נכונה כתחזוקה מתחת לכל אחד מהרעיונות 1–6 — אבל לבדה היא משאירה את המשחק „כמו עכשיו, רק מסודר יותר“, וזה בדיוק מה שביקשת שלא.</p>
+</div>
+
+<h2>ההחלטה על הסבב הראשון ✓</h2>
+<div class="verdict">
+  <p><b>הוחלט (24.8):</b> חבילת <b>3+2+1</b> — אובך, שעת זהב, והעולם כאיור — ואחריה <b>6 (עולם חי)</b> לנשמה ו<b>7 (איחוד חומרים)</b> כתחזוקה שוטפת. <b>4 ו־5</b> ייבדקו כפרוטוטיפ של יום אחרי שהחבילה בפנים. הסליידר שבראש העמוד הוא היעד.</p>
+</div>
+
+<header class="hero" style="padding-top:26px">
+  <div class="eyebrow">הסבב השני · תנועה · מפגשים · וידאו</div>
+  <h1 style="font-size:clamp(30px,4.6vw,46px)">מה שמרגישים בידיים</h1>
+  <p class="thesis">הסבב הראשון עסק במה שרואים. הסבב הזה עוסק במה שמרגישים: ההליכה, המפגשים, והחפצים. גם כאן — כל רעיון נבדק על המשחק החי, כולל שני סרטונים מוקלטים ותגלית אחת: <b>חמישה סרטי אנימציה גמורים ומשולמים יושבים בתיקיית הנכסים ולא מנוגנים בשום מקום.</b></p>
+</header>
+
+<!-- ═══════════ 8 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">8</span><h2>הליכה עם נוכחות</h2></div>
+  <p class="essence">המצלמה כבר עובדת יפה — עדשה שנפתחת בריצה, נשימה בעמידה, התנגשות בעצמים. מה שחסר הוא הגוף והקרקע: אבק שעולה מהצעדים, והליכה אמיתית במקום החלפה בין שתי תנוחות.</p>
+  <div class="chips"><span class="chip rec">מומלץ · הראשון בסבב</span><span class="chip">שלושה–ארבעה ימים</span><span class="chip">סיכון נמוך</span></div>
+  <div class="pair">
+    <figure><video src="{{img:vid-walk-base}}" muted loop autoplay playsinline style="width:100%;border-radius:6px"></video><figcaption>היום: הקרקע לא יודעת שדורכים עליה</figcaption></figure>
+    <figure><video src="{{img:vid-walk-dust}}" muted loop autoplay playsinline style="width:100%;border-radius:6px"></video><figcaption>הניסוי, מוקלט חי: אבק צעדים — הבטו בכפות הרגליים</figcaption></figure>
+  </div>
+  <div class="sub">מה בדקתי</div>
+  <p class="note">מערכת חלקיקי אבק הוזרקה חיה לרמות תימן והוקלטה בווידאו — פוך רך בכל 62 ס״מ של הליכה, עולה, מתרחב ונמוג בחצי שנייה. עדין בכוונה; בתנועה הוא בדיוק מתחת לסף המודע.</p>
+  <div class="sub">איך זה נבנה באמת</div>
+  <p class="note">האבק מתחבר למונה הצעדים שכבר קיים (זה שמפעיל את צלילי הצעדים). וההליכה עצמה: הערת קוד במשחק מודה ש„לשחקן אין הליכה אמיתית — שתי תנוחות מתחלפות“, אבל <code>make-player.py</code> כבר בונה לו שלד עם משקולות כתובות ידנית — אופים עליו מחזור הליכה אמיתי בבלנדר ומנגנים כמו את ראאווי, שכבר צועד עם אנימציה אמיתית לצידך. הצינור קיים; חסרה רק האפייה.</p>
+</div>
+
+<!-- ═══════════ 9 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">9</span><h2>מפגשים מבוימים</h2></div>
+  <p class="essence">עשרים ושבעה מפגשים הם לב הפרק — וכולם נראים כמו עורף של שחקן מול חזה של דמות. מצלמת שיחה צדית הופכת כל מפגש לסצנה עם פנים.</p>
+  <div class="chips"><span class="chip rec">מומלץ · עם 8</span><span class="chip">שלושה–ארבעה ימים</span><span class="chip">סיכון בינוני</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:twoshot-before}}" alt="שיחה היום"><span class="tag">היום: גב אל המצלמה</span></figure>
+    <figure class="shot"><img src="{{img:twoshot-after}}" alt="two-shot מבוים"><span class="tag after">הניסוי: שליח האימפריה מקבל פנים</span></figure>
+  </div>
+  <p>אותה שיחה בדיוק, אותו רגע — אבל פתאום רואים את הפנים של שליח האימפריה, את הגמל שלו, את הלפיד. הטקסט החינוכי מקבל דובר אנושי. מנגנון הג׳סטות ופניית־הדובר כבר קיימים בקוד; המצלמה היא החוליה החסרה.</p>
+  <div class="sub">מה עוד לא בדוק</div>
+  <p class="note">בצילום הניסוי קורה בדיוק הדבר שהמערכת הקיימת כבר יודעת לפתור: קורה של סוכך מסתירה חלק מהשחקן. מנגנון משיכת־המצלמה־פנימה שכבר רץ בהליכה צריך לרוץ גם בזווית השיחה. וכן מעבר חלק פנימה והחוצה מהזווית, לא קפיצה.</p>
+</div>
+
+<!-- ═══════════ 10 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">10</span><h2>עדות ביד</h2></div>
+  <p class="essence">היום F פותח כרטיס טקסט. אבל שבעת דגמי העדויות — המטבע, החותם, הכתובת, המגילה — קיימים כקבצי תלת־ממד מלאים. שהחפץ עצמו יעלה מהקרקע ויסתובב מול העיניים, והטקסט לצידו.</p>
+  <div class="chips"><span class="chip">יומיים–שלושה</span><span class="chip">סיכון נמוך</span><span class="chip">הנכסים כבר קיימים</span></div>
+  <p>זו האינטרקציה החינוכית החזקה ביותר שאפשר לקנות בזול כאן: במקום לקרוא על דרהמה ססאנית — מסובבים אותה ביד ורואים את שני הצדדים. כל שבעת הדגמים (<code>find-coin</code>, <code>find-seal</code>, <code>find-inscription</code>, <code>find-scroll</code>, <code>find-sherd</code>, <code>find-incense</code>) כבר טעונים במשחק — הם פשוט מוצגים היום כחפצים זעירים על הקרקע במקום כגיבורי הרגע. ותנוחת כריעה לשחקן? צינור התנוחות כבר ייצר תנוחת ישיבה ותנוחת שאיבת מים — כריעה היא עוד הרצה שלו.</p>
+  <div class="sub">מה עוד לא בדוק</div>
+  <p class="note">רזולוציית הדגמים בקלוז־אפ — חלקם נבנו לצפייה מרחוק. אם דגם מסוים גס מדי, הכרטיס נשאר עם תמונה במקומו — החלטה פר־עדות, לא סיכון פרויקט.</p>
+</div>
+
+<!-- ═══════════ 11 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">11</span><h2>דמויות שחיות את המקום</h2></div>
+  <p class="essence">ההרחבה של „עולם חי“ שאישרת: לא רק ניצבים — דמויות עם סדר יום. הסוחר הולך בין הדוכן לגמל, הנזיר פוסע בחצר המנזר, שיירה חוצה את הרקע אחת לדקה.</p>
+  <div class="chips"><span class="chip">כשבוע · חלק מ־6</span><span class="chip">סיכון נמוך</span></div>
+  <p>המנגנון כבר קיים ורץ: ראאווי הולך אחריך עם מחזור הליכה אמיתי, נעצר במרחק נימוס, ומאיץ כשמתרחקים — זו בדיוק מערכת ה„לך אל נקודה“ שדמות אמביינטית צריכה, רק עם לולאת נקודות־עצירה במקום שחקן כיעד. וגמל הולך? <code>camel-walk.glb</code> יושב בתיקיית הדגמים עם אנימציה מוכנה.</p>
+  <div class="sub">למה זה משנה חינוכית</div>
+  <p class="note">הפרק מלמד על עולם המסחר הערבי — ועולם מסחר בלי תנועת סחורות הוא אוקסימורון. שיירה שחוצה את הרקע מלמדת „דרך הבשמים“ בלי מילה אחת.</p>
+</div>
+
+<!-- ═══════════ 12 ═══════════ -->
+<div class="card">
+  <div class="idea-head"><span class="idea-num">12</span><h2>הסרטים האבודים</h2></div>
+  <p class="essence">בתיקיית הנכסים יושבים חמישה סרטוני אנימציה גמורים — עמלתם ושילמתם עליהם ב־POC של אוגוסט — ואף אחד מהם לא מנוגן בשום מקום במשחק. ויש להם בדיוק הפלטה של הכיוון שאישרת.</p>
+  <div class="chips"><span class="chip rec">רווח מהיר</span><span class="chip">יומיים–שלושה</span><span class="chip">הנכסים משולמים</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:anim-frame}}" alt="פריים מסרטוני האנימציה"><span class="tag">פריים מ־scene1 — נכס גמור שלא מנוגן</span></figure>
+    <figure class="shot"><img src="{{img:vidtex}}" alt="וידאו חי בתוך העולם"><span class="tag after">scene2 מתנגן בתוך מכה — נבדק חי</span></figure>
+  </div>
+  <p>שלוש דרכים לשלב אותם, מהעדינה לנועזת:</p>
+  <ul>
+    <li><b>רגעי סיפור של ראאווי.</b> בשלוש–ארבע נקודות שיא, חלון הדיאלוג מתרחב וסרטון מספר את הרגע — לשניים מהם יש כבר גם קריינות מוקלטת (<code>anim-voice</code>). התבנית קיימת: פרק 2 כבר מריץ באנר וידאו.</li>
+    <li><b>וידאו כמשטח בעולם.</b> הוכח חי (בתמונה): זיכרון שמרצד מעל מדורה, חיזיון בשער אזור. ב־three.js זה <code>VideoTexture</code> סטנדרטי.</li>
+    <li><b>פתיח פרק.</b> סרטון פתיחה לפני רמות תימן במקום כניסה קרה למשחק.</li>
+  </ul>
+  <div class="sub">הערת יושר</div>
+  <p class="note">במעבדה נגן הווידאו דרך קנבס ביניים — מחלקת הטקסטורה החטופה סירבה לקבל אלמנט וידאו ישירות. בקוד אמיתי מייבאים <code>THREE.VideoTexture</code> ואין את הבעיה. ותוכן הסרטונים צריך בדיקת נאמנות מול מסמך המקור של הפרק — הם נוצרו ל־POC, לא לפרק הסופי.</p>
+</div>
+
+<header class="hero" style="padding-top:26px">
+  <div class="eyebrow">הסבב השלישי · מבט שני על 4</div>
+  <h1 style="font-size:clamp(30px,4.6vw,46px)">המיניאטורה, בחינה לעומק</h1>
+  <p class="thesis">אמרת ש־4 מעניין — אז לקחתי אותו לבדיקת עומק: איך הוא נראה <b>יחד עם</b> הכיוון שאישרת (דגם מצויר), האם הוא מציל את האזורים החלשים, ואיך הוא מרגיש בתנועה. התוצאה מפתיעה בשני הכיוונים.</p>
+</header>
+
+<div class="card">
+  <div class="idea-head"><span class="idea-num">4+</span><h2>מה הבדיקה גילתה</h2></div>
+  <p class="essence">הדמויות הופכות לפיגורות מקסימות, המעברים קסומים — אבל מבט־על מטה את כלכלת הנכסים: הוא ממלא את הפריים בקרקע (הנכס הכי חלש) ומפנה את הגב לבתים ולסוככים (הנכסים הכי חזקים).</p>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:mini-yemen}}" alt="מיניאטורה על קרקע ריקה"><span class="tag">על קרקע ריקה: 75% מהפריים — בוץ כתום</span></figure>
+    <figure class="shot"><img src="{{img:mini-dense}}" alt="מיניאטורה על אזור מלביש"><span class="tag after">על אזור מלביש: פתאום זה עובד</span></figure>
+  </div>
+  <p>שתי התמונות — אותו אזור, אותו כיול, אותה מצלמה. ההבדל היחיד: כמה תפאורה יש בפריים. <b>המיניאטורה לא צריכה קרקע יפה יותר — היא צריכה עולם צפוף יותר.</b> כלומר: היא תלויה ישירות ברעיון 6 (עולם חי) וברצפות של 7. זו לא פסילה — זו תלות, וכדאי לדעת עליה לפני שמתאהבים.</p>
+  <div class="sub">בתנועה — שני הסרטונים המוקלטים</div>
+  <div class="pair">
+    <figure><video src="{{img:vid-mini-walk}}" muted loop autoplay playsinline style="width:100%;border-radius:6px"></video><figcaption>הליכה במבט מיניאטורה — הפרלקסה עוזרת, הקרקע עדיין שולטת</figcaption></figure>
+    <figure><video src="{{img:vid-mini-rise}}" muted loop autoplay playsinline style="width:100%;border-radius:6px"></video><figcaption>„העלייה אל הדגם“ — המצלמה עוזבת את הכתף ומתרוממת עד שהאזור נהיה דגם. זה המעבר.</figcaption></figure>
+  </div>
+  <div class="sub">שלוש רמות אימוץ, מהבטוחה לנועזת</div>
+  <ul>
+    <li><b>א. מחוות מעבר (אפשר היום).</b> ביציאה מאזור המצלמה מתרוממת אל הדגם, מחליקה על „שולחן המפה“ אל האזור הבא ויורדת. הסרטון הימני מוכיח את החצי הראשון של המחווה — והוא כבר עובד על הנכסים הקיימים, כי מעבר הוא רגע, לא מבט קבוע.</li>
+    <li><b>ב. המפה החיה (אפשר היום).</b> מקש M פותח היום מפה שטוחה — שיפתח במקום זאת את מבט הדגם על האזור החי, עם הסמנים. מחברת + דגם = השפה של ראאווי.</li>
+    <li><b>ג. מבט קבוע (רק אחרי 6+7).</b> המשחק כולו במבט דיורמה. הכי ייחודי — ותלוי בצפיפות ובקרקעות. לבדוק שוב אחרי שלב ג׳.</li>
+  </ul>
+  <div class="sub">מה עוד נבדק</div>
+  <p class="note">קריאוּת: הסמנים, החלוניות והמיני־מפה נשארים קריאים בזווית הדגם (נראה בתמונות). תנוחת המצלמה כוילה פעמיים — הגרסה הראשונה (גבוהה, רוויה מדי) נפסלה ותועדה. מה שלא נבדק: ההחלקה בין אזורים על „השולחן“ — האזורים הם סצנות נפרדות, והתפירה ביניהן היא עבודת הפרוטוטיפ האמיתית.</p>
+</div>
+
+<header class="hero" style="padding-top:26px">
+  <div class="eyebrow">הסבב הרביעי · האינטרקציות עצמן</div>
+  <h1 style="font-size:clamp(30px,4.6vw,46px)">מעשים במקום כפתורים</h1>
+  <p class="thesis">שש תחנות המשימה הן הרגעים היחידים שבהם המשחק מבקש משהו חזרה — וכולן אותה מכניקה: פאנל עם שלושה כפתורי טקסט. אבל תראי מה הפרומפטים שלהן כבר אומרים: „שלמו את המכס“, „העמיסו את הארגז“, „עמדו מול האבנים“. <b>התוכן כבר פיזי — רק הממשק נשאר מבחן.</b></p>
+</header>
+
+<div class="card">
+  <div class="idea-head"><span class="idea-num">13</span><h2>שש התחנות נהיות מעשים</h2></div>
+  <p class="essence">אותן שאלות, אותן תשובות נכונות, אותן הערות של ראאווי — מילה במילה, כלל הברזל נשמר. רק צורת המענה משתנה: במקום ללחוץ על „מטבע כסף סאסאני“ — מניחים את המטבע על כף המאזניים.</p>
+  <div class="chips"><span class="chip rec">מומלץ · לב הפרק</span><span class="chip">כשבוע לארבע תחנות</span><span class="chip">סיכון בינוני</span><span class="chip">הפועל הוכח חי</span></div>
+  <div class="pair">
+    <figure class="shot"><img src="{{img:task-panel}}" alt="פאנל המשימה היום"><span class="tag">היום: שאלה יפה, שלושה כפתורים אפורים</span></figure>
+    <figure class="shot"><img src="{{img:drag-end}}" alt="הארגז על תחנת המכס"><span class="tag after">הניסוי: הארגז הונח על תחנת המכס — בעכבר</span></figure>
+  </div>
+  <div class="sub">ההוכחה — גרירה אמיתית במשחק החי</div>
+  <figure><video src="{{img:vid-drag}}" muted loop autoplay playsinline style="width:100%;border-radius:6px"></video><figcaption>עכבר אמיתי, חפץ אמיתי: תפיסה, הרמה, הנחה על המאזניים. מדידת הסיום: 23 ס״מ מהתחנה. שום דבר לא מוקלט מראש — ה־handlers מריצים הטלת־קרן אמיתית מהמסך אל העולם.</figcaption></figure>
+  <div class="sub">איך כל תחנה נראית כמעשה</div>
+  <ul>
+    <li><b>המכס בגבול</b> — שלושה מטבעות על שולחן המוכס (דגם <code>find-coin</code> קיים); גוררים את הנכון אל כף המאזניים. מטבע שגוי חוזר לשולחן עם ההערה הקיימת של ראאווי — הטעות עדיין מלמדת, כמו היום.</li>
+    <li><b>מה נכנס לארגז</b> — גוררים משי ותבלינים אל הגמל (<code>camel-load.glb</code> קיים עם דגם עמוס מוכן). ו„רעיונות“? מגילה (<code>find-scroll</code>) — שגוררים אותה, ראאווי אומר בדיוק את מה שהוא אומר היום: רעיונות לא נוסעים בארגז. השגיאה הכי יפה בפרק נהיית רגע פיזי.</li>
+    <li><b>משותף ונפרד</b> (ית׳רב) — אסימונים על שולחן האבן, ממיינים לשני צדדים. מיון הוא בדיוק המבנה של השאלה.</li>
+    <li><b>שלוש האבנים</b> (מכה) — בלי פאנל בכלל: שלוש המצבות כבר עומדות בעולם (שמונה דגמי <code>ansab</code> בסצנה). מצביעים על אבן כשראאווי נוקב בשמה. מתמטיקת ההקרנה שצריך — היא זו שמערכת הסמנים כבר מריצה כל פריים.</li>
+    <li><b>מי מבטיח את המעבר + מה נשאר בחוץ</b> — נשארות שיחה. שאלה רעיונית ראויה לתשובה מדוברת; להכריח פיזיות בכל מקום זה אותו אינסטינקט של לומדה, רק בתחפושת.</li>
+  </ul>
+  <div class="sub">מה הניסוי לימד — שני לקחים לגרסת האמת</div>
+  <p class="note">הגרירה נכשלה פעמיים לפני שהצליחה, ושתי הסיבות הן בדיוק העבודה של המימוש האמיתי: (1) יעד הגרירה חייב להיות מוקרן בגובה מישור הגרירה — אחרת החפץ נוחת מטרים לפני היעד; (2) בזמן גרירת חפץ, העכבר חייב להיות בבעלות בלעדית — היום אותה גרירה מסובבת גם את המצלמה, ושתי היד־על־ההגה גוררות זו את זו. שתי הריצות הכושלות תועדו עם מדידות.</p>
+</div>
+
+<h2>סדר העבודה המעודכן</h2>
+<div class="verdict">
+  <p><b>שלב א׳ (הוחלט):</b> 1+2+3 — המראה. <b>שלב ב׳:</b> 8+9 — ההרגשה: הליכה ומפגשים, הם נוגעים בכל דקה של משחק. אל שלב ב׳ מצטרפות שתי מחוות מהמיניאטורה שכבר עובדות על הנכסים הקיימים: <b>העלייה אל הדגם</b> כמעבר בין אזורים, ו<b>המפה החיה</b> על מקש M. <b>שלב ג׳:</b> 13+10 — האינטרקציות הדיאגטיות: ארבע תחנות נהיות מעשים, והעדויות עולות ביד. זה הלב הלימודי, והפועל שלו כבר הוכח. <b>שלב ד׳:</b> 6+11 יחד — עולם חי על שני רבדיו, ו־12 במקביל (זול, הנכסים מחכים). <b>שלב ה׳:</b> הכרעה על מיניאטורה כמבט קבוע — אחרי שהעולם צפוף. <b>7</b> נשאר תחזוקה שוטפת לאורך כל הדרך.</p>
+</div>
+<div class="klist">
+  <div class="k"><b>מה זה לא דורש</b>אף קרדיט ג׳נרוט — Higgsfield ו־Magnific ריקים כרגע, וכל שבע ההצעות בנויות לעבוד בלעדיהם.</div>
+  <div class="k"><b>מה זה לא שובר</b>שום דבר מהמשחק: כל הניסויים רצו על הסצנות בלי לגעת בקוד. שערי הבדיקה (27/27, 17/17, 6/6) נשארים הדיינים.</div>
+  <div class="k"><b>איפה הכלים</b><code>web/scratchpad/lab.mjs</code> — כל ניסוי משוחזר בפקודה אחת, וכל צילום כאן נלקח ממנו.</div>
+</div>
+
+<hr>
+<p class="note" style="margin-top:18px">נבדק על המשחק החי ב־24.8.2026, ברינדור חומרה (RTX 3070). התמונות לא עברו עריכה מלבד דחיסה.</p>
+</div>
+<script>
+(function(){
+  const ba = document.getElementById('ba1')
+  if (!ba) return
+  const top = ba.querySelector('.top'), handle = ba.querySelector('.handle'), knob = ba.querySelector('.knob')
+  function setP(p){
+    p = Math.max(2, Math.min(98, p))
+    top.style.clipPath = 'inset(0 ' + (100 - p) + '% 0 0)'
+    handle.style.left = p + '%'
+    knob.style.left = p + '%'
+  }
+  function fromEvent(e){
+    const r = ba.getBoundingClientRect()
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left
+    setP(100 * x / r.width)
+  }
+  let down = false
+  ba.addEventListener('pointerdown', (e) => { down = true; ba.setPointerCapture(e.pointerId); fromEvent(e) })
+  ba.addEventListener('pointermove', (e) => { if (down) fromEvent(e) })
+  ba.addEventListener('pointerup', () => { down = false })
+  setP(50)
+})()
+</script>

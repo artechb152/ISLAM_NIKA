@@ -32,9 +32,9 @@
     "skyLight": 0.28,
     "exposure": 1.62,
     "fog": {
-      "color": "#e2b18b",
-      "near": 45,
-      "far": 260
+      "color": "#e3ac77",
+      "near": 16,
+      "far": 140
     },
     "fill": {
       "sky": "#9db4d4",
@@ -44,11 +44,11 @@
     "sun": {
       "position": [
         -20.9,
-        13.4,
+        6,
         -16.8
       ],
-      "color": "#ffd9a2",
-      "intensity": 4
+      "color": "#ffb867",
+      "intensity": 4.2
     },
     "viewerFill": 0.42
   },

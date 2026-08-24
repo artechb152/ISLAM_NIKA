@@ -154,7 +154,12 @@ body{
 
 /* ---------- stage ---------- */
 .ch1-stage{position:relative;height:calc(100dvh - var(--header-height));overflow:hidden}
-.ch1-stage canvas{display:block}
+.ch1-stage canvas{display:block;filter:var(--ch1-grade,none)}
+/* המסגרת שסוגרת את הפריים: וינייטה חמה, מתחת לכל שכבות ה-HUD */
+.ch1-vignette{
+  position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse at 50% 42%, transparent 55%, rgba(43,20,8,var(--ch1-vignette,.34)) 100%);
+}
 .ch1-loading{
   height:calc(100dvh - var(--header-height));display:grid;place-items:center;
   background:#1c1108;color:var(--cream);font-family:var(--font-body);font-size:18px;

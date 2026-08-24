@@ -1684,17 +1684,17 @@
       "intensity": 0.95
     },
     "fog": {
-      "color": "#d7cbc5",
-      "near": 60,
-      "far": 460
+      "color": "#d8c3a4",
+      "near": 20,
+      "far": 170
     },
     "sun": {
       "position": [
         -20.9,
-        13.4,
+        10,
         -16.8
       ],
-      "color": "#fff0d8",
+      "color": "#ffdfae",
       "intensity": 3.9
     },
     "skyLight": 0.2,

@@ -162,6 +162,62 @@ function Sky() {
   return null
 }
 
+/* The world rendered as an illustration: outgoing light quantized into bands,
+   so the 3D scene speaks the same gouache language as the painted characters.
+   This was the widest gap in the chapter — hand-painted figures standing in a
+   world that tried for realism and missed — and it closes from the world's
+   side, in one shader patch, at a strength each region chooses in its mood.
+   Proven live before it was written: scratchpad/lab.mjs `paint`/`combo`.
+
+   Materials arrive gradually (models load under Suspense, characters clone
+   their own), so the patch is applied by a low-frequency sweep instead of a
+   one-shot effect. Characters already carry an onBeforeCompile for breathing;
+   theirs runs first and this appends — and the program cache key must keep the
+   two variants apart, because toString() of the shared wrapper is identical
+   for both closures and three would otherwise hand one of them the other's
+   compiled program. */
+const PAINT_UNIFORM = { value: 0.7 }
+const PAINT_SEEN = new WeakSet<THREE.Material>()
+function Painterly({ strength }: { strength: number }) {
+  const scene = useThree((s) => s.scene)
+  const tick = useRef(0)
+  useEffect(() => {
+    PAINT_UNIFORM.value = strength
+  }, [strength])
+  useFrame(() => {
+    if (strength <= 0 || (tick.current++ & 63) !== 0) return
+    scene.traverse((o) => {
+      const mesh = o as THREE.Mesh
+      if (!mesh.isMesh || !mesh.material) return
+      const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+      for (const m of mats) {
+        if (!m || PAINT_SEEN.has(m) || !(m as THREE.MeshStandardMaterial).isMeshStandardMaterial) continue
+        PAINT_SEEN.add(m)
+        const prior = m.onBeforeCompile
+        const priorKey = prior ? prior.toString() : ''
+        m.onBeforeCompile = (shader, renderer) => {
+          if (prior) prior.call(m, shader, renderer)
+          shader.uniforms.uPaint = PAINT_UNIFORM
+          shader.fragmentShader =
+            'uniform float uPaint;\n' +
+            shader.fragmentShader.replace(
+              '#include <dithering_fragment>',
+              'float ch1L = dot(gl_FragColor.rgb, vec3(.299,.587,.114));\n' +
+                'float ch1Q = (floor(ch1L*6.0)+0.5)/6.0;\n' +
+                /* בצללים המדרגות הופכות לכתמים — קרקע כהה נצבעה טלאים-
+                   טלאים. ההשטחה דועכת מתחת ללומיננס 0.14, והצל נשאר צל. */
+                'gl_FragColor.rgb *= mix(1.0, ch1Q/max(ch1L,1e-3), uPaint * smoothstep(0.03, 0.14, ch1L));\n' +
+                '#include <dithering_fragment>',
+            )
+        }
+        m.customProgramCacheKey = () => priorKey + '|ch1paint'
+        m.needsUpdate = true
+      }
+    })
+  })
+  return null
+}
+
 /* Terrain baked in Blender: already scaled, positioned and flattened there, so
    the game only has to give it a material. A procedural Blender material cannot
    survive glTF, so when the export carries no image we keep the tiling sand and
@@ -1644,6 +1700,13 @@ const MOOD = {
      תצלום שטוח, והתגובה לזה הייתה להעלות את השמש בכל אזור בנפרד —
      מה שרק העלה את הכל יחד. עכשיו זה שייך ל-mood כמו כל השאר. */
   viewerFill: campLayout.mood?.viewerFill ?? 0.42,
+  /* עוצמת האיור — כמה מדרגות האור נאכפות. 0 מכבה את הטלאי כליל. */
+  paint: campLayout.mood?.paint ?? 0.7,
+  /* גרייד על הקנבס עצמו — CSS, לא GPU: חום, רוויה וניגודיות שנבדקו
+     חיים לפני שנכתבו (scratchpad/lab.mjs). אזור רשאי לדרוס. */
+  grade: campLayout.mood?.grade ?? 'saturate(1.16) contrast(1.06) sepia(.1) brightness(1.02)',
+  /* וינייטה — אטימות הפינות. המסגרת שסוגרת את הפריים. */
+  vignette: campLayout.mood?.vignette ?? 0.34,
 }
 const SUN_POS = MOOD.sun.position as [number, number, number]
 
@@ -2668,12 +2731,20 @@ export default function Game() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
+        /* הגרייד רץ על הקנבס עצמו דרך משתנה CSS — פילטר דפדפן, לא עוד
+           מעבר GPU — והווינייטה היא שכבת רקע מעל. שניהם ערכי mood. */
+        style={{ '--ch1-grade': MOOD.grade, '--ch1-vignette': MOOD.vignette } as React.CSSProperties}
       >
         {/* אין toneMappingExposure כאן בכוונה: r3f מחיל מחדש את מאפייני
             gl בכל רינדור, ולכן ערך קבוע כאן דרס את החשיפה שהאזור מגדיר
             ב-mood — וכל כיול חשיפה פר-אזור פשוט לא הגיע למסך. החשיפה
             נקבעת ב-<Sky>, שם היא נגזרת מה-layout. */}
-        <Canvas shadows camera={{ position: [0, 3.4, 10], fov: 55 }} dpr={[1, 2]}>
+        {/* `shadows` לבדו מבקש PCFSoftShadowMap, ש-three.js 0.185 הוציא
+            משימוש — הוא נופל חזרה ל-PCF וכותב אזהרה על כל עדכון מפת צל.
+            בפיתוח כל הודעת קונסולה נשלחת מהדפדפן אל הטרמינל, וזה היה
+            1,576 הודעות בשתי דקות: הרינדור עצמו תקין, אבל המשחק מגמגם
+            מרוב דיווח עליו. מבקשים במפורש את מה שהוא ממילא משתמש בו. */}
+        <Canvas shadows="percentage" camera={{ position: [0, 3.4, 10], fov: 55 }} dpr={[1, 2]}>
           <Suspense fallback={null}>
             <World
               live={live}
@@ -2690,7 +2761,10 @@ export default function Game() {
             />
             <SceneReady onReady={onSceneReady} />
           </Suspense>
+          <Painterly strength={MOOD.paint} />
         </Canvas>
+        {/* המסגרת שסוגרת את הפריים — מתחת לכל שכבות ה-HUD, מעל הקנבס */}
+        <div className="ch1-vignette" aria-hidden="true" />
 
         {/* Leaving a region took 900 ms behind a banner; arriving took none.
             The new document rendered a bare plate, then a loading line, then a

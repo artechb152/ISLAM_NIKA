@@ -1133,18 +1133,18 @@
       "intensity": 1.13
     },
     "fog": {
-      "color": "#d79670",
-      "near": 60,
-      "far": 460
+      "color": "#dda071",
+      "near": 18,
+      "far": 150
     },
     "sun": {
       "position": [
         -20.9,
-        13.4,
+        8,
         -16.8
       ],
-      "color": "#fad6a6",
-      "intensity": 2.23
+      "color": "#fac07e",
+      "intensity": 2.6
     },
     "skyLight": 0.64,
     "exposure": 1.22,

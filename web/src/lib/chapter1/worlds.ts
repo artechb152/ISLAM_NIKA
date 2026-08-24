@@ -84,6 +84,15 @@ export interface Layout {
         ends up the same flat photograph. Absent = 0.42. */
     viewerFill?: number
     exposure?: number
+    /** Illustration strength — how hard the light-band shader quantizes.
+        0 turns the painterly pass off entirely. Absent = 0.7. */
+    paint?: number
+    /** CSS filter applied to the canvas — the region's colour grade.
+        Absent = the shared warm grade. */
+    grade?: string
+    /** Corner-darkening opacity, 0..1. The frame that closes the frame.
+        Absent = 0.34. */
+    vignette?: number
   }
   /** The painted minimap plate for this region, under public/assets/chapter1/tex.
       A region without one shows pins on plain parchment. */
