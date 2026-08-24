@@ -828,6 +828,13 @@ body{
 .ch1-find-card h3,.ch1-task-card h3{
   margin:0 0 12px;font-family:var(--font-heading);font-size:23px;color:var(--cream);
 }
+/* שבב מבט הדגם — צף מתחת לכותרת, מעל הקנבס */
+.ch1-model-chip{
+  position:absolute;top:14px;inset-inline-start:50%;transform:translateX(50%);
+  z-index:12;padding:6px 16px;font-size:13.5px;pointer-events:none;
+}
+.ch1-model-chip b{color:var(--gold-soft, #c9a25c)}
+
 /* תווית מעל חפץ-תשובה ליד תחנה — קטנה, בסגנון חלוניות ה-HUD */
 .ch1-prop-label{
   display:inline-block;white-space:nowrap;pointer-events:none;

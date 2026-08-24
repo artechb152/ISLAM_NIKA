@@ -95,6 +95,10 @@ interface Live {
   riseAt: number
   /** a task prop is in hand — the camera's mouse-look must not fight the drag */
   taskDrag: boolean
+  /** the model view — M lifts the camera to the diorama pose while play goes
+      on underneath. The chapter's world is the model Rawi builds in memory,
+      and this is the key that looks at it that way. */
+  modelView: boolean
 }
 
 /* Where the traveller is standing when this region opens. Normally the layout's
@@ -139,6 +143,7 @@ function makeLive(): Live {
     talk: null,
     riseAt: 0,
     taskDrag: false,
+    modelView: false,
   }
 }
 
@@ -1293,6 +1298,80 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
   )
 }
 
+/* A walker: somebody going somewhere, on foot. The traveller's own three baked
+   poses (stand/stride/passing) in another tint, cycled exactly the way the
+   player cycles them, along a camel-style ellipse. The chapter teaches a trade
+   route — a road nobody walks on is a diagram. */
+function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
+  live: Live
+  cx: number
+  cz: number
+  rx: number
+  rz: number
+  speed: number
+  phase: number
+  tint?: string
+}) {
+  const g = useRef<THREE.Group>(null)
+  const standRef = useRef<THREE.Group>(null)
+  const strideRef = useRef<THREE.Group>(null)
+  const passRef = useRef<THREE.Group>(null)
+  const walkT = useRef(0)
+  const stand = useNormalizedGLB(MODEL_TRAVELER_STAND, 1.72, tint)
+  const stride = useNormalizedGLB(MODEL_TRAVELER_STRIDE, 1.72, tint)
+  const passing = useNormalizedGLB(MODEL_TRAVELER_PASSING, 1.72, tint)
+  const col = useMemo<Collider>(() => ({ x: cx + rx, z: cz, r: 0.45 }), [cx, cz, rx])
+  useEffect(() => {
+    live.dynamic.push(col)
+    return () => {
+      const i = live.dynamic.indexOf(col)
+      if (i >= 0) live.dynamic.splice(i, 1)
+    }
+  }, [live, col])
+  useFrame(({ clock }, dt) => {
+    const el = g.current
+    if (!el) return
+    const t = clock.elapsedTime * speed + phase
+    const x = cx + Math.cos(t) * rx
+    const z = cz + Math.sin(t) * rz
+    const dx = -Math.sin(t) * rx * Math.sign(speed)
+    const dz = Math.cos(t) * rz * Math.sign(speed)
+    /* קצב הצעדים נגזר ממהירות הקרקע — רגליים שלא מחליקות */
+    const groundSpeed = Math.abs(speed) * ((rx + rz) / 2)
+    walkT.current += dt * (groundSpeed / 0.35) * Math.PI
+    const s = Math.sin(walkT.current)
+    const showStride = Math.abs(s) > 0.25
+    if (standRef.current) standRef.current.visible = false
+    if (strideRef.current) {
+      strideRef.current.visible = showStride
+      strideRef.current.scale.x = s >= 0 ? 1 : -1
+    }
+    if (passRef.current) {
+      passRef.current.visible = !showStride
+      passRef.current.scale.x = Math.cos(walkT.current) >= 0 ? 1 : -1
+    }
+    const bob = Math.abs(Math.cos(walkT.current)) * 0.05
+    el.position.set(x, groundYAt(x, z) + bob, z)
+    el.rotation.y = Math.atan2(dx, dz)
+    col.x = x
+    col.z = z
+  })
+  return (
+    <group ref={g}>
+      <group ref={standRef}>
+        <primitive object={stand} />
+      </group>
+      <group ref={strideRef} visible={false}>
+        <primitive object={stride} />
+      </group>
+      <group ref={passRef} visible={false}>
+        <primitive object={passing} />
+      </group>
+      <ContactShadow radius={0.42} />
+    </group>
+  )
+}
+
 /* An extra: a cast model standing somewhere as somebody else. The collider is
    the same shape a wandering camel registers, so the walk treats them as
    people and not as scenery you pass through. JSON hands us `who` as a plain
@@ -1374,6 +1453,7 @@ function Player({ live }: { live: Live }) {
      שניים צדי וחוזרת כשהשיחה נסגרת. הוכח חי לפני שנכתב:
      scratchpad/lab2.mjs `twoshot`. */
   const talkBlend = useRef(0)
+  const modelBlend = useRef(0)
   const talkAnchor = useRef({ x: 0, z: 0 })
   const twoShotV = useRef(new THREE.Vector3())
   const lookV = useRef(new THREE.Vector3())
@@ -1562,6 +1642,10 @@ function Player({ live }: { live: Live }) {
       const rt = Math.max(0, Math.min(1, (performance.now() - live.riseAt) / 1500))
       riseK = rt < 0.5 ? 2 * rt * rt : 1 - Math.pow(-2 * rt + 2, 2) / 2
     }
+    /* מבט הדגם (מקש M) — אותה תנוחה, אבל נשלטת: נכנסים ויוצאים ברצון,
+       וההליכה ממשיכה מתחת. שני המבטים חולקים מקדם אחד. */
+    modelBlend.current += ((live.modelView ? 1 : 0) - modelBlend.current) * Math.min(1, dt * 2.2)
+    riseK = Math.max(riseK, modelBlend.current)
 
     const CAM_DIST = 3.7 + rb * 0.65
     const camOffset = new THREE.Vector3(0, 2.45 - rb * 0.15, CAM_DIST).applyAxisAngle(new THREE.Vector3(0, 1, 0), -live.yaw)
@@ -2421,6 +2505,11 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       {/* הניצבים — אנשים שפשוט נמצאים שם. בלי שורות, בלי טבעת גישה, בלי
           פנייה אל השחקן; רק נשימה, גוון משלהם, וקוליידר כדי שלא הולכים
           דרכם. שוק בלי אנשים הוא תפאורה נטושה. */}
+      {(WORLD.layout.walkers ?? []).map((w, i) => (
+        <Suspense key={`w${i}`} fallback={null}>
+          <WalkingExtra live={live} {...w} />
+        </Suspense>
+      ))}
       {(WORLD.layout.extras ?? []).map((e, i) => (
         /* גבול משלו לכל ניצב: ניצב שמודל שלו אינו בין דמויות האזור טוען
            אותו מחדש, ובתוך גבול העולם הטעינה הזאת החביאה את מכה כולה. */
@@ -2518,7 +2607,7 @@ function ControlsPanel({ pressed }: { pressed: Set<string> }) {
           <span><i className="hud-key">R</i> שיחה עם רָאוִי</span>
         )}
         <span><i className="hud-key">J</i> מחברת</span>
-        <span><i className="hud-key">M</i> מפה</span>
+        <span><i className="hud-key">M</i> מבט הדגם ומפה</span>
         <span>גרירת עכבר — סיבוב מבט</span>
       </div>
     </section>
@@ -2782,6 +2871,7 @@ export default function Game() {
   const [solved, setSolved] = useState<string[]>([])
   const [openFind, setOpenFind] = useState<Find | null>(null)
   const [openTask, setOpenTask] = useState(false)
+  const [modelView, setModelView] = useState(false)
   /* מצב המשימה חי כאן ולא בפאנל: גם הכפתורים וגם גרירת החפצים
      עוברים דרך אותו chooseTask, וסגירת הפאנל לא מאבדת התקדמות —
      בארגז ההעמסה שתי תשובות נכונות, וסגירה בין שתיהן היא לגיטימית. */
@@ -3001,10 +3091,34 @@ export default function Game() {
       /* J and M open the two surfaces — but never over a conversation, which
          owns the keyboard while it is running. An open surface swallows
          everything else: no walking, no talking, until it closes. */
-      if ((e.code === 'KeyJ' || e.code === 'KeyM') && !encounterRef.current) {
+      if (e.code === 'KeyJ' && !encounterRef.current) {
         e.preventDefault()
         cue('page')
-        openOverlay(e.code === 'KeyJ' ? 'notebook' : 'map')
+        openOverlay('notebook')
+        return
+      }
+      /* M עובר סבב: מבט הדגם → מפת הקלף → סגירה. המבט הוא מצב מצלמה,
+         לא חלון — הולכים מתחתיו, והסמנים נשארים חיים. */
+      if (e.code === 'KeyM' && !encounterRef.current) {
+        e.preventDefault()
+        if (overlayRef.current === 'map') {
+          cue('page')
+          openOverlay('map')
+        } else if (!live.modelView) {
+          cue('ui')
+          live.modelView = true
+          setModelView(true)
+        } else {
+          live.modelView = false
+          setModelView(false)
+          cue('page')
+          openOverlay('map')
+        }
+        return
+      }
+      if (e.code === 'Escape' && live.modelView) {
+        live.modelView = false
+        setModelView(false)
         return
       }
       if (overlayRef.current) return
@@ -3237,6 +3351,11 @@ export default function Game() {
         </Canvas>
         {/* המסגרת שסוגרת את הפריים — מתחת לכל שכבות ה-HUD, מעל הקנבס */}
         <div className="ch1-vignette" aria-hidden="true" />
+        {modelView && (
+          <div className="hud-panel ch1-model-chip" role="status">
+            מבט הדגם · <b>M</b> למפה · <b>Esc</b> לחזרה
+          </div>
+        )}
 
         {/* Leaving a region took 900 ms behind a banner; arriving took none.
             The new document rendered a bare plate, then a loading line, then a

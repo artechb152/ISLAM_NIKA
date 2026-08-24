@@ -110,6 +110,9 @@ export interface Layout {
       so no two read as the same person, with no lines and no approach ring:
       a market with nobody in it is an abandoned set. */
   extras?: { who: string; x: number; z: number; ry?: number; tint?: string }[]
+  /** Walkers — people on foot along a camel-style ellipse, in the player's
+      baked poses under another tint. The road, being used. */
+  walkers?: { cx: number; cz: number; rx: number; rz: number; speed: number; phase: number; tint?: string }[]
   rugs: { x: number; z: number; ry: number }[]
   scrolls: { x: number; z: number }[]
   terrain?: {

@@ -976,7 +976,7 @@
     "baked": true,
     "hasImage": false,
     "tint": "#b3a89c",
-    "ground": "ground-scree.jpg",
+    "ground": "ground-softscree.jpg",
     "repeat": 78,
     "relief": {
       "amp": 34,
