@@ -20,7 +20,7 @@ import { FindCard } from './FindCard'
 import { wrapPi } from '@/lib/chapter1/angles'
 import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
 import { TaskPanel } from './TaskPanel'
-import { ContactShadow, Npc, Rawi, type RawiClip } from './Characters'
+import { ContactShadow, Npc, Rawi, fitToGround, type RawiClip } from './Characters'
 import { DialogueHud } from './DialogueHud'
 import { Notebook } from './Notebook'
 import { WorldMap } from './WorldMap'
@@ -664,7 +664,7 @@ const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
 const MODEL_TRAVELER_STAND = '/assets/chapter1/models/traveler-stand.glb'
 const MODEL_TRAVELER_STRIDE = '/assets/chapter1/models/traveler-stride.glb'
 const MODEL_TRAVELER_PASSING = '/assets/chapter1/models/traveler-passing.glb'
-const MODEL_TRAVELER_WALK = '/assets/chapter1/models/traveler-walk.glb'
+const MODEL_TRAVELER_WALK = '/assets/chapter1/models/traveler-anim.glb'
 const MODEL_PALM = '/assets/chapter1/models/palm.glb'
 const MODEL_WELL = '/assets/chapter1/models/well.glb'
 const MODEL_ROCKS = '/assets/chapter1/models/rocks.glb'
@@ -1319,12 +1319,6 @@ function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
   const { scene: walkScene, animations: walkAnims } = useGLTF(MODEL_TRAVELER_WALK)
   const model = useMemo(() => {
     const c = cloneSkinned(walkScene)
-    const box = new THREE.Box3().setFromObject(c)
-    const size = new THREE.Vector3()
-    box.getSize(size)
-    const s = size.y > 0 ? 1.72 / size.y : 1
-    c.scale.setScalar(s)
-    c.position.y = -box.min.y * s
     c.traverse((o) => {
       const m = o as THREE.Mesh
       if (!m.isMesh) return
@@ -1336,7 +1330,9 @@ function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
         mat.color.set(tint)
         m.material = mat
       }
+      ;(m.material as THREE.Material).side = THREE.DoubleSide
     })
+    fitToGround(c, 1.72)
     return c
   }, [walkScene, tint])
   const { actions } = useAnimations(walkAnims, model)
@@ -1467,6 +1463,7 @@ function Player({ live }: { live: Live }) {
      keyframes ו-mixer במקום החלפת רשתות. משקל הקליפ דועך לאפס בעמידה,
      ותנוחת הכפיתה היא העמידה — כך שהעצירה עצמה היא האנימציה. */
   const walkAction = useRef<THREE.AnimationAction | null>(null)
+  const idleAction = useRef<THREE.AnimationAction | null>(null)
   const heading = useRef(0)
   const walkT = useRef(0)
   const lastStep = useRef(0)
@@ -1594,11 +1591,14 @@ function Player({ live }: { live: Live }) {
     const act = walkAction.current
     if (act) {
       /* המשקל נכנס ויוצא ברוך; הקצב צמוד לשעון ההליכה — אותו מקור
-         שמתזמן את הצליל והאבק, כדי שהרגליים לא יחליקו על הקרקע. */
+         שמתזמן את הצליל והאבק, כדי שהרגליים לא יחליקו על הקרקע.
+         idle משלים ל-1 תמיד: תנוחת הכפיתה של ריג מיקסאמו היא T-pose. */
       const wantW = walking ? Math.min(1, gait * 2) : 0
       const w = act.getEffectiveWeight()
-      act.setEffectiveWeight(w + (wantW - w) * Math.min(1, dt * 8))
+      const w2 = w + (wantW - w) * Math.min(1, dt * 8)
+      act.setEffectiveWeight(w2)
       act.setEffectiveTimeScale(1.43 * Math.sqrt(Math.max(gait, 0.4)))
+      idleAction.current?.setEffectiveWeight(1 - w2)
     }
     /* רגל נוגעת בקרקע בכל חצי מחזור. שעון ההליכה כבר סופר את זה,
        ולכן הצעד נשמע מאותו מקור שמצייר אותו — בלי טיימר נפרד
@@ -1783,30 +1783,39 @@ function Player({ live }: { live: Live }) {
   const { scene: walkScene, animations: walkAnims } = useGLTF(MODEL_TRAVELER_WALK)
   const model = useMemo(() => {
     const c = cloneSkinned(walkScene)
-    const box = new THREE.Box3().setFromObject(c)
-    const size = new THREE.Vector3()
-    box.getSize(size)
-    const s = size.y > 0 ? 1.78 / size.y : 1
-    c.scale.setScalar(s)
-    c.position.y = -box.min.y * s
     c.traverse((o) => {
       const m = o as THREE.Mesh
       if (!m.isMesh) return
       m.castShadow = true
       m.receiveShadow = false
       m.frustumCulled = false // skinned bounds go stale during clips
+      /* הגלימה היא גיאומטריה פתוחה — בלי DoubleSide רואים את פנים
+         הבד החיוור במקום הטקסטורה */
+      ;(m.material as THREE.Material).side = THREE.DoubleSide
     })
+    /* אותו נרמול כמו של ראאווי — עם עדכוני המטריצה שבלעדיהם Box3 מודד
+       גיאומטריה גולמית בסנטימטרים והדמות נעלמת */
+    fitToGround(c, 1.78)
     return c
   }, [walkScene])
   const { actions } = useAnimations(walkAnims, model)
   useEffect(() => {
-    const a = actions['walk']
-    if (!a) return
-    a.play()
-    a.setEffectiveWeight(0)
-    walkAction.current = a
+    const walk = actions['walk']
+    const idle = actions['idle']
+    if (!walk) return
+    /* תנוחת הכפיתה של הריג היא T-pose — חייב תמיד קליפ במשקל.
+       idle ו-walk רצים יחד והמשקל נודד ביניהם, כמו אצל ראאווי. */
+    walk.play()
+    walk.setEffectiveWeight(0)
+    if (idle) {
+      idle.play()
+      idle.setEffectiveWeight(1)
+    }
+    walkAction.current = walk
+    idleAction.current = idle ?? null
     return () => {
       walkAction.current = null
+      idleAction.current = null
     }
   }, [actions])
 

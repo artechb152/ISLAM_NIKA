@@ -29,11 +29,11 @@ const CHAR_HEIGHT = 1.7
     still carries identity world matrices, and Box3 would then measure the raw
     Z-up geometry — the character comes out lying on its side and several times
     too large. */
-function fitToGround(obj: THREE.Object3D) {
+export function fitToGround(obj: THREE.Object3D, height = CHAR_HEIGHT) {
   obj.updateMatrixWorld(true)
   const box = new THREE.Box3().setFromObject(obj)
   const h = box.max.y - box.min.y
-  if (h > 0) obj.scale.setScalar(CHAR_HEIGHT / h)
+  if (h > 0) obj.scale.setScalar(height / h)
   obj.updateMatrixWorld(true)
   const after = new THREE.Box3().setFromObject(obj)
   obj.position.y -= after.min.y
