@@ -10,7 +10,7 @@
  * pass does not reach it — an object under study reads crisp, like a plate in
  * a catalogue, not like a painting of one. */
 
-import { Suspense, useEffect, useMemo, useRef } from 'react'
+import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
@@ -72,6 +72,14 @@ function Turntable({ url }: { url: string }) {
 }
 
 export function FindView({ model }: { model: string }) {
+  /* הקנבס נולד טיק אחרי הכרטיס: יצירת הקשר WebGL שני בפתיחה חוסמת את
+     ה-thread, והכרטיס היה נתקע לרגע לפני שהופיע. קודם הכרטיס — אז הבמה. */
+  const [staged, setStaged] = useState(false)
+  useEffect(() => {
+    const t = window.setTimeout(() => setStaged(true), 60)
+    return () => window.clearTimeout(t)
+  }, [])
+  if (!staged) return <div className='ch1-find-view' aria-hidden='true' />
   return (
     <div className="ch1-find-view" aria-hidden="true">
       <Canvas camera={{ position: [0, 0.35, 1.45], fov: 30 }} dpr={[1, 2]} gl={{ alpha: true }}>

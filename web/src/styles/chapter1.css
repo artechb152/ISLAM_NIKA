@@ -322,6 +322,22 @@ body{
   width:min(640px,92vw);align-items:flex-start;
 }
 .hud-dialogue.is-anchored::after{display:none}
+/* מצב קולנוע: מפגש עם סרט תופס את המסך — הווידאו גדול, נכון ביחס,
+   והטקסט יושב מתחתיו ככתוביות של הקרנה */
+.hud-dialogue.has-film{
+  bottom:auto;top:50%;left:50%;transform:translate(-50%,-52%);
+  width:min(1080px,94vw);flex-direction:column;align-items:stretch;
+  padding:14px 14px 16px;
+}
+.hud-dialogue.has-film .hud-portrait,
+.hud-dialogue.has-film .hud-speaker-avatar{display:none}
+.hud-dialogue.has-film .hud-film{
+  width:100%;aspect-ratio:16/9;max-height:56vh;object-fit:contain;
+  background:#0d0704;border-radius:8px;margin:0 0 12px;
+  animation:ch1-film-in .55s ease both;
+}
+@keyframes ch1-film-in{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+
 /* the narrator has no portrait and no speaker to hang off */
 .hud-dialogue.is-cinematic p{font-style:italic}
 

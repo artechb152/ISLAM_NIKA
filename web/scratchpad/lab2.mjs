@@ -50,7 +50,7 @@ async function boot(region, opts = {}) {
   const pg = await ctx.newPage()
   pg.on('console', (m) => { if (m.type() === 'error') console.log('PAGE ERR:', m.text().slice(0, 300)) })
   await pg.goto(`${BASE}/chapter1?region=${region}`, { waitUntil: 'networkidle', timeout: 90000 })
-  await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1') })
+  await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1'); localStorage.setItem('ch1:intro:v1', '1') })
   await pg.reload({ waitUntil: 'networkidle' })
   await wait(1500)
   for (const b of await pg.$$('button')) {

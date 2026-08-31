@@ -7,7 +7,7 @@ const pg = await (await browser.newContext({ viewport: { width: 1100, height: 62
 pg.on('console', (m) => { if (m.type() === 'error') console.log('ERR:', m.text().slice(0, 200)) })
 pg.on('pageerror', (e) => console.log('EXC:', String(e).slice(0, 200)))
 await pg.goto('http://localhost:3000/chapter1?region=yemen-heights', { waitUntil: 'networkidle', timeout: 90000 })
-await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1') })
+await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1'); localStorage.setItem('ch1:intro:v1', '1') })
 await pg.reload({ waitUntil: 'networkidle' })
 await wait(1500)
 for (const bt of await pg.$$('button')) { const t = await bt.innerText().catch(() => ''); if (t.includes('התחילו')) { await bt.click(); break } }

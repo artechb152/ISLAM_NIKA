@@ -2360,6 +2360,38 @@ function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
    exactly where he was — he only turns his body to keep facing you. */
 const RAWI_SIDE = 1.45
 const RAWI_SPEED = 3.4
+/* ── פתיחת המדריך ─────────────────────────────────────────────────────────
+   מפגש היכרות מסונתז: אינו יושב ב-dialogue.json כי אינו נשען על המקור —
+   אין בו אף טענה היסטורית, רק היכרות, תפקיד והזמנה. notebook: 0 מסמן
+   שהוא לא נרשם במחברת. השאלות הן של השחקן; שתיהן נענות, אין שגויה. */
+const INTRO_KEY = 'ch1:intro:v1'
+const RAWI_INTRO: Encounter = {
+  id: 'rawi-hello',
+  speaker: 'rawi',
+  notebook: 0,
+  gesture: 'talk-happy',
+  lines: [
+    { source: '', text: 'שלום עליך, נוסע! חיכיתי לך. ראאווי שמי — מלווה שיירות, ואוסף סיפורים.' },
+    { source: '', text: 'הדרך שלפנינו היא דרך הבשמים: מרמות תימן הירוקות האלה, דרך תחנות המסחר והמדבר, צפונה עד מכה.' },
+    { source: '', text: 'אני אצעד לצידך. כל דבר ששווה לזכור — אכתוב במחברת המסע, ובסוף הדרך נדע איך נראה העולם שאל תוכו עתיד לבוא האסלאם.' },
+    { source: '', text: 'קדימה — השער הראשון מחכה במעלה הדרך.' },
+  ],
+  choices: [
+    {
+      prompt: 'ראאווי — זה שם?',
+      lines: [
+        { source: '', text: 'זה גם שם וגם מקצוע: ראאווי פירושו מוסר־סיפורים. מה ששמעתי בדרכים אני נושא איתי — ומה שנגלה יחד, אספר הלאה.' },
+      ],
+    },
+    {
+      prompt: 'איך נדבר בדרך?',
+      lines: [
+        { source: '', text: 'קרא לי עם R בכל עת. ליד אנשים — E פותח שיחה, ו-F מרים דבר־מה מהקרקע אל המחברת.' },
+      ],
+    },
+  ],
+}
+
 const RAWI_WALK_GAP = 0.45
 const PLAYER_MOVE_EPS = 0.004
 
@@ -2372,9 +2404,21 @@ function RawiCompanion({ live, talking, gesture }: {
      הראשון היא 21 מטר קדימה, ולכן הוא עמד באמצע השדה עד הצעד
      הראשון של השחקן ואז זינק אחורה. הוא מתחיל ליד מי שהוא מלווה. */
   const spawn = useMemo(entryPoint, [])
-  const pos = useRef(new THREE.Vector3(spawn.x + RAWI_SIDE, 0, spawn.z))
+  /* בביקור הראשון ראאווי לא מתחיל צמוד לכתף אלא במעלה הדרך — והולך
+     אל השחקן בזמן קריינות הפתיחה. כניסה של דמות, לא הופעה של מודל. */
+  const introAhead = useMemo(() => {
+    if (REGION.id !== 'yemen-heights' || typeof window === 'undefined') return false
+    if (new URLSearchParams(window.location.search).get('from')) return false
+    try {
+      return !window.localStorage.getItem(INTRO_KEY)
+    } catch {
+      return false
+    }
+  }, [])
+  const startZ = spawn.z - (introAhead ? 9 : 0)
+  const pos = useRef(new THREE.Vector3(spawn.x + RAWI_SIDE, 0, startZ))
   const look = useRef(new THREE.Vector3())
-  const target = useRef(new THREE.Vector3(spawn.x + RAWI_SIDE, 0, spawn.z))
+  const target = useRef(new THREE.Vector3(spawn.x + RAWI_SIDE, 0, startZ))
   const prevPlayer = useRef(new THREE.Vector3(spawn.x, 0, spawn.z))
   const [clip, setClip] = useState<RawiClip>('idle')
   const clipRef = useRef<RawiClip>('idle')
@@ -2424,7 +2468,7 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, onExit, met, found, solved }: {
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved }: {
   live: Live
   onNearChange: (who: string | null) => void
   onNearFind: (id: string | null) => void
@@ -2436,6 +2480,8 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
   gesture: RawiClip
   /** which placed character is mid-sentence, so only they gesture */
   speakingWho: string | null
+  /** מי מהדמויות מפנה מבט אל ראאווי — כשההערה שלו היא שנאמרת */
+  attendWho: string | null
   onExit: (to: string, label: string) => void
 }) {
   /* Scatter rocks and shrubs only where they don't intersect a placed prop or
@@ -2547,7 +2593,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       <GrassTufts />
       <DustMotes />
       {CAST.map((c) => (
-        <Npc key={c.who} who={c.who} position={[c.x, groundYAt(c.x, c.z), c.z]} rotationY={c.ry ?? 0} speaking={speakingWho === c.who} playerRef={{ current: live.player }} />
+        <Npc key={c.who} who={c.who} position={[c.x, groundYAt(c.x, c.z), c.z]} rotationY={c.ry ?? 0} speaking={speakingWho === c.who} playerRef={{ current: c.who === attendWho ? live.rawiPos : live.player }} />
       ))}
       {/* הניצבים — אנשים שפשוט נמצאים שם. בלי שורות, בלי טבעת גישה, בלי
           פנייה אל השחקן; רק נשימה, גוון משלהם, וקוליידר כדי שלא הולכים
@@ -2654,7 +2700,7 @@ function ControlsPanel({ pressed }: { pressed: Set<string> }) {
           <span><i className="hud-key">R</i> שיחה עם רָאוִי</span>
         )}
         <span><i className="hud-key">J</i> מחברת</span>
-        <span><i className="hud-key">M</i> מבט הדגם ומפה</span>
+        <span><i className="hud-key">M</i> מפה</span>
         <span>גרירת עכבר — סיבוב מבט</span>
       </div>
     </section>
@@ -2917,6 +2963,9 @@ export default function Game() {
   const [found, setFound] = useState<string[]>([])
   const [solved, setSolved] = useState<string[]>([])
   const [openFind, setOpenFind] = useState<Find | null>(null)
+  /* מי מדבר בשורה הנוכחית — לא מי בעל המפגש: הדמות מחווה רק כשהשורה
+     שלה על המסך, ומפנה מבט אל ראאווי כשהוא זה שמעיר. */
+  const [stepSpeaker, setStepSpeaker] = useState<string | null>(null)
   const [openTask, setOpenTask] = useState(false)
   const [modelView, setModelView] = useState(false)
   /* מצב המשימה חי כאן ולא בפאנל: גם הכפתורים וגם גרירת החפצים
@@ -3047,10 +3096,32 @@ export default function Game() {
   const met = useCallback((who: string) => !nextFrom(who), [nextFrom])
 
   const finishEncounter = useCallback((e: Encounter) => {
+    /* ברכת ההיכרות של ראאווי אינה תוכן לימודי — היא לא תופסת רשומה.
+       27 הרשומות שמורות למה שנשען על המקור. */
+    if (e.notebook === 0) return
     const store = recordEncounter(e.id, e.notebook)
     setSeen(store.seen)
     setNotebook(notebookCount(store))
   }, [])
+
+  /* פתיחת המדריך: בביקור הראשון ברמות תימן ראאווי מתחיל במעלה הדרך
+     והולך אל השחקן בזמן קריינות הפתיחה. כשהיא נסגרת — הוא כבר כאן,
+     ומציג את עצמו בצילום־שניים. פעם אחת בלבד. */
+  const prevEncounterId = useRef<string | null>(null)
+  useEffect(() => {
+    const prev = prevEncounterId.current
+    prevEncounterId.current = encounter?.id ?? null
+    if (encounter || prev !== 'opening') return
+    if (REGION.id !== 'yemen-heights') return
+    try {
+      if (window.localStorage.getItem(INTRO_KEY)) return
+      window.localStorage.setItem(INTRO_KEY, '1')
+    } catch {
+      return
+    }
+    const t = window.setTimeout(() => setEncounter(RAWI_INTRO), 700)
+    return () => window.clearTimeout(t)
+  }, [encounter])
 
   /* The narrator has no body to stand next to and no key of his own, so the two
      encounters he carries — the chapter's opening line and the birds over
@@ -3144,28 +3215,12 @@ export default function Game() {
         openOverlay('notebook')
         return
       }
-      /* M עובר סבב: מבט הדגם → מפת הקלף → סגירה. המבט הוא מצב מצלמה,
-         לא חלון — הולכים מתחתיו, והסמנים נשארים חיים. */
+      /* M פותח את המפה, ורק אותה. מבט הדגם נשאר מחוות המעבר בין
+         אזורים (העלייה בשערים) — שם מקומו, לא על מקש. */
       if (e.code === 'KeyM' && !encounterRef.current) {
         e.preventDefault()
-        if (overlayRef.current === 'map') {
-          cue('page')
-          openOverlay('map')
-        } else if (!live.modelView) {
-          cue('ui')
-          live.modelView = true
-          setModelView(true)
-        } else {
-          live.modelView = false
-          setModelView(false)
-          cue('page')
-          openOverlay('map')
-        }
-        return
-      }
-      if (e.code === 'Escape' && live.modelView) {
-        live.modelView = false
-        setModelView(false)
+        cue('page')
+        openOverlay('map')
         return
       }
       if (overlayRef.current) return
@@ -3372,7 +3427,8 @@ export default function Game() {
               solved={solved}
               talking={!!encounter}
               gesture={encounter?.gesture ?? 'talk'}
-              speakingWho={encounter && encounter.speaker !== 'rawi' ? encounter.speaker : null}
+              speakingWho={encounter && stepSpeaker && stepSpeaker !== 'rawi' && stepSpeaker !== 'narrator' ? stepSpeaker : null}
+              attendWho={encounter && stepSpeaker === 'rawi' && encounter.speaker !== 'rawi' && encounter.speaker !== 'narrator' ? encounter.speaker : null}
               onExit={travel}
               met={met}
             />
@@ -3533,6 +3589,7 @@ export default function Game() {
             encounter={encounter}
             notebookDone={notebook.done}
             notebookTotal={NOTEBOOK_TOTAL}
+            onSpeakerChange={setStepSpeaker}
             onFinished={finishEncounter}
             onClose={() => setEncounter(null)}
           />

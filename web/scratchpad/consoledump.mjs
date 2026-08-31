@@ -10,7 +10,7 @@ const lines = []
 pg.on('console', (m) => lines.push(m.type() + ': ' + m.text().slice(0, 160)))
 pg.on('pageerror', (e) => lines.push('PAGEERROR: ' + String(e).slice(0, 200)))
 await pg.goto(`http://localhost:3000/chapter1?region=${region}`, { waitUntil: 'networkidle', timeout: 90000 })
-await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1') })
+await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1'); localStorage.setItem('ch1:intro:v1', '1') })
 await pg.reload({ waitUntil: 'networkidle' })
 await wait(1500)
 for (const bt of await pg.$$('button')) { const t = await bt.innerText().catch(() => ''); if (t.includes('התחילו')) { await bt.click(); break } }

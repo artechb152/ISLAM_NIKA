@@ -40,7 +40,7 @@ for (const region of ORDER) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 810 } })
   const pg = await ctx.newPage()
   await pg.goto(`${BASE}/chapter1?region=${region}`, { waitUntil: 'networkidle', timeout: 90000 })
-  await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1') })
+  await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1'); localStorage.setItem('ch1:intro:v1', '1') })
   await pg.reload({ waitUntil: 'networkidle' })
   await wait(1500)
 

@@ -10,7 +10,7 @@ const browser = await chromium.launch({ executablePath: CHROME, headless: true,
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 810 }, recordVideo: { dir: 'scratchpad/tour', size: { width: 960, height: 540 } } })
 const pg = await ctx.newPage()
 await pg.goto('http://localhost:3000/chapter1?region=yemen-heights', { waitUntil: 'networkidle', timeout: 90000 })
-await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1') })
+await pg.evaluate(() => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:muted', '1'); localStorage.setItem('ch1:intro:v1', '1') })
 await pg.reload({ waitUntil: 'networkidle' })
 await wait(1500)
 for (const b of await pg.$$('button')) { const t = await b.innerText().catch(() => ''); if (t.includes('התחילו')) { await b.click(); break } }

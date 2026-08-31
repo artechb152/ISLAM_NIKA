@@ -47,8 +47,10 @@ for (const region of ORDER) {
   if (!finds.length) continue
   const br = await launch()
   const pg = await br.newPage()
+  pg.on('pageerror', (e) => console.log('PAGE EXC:', String(e).slice(0, 250)))
+  pg.on('console', (m) => { if (m.type() === 'error') console.log('PAGE ERR:', m.text().slice(0, 250)) })
   await pg.goto(`${BASE}/chapter1?region=${region}`, { waitUntil: 'networkidle2', timeout: 90000 })
-  await evalSafe(pg, () => localStorage.removeItem('ch1:notebook:v1'))
+  await evalSafe(pg, () => { localStorage.removeItem('ch1:notebook:v1'); localStorage.setItem('ch1:intro:v1', '1') })
   await pg.reload({ waitUntil: 'networkidle2' })
   await wait(2200)
   for (const el of await pg.$$('button')) {
@@ -66,7 +68,7 @@ for (const region of ORDER) {
   const dismiss = async (rounds = 26) => {
     for (let i = 0; i < rounds; i++) {
       const done = await evalSafe(pg, () => {
-        const cont = [...document.querySelectorAll('button')].find((b) => /המשיכו|הבנתי|סגור|לסיום|קדימה/.test(b.innerText))
+        const cont = [...document.querySelectorAll('button')].find((b) => /המשיכו|הבנתי|סגור|לסיום|קדימה|נמשיך|המשך/.test(b.innerText))
         const card = document.querySelector('.ch1-find, .ch1-task')
         const talk = document.querySelector('.hud-dialogue')
         if (!card && !talk) return true
@@ -83,6 +85,17 @@ for (const region of ORDER) {
     for (;;) { const v = await evalSafe(pg, fn); if (v) return v; if (Date.now() > stop) return null; await wait(350) }
   }
   await wait(2600); await dismiss()
+  for (let i = 0; i < 45; i++) {
+    const open = await evalSafe(pg, () => !!document.querySelector('.hud-dialogue'))
+    if (!open) break
+    const clicked = await evalSafe(pg, () => {
+      const b = [...document.querySelectorAll('.hud-dialogue button')].find((x) => /נמשיך|המשך|הבנתי|סגור/.test(x.innerText))
+      if (b) { b.click(); return true }
+      return false
+    })
+    if (!clicked) await pg.keyboard.press('Space')
+    await wait(400)
+  }
 
   for (const f of finds) {
     await evalSafe(pg, ({ x, z }) => window.__ch1Live.player.set(x, 0, z), { x: f.x, z: f.z + 0.9 })
@@ -96,8 +109,26 @@ for (const region of ORDER) {
     if (!near) { rows.push({ region, target: f.id, near: seenNear + ' @' + at.x + ',' + at.z, opened: false, recorded: '', status: 'NEVER NAMED' }); continue }
     const beforeArr = await evalSafe(pg, () => (JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}').found || []))
     await pg.keyboard.press('KeyF')
-    const opened = !!(await until(() => !!document.querySelector('.ch1-find'), 4000))
+    const opened = !!(await until(() => !!document.querySelector('.ch1-find'), 9000))
     await dismiss()
+    if (!opened) {
+      const why = await evalSafe(pg, () => ({
+        dialogue: !!document.querySelector('.hud-dialogue'),
+        findCard: !!document.querySelector('.ch1-find'),
+        task: !!document.querySelector('.ch1-task'),
+        nearFind: window.__ch1Live.nearFind,
+        overlayMap: !!document.querySelector('[class*=worldmap]'),
+        introFlag: localStorage.getItem('ch1:intro:v1'),
+        notebookSeen: (JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}').seen || []),
+      }))
+      console.log('WHY NOT OPENED:', JSON.stringify(why))
+      await evalSafe(pg, () => { window.addEventListener('keydown', (e) => { window.__lastKey = e.code }, true) })
+      await pg.keyboard.press('KeyF')
+      await wait(2500)
+      const retry = await evalSafe(pg, () => ({ lastKey: window.__lastKey, findCard: !!document.querySelector('.ch1-find'), found: (JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}').found || []) }))
+      console.log('RETRY:', JSON.stringify(retry))
+      console.log('FDBG:', JSON.stringify(await evalSafe(pg, () => window.__ch1F)))
+    }
     const afterArr = await evalSafe(pg, () => (JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}').found || [])) || []
     const added = afterArr.filter((x) => !(beforeArr || []).includes(x))
     rows.push({ region, target: f.id, near, opened, recorded: added.join(',') || '(none)',

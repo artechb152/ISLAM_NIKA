@@ -26,6 +26,9 @@ const br = await puppeteer.launch({executablePath: process.env.CHROME || 'C:/Pro
 const pg = await br.newPage()
 const BASE = process.env.BASE || `http://localhost:${process.env.PORT || 3000}`
 await pg.goto(`${BASE}/chapter1?region=night-camp`, { waitUntil: 'networkidle2', timeout: 90000 })
+  /* ברכת ההיכרות של ראאווי מיועדת לשחקן ראשון — לא לרתמה: היא חוסמת
+     F והליכה לרגע, והרתמה בודקת את הפרק, לא את הפתיחה. */
+  await pg.evaluate(() => localStorage.setItem('ch1:intro:v1', '1'))
 await new Promise(r=>setTimeout(r,2500))
 for(const el of await pg.$$('button')){const t=await pg.evaluate(e=>e.innerText,el); if(t.includes('התחילו')){await el.click();break}}
 for(let t=0;t<26;t++){ await new Promise(r=>setTimeout(r,1400)); if(await pg.evaluate(()=>!!window.__ch1Live)) break }

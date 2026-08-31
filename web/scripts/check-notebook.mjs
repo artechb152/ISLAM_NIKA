@@ -114,6 +114,9 @@ for (const region of ORDER) {
   pg.on('pageerror', (e) => errs.push(e.message.slice(0, 140)))
 
   await pg.goto(`${BASE}/chapter1?region=${region}`, { waitUntil: 'networkidle2', timeout: 90000 })
+  /* ברכת ההיכרות של ראאווי מיועדת לשחקן ראשון — לא לרתמה: היא חוסמת
+     F והליכה לרגע, והרתמה בודקת את הפרק, לא את הפתיחה. */
+  await evalSafe(pg, () => localStorage.setItem('ch1:intro:v1', '1'))
   if (carried) {
     await evalSafe(pg, (s) => localStorage.setItem('ch1:notebook:v1', s), carried)
     await pg.reload({ waitUntil: 'networkidle2' })
@@ -145,12 +148,14 @@ for (const region of ORDER) {
     for (let i = 0; i < rounds; i++) {
       const done = await evalSafe(pg, () => {
         const cont = [...document.querySelectorAll('button')]
-          .find((b) => /המשיכו|הבנתי|סגור|לסיום|קדימה/.test(b.innerText))
+          .find((b) => /המשיכו|הבנתי|סגור|לסיום|קדימה|נמשיך|המשך/.test(b.innerText))
         const choice = document.querySelector('.ch1-task-card button')
         const card = document.querySelector('.ch1-find, .ch1-task')
         const talk = document.querySelector('.hud-dialogue')
         if (!card && !talk) return true
-        if (card && cont) { cont.click(); return false }
+        /* גם דיאלוג נסגר בכפתור — מסך השאלות של מפגש לא נסגר ברווח בלבד
+           בגרסאות ישנות, ותקיעה שם חסמה כל מה שאחריה */
+        if (cont) { cont.click(); return false }
         if (card && choice) { choice.click(); return false }
         return false
       })
@@ -187,6 +192,19 @@ for (const region of ORDER) {
      of those two regions then fails. */
   await wait(2600)
   await dismiss()
+  /* הסרט הגדול בקריינות הפתיחה מאט את הסגירה תחת רינדור תוכנה — אסור
+     לגשת לעדויות כשעוד יש דיאלוג פתוח: F חסום בצדק בזמן שיחה. */
+  for (let i = 0; i < 45; i++) {
+    const open = await evalSafe(pg, () => !!document.querySelector('.hud-dialogue'))
+    if (!open) break
+    const clicked = await evalSafe(pg, () => {
+      const b = [...document.querySelectorAll('.hud-dialogue button')].find((x) => /נמשיך|המשך|הבנתי|סגור/.test(x.innerText))
+      if (b) { b.click(); return true }
+      return false
+    })
+    if (!clicked) await pg.keyboard.press('Space')
+    await wait(400)
+  }
 
   const before = await evalSafe(pg, () => JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}'))
 
@@ -208,7 +226,14 @@ for (const region of ORDER) {
       continue
     }
     await pg.keyboard.press('KeyF')
-    const opened = await until(() => !!document.querySelector('.ch1-find'), 4000)
+    let opened = await until(() => !!document.querySelector('.ch1-find'), 9000)
+    /* לחיצה ראשונה נבלעת לעיתים בחלון תזמון צר אחרי סגירת הפתיחה —
+       שחקן אמיתי פשוט לוחץ שוב, וגם הרתמה. */
+    if (!opened) {
+      await wait(900)
+      await pg.keyboard.press('KeyF')
+      opened = await until(() => !!document.querySelector('.ch1-find'), 6000)
+    }
     await dismiss()
     /* The card opening is not proof the evidence was written down — the card of
        an already-taken find opens too. Ask the notebook. This column read 2/2

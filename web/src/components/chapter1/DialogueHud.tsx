@@ -127,8 +127,10 @@ export function DialogueHud({
     const onKey = (ev: KeyboardEvent) => {
       if (ev.key === ' ' || ev.key === 'Enter') {
         ev.preventDefault()
-        if (showDone) onClose()
-        else if (!showChoices) advance()
+        /* במסך השאלות רווח מדלג וסוגר — השאלות הן העשרה למי שסקרן,
+           לא שער חובה. מי שרוצה לשאול — לוחץ. */
+        if (showDone || showChoices) onClose()
+        else advance()
       }
       if (ev.key === 'Escape' && showDone) onClose()
     }
@@ -142,7 +144,7 @@ export function DialogueHud({
 
   return (
     <div
-      className={`hud-panel hud-dialogue is-open is-anchored${cinematic ? ' is-cinematic' : ''}`}
+      className={`hud-panel hud-dialogue is-open is-anchored${cinematic ? ' is-cinematic' : ''}${encounter.film ? ' has-film' : ''}`}
       onClick={() => (showChoices || showDone ? undefined : advance())}
       role="dialog"
       aria-live="polite"
@@ -174,7 +176,7 @@ export function DialogueHud({
           {SPEAKERS[step.speaker]}
           {/* מספר הסעיף במקור הוא סימון של הכותבים, לא של הלומד.
               על קריינות פתיחה הוא נקרא ליד „קריין“ כמו טקסט דיבאג. */}
-          {encounter.kind !== 'cinematic' && (
+          {encounter.kind !== 'cinematic' && step.source && (
             <span className="hud-dialogue-topic"> · {step.source}</span>
           )}
         </h3>

@@ -57,6 +57,33 @@ bpy.ops.object.data_transfer(
     data_type='VGROUP_WEIGHTS', use_create=True,
     vert_mapping='POLYINTERP_NEAREST',
     layers_select_src='ALL', layers_select_dst='NAME')
+# Garment discipline, per real-time skirt-rigging practice: the lower robe is
+# driven ONLY by hips/spine/legs — an arm bone owning a skirt vertex is what
+# tears the robe open when the arm swings. Mid-torso may keep shoulders/arms
+# (sleeves) but never forearms/hands; finger bones own nothing anywhere (the
+# hands are fused into the cloth on this mesh).
+SKIRT_TOP = 78.0    # world z, hips sit at ~68
+CHEST_TOP = 115.0
+leg_allow = {'mixamorig:Hips', 'mixamorig:Spine'} | {
+    'mixamorig:%s%s' % (s, p) for s in ('Left', 'Right') for p in ('UpLeg', 'Leg', 'Foot', 'ToeBase')}
+gname = {g.index: g.name for g in body.vertex_groups}
+removals = {n: [] for n in gname.values()}
+for v in body.data.vertices:
+    z = v.co.z
+    for ge in v.groups:
+        n = gname[ge.group]
+        core = n.replace('mixamorig:', '')
+        deny = ('Hand' in core and core not in ('LeftHand', 'RightHand'))
+        if z < SKIRT_TOP and n not in leg_allow:
+            deny = True
+        elif z < CHEST_TOP and ('Hand' in core or 'ForeArm' in core):
+            deny = True
+        if deny:
+            removals[n].append(v.index)
+for n, idxs in removals.items():
+    if idxs:
+        body.vertex_groups[n].remove(idxs)
+print('garment filter:', sum(len(i) for i in removals.values()), 'influences removed')
 # Nearest-face transfer leaves a few robe vertices holding a hand or arm bone
 # from across a fold — they stretch into flaps when the arm swings. Smooth the
 # weights over the surface, cap influences, renormalise.
