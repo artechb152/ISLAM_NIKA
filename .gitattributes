@@ -1,0 +1,35 @@
+# Line endings are part of the build here, not cosmetics.
+#
+# The check scripts in web/scripts/ parse the source files as text with hard
+# '\n' anchors — check-journey.mjs, for instance, reads the cast table out of
+# placements.ts with /\],?\n/. On a Windows clone with git's default
+# core.autocrlf=true the checkout rewrites every line to CRLF, that regex stops
+# matching, the cast table reads as empty, and `npm run verify` fails with 16
+# false "speaker has no placement" errors on a tree that is actually correct.
+#
+# The blobs in this repo are already LF, so pinning the checkout to LF costs
+# nothing and removes the trap.
+* text=auto eol=lf
+
+# Assets are bytes — never let the text filter near them.
+*.glb  binary
+*.gltf binary
+*.fbx  binary
+*.blend binary
+*.vdb  binary
+*.mp4  binary
+*.webm binary
+*.mp3  binary
+*.wav  binary
+*.ogg  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.ktx2 binary
+*.hdr  binary
+*.exr  binary
+*.ttf  binary
+*.otf  binary
+*.woff binary
+*.woff2 binary
