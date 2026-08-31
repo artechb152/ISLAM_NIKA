@@ -16,6 +16,7 @@
     "audit-assets": "node scripts/audit-assets.mjs",
     "measure-walk": "node scripts/measure-walk.mjs",
     "check-slide": "node scripts/check-slide.mjs",
+    "check-keys": "node scripts/check-keys.mjs",
     "explore": "node scripts/explore.mjs",
     "play-scene": "node scripts/play-scene.mjs",
     "check-notebook": "node scripts/check-notebook.mjs",

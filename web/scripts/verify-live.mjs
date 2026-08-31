@@ -1,12 +1,16 @@
 /* The two browser gates, made runnable with one command.
  *
- * `check-yaw.mjs` and `check-notebook.mjs` are the gates that play the game —
- * the first asks whether the player walks where they are pointed, the second
- * plays all nine regions and asks whether the notebook fills. They stayed out
- * of `npm run verify` for a documented reason: they need a Chrome binary and a
- * server on :3000, and a gate that fails on machines missing either is a gate
- * that gets deleted. The static gates stay fast and dependency-free; this
- * wrapper is for when you want the full answer.
+ * Four gates that play the game rather than read it:
+ *   check-keys      M opens the map and only the map, and leaving a region
+ *                   still lifts the camera to the model view
+ *   check-slide     the feet cover the same ground per stride at every speed
+ *   check-yaw       the player walks where they are pointed
+ *   check-notebook  all nine regions, and does the notebook fill
+ *
+ * They stay out of `npm run verify` for a documented reason: they need a
+ * Chrome binary and a server on :3000, and a gate that fails on machines
+ * missing either is a gate that gets deleted. The static gates stay fast and
+ * dependency-free; this wrapper is for when you want the full answer.
  *
  * It preflights instead of crashing: finds Chrome in the usual places (or
  * CHROME), reuses a server that is already up on BASE/:3000, and otherwise
@@ -90,7 +94,7 @@ const run = (script) => new Promise((resolve) => {
 })
 
 let failed = 0
-for (const gate of ['check-yaw.mjs', 'check-notebook.mjs']) {
+for (const gate of ['check-keys.mjs', 'check-slide.mjs', 'check-yaw.mjs', 'check-notebook.mjs']) {
   if (await run(gate)) { failed++; break /* the second gate's answer means nothing on a broken first */ }
 }
 
