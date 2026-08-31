@@ -24,7 +24,7 @@ import { ContactShadow, Npc, Rawi, fitToGround, type RawiClip } from './Characte
 import { DialogueHud } from './DialogueHud'
 import { Notebook } from './Notebook'
 import { WorldMap } from './WorldMap'
-import { MODEL, NOTEBOOK_TOTAL, SPEAKERS, regionById, type Encounter } from '@/lib/chapter1/dialogue'
+import { MODEL, NOTEBOOK_TOTAL, SPEAKERS, regionById, type Encounter, type Gesture } from '@/lib/chapter1/dialogue'
 import { PLACEMENTS, type Placement } from '@/lib/chapter1/placements'
 import { notebookCount, readNotebook, recordEncounter, recordFind, recordTask, setRegion } from '@/lib/chapter1/notebook'
 
@@ -670,6 +670,19 @@ const MODEL_FIREWOOD = '/assets/chapter1/models/firewood.glb'
 const MODEL_SHRUB = '/assets/chapter1/models/shrub.glb'
 /** same camel, split into body + four hip-pivoted legs for the walk cycle */
 const MODEL_CAMEL_PARTS = '/assets/chapter1/models/camel-parts.glb'
+
+/* The two numbers the traveller's locomotion is built on.
+
+   `WALK_CLIP_SECONDS` is read straight out of traveler-anim.glb — run
+   `npm run measure-walk` to print it again if the clip is ever re-exported.
+
+   `WALK_CYCLE_METRES` is how far one loop of that clip should carry him. It is
+   derived from the walk-pace tuning that was signed off by eye — timeScale
+   1.43 at 2.6 m/s — so 2.6 × 1.042 / 1.43 ≈ 1.9 m per loop. Keeping that
+   anchor means the walk still looks exactly as it did, while every other speed
+   stops sliding. */
+const WALK_CLIP_SECONDS = 1.042
+const WALK_CYCLE_METRES = 1.9
 for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_WALK, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
   useGLTF.preload(m)
 }
@@ -1463,6 +1476,8 @@ function Player({ live }: { live: Live }) {
   const idleAction = useRef<THREE.AnimationAction | null>(null)
   const heading = useRef(0)
   const walkT = useRef(0)
+  /** clip-seconds played since mount — dev-only, for the foot-slide harness */
+  const walkPhase = useRef(0)
   const lastStep = useRef(0)
   const speed = useRef(0)
   const runBlend = useRef(0)
@@ -1569,7 +1584,14 @@ function Player({ live }: { live: Live }) {
         live.yaw += wrapPi(Math.PI - heading.current - live.yaw) * Math.min(1, dt * 1.2)
       }
     }
-    if (speed.current > 0.05) walkT.current += dt * 9 * Math.sqrt(gait)
+    /* שעון ההליכה — הוא שמתזמן את הצליל, את האבק ואת הנדנוד, ולכן הוא
+       חייב להיות באותו חוק ליניארי כמו הקליפ. כשהוא רץ על √gait והגוף
+       נע ליניארית, הצעדים נשמעים בקצב אחד והרגליים נראות בקצב אחר:
+       בריצה נשמעו שני שלישים מהצעדים שנראו. π רדיאנים = חצי מחזור =
+       צעד אחד, ולכן 2π לסיבוב מלא של WALK_CYCLE_METRES. */
+    if (speed.current > 0.05) {
+      walkT.current += dt * ((speed.current / WALK_CYCLE_METRES) * 2 * Math.PI)
+    }
     // two-pose walk: the character is a plain static mesh (no skeleton — the
     // rigged model rendered T-pose on some GPUs). While moving we alternate
     // between the standing and mid-stride meshes at gait frequency, mirroring
@@ -1586,15 +1608,38 @@ function Player({ live }: { live: Live }) {
     const walking = speed.current > 0.35
     const act = walkAction.current
     if (act) {
-      /* המשקל נכנס ויוצא ברוך; הקצב צמוד לשעון ההליכה — אותו מקור
-         שמתזמן את הצליל והאבק, כדי שהרגליים לא יחליקו על הקרקע.
-         idle משלים ל-1 תמיד: תנוחת הכפיתה של ריג מיקסאמו היא T-pose. */
+      /* המשקל נכנס ויוצא ברוך; idle משלים ל-1 תמיד, כי תנוחת הכפיתה
+         של ריג מיקסאמו היא T-pose.
+
+         הקצב ליניארי במהירות הקרקע, ולא `1.43·√gait` כפי שהיה. מרחק
+         הוא ליניארי במהירות; שורש יכול להסכים איתו בנקודה אחת בדיוק,
+         ובכל שאר המהירויות הרגליים מחליקות. בריצה (6 מ״ש) הקליפ רץ
+         2.17 במקום 3.29 — כלומר הדמות גלשה קדימה ב-34% מהדרך. הגמל
+         שהולך לידה עשה את זה נכון כל הזמן: `groundSpeed / 1.24`.
+
+         שני המספרים נמדדו ולא נוחשו: אורך הקליפ הוא 1.042 שניות
+         (`npm run measure-walk` קורא אותו מה-GLB), ואורך המחזור נגזר
+         מנקודת הכיול שאושרה בעין — 1.43 בקצב הליכה של 2.6 מ״ש נותן
+         2.6·1.042/1.43 ≈ 1.9 מ׳ לסיבוב. לכן בקצב הליכה החוק החדש
+         מחזיר 1.426 — אותו מראה בדיוק — ומתקן את כל השאר. */
       const wantW = walking ? Math.min(1, gait * 2) : 0
       const w = act.getEffectiveWeight()
       const w2 = w + (wantW - w) * Math.min(1, dt * 8)
       act.setEffectiveWeight(w2)
-      act.setEffectiveTimeScale(1.43 * Math.sqrt(Math.max(gait, 0.4)))
+      const ts = (speed.current * WALK_CLIP_SECONDS) / WALK_CYCLE_METRES
+      act.setEffectiveTimeScale(ts)
       idleAction.current?.setEffectiveWeight(1 - w2)
+      /* A monotonic count of clip-seconds played, so a harness can divide
+         ground travelled by clip loops and see whether the feet are planted —
+         the question `1.43·√gait` got wrong at every speed but one, and that no
+         screenshot can answer. `action.time` cannot be used: it wraps every
+         1.042 s. Read by scripts/check-slide.mjs. */
+      if (process.env.NODE_ENV !== 'production') {
+        walkPhase.current += dt * ts
+        ;(window as unknown as Record<string, unknown>).__ch1Walk = {
+          phase: walkPhase.current, weight: w2, timeScale: ts, clip: WALK_CLIP_SECONDS,
+        }
+      }
     }
     /* רגל נוגעת בקרקע בכל חצי מחזור. שעון ההליכה כבר סופר את זה,
        ולכן הצעד נשמע מאותו מקור שמצייר אותו — בלי טיימר נפרד
@@ -1756,6 +1801,25 @@ function Player({ live }: { live: Live }) {
       twoShotV.current.set(live.player.x + 5.5, 7, live.player.z + 7.5)
       target.lerp(twoShotV.current, riseK)
       lookV.current.lerp(twoShotV.current.set(live.player.x, 0.9, live.player.z - 1.5), riseK)
+    }
+
+    /* Keep the lens out of the actors.
+       Both blends above are straight lerps between two good camera positions,
+       and the chord between them runs through whoever is standing in the
+       middle — for a second or so on every conversation the frame was the
+       inside of a robe. The colliders swept for props do not include people,
+       and adding them there would also shove the follow camera around
+       harmlessly-standing NPCs. This is the narrower rule: never end up inside
+       the two bodies this shot is actually about. */
+    const KEEP_OUT = 1.15
+    for (const body of [live.player, talkAnchor.current]) {
+      const dx = target.x - body.x
+      const dz = target.z - body.z
+      const d = Math.hypot(dx, dz)
+      if (d < KEEP_OUT && d > 1e-4) {
+        target.x = body.x + (dx / d) * KEEP_OUT
+        target.z = body.z + (dz / d) * KEEP_OUT
+      }
     }
 
     camera.position.lerp(target, Math.min(1, dt * (5 + riseK * 4)))
@@ -2387,6 +2451,64 @@ const RAWI_INTRO: Encounter = {
   ],
 }
 
+/* ── פעימת ההגעה ──────────────────────────────────────────────────────────
+   שבעה מתשעת האזורים נפתחו בשקט מוחלט: שלט מכריז על שם המקום, נעלם, ומשם
+   השחקן עומד במדבר בלי לדעת לאן ללכת ולמה. הדבר הראשון שיש לקרוא הגיע רק
+   כשמצא לבד סמן — נמדד ברתמת explore: „NOTHING in 28s" בשבעה אזורים.
+
+   ראאווי צועד לצידו בכל אזור, ולכן זה תפקידו: משפט אחד שאומר לאן הגענו ומה
+   שווה כאן מבט. אלה אינם תוכן לימודי ולכן אינם ב-dialogue.json ואינם נושאים
+   §: אין בהם שום טענה היסטורית — רק מקום, כיוון וסקרנות. אותו דפוס בדיוק
+   של `rawi-hello`, ואותו `notebook: 0` שמוודא שהם לא גוזלים רשומה. כל טענה
+   על העבר נשארת במפגשים המעוגנים. */
+const ARRIVAL_KEY = (id: string) => `ch1:arrived:${id}:v1`
+const RAWI_ARRIVALS: Record<string, { gesture: Gesture; text: string }> = {
+  'night-camp': {
+    gesture: 'talk',
+    text: 'כאן נעצור ללילה. השיירה פורקת, והאנשים מדברים — זה הזמן הטוב ביותר לשאול. קרא לי ב-R כשתרצה.',
+  },
+  'border-post': {
+    gesture: 'talk-nod',
+    text: 'שים לב איך משתנה הדרך. מכאן והלאה יש למי לתת דין וחשבון — ויש שם אדם שיסביר לך למי.',
+  },
+  'narrow-pass': {
+    gesture: 'talk',
+    text: 'המעבר הזה צר, ומי ששולט בו שולט בכל מה שעובר. יש מדורה למעלה — ומי שיושב לידה יודע למה.',
+  },
+  'loading-road': {
+    gesture: 'talk',
+    text: 'דרך העמסה. כאן מעבירים סחורה מגב לגב — ולא רק סחורה עוברת בדרכים כאלה. לך, ואספר תוך כדי.',
+  },
+  yathrib: {
+    gesture: 'talk-happy',
+    text: 'ית׳רב. הדקלים והבארות הם הסיבה שיושבים כאן, ולא כולם שיושבים כאן הגיעו מאותו מקום.',
+  },
+  monastery: {
+    gesture: 'talk-nod',
+    text: 'מנזר, כאן, בקצה המדבר. מי שבחר לחיות ככה הרחק מכולם — כדאי לשמוע ממנו למה.',
+  },
+  mecca: {
+    gesture: 'talk',
+    text: 'מכה. הרבה דרכים נפגשות כאן, והרבה אמונות איתן. הסתובב לאט — הכל בעיר הזאת עומד במקומו מסיבה.',
+  },
+  exit: {
+    gesture: 'talk-nod',
+    text: 'זה המקום להביט אחורה. עברנו את כל הדרך — בוא נראה מה עומד מאחורינו.',
+  },
+}
+
+function arrivalBeat(regionId: string): Encounter | null {
+  const a = RAWI_ARRIVALS[regionId]
+  if (!a) return null
+  return {
+    id: `rawi-arrive-${regionId}`,
+    speaker: 'rawi',
+    notebook: 0,
+    gesture: a.gesture,
+    lines: [{ source: '', text: a.text }],
+  }
+}
+
 const RAWI_WALK_GAP = 0.45
 const PLAYER_MOVE_EPS = 0.004
 
@@ -2417,6 +2539,8 @@ function RawiCompanion({ live, talking, gesture }: {
   const prevPlayer = useRef(new THREE.Vector3(spawn.x, 0, spawn.z))
   const [clip, setClip] = useState<RawiClip>('idle')
   const clipRef = useRef<RawiClip>('idle')
+  /** his actual ground speed this frame — the step rate is derived from it */
+  const paceRef = useRef(0)
 
   useFrame((_, dt) => {
     const p = live.player
@@ -2447,8 +2571,12 @@ function RawiCompanion({ live, talking, gesture }: {
       const stepLen = Math.min(speed * dt, gap - RAWI_WALK_GAP * 0.5)
       pos.current.lerp(target.current, stepLen / gap)
       look.current.copy(target.current)
+      /* the distance he really covered, not the speed he was aiming for — the
+         last step into the gap is clamped, and his feet should slow with it */
+      paceRef.current = dt > 0 ? stepLen / dt : 0
     } else {
       look.current.set(p.x, 0, p.z)
+      paceRef.current = 0
     }
     const want: RawiClip = talking ? gesture : moving ? 'walk' : 'idle'
     if (want !== clipRef.current) {
@@ -2460,7 +2588,7 @@ function RawiCompanion({ live, talking, gesture }: {
     live.rawiPos.z = pos.current.z
   })
 
-  return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} />
+  return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
 function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved }: {
@@ -3136,6 +3264,43 @@ export default function Game() {
     )
     if (!cine) return
     const t = window.setTimeout(() => setEncounter(cine), 1100)
+    return () => window.clearTimeout(t)
+  }, [sceneReady])
+
+  /* Rawi's word on arrival — the region says where you are, he says why you
+     would walk anywhere. It waits for the arrival plate to clear and for any
+     narrator cinematic the region opens with, so it lands as the first thing
+     said rather than on top of the film. Once per region, ever. */
+  /* Fires once, on arrival, and never re-arms. Keyed off `sceneReady` alone:
+     an earlier version also depended on `encounter`, so the timer restarted
+     every time a panel closed — the greeting could then open minutes later,
+     on top of the player walking up to a piece of evidence, and F is correctly
+     refused while a dialogue is up. `check-notebook` caught it as two finds
+     that did nothing. */
+  const arrivalFired = useRef(false)
+  useEffect(() => {
+    if (!sceneReady || arrivalFired.current) return
+    const beat = arrivalBeat(REGION.id)
+    if (!beat) return
+    /* a region that opens on the narrator gets its cinematic first; the
+       greeting follows it, not over it */
+    const heard = readNotebook().seen
+    const cinePending = REGION.encounters.some(
+      (e) => e.speaker === 'narrator' && !heard.includes(e.id) && (e.trigger ?? 'arrive') === 'arrive',
+    )
+    if (cinePending) return
+    try {
+      if (window.localStorage.getItem(ARRIVAL_KEY(REGION.id))) return
+      window.localStorage.setItem(ARRIVAL_KEY(REGION.id), '1')
+    } catch {
+      return
+    }
+    arrivalFired.current = true
+    const t = window.setTimeout(() => {
+      /* if the player already got into something in the meantime, the moment
+         for a greeting has passed — say nothing rather than interrupt */
+      setEncounter((cur) => cur ?? beat)
+    }, 1400)
     return () => window.clearTimeout(t)
   }, [sceneReady])
 

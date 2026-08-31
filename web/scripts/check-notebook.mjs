@@ -115,8 +115,13 @@ for (const region of ORDER) {
 
   await pg.goto(`${BASE}/chapter1?region=${region}`, { waitUntil: 'networkidle2', timeout: 90000 })
   /* ברכת ההיכרות של ראאווי מיועדת לשחקן ראשון — לא לרתמה: היא חוסמת
-     F והליכה לרגע, והרתמה בודקת את הפרק, לא את הפתיחה. */
-  await evalSafe(pg, () => localStorage.setItem('ch1:intro:v1', '1'))
+     F והליכה לרגע, והרתמה בודקת את הפרק, לא את הפתיחה. אותו שיקול חל
+     על משפט ההגעה שראאווי אומר בכל אזור: שחקן שומע אותו, לוחץ רווח
+     והולך; הרתמה מטלפורטת אל עדות תוך שנייה ונחסמת. */
+  await evalSafe(pg, (r) => {
+    localStorage.setItem('ch1:intro:v1', '1')
+    localStorage.setItem(`ch1:arrived:${r}:v1`, '1')
+  }, region)
   if (carried) {
     await evalSafe(pg, (s) => localStorage.setItem('ch1:notebook:v1', s), carried)
     await pg.reload({ waitUntil: 'networkidle2' })

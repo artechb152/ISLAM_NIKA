@@ -27,13 +27,27 @@ const pg = await br.newPage()
 const BASE = process.env.BASE || `http://localhost:${process.env.PORT || 3000}`
 await pg.goto(`${BASE}/chapter1?region=night-camp`, { waitUntil: 'networkidle2', timeout: 90000 })
   /* ברכת ההיכרות של ראאווי מיועדת לשחקן ראשון — לא לרתמה: היא חוסמת
-     F והליכה לרגע, והרתמה בודקת את הפרק, לא את הפתיחה. */
-  await pg.evaluate(() => localStorage.setItem('ch1:intro:v1', '1'))
+     F והליכה לרגע, והרתמה בודקת את הפרק, לא את הפתיחה. גם משפט ההגעה
+     של האזור, מאותו טעם. */
+  await pg.evaluate(() => {
+    localStorage.setItem('ch1:intro:v1', '1')
+    localStorage.setItem('ch1:arrived:night-camp:v1', '1')
+  })
 await new Promise(r=>setTimeout(r,2500))
 for(const el of await pg.$$('button')){const t=await pg.evaluate(e=>e.innerText,el); if(t.includes('התחילו')){await el.click();break}}
 for(let t=0;t<26;t++){ await new Promise(r=>setTimeout(r,1400)); if(await pg.evaluate(()=>!!window.__ch1Live)) break }
 for(let t=0;t<20;t++){ if(await pg.evaluate(()=>{const e=document.querySelector('.ch1-arrive');return !e||e.classList.contains('is-gone')})) break; await new Promise(r=>setTimeout(r,700)) }
 const read = () => pg.evaluate(()=>({yaw:+window.__ch1Live.yaw.toFixed(3), x:+window.__ch1Live.player.x.toFixed(2), z:+window.__ch1Live.player.z.toFixed(2)}))
+
+/* A warm-up leg that is measured by nobody. The first angle used to report
+   „moved 0.00m — blocked?" every run while the other three aligned at 1.000:
+   the region is still settling when the loop starts, and the first three
+   seconds of held W buy no rendered frames. Burning one leg first is the
+   difference between a harness that measures the camera and one that measures
+   the loading screen. */
+await pg.evaluate(()=>{ const l=window.__ch1Live; l.player.set(0,0,0); l.yaw=0.6; l.lastDrag=0 })
+await pg.keyboard.down('KeyW'); await new Promise(r=>setTimeout(r,2500)); await pg.keyboard.up('KeyW')
+await new Promise(r=>setTimeout(r,600))
 
 for (const startYaw of [2.117, -1.2, Math.PI, -2.8]) {
   await pg.evaluate((y)=>{ const l=window.__ch1Live; l.player.set(0,0,0); l.yaw=y; l.lastDrag=0 }, startYaw)

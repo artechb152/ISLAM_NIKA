@@ -44,11 +44,24 @@ export function fitToGround(obj: THREE.Object3D, height = CHAR_HEIGHT) {
 
 export type RawiClip = 'idle' | 'walk' | 'talk' | 'talk-nod' | 'talk-ack' | 'talk-happy'
 
+/* Rawi's walk is the same 1.042 s Mixamo cycle the traveller uses (both read
+   with `npm run measure-walk`), on a body fitted to 1.70 m instead of 1.78 —
+   so one loop carries him 1.9 × 1.70/1.78 ≈ 1.82 m.
+
+   He needs this because he does not move at one speed: the companion closes a
+   gap at 3.4, 4.6 or 6.6 m/s depending on how far behind he has fallen, and
+   the clip played at a flat rate of 1 the whole time. At 6.6 m/s that is a
+   2.6 m/s walk cycle under a body crossing the ground almost three times as
+   fast — he skated back to your shoulder. */
+const RAWI_CLIP_SECONDS = 1.042
+const RAWI_CYCLE_METRES = 1.82
+
 export function Rawi({
   clip,
   position,
   lookAt,
   groundAt,
+  speed,
 }: {
   clip: RawiClip
   position: THREE.Vector3
@@ -56,6 +69,11 @@ export function Rawi({
   groundAt?: (x: number, z: number) => number
   /** World point the body turns toward — the player, or the character speaking. */
   lookAt?: THREE.Vector3
+  /** How fast he is actually crossing the ground, m/s — drives the step rate.
+      A ref and not a number: his speed changes every frame as the gap to the
+      player closes, and a plain prop would only be re-read when the clip
+      changes — which is to say, almost never while he is walking. */
+  speed?: { current: number }
 }) {
   const group = useRef<THREE.Group>(null)
   const { scene, animations } = useGLTF(MODEL.rawi)
@@ -86,7 +104,18 @@ export function Rawi({
     }
   }, [actions, clip])
 
+  /* The walk action is held so its rate can follow his ground speed. Setting it
+     inside the effect above would only sample the speed at the moment the clip
+     changed, and his speed changes continuously as the gap to the player
+     closes. */
+  const walk = actions['walk']
   useFrame(() => {
+    if (walk) {
+      const v = speed?.current ?? 0
+      walk.setEffectiveTimeScale(
+        clip === 'walk' && v > 0.05 ? (v * RAWI_CLIP_SECONDS) / RAWI_CYCLE_METRES : 1,
+      )
+    }
     const g = group.current
     if (!g) return
     g.position.copy(position)

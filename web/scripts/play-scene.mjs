@@ -43,7 +43,10 @@ const errs = []
 pg.on('pageerror', (e) => errs.push(String(e.message).slice(0, 180)))
 
 await pg.goto(`${BASE}/chapter1?region=${REGION}`, { waitUntil: 'networkidle', timeout: 120000 })
-await pg.evaluate(() => localStorage.setItem('ch1:intro:v1', '1'))
+await pg.evaluate((r) => {
+  localStorage.setItem('ch1:intro:v1', '1')
+  localStorage.setItem(`ch1:arrived:${r}:v1`, '1')
+}, REGION)
 /* The splash button has to be clicked after React has hydrated, and clicking it
    once is not proof it took: the first attempt landed on a button whose handler
    was not attached yet and the harness then waited a full minute at the title

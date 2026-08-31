@@ -225,8 +225,11 @@ export function DialogueHud({
         )}
 
         <div className="hud-dialogue-actions">
+          {/* „נרשם במחברת" רק כשבאמת נרשם. פעימות בלי רשומה — ברכת ההיכרות
+              ומשפטי ההגעה — נושאות notebook: 0 ואינן נכנסות למחברת, והשורה
+              הזאת הצהירה עליהן שכן, ליד מונה שנשאר על אותו מספר. */}
           <span className="hud-dialogue-count">
-            {showDone ? '✓ נרשם במחברת · ' : ''}
+            {showDone && encounter.notebook > 0 ? '✓ נרשם במחברת · ' : ''}
             מחברת: {notebookDone} מתוך {notebookTotal}
           </span>
           {showDone && (
