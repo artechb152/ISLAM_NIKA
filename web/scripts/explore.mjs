@@ -46,7 +46,13 @@ let shotN = 0
 
 async function shoot(pg, region, tag) {
   const name = `${String(++shotN).padStart(3, '0')}-${region}-${tag}.png`
-  await pg.screenshot({ path: join(OUT, name) })
+  /* A heavy region under software rendering can take longer than Playwright's
+     default 30 s to produce one frame. That is the renderer, not the game, and
+     a missed picture must not abort a nine-region run — the border post used to
+     kill the whole sweep two regions in. */
+  const ok = await pg.screenshot({ path: join(OUT, name), timeout: 20000 })
+    .then(() => true).catch(() => false)
+  if (!ok) { console.log(`  (no frame for ${region}/${tag} within 20s)`); return null }
   return name
 }
 
