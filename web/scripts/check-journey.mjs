@@ -65,6 +65,18 @@ for (const region of dialogue.regions) {
 
   const placed = new Set([...(cast[region.id] ?? []), ...ALWAYS_PRESENT])
   for (const e of encounters) {
+    /* A line may name its own speaker so two people can hold a conversation.
+       That also makes it possible to hand a line to somebody who is nowhere in
+       the region — the panel would show their face and their name over a scene
+       they are not standing in, and no other check would see it. */
+    for (const l of [...(e.lines ?? []), ...(e.rawi_followup ?? []), ...(e.choices ?? []).flatMap((c) => c.lines ?? [])]) {
+      if (l.speaker && !placed.has(l.speaker) && l.speaker !== 'narrator') {
+        problems.push(
+          `${region.id}: a line in "${e.id}" is given to '${l.speaker}', who is not in this region — ` +
+          `the panel would show their portrait over a place they do not stand in.`,
+        )
+      }
+    }
     if (!placed.has(e.speaker)) {
       problems.push(
         `${region.id}: "${e.id}" is spoken by '${e.speaker}', who has no placement — ` +
@@ -74,6 +86,28 @@ for (const region of dialogue.regions) {
     }
     if (!/§\s*\d/.test(JSON.stringify(e))) {
       problems.push(`${region.id}: "${e.id}" carries no §-anchor to the source text.`)
+    }
+    /* A narrator beat fires by itself — on arrival, or once the beat it is the
+       payoff to has been heard. `after:` pointing at nothing is a beat that can
+       never play, and nothing else here would notice: it has a speaker who is
+       always present and a §-anchor like any other. */
+    const trig = e.trigger ?? 'arrive'
+    if (trig.startsWith('after:')) {
+      const needs = trig.slice(6)
+      const found = region.encounters.find((x) => x.id === needs)
+      if (!found) {
+        problems.push(
+          `${region.id}: "${e.id}" waits for "${needs}", which is not an encounter in this region — ` +
+          `it can never fire.`,
+        )
+      } else if (found.notebook >= e.notebook) {
+        problems.push(
+          `${region.id}: "${e.id}" (notebook ${e.notebook}) waits for "${needs}" (notebook ${found.notebook}), ` +
+          `which comes after it — the payoff would still precede its setup.`,
+        )
+      }
+    } else if (trig !== 'arrive') {
+      problems.push(`${region.id}: "${e.id}" has an unknown trigger '${trig}'.`)
     }
   }
   notes.push(`✓ ${region.id.padEnd(14)} ${String(encounters.length).padStart(2)} encounters, cast: ${[...(cast[region.id] ?? [])].join(', ') || '(rawi only)'}`)

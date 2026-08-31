@@ -15,3 +15,8 @@ concept/chapter2/node_modules/
 # live-lab outputs — screenshots and recordings, regenerated on demand
 web/scratchpad/tour/
 web/scratchpad/imgs.json
+# playthrough captures from scripts/explore.mjs and scripts/play-scene.mjs —
+# hundreds of PNGs per run, regenerated on demand
+web/scratchpad/explore*/
+web/scratchpad/film-check*/
+web/scratchpad/scene-*/

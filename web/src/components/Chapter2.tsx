@@ -301,18 +301,10 @@ function Head({ id }: { id: string }) {
   )
 }
 
-/** A sub-heading — chapter 6's `.scrolly-env`: Kedem at --sub, maroon, one rule
-    under it, sized to its own text. Fifteen of these are what make chapter 6
-    feel paced; this chapter has four, all of them inside „התרבות השבטית". */
-function SubHead({ section, id }: { section: string; id: string }) {
-  const s = sub(section, id)
-  return (
-    <h3 className="ch2-sub" id={id} data-reveal>
-      {s.title}
-      {s.term && <span> ({s.term})</span>}
-    </h3>
-  )
-}
+/* The plain `SubHead` that used to stand here is gone. Its four headings —
+   all of them inside „התרבות השבטית" — are rendered by `TraitCard` below, which
+   emits the same `<h3.ch2-sub>` with the card's button inside it. Nothing had
+   called SubHead since; it was the shape the cards replaced. */
 
 function Section({ id, className = '', children }: { id: string; className?: string; children: React.ReactNode }) {
   return (

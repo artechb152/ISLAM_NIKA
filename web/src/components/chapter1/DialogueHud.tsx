@@ -118,7 +118,9 @@ export function DialogueHud({
 
   const pickChoice = useCallback((c: Choice) => {
     setAsked((a) => [...a, c.prompt])
-    setInterlude(c.lines.map((l) => ({ speaker: encounter.speaker, text: l.text, source: l.source })))
+    /* an answer can come from someone other than the person asked — Rawi
+       cutting in on the envoy is the whole point of a travelling companion */
+    setInterlude(c.lines.map((l) => ({ speaker: l.speaker ?? encounter.speaker, text: l.text, source: l.source })))
     setI(0)
   }, [encounter.speaker])
 
@@ -143,6 +145,17 @@ export function DialogueHud({
   const cinematic = encounter.kind === 'cinematic' && step.speaker === 'narrator'
 
   return (
+    <>
+      {/* An encounter with a film is a screening, and a screening needs the room
+          dark. Without this the picture competed with a lit desert behind it and
+          read as a widget floating over the game rather than as a cut to film. */}
+      {encounter.film && (
+        <div
+          className="ch1-cinema-scrim"
+          aria-hidden="true"
+          onClick={() => (showChoices || showDone ? undefined : advance())}
+        />
+      )}
     <div
       className={`hud-panel hud-dialogue is-open is-anchored${cinematic ? ' is-cinematic' : ''}${encounter.film ? ' has-film' : ''}`}
       onClick={() => (showChoices || showDone ? undefined : advance())}
@@ -238,5 +251,6 @@ export function DialogueHud({
         </div>
       </div>
     </div>
+    </>
   )
 }

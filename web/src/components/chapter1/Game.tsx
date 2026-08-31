@@ -96,10 +96,6 @@ interface Live {
   riseAt: number
   /** a task prop is in hand — the camera's mouse-look must not fight the drag */
   taskDrag: boolean
-  /** the model view — M lifts the camera to the diorama pose while play goes
-      on underneath. The chapter's world is the model Rawi builds in memory,
-      and this is the key that looks at it that way. */
-  modelView: boolean
 }
 
 /* Where the traveller is standing when this region opens. Normally the layout's
@@ -144,7 +140,6 @@ function makeLive(): Live {
     talk: null,
     riseAt: 0,
     taskDrag: false,
-    modelView: false,
   }
 }
 
@@ -662,8 +657,10 @@ const MODEL_FIREPIT = '/assets/chapter1/models/firepit.glb'
 const MODEL_TORCH = '/assets/chapter1/models/torch.glb'
 const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
 const MODEL_TRAVELER_STAND = '/assets/chapter1/models/traveler-stand.glb'
-const MODEL_TRAVELER_STRIDE = '/assets/chapter1/models/traveler-stride.glb'
-const MODEL_TRAVELER_PASSING = '/assets/chapter1/models/traveler-passing.glb'
+/* make-player.py also writes traveler-stride, traveler-passing and
+   traveler-walk. The game stopped loading all three when the player took
+   Rawi's skeleton and the walk came from traveler-anim instead; the constants
+   outlived the code that used them. */
 const MODEL_TRAVELER_WALK = '/assets/chapter1/models/traveler-anim.glb'
 const MODEL_PALM = '/assets/chapter1/models/palm.glb'
 const MODEL_WELL = '/assets/chapter1/models/well.glb'
@@ -1476,7 +1473,6 @@ function Player({ live }: { live: Live }) {
      שניים צדי וחוזרת כשהשיחה נסגרת. הוכח חי לפני שנכתב:
      scratchpad/lab2.mjs `twoshot`. */
   const talkBlend = useRef(0)
-  const modelBlend = useRef(0)
   const talkAnchor = useRef({ x: 0, z: 0 })
   const twoShotV = useRef(new THREE.Vector3())
   const lookV = useRef(new THREE.Vector3())
@@ -1661,10 +1657,9 @@ function Player({ live }: { live: Live }) {
       const rt = Math.max(0, Math.min(1, (performance.now() - live.riseAt) / 1500))
       riseK = rt < 0.5 ? 2 * rt * rt : 1 - Math.pow(-2 * rt + 2, 2) / 2
     }
-    /* מבט הדגם (מקש M) — אותה תנוחה, אבל נשלטת: נכנסים ויוצאים ברצון,
-       וההליכה ממשיכה מתחת. שני המבטים חולקים מקדם אחד. */
-    modelBlend.current += ((live.modelView ? 1 : 0) - modelBlend.current) * Math.min(1, dt * 2.2)
-    riseK = Math.max(riseK, modelBlend.current)
+    /* מבט הדגם שהיה כאן ירד עם המהלך שהחזיר את M למפה בלבד. `live.modelView`
+       נשאר false לתמיד, ולכן ההשמה הזאת התכנסה ל-0 ו-Math.max לא עשה כלום —
+       מחוות היציאה (`riseAt`) היא היחידה שמרימה את המצלמה אל הדגם. */
 
     const CAM_DIST = 3.7 + rb * 0.65
     const camOffset = new THREE.Vector3(0, 2.45 - rb * 0.15, CAM_DIST).applyAxisAngle(new THREE.Vector3(0, 1, 0), -live.yaw)
@@ -2967,7 +2962,6 @@ export default function Game() {
      שלה על המסך, ומפנה מבט אל ראאווי כשהוא זה שמעיר. */
   const [stepSpeaker, setStepSpeaker] = useState<string | null>(null)
   const [openTask, setOpenTask] = useState(false)
-  const [modelView, setModelView] = useState(false)
   /* מצב המשימה חי כאן ולא בפאנל: גם הכפתורים וגם גרירת החפצים
      עוברים דרך אותו chooseTask, וסגירת הפאנל לא מאבדת התקדמות —
      בארגז ההעמסה שתי תשובות נכונות, וסגירה בין שתיהן היא לגיטימית. */
@@ -3138,12 +3132,29 @@ export default function Game() {
     if (!sceneReady) return
     const heard = readNotebook().seen
     const cine = REGION.encounters.find(
-      (e) => e.speaker === 'narrator' && !heard.includes(e.id),
+      (e) => e.speaker === 'narrator' && !heard.includes(e.id) && (e.trigger ?? 'arrive') === 'arrive',
     )
     if (!cine) return
     const t = window.setTimeout(() => setEncounter(cine), 1100)
     return () => window.clearTimeout(t)
   }, [sceneReady])
+
+  /* A narrator beat that waits for its setup. `birds-cinematic` is the payoff
+     to `abraha-story`, and the moment that story is filed the birds are what
+     happens next — no marker to find, no key to press, because a miracle is
+     not something the player goes and collects. */
+  useEffect(() => {
+    if (!sceneReady || encounter) return
+    const heard = new Set(seen)
+    const due = REGION.encounters.find((e) => {
+      if (e.speaker !== 'narrator' || heard.has(e.id)) return false
+      const t = e.trigger ?? 'arrive'
+      return t.startsWith('after:') && heard.has(t.slice(6))
+    })
+    if (!due) return
+    const t = window.setTimeout(() => setEncounter(due), 900)
+    return () => window.clearTimeout(t)
+  }, [sceneReady, seen, encounter])
 
   /* A read-only handle on where the traveller is standing. This used to be
      dev-only, which meant the built chapter — the one people actually play —
@@ -3454,12 +3465,6 @@ export default function Game() {
         </Canvas>
         {/* המסגרת שסוגרת את הפריים — מתחת לכל שכבות ה-HUD, מעל הקנבס */}
         <div className="ch1-vignette" aria-hidden="true" />
-        {modelView && (
-          <div className="hud-panel ch1-model-chip" role="status">
-            מבט הדגם · <b>M</b> למפה · <b>Esc</b> לחזרה
-          </div>
-        )}
-
         {/* Leaving a region took 900 ms behind a banner; arriving took none.
             The new document rendered a bare plate, then a loading line, then a
             canvas drawing nothing while up to 193 props decoded, and then the

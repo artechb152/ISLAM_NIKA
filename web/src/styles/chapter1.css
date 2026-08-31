@@ -322,21 +322,84 @@ body{
   width:min(640px,92vw);align-items:flex-start;
 }
 .hud-dialogue.is-anchored::after{display:none}
-/* מצב קולנוע: מפגש עם סרט תופס את המסך — הווידאו גדול, נכון ביחס,
-   והטקסט יושב מתחתיו ככתוביות של הקרנה */
+/* מצב קולנוע: מפגש עם סרט הוא הקרנה, לא חלונית עם וידאו בתוכה.
+   העולם מתעמעם מאחור, הסרט תופס את המסך, והטקסט יושב מתחתיו ככתוביות.
+
+   מה שהיה כאן קודם: תיבה ברוחב מלא עם max-height:56vh ו-object-fit:contain.
+   שני הכללים נלחמו — התיבה יצאה 1052×453 (יחס 2.3:1), הסרט 16:9 הוכנס לתוכה
+   ב-contain, וקיבלנו 805 פיקסלים של תמונה עם 123 פיקסלים של שחור מכל צד,
+   על מסך ברוחב 1440. הסרט לא היה קטן כי לא היה מקום; הוא היה קטן כי התיבה
+   שסביבו הייתה בצורה הלא נכונה.
+
+   התיקון: התיבה עצמה מקבלת את יחס הסרט. הגובה הוא הכובל, הרוחב נגזר ממנו,
+   ואין מה ל-contain למלא. */
+.ch1-cinema-scrim{
+  position:absolute;inset:0;z-index:14;
+  background:radial-gradient(ellipse at center,rgba(8,4,2,.72),rgba(6,3,1,.93));
+  backdrop-filter:blur(2px);
+  animation:ch1-scrim-in .45s ease both;
+}
+@keyframes ch1-scrim-in{from{opacity:0}to{opacity:1}}
+
 .hud-dialogue.has-film{
-  bottom:auto;top:50%;left:50%;transform:translate(-50%,-52%);
-  width:min(1080px,94vw);flex-direction:column;align-items:stretch;
-  padding:14px 14px 16px;
+  z-index:15;
+  bottom:auto;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:fit-content;max-width:96vw;
+  flex-direction:column;align-items:center;
+  padding:0;background:none;border:0;box-shadow:none;backdrop-filter:none;
 }
 .hud-dialogue.has-film .hud-portrait,
 .hud-dialogue.has-film .hud-speaker-avatar{display:none}
+.hud-dialogue.has-film .hud-dialogue-body{width:100%;display:flex;flex-direction:column;align-items:center}
 .hud-dialogue.has-film .hud-film{
-  width:100%;aspect-ratio:16/9;max-height:56vh;object-fit:contain;
-  background:#0d0704;border-radius:8px;margin:0 0 12px;
-  animation:ch1-film-in .55s ease both;
+  /* the box IS the film's shape, so nothing is letterboxed into it */
+  aspect-ratio:16/9;
+  height:min(74vh, calc(96vw * 9 / 16));
+  width:auto;max-width:96vw;
+  /* the generic .hud-film below caps every film at 200px for the small
+     in-card use; a taller `height` cannot beat a `max-height`, and leaving
+     this out is what pinned the screening at 356×200 */
+  max-height:none;
+  object-fit:contain;display:block;
+  background:#000;border-radius:10px;margin:0;
+  box-shadow:0 24px 80px rgba(0,0,0,.66), 0 0 0 1px rgba(199,154,60,.22);
+  animation:ch1-film-in .6s cubic-bezier(.2,.7,.3,1) both;
 }
-@keyframes ch1-film-in{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+/* the caption band under the picture — a projection's subtitles, not a panel */
+.hud-dialogue.has-film .hud-title,
+.hud-dialogue.has-film p.is-full,
+.hud-dialogue.has-film .hud-dialogue-actions,
+.hud-dialogue.has-film .hud-choices{
+  width:min(880px,92vw);
+}
+.hud-dialogue.has-film .hud-title{margin:16px 0 4px;text-align:center;opacity:.82}
+.hud-dialogue.has-film p.is-full{
+  text-align:center;font-size:17.5px;line-height:1.62;min-height:0;
+  text-shadow:0 2px 14px rgba(0,0,0,.8);
+}
+.hud-dialogue.has-film .hud-dialogue-actions{margin-top:14px;justify-content:center}
+.hud-dialogue.has-film .hud-dialogue-count{margin-inline-end:0}
+@keyframes ch1-film-in{from{opacity:0;transform:scale(.965)}to{opacity:1;transform:none}}
+
+/* short screens: the caption needs the room more than the picture does */
+@media (max-height:620px){
+  .hud-dialogue.has-film .hud-film{height:min(58vh, calc(96vw * 9 / 16))}
+  .hud-dialogue.has-film p.is-full{font-size:15.5px}
+}
+
+/* While the film runs, the play HUD gets out of the way. Dimming the world but
+   leaving the goal bar, the minimap and the key hints lit is what made the
+   first version still read as a video widget pasted over a game: the eye had
+   somewhere else to go. The lights go down on the whole room. */
+.ch1-stage:has(.ch1-cinema-scrim) .hud-goal,
+.ch1-stage:has(.ch1-cinema-scrim) .hud-map,
+.ch1-stage:has(.ch1-cinema-scrim) .hud-controls,
+.ch1-stage:has(.ch1-cinema-scrim) .hud-controls-peek,
+.ch1-stage:has(.ch1-cinema-scrim) .poi-hint,
+.ch1-stage:has(.ch1-cinema-scrim) .ch1-travel,
+.ch1-stage:has(.ch1-cinema-scrim) .ch1-vignette{
+  opacity:0;pointer-events:none;transition:opacity .4s ease;
+}
 
 /* the narrator has no portrait and no speaker to hang off */
 .hud-dialogue.is-cinematic p{font-style:italic}
@@ -844,12 +907,7 @@ body{
 .ch1-find-card h3,.ch1-task-card h3{
   margin:0 0 12px;font-family:var(--font-heading);font-size:23px;color:var(--cream);
 }
-/* שבב מבט הדגם — צף מתחת לכותרת, מעל הקנבס */
-.ch1-model-chip{
-  position:absolute;top:14px;inset-inline-start:50%;transform:translateX(50%);
-  z-index:12;padding:6px 16px;font-size:13.5px;pointer-events:none;
-}
-.ch1-model-chip b{color:var(--gold-soft, #c9a25c)}
+/* שבב מבט הדגם ירד יחד עם המצב שהציג אותו — M חזר להיות מפה בלבד. */
 
 /* תווית מעל חפץ-תשובה ליד תחנה — קטנה, בסגנון חלוניות ה-HUD */
 .ch1-prop-label{

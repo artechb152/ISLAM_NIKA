@@ -6,7 +6,12 @@
 import { readFile } from 'node:fs/promises'
 
 const dir = new URL('.', import.meta.url)
-const dlg = JSON.parse(await readFile(new URL('dialogue.json', dir), 'utf8'))
+/* The live file, not the copy that used to sit beside this script. There were
+   two dialogue.json — this folder's and the game's — and they had drifted 16
+   encounters apart, so the fidelity gate was checking text no player has seen
+   since the content pass of 26.8. A gate pointed at a stale copy is worse than
+   no gate: it reports green over unverified content. */
+const dlg = JSON.parse(await readFile(new URL('../../web/src/lib/chapter1/dialogue.json', dir), 'utf8'))
 const src = await readFile(new URL('SOURCE-TEXT.md', dir), 'utf8')
 
 const sourceSections = new Set([...src.matchAll(/^#{2,3} (§\d+)/gm)].map((m) => m[1]))

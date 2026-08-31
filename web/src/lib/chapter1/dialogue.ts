@@ -18,6 +18,18 @@ export interface Line {
   text: string
   /** Quotes or cites the Qur'an — collected into the notebook's verses tab. */
   verse?: boolean
+  /** Who says this line, when it is not the encounter's own speaker.
+   *
+   *  Without this the model could only produce one voice per encounter, with
+   *  Rawi allowed a remark at the end — and 24 of the chapter's 27 encounters
+   *  came out as an uninterrupted lecture by a single person. Yathrib was five
+   *  of them in a row from the same man while Rawi stood beside the player and
+   *  said nothing until the fifth.
+   *
+   *  The runtime was already ready for this: the panel swaps portrait and name
+   *  per line, and `onSpeakerChange` turns the right head in the 3D scene. Only
+   *  the data could not say "and here the other one answers". */
+  speaker?: SpeakerId
 }
 
 export interface Choice {
@@ -30,6 +42,13 @@ export interface Encounter {
   speaker: SpeakerId
   /** `cinematic` plays without a portrait; `climax` is the Abraha sequence. */
   kind?: 'cinematic' | 'climax'
+  /** When a narrator beat fires. The narrator has no body to stand beside and
+      no key of his own, so his encounters play on their own — and "as soon as
+      the region opens" was the only rule there was. In Mecca that handed the
+      player the birds over Abraha's army the moment they walked in: notebook
+      25 of 27, the payoff to a story told in 24, delivered before any of it.
+      `after:<id>` is how a beat waits for the ground it stands on. */
+  trigger?: 'arrive' | `after:${string}`
   /** Index into the 26-item notebook this encounter files under. */
   notebook: number
   gesture?: Gesture
@@ -157,10 +176,11 @@ export function regionProgress(seen: string[]): RegionProgress[] {
   })
 }
 
-/** Flattened speech for an encounter: the character, then Rawi's remark. */
+/** Flattened speech for an encounter, in the order it is heard. A line speaks
+    in its own voice when it names one, and otherwise in the encounter's. */
 export function encounterScript(e: Encounter): { speaker: SpeakerId; line: Line }[] {
   return [
-    ...e.lines.map((line) => ({ speaker: e.speaker, line })),
-    ...(e.rawi_followup ?? []).map((line) => ({ speaker: 'rawi' as SpeakerId, line })),
+    ...e.lines.map((line) => ({ speaker: line.speaker ?? e.speaker, line })),
+    ...(e.rawi_followup ?? []).map((line) => ({ speaker: line.speaker ?? ('rawi' as SpeakerId), line })),
   ]
 }
