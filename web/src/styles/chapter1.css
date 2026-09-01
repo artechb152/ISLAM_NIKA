@@ -1004,3 +1004,19 @@ body{
 .ch1-plan-map .pm-dot{fill:rgba(245,236,214,.75)}
 .ch1-plan-map .pm-dot-mecca{fill:var(--gold-soft,#c79a3c)}
 .ch1-plan-map .pm-stop{fill:rgba(245,236,214,.85);font-size:11px}
+
+.hud-card-btn.is-locked{opacity:.45;border-style:dashed}
+.ch1-task-lock{font-size:12px;opacity:.75}
+
+/* מפת השכנות — connect: המעגל המשותף עוטף את הבית */
+.ch1-task-rings{display:flex;flex-direction:column;gap:0;margin-top:6px}
+.ch1-task-rings .ch1-sort-bin{display:block;width:100%;text-align:center;border-radius:22px;border:1.5px dashed rgba(199,154,60,.4);background:rgba(199,154,60,.06);padding:14px 16px 18px;cursor:pointer;color:inherit}
+.ch1-task-rings .ch1-sort-bin + .ch1-sort-bin{margin:-6px auto 0;width:72%;border-radius:16px;border-style:solid;border-color:rgba(245,236,214,.35);background:rgba(20,10,8,.45)}
+.ch1-task-rings .ch1-sort-bin.is-live{border-color:var(--gold-soft,#c79a3c);box-shadow:0 0 0 2px rgba(199,154,60,.18)}
+.ch1-task-rings .ch1-sort-bin[disabled]{cursor:default;opacity:.85}
+.ch1-task-rings .ch1-sort-bin-label{display:block;font-weight:600;margin-bottom:4px}
+.ch1-task-rings .ch1-sort-bin-has{display:block;font-size:13px;opacity:.8;min-height:1.2em}
+
+.ch1-observe-list{list-style:none;padding:4px 0 0;margin:0;display:grid;gap:6px}
+.ch1-observe-list li{opacity:.6}
+.ch1-observe-list li.is-seen{opacity:1;color:var(--gold-soft,#c79a3c)}

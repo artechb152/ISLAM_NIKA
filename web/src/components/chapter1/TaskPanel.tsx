@@ -16,11 +16,19 @@
 
 import { useState } from 'react'
 import type { Task } from '@/lib/chapter1/tasks'
+import { FINDS } from '@/lib/chapter1/finds'
 
-export function TaskPanel({ task, chosen, last, lastOk, solved, onChoose, onSort, onClose }: {
+/* כותרות התצפיות של משימות observe, מהעדויות עצמן — מקור אחד לאמת */
+const OBSERVE_LABELS: Record<string, string> = Object.fromEntries(
+  FINDS.map((f) => [f.id, f.title]),
+)
+
+export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onChoose, onSort, onClose }: {
   task: Task
   /** right answers already given, by either hand or button */
   chosen: string[]
+  /** evidence already picked up — `present` options stay locked without theirs */
+  found?: string[]
   /** the most recent choice — its note is on display */
   last: string | null
   /** whether that choice was the right one; a sort task's misses teach too */
@@ -31,7 +39,10 @@ export function TaskPanel({ task, chosen, last, lastOk, solved, onChoose, onSort
   onSort: (itemId: string, binId: string) => void
   onClose: () => void
 }) {
-  const sorting = task.kind === 'sort'
+  /* connect חולק את מכניקת השני-קליקים של sort — רק התמונה שונה:
+     מעגל משותף שעוטף את "בבית פנימה" במקום שני דליים זה לצד זה. */
+  const sorting = task.kind === 'sort' || task.kind === 'connect' || task.kind === 'observe'
+  const nested = task.kind === 'connect'
   const needed = sorting ? task.options : task.options.filter((o) => o.right)
   const lastOpt = last ? task.options.find((o) => o.id === last) : null
   /* Two clicks, not a drag: pick the thing up, then say which side it goes on.
@@ -47,7 +58,21 @@ export function TaskPanel({ task, chosen, last, lastOk, solved, onChoose, onSort
         <h3 id="ch1-task-title">{task.title}</h3>
         <p className="ch1-task-question">{task.question}</p>
 
-        {sorting ? (
+        {task.kind === 'observe' && (task.needsFinds ?? []).some((f) => !found.includes(f)) ? (
+          /* שופטים רק את מה שראו: עד ששלוש התצפיות נראו, המיון נשאר סגור
+             והלוח אומר בדיוק מה עוד יש לראות. */
+          <div className="ch1-task-observe" role="status">
+            <p className="ch1-task-hint">לפני שתשיבו — הסתובבו וראו במו עיניכם (F):</p>
+            <ul className="ch1-observe-list">
+              {(task.needsFinds ?? []).map((f) => (
+                <li key={f} className={found.includes(f) ? 'is-seen' : ''}>
+                  {found.includes(f) ? '✓' : '○'}{' '}
+                  {OBSERVE_LABELS[f] ?? f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : sorting ? (
           <div className="ch1-task-sort">
             <div className="ch1-task-tray" role="group" aria-label="הדברים למיון">
               {task.options.map((o) => {
@@ -66,7 +91,7 @@ export function TaskPanel({ task, chosen, last, lastOk, solved, onChoose, onSort
                 )
               })}
             </div>
-            <div className="ch1-task-bins">
+            <div className={nested ? 'ch1-task-rings' : 'ch1-task-bins'}>
               {(task.bins ?? []).map((b) => (
                 <button
                   key={b.id}
@@ -118,17 +143,23 @@ export function TaskPanel({ task, chosen, last, lastOk, solved, onChoose, onSort
               </svg>
             )}
             <div className="ch1-task-options">
-              {task.options.map((o) => (
-                <button
-                  key={o.id}
-                  type="button"
-                  className={`hud-card-btn${chosen.includes(o.id) ? ' is-taken' : ''}`}
-                  disabled={chosen.includes(o.id) || solved}
-                  onClick={() => onChoose(o.id)}
-                >
-                  {o.label}
-                </button>
-              ))}
+              {task.options.map((o) => {
+                /* אי אפשר להציג מה שאין ביד: אופציית present בלי העדות
+                   שלה נעולה, ואומרת בדיוק מה חסר ואיך משיגים אותו. */
+                const missing = !!o.needsFind && !found.includes(o.needsFind)
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    className={`hud-card-btn${chosen.includes(o.id) ? ' is-taken' : ''}${missing ? ' is-locked' : ''}`}
+                    disabled={missing || chosen.includes(o.id) || solved}
+                    onClick={() => onChoose(o.id)}
+                  >
+                    {o.label}
+                    {missing && <span className="ch1-task-lock"> · עוד לא נמצא — חפשו סביב (F)</span>}
+                  </button>
+                )
+              })}
             </div>
           </>
         )}

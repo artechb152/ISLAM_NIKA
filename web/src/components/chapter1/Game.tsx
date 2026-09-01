@@ -3226,7 +3226,7 @@ export default function Game() {
      answer a choose task waits for. */
   const sortTask = useCallback(
     (itemId: string, binId: string) => {
-      if (!REGION_TASK || REGION_TASK.kind !== 'sort') return
+      if (!REGION_TASK || !['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')) return
       const opt = REGION_TASK.options.find((o) => o.id === itemId)
       if (!opt) return
       setTaskLast(itemId)
@@ -3995,6 +3995,7 @@ export default function Game() {
           <TaskPanel
             task={REGION_TASK}
             chosen={taskChosen}
+            found={found}
             last={taskLast}
             lastOk={taskLastOk}
             solved={taskSolved}
