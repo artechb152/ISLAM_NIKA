@@ -15,7 +15,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { SkeletonUtils } from 'three-stdlib'
 
-const DEFAULT_MODEL = '/assets/chapter1/models/traveler-anim.glb'
+const DEFAULT_MODEL = '/assets/chapter1/models/player2.glb'
 
 function useQuery(name: string, fallback: string): string {
   const [v, setV] = useState(fallback)

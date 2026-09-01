@@ -696,7 +696,6 @@ const MODEL_TENT = '/assets/chapter1/models/blacktent.glb'
 const MODEL_FIREPIT = '/assets/chapter1/models/firepit.glb'
 const MODEL_TORCH = '/assets/chapter1/models/torch.glb'
 const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
-const MODEL_TRAVELER_STAND = '/assets/chapter1/models/traveler-stand.glb'
 /* make-player.py also writes traveler-stride, traveler-passing and
    traveler-walk. The game stopped loading all three when the player took
    Rawi's skeleton and the walk came from traveler-anim instead; the constants
@@ -729,7 +728,7 @@ const RUN_CYCLE_METRES = 4.41
 /* אורך צעד לשעון הצליל/אבק/נדנוד — הקליפ החדש מכיל כמה צעדים בלולאה,
    ולכן השעון סופר צעדים (2 לכל 2π) ולא לולאות-קליפ */
 const STEP_METRES = 0.78
-for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_WALK, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
+for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_WALK, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
   useGLTF.preload(m)
 }
 

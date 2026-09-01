@@ -1,0 +1,20 @@
+> node scripts/fix-basepath.mjs
+
+[fix-basepath] GH_PAGES!=true — skipping (local build unchanged).
+
+the chapter walks end to end
+│ 8       │ 'exit'          │ '1/1' │ 0     │ 1    │ '—'  │ '25 → 26' │ 0      │
+└─────────┴─────────────────┴───────┴───────┴──────┴──────┴───────────┴────────┘
+
+encounters heard: 26 / 26
+evidence:         21 / 21
+tasks solved:     8 / 8
+
+the notebook fills
+
+  M opens the map only, and the region hand-off still lifts to the model view.
+
+
+  run differs from walk by 0%
+  ✓ the feet keep up with the ground at both speeds
+
