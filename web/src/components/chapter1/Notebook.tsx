@@ -20,6 +20,7 @@ import {
 } from '@/lib/chapter1/dialogue'
 import { FINDS, FINDS_TOTAL } from '@/lib/chapter1/finds'
 import { TASKS, TASKS_TOTAL } from '@/lib/chapter1/tasks'
+import enrichment from '@/lib/chapter1/enrichment.json'
 
 type Tab = 'all' | 'region' | 'speaker' | 'verses' | 'finds'
 
@@ -104,6 +105,10 @@ export function Notebook({ seen, found, solved, onClose }: {
 }) {
   const [tab, setTab] = useState<Tab>('all')
   const entries = useMemo(() => journal(seen), [seen])
+  const unlockedEnrichment = useMemo(
+    () => enrichment.cards.filter((c) => seen.includes(c.unlock)),
+    [seen],
+  )
   const verseEntries = useMemo(() => verses(seen), [seen])
 
   /* Grouping keeps journey order: a Map preserves insertion order, and the
@@ -178,11 +183,32 @@ export function Notebook({ seen, found, solved, onClose }: {
           )}
 
           {!empty && tab === 'all' && (
-            <div className="nb-grid">
-              {entries.map((entry) => (
-                <Card key={entry.encounter.id} entry={entry} />
-              ))}
-            </div>
+            <>
+              <div className="nb-grid">
+                {entries.map((entry) => (
+                  <Card key={entry.encounter.id} entry={entry} />
+                ))}
+              </div>
+              {/* ערוץ ההעשרה: סעיפי מקור שהוצאו מהמסלול הראשי כדי שלא
+                  יחטפו אותו — ההדהוד המודרני של סורת הפיל ירד מיד אחרי
+                  נס הציפורים לכאן. קלף נפתח כשמפגש ה-unlock שלו נשמע,
+                  ושער הנאמנות סופר אותו ככיסוי מלא. */}
+              {unlockedEnrichment.length > 0 && (
+                <section className="nb-group">
+                  <h3 className="nb-group-title">עוד על זה — למי שרוצה להעמיק</h3>
+                  <div className="nb-grid">
+                    {unlockedEnrichment.map((c) => (
+                      <article key={c.id} className="nb-card nb-enrich">
+                        <div className="nb-card-body">
+                          <p className="nb-who">{c.title}</p>
+                          <p className="nb-txt">{c.body}</p>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           )}
 
           {!empty && tab === 'region' &&

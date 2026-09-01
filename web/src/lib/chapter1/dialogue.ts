@@ -47,8 +47,9 @@ export interface Encounter {
       the region opens" was the only rule there was. In Mecca that handed the
       player the birds over Abraha's army the moment they walked in: notebook
       25 of 27, the payoff to a story told in 24, delivered before any of it.
-      `after:<id>` is how a beat waits for the ground it stands on. */
-  trigger?: 'arrive' | `after:${string}`
+      `after:<id>` is how a beat waits for the ground it stands on, and
+      `task:<id>` fires the moment a station is worked out. */
+  trigger?: 'arrive' | `after:${string}` | `task:${string}`
   /** Index into the 26-item notebook this encounter files under. */
   notebook: number
   gesture?: Gesture
@@ -108,7 +109,7 @@ export const MODEL: Record<Exclude<SpeakerId, 'narrator'>, string> = {
   monk: '/assets/chapter1/models/npc-monk.glb',
 }
 
-export const NOTEBOOK_TOTAL = 27
+export const NOTEBOOK_TOTAL = 26
 
 export function regionById(id: string): Region {
   const r = REGIONS.find((x) => x.id === id)

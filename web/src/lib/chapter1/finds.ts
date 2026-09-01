@@ -229,6 +229,16 @@ export const FINDS: Find[] = [
 
   /* ---- מכה — the pantheon, and the argument about it ---- */
   {
+    id: 'find-divination',
+    region: 'mecca',
+    x: -3.6, z: -9.8, model: 'basket', h: 0.36, ry: 0.7,
+    title: 'אשפת חיצים ליד הכעבה',
+    body:
+      'חיצים בלי חוד, מוחלקים משימוש. כאן שואלים את הֻבַּל שאלה: מיידים ' +
+      'חיצים ליד הפסל, ולפי נפילת החץ מפרשים את התשובה.',
+    source: '§37',
+  },
+  {
     id: 'find-ansab',
     region: 'mecca',
     x: -11.4, z: -12.8, model: 'ansab', h: 1.5, ry: 0.4,

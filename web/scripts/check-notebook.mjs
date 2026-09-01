@@ -415,11 +415,11 @@ console.table(log)
 const seen = tally.seen.length
 const found = tally.found.length
 const solved = tally.solved.length
-console.log('\nencounters heard: %d / 27', seen)
+console.log('\nencounters heard: %d / 26', seen)
 console.log('evidence:         %d / %d', found, FINDS.length)
 console.log('tasks solved:     %d / %d', solved, TASKS.length)
 
-const short = (seen < 27 ? 1 : 0) + (found < FINDS.length ? 1 : 0) + (solved < TASKS.length ? 1 : 0)
+const short = (seen < 26 ? 1 : 0) + (found < FINDS.length ? 1 : 0) + (solved < TASKS.length ? 1 : 0)
 if (short) {
   console.error('\nthe chapter cannot be completed as it stands')
   process.exit(1)

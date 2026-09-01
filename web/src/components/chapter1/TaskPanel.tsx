@@ -58,7 +58,7 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onCh
         <h3 id="ch1-task-title">{task.title}</h3>
         <p className="ch1-task-question">{task.question}</p>
 
-        {task.kind === 'observe' && (task.needsFinds ?? []).some((f) => !found.includes(f)) ? (
+        {(task.needsFinds ?? []).some((f) => !found.includes(f)) ? (
           /* שופטים רק את מה שראו: עד ששלוש התצפיות נראו, המיון נשאר סגור
              והלוח אומר בדיוק מה עוד יש לראות. */
           <div className="ch1-task-observe" role="status">
