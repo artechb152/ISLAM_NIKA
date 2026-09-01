@@ -185,14 +185,9 @@ export function DialogueHud({
             aria-hidden="true"
           />
         )}
-        <h3 className="hud-title">
-          {SPEAKERS[step.speaker]}
-          {/* מספר הסעיף במקור הוא סימון של הכותבים, לא של הלומד.
-              על קריינות פתיחה הוא נקרא ליד „קריין“ כמו טקסט דיבאג. */}
-          {encounter.kind !== 'cinematic' && step.source && (
-            <span className="hud-dialogue-topic"> · {step.source}</span>
-          )}
-        </h3>
+        {/* מספר הסעיף במקור (§) הוא סימון של הכותבים, לא של הלומד — הוא
+            נשאר בנתונים בשביל שער הנאמנות ואינו מוצג עוד. */}
+        <h3 className="hud-title">{SPEAKERS[step.speaker]}</h3>
         <p className="is-full">
           {full.slice(0, revealed)}
           <span className="hud-reveal-rest">{full.slice(revealed)}</span>

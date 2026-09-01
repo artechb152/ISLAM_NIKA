@@ -22,9 +22,7 @@ export function FindCard({ find, index, total, onClose, onNotebook }: {
   return (
     <div className="ch1-find" role="dialog" aria-labelledby="ch1-find-title">
       <div className="ch1-find-card">
-        <p className="ch1-find-eyebrow">
-          נמצא · <span>{find.source}</span>
-        </p>
+        <p className="ch1-find-eyebrow">נמצא</p>
         <h3 id="ch1-find-title">{find.title}</h3>
         {/* העדות עצמה, ביד: הדגם שכבר שכב על הקרקע מסתובב מול העיניים,
             וגרירה מסובבת אותו — רואים את שני צידי הדרהמה במקום לקרוא עליהם */}

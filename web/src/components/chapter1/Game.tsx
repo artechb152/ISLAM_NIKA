@@ -3073,13 +3073,15 @@ function MiniMap({ pos, yaw, met, found, solved }: {
  *
  * It appears only where the road actually stops, and only once everything that
  * region has to say has been said. */
-function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave }: {
+function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose }: {
   done: number
   /** how much of the evidence was actually picked up along the way */
   evidence: number
   onNotebook: () => void
   onMap: () => void
   onLeave: () => void
+  /** back to the overlook — the card must not be a dead end */
+  onClose: () => void
 }) {
   /* הרגע היחיד בפרק שאומר „סיימת“. עד עכשיו הוא הופיע בשקט מוחלט. */
   useEffect(() => { cue('find') }, [])
@@ -3107,6 +3109,9 @@ function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave }: {
           </button>
           <button type="button" className="hud-card-btn" onClick={onLeave}>
             לכל הפרקים
+          </button>
+          <button type="button" className="hud-card-btn" onClick={onClose}>
+            להישאר במשקיף
           </button>
         </div>
       </div>
@@ -3236,6 +3241,25 @@ export default function Game() {
      rather than the state it closes over. */
   const [overlay, setOverlay] = useState<'notebook' | 'map' | null>(null)
 
+  /* הפינאלה. הכרטיס לבדו קפץ על מסך רגיל של כתף — סוף שטוח לדרך של תשעה
+     אזורים. עכשיו סוף הפרק משתמש באותה מחוות מצלמה של מעברי האזורים:
+     המצלמה עולה אל הדגם (riseAt), העולם נהיה דיורמה, ורק אז הכרטיס מופיע
+     מעליו. הסגירה מחזירה את המצלמה ואת השיטוט — ולא קופצת שוב: מי שסגר
+     סגר. דגל ההשלמה של מסך הפרקים נכתב ברגע שהמסע הושלם. */
+  const [finale, setFinale] = useState<'none' | 'rising' | 'card' | 'closed'>('none')
+  const finaleEligible =
+    !ONWARD && !encounter && REGION.encounters.length > 0 && REGION.encounters.every((e) => seen.includes(e.id))
+  useEffect(() => {
+    if (!finaleEligible || finale !== 'none') return
+    live.riseAt = performance.now()
+    cue('gate')
+    try {
+      localStorage.setItem('islam:chapter:1', 'done')
+    } catch {}
+    setFinale('rising')
+    window.setTimeout(() => setFinale('card'), 2400)
+  }, [finaleEligible, finale, live])
+
   /* Crossing into the next region. The world is built at module scope, so the
      handover is a navigation rather than a rebuild — but the learner should
      read it as walking on, so the road's name appears, the screen holds it for
@@ -3270,7 +3294,28 @@ export default function Game() {
   /* one gate for "something is already on screen", so a keypress cannot open a
      second panel behind the first */
   const openRef = useRef(false)
-  openRef.current = !!openFind || openTask
+  openRef.current = !!openFind || openTask || finale === 'card'
+
+  /* Escape סגר דיאלוג, מחברת ומפה — אבל לא כרטיס ראיה, לוח משימה או את
+     כרטיס הסיום. מקש אחד לסגירה חייב לעבוד על כל מה שנפתח. הפעולה נקראת
+     דרך ref כי מטפל המקלדת נרשם פעם אחת. */
+  const escActionRef = useRef<() => boolean>(() => false)
+  escActionRef.current = () => {
+    if (openFind) {
+      setOpenFind(null)
+      return true
+    }
+    if (openTask) {
+      setOpenTask(false)
+      return true
+    }
+    if (finale === 'card') {
+      live.riseAt = 0
+      setFinale('closed')
+      return true
+    }
+    return false
+  }
 
   /* מקש שהוחזק לחוץ ברגע שנפתחה שיחה נשאר לחוץ — ה-keydown הבא הוא
      שמנקה אותו, ועד אז השחקן ממשיך ללכת מתחת לחלון. הדרך היחידה
@@ -3487,6 +3532,13 @@ export default function Game() {
         e.preventDefault()
         cue('page')
         openOverlay('map')
+        return
+      }
+      if (e.code === 'Escape') {
+        if (escActionRef.current()) {
+          e.preventDefault()
+          cue('ui')
+        }
         return
       }
       if (overlayRef.current) return
@@ -3873,13 +3925,17 @@ export default function Game() {
         <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />
 
         {/* the road stops here, and everything this place had to say is said */}
-        {!ONWARD && !encounter && REGION.encounters.every((e) => seen.includes(e.id)) && !overlay && (
+        {finale === 'card' && !overlay && (
           <ChapterEnd
             done={notebook.done}
             evidence={found.length}
             onNotebook={() => setOverlay('notebook')}
             onMap={() => setOverlay('map')}
             onLeave={() => router.push('/chapters')}
+            onClose={() => {
+              live.riseAt = 0
+              setFinale('closed')
+            }}
           />
         )}
 

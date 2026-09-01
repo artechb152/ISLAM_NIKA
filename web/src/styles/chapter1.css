@@ -89,6 +89,8 @@ body{
   transition:transform .25s ease,background .25s ease,box-shadow .25s ease;
 }
 .ch1-opening-start:hover{transform:translateY(-3px);background:var(--stamp);box-shadow:0 17px 38px rgba(20,5,7,.5),0 0 0 4px rgba(199,154,60,.08)}
+.ch1-opening-restart{margin-top:14px;display:block;background:none;border:none;color:rgba(245,236,214,.55);font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:4px}
+.ch1-opening-restart:hover{color:var(--gold-soft)}
 .ch1-opening-start:active{transform:translateY(-1px)}
 .ch1-opening-start:focus-visible{outline:2px solid var(--gold-soft);outline-offset:4px}
 .ch1-opening-start svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s ease}

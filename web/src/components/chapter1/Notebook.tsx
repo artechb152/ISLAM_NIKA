@@ -42,8 +42,6 @@ function Face({ who }: { who: SpeakerId }) {
 function Card({ entry }: { entry: JournalEntry }) {
   const e = entry.encounter
   const followup = e.rawi_followup ?? []
-  const sources = [...e.lines, ...followup].map((l) => l.source)
-  const uniqueSources = [...new Set(sources)]
   return (
     <article className="nb-card">
       <Face who={e.speaker} />
@@ -63,7 +61,6 @@ function Card({ entry }: { entry: JournalEntry }) {
             {followup.map((l) => l.text).join(' ')}
           </p>
         )}
-        <p className="nb-src">{uniqueSources.join(' · ')}</p>
       </div>
     </article>
   )
@@ -79,7 +76,6 @@ function VerseCard({ entry }: { entry: VerseEntry }) {
           <span className="nb-where"> · {entry.regionName}</span>
         </p>
         <p className="nb-txt is-verse">{entry.line.text}</p>
-        <p className="nb-src">{entry.line.source}</p>
       </div>
     </article>
   )
@@ -205,7 +201,6 @@ export function Notebook({ seen, found, solved, onClose }: {
                   <div className="nb-grid">
                     {foundEntries.map((f) => (
                       <article key={f.id} className="nb-card">
-                        <p className="nb-find-src">{f.source}</p>
                         <h4 className="nb-find-title">{f.title}</h4>
                         <p className="nb-find-text">{f.body}</p>
                       </article>
@@ -225,7 +220,6 @@ export function Notebook({ seen, found, solved, onClose }: {
                   <div className="nb-grid">
                     {solvedEntries.map((t) => (
                       <article key={t.id} className="nb-card">
-                        <p className="nb-find-src">{t.source}</p>
                         <h4 className="nb-find-title">{t.title}</h4>
                         <p className="nb-find-text">{t.done}</p>
                       </article>

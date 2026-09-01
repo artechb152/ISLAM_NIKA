@@ -83,3 +83,23 @@ export function setRegion(region: string): NotebookStore {
 export function notebookCount(s: NotebookStore = readNotebook()) {
   return { done: s.entries.length, total: NOTEBOOK_TOTAL }
 }
+
+/* A journey you cannot restart is a journey you can play exactly once: the
+   intro and the arrival greetings are one-shot localStorage flags, so a
+   replay used to be silent from the first step. This clears every chapter-1
+   key — progress, intro, arrivals — and leaves the mute preference alone. */
+export function resetJourney() {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(NOTEBOOK_KEY)
+    window.localStorage.removeItem('ch1:intro:v1')
+    const dead: string[] = []
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i)
+      if (k && k.startsWith('ch1:arrived:')) dead.push(k)
+    }
+    for (const k of dead) window.localStorage.removeItem(k)
+  } catch {
+    /* private mode: nothing stored, nothing to clear */
+  }
+}

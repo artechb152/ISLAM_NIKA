@@ -8,6 +8,8 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { readNotebook, resetJourney } from '@/lib/chapter1/notebook'
+
 const Game = dynamic(() => import('@/components/chapter1/Game'), {
   ssr: false,
   loading: () => (
@@ -32,8 +34,15 @@ export default function Chapter1Client() {
      כאילו המסע מתחיל מחדש בכל פעם. עד שיודעים, לא מציגים
      אף אחד מהשניים. */
   const [know, setKnow] = useState(false)
+  /* אזור אמצע-מסע שמור, אם יש התקדמות. המסך הזה תמיד שלח לרמות תימן —
+     גם מטייל שנעצר במכה. */
+  const [resumeAt, setResumeAt] = useState<string | null>(null)
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has('from')) setStarted(true)
+    const store = readNotebook()
+    if (store.seen.length > 0 || store.entries.length > 0) {
+      setResumeAt(store.region || 'yemen-heights')
+    }
     setKnow(true)
     /* מושכים את צ׳אנק המשחק בזמן שקוראים את מסך הפתיחה. בלי זה
        ההורדה מתחילה רק בלחיצה, ו„טוען את המסע…“ הוא המסך הראשון
@@ -75,10 +84,34 @@ export default function Chapter1Client() {
           המקומות והמושגים שעיצבו את חצי האי ערב ערב עליית האסלאם.
         </p>
 
-        <button className="ch1-opening-start" type="button" onClick={() => setStarted(true)}>
-          התחילו במסע
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6" /></svg>
-        </button>
+        {resumeAt ? (
+          <>
+            <button
+              className="ch1-opening-start"
+              type="button"
+              onClick={() => window.location.assign(`?region=${resumeAt}&from=resume`)}
+            >
+              המשיכו במסע
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6" /></svg>
+            </button>
+            <button
+              className="ch1-opening-restart"
+              type="button"
+              onClick={() => {
+                if (!window.confirm('להתחיל מסע חדש? ההתקדמות והמחברת יימחקו.')) return
+                resetJourney()
+                setStarted(true)
+              }}
+            >
+              מסע חדש מההתחלה
+            </button>
+          </>
+        ) : (
+          <button className="ch1-opening-start" type="button" onClick={() => setStarted(true)}>
+            התחילו במסע
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6" /></svg>
+          </button>
+        )}
       </section>
 
       {/* נקודה לכל אזור. היו שבע לתשעה אזורים. */}

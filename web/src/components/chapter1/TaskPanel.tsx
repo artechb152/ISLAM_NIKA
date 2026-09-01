@@ -43,9 +43,7 @@ export function TaskPanel({ task, chosen, last, lastOk, solved, onChoose, onSort
   return (
     <div className="ch1-task" role="dialog" aria-labelledby="ch1-task-title">
       <div className="ch1-task-card">
-        <p className="ch1-task-eyebrow">
-          {task.asker} · <span>{task.source}</span>
-        </p>
+        <p className="ch1-task-eyebrow">{task.asker}</p>
         <h3 id="ch1-task-title">{task.title}</h3>
         <p className="ch1-task-question">{task.question}</p>
 
