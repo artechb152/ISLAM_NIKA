@@ -243,8 +243,21 @@ export function Npc({
 }) {
   const { scene } = useGLTF(MODEL[who])
   const group = useRef<THREE.Group>(null)
+  /* Every robed figure ran this shader from uTime = 0, so all of them breathed,
+     swayed and shifted their weight on exactly the same beat. Mecca stands
+     seven of them in one square and they moved like a chorus line — which is a
+     stronger tell that these are copies of one model than any amount of
+     stillness would have been.
+
+     A phase offset and a slightly different tempo per person, both seeded from
+     where they stand, so a figure keeps its own rhythm across re-renders and no
+     two drift back into step. Nothing in the shader changes. */
+  const life = useMemo(() => {
+    const seed = Math.abs(Math.sin(position[0] * 12.9898 + position[2] * 78.233 + who.length) * 43758.5453) % 1
+    return { phase: seed * 37, rate: 0.86 + seed * 0.28 }
+  }, [who, position])
   const uniforms = useRef<ProcUniforms>({
-    uTime: { value: 0 },
+    uTime: { value: life.phase },
     uTalk: { value: 0 },
     uH: { value: CHAR_HEIGHT },
   })
@@ -277,7 +290,7 @@ export function Npc({
 
   useFrame((_, dt) => {
     const u = uniforms.current
-    u.uTime.value += dt
+    u.uTime.value += dt * life.rate
     const want = speaking ? 1 : 0
     u.uTalk.value += (want - u.uTalk.value) * Math.min(dt * 3.5, 1)
 

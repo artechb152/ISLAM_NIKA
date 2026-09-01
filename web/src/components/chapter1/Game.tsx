@@ -2575,7 +2575,17 @@ function RawiCompanion({ live, talking, gesture }: {
          last step into the gap is clamped, and his feet should slow with it */
       paceRef.current = dt > 0 ? stepLen / dt : 0
     } else {
-      look.current.set(p.x, 0, p.z)
+      /* Standing still, he watches whoever or whatever matters. Looking only at
+         the player made him a man who never notices anything: you could stand
+         nose-to-stone in front of a carved inscription and your guide would be
+         staring at the back of your head. When the traveller is close enough to
+         a piece of evidence or a task station for the prompt to be up, that is
+         where his attention goes — the same thing a person walking beside you
+         does, and the cheapest possible way to point without a line of dialogue. */
+      const at = live.nearFind ? REGION_FINDS.find((f) => f.id === live.nearFind) : null
+      const focus = at ?? (live.atTask && REGION_TASK ? REGION_TASK : null)
+      if (focus) look.current.set(focus.x, 0, focus.z)
+      else look.current.set(p.x, 0, p.z)
       paceRef.current = 0
     }
     const want: RawiClip = talking ? gesture : moving ? 'walk' : 'idle'
