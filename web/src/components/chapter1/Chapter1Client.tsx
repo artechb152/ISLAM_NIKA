@@ -89,7 +89,11 @@ export default function Chapter1Client() {
             <button
               className="ch1-opening-start"
               type="button"
-              onClick={() => window.location.assign(`?region=${resumeAt}&from=resume`)}
+              onClick={() => {
+                /* ?region= מפורש ב-URL (קישור עמוק, הרנס) גובר על האזור השמור */
+                if (new URLSearchParams(window.location.search).has('region')) setStarted(true)
+                else window.location.assign(`?region=${resumeAt}&from=resume`)
+              }}
             >
               המשיכו במסע
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6" /></svg>

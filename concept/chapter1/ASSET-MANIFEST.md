@@ -14,3 +14,18 @@ media ids: dea392ae / c2763134 / c5f322c0 / 6cae1cd6.
 idle→0 (Idle) · walk→30 (Casual_Walk) · talk→313 (Talk_with_Hands_Open) ·
 talk-ack→47 (Listening_Gesture) · talk-happy→308 (Talk_Passionately) ·
 talk-nod→314 (Talk_with_Right_Hand_Open, גיבוי: חיפוש נוסף)
+
+| 3 | קליפים: idle,walk(30),talk(313),ack(47),happy(308),nod(314) | 3d_rigging ×6 | afb4ac3e,2ac1067f,e66b60f3,b259c70d,63970f5c,07d08e3a | 48 | ✔ | מוזגו |
+| 4 | קליפים: walk מהיר (115), run (16) | 3d_rigging ×2 | e7ca20dd,afd2f34b | 16 | ✔ | player2.glb |
+
+**player2.glb** (7.1MB, 7 קליפים: walk/run/idle/talk/talk-ack/talk-happy/talk-nod) →
+web/public/assets/chapter1/models/player2.glb. מדידות (dev-character, מד רגל נטועה):
+walk 1.332 מ/ש × 3.033s = 4.04 מ/לולאה · run 8.83 מ/ש × 0.5s = 4.41 מ/לולאה.
+check-slide: כיול 100%/100%, סחיפה 0%.
+
+**סה"כ הוצאה עד כה: ~103 קרדיטים** (מתוך תקרת 4,480).
+
+| 5 | בדיקת קומפוזיציה אברהה 12ש' 720p | seedance_2_5 | e714da8b-0c38-40c7-931b-1b1b1d43447a | 78 | ✔ אושר (קובייה נכונה! צבא מוגזם→צומצם) | scratchpad/abraha-test.mp4 |
+| 6 | סרט אברהה סופי 24ש' 1080p + אודיו | seedance_2_5 | af497aa4-7942-4492-ba4c-33be6335d9bf | 216 | ⏳ | anim-video/abraha.mp4 → birds-cinematic |
+
+**סה"כ: ~397 קרדיטים.**

@@ -47,7 +47,7 @@ await pg.evaluate((r) => {
   localStorage.setItem(`ch1:arrived:${r}:v1`, '1')
 }, REGION)
 
-const start = pg.getByRole('button', { name: /התחילו/ })
+const start = pg.getByRole('button', { name: /התחילו|המשיכו/ })
 let live = false
 for (let t = 0; t < 50; t++) {
   live = await pg.evaluate(() => !!window.__ch1Live).catch(() => false)
@@ -74,7 +74,7 @@ const sample = () => pg.evaluate(() => {
   return {
     x: l.player.x, z: l.player.z, keys: l.keys ? l.keys.size : -1,
     talking: !!document.querySelector('.hud-dialogue, .ch1-find, .ch1-task'),
-    clip: d ? d.phase : null, dur: d ? d.clip : 1.042, w: d ? d.weight : null, ts: d ? d.timeScale : null,
+    clip: d ? d.phase : null, dur: d ? d.clip : 1.042, cycle: d ? d.cycle : null, w: d ? d.weight : null, ts: d ? d.timeScale : null,
   }
 })
 
@@ -118,13 +118,18 @@ async function leg(label, keys, ms) {
   const loops = (b.clip - a.clip) / b.dur
   const perLoop = loops > 0.01 ? dist / loops : NaN
   console.log(`  ${label.padEnd(6)} speed ${speed.toFixed(2)} m/s · timeScale ${(b.ts ?? 0).toFixed(2)} · ${loops.toFixed(2)} clip loops · ${perLoop.toFixed(2)} m per loop`)
-  return perLoop
+  /* שני קליפים (walk/run) עם אורכי מחזור שונים: הציון הוא היחס אל המחזור
+     הצפוי של הקליפ הפעיל, לא ההשוואה הגולמית בין הרגליים */
+  return b.cycle ? perLoop / b.cycle : perLoop
 }
 
 console.log('\nground covered per loop of the walk clip — this should not change with speed\n')
 const w = await leg('walk', ['KeyW'], 3000)
 const r = await leg('run', ['KeyW', 'ShiftLeft'], 3000)
 if (w && r && isFinite(w) && isFinite(r)) {
+  console.log(`  calibration: walk ${(w * 100).toFixed(0)}% of its clip cycle, run ${(r * 100).toFixed(0)}%`)
+  if (Math.abs(w - 1) > 0.12 || Math.abs(r - 1) > 0.12) console.log('  ⚠ cycle constants are off — remeasure WALK/RUN_CYCLE_METRES')
+
   const drift = Math.abs(r - w) / w
   console.log(`\n  run differs from walk by ${(drift * 100).toFixed(0)}%`)
   console.log(drift < 0.08 ? '  ✓ the feet keep up with the ground at both speeds\n'

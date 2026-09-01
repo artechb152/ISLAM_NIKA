@@ -701,7 +701,7 @@ const MODEL_TRAVELER_STAND = '/assets/chapter1/models/traveler-stand.glb'
    traveler-walk. The game stopped loading all three when the player took
    Rawi's skeleton and the walk came from traveler-anim instead; the constants
    outlived the code that used them. */
-const MODEL_TRAVELER_WALK = '/assets/chapter1/models/traveler-anim.glb'
+const MODEL_TRAVELER_WALK = '/assets/chapter1/models/player2.glb'
 const MODEL_PALM = '/assets/chapter1/models/palm.glb'
 const MODEL_WELL = '/assets/chapter1/models/well.glb'
 const MODEL_ROCKS = '/assets/chapter1/models/rocks.glb'
@@ -711,18 +711,24 @@ const MODEL_SHRUB = '/assets/chapter1/models/shrub.glb'
 /** same camel, split into body + four hip-pivoted legs for the walk cycle */
 const MODEL_CAMEL_PARTS = '/assets/chapter1/models/camel-parts.glb'
 
-/* The two numbers the traveller's locomotion is built on.
+/* המספרים שההליכה בנויה עליהם — נמדדו, לא נוחשו, על player2.glb
+   (ריג Meshy, ריצת הלילה 2026-09-01) בעמוד /chapter1/dev-character:
+   מד-הסקייט שם דוגם את מהירות כף הרגל הנטועה ב-timeScale=1, וזה
+   בדיוק "כמה מטרים הקליפ מכסה בשנייה". מטרים-ללולאה = מהירות × אורך.
 
-   `WALK_CLIP_SECONDS` is read straight out of traveler-anim.glb — run
-   `npm run measure-walk` to print it again if the clip is ever re-exported.
+   walk (Quick_Walk):  1.332 מ/ש × 3.033 ש = 4.04 מ ללולאה
+   run  (RunFast):     8.83  מ/ש × 0.5   ש = 4.41 מ ללולאה
 
-   `WALK_CYCLE_METRES` is how far one loop of that clip should carry him. It is
-   derived from the walk-pace tuning that was signed off by eye — timeScale
-   1.43 at 2.6 m/s — so 2.6 × 1.042 / 1.43 ≈ 1.9 m per loop. Keeping that
-   anchor means the walk still looks exactly as it did, while every other speed
-   stops sliding. */
-const WALK_CLIP_SECONDS = 1.042
-const WALK_CYCLE_METRES = 1.9
+   לראשונה יש קליפ ריצה אמיתי: הנכס הישן מתח את ההליכה פי 2.3 בריצה,
+   והחדש מחליף קליפ — המשקל נודד walk→run עם runBlend, וכל קליפ מנוגן
+   בקצב הליניארי שלו עצמו. */
+const WALK_CLIP_SECONDS = 3.033
+const WALK_CYCLE_METRES = 4.04
+const RUN_CLIP_SECONDS = 0.5
+const RUN_CYCLE_METRES = 4.41
+/* אורך צעד לשעון הצליל/אבק/נדנוד — הקליפ החדש מכיל כמה צעדים בלולאה,
+   ולכן השעון סופר צעדים (2 לכל 2π) ולא לולאות-קליפ */
+const STEP_METRES = 0.78
 for (const m of [MODEL_TENT, MODEL_FIREPIT, MODEL_TORCH, MODEL_CAMEL, MODEL_CAMEL_PARTS, MODEL_TRAVELER_STAND, MODEL_TRAVELER_WALK, MODEL_PALM, MODEL_WELL, MODEL_ROCKS, MODEL_JARS, MODEL_FIREWOOD, MODEL_SHRUB]) {
   useGLTF.preload(m)
 }
@@ -1391,8 +1397,8 @@ function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
     const a = actions['walk']
     if (!a) return
     const groundSpeed = Math.abs(speed) * ((rx + rz) / 2)
-    /* מחזור אחד = שני צעדים ≈ 1.24 מ׳ — רגליים שלא מחליקות */
-    a.setEffectiveTimeScale(groundSpeed / 1.24)
+    /* אותו קליפ של השחקן על גוף שממודד ל-1.72 במקום 1.78 — המחזור מתקצר ביחס */
+    a.setEffectiveTimeScale(groundSpeed / ((WALK_CYCLE_METRES * 1.72) / 1.78))
     a.play()
   }, [actions, speed, rx, rz])
   useEffect(() => {
@@ -1514,6 +1520,7 @@ function Player({ live }: { live: Live }) {
      ותנוחת הכפיתה היא העמידה — כך שהעצירה עצמה היא האנימציה. */
   const walkAction = useRef<THREE.AnimationAction | null>(null)
   const idleAction = useRef<THREE.AnimationAction | null>(null)
+  const runAction = useRef<THREE.AnimationAction | null>(null)
   const heading = useRef(0)
   const walkT = useRef(0)
   /** clip-seconds played since mount — dev-only, for the foot-slide harness */
@@ -1630,7 +1637,7 @@ function Player({ live }: { live: Live }) {
        בריצה נשמעו שני שלישים מהצעדים שנראו. π רדיאנים = חצי מחזור =
        צעד אחד, ולכן 2π לסיבוב מלא של WALK_CYCLE_METRES. */
     if (speed.current > 0.05) {
-      walkT.current += dt * ((speed.current / WALK_CYCLE_METRES) * 2 * Math.PI)
+      walkT.current += dt * ((speed.current / (STEP_METRES * 2)) * 2 * Math.PI)
     }
     // two-pose walk: the character is a plain static mesh (no skeleton — the
     // rigged model rendered T-pose on some GPUs). While moving we alternate
@@ -1663,11 +1670,16 @@ function Player({ live }: { live: Live }) {
          2.6·1.042/1.43 ≈ 1.9 מ׳ לסיבוב. לכן בקצב הליכה החוק החדש
          מחזיר 1.426 — אותו מראה בדיוק — ומתקן את כל השאר. */
       const wantW = walking ? Math.min(1, gait * 2) : 0
-      const w = act.getEffectiveWeight()
+      const w = act.getEffectiveWeight() + (runAction.current?.getEffectiveWeight() ?? 0)
       const w2 = w + (wantW - w) * Math.min(1, dt * 8)
-      act.setEffectiveWeight(w2)
+      /* חלוקת המשקל בין הליכה לריצה רוכבת על runBlend של המצלמה —
+         אותו אות, פריים אחד מאחור, וזה בסדר: שניהם רכים ממילא */
+      const runK = runAction.current ? runBlend.current : 0
+      act.setEffectiveWeight(w2 * (1 - runK))
+      runAction.current?.setEffectiveWeight(w2 * runK)
       const ts = (speed.current * WALK_CLIP_SECONDS) / WALK_CYCLE_METRES
       act.setEffectiveTimeScale(ts)
+      runAction.current?.setEffectiveTimeScale((speed.current * RUN_CLIP_SECONDS) / RUN_CYCLE_METRES)
       idleAction.current?.setEffectiveWeight(1 - w2)
       /* A monotonic count of clip-seconds played, so a harness can divide
          ground travelled by clip loops and see whether the feet are planted —
@@ -1675,9 +1687,15 @@ function Player({ live }: { live: Live }) {
          screenshot can answer. `action.time` cannot be used: it wraps every
          1.042 s. Read by scripts/check-slide.mjs. */
       if (process.env.NODE_ENV !== 'production') {
-        walkPhase.current += dt * ts
+        /* הקליפ הדומיננטי מדווח: בריצה סופרים את קליפ הריצה, אחרת הליכה.
+           `cycle` נוסף כדי שההרנס ישווה מטרים-ללולאה מול הערך הצפוי של
+           הקליפ הפעיל — שני קליפים, שני אורכי מחזור. */
+        const dominant = runK > 0.5
+        walkPhase.current += dt * (dominant ? (speed.current * RUN_CLIP_SECONDS) / RUN_CYCLE_METRES : ts)
         ;(window as unknown as Record<string, unknown>).__ch1Walk = {
-          phase: walkPhase.current, weight: w2, timeScale: ts, clip: WALK_CLIP_SECONDS,
+          phase: walkPhase.current, weight: w2, timeScale: ts,
+          clip: dominant ? RUN_CLIP_SECONDS : WALK_CLIP_SECONDS,
+          cycle: dominant ? RUN_CYCLE_METRES : WALK_CYCLE_METRES,
         }
       }
     }
@@ -1906,6 +1924,15 @@ function Player({ live }: { live: Live }) {
       /* הגלימה היא גיאומטריה פתוחה — בלי DoubleSide רואים את פנים
          הבד החיוור במקום הטקסטורה */
       ;(m.material as THREE.Material).side = THREE.DoubleSide
+      /* הטקסטורה של player2 יוצאת מ-Meshy בהירה וקרירה מדי מול הפלטה,
+         והחומר מגיע עם ברק PBR שמלבין אותה עוד. גוון חם עדין (לא הכהיה
+         של 16% כמו ה-tint הישן שהוסר) ומאט מלא. */
+      const pm = m.material as THREE.MeshStandardMaterial
+      if (pm.isMeshStandardMaterial) {
+        pm.color.set('#eadcbe')
+        pm.roughness = 1
+        pm.metalness = 0
+      }
     })
     /* אותו נרמול כמו של ראאווי — עם עדכוני המטריצה שבלעדיהם Box3 מודד
        גיאומטריה גולמית בסנטימטרים והדמות נעלמת */
@@ -1925,11 +1952,20 @@ function Player({ live }: { live: Live }) {
       idle.play()
       idle.setEffectiveWeight(1)
     }
+    /* קליפ הריצה — חדש עם player2. אם הנכס הוחלף לישן שאין לו run,
+       runAction נשאר null והמשקל כולו נשאר על ההליכה. */
+    const run = actions['run']
+    if (run) {
+      run.play()
+      run.setEffectiveWeight(0)
+    }
     walkAction.current = walk
     idleAction.current = idle ?? null
+    runAction.current = run ?? null
     return () => {
       walkAction.current = null
       idleAction.current = null
+      runAction.current = null
     }
   }, [actions])
 

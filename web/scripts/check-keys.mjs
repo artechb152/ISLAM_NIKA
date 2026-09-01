@@ -42,7 +42,7 @@ await pg.evaluate((r) => {
   localStorage.setItem(`ch1:arrived:${r}:v1`, '1')
 }, REGION)
 
-const start = pg.getByRole('button', { name: /התחילו/ })
+const start = pg.getByRole('button', { name: /התחילו|המשיכו/ })
 let live = false
 for (let t = 0; t < 50; t++) {
   live = await pg.evaluate(() => !!window.__ch1Live).catch(() => false)

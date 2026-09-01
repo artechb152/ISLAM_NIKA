@@ -1,0 +1,12 @@
+import { chromium } from 'playwright-core'
+const browser = await chromium.launch({ channel: 'chrome', headless: false })
+const page = await (await browser.newContext({ viewport: { width: 900, height: 600 } })).newPage()
+await page.goto('http://localhost:3000/chapter1/dev-character?model=/assets/chapter1/models/player2.glb&raw=1', { waitUntil: 'domcontentloaded' })
+await page.waitForTimeout(5000)
+await page.click('text=side'); await page.waitForTimeout(1800)
+await page.screenshot({ path: 'scratchpad/p2-side.png' })
+await page.click('text=low'); await page.waitForTimeout(1800)
+await page.screenshot({ path: 'scratchpad/p2-low.png' })
+await page.click('text=talk'); await page.waitForTimeout(1500)
+await page.screenshot({ path: 'scratchpad/p2-talk.png' })
+await browser.close()

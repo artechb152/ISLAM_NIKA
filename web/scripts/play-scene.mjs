@@ -51,7 +51,7 @@ await pg.evaluate((r) => {
    once is not proof it took: the first attempt landed on a button whose handler
    was not attached yet and the harness then waited a full minute at the title
    screen. Keep offering until the scene answers. */
-const start = pg.getByRole('button', { name: /התחילו/ })
+const start = pg.getByRole('button', { name: /התחילו|המשיכו/ })
 let live = false
 for (let t = 0; t < 50; t++) {
   live = await pg.evaluate(() => !!window.__ch1Live).catch(() => false)
