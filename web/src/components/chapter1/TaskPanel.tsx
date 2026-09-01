@@ -14,20 +14,31 @@
  * station — and both routes must share one progress. The buttons stay for
  * keyboards, screen readers and the harnesses. */
 
+import { useState } from 'react'
 import type { Task } from '@/lib/chapter1/tasks'
 
-export function TaskPanel({ task, chosen, last, solved, onChoose, onClose }: {
+export function TaskPanel({ task, chosen, last, lastOk, solved, onChoose, onSort, onClose }: {
   task: Task
   /** right answers already given, by either hand or button */
   chosen: string[]
   /** the most recent choice — its note is on display */
   last: string | null
+  /** whether that choice was the right one; a sort task's misses teach too */
+  lastOk: boolean
   solved: boolean
   onChoose: (id: string) => void
+  /** sort tasks: an item was put on one side */
+  onSort: (itemId: string, binId: string) => void
   onClose: () => void
 }) {
-  const needed = task.options.filter((o) => o.right)
+  const sorting = task.kind === 'sort'
+  const needed = sorting ? task.options : task.options.filter((o) => o.right)
   const lastOpt = last ? task.options.find((o) => o.id === last) : null
+  /* Two clicks, not a drag: pick the thing up, then say which side it goes on.
+     A pointer drag would shut out the keyboard and the screen reader, and this
+     panel is the accessible route by design — the hands-on route is the props
+     standing out by the station. */
+  const [held, setHeld] = useState<string | null>(null)
 
   return (
     <div className="ch1-task" role="dialog" aria-labelledby="ch1-task-title">
@@ -38,23 +49,68 @@ export function TaskPanel({ task, chosen, last, solved, onChoose, onClose }: {
         <h3 id="ch1-task-title">{task.title}</h3>
         <p className="ch1-task-question">{task.question}</p>
 
-        <div className="ch1-task-options">
-          {task.options.map((o) => (
-            <button
-              key={o.id}
-              type="button"
-              className={`hud-card-btn${chosen.includes(o.id) ? ' is-taken' : ''}`}
-              disabled={chosen.includes(o.id) || solved}
-              onClick={() => onChoose(o.id)}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
+        {sorting ? (
+          <div className="ch1-task-sort">
+            <div className="ch1-task-tray" role="group" aria-label="הדברים למיון">
+              {task.options.map((o) => {
+                const placed = chosen.includes(o.id)
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    className={`hud-card-btn ch1-sort-item${placed ? ' is-taken' : ''}${held === o.id ? ' is-held' : ''}`}
+                    disabled={placed || solved}
+                    aria-pressed={held === o.id}
+                    onClick={() => setHeld(held === o.id ? null : o.id)}
+                  >
+                    {o.label}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="ch1-task-bins">
+              {(task.bins ?? []).map((b) => (
+                <button
+                  key={b.id}
+                  type="button"
+                  className={`ch1-sort-bin${held ? ' is-live' : ''}`}
+                  disabled={!held || solved}
+                  onClick={() => {
+                    if (!held) return
+                    onSort(held, b.id)
+                    setHeld(null)
+                  }}
+                >
+                  <span className="ch1-sort-bin-label">{b.label}</span>
+                  <span className="ch1-sort-bin-has">
+                    {task.options.filter((o) => chosen.includes(o.id) && o.bin === b.id).map((o) => o.label).join(' · ') || '—'}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {!held && !solved && (
+              <p className="ch1-task-hint">בחרו דבר, ואז את הצד שלו.</p>
+            )}
+          </div>
+        ) : (
+          <div className="ch1-task-options">
+            {task.options.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className={`hud-card-btn${chosen.includes(o.id) ? ' is-taken' : ''}`}
+                disabled={chosen.includes(o.id) || solved}
+                onClick={() => onChoose(o.id)}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {lastOpt && (
-          <p className={`ch1-task-note${lastOpt.right ? ' is-right' : ''}`} role="status" aria-live="polite">
-            {lastOpt.note}
+          <p className={`ch1-task-note${lastOk ? ' is-right' : ''}`} role="status" aria-live="polite">
+            {lastOk ? lastOpt.note : (lastOpt.wrong ?? lastOpt.note)}
           </p>
         )}
 

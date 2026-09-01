@@ -22,15 +22,43 @@ export interface TaskOption {
       to give this answer with your hands. Absent = this option lives only in
       the panel (keyboard and screen-reader users always have the buttons). */
   prop?: { model: string; h: number; tint?: string }
-  /** true for the answer the source text supports */
+  /** true for the answer the source text supports (`choose` tasks) */
   right?: boolean
+  /** which bin this item belongs in (`sort` tasks) */
+  bin?: string
+  /** `sort` tasks: what is said when it lands on the wrong side. The
+      correction is the teaching moment, so it is written per item. */
+  wrong?: string
   /** what Rawi says when you choose this — right or wrong, it teaches */
   note: string
+}
+
+/** One side of a sorting task. */
+export interface TaskBin {
+  id: string
+  label: string
 }
 
 export interface Task {
   id: string
   region: string
+  /** How this one is answered.
+
+      `choose` — pick the option the source supports. Five of the six regions
+      asked exactly this, which is one multiple-choice question wearing six
+      costumes: after the first, the player knows that whatever is coming, it
+      will be three buttons.
+
+      `sort` — put several things on the right side of a line. A different act
+      of thought rather than a different skin: choosing tests recall of one
+      fact, sorting tests where the *boundary* runs — and two regions here are
+      about exactly that. What the Jews of Yathrib shared with their Arab
+      neighbours and what each kept to itself (§13, §14), and what of monastic
+      life crossed the desert to Mecca while the doctrine stayed behind
+      (§20–§23). In both, the mechanic is the lesson. */
+  kind?: 'choose' | 'sort'
+  /** `sort` only: the two sides. */
+  bins?: TaskBin[]
   /** where the station stands, in scene metres */
   x: number
   z: number
@@ -167,76 +195,111 @@ export const TASKS: Task[] = [
   {
     id: 'task-market',
     region: 'yathrib',
+    kind: 'sort',
     x: 1.4, z: 6.2, model: 'stone-bench', h: 0.62, ry: 1.2,
     prompt: 'שבו אל השולחן',
     title: 'משותף ונפרד',
     asker: 'הסוחר היהודי',
     question:
-      'אנחנו יושבים כאן דורות. יש דברים שאנחנו חולקים עם שכנינו הערבים ויש דברים שלא. ' +
-      'מה מהם היה משותף?',
+      'אנחנו יושבים כאן דורות, קונים ומוכרים אלה מאלה. אבל לא הכול עבר בין הבתים. ' +
+      'קח כל דבר — ושים אותו בצד שלו.',
+    bins: [
+      { id: 'shared', label: 'עבר בין הבתים' },
+      { id: 'apart', label: 'נשאר בבית פנימה' },
+    ],
     options: [
       {
         id: 'trade',
-        label: 'מסחר ושירה',
-        prop: { model: 'find-scroll', h: 0.3, tint: '#d9c08a' },
-        right: true,
-        note:
-          'כן. התקיימו יחסי מסחר, ואף נושאי תרבות משותפים — כמו שירה. בחיי היום־יום חיינו ' +
-          'בשלום עם שכנינו.',
+        label: 'מסחר יומיומי',
+        bin: 'shared',
+        wrong: 'זה דווקא עבר. השכן קונה ממני, אני קונה ממנו — כל בוקר מחדש.',
+        note: 'כן. יחסי מסחר התקיימו, ובחיי היום־יום חיינו בשלום עם שכנינו.',
+      },
+      {
+        id: 'poetry',
+        label: 'שירה',
+        bin: 'shared',
+        wrong: 'לא. שירה היא בדיוק מה שכן חצה — אנחנו יושבים ושומעים את אותם שירים.',
+        note: 'כן. נושאי תרבות משותפים היו, ושירה היא הבולט שבהם.',
       },
       {
         id: 'law',
         label: 'חוקים ומנהגים',
-        prop: { model: 'find-inscription', h: 0.34 },
-        note:
-          'לא. כל שבט חי עם החוקים והמנהגים שלו. זה מה שאִפשר לשכנוּת להחזיק כל כך הרבה זמן.',
+        bin: 'apart',
+        wrong: 'לא. כל שבט חי עם החוקים והמנהגים שלו — גם כשהוא קונה מהשכן כל בוקר.',
+        note: 'נכון. כל שבט וחוקיו. זה מה שאִפשר לשכנוּת להחזיק דורות.',
       },
       {
         id: 'faith',
         label: 'אמונה',
-        prop: { model: 'ansab', h: 0.4 },
-        note:
-          'לא. ואת הציפייה שלנו למשיח השכנים הכירו — אבל היא נשארה שלנו.',
+        bin: 'apart',
+        wrong: 'לא. הם ידעו שיש לנו דת משלנו — לדעת עליה זה לא לחלוק אותה.',
+        note: 'נכון. הערבים ידעו שאנחנו שונים בכך שיש לנו דת משלנו.',
       },
     ],
-    done: 'רשמתי: השוק היה משותף, החוק לא. שני הדברים יחד, לאורך דורות.',
+    done:
+      'רשמתי: השוק והשירה עברו בין הבתים, החוק והאמונה לא. שני הדברים יחד, לאורך דורות — ' +
+      'וזה בדיוק מה שהחזיק את השכנוּת.',
     source: '§13',
   },
 
   {
     id: 'task-monk',
     region: 'monastery',
+    kind: 'sort',
     x: -2.6, z: 3.8, model: 'altar', h: 1.5, ry: -0.5,
     prompt: 'עמדו ליד המזבח',
-    title: 'מה נשאר בחוץ',
+    title: 'מה חצה את המדבר',
     asker: 'הנזיר',
     question:
-      'אנשי מכה באים לכאן ורואים אותנו. משהו מאורחות חיינו נשאר אצלם. ' +
-      'מה לדעתך עבר — ומה לא?',
+      'אנשי מכה באים לכאן, יושבים, מסתכלים — וחוזרים. משהו הם לוקחים איתם, ומשהו נשאר. ' +
+      'העבר כל דבר לצד שלו.',
+    bins: [
+      { id: 'crossed', label: 'הלך איתם למכה' },
+      { id: 'stayed', label: 'נשאר כאן' },
+    ],
     options: [
       {
-        id: 'ways',
-        label: 'צניעות, חסידות ודאגה לנזקקים',
-        right: true,
-        note:
-          'כן. אורחות החיים עברו: צניעות, חסידות, דאגה לנזקקים — וגם התבודדות, כתיבת שירה ' +
-          'ומנהגים פולחניים.',
+        id: 'modesty',
+        label: 'צניעות ופרישות',
+        bin: 'crossed',
+        wrong: 'זה דווקא הלך. את זה אדם לוקח בלי שילמדו אותו.',
+        note: 'כן. היינו מקור השראה בענייני צניעות, חסידות ופרישות.',
       },
       {
-        id: 'religion',
-        label: 'הדת עצמה',
-        note:
-          'לא. הביזנטים, למרות השפעתם, לא הצליחו להשליט את דתם בחצי האי. מה שעבר היה ' +
-          'אורח חיים, לא ממסד.',
+        id: 'charity',
+        label: 'דאגה לנזקקים וליתומים',
+        bin: 'crossed',
+        wrong: 'לא. זה מהדברים הראשונים שעברו.',
+        note: 'כן. דאגה לנזקקים וליתומים — מזה הם הושפעו.',
       },
       {
-        id: 'nothing2',
-        label: 'שום דבר',
-        note:
-          'לא כך. ההשפעה הייתה אמיתית — היא פשוט לא לבשה צורה של המרה.',
+        id: 'solitude',
+        label: 'התבודדות וכתיבת שירה',
+        bin: 'crossed',
+        wrong: 'לא. גם אורחות החיים הקטנות עברו, לא רק הגדולות.',
+        note: 'כן. התבודדות וכתיבת שירה — אלה עברו איתם.',
+      },
+      {
+        id: 'ritual',
+        label: 'מנהגים פולחניים',
+        bin: 'crossed',
+        wrong: 'לא. דווקא אלה עברו — ורוב הריטואלים שיהיו באסלאם מקורם בדתות שקדמו לו.',
+        note: 'כן. ומנהגים פולחניים — רוב הריטואלים שיהיו באסלאם מקורם בדתות שקדמו לו.',
+      },
+      {
+        id: 'doctrine',
+        label: 'שורשי האמונה הנוצרית עצמה',
+        bin: 'stayed',
+        wrong:
+          'לא. על השורשים הם יודעים ככל הנראה מעט מאוד. מה שהם ראו הוא איך אנחנו חיים — ' +
+          'לא במה אנחנו מאמינים.',
+        note: 'נכון. זה הדבר האחד שנשאר מאחור.',
       },
     ],
-    done: 'רשמתי: אורחות החיים חלחלו למכה. הדת עצמה לא הושלטה שם.',
+    done:
+      'רשמתי: אורח החיים חצה את המדבר, הדוקטרינה לא. ארבעה דברים הלכו למכה ואחד נשאר כאן — ' +
+      'וזה בדיוק ההבדל.',
     source: '§21',
   },
 

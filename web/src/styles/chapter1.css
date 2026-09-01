@@ -951,6 +951,36 @@ body{
   border-inline-start:3px solid rgba(199,154,60,.5);border-radius:8px;
 }
 .ch1-task-note.is-right{border-inline-start-color:var(--olive)}
+
+/* מיון לשני צדדים — לא בחירה מתוך שלוש.
+   שני האזורים שמלמדים „מה עבר ומה נשאר" נשאלו עד עכשיו בשאלה אמריקאית,
+   וזה מדד את הזיכרון ולא את מה שהם באמת מלמדים: איפה עובר הגבול. כאן
+   מרימים דבר ומניחים אותו בצד — שתי לחיצות, כדי שזה יעבוד גם במקלדת
+   וגם בקורא מסך; היד הפיזית היא החפצים שעומדים ליד התחנה עצמה. */
+.ch1-task-sort{margin-bottom:14px}
+.ch1-task-tray{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+.ch1-sort-item{font-size:14px;padding:6px 14px}
+.ch1-sort-item.is-held{
+  background:rgba(199,154,60,.26);border-color:var(--gold);color:#fdf3dd;
+}
+.ch1-sort-item.is-taken{
+  border-color:var(--olive);color:var(--olive);opacity:.6;
+}
+.ch1-task-bins{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ch1-sort-bin{
+  all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:5px;
+  min-height:76px;padding:11px 13px;border-radius:10px;text-align:start;
+  border:1px dashed rgba(199,154,60,.42);background:rgba(24,15,9,.4);
+  transition:border-color .18s ease,background .18s ease,transform .18s ease;
+}
+.ch1-sort-bin.is-live{border-style:solid;border-color:var(--gold);background:rgba(199,154,60,.12)}
+.ch1-sort-bin.is-live:hover{transform:translateY(-1px);background:rgba(199,154,60,.2)}
+.ch1-sort-bin:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ch1-sort-bin[disabled]{cursor:default}
+.ch1-sort-bin-label{font-family:var(--font-heading);font-size:15px;color:var(--gold-soft)}
+.ch1-sort-bin-has{font-size:12.5px;line-height:1.5;color:rgba(245,236,214,.72)}
+.ch1-task-hint{margin:10px 0 0;font-size:13px;color:rgba(245,236,214,.62)}
+@media (max-width:560px){.ch1-task-bins{grid-template-columns:1fr}}
 .ch1-task-done{font-size:14px;color:var(--olive);flex:1 1 240px}
 
 /* the evidence page of the notebook — cards for things picked up, not said */

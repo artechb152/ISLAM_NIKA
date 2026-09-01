@@ -3095,6 +3095,10 @@ export default function Game() {
      בארגז ההעמסה שתי תשובות נכונות, וסגירה בין שתיהן היא לגיטימית. */
   const [taskChosen, setTaskChosen] = useState<string[]>([])
   const [taskLast, setTaskLast] = useState<string | null>(null)
+  /* Whether the last answer landed. A choose task reads it off `right`; a sort
+     task cannot, because every item is right somewhere — what matters is which
+     side it was put on, and the miss carries its own correction. */
+  const [taskLastOk, setTaskLastOk] = useState(false)
   const taskSolved = REGION_TASK ? solved.includes(REGION_TASK.id) : false
   const chooseTask = useCallback(
     (id: string) => {
@@ -3102,11 +3106,34 @@ export default function Game() {
       const opt = REGION_TASK.options.find((o) => o.id === id)
       if (!opt) return
       setTaskLast(id)
+      setTaskLastOk(!!opt.right)
       if (!opt.right) return
       setTaskChosen((prev) => {
         const next = prev.includes(id) ? prev : [...prev, id]
         const needed = REGION_TASK.options.filter((o) => o.right).map((o) => o.id)
         if (needed.every((n) => next.includes(n))) setSolved(recordTask(REGION_TASK.id).solved)
+        return next
+      })
+    },
+    [],
+  )
+  /* Sorting: an item is placed on one side. Solved when every item sits on its
+     own side — so the count that closes the task is all of them, not the one
+     answer a choose task waits for. */
+  const sortTask = useCallback(
+    (itemId: string, binId: string) => {
+      if (!REGION_TASK || REGION_TASK.kind !== 'sort') return
+      const opt = REGION_TASK.options.find((o) => o.id === itemId)
+      if (!opt) return
+      setTaskLast(itemId)
+      const ok = opt.bin === binId
+      setTaskLastOk(ok)
+      if (!ok) return
+      setTaskChosen((prev) => {
+        const next = prev.includes(itemId) ? prev : [...prev, itemId]
+        if (REGION_TASK.options.every((o) => next.includes(o.id))) {
+          setSolved(recordTask(REGION_TASK.id).solved)
+        }
         return next
       })
     },
@@ -3810,8 +3837,10 @@ export default function Game() {
             task={REGION_TASK}
             chosen={taskChosen}
             last={taskLast}
+            lastOk={taskLastOk}
             solved={taskSolved}
             onChoose={chooseTask}
+            onSort={sortTask}
             onClose={() => setOpenTask(false)}
           />
         )}

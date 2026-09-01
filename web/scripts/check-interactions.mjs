@@ -10,18 +10,31 @@ import { layouts, ORDER, collidersOf, PLAYER_R, entryPoint, route } from './rout
 const src = (f) => readFileSync('src/lib/chapter1/' + f, 'utf8')
 const parse = (text, re) => [...text.matchAll(re)]
 
-const finds = parse(
-  src('finds.ts'),
-  /id:\s*'([^']+)',\s*\n\s*region:\s*'([^']+)',\s*\n\s*x:\s*(-?[\d.]+),\s*z:\s*(-?[\d.]+),[^]*?source:\s*'(§\d+)'/g,
-).map((m) => ({ id: m[1], region: m[2], x: +m[3], z: +m[4], source: m[5] }))
+/* `region` and `x` used to have to be adjacent lines. Adding one field between
+   them — `kind: 'sort'` — silently dropped two of the six tasks out of this
+   gate, and it went on reporting a cheerful ✓ over the remaining four. Anything
+   may now sit between the fields, and the count is checked against what the
+   file actually declares rather than against a floor nobody updates. */
+const ENTRY = /id:\s*'([^']+)',[^]*?region:\s*'([^']+)',[^]*?\bx:\s*(-?[\d.]+),\s*z:\s*(-?[\d.]+),[^]*?source:\s*'(§\d+)'/g
+const read = (file) => parse(src(file), new RegExp(ENTRY.source, "g"))
+  .map((m) => ({ id: m[1], region: m[2], x: +m[3], z: +m[4], source: m[5] }))
 
-const tasks = parse(
-  src('tasks.ts'),
-  /id:\s*'([^']+)',\s*\n\s*region:\s*'([^']+)',\s*\n\s*x:\s*(-?[\d.]+),\s*z:\s*(-?[\d.]+),[^]*?source:\s*'(§\d+)'/g,
-).map((m) => ({ id: m[1], region: m[2], x: +m[3], z: +m[4], source: m[5] }))
+const finds = read('finds.ts')
+const tasks = read('tasks.ts')
 
-if (finds.length < 10) throw new Error(`parsed only ${finds.length} finds — regex out of step with finds.ts`)
-if (tasks.length < 4) throw new Error(`parsed only ${tasks.length} tasks — regex out of step with tasks.ts`)
+/* How many the file says there are, counted a different way: every top-level
+   `id:` in the array. If the two numbers disagree the pattern above has
+   drifted, and something is going unchecked while the gate still says ✓. */
+const declared = (file) => [...src(file).matchAll(/^ {4}id:\s*'/gm)].length
+for (const [file, got] of [['finds.ts', finds], ['tasks.ts', tasks]]) {
+  const want = declared(file)
+  if (got.length !== want) {
+    throw new Error(
+      `${file} declares ${want} entries but this gate parsed ${got.length} — ` +
+      `the pattern has drifted and ${want - got.length} would go unchecked.`,
+    )
+  }
+}
 
 const sections = new Set(
   [...readFileSync('../concept/chapter1/SOURCE-TEXT.md', 'utf8').matchAll(/^#+ (§\d+) ·/gm)].map((m) => m[1]),

@@ -196,20 +196,32 @@ for (const region of ORDER) {
      not from mount, so dismissing too early clears nothing and the first find
      of those two regions then fails. */
   await wait(2600)
-  await dismiss()
-  /* הסרט הגדול בקריינות הפתיחה מאט את הסגירה תחת רינדור תוכנה — אסור
-     לגשת לעדויות כשעוד יש דיאלוג פתוח: F חסום בצדק בזמן שיחה. */
-  for (let i = 0; i < 45; i++) {
-    const open = await evalSafe(pg, () => !!document.querySelector('.hud-dialogue'))
-    if (!open) break
-    const clicked = await evalSafe(pg, () => {
-      const b = [...document.querySelectorAll('.hud-dialogue button')].find((x) => /נמשיך|המשך|הבנתי|סגור/.test(x.innerText))
-      if (b) { b.click(); return true }
-      return false
-    })
-    if (!clicked) await pg.keyboard.press('Space')
-    await wait(400)
+  /* Nothing may be pressed while a panel is open — F is refused during a
+     conversation, and rightly so. This used to count 45 rounds and hope, which
+     held until the opening film grew from 807×454 to a 1066×599 screening:
+     2.3× the pixels for a software renderer to composite every frame, and
+     Yemen Heights became the one region where the count ran out before the
+     film closed. The first piece of evidence there then failed on every run,
+     and read as „F DID NOTHING" — a fault in the game, which it was not.
+
+     So it waits for the condition instead of for a number, the way everything
+     else in this harness learned to. */
+  const noPanel = async (ms = 45000) => {
+    const stop = Date.now() + ms
+    while (Date.now() < stop) {
+      if (!(await evalSafe(pg, () => !!document.querySelector('.hud-dialogue, .ch1-find, .ch1-task')))) return true
+      const clicked = await evalSafe(pg, () => {
+        const b = [...document.querySelectorAll('.hud-dialogue button, .ch1-task-card button, .ch1-find button')]
+          .find((x) => /נמשיך|המשך|הבנתי|סגור|הלאה|אחר כך/.test(x.innerText))
+        if (b) { b.click(); return true }
+        return false
+      })
+      if (!clicked) await pg.keyboard.press('Space')
+      await wait(400)
+    }
+    return false
   }
+  if (!(await noPanel())) log.push({ region, status: 'A PANEL WOULD NOT CLOSE — everything after this is blocked' })
 
   const before = await evalSafe(pg, () => JSON.parse(localStorage.getItem('ch1:notebook:v1') || '{}'))
 
@@ -225,6 +237,7 @@ for (const region of ORDER) {
        recorded nothing. It still counted, because the card of an already-taken
        find does re-open. Six of nine regions lost their second piece of
        evidence that way and the fault was read as the game's. */
+    await noPanel(12000)
     await evalSafe(pg, (id) => { window.__ch1Target = id }, f.id)
     if (!(await until(() => window.__ch1Live.nearFind === window.__ch1Target, 15000))) {
       log.push({ region, what: 'find ' + f.id, status: 'OUT OF RANGE' })
@@ -279,16 +292,48 @@ for (const region of ORDER) {
     await pg.keyboard.press('KeyE')
     await wait(900)
     if (await until(() => !!document.querySelector('.ch1-task'), 4000)) {
-      /* Click every option, not just the first. A task can require more than
-         one right answer (task-loading needs two), wrong picks only surface a
-         note, and this asks whether the panel works — not whether we know. */
-      const opts = await evalSafe(pg, () => document.querySelectorAll('.ch1-task-card button').length)
-      for (let i = 0; i < (opts || 0); i++) {
-        await evalSafe(pg, (i) => {
-          const b = document.querySelectorAll('.ch1-task-card button')[i]
-          if (b && !/המשיכו|סגור/.test(b.innerText)) b.click()
-        }, i)
-        await wait(400)
+      /* Two shapes of task, and the difference matters to a harness.
+
+         A `choose` task is a row of options: click every one, not just the
+         first. Some need more than one right answer (the caravan crate needs
+         two), wrong picks only surface a note, and this asks whether the panel
+         works — not whether we know.
+
+         A `sort` task is items and two sides, and clicking every button in DOM
+         order pairs nothing with anything: it selects an item, then selects
+         another, and the sides never receive the item they belong to. So it is
+         played the way a person plays it — pick the thing up, try a side, and
+         if it did not stick, try the other. Reading `bin:` out of tasks.ts
+         would be faster and would also mean the harness knows the answers,
+         which is exactly what it must not do. */
+      const isSort = await evalSafe(pg, () => !!document.querySelector('.ch1-sort-bin'))
+      if (isSort) {
+        for (let round = 0; round < 14; round++) {
+          const left = await evalSafe(pg, () => document.querySelectorAll('.ch1-sort-item:not([disabled])').length)
+          if (!left) break
+          const before = await evalSafe(pg, () => document.querySelectorAll('.ch1-sort-item[disabled]').length)
+          await evalSafe(pg, () => document.querySelector('.ch1-sort-item:not([disabled])')?.click())
+          await wait(250)
+          await evalSafe(pg, () => document.querySelectorAll('.ch1-sort-bin')[0]?.click())
+          await wait(420)
+          const after = await evalSafe(pg, () => document.querySelectorAll('.ch1-sort-item[disabled]').length)
+          if (after === before) {
+            /* the first side refused it — the other one is where it goes */
+            await evalSafe(pg, () => document.querySelector('.ch1-sort-item:not([disabled])')?.click())
+            await wait(250)
+            await evalSafe(pg, () => document.querySelectorAll('.ch1-sort-bin')[1]?.click())
+            await wait(420)
+          }
+        }
+      } else {
+        const opts = await evalSafe(pg, () => document.querySelectorAll('.ch1-task-card button').length)
+        for (let i = 0; i < (opts || 0); i++) {
+          await evalSafe(pg, (i) => {
+            const b = document.querySelectorAll('.ch1-task-card button')[i]
+            if (b && !/המשיכו|סגור/.test(b.innerText)) b.click()
+          }, i)
+          await wait(400)
+        }
       }
       await wait(700)
       await dismiss()
