@@ -6,6 +6,7 @@
    invents wording — every string comes from dialogue.json with its §source. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { isMuted } from '@/lib/chapter1/audio'
 import {
   PORTRAIT,
   SPEAKERS,
@@ -176,11 +177,12 @@ export function DialogueHud({
             המוקלדת היא הקול. */}
         {encounter.film && (
           <video
+            key={encounter.id}
             className="hud-film"
             src={`/assets/anim-video/${encounter.film}`}
             autoPlay
-            muted
-            loop
+            muted={!encounter.filmOnce || isMuted()}
+            loop={!encounter.filmOnce}
             playsInline
             aria-hidden="true"
           />

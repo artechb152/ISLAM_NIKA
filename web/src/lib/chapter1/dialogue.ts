@@ -57,6 +57,9 @@ export interface Encounter {
       under /assets/anim-video. Only where the footage keeps faith with the
       chapter's period: of the five finished films, one does. */
   film?: string
+  /** סרט אירוע חד-פעמי: מתנגן פעם אחת עם קול, לא בלולאה. לסרטי אווירה
+      (הפתיח) משאירים לולאה שקטה — אירוע סיפורי שחוזר על עצמו נראה כתקלה. */
+  filmOnce?: boolean
   /** Rawi's sharpening remark after the character finishes. */
   rawi_followup?: Line[]
   choices?: Choice[]
