@@ -1,0 +1,25 @@
+exit           (end of the road)
+
+the chapter walks end to end
+│ (index) │ region          │ finds │ talks │ rawi │ task │ entries   │ errors │
+├─────────┼─────────────────┼───────┼───────┼──────┼──────┼───────────┼────────┤
+│ 0       │ 'yemen-heights' │ '2/2' │ 0     │ 0    │ 'ok' │ '1 → 1'   │ 0      │
+│ 1       │ 'night-camp'    │ '2/2' │ 0     │ 12   │ 'ok' │ '1 → 2'   │ 0      │
+│ 2       │ 'border-post'   │ '2/2' │ 2     │ 1    │ 'ok' │ '2 → 5'   │ 0      │
+│ 3       │ 'narrow-pass'   │ '2/2' │ 1     │ 1    │ 'ok' │ '5 → 7'   │ 0      │
+│ 4       │ 'loading-road'  │ '2/2' │ 0     │ 12   │ 'ok' │ '7 → 8'   │ 0      │
+│ 5       │ 'yathrib'       │ '2/2' │ 5     │ 0    │ 'ok' │ '8 → 13'  │ 0      │
+│ 6       │ 'monastery'     │ '5/5' │ 4     │ 0    │ 'ok' │ '13 → 17' │ 0      │
+│ 7       │ 'mecca'         │ '3/3' │ 4     │ 4    │ 'ok' │ '17 → 25' │ 0      │
+│ 8       │ 'exit'          │ '1/1' │ 0     │ 1    │ '—'  │ '25 → 26' │ 0      │
+└─────────┴─────────────────┴───────┴───────┴──────┴──────┴───────────┴────────┘
+
+encounters heard: 26 / 26
+evidence:         21 / 21
+tasks solved:     8 / 8
+
+the notebook fills
+  leaving the region stamps riseAt: yes
+
+  M opens the map only, and the region hand-off still lifts to the model view.
+
