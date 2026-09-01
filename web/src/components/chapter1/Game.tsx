@@ -1774,7 +1774,22 @@ function Player({ live }: { live: Live }) {
         ax = -ax
         az = -az
       }
-      let side = Math.max(2.7, Math.hypot(sp.x - live.player.x, sp.z - live.player.z) * 1.1 + 1.5)
+      /* How far back the two-shot stands has to come from the lens, not from
+         the gap between the two people. It used to be `gap * 1.1 + 1.5`, and
+         for Rawi — who walks at your shoulder, 1.45 m away — that put the
+         camera 3.1 m out. At the 34° talk lens 3.1 m sees 1.9 m of width, and
+         two bodies 1.45 m apart are about 1.95 m across: both were cropped at
+         the frame edges with empty ground between them, which is what every
+         arrival in the chapter opened on.
+
+         So: take the width that has to fit — their separation plus a body
+         each, plus margin — and solve for the distance at which the lens
+         contains it. A pair standing further apart pushes the camera back on
+         its own, which is the same thing a camera operator does. */
+      const TALK_FOV = 34
+      const spread = Math.hypot(sp.x - live.player.x, sp.z - live.player.z) + 0.9
+      const halfNeeded = spread / 2 + 0.55
+      let side = Math.max(2.7, halfNeeded / Math.tan((TALK_FOV / 2) * (Math.PI / 180)))
       /* אותה בדיקת עיגולים כמו מצלמת ההליכה, הפעם על הקרן מן האמצע
          החוצה — במעבדה קורת סוכך חצתה את הפריים, וזה הפתרון שכבר
          קיים במשחק לבעיה הזאת. */

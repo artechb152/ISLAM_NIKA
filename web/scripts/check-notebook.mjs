@@ -206,10 +206,27 @@ for (const region of ORDER) {
 
      So it waits for the condition instead of for a number, the way everything
      else in this harness learned to. */
-  const noPanel = async (ms = 45000) => {
+  const anyPanel = () => evalSafe(pg, () => !!document.querySelector('.hud-dialogue, .ch1-find, .ch1-task'))
+  /* `settle` is why this is not simply "is a panel open right now".
+
+     A region opens its narrator cinematic 1.1 s after the scene reports ready,
+     and under software rendering "ready" lands late — so a harness that clears
+     the screen and walks on can clear an empty screen, reach the evidence, and
+     have the film open on top of it. F is then refused, correctly, and the run
+     reports `F DID NOTHING` about a key that works.
+
+     Measured rather than guessed: scratchpad/probe-find.mjs read `panel: none`
+     at the spawn and `has-film` two seconds later standing at the find, with
+     the same F press swallowed. Clear has to mean clear, and still clear a
+     moment later. */
+  const noPanel = async (ms = 45000, settle = 2600) => {
     const stop = Date.now() + ms
     while (Date.now() < stop) {
-      if (!(await evalSafe(pg, () => !!document.querySelector('.hud-dialogue, .ch1-find, .ch1-task')))) return true
+      if (!(await anyPanel())) {
+        await wait(settle)
+        if (!(await anyPanel())) return true
+        continue
+      }
       const clicked = await evalSafe(pg, () => {
         const b = [...document.querySelectorAll('.hud-dialogue button, .ch1-task-card button, .ch1-find button')]
           .find((x) => /נמשיך|המשך|הבנתי|סגור|הלאה|אחר כך/.test(x.innerText))
@@ -244,13 +261,19 @@ for (const region of ORDER) {
       continue
     }
     await pg.keyboard.press('KeyF')
-    let opened = await until(() => !!document.querySelector('.ch1-find'), 9000)
+    /* 9 s was the budget here, and under SwiftShader Yemen Heights renders at
+       barely more than a frame a second — nine frames to mount a card, in the
+       one region that also decodes the opening film. It failed there on run
+       after run and reported „F DID NOTHING", which reads as a broken key and
+       was a stopwatch. The card is waited for in frames the machine can
+       actually deliver. */
+    let opened = await until(() => !!document.querySelector('.ch1-find'), 22000)
     /* לחיצה ראשונה נבלעת לעיתים בחלון תזמון צר אחרי סגירת הפתיחה —
        שחקן אמיתי פשוט לוחץ שוב, וגם הרתמה. */
     if (!opened) {
       await wait(900)
       await pg.keyboard.press('KeyF')
-      opened = await until(() => !!document.querySelector('.ch1-find'), 6000)
+      opened = await until(() => !!document.querySelector('.ch1-find'), 14000)
     }
     await dismiss()
     /* The card opening is not proof the evidence was written down — the card of
