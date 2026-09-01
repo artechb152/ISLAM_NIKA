@@ -520,6 +520,46 @@ function Sway({ x, z, children }: { x: number; z: number; children: React.ReactN
   return <group ref={ref}>{children}</group>
 }
 
+/* עד 193 פרופים נפרשו בבת אחת בפריים אחד — פענוח ושכפול של כולם נערמו
+   למשימת main-thread אחת של יותר משתי שניות, וזו הקפיאה שדווחה בכניסה
+   לאזור הראשון. כאן העולם נבנה מהשחקן החוצה: המנה הראשונה היא מה שרואים
+   בנקודת הכניסה (והיא לבדה מעכבת את לוח ההגעה), והשאר מצטרפים במנות
+   קטנות מאחורי הערפל. כל פרופ מאוחר בגבול Suspense משלו כדי שמודל אחד
+   איטי לא יחביא את האזור. */
+function StagedProps({ placed, live }: { placed: CampProp[]; live: Live }) {
+  const FIRST_BATCH = 30
+  const ordered = useMemo(() => {
+    const px = live.player.x
+    const pz = live.player.z
+    return [...placed].sort(
+      (a, b) => Math.hypot(a.x - px, a.z - pz) - Math.hypot(b.x - px, b.z - pz),
+    )
+    // המיקום נדגם פעם אחת, בהרכבה — הסדר חייב להישאר יציב כדי שה-keys לא ינדדו
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placed])
+  const [count, setCount] = useState(Math.min(FIRST_BATCH, ordered.length))
+  useEffect(() => {
+    if (count >= ordered.length) return
+    const t = window.setInterval(() => {
+      setCount((c) => Math.min(c + 12, ordered.length))
+    }, 120)
+    return () => window.clearInterval(t)
+  }, [count, ordered.length])
+  return (
+    <>
+      {ordered.slice(0, count).map((p, i) =>
+        i < FIRST_BATCH ? (
+          <Prop key={i} url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} />
+        ) : (
+          <Suspense key={i} fallback={null}>
+            <Prop url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} />
+          </Suspense>
+        ),
+      )}
+    </>
+  )
+}
+
 function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1 }: {
   url: string
   x: number
@@ -2702,9 +2742,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       )}
 
       {/* every placed prop comes from one spacing-checked layout table */}
-      {CAMP.filter((p) => !p.role).map((p, i) => (
-        <Prop key={i} url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} />
-      ))}
+      <StagedProps placed={CAMP.filter((p) => !p.role)} live={live} />
       {CAMP.filter((p) => p.role === 'campfire').map((p, i) => (
         <Campfire key={i} x={p.x} z={p.z} />
       ))}
