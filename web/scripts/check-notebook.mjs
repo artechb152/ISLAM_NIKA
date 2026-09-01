@@ -129,7 +129,7 @@ for (const region of ORDER) {
   await wait(2200)
   for (const el of await pg.$$('button')) {
     const t = await evalSafe(pg, (e) => e.innerText, el)
-    if (t && t.includes('התחילו')) { await el.click(); break }
+    if (t && (t.includes('התחילו') || t.includes('המשיכו'))) { await el.click(); break }
   }
   let alive = false
   for (let t = 0; t < 26; t++) {

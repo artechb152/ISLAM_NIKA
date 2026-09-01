@@ -1,0 +1,19 @@
+┌─────────┬─────────────────┬───────┬───────┬──────┬──────┬─────────┬────────┬─────────────────┐
+│ (index) │ region          │ finds │ talks │ rawi │ task │ entries │ errors │ status          │
+├─────────┼─────────────────┼───────┼───────┼──────┼──────┼─────────┼────────┼─────────────────┤
+│ 0       │ 'yemen-heights' │ '2/2' │ 0     │ 0    │ '—'  │ '1 → 1' │ 0      │                 │
+│ 1       │ 'night-camp'    │       │       │      │      │         │        │ 'NEVER STARTED' │
+│ 2       │ 'border-post'   │       │       │      │      │         │        │ 'NEVER STARTED' │
+│ 3       │ 'narrow-pass'   │       │       │      │      │         │        │ 'NEVER STARTED' │
+│ 4       │ 'loading-road'  │       │       │      │      │         │        │ 'NEVER STARTED' │
+│ 5       │ 'yathrib'       │       │       │      │      │         │        │ 'NEVER STARTED' │
+│ 6       │ 'monastery'     │       │       │      │      │         │        │ 'NEVER STARTED' │
+│ 7       │ 'mecca'         │       │       │      │      │         │        │ 'NEVER STARTED' │
+│ 8       │ 'exit'          │       │       │      │      │         │        │ 'NEVER STARTED' │
+└─────────┴─────────────────┴───────┴───────┴──────┴──────┴─────────┴────────┴─────────────────┘
+
+encounters heard: 1 / 27
+evidence:         2 / 17
+tasks solved:     0 / 6
+
+the chapter cannot be completed as it stands
