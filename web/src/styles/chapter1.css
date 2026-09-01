@@ -990,3 +990,17 @@ body{
 .nb-find-title{margin:0 0 6px;font-family:var(--font-heading);font-size:16.5px;color:#5d3b18}
 .nb-find-text{margin:0;font-size:14.5px;line-height:1.62}
 .nb-card:has(.nb-find-title){display:block}
+
+/* מפת תכנון המסלול — מחנה הלילה */
+.ch1-plan-map{width:100%;max-width:460px;display:block;margin:2px auto 10px;border-radius:10px}
+.ch1-plan-map .pm-ground{fill:rgba(58,44,26,.55);stroke:rgba(199,154,60,.25)}
+.ch1-plan-map .pm-sea{fill:rgba(38,58,74,.7)}
+.ch1-plan-map .pm-sea-label{fill:rgba(245,236,214,.5);font-size:11px}
+.ch1-plan-map .pm-empty-label{fill:rgba(245,236,214,.45);font-size:12px}
+.ch1-plan-map .pm-empty-sub{fill:rgba(245,236,214,.3);font-size:9px}
+.ch1-plan-map .pm-route{fill:none;stroke:var(--gold-soft,#c79a3c);stroke-width:2.2;stroke-dasharray:5 4;stroke-linecap:round}
+.ch1-plan-map .pm-wrong{fill:none;stroke:rgba(245,236,214,.22);stroke-width:1.6;stroke-dasharray:2 5}
+.ch1-plan-map .pm-here{fill:#f5ecd6;stroke:var(--gold-soft,#c79a3c);stroke-width:2}
+.ch1-plan-map .pm-dot{fill:rgba(245,236,214,.75)}
+.ch1-plan-map .pm-dot-mecca{fill:var(--gold-soft,#c79a3c)}
+.ch1-plan-map .pm-stop{fill:rgba(245,236,214,.85);font-size:11px}

@@ -107,6 +107,17 @@ for (const region of dialogue.regions) {
           `which comes after it — the payoff would still precede its setup.`,
         )
       }
+    } else if (trig.startsWith('task:')) {
+      /* beat שנפתח עם פתרון תחנה: המשימה חייבת להתקיים ולשבת באותו אזור,
+         אחרת ה-beat לא יתנגן לעולם. */
+      const needs = trig.slice(5)
+      const at = tasksSrc.indexOf(`id: '` + needs + `',`)
+      const near = at >= 0 ? tasksSrc.slice(at, at + 200) : ''
+      if (!near.includes(`region: '` + region.id + `'`)) {
+        problems.push(
+          `${region.id}: "${e.id}" waits for task "${needs}", which is not a task of this region — it can never fire.`,
+        )
+      }
     } else if (trig !== 'arrive') {
       problems.push(`${region.id}: "${e.id}" has an unknown trigger '${trig}'.`)
     }

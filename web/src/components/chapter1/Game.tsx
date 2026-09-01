@@ -3475,22 +3475,26 @@ export default function Game() {
     return () => window.clearTimeout(t)
   }, [sceneReady])
 
-  /* A narrator beat that waits for its setup. `birds-cinematic` is the payoff
-     to `abraha-story`, and the moment that story is filed the birds are what
-     happens next — no marker to find, no key to press, because a miracle is
+  /* A beat that waits for its setup. `birds-cinematic` is the payoff to
+     `abraha-story`; `task:` beats fire when a station is worked out — the
+     loading road's "what was never packed travelled anyway" line lands right
+     after the crate closes. No marker to find, no key to press: a payoff is
      not something the player goes and collects. */
   useEffect(() => {
     if (!sceneReady || encounter) return
     const heard = new Set(seen)
+    const worked = new Set(solved)
     const due = REGION.encounters.find((e) => {
-      if (e.speaker !== 'narrator' || heard.has(e.id)) return false
+      if (heard.has(e.id)) return false
       const t = e.trigger ?? 'arrive'
-      return t.startsWith('after:') && heard.has(t.slice(6))
+      if (t.startsWith('after:')) return heard.has(t.slice(6))
+      if (t.startsWith('task:')) return worked.has(t.slice(5))
+      return false
     })
     if (!due) return
     const t = window.setTimeout(() => setEncounter(due), 900)
     return () => window.clearTimeout(t)
-  }, [sceneReady, seen, encounter])
+  }, [sceneReady, seen, solved, encounter])
 
   /* A read-only handle on where the traveller is standing. This used to be
      dev-only, which meant the built chapter — the one people actually play —
