@@ -31,6 +31,9 @@
             }
           ]
         }
+      ],
+      "core": [
+        "opening"
       ]
     },
     {
@@ -85,6 +88,10 @@
             }
           ]
         }
+      ],
+      "core": [
+        "rawi-intro",
+        "task-plan-route"
       ]
     },
     {
@@ -151,6 +158,11 @@
             }
           ]
         }
+      ],
+      "core": [
+        "envoy-empires",
+        "envoy-sasanian",
+        "task-toll"
       ]
     },
     {
@@ -184,6 +196,10 @@
             }
           ]
         }
+      ],
+      "core": [
+        "chief-tribes",
+        "task-protection"
       ]
     },
     {
@@ -224,6 +240,10 @@
             }
           ]
         }
+      ],
+      "core": [
+        "rawi-seep",
+        "task-loading"
       ]
     },
     {
@@ -329,6 +349,10 @@
             }
           ]
         }
+      ],
+      "core": [
+        "jewish-arrival",
+        "task-market"
       ]
     },
     {
@@ -423,6 +447,11 @@
             }
           ]
         }
+      ],
+      "core": [
+        "monk-christianity",
+        "monk-influence",
+        "task-monk"
       ]
     },
     {
@@ -617,6 +646,11 @@
             }
           ]
         }
+      ],
+      "core": [
+        "merchant-idols",
+        "abraha-story",
+        "birds-cinematic"
       ]
     },
     {

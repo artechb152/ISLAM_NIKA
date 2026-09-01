@@ -69,6 +69,10 @@ export interface Encounter {
 export interface Region {
   id: string
   name: string
+  /** מטרת הליבה: מזהי מפגשים/משימה שבלעדיהם השער קדימה נשאר סגור.
+      עדויות אופציונליות לעולם לא מופיעות כאן, ושערים אחורה תמיד פתוחים —
+      check-journey אוכף שכל מזהה קיים ובר-השגה. */
+  core?: string[]
   encounters: Encounter[]
 }
 

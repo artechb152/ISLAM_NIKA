@@ -37,11 +37,25 @@ for (const r of dlg.regions) {
   }
 }
 
+/* ערוץ ההעשרה של המחברת נחשב כיסוי: קלף העשרה הוא טקסט שהלומד קורא,
+   באותם כללי נאמנות בדיוק — עוגן § תקף, בלי המצאות. כך אפשר להוציא
+   סעיף משני מהמסלול הראשי בלי לאבד אותו. */
+const enr = JSON.parse(await readFile(new URL('../../web/src/lib/chapter1/enrichment.json', dir), 'utf8'))
+const allEncounterIds = new Set(dlg.regions.flatMap((r) => r.encounters.map((e) => e.id)))
+for (const c of enr.cards ?? []) {
+  const where = 'enrichment/' + c.id
+  if (!c.source || !/^§\d+$/.test(c.source)) errors.push(`קלף העשרה בלי מקור תקין ב־${where}`)
+  else if (!sourceSections.has(c.source)) errors.push(`מקור לא קיים ${c.source} ב־${where}`)
+  else spoken.set(c.source, (spoken.get(c.source) ?? 0) + 1)
+  if (!c.body?.trim()) errors.push(`קלף העשרה ריק ב־${where}`)
+  if (c.unlock && !allEncounterIds.has(c.unlock)) errors.push(`קלף העשרה ${c.id} נפתח על-ידי מפגש לא קיים: ${c.unlock}`)
+}
+
 const unspoken = [...sourceSections].filter((s) => !spoken.has(s))
 if (unspoken.length) errors.push(`סעיפים שאף אחד לא אומר: ${unspoken.join(', ')}`)
 
 // blacklist — inventions that were removed and must not return
-const allText = JSON.stringify(dlg)
+const allText = JSON.stringify(dlg) + JSON.stringify(enr)
 for (const [bad, why] of [
   ['שנת הפיל', 'שם פרק שהומצא'],
   ['באותה שנה נולד', 'לידת מוחמד לא בטקסט'],

@@ -395,6 +395,19 @@ for (const region of ORDER) {
     errors: errs.length,
   })
   if (errs.length) log.push({ region, status: 'PAGE ERROR: ' + errs[0] })
+  /* באזור האחרון, כשהכול נשמע — הפינאלה: המצלמה עולה (riseAt) ורק אחר-כך
+     כרטיס הסיום מעל הדיורמה. סוף שטוח = רגרסיה. */
+  if (region === 'exit') {
+    let rise = 0, card = false
+    for (let i = 0; i < 20; i++) {
+      await wait(500)
+      rise = await evalSafe(pg, () => window.__ch1Live?.riseAt || 0) || 0
+      card = !!(await evalSafe(pg, () => !!document.querySelector('.ch1-end')))
+      if (rise > 0 && card) break
+    }
+    console.log(`  finale: camera rise ${rise > 0 ? 'yes' : 'NO'} · end card ${card ? 'yes' : 'NO'}`)
+    if (!(rise > 0 && card)) log.push({ region, status: 'FINALE MISSING (rise=' + rise + ', card=' + card + ')' })
+  }
   await br.close()
 }
 

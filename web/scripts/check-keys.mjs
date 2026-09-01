@@ -82,6 +82,48 @@ console.log(`  M → map on screen: ${onM.map ? 'yes' : 'NO'} · model-view chip
 await pg.keyboard.press('Escape')
 await wait(900)
 
+// ── 1.5 שער ליבה: קדימה בלי ליבה = עצירה דיאגטית, לא מעבר ─────────────────
+/* המחנה עם ליבה חסרה (rawi-intro + תכנון המסלול): כניסה לשער קדימה חייבת
+   שלא לנווט, לא להרים riseAt, וכן להעלות את שורת ההסבר של ראווי. */
+await pg.evaluate(() => { window.__ch1Live.player.set(0, 0, -20) })
+let heldLine = null
+for (let i = 0; i < 12; i++) {
+  await wait(400)
+  heldLine = await pg.evaluate(() => document.querySelector('.hud-dialogue .is-full')?.textContent ?? null).catch(() => null)
+  if (heldLine) break
+}
+const heldRise = await pg.evaluate(() => window.__ch1Live?.riseAt || 0).catch(() => 0)
+const heldUrl = await pg.evaluate(() => window.location.search).catch(() => '')
+const heldOk = !!heldLine && heldLine.includes('עוד לא סיימנו') && heldRise === 0 && heldUrl.includes('night-camp')
+console.log(`  core gate holds the forward exit: ${heldOk ? 'yes' : 'NO'} (${heldLine ? 'ראווי הסביר' : 'no line'})`)
+if (!heldOk) problems.push('the forward gate let an unfinished region go — or held it silently')
+/* לסגור את שורת ההסבר ולהשלים את הליבה דרך ה-store, כמו שחקן שסיים */
+await pg.keyboard.press('Space'); await wait(400)
+await pg.keyboard.press('Space'); await wait(400)
+await pg.evaluate(() => {
+  const s = JSON.parse(localStorage.getItem('ch1:notebook:v1') ?? '{"seen":[],"entries":[],"region":"night-camp","found":[],"solved":[]}')
+  if (!s.seen.includes('rawi-intro')) s.seen.push('rawi-intro')
+  if (!s.entries.includes(2)) s.entries.push(2)
+  if (!s.solved.includes('task-plan-route')) s.solved.push('task-plan-route')
+  localStorage.setItem('ch1:notebook:v1', JSON.stringify(s))
+})
+await pg.reload({ waitUntil: 'networkidle' })
+{
+  const start2 = pg.getByRole('button', { name: /התחילו|המשיכו/ })
+  for (let t = 0; t < 30; t++) {
+    if (await pg.evaluate(() => !!window.__ch1Live).catch(() => false)) break
+    if (await start2.isVisible().catch(() => false)) await start2.click({ timeout: 2000 }).catch(() => {})
+    await wait(1000)
+  }
+  for (let i = 0; i < 10; i++) {
+    if (!(await pg.evaluate(() => !!document.querySelector('.hud-dialogue')).catch(() => false))) break
+    await pg.keyboard.press('Space'); await wait(300)
+  }
+  /* מחוץ לשער, כדי שהמעבר ייורה מחדש בכניסה */
+  await pg.evaluate(() => { window.__ch1Live.player.set(0, 0, -10) }).catch(() => {})
+  await wait(600)
+}
+
 // ── 2. the gate still lifts the camera ──────────────────────────────────────
 /* Walk into the onward gate by standing on it: the transition stamps riseAt
    and the camera climbs to the diorama pose for the length of the hand-off. */

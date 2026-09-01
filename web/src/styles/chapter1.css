@@ -1020,3 +1020,7 @@ body{
 .ch1-observe-list{list-style:none;padding:4px 0 0;margin:0;display:grid;gap:6px}
 .ch1-observe-list li{opacity:.6}
 .ch1-observe-list li.is-seen{opacity:1;color:var(--gold-soft,#c79a3c)}
+
+/* שער ליבה סגור — עמום, בלי זוהר, עם שורת הסבר */
+.poi-marker.is-gate-marker.is-held-gate{opacity:.45;filter:saturate(.4)}
+.poi-gate-hold{display:block;font-size:11px;color:rgba(245,236,214,.8);background:rgba(20,10,8,.55);border-radius:8px;padding:2px 8px;margin-top:3px}

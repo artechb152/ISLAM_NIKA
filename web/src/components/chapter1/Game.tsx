@@ -2600,6 +2600,37 @@ function arrivalBeat(regionId: string): Encounter | null {
   }
 }
 
+/* שער ליבה סגור אינו קיר שקוף: כשהמטייל נכנס לשער קדימה לפני שהליבה
+   הושלמה, ראווי אומר דיאגטית מה בדיוק חסר ואיפה — לא הודעת מערכת,
+   אלא בן-לוויה שמצביע. שערים אחורה לא נשערים לעולם. */
+function coreHoldBeat(missing: string[]): Encounter {
+  const hints = missing.map((id) => {
+    const e = REGION.encounters.find((x) => x.id === id)
+    if (e) {
+      if (e.speaker === 'rawi') return 'יש לי עוד משהו לספר לך — קרא לי (R)'
+      if (e.speaker === 'narrator') return 'יש כאן עוד רגע אחד שמחכה לקרות'
+      return `${SPEAKERS[e.speaker]} עוד מחכה לדבר איתך (E)`
+    }
+    if (REGION_TASK && REGION_TASK.id === id) {
+      return `${REGION_TASK.prompt} — התחנה של ${REGION_TASK.asker} (E)`
+    }
+    return id
+  })
+  const uniq = [...new Set(hints)]
+  return {
+    id: `rawi-hold-${REGION.id}`,
+    speaker: 'rawi',
+    notebook: 0,
+    gesture: 'talk-nod',
+    lines: [
+      {
+        source: '',
+        text: `רגע — הדרך לא תברח. עוד לא סיימנו כאן: ${uniq.join(' · ')}. ואז נמשיך.`,
+      },
+    ],
+  }
+}
+
 const RAWI_WALK_GAP = 0.45
 const PLAYER_MOVE_EPS = 0.004
 
@@ -3302,6 +3333,14 @@ export default function Game() {
      a beat, and the next region opens with them already inside its gate. */
   const [travelTo, setTravelTo] = useState<{ to: string; label: string } | null>(null)
   const travelling = useRef(false)
+  /* שער הליבה: היציאה קדימה נפתחת רק כשמה שהאזור קיים בשבילו נעשה.
+     עדויות אופציונליות לא נספרות כאן, ואחורה תמיד פתוח — אי אפשר
+     להיתקע, רק אי אפשר לדלג. */
+  const coreMissing = (REGION.core ?? []).filter((id) => !seen.includes(id) && !solved.includes(id))
+  const coreMissingRef = useRef<string[]>([])
+  coreMissingRef.current = coreMissing
+  const coreHeldAt = useRef(0)
+
   const travel = useCallback(
     (to: string, label: string) => {
       if (travelling.current) return
@@ -3325,6 +3364,26 @@ export default function Game() {
     },
     [live],
   )
+
+  /* כניסה לשער קדימה עם ליבה חסרה לא מעבירה אזור — היא מקבלת את ראווי,
+     שאומר מה חסר. קירור קצר כדי שעמידה בתוך השער לא תפתח את אותה שורה
+     שוב ושוב. */
+  const guardedTravel = useCallback(
+    (to: string, label: string) => {
+      if (to === ONWARD && coreMissingRef.current.length > 0) {
+        if (encounterRef.current) return
+        const now = performance.now()
+        if (now - coreHeldAt.current < 4000) return
+        coreHeldAt.current = now
+        cue('ui')
+        setEncounter(coreHoldBeat(coreMissingRef.current))
+        return
+      }
+      travel(to, label)
+    },
+    [travel],
+  )
+
   const overlayRef = useRef<'notebook' | 'map' | null>(null)
   overlayRef.current = overlay
   /* one gate for "something is already on screen", so a keypress cannot open a
@@ -3787,7 +3846,7 @@ export default function Game() {
               gesture={encounter?.gesture ?? 'talk'}
               speakingWho={encounter && stepSpeaker && stepSpeaker !== 'rawi' && stepSpeaker !== 'narrator' ? stepSpeaker : null}
               attendWho={encounter && stepSpeaker === 'rawi' && encounter.speaker !== 'rawi' && encounter.speaker !== 'narrator' ? encounter.speaker : null}
-              onExit={travel}
+              onExit={guardedTravel}
               met={met}
             />
             <SceneReady onReady={onSceneReady} />
@@ -3852,7 +3911,7 @@ export default function Game() {
             שבר את הרגע הזה — שם המצפן והדרך עצמה מספיקים. */}
         {ONWARD && REGION.id !== 'night-camp' && (
           <div
-            className="poi-marker is-gate-marker"
+            className={`poi-marker is-gate-marker${coreMissing.length > 0 ? ' is-held-gate' : ''}`}
             ref={(el) => {
               if (el) live.markerEls.set('__gate', el)
               else live.markerEls.delete('__gate')
@@ -3861,6 +3920,7 @@ export default function Game() {
             <span className="poi-gate-label">
               {campLayout.exits?.find((e) => e.to === ONWARD)?.label ?? ''}
             </span>
+            {coreMissing.length > 0 && <span className="poi-gate-hold">נשלים כאן קודם</span>}
             <span className="poi-gate-dist" />
           </div>
         )}
