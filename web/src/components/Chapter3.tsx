@@ -326,6 +326,26 @@ function Statement({ r }: { r: string }) {
   )
 }
 
+/** One picture, on paper, beside the prose it belongs to.
+
+    NO TEXT IS BURNED INTO ANY PLATE and none carries a caption over it — both
+    were deleted from chapter 2 and do not come back. `alt=""` with
+    `aria-hidden`: every fact lives in the text, and a plate that tried to carry
+    one would be a fact only sighted readers get.
+
+    ⚠ AND NO HUMAN FIGURE IN ANY OF THEM. Not Muhammad, not Gabriel, not a
+    crowd, not a faceless silhouette — chapter 2 drafted exactly that for its
+    own opening and it was rejected and deleted. These three are a town, a
+    cargo and a precinct: places, objects, light. */
+function Plate({ src }: { src: string }) {
+  return (
+    <figure className="ch3-plate">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/assets/chapter3/${src}`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+    </figure>
+  )
+}
+
 /* ---------------- a note on the story, not the story ----------------
 
    THE PAGE SHOWED EVERYTHING AT ONCE and read as a wall. Chapter 2 holds 950
@@ -891,8 +911,11 @@ export default function Chapter3() {
                   <T r="§12.a" />
                 </div>
                 <Lineage />
-                <div className="ch3-body" data-reveal>
-                  <T r="§10.a" />
+                <div className="ch3-withplate" data-reveal>
+                  <div className="ch3-body">
+                    <T r="§10.a" />
+                  </div>
+                  <Plate src="mecca-town.jpg" />
                 </div>
                 <Note id="n-abdallah" label="על השם עבד אללה">
                   {/* §9.a ends on a bracket, §9.b opens with a vav — one sentence */}
@@ -909,11 +932,14 @@ export default function Chapter3() {
                   for a short trait was exactly this: „טקסט רץ. אין מנגנון." */}
               <Section id="khadija">
                 <Head id="khadija" />
-                <div className="ch3-body" data-reveal>
-                  <T r="§13.a" />
-                  <T r={['§14.a', '§14.daughters']} />
-                  <T r="§15.a" />
-                  <T r="§16.a" />
+                <div className="ch3-withplate" data-reveal>
+                  <div className="ch3-body">
+                    <T r="§13.a" />
+                    <T r={['§14.a', '§14.daughters']} />
+                    <T r="§15.a" />
+                    <T r="§16.a" />
+                  </div>
+                  <Plate src="caravan-load.jpg" />
                 </div>
               </Section>
 
@@ -942,10 +968,10 @@ export default function Chapter3() {
                   <T r="§19.a" />
                 </div>
                 <Verse r="§19.verse" />
-                <div className="ch3-body" data-reveal>
+                <Note id="n-unlettered" label="על המחלוקת בפירוש „אינני קורא“">
                   <T r="§20.a" />
                   <T r="§20.b" />
-                </div>
+                </Note>
                 <SubHead section="revelation" id="qadr" />
                 <div className="ch3-body" data-reveal>
                   <T r="§21.a" em={['ליל הגורל']} />
@@ -969,13 +995,18 @@ export default function Chapter3() {
                   <T r="§25.a" />
                   <T r="§25.b" />
                 </div>
-                <div className="ch3-body" data-reveal>
-                  <T r="§26.a" />
-                  <T r="§26.b" />
-                  <T r="§26.c" />
+                <div className="ch3-withplate" data-reveal>
+                  <div className="ch3-body">
+                    <T r="§26.a" />
+                    <T r="§26.b" />
+                    <T r="§26.c" />
+                  </div>
+                  <Plate src="kaaba-precinct.jpg" />
+                </div>
+                <Note id="n-counter" label="מה ענו אנשי מכה">
                   <T r="§27.a" />
                   <T r="§27.b" />
-                </div>
+                </Note>
                 <SubHead section="preaching" id="sahaba" />
                 <div className="ch3-body" data-reveal>
                   <T r="§28.a" />
@@ -1046,8 +1077,10 @@ export default function Chapter3() {
                 </div>
                 <div className="ch3-body" data-reveal>
                   <T r="§38.a" />
-                  <T r="§38.b" />
                 </div>
+                <Note id="n-seal" label="מה האסלאם למד מכך">
+                  <T r="§38.b" />
+                </Note>
               </Section>
 
               {/* ============ 09 · העליה לשמים ============
@@ -1065,16 +1098,18 @@ export default function Chapter3() {
                     geometry — Muhammad comes back DOWN past Moses — so the
                     negotiation reads better with the rungs still on screen than
                     scrolled off above it. */}
-                <div className="ch3-beside">
-                  <div className="ch3-body" data-reveal>
-                    <T r="§39.a" />
-                    <T r="§40.a" />
-                    <T r="§40.b" />
-                    <T r="§40.c" />
-                    <T r="§40.d" />
-                  </div>
-                  <Heavens />
+                <div className="ch3-body" data-reveal>
+                  <T r="§39.a" />
                 </div>
+                <Heavens />
+                <div className="ch3-body" data-reveal>
+                  <T r="§40.a" />
+                  <T r="§40.b" />
+                  <T r="§40.c" />
+                </div>
+                <Note id="n-intent" label="על תפילה בכוונה">
+                  <T r="§40.d" />
+                </Note>
                 <div className="ch3-body" data-reveal>
                   <T r="§41.a" />
                   <T r="§41.b" />

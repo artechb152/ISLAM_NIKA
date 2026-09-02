@@ -27,6 +27,9 @@ await new Promise((r) => setTimeout(r, 400))
 
 /* force every reveal on: a fullPage shot otherwise photographs opacity:0 */
 await page.addStyleTag({ content: '[data-reveal]{opacity:1!important;transform:none!important}' })
+/* a fullPage shot does not paint lazy images that were never in a viewport */
+await page.evaluate(() => document.querySelectorAll('img[loading]').forEach((i) => i.removeAttribute('loading')))
+await new Promise((r) => setTimeout(r, 900))
 await new Promise((r) => setTimeout(r, 200))
 
 const report = await page.evaluate(() => {

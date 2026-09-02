@@ -32,7 +32,14 @@
   --flow-part:clamp(44px,5.2vw,66px); /* before a sub-heading — a new move   */
   --flow-tight:clamp(14px,1.8vw,20px);/* a sub-heading to its own first line */
 
-  --measure:880px;   /* the reading column's ceiling            */
+  /* ⚠ THIS WAS 880px AND IT WAS THE WHOLE PROBLEM. Measured against chapter 2
+     at 1600: that chapter sets its prose to the FULL article width — 1157px of
+     1157, no void. This one ran at 880 inside 1172, so every paragraph in the
+     chapter trailed 292px of bare parchment, for eleven thousand pixels. The
+     page read as crowded on the reading edge and empty beside it at the same
+     time, which is exactly what it was. The line runs ~115 characters here,
+     which is what chapter 2 runs and what it was signed off at. */
+  --measure:100%;    /* the reading column fills the article    */
   /* A DEVICE IS AN EVENT, NOT A PARAGRAPH. All three sat at --measure, so they
      were exactly as wide as the prose and broke nothing: the page read as one
      880px ribbon from the banner to the hand-off. The audit counts a block as
@@ -119,7 +126,10 @@
   margin:0;width:100%;max-width:var(--measure,880px);
   overflow:hidden;border:1px solid var(--edge);box-shadow:var(--shadow);
 }
-.ch3-plate img{display:block;width:100%;height:auto;aspect-ratio:16/7;object-fit:cover}
+/* 4:3 — the ratio the plates were made at. At 16/7 the crop was eating the
+   hills out of the precinct and the sky out of the town, which is most of what
+   those two pictures are. */
+.ch3-plate img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
 
 /* ============================ the two set-apart voices ============================
    Two costumes, two uses each, and the audit fails at three. See
@@ -521,28 +531,90 @@
    the heading above the fold once the reveal had settled */
 .ch3-sub{scroll-margin-top:calc(var(--header-height) + 84px)}
 
-/* ============================ prose beside a device ============================
-   THE PAGE WAS DENSE IN THE COLUMN AND EMPTY BESIDE IT. The prose ran at
-   --measure and every device sat UNDERNEATH it, so the reader met a wall on the
-   reading edge and a field of bare parchment on the outer one — and the devices
-   made the page taller instead of using the space that was already there.
+/* ============================ the ranks, stated once ============================
+   Six things were competing and the reader could not tell which led:
 
-   Chapter 2's `.ch2-withmap` answers exactly this: the prose keeps the reading
-   edge, the device takes the outer one, and they share a row. Each column
-   carries its own ceiling rather than the pair being capped, so the device is
-   pinned to the outer edge instead of drifting inward on a wide screen. */
-@media (min-width:1100px){
-  .chapter-article .ch3-beside{
-    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);
-    /* the row step is the chapter's flow; the column gap is a different
-       relationship and must not share the same number */
-    gap:var(--flow) clamp(26px,2.8vw,44px);
-    align-content:start;
-  }
-  /* the wrapper's children are the two columns, so nothing inside them may
-     carry the flow rule's own top margin and push one column out of line */
-  .chapter-article .ch3-beside > * + *{margin-top:0}
-  .chapter-article .ch3-beside .ch3-body{max-width:none}
-  .chapter-article .ch3-beside .ch3-lineage,
-  .chapter-article .ch3-beside .ch3-heavens{max-width:none;margin-top:0}
+     1  section heading   the loudest — 56px, maroon, with the ornament
+     2  sub-heading       the movement inside it
+     3  DEVICE            an OBJECT in the column: full width, its own ground,
+                          a full step of air either side
+     4  prose             the ground everything else sits on
+     5  verse / statement a change of voice, twice each and no more
+     6  note              recessive — apparatus, folded, and never the story
+
+   ⚠ RANK 3 WAS BROKEN BY PUTTING THE DEVICES BESIDE THE PROSE. At .92fr against
+   a column of text the ladder read as a margin note, when it is what §39 IS.
+   The width saved 500px and cost the hierarchy, which was the wrong trade. */
+.chapter-article .ch3-lineage,
+.chapter-article .ch3-heavens,
+.chapter-article .ch3-readings{margin-top:var(--flow-part)}
+
+/* ============================ 6 · the note ============================
+   Apparatus, not story: an etymology, what the commentators make of a passage,
+   a dispute about a word. Folded by default so a first read runs clean.
+
+   THE TEXT IS ALWAYS IN THE DOM — clipped by CSS, never `hidden`, never
+   conditionally rendered. Chapter 2's dialogs keep their children mounted for
+   the same two reasons: the presence gate proves every fragment reaches the
+   page, and the in-chapter search walks the DOM. */
+.ch3-note{
+  width:100%;max-width:var(--measure,880px);
+  border-top:1px solid var(--rule);
 }
+.ch3-note-btn{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:12px 0;min-height:44px;
+  background:none;border:0;cursor:pointer;text-align:start;
+  font-family:var(--font-body);font-size:15.5px;font-weight:600;color:var(--muted);
+  transition:color .18s ease;
+}
+.ch3-note-btn:hover{color:var(--maroon)}
+.ch3-note.is-open .ch3-note-btn{color:var(--maroon)}
+/* a small maroon diamond, turned when the note is open. The chapter's own mark,
+   at the size of a control rather than of a heading's ornament. */
+.ch3-note-mark{
+  width:7px;height:7px;flex:none;background:var(--gold);
+  transform:rotate(45deg);transition:transform .2s ease,background .18s ease;
+}
+.ch3-note.is-open .ch3-note-mark{background:var(--maroon);transform:rotate(135deg)}
+.ch3-note-body{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .26s ease;
+}
+.ch3-note.is-open .ch3-note-body{grid-template-rows:1fr}
+.ch3-note-body > *{overflow:hidden;min-height:0}
+/* the apparatus is set one step quieter than the story it comments on */
+/* ⚠ THE PADDING MUST NOT SIT ON THE CLIPPED CHILD. `min-height:0` removes the
+   content box but not the padding, so `grid-template-rows:0fr` resolved to 16px
+   and every closed note kept a sliver open. It is applied only when open. */
+.chapter-article .ch3-note .ch3-body{
+  font-size:calc(var(--read) * .94);color:var(--muted);
+}
+.chapter-article .ch3-note.is-open .ch3-body{padding-bottom:18px}
+@media (prefers-reduced-motion:reduce){
+  .ch3-note-body,.ch3-note-mark{transition:none}
+}
+
+/* ============================ a plate beside the prose ============================
+   A PICTURE IS A COMPANION TO THE TEXT, NOT THE SECTION'S EVENT — which is why
+   this grid is right for plates and was wrong for the devices. The ladder IS
+   what §39 is about and had to keep the full column; the town, the cargo and
+   the precinct are what the prose is describing, and they belong beside it.
+
+   It also closes the hole the page had: the prose ran at --measure and left a
+   field of bare parchment on the outer edge for eleven thousand pixels. The
+   plate takes that edge. */
+@media (min-width:1100px){
+  .chapter-article .ch3-withplate{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.78fr);
+    /* the row step is the chapter's flow; the column gap is a different
+       relationship and does not share the same number */
+    gap:var(--flow) clamp(26px,2.8vw,44px);
+    align-items:start;
+  }
+  .chapter-article .ch3-withplate > * + *{margin-top:0}
+  .chapter-article .ch3-withplate .ch3-body{max-width:none}
+  .chapter-article .ch3-withplate .ch3-plate{margin-top:6px}
+}
+/* stacked below 1100px, where there is no outer edge to take */
+.chapter-article .ch3-withplate .ch3-plate{max-width:var(--measure,880px)}

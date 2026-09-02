@@ -6,24 +6,68 @@
       "title": "ההגירה למדינה",
       "device": "hero video + map-timeline · 622",
       "subs": [
-        { "id": "groups", "title": "ארבע קבוצות אנשים" },
-        { "id": "covenant", "title": "חוזה האומה" }
+        {
+          "id": "groups",
+          "title": "ארבע קבוצות אנשים"
+        },
+        {
+          "id": "covenant",
+          "title": "חוזה האומה"
+        }
       ],
       "$note": "המקטע הגדול בפרק — 25 קטעים — ולכן הוא היחיד שנושא שתי תנועות. §2 נושא שתי גרסאות של אותו אירוע והמקור לא מכריע ביניהן, ולכן שני סלוטים ולא פסקה אחת.",
       "slots": {
-        "lead": ["§0.a"],
-        "key": ["§0.b"],
-        "road": ["§1.a", "§1.b"],
-        "versionFlight": ["§2.flight"],
-        "versionInvited": ["§2.invited"],
-        "groupsLead": ["§3.a", "§3.b"],
-        "cards": ["§3.muhajirun", "§3.ansar", "§3.jews", "§3.quraysh"],
-        "became": ["§4.a", "§4.b"],
-        "covenantTerms": ["§8.a", "§8.b"],
-        "unravel": ["§8.c", "§8.d"],
-        "meaning": ["§5.a", "§5.b"],
-        "echo": ["§6.echo1", "§6.echo2"],
-        "mosque": ["§7.a", "§7.b", "§7.c"]
+        "lead": [
+          "§0.a"
+        ],
+        "key": [
+          "§0.b"
+        ],
+        "road": [
+          "§1.a",
+          "§1.b"
+        ],
+        "versionFlight": [
+          "§2.flight"
+        ],
+        "versionInvited": [
+          "§2.invited"
+        ],
+        "groupsLead": [
+          "§3.a",
+          "§3.b"
+        ],
+        "cards": [
+          "§3.muhajirun",
+          "§3.ansar",
+          "§3.jews",
+          "§3.quraysh"
+        ],
+        "became": [
+          "§4.a",
+          "§4.b"
+        ],
+        "covenantTerms": [
+          "§8.a",
+          "§8.b"
+        ],
+        "unravel": [
+          "§8.c",
+          "§8.d"
+        ],
+        "meaning": [
+          "§5.a",
+          "§5.b"
+        ],
+        "echo": [
+          "§6.echo1",
+          "§6.echo2"
+        ],
+        "mosque": [
+          "§7.a",
+          "§7.b",
+          "§7.c"
+        ]
       }
     },
     {
@@ -31,47 +75,122 @@
       "title": "מעבר מהטפה בדרכי נועם לג'האד נגד הכופרים",
       "device": "turning point",
       "$note": "שלושה קטעים, והוא נשאר מקטע ראשי משום שהמקור נותן לו כותרת רצה משלו — וזה באמת הציר: עד כאן הטפה, מכאן קרבות.",
-      "slots": { "lead": ["§9.a"], "consequence": ["§9.b", "§9.c"] }
+      "slots": {
+        "pair": [
+          "§9.dawa",
+          "§9.jihad"
+        ],
+        "consequence": [
+          "§9.b",
+          "§9.c"
+        ]
+      }
     },
     {
       "id": "badr",
       "title": "קרב בדר",
       "device": "map-timeline · 624 + force-balance + film",
-      "subs": [{ "id": "badr-quran", "title": "בדר בקוראן" }],
+      "subs": [
+        {
+          "id": "badr-quran",
+          "title": "בדר בקוראן"
+        }
+      ],
       "slots": {
-        "lead": ["§10.a", "§10.b"],
-        "approach": ["§11.a"],
-        "forceMuslims": ["§11.muslims"],
-        "forceQuraysh": ["§11.quraysh"],
-        "film": ["§12.rain", "§12.duel"],
-        "outcome": ["§13.a", "§13.b"],
-        "quranLead": ["§14.a"],
-        "verse1": ["§14.verse"],
-        "intro2": ["§15.a"],
-        "verse2": ["§15.verse"],
-        "echo": ["§15.echo"],
-        "ramadan": ["§16.a"],
-        "ramadanEcho": ["§16.echo"]
+        "lead": [
+          "§10.a",
+          "§10.b"
+        ],
+        "approach": [
+          "§11.a"
+        ],
+        "forceMuslims": [
+          "§11.muslims"
+        ],
+        "forceQuraysh": [
+          "§11.quraysh"
+        ],
+        "film": [
+          "§12.rain",
+          "§12.duel"
+        ],
+        "outcome": [
+          "§13.a",
+          "§13.b"
+        ],
+        "quranLead": [
+          "§14.a"
+        ],
+        "verse1": [
+          "§14.verse"
+        ],
+        "intro2": [
+          "§15.a"
+        ],
+        "verse2": [
+          "§15.verse"
+        ],
+        "echo": [
+          "§15.echo"
+        ],
+        "ramadan": [
+          "§16.a"
+        ],
+        "ramadanEcho": [
+          "§16.echo"
+        ]
       }
     },
     {
       "id": "uhud",
       "title": "קרב אֻחֻד",
       "device": "map-timeline · 625 + force-balance",
-      "subs": [{ "id": "shahids", "title": "פסוק השהידים" }],
+      "subs": [
+        {
+          "id": "shahids",
+          "title": "פסוק השהידים"
+        }
+      ],
       "$note": "אותו מנגנון מאזן כוחות כמו בדר, והיחס מתהפך: 1000 מול 3000. זה מה שהמנגנון אומר, ולכן הוא מופיע פעמיים בלבד בפרק.",
       "slots": {
-        "lead": ["§17.a"],
-        "forceQuraysh": ["§17.quraysh"],
-        "forceMuslims": ["§17.muslims"],
-        "fear": ["§18.a", "§18.b"],
-        "outcome": ["§19.a", "§19.b", "§19.c"],
-        "hamzaLead": ["§20.a"],
-        "saying": ["§20.saying"],
-        "hamza": ["§20.translit", "§20.hind"],
-        "shahidsLead": ["§21.a", "§21.b"],
-        "verse": ["§21.verse"],
-        "echo": ["§22.echo"]
+        "lead": [
+          "§17.a"
+        ],
+        "forceQuraysh": [
+          "§17.quraysh"
+        ],
+        "forceMuslims": [
+          "§17.muslims"
+        ],
+        "fear": [
+          "§18.a",
+          "§18.b"
+        ],
+        "outcome": [
+          "§19.a",
+          "§19.b",
+          "§19.c"
+        ],
+        "hamzaLead": [
+          "§20.a"
+        ],
+        "saying": [
+          "§20.saying"
+        ],
+        "hamza": [
+          "§20.translit",
+          "§20.hind"
+        ],
+        "shahidsLead": [
+          "§21.a",
+          "§21.b"
+        ],
+        "verse": [
+          "§21.verse"
+        ],
+        "echo": [
+          "§22.echo"
+        ]
       }
     },
     {
@@ -80,44 +199,107 @@
       "device": "trench diagram · 627",
       "$note": "הקרב היחיד שהרעיון שלו הוא גאומטריה — העיר, הצד הצפוני החשוף, החפירה. בני קוריזה יושבים כאן ולא במקטע משלהם: המקור מציב אותם כהמשך ישיר של הקרב, ומקטע נפרד היה נותן לטבח כותרת משלו בסרגל.",
       "slots": {
-        "lead": ["§23.a"],
-        "cause1": ["§23.cause1"],
-        "cause2": ["§23.cause2"],
-        "diagram": ["§24.trench"],
-        "storm": ["§24.storm"],
-        "ahzab": ["§25.a"],
-        "qurayza": ["§26.a", "§26.b"]
+        "lead": [
+          "§23.a"
+        ],
+        "cause1": [
+          "§23.cause1"
+        ],
+        "cause2": [
+          "§23.cause2"
+        ],
+        "diagram": [
+          "§24.trench"
+        ],
+        "storm": [
+          "§24.storm"
+        ],
+        "ahzab": [
+          "§25.a"
+        ],
+        "qurayza": [
+          "§26.a",
+          "§26.b"
+        ]
       }
     },
     {
       "id": "hudaybiyyah",
       "title": "הסכם חודיביה",
       "device": "map-timeline · 628 + concessions table",
-      "subs": [{ "id": "hudna", "title": "הודנה" }],
+      "subs": [
+        {
+          "id": "hudna",
+          "title": "הודנה"
+        }
+      ],
       "slots": {
-        "dream": ["§27.a", "§27.b"],
-        "stopped": ["§28.a", "§28.b"],
-        "concessions": ["§29.term1", "§29.term2", "§29.term3"],
-        "counter": ["§30.a", "§30.b"],
-        "definition": ["§31.a"]
+        "dream": [
+          "§27.a",
+          "§27.b"
+        ],
+        "stopped": [
+          "§28.a",
+          "§28.b"
+        ],
+        "concessions": [
+          "§29.term1",
+          "§29.term2",
+          "§29.term3"
+        ],
+        "counter": [
+          "§30.a",
+          "§30.b"
+        ],
+        "definition": [
+          "§31.a"
+        ]
       }
     },
     {
       "id": "khaybar",
       "title": "טבח יהודי ח'יבר",
       "device": "map-timeline · quiet typography",
-      "subs": [{ "id": "slogan", "title": "הסיסמה" }],
+      "subs": [
+        {
+          "id": "slogan",
+          "title": "הסיסמה"
+        }
+      ],
       "$note": "§41.year — התאריך השגוי — מסומן omitted ואינו נצרך כאן. הגירוש מוצג ביחסו לקרב בדר, כפי שהמקור עצמו עושה לבני נדיר.",
       "slots": {
-        "qaynuqa": ["§41.qaynuqa"],
-        "nadir": ["§41.nadir"],
-        "qurayza": ["§42.a"],
-        "conquest": ["§43.a", "§43.b"],
-        "forts": ["§44.a", "§44.b"],
-        "participants": ["§45.a", "§45.b"],
-        "ali": ["§46.a", "§46.b", "§46.c"],
-        "sloganLead": ["§47.a"],
-        "echo": ["§47.echo"]
+        "qaynuqa": [
+          "§41.qaynuqa"
+        ],
+        "nadir": [
+          "§41.nadir"
+        ],
+        "qurayza": [
+          "§42.a"
+        ],
+        "conquest": [
+          "§43.a",
+          "§43.b"
+        ],
+        "forts": [
+          "§44.a",
+          "§44.b"
+        ],
+        "participants": [
+          "§45.a",
+          "§45.b"
+        ],
+        "ali": [
+          "§46.a",
+          "§46.b",
+          "§46.c"
+        ],
+        "sloganLead": [
+          "§47.a"
+        ],
+        "echo": [
+          "§47.echo"
+        ]
       }
     },
     {
@@ -125,38 +307,95 @@
       "title": "כיבוש מכה",
       "device": "map-timeline · 630",
       "$note": "המעגל נסגר — הוא חוזר לעיר שממנה נאלץ לצאת ב-§0.",
-      "slots": { "breach": ["§48.a", "§48.b"], "conquest": ["§49.a", "§49.b"] }
+      "slots": {
+        "breach": [
+          "§48.a",
+          "§48.b"
+        ],
+        "conquest": [
+          "§49.a",
+          "§49.b"
+        ]
+      }
     },
     {
       "id": "death",
       "title": "מותו של מוחמד",
       "device": "quiet close · no mechanism",
-      "slots": { "lead": ["§50.a", "§50.b"], "close": ["§51.a"] }
+      "slots": {
+        "lead": [
+          "§50.a",
+          "§50.b"
+        ],
+        "close": [
+          "§51.a"
+        ]
+      }
     },
     {
       "id": "today",
       "title": "הסכם חודיביה בפסקי ההלכה באסלאם המודרני",
       "device": "three mufti cards",
-      "subs": [{ "id": "maslaha", "title": "מצלחה" }],
+      "subs": [
+        {
+          "id": "maslaha",
+          "title": "מצלחה"
+        }
+      ],
       "$note": "החלק לא נסגר בהסכמה, וזו הנקודה. אין מקטע סיכום אחריו.",
       "slots": {
-        "lead": ["§32.a"],
-        "treaties": ["§32.list"],
-        "question": ["§32.b"],
-        "sources": ["§33.a"],
-        "definition": ["§34.a"],
-        "applied": ["§34.b"],
-        "egyptLead": ["§35.lead"],
-        "egyptPoints": ["§35.points"],
-        "egyptNote": ["§36.a"],
-        "saudiLead": ["§37.lead"],
-        "saudiPoint": ["§37.point"],
-        "saudiNote": ["§37.b"],
-        "arafatLead": ["§38.lead"],
-        "arafatQuote": ["§38.quote"],
-        "qaradawi": ["§39.a"],
-        "verse": ["§39.verse"],
-        "charter": ["§40.a", "§40.b"]
+        "lead": [
+          "§32.a"
+        ],
+        "treaties": [
+          "§32.list"
+        ],
+        "question": [
+          "§32.b"
+        ],
+        "sources": [
+          "§33.a"
+        ],
+        "definition": [
+          "§34.a"
+        ],
+        "applied": [
+          "§34.b"
+        ],
+        "egyptLead": [
+          "§35.lead"
+        ],
+        "egyptPoints": [
+          "§35.points"
+        ],
+        "egyptNote": [
+          "§36.a"
+        ],
+        "saudiLead": [
+          "§37.lead"
+        ],
+        "saudiPoint": [
+          "§37.point"
+        ],
+        "saudiNote": [
+          "§37.b"
+        ],
+        "arafatLead": [
+          "§38.lead"
+        ],
+        "arafatQuote": [
+          "§38.quote"
+        ],
+        "qaradawi": [
+          "§39.a"
+        ],
+        "verse": [
+          "§39.verse"
+        ],
+        "charter": [
+          "§40.a",
+          "§40.b"
+        ]
       }
     }
   ]

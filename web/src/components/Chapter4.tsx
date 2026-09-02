@@ -41,6 +41,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
+import { layoutLabels, px, py, ROUTE } from '@/lib/chapter4/art'
 import layoutData from '@/lib/chapter4/layout.json'
 import {
   completedSections,
@@ -227,6 +228,22 @@ const nameOf = (r: string): string => {
 }
 
 
+/** A word LIFTED OUT of a fragment for a label, proved to be in it. A legend
+    that names a thing has to be able to name it, but the name must still be the
+    source's word and not a caption we compose. Throws if the word is not in the
+    fragment at a word boundary, so a label cannot drift from its sentence. */
+const EDGE = /[\s,.;:—"'„”()[\]–-]/
+const pick = (ref: string, phrase: string): string => {
+  const t = text(ref)
+  const at = t.indexOf(phrase)
+  const before = at > 0 ? t[at - 1] : ' '
+  const after = at + phrase.length < t.length ? t[at + phrase.length] : ' '
+  if (at < 0 || !EDGE.test(before) || !EDGE.test(after)) {
+    throw new Error(`chapter 4: "${phrase}" is not a word of ${ref}`)
+  }
+  return phrase
+}
+
 /* ---------------- structure ---------------- */
 
 /** The section heading — chapter 6's `.section-heading` with its diamond.
@@ -306,6 +323,206 @@ function Statement({ r }: { r: string }) {
    drawing would assert a geography the source does not give. Until they exist,
    their sections print their sentences in full — nothing is withheld from the
    reader, only from the page's decoration. */
+
+/* ---------------- mechanism · the route strip ----------------
+
+   §1 says the town he chose is „למעלה מ-300 ק"מ צפונית לעיר מכה". In prose that
+   is a number the reader takes on trust and forgets by the next paragraph. Here
+   it is the height of the drawing, and the four other places the chapter visits
+   hang on the same line — so when §49 brings him back to Mecca at the bottom,
+   the reader has already seen how far back that is.
+
+   IT PRINTS NO NUMBER OF ITS OWN. The distance the coordinates give is 339 km,
+   which agrees with the source, but 339 is this file's fact and not the
+   booklet's — and the rule here is that the page prints the source's words and
+   nothing else. So the figure carries names and years only, art.ts asserts the
+   agreement at module load, and the sentence beside the map does the telling.
+
+   TRUE SCALE, NO CHEATING. The five places span 1.2° of longitude against 4.5°
+   of latitude, so a true-scale map of them is a tall narrow ribbon and this one
+   is drawn as one. Widening it would make a friendlier picture of a country
+   that is not shaped that way; the board's ruling on the qibla map in chapter 6
+   was that a map has to be right about direction first.
+
+   NO TEXT INSIDE THE SVG. Hebrew flows right-to-left from its x and that trap
+   has already cost this project a labelling bug. The geometry is SVG; every
+   name is an HTML span positioned over it. Where two dots are too close to
+   label apart — Mecca and Hudaybiyyah are twenty kilometres apart on a
+   five-hundred-kilometre ribbon — the LABEL steps down and a leader line runs
+   back to the dot. The dot itself never moves. */
+const STRIP = 430
+const LABELS = layoutLabels(STRIP)
+const STRIP_BOX = Math.max(STRIP, ...LABELS.map((l) => l.labelY * STRIP)) + 24
+
+function Journey({ focus }: { focus?: string }) {
+  const w = 150
+  const xy = (p: { lat: number; lon: number }) => [px(p.lon) * w, py(p.lat) * STRIP] as const
+  const road = ROUTE.map((p) => xy(p).join(',')).join(' ')
+  return (
+    <figure className={`ch4-journey${focus ? " is-focused" : ""}`} data-reveal>
+      <div className="ch4-journey-strip" style={{ height: STRIP_BOX }}>
+        <svg viewBox={`0 0 ${w} ${STRIP_BOX}`} width={w} height={STRIP_BOX} aria-hidden="true">
+          <polyline className="ch4-journey-road" points={road} />
+          {LABELS.map(({ place, dotY, labelY }) => {
+            const [x, y] = xy(place)
+            const stepped = Math.abs(labelY - dotY) * STRIP > 1
+            return (
+              <g key={place.id}>
+                {stepped && (
+                  <line className="ch4-journey-leader" x1={x} y1={y} x2={w} y2={labelY * STRIP} />
+                )}
+                <circle
+                  className={`ch4-journey-dot${focus === place.id ? " is-here" : ""}`}
+                  cx={x}
+                  cy={y}
+                  r={focus === place.id ? 7 : 5}
+                />
+              </g>
+            )
+          })}
+        </svg>
+        {LABELS.map(({ place, labelY }) => (
+          <span
+            className={`ch4-journey-name${focus === place.id ? " is-here" : ""}`}
+            key={place.id}
+            style={{ top: labelY * STRIP }}
+          >
+            {place.name}
+            {place.year && <i className="ch4-journey-year">{place.year}</i>}
+          </span>
+        ))}
+      </div>
+    </figure>
+  )
+}
+
+/* ---------------- mechanism · the film ----------------
+
+   §12 is the chapter's one cinematic beat: rain on one army's camp the night
+   before, and a duel at dawn. It was two paragraphs in the middle of a wall of
+   them. Here the valley plays behind the words and the two sentences sit on it
+   as a caption block — a documentary card, not a decoration.
+
+   BOTH SENTENCES STAY IN THE DOM. Chapter 3's note about the desert stage is
+   the reason: a device that keeps its text behind a click is a device that
+   hides the chapter from search and from a screen reader. Nothing here is
+   timed, nothing appears and disappears.
+
+   THE LOOP IS A PALINDROME. The clip runs forward and then backward, so the
+   last frame is the first and the banner never jumps. */
+function Film({ src, children }: { src: string; children: React.ReactNode }) {
+  return (
+    <figure className="ch4-film" data-reveal>
+      <div className="ch4-film-media" aria-hidden="true">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster={`/assets/chapter4/${src}.jpg`}
+          tabIndex={-1}
+        >
+          <source src={`/assets/chapter4/${src}.mp4`} type="video/mp4" />
+        </video>
+      </div>
+      <figcaption className="ch4-film-text">{children}</figcaption>
+    </figure>
+  )
+}
+
+/* ---------------- mechanism · a pair of terms ----------------
+
+   §9 is the chapter's hinge: preaching before it, war after it. The source
+   names both states inside one sentence — דעוה and ג'האד — and the sentence is
+   thirty-three words long, which is where the turn gets lost. Two cards put the
+   two states side by side so the hinge is a shape and not a clause.
+
+   The cards carry the SOURCE's sentences; the two words above them are lifted
+   out of those same sentences and proved to be in them by `pick`. */
+function Pair({ a, b, terms }: { a: string; b: string; terms: [string, string] }) {
+  return (
+    <div className="ch4-pair" data-reveal>
+      <article className="ch4-pair-side">
+        <h3 className="ch4-pair-term">{pick(a, terms[0])}</h3>
+        <p className="ch4-pair-text">{text(a)}</p>
+      </article>
+      <article className="ch4-pair-side">
+        <h3 className="ch4-pair-term">{pick(b, terms[1])}</h3>
+        <p className="ch4-pair-text">{text(b)}</p>
+      </article>
+    </div>
+  )
+}
+
+/* ---------------- mechanism · what the battle left ----------------
+
+   Uhud has no victory to report, and §19 says three separate things about how
+   it ended: who shaped the fighters' morale, that it ended undecided, and who
+   fell. In prose the middle one — „ובוודאי לא בניצחון צבא מוחמד" — is a clause
+   inside a longer run and slides past. Three panels give the undecided ending
+   the same weight as the two facts around it, which is the point of the
+   section. */
+function Outcomes({ refs }: { refs: string[] }) {
+  return (
+    <div className="ch4-outcomes" data-reveal>
+      {refs.map((r) => (
+        <p className="ch4-outcome" key={r}>
+          {text(r)}
+        </p>
+      ))}
+    </div>
+  )
+}
+
+/* ---------------- mechanism · a person the chapter turns on ----------------
+
+   §46 hangs four roles on one man in a single parenthesis — cousin, son-in-law,
+   fourth caliph, first Shia imam — and then tells the story of the poisoned
+   goat. The roles are the reason the later chapters have anyone to talk about,
+   and inside a bracket they are furniture. The card lifts the name out and
+   lets the three sentences run under it. */
+function Figure({ refs }: { refs: string[] }) {
+  return (
+    <div className="ch4-figure" data-reveal>
+      {refs.map((r) => (
+        <p className="ch4-figure-line" key={r}>
+          {text(r)}
+        </p>
+      ))}
+    </div>
+  )
+}
+
+/* ---------------- mechanism · the treaties on a line ----------------
+
+   §32 lists three agreements in one clause — Egypt 1979, Oslo 1993, Jordan 1994
+   — and the whole of part ה׳ is jurists arguing about them. Read as a clause
+   they are a footnote; read as three dated marks they are the subject. The
+   years and the names both come out of the source sentence. */
+function Treaties({ r }: { r: string }) {
+  /* the source prints them out of order — 1979, 1994, 1993 — and this keeps
+     that order, because reordering would be an edit */
+  const items = text(r)
+    .replace(/^למשל,\s*/, '')
+    .replace(/\.$/, '')
+    .split(/,\s*/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+  return (
+    <ol className="ch4-treaties" data-reveal>
+      {items.map((s) => {
+        const year = s.match(/\((\d{4})\)/)?.[1] ?? ''
+        return (
+          <li key={s}>
+            <b className="ch4-treaty-year">{year}</b>
+            <span className="ch4-treaty-name">{s.replace(/\s*\(\d{4}\)/, '')}</span>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
 
 /** A plate: one painted view, sitting under the sentences it belongs to and
     never instead of them. Three in the chapter, and each one shows a PLACE the
@@ -710,6 +927,7 @@ export default function Chapter4() {
                 <Statement r="§0.b" />
                 <T r="§1.a" className="ch4-body" reveal />
                 <T r="§1.b" className="ch4-body" reveal />
+                <Journey />
                 <div className="ch4-two" data-reveal>
                   <T r="§2.flight" className="ch4-body ch4-two-side" />
                   <T r="§2.invited" className="ch4-body ch4-two-side" />
@@ -748,7 +966,7 @@ export default function Chapter4() {
                   משלו — וזה באמת הציר של הפרק. */}
               <Section id="jihad">
                 <Head id="jihad" />
-                <Statement r="§9.a" />
+                <Pair a="§9.dawa" b="§9.jihad" terms={['דעוה', "ג'האד"]} />
                 <T r="§9.b" className="ch4-body" reveal />
                 <T r="§9.c" className="ch4-body" reveal />
               </Section>
@@ -760,9 +978,10 @@ export default function Chapter4() {
                 <T r="§10.b" className="ch4-body" reveal />
                 <T r="§11.a" className="ch4-body" reveal />
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
-                <Plate src="badr-night" />
-                <T r="§12.rain" className="ch4-body" reveal />
-                <T r="§12.duel" className="ch4-body" reveal />
+                <Film src="badr-film">
+                  <T r="§12.rain" className="ch4-body" />
+                  <T r="§12.duel" className="ch4-body" />
+                </Film>
                 <T r="§13.a" className="ch4-body" reveal />
                 <T r="§13.b" className="ch4-body" reveal />
 
@@ -788,9 +1007,7 @@ export default function Chapter4() {
                 <Forces muslims="§17.muslims" other="§17.quraysh" />
                 <T r="§18.a" className="ch4-body" reveal />
                 <T r="§18.b" className="ch4-body" reveal />
-                <T r="§19.a" className="ch4-body" reveal />
-                <T r="§19.b" className="ch4-body" reveal />
-                <T r="§19.c" className="ch4-body" reveal />
+                <Outcomes refs={['§19.a', '§19.b', '§19.c']} />
                 <T r="§20.a" className="ch4-body" reveal />
                 <Verse r="§20.saying" />
                 <T r="§20.translit" className="ch4-body" reveal />
@@ -861,9 +1078,7 @@ export default function Chapter4() {
                 <T r="§44.b" className="ch4-body" reveal />
                 <T r="§45.a" className="ch4-body" reveal />
                 <T r="§45.b" className="ch4-body" reveal />
-                <T r="§46.a" className="ch4-body" reveal />
-                <T r="§46.b" className="ch4-body" reveal />
-                <T r="§46.c" className="ch4-body" reveal />
+                <Figure refs={['§46.a', '§46.b', '§46.c']} />
 
                 {/* החריגה היחידה בפרק מכלל תעתיק עברי בלבד:
                     הסיסמה מופיעה בערבית במקור. */}
@@ -880,6 +1095,7 @@ export default function Chapter4() {
                 <T r="§48.a" className="ch4-body" reveal />
                 <T r="§48.b" className="ch4-body" reveal />
                 <T r="§49.a" className="ch4-body" reveal />
+                <Journey focus="mecca" />
                 <T r="§49.b" className="ch4-body" reveal />
               </Section>
 
@@ -898,7 +1114,7 @@ export default function Chapter4() {
               <Section id="today">
                 <Head id="today" />
                 <T r="§32.a" className="ch4-body" reveal />
-                <T r="§32.list" className="ch4-body" reveal />
+                <Treaties r="§32.list" />
                 <T r="§32.b" className="ch4-body" reveal />
                 <T r="§33.a" className="ch4-body" reveal />
 

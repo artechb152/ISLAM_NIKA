@@ -80,3 +80,46 @@ export const ROUTE = ['mecca', 'badr', 'medina', 'khaybar'].map(at)
     by the gate, so the drawing cannot quietly contradict the sentence beside
     it. */
 export const MECCA_TO_MEDINA = Math.round(km(at('mecca'), at('medina')))
+
+/* ---------------- label placement ----------------
+
+   THE PROBLEM THIS SOLVES. Mecca sits at 97.3% down the strip and Hudaybiyyah
+   at 96.7% — twenty kilometres apart on a map five hundred kilometres tall,
+   which is three pixels. Their labels would print on top of each other. The
+   answer is not to move the dots, which would be a lie about where the places
+   are, but to move the LABELS and draw a leader line back to the dot it names.
+
+   One pass, top to bottom: keep each label at its dot's height unless that puts
+   it inside the previous label's line, in which case push it down by exactly
+   the gap needed and no more. */
+export interface Label {
+  place: Place
+  /** where the dot really is, 0..1 down the strip */
+  dotY: number
+  /** where its name is printed, 0..1 — the same unless it had to be pushed */
+  labelY: number
+}
+
+export function layoutLabels(stripPx: number, minGapPx = 34): Label[] {
+  const sorted = [...PLACES].sort((a, b) => py(a.lat) - py(b.lat))
+  const out: Label[] = []
+  let lastPx = -Infinity
+  for (const place of sorted) {
+    const dotY = py(place.lat)
+    const wantPx = dotY * stripPx
+    const gotPx = Math.max(wantPx, lastPx + minGapPx)
+    lastPx = gotPx
+    out.push({ place, dotY, labelY: gotPx / stripPx })
+  }
+  return out
+}
+
+/* THE COORDINATES AND THE SENTENCE CHECK EACH OTHER. §1 says Yathrib is „למעלה
+   מ-300 ק"מ צפונית לעיר מכה". The coordinates give 339. If someone edits a
+   latitude and the two stop agreeing, the chapter fails to load rather than
+   drawing a map that quietly contradicts the paragraph beside it. */
+if (MECCA_TO_MEDINA <= 300) {
+  throw new Error(
+    `chapter 4: the map puts Mecca ${MECCA_TO_MEDINA} km from Medina, but §1 says more than 300`,
+  )
+}

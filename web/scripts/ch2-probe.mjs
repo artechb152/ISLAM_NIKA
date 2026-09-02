@@ -25,6 +25,13 @@ await page.evaluate(async () => {
 })
 await new Promise((r) => setTimeout(r, 400))
 
+/* force every reveal on: a fullPage shot otherwise photographs opacity:0 */
+await page.addStyleTag({ content: '[data-reveal]{opacity:1!important;transform:none!important}' })
+/* a fullPage shot does not paint lazy images that were never in a viewport */
+await page.evaluate(() => document.querySelectorAll('img[loading]').forEach((i) => i.removeAttribute('loading')))
+await new Promise((r) => setTimeout(r, 900))
+await new Promise((r) => setTimeout(r, 200))
+
 const report = await page.evaluate(() => {
   const words = (s) => s.trim().split(/\s+/).filter(Boolean).length
   const secs = [...document.querySelectorAll('.article-section')]
@@ -90,12 +97,25 @@ const report = await page.evaluate(() => {
     }
   }
 
+  /* the audit's own test: a section is off-axis if it centres something or
+     places a block wider than 920px */
+  const colW = document.querySelector('.ch2-body')?.getBoundingClientRect().width ?? 0
+  const offAxis = secs.filter((s) =>
+    [...s.querySelectorAll('*')].some((el) => {
+      const w = el.getBoundingClientRect().width
+      const cs = getComputedStyle(el)
+      return w > 920 || (cs.textAlign === 'center' && el.textContent.trim().length > 20)
+    }),
+  ).map((s) => s.id)
+
   const article = document.querySelector('.chapter-article')
   return {
     totalHeight: Math.round(article.scrollHeight),
     sections,
     imgs,
     gaps: [...new Set(gaps)].sort((a, b) => a - b),
+    offAxis,
+    colW: Math.round(colW),
   }
 })
 
@@ -120,5 +140,5 @@ for (const [k, n] of Object.entries(report.imgs)) console.log(`  ${n}×  ${k}`)
 console.log('\nמרווחים אנכיים שנמדדו בפועל:', report.gaps.join(', '))
 
 await page.screenshot({ path: new URL('full.png', OUT).pathname.slice(1), fullPage: true })
-console.log('\nצילום מלא: concept/chapter2/probe/full.png')
+console.log('\nצילום מלא: concept/chapter3/probe/full.png')
 await browser.close()

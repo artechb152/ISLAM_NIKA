@@ -20,7 +20,7 @@ import { FindCard } from './FindCard'
 import { wrapPi } from '@/lib/chapter1/angles'
 import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
 import { TaskPanel } from './TaskPanel'
-import { ContactShadow, Npc, Rawi, fitToGround, type RawiClip } from './Characters'
+import { ContactShadow, Npc, Rawi, type RawiClip } from './Characters'
 import { DialogueHud } from './DialogueHud'
 import { Notebook } from './Notebook'
 import { WorldMap } from './WorldMap'
@@ -1214,30 +1214,74 @@ function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
     </group>
   )
 }
-function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
+function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
   live: Live
   atTask: boolean
   chosen: string[]
   solvedTask: boolean
+  found: string[]
   onChoose: (id: string) => void
 }) {
   const { camera, gl } = useThree()
+  /* שני מצבים לאותה יד: גרירת-תשובות (כל אופציה היא חפץ) — ותכנון-מסלול,
+     שבו יש אסימון שיירה אחד ושלוש דרכים על מפת בד; הדרך שבוחרים היא
+     המקום שאליו הנחת אותו. */
+  const planMode = REGION_TASK?.kind === 'plan'
   const opts = useMemo(
-    () => (REGION_TASK ? REGION_TASK.options.filter((o) => o.prop) : []),
+    () =>
+      REGION_TASK
+        ? planMode
+          ? REGION_TASK.options.filter((o) => o.spot)
+          : REGION_TASK.options.filter((o) => o.prop)
+        : [],
+    [planMode],
+  )
+  const foundRef = useRef(found)
+  foundRef.current = found
+  /* מסירה ביד: אופציה שהראיה שלה טרם נאספה — אין לה חפץ בעולם.
+     אי אפשר למסור מה שאין ביד. */
+  const locked = useCallback(
+    (o: { needsFind?: string }) => !!o.needsFind && !foundRef.current.includes(o.needsFind),
     [],
   )
   /* מיקומים חיים — בית קבוע לכל חפץ, יעד משלו (spot של האופציה או התחנה),
-     ומיקום נוכחי שהגרירה מזיזה */
+     ומיקום נוכחי שהגרירה מזיזה. בתכנון: רשומה אחת — אסימון השיירה. */
   const state = useRef(
-    opts.map((o, i) => {
-      const spot = TASK_PROP_SPOTS[i % TASK_PROP_SPOTS.length]
-      const home = { x: (REGION_TASK?.x ?? 0) + spot.dx, z: (REGION_TASK?.z ?? 0) + spot.dz }
-      const tgt = {
-        x: (REGION_TASK?.x ?? 0) + (o.spot?.dx ?? 0),
-        z: (REGION_TASK?.z ?? 0) + (o.spot?.dz ?? 0),
-      }
-      return { id: o.id, home, tgt, cur: { ...home }, lift: 0, hop: 0, returning: false, placed: false }
-    }),
+    planMode
+      ? [
+          {
+            id: '__caravan',
+            home: { x: (REGION_TASK?.x ?? 0) - 0.85, z: (REGION_TASK?.z ?? 0) + 0.95 },
+            tgt: { x: (REGION_TASK?.x ?? 0) - 0.85, z: (REGION_TASK?.z ?? 0) + 0.95 },
+            cur: { x: (REGION_TASK?.x ?? 0) - 0.85, z: (REGION_TASK?.z ?? 0) + 0.95 },
+            lift: 0, hop: 0, returning: false, placed: false,
+          },
+        ]
+      : opts.map((o, i) => {
+          const spot = TASK_PROP_SPOTS[i % TASK_PROP_SPOTS.length]
+          const home = { x: (REGION_TASK?.x ?? 0) + spot.dx, z: (REGION_TASK?.z ?? 0) + spot.dz }
+          const tgt = {
+            x: (REGION_TASK?.x ?? 0) + (o.spot?.dx ?? 0),
+            z: (REGION_TASK?.z ?? 0) + (o.spot?.dz ?? 0),
+          }
+          return { id: o.id, home, tgt, cur: { ...home }, lift: 0, hop: 0, returning: false, placed: false }
+        }),
+  )
+  /* שלוש הדרכים על המפה — עמדות קבועות, נגזרות מה-spot של כל אופציה */
+  const spots = useMemo(
+    () =>
+      planMode && REGION_TASK
+        ? REGION_TASK.options
+            .filter((o) => o.spot)
+            .map((o) => ({
+              id: o.id,
+              right: !!o.right,
+              label: o.label,
+              x: REGION_TASK.x + o.spot!.dx,
+              z: REGION_TASK.z + o.spot!.dz,
+            }))
+        : [],
+    [planMode],
   )
   const dragging = useRef<number>(-1)
   const hovering = useRef<number>(-1)
@@ -1248,9 +1292,10 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
   /* טבעת יעד + טבעת hover — חומרים בסיסיים, מחוץ לטווח של Painterly */
   const targetRing = useRef<THREE.Mesh>(null)
   const hoverRing = useRef<THREE.Mesh>(null)
+  const spotRings = useRef<(THREE.Mesh | null)[]>([])
 
   useEffect(() => {
-    if (!REGION_TASK || !opts.length) return
+    if (!REGION_TASK || !state.current.length) return
     const v = new THREE.Vector3()
     const project = (i: number) => {
       const st = state.current[i]
@@ -1274,11 +1319,22 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
     }
     const hitAt = (cx: number, cy: number) => {
       for (let i = 0; i < state.current.length; i++) {
-        if (state.current[i].placed || chosen.includes(state.current[i].id)) continue
+        const st = state.current[i]
+        if (st.placed || chosen.includes(st.id)) continue
+        if (!planMode && locked(opts[i])) continue
         const p = project(i)
         if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < 70) return i
       }
       return -1
+    }
+    const nearestSpot = (x: number, z: number) => {
+      let best = -1
+      let bd = 1.6
+      for (let k = 0; k < spots.length; k++) {
+        const d = Math.hypot(x - spots[k].x, z - spots[k].z)
+        if (d < bd) { bd = d; best = k }
+      }
+      return best
     }
     const down = (e: PointerEvent) => {
       /* פאנל פתוח מעל הקנבס: לחיצה עליו לא תופסת פרופ שמאחוריו */
@@ -1315,7 +1371,9 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
       st.cur.x = (REGION_TASK?.x ?? 0) + dx * cap
       st.cur.z = (REGION_TASK?.z ?? 0) + dz * cap
       st.lift = 0.55
-      nearTarget.current = Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z) < 1.6
+      nearTarget.current = planMode
+        ? nearestSpot(st.cur.x, st.cur.z) >= 0
+        : Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z) < 1.6
     }
     const drop = (i: number) => {
       dragging.current = -1
@@ -1323,18 +1381,36 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
       gl.domElement.style.cursor = ''
       const st = state.current[i]
       st.lift = 0
-      /* נדיב: שחרור בקרבת היעד נספר — אף פעם לא דיוק-פיקסל */
-      const d = Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z)
-      if (d < 1.6) {
-        const opt = opts[i]
-        if (opt.right) st.placed = true
-        else {
+      if (planMode) {
+        /* הדרך שבחרת היא המקום שאליו הנחת את השיירה */
+        const k = nearestSpot(st.cur.x, st.cur.z)
+        if (k >= 0) {
+          const sp = spots[k]
+          if (sp.right) {
+            st.placed = true
+            st.tgt = { x: sp.x, z: sp.z }
+          } else {
+            st.returning = true
+            st.hop = 1 /* המפה עונה: מהדרך הזאת חוזרים */
+          }
+          onChoose(sp.id)
+        } else {
           st.returning = true
-          st.hop = 1 /* קפיצת סירוב — העולם עונה, לא רק הפאנל */
         }
-        onChoose(opt.id)
       } else {
-        st.returning = true
+        /* נדיב: שחרור בקרבת היעד נספר — אף פעם לא דיוק-פיקסל */
+        const d = Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z)
+        if (d < 1.6) {
+          const opt = opts[i]
+          if (opt.right) st.placed = true
+          else {
+            st.returning = true
+            st.hop = 1 /* קפיצת סירוב — העולם עונה, לא רק הפאנל */
+          }
+          onChoose(opt.id)
+        } else {
+          st.returning = true
+        }
       }
       nearTarget.current = false
       force((n) => n + 1)
@@ -1363,11 +1439,9 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
       gl.domElement.style.cursor = ''
       live.taskDrag = false
     }
-  }, [camera, gl, live, opts, chosen, solvedTask, onChoose])
+  }, [camera, gl, live, opts, spots, planMode, locked, chosen, solvedTask, onChoose])
 
   useFrame((_, dt) => {
-    /* רוב התחנות בכלל בלי פרופים — בלי השומר הזה הפרסום ל-__ch1Task
-       ניגש ל-state.current[0] ריק וקרס ~50 פעם בשנייה (דוח השחקנית) */
     if (!state.current.length) return
     for (let i = 0; i < state.current.length; i++) {
       const st = state.current[i]
@@ -1376,7 +1450,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
         st.cur.x += (st.tgt.x - st.cur.x) * Math.min(1, dt * 6)
         st.cur.z += (st.tgt.z - st.cur.z) * Math.min(1, dt * 6)
         /* אחרי הפתרון: החפצים שוקעים אל תוך התחנה — הארגז "נסגר" */
-        if (solvedTask && solvedAt.current > 0) {
+        if (solvedTask && solvedAt.current > 0 && !planMode) {
           const k = Math.min(1, (performance.now() - solvedAt.current) / 700)
           st.lift = -0.35 * k
         }
@@ -1391,7 +1465,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
     const tr = targetRing.current
     if (tr) {
       const d = dragging.current
-      tr.visible = d >= 0 && !solvedTask
+      tr.visible = !planMode && d >= 0 && !solvedTask
       if (tr.visible) {
         const st = state.current[d]
         tr.position.set(st.tgt.x, groundYAt(st.tgt.x, st.tgt.z) + 0.03, st.tgt.z)
@@ -1400,6 +1474,21 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
         tr.scale.x += (target - tr.scale.x) * Math.min(1, dt * 10)
         tr.scale.y = tr.scale.z = tr.scale.x
         ;(tr.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.55
+      }
+    }
+    /* דרכי המפה: תמיד דולקות ליד התחנה; הקרובה לאסימון הנגרר מתרחבת */
+    if (planMode) {
+      const st0 = state.current[0]
+      const drag = dragging.current >= 0
+      for (let k = 0; k < spots.length; k++) {
+        const ring = spotRings.current[k]
+        if (!ring) continue
+        ring.visible = !solvedTask || st0.placed
+        const near = drag && Math.hypot(st0.cur.x - spots[k].x, st0.cur.z - spots[k].z) < 1.6
+        const target = near ? 1.4 : 1.0
+        ring.scale.x += (target - ring.scale.x) * Math.min(1, dt * 10)
+        ring.scale.y = ring.scale.z = ring.scale.x
+        ;(ring.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.45
       }
     }
     const hr = hoverRing.current
@@ -1417,7 +1506,8 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
       const vv = new THREE.Vector3()
       const d0 = dragging.current >= 0 ? dragging.current : 0
       const st0 = state.current[d0]
-      vv.set(st0.tgt.x, groundYAt(st0.tgt.x, st0.tgt.z), st0.tgt.z).project(camera)
+      const tgt0 = planMode && spots.length ? spots.find((s) => s.right)! : st0.tgt
+      vv.set(tgt0.x, groundYAt(tgt0.x, tgt0.z), tgt0.z).project(camera)
       const tgtScreen = { x: (vv.x * 0.5 + 0.5) * r.width + r.left, y: (-vv.y * 0.5 + 0.5) * r.height + r.top }
       ;(window as unknown as Record<string, unknown>).__ch1Task = {
         props: state.current.map((st) => {
@@ -1435,7 +1525,8 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
     }
   })
 
-  if (!REGION_TASK || !opts.length) return null
+  if (!REGION_TASK || !state.current.length) return null
+  const T = REGION_TASK
   return (
     <group>
       {/* טבעת היעד — נדלקת בזמן גרירה, מתרחבת ומתבהרת בקרבת snap */}
@@ -1448,23 +1539,76 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
         <ringGeometry args={[0.3, 0.4, 32]} />
         <meshBasicMaterial color="#f5ecd6" transparent opacity={0.8} depthWrite={false} />
       </mesh>
-      {opts.map((o, i) => {
-        const st = state.current[i]
-        return (
-          <group key={o.id} position={[st.cur.x - st.home.x, st.lift + Math.sin(st.hop * Math.PI) * 0.3, st.cur.z - st.home.z]}>
-            <TaskProp
-              url={`/assets/chapter1/models/${o.prop!.model}.glb`}
-              tint={o.prop!.tint}
-              h={o.prop!.h}
-              x={st.home.x}
-              z={st.home.z}
-              label={o.label}
-              showLabel={atTask && !solvedTask}
-              taken={st.placed || chosen.includes(o.id)}
-            />
+      {planMode && (
+        <>
+          {/* בד המפה, פרוש על החול לאור המדורה */}
+          <group position={[T.x, groundYAt(T.x, T.z) + 0.05, T.z]}>
+            <mesh rotation-x={-Math.PI / 2} renderOrder={1}>
+              <circleGeometry args={[2.2, 48]} />
+              <meshBasicMaterial color="#d9c69b" transparent opacity={0.88} depthWrite={false} />
+            </mesh>
+            <mesh rotation-x={-Math.PI / 2} position-y={0.006} renderOrder={1}>
+              <ringGeometry args={[2.06, 2.2, 48]} />
+              <meshBasicMaterial color="#8a6a3f" transparent opacity={0.8} depthWrite={false} />
+            </mesh>
           </group>
-        )
-      })}
+          {/* שלוש הדרכים — עמדות על הבד, עם שמות */}
+          {spots.map((sp, k) => (
+            <group key={sp.id}>
+              <mesh
+                ref={(el) => { spotRings.current[k] = el }}
+                rotation-x={-Math.PI / 2}
+                position={[sp.x, groundYAt(sp.x, sp.z) + 0.08, sp.z]}
+                renderOrder={2}
+              >
+                <ringGeometry args={[0.5, 0.66, 40]} />
+                <meshBasicMaterial color="#e8bf76" transparent opacity={0.45} depthWrite={false} />
+              </mesh>
+              {atTask && !solvedTask && (
+                <Html center position={[sp.x, groundYAt(sp.x, sp.z) + 0.8, sp.z]} zIndexRange={[4, 4]}>
+                  <span className="ch1-prop-label">{sp.label}</span>
+                </Html>
+              )}
+            </group>
+          ))}
+          {/* אסימון השיירה — גמל עמוס, אחד, ביד השחקן */}
+          {(() => {
+            const st = state.current[0]
+            return (
+              <group position={[st.cur.x - st.home.x, st.lift + Math.sin(st.hop * Math.PI) * 0.3, st.cur.z - st.home.z]}>
+                <TaskProp
+                  url="/assets/chapter1/models/camel-load.glb"
+                  h={0.6}
+                  x={st.home.x}
+                  z={st.home.z}
+                  label="השיירה — גררו אל הדרך"
+                  showLabel={atTask && !solvedTask && !st.placed}
+                  taken={false}
+                />
+              </group>
+            )
+          })()}
+        </>
+      )}
+      {!planMode &&
+        opts.map((o, i) => {
+          const st = state.current[i]
+          if (locked(o)) return null
+          return (
+            <group key={o.id} position={[st.cur.x - st.home.x, st.lift + Math.sin(st.hop * Math.PI) * 0.3, st.cur.z - st.home.z]}>
+              <TaskProp
+                url={`/assets/chapter1/models/${o.prop!.model}.glb`}
+                tint={o.prop!.tint}
+                h={o.prop!.h}
+                x={st.home.x}
+                z={st.home.z}
+                label={o.label}
+                showLabel={atTask && !solvedTask}
+                taken={st.placed || chosen.includes(o.id)}
+              />
+            </group>
+          )
+        })}
     </group>
   )
 }
@@ -3984,6 +4128,7 @@ export default function Game() {
                 atTask={atTask}
                 chosen={taskChosen}
                 solvedTask={taskSolved}
+                found={found}
                 onChoose={chooseByDrop}
               />
             </Suspense>
