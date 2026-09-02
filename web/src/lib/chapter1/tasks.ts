@@ -43,6 +43,9 @@ export interface TaskOption {
 export interface TaskBin {
   id: string
   label: string
+  /** עמדה פיזית בעולם (היסט מהתחנה): צד המיון הוא מקום שמניחים בו
+      חפץ ביד, לא כפתור. בלעדיה — המיון חי בפאנל בלבד. */
+  spot?: { dx: number; dz: number }
 }
 
 export interface Task {
@@ -337,13 +340,16 @@ export const TASKS: Task[] = [
       'הסתובבת אצלנו, ראית: את הסל בשער, את השיר בתא, את המנהג שחוזר בשעתו. ' +
       'אנשי מכה רואים את אותם דברים — וחוזרים הביתה. עכשיו אמור אתה: ' +
       'מה מכל זה הלך איתם, ומה נשאר כאן.',
+    /* שולחן ההשוואה: שתי עמדות על הקרקע משני צדי המזבח. מה שחצה את
+       המדבר מונח בצד הדרומי הפונה אל מכה; מה שנשאר — לצד המנזר. */
     bins: [
-      { id: 'crossed', label: 'הלך איתם למכה' },
-      { id: 'stayed', label: 'נשאר כאן' },
+      { id: 'crossed', label: 'הלך איתם למכה', spot: { dx: -2.3, dz: 1.5 } },
+      { id: 'stayed', label: 'נשאר כאן', spot: { dx: 2.3, dz: 1.5 } },
     ],
     options: [
       {
         id: 'modesty',
+        prop: { model: 'fodder', h: 0.36 },
         label: 'צניעות ופרישות',
         bin: 'crossed',
         wrong: 'זה דווקא הלך. את זה אדם לוקח בלי שילמדו אותו.',
@@ -351,6 +357,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'charity',
+        prop: { model: 'basket', h: 0.34 },
         label: 'דאגה לנזקקים וליתומים',
         bin: 'crossed',
         wrong: 'לא. זה מהדברים הראשונים שעברו.',
@@ -358,6 +365,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'solitude',
+        prop: { model: 'find-scroll', h: 0.3 },
         label: 'התבודדות וכתיבת שירה',
         bin: 'crossed',
         wrong: 'לא. גם אורחות החיים הקטנות עברו, לא רק הגדולות.',
@@ -365,6 +373,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'ritual',
+        prop: { model: 'find-incense', h: 0.32 },
         label: 'מנהגים פולחניים',
         bin: 'crossed',
         wrong: 'לא. דווקא אלה עברו — ורוב הריטואלים שיהיו באסלאם מקורם בדתות שקדמו לו.',
@@ -372,6 +381,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'doctrine',
+        prop: { model: 'find-inscription', h: 0.4 },
         label: 'שורשי האמונה הנוצרית עצמה',
         bin: 'stayed',
         wrong:

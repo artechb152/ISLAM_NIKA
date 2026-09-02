@@ -1,236 +1,329 @@
 <meta charset="utf-8">
-<title>פרק 3 · מוד־בורד הקומיקס</title>
+<title>פרק 3 · שפת הקומיקס</title>
 <style>
+@font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-regular-aaa.otf") format("opentype");font-weight:400}
 @font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-bold-aaa.otf") format("opentype");font-weight:700}
 @font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-black-aaa.otf") format("opentype");font-weight:900}
 @font-face{font-family:"Ploni";src:url("../../../web/public/assets/fonts/ploni-regular-aaa.otf") format("opentype");font-weight:400}
 @font-face{font-family:"Ploni";src:url("../../../web/public/assets/fonts/ploni-demibold-aaa.otf") format("opentype");font-weight:600}
 :root{
-  --paper:#EDE4D0; --panel:#f3ead6; --surface:#faf4e6; --edge:#d8c7a3;
-  --maroon:#8a2733; --maroon-deep:#571820; --stamp:#a5322f;
-  --ink:#3c2c1d; --muted:#6f5c43; --cream:#f5ecd6;
-  --gold:#c79a3c; --gold-text:#856016;
-  --line:#4a3826;                  /* the comic's ink line */
-  --wash-sand:#e3cfa6; --wash-stone:#c9ae86; --wash-shadow:#8f7a5e;
-  --wash-sky:#cfd8dc; --wash-night:#2b3550;
+  --paper:#EDE4D0;--panel:#f3ead6;--mat:#f5ecd6;--surface:#faf4e6;--edge:#d8c7a3;
+  --rule:rgba(87,24,32,.14);--maroon:#8a2733;--maroon-deep:#571820;--stamp:#a5322f;
+  --cream:#f5ecd6;--ink:#3c2c1d;--muted:#6f5c43;
+  --gold:#c79a3c;--gold-soft:#d9b45b;--gold-text:#856016;
+  --shadow:0 8px 22px rgba(60,35,18,.10);
+  --font-heading:"Kedem",serif;--font-body:"Ploni",Arial,sans-serif;
+  --line:#4a3826;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:var(--paper); color:var(--ink); direction:rtl;
-  font-family:"Ploni",Arial,sans-serif; font-size:16px; line-height:1.7;
-  padding:56px 64px 90px;
-}
-h1{font-family:"Kedem",serif;font-weight:900;font-size:54px;color:var(--maroon);line-height:1.05}
-.sub{font-size:19px;color:var(--muted);margin-top:10px;max-width:900px}
-h2{font-family:"Kedem",serif;font-weight:700;font-size:30px;color:var(--maroon);
-   margin:64px 0 6px;padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);width:fit-content}
-.note{font-size:15px;color:var(--muted);margin:10px 0 24px;max-width:1000px}
-.warn{border-inline-start:4px solid var(--stamp);padding:12px 18px;background:var(--surface);
-      max-width:1000px;margin:18px 0 26px;font-size:15px}
-.row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
-.cap{font-family:"Ploni";font-size:12.5px;color:var(--muted);margin-top:9px;letter-spacing:.02em}
+body{background:var(--panel);color:var(--ink);direction:rtl;
+  font-family:var(--font-body);font-size:20px;line-height:1.75}
+.masthead{background:var(--maroon-deep);color:var(--cream);height:56px;display:flex;
+  align-items:center;padding:0 clamp(28px,4vw,64px);font-family:var(--font-heading);
+  font-weight:700;font-size:19px;letter-spacing:.04em}
+.wrap{max-width:1120px;margin:0 auto;padding:52px clamp(28px,4vw,64px) 100px}
+h1{font-family:var(--font-heading);font-weight:900;font-size:56px;color:var(--maroon);line-height:1.05}
+.lede{font-size:20px;color:var(--ink);margin-top:16px;max-width:70ch;line-height:1.8}
+.ornament{display:flex;align-items:center;gap:14px;margin:18px 0 0}
+.ornament i{height:1px;background:var(--maroon);opacity:.45;flex:1}
+.ornament b{width:9px;height:9px;background:none;border:1.5px solid var(--maroon);
+  transform:rotate(45deg);opacity:.6}
+h2{font-family:var(--font-heading);font-weight:700;font-size:31px;color:var(--maroon);
+  margin:72px 0 0;padding-bottom:9px;border-bottom:2px solid rgba(138,39,51,.3);width:fit-content}
+h2 span{font-family:var(--font-body);font-size:.55em;font-weight:600;color:var(--gold-text);
+  margin-inline-start:12px}
+p{margin-top:20px;max-width:70ch}
+.src{font-size:14.5px;color:var(--muted);margin-top:10px}
+.card{background:var(--mat);border:1px solid var(--edge);padding:26px 30px;margin-top:26px}
+.card h3{font-family:var(--font-heading);font-weight:700;font-size:22px;color:var(--maroon-deep);margin-bottom:6px}
+.row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;margin-top:26px}
+.cap{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.55;max-width:250px}
+table{border-collapse:collapse;font-size:17px;margin-top:22px;width:100%}
+td,th{border:1px solid var(--edge);padding:10px 15px;text-align:start;vertical-align:top}
+th{background:var(--surface);font-family:var(--font-heading);font-weight:700;color:var(--maroon)}
+.key{color:var(--maroon);font-weight:700}
+.beat{display:grid;grid-template-columns:auto 1fr;gap:14px;margin-top:14px;align-items:start}
+/* THE MARKER ONLY, NOT EVERY <b> INSIDE THE ROW. Unscoped, this rule painted
+   every emphasised phrase in the list as a maroon diamond. */
+.beat > b:first-child{width:9px;height:9px;background:var(--maroon);transform:rotate(45deg);margin-top:.6em;flex:none}
 
-/* ---- the page: what a spread looks like when you turn it ---- */
-.book{display:flex;gap:0;box-shadow:0 18px 50px rgba(60,35,18,.22);width:fit-content;margin-top:8px}
-.leaf{width:430px;height:600px;background:var(--panel);padding:22px;position:relative}
-.leaf.l{border-inline-end:1px solid var(--edge);
-        background:linear-gradient(to left,rgba(0,0,0,.07),transparent 12%),var(--panel)}
-.leaf.r{background:linear-gradient(to right,rgba(0,0,0,.07),transparent 12%),var(--panel)}
-.folio{position:absolute;bottom:10px;inset-inline-start:22px;font-size:11px;color:var(--muted);letter-spacing:.12em}
-
-/* ---- panels ---- */
-.grid{display:grid;gap:12px;height:100%}
-.g-a{grid-template-columns:1fr 1fr;grid-template-rows:1.25fr 1fr}
-.g-a .p1{grid-column:1/3}
-.g-b{grid-template-rows:1fr 1.5fr;grid-template-columns:1fr}
-.g-c{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1.4fr}
-.g-c .p4{grid-column:1/4}
-.g-d{grid-template-rows:1fr}
-.panel{border:2.5px solid var(--line);background:var(--surface);position:relative;overflow:hidden}
-.panel svg{display:block;width:100%;height:100%}
-/* the caption box — every word of the chapter lives in one of these */
-.box{position:absolute;inset-inline:8px;bottom:8px;background:rgba(250,244,230,.94);
-     border:1.5px solid var(--line);padding:7px 10px;font-size:12.5px;line-height:1.5;color:var(--ink)}
-.box.top{top:8px;bottom:auto}
-.box b{color:var(--maroon)}
-.src{position:absolute;top:6px;inset-inline-start:8px;font-size:10px;color:var(--gold-text);
-     letter-spacing:.08em;background:rgba(250,244,230,.85);padding:1px 5px;border:1px solid var(--edge)}
-
-/* ---- swatches ---- */
-.sw{width:112px}
-.sw i{display:block;height:64px;border:1.5px solid var(--line)}
-.sw span{display:block;font-size:11.5px;color:var(--muted);margin-top:6px;letter-spacing:.03em}
-.rules{max-width:1020px;font-size:15.5px}
-.rules li{margin:8px 0 8px 0;padding-inline-start:14px;list-style:none;position:relative}
-.rules li::before{content:"";position:absolute;inset-inline-start:0;top:.62em;width:7px;height:7px;
-  background:var(--maroon);transform:rotate(45deg)}
-table{border-collapse:collapse;font-size:15px;margin-top:8px}
-td,th{border:1px solid var(--edge);padding:8px 14px;text-align:start}
-th{background:var(--surface);font-family:"Kedem";font-weight:700;color:var(--maroon)}
+/* ---------- comic primitives, in the site's palette ---------- */
+.pg{background:var(--surface);border:1px solid var(--edge);box-shadow:var(--shadow);padding:14px}
+.grid{display:grid;height:100%}
+.pn{border:2.5px solid var(--line);background:var(--paper);position:relative;overflow:hidden}
+.pn.dark{background:#232a3d}
+.pn.sand{background:#e3cfa6}
+.pn.stone{background:#c9ae86}
+.pn em{position:absolute;inset-inline-start:6px;top:5px;font-style:normal;font-size:10px;
+  color:var(--gold-text);background:rgba(250,244,230,.9);border:1px solid var(--edge);padding:0 4px}
+.num{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--font-heading);
+  font-weight:900;font-size:26px;color:rgba(74,56,38,.34)}
+.arrow{position:absolute;inset:0;pointer-events:none}
 </style>
 
-<h1>פרק 3 · מוד־בורד הקומיקס</h1>
-<p class="sub">איך הפרק ייראה לפני שמופק ולו נכס אחד. אף תמונה כאן אינה מיוצרת —
-כל מה שמופיע צויר ידנית כדי להראות את <b>המערכת</b>: הפורמט, הרשת, הקופסאות,
-המוסכמות והפלטה. זה מה שיהפוך את 58 הפאנלים לרצף אחד ולא לאוסף.</p>
+<div class="masthead">אסלאם · דת ותרבות</div>
+<div class="wrap">
 
-<div class="warn"><b>המדיום משתנה, וזו הכרעה שצריך לאשר.</b>
-הנכסים שהופקו עד כה הם „שמן על בד במסורת האוריינטליזם של המאה ה-19" — מדיום
-<b>בלי קו</b>. קומיקס הוא קו. ההצעה: <b>קו דיו על שטיפת אקוורל</b> — משמר את
-הפלטה, את הנייר ואת האור של האתר, ומוסיף את הקו שהצורה מחייבת.
-<b>אף אחד מהנכסים הקיימים לא ישמש.</b></div>
+<h1>פרק 3 · שפת הקומיקס</h1>
+<div class="ornament"><i></i><b></b><i></i></div>
+<p class="lede">מוד־בורד שנבנה על <b>כללי הקומיקס בפועל</b>, לא על רשת שהמצאתי.
+כל כלל כאן נלקח ממקורות מקצועיים ומיושם על החומר של פרק 3 — ואז מולבש
+בשפה של האתר: אותה פלטה, אותה טיפוגרפיה, אותו קלף.</p>
 
-<h2>1 · הפורמט — דפדוף</h2>
-<p class="note">פריסה כפולה, דפדוף מימין לשמאל כמו ספר עברי. אין גלילה אינסופית:
-הקורא מסיים פריסה ומדפדף. זה מה שפותר את בעיית האורך של 18,000 הפיקסלים.</p>
-<div class="book">
-  <div class="leaf l">
-    <div class="grid g-a">
-      <div class="panel p1"><svg viewBox="0 0 380 210" preserveAspectRatio="none">
-        <rect width="380" height="210" fill="#dfe6e6"/>
-        <path d="M0 150 L60 118 L110 134 L170 96 L232 126 L290 104 L340 128 L380 116 L380 210 L0 210Z" fill="#c9ae86"/>
-        <path d="M0 176 L70 158 L150 172 L240 152 L320 170 L380 158 L380 210 L0 210Z" fill="#e3cfa6"/>
-        <g fill="none" stroke="#4a3826" stroke-width="2">
-          <path d="M0 150 L60 118 L110 134 L170 96 L232 126 L290 104 L340 128 L380 116"/>
-          <path d="M0 176 L70 158 L150 172 L240 152 L320 170 L380 158"/></g>
-        <g fill="#8f7a5e"><rect x="120" y="176" width="26" height="18"/><rect x="156" y="180" width="20" height="14"/>
-          <rect x="188" y="174" width="30" height="20"/><rect x="228" y="181" width="18" height="13"/></g>
-        <g fill="none" stroke="#4a3826" stroke-width="1.6"><rect x="120" y="176" width="26" height="18"/>
-          <rect x="156" y="180" width="20" height="14"/><rect x="188" y="174" width="30" height="20"/>
-          <rect x="228" y="181" width="18" height="13"/></g>
-      </svg>
-        <span class="src">§0</span>
-        <div class="box">לפי המסורת מוחמד נולד בשנת 570 לספירה. שנה זו מכונה באסלאם <b>„שנת הפיל"</b>.</div>
-      </div>
-      <div class="panel"><svg viewBox="0 0 184 170">
-        <rect width="184" height="170" fill="#e8dcc0"/>
-        <g fill="#8f7a5e" stroke="#4a3826" stroke-width="1.8">
-          <ellipse cx="92" cy="112" rx="34" ry="40"/><ellipse cx="70" cy="86" rx="15" ry="19"/>
-          <ellipse cx="114" cy="86" rx="15" ry="19"/></g>
-        <ellipse cx="92" cy="74" rx="20" ry="22" fill="#d8c7a3" opacity=".85"/>
-        <ellipse cx="92" cy="74" rx="13" ry="15" fill="#c9ae86" opacity=".6"/>
-      </svg>
-        <span class="src">§8</span>
-        <div class="box">פנים מטושטשות — שטיפה, בלי עיניים ובלי פה.</div>
-      </div>
-      <div class="panel"><svg viewBox="0 0 184 170">
-        <rect width="184" height="170" fill="#2b3550"/>
-        <g fill="#f5ecd6"><circle cx="40" cy="36" r="1.6"/><circle cx="96" cy="24" r="1.2"/>
-          <circle cx="140" cy="52" r="1.8"/><circle cx="62" cy="78" r="1.1"/><circle cx="120" cy="98" r="1.4"/>
-          <circle cx="30" cy="120" r="1.2"/><circle cx="158" cy="128" r="1.5"/></g>
-        <path d="M0 140 L52 122 L104 136 L184 120 L184 170 L0 170Z" fill="#1b2233"/>
-        <path d="M0 140 L52 122 L104 136 L184 120" fill="none" stroke="#4a3826" stroke-width="2"/>
-      </svg>
-        <span class="src">§35</span>
-        <div class="box">הדרך בלילה. <b>אלבראק אינו מצויר.</b></div>
-      </div>
-    </div>
-    <div class="folio">14 ·</div>
-  </div>
-  <div class="leaf r">
-    <div class="grid g-b">
-      <div class="panel"><svg viewBox="0 0 380 176">
-        <rect width="380" height="176" fill="#efe4c8"/>
-        <g fill="#c9ae86" stroke="#4a3826" stroke-width="2">
-          <path d="M30 176 L30 96 Q30 74 52 74 L96 74 Q118 74 118 96 L118 176Z"/>
-          <path d="M150 176 L150 88 Q150 66 172 66 L216 66 Q238 66 238 88 L238 176Z"/>
-          <path d="M266 176 L266 100 Q266 78 288 78 L332 78 Q354 78 354 100 L354 176Z"/></g>
-        <g fill="#d8c7a3" opacity=".9"><ellipse cx="74" cy="62" rx="19" ry="21"/>
-          <ellipse cx="194" cy="54" rx="19" ry="21"/><ellipse cx="310" cy="66" rx="19" ry="21"/></g>
-        <g fill="#c9ae86" opacity=".55"><ellipse cx="74" cy="62" rx="12" ry="14"/>
-          <ellipse cx="194" cy="54" rx="12" ry="14"/><ellipse cx="310" cy="66" rx="12" ry="14"/></g>
-      </svg>
-        <span class="src">§26</span>
-        <div class="box top">מרבית תושבי מכה לא אבו לשמוע למסרי ההטפה, ואף פתחו עוינות כלפיו.</div>
-      </div>
-      <div class="panel"><svg viewBox="0 0 380 268">
-        <rect width="380" height="268" fill="#1a1712"/>
-        <path d="M0 0 L0 268 L110 268 Q86 190 96 120 Q104 58 138 0Z" fill="#3a2f22"/>
-        <path d="M380 0 L380 268 L268 268 Q296 186 286 118 Q276 56 244 0Z" fill="#3a2f22"/>
-        <ellipse cx="190" cy="140" rx="72" ry="96" fill="#efe4c8"/>
-        <ellipse cx="190" cy="140" rx="58" ry="80" fill="#f7f0dd"/>
-        <g fill="none" stroke="#4a3826" stroke-width="2.4">
-          <path d="M138 0 Q104 58 96 120 Q86 190 110 268"/>
-          <path d="M244 0 Q276 56 286 118 Q296 186 268 268"/></g>
-        <g fill="#e3cfa6" stroke="#4a3826" stroke-width="1.6">
-          <rect x="150" y="108" width="82" height="26" rx="3"/>
-          <rect x="158" y="140" width="66" height="22" rx="3"/></g>
-      </svg>
-        <span class="src">§18</span>
-        <div class="box">POV: הגווילים נפרסים אלינו. <b>גבריאל הוא האור, לא גוף.</b></div>
-      </div>
-    </div>
-    <div class="folio">· 15</div>
-  </div>
+<!-- ============================================ -->
+<h2>1 · פאנל אחד = ביט אחד <span>one panel, one beat</span></h2>
+<p>הכלל הראשון והחשוב ביותר, וזה שהפרתי: <b class="key">פאנל נושא רגע אחד.</b>
+אם לתיאור יש שני ביטים — הוא מתפצל לשני פאנלים. הקצב הוויזואלי של קומיקס
+נשען על זה.</p>
+<div class="card">
+  <h3>מה זה עושה לפריסה שהצעתי</h3>
+  <p style="margin-top:8px">מיפיתי <b>§ אחד = פאנל אחד</b>, ו-45 סעיפים הפכו ל-58 פאנלים.
+  אבל §2 לבדו נושא <b>שלושה ביטים</b>: הצבא מגיע · אללה שולח את הציפורים ·
+  מכה ניצלה. §22 נושא שלושה: הוא חוזר · מבקש שיעטו אותו · ח'דיג'ה מתייעצת.</p>
+  <p style="margin-top:14px"><b class="key">האומדן המתוקן: 85–95 פאנלים, לא 58.</b>
+  זה משנה את היקף ההפקה בכ-60%, ועדיף לדעת את זה עכשיו.</p>
 </div>
-<p class="cap">פריסה כפולה · 430×600 לעמוד · המספור בשוליים החיצוניים · הדפדוף מימין לשמאל</p>
 
-<h2>2 · הרשת — מה שהופך 58 פאנלים לרצף אחד</h2>
-<p class="note">ארבע פריסות בלבד, וכל עמוד בפרק בנוי מאחת מהן. אותו מרזח (12px),
-אותו קו מסגרת (2.5px), אותה קופסה. <b>הרציפות היא הרשת, לא הציור.</b></p>
+<!-- ============================================ -->
+<h2>2 · מסלול ה-Z, הפוך <span>RTL Z-path</span></h2>
+<p>העין נכנסת <b class="key">מימין־למעלה</b> ויוצאת <b class="key">משמאל־למטה</b> —
+אותו מסלול Z של קומיקס מערבי, משוקף. זה תואם למנגה, ולכיוון הקריאה של האתר.</p>
 <div class="row">
-  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
-    <div class="grid g-a"><div class="panel p1"></div><div class="panel"></div><div class="panel"></div></div></div>
-    <p class="cap">א · רחב מלמעלה, שניים מתחת<br>לפתיחת סצנה</p></div>
-  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
-    <div class="grid g-b"><div class="panel"></div><div class="panel"></div></div></div>
-    <p class="cap">ב · שניים, התחתון גדול<br>לרגע מכריע</p></div>
-  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
-    <div class="grid g-c"><div class="panel"></div><div class="panel"></div><div class="panel"></div>
-      <div class="panel p4"></div></div></div>
-    <p class="cap">ג · שלושה קצרים ורצועה<br>לרצף מהיר</p></div>
-  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
-    <div class="grid g-d"><div class="panel"></div></div></div>
-    <p class="cap">ד · פאנל יחיד<br>לשבעת הרקיעים ולמסע</p></div>
+  <div>
+    <div class="pg" style="width:300px;height:300px">
+      <div class="grid" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;position:relative">
+        <div class="pn"><div class="num">1</div></div>
+        <div class="pn"><div class="num">2</div></div>
+        <div class="pn"><div class="num">3</div></div>
+        <div class="pn"><div class="num">4</div></div>
+        <svg class="arrow" viewBox="0 0 272 272">
+          <defs><marker id="h" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+            <path d="M0 0 L7 3.5 L0 7Z" fill="#a5322f"/></marker></defs>
+          <path d="M200 68 L86 68" stroke="#a5322f" stroke-width="3" fill="none" marker-end="url(#h)"/>
+          <path d="M72 96 Q136 128 200 168" stroke="#a5322f" stroke-width="3" fill="none"
+            stroke-dasharray="6 5" marker-end="url(#h)"/>
+          <path d="M200 204 L86 204" stroke="#a5322f" stroke-width="3" fill="none" marker-end="url(#h)"/>
+        </svg>
+      </div>
+    </div>
+    <p class="cap">כניסה מימין־למעלה · יציאה משמאל־למטה.
+    הקו המקווקו הוא ה„חזרה" — המקום שבו הקורא הכי עלול ללכת לאיבוד,
+    ולכן שם ממקמים קופסה שמושכת.</p>
+  </div>
+  <div>
+    <div class="pg" style="width:300px;height:300px">
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:8px">
+        <div class="pn"></div><div class="pn"></div><div class="pn"></div>
+        <div class="pn"></div><div class="pn"></div><div class="pn"></div>
+        <div class="pn"></div><div class="pn"></div><div class="pn"></div>
+      </div>
+    </div>
+    <p class="cap"><b>רשת התשעה.</b> קוראת כרשמית, דוקומנטרית, בלתי נמנעת.
+    זו בדיוק הרשת ל<b class="key">§§4–6</b> — הרובד העכשווי, שהוא הקטע היחיד
+    בפרק שאסור לצייר בו כלום.</p>
+  </div>
+  <div>
+    <div class="pg" style="width:300px;height:300px">
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:12px">
+        <div class="pn"></div><div class="pn"></div><div class="pn"></div>
+        <div class="pn"></div><div class="pn"></div><div class="pn"></div>
+      </div>
+    </div>
+    <p class="cap"><b>רשת השישה</b> — שתי שורות של שלושה. ברירת המחדל של הפרק.
+    עמוד טיפוסי בקומיקס נושא 5–7 פאנלים.</p>
+  </div>
 </div>
 
-<h2>3 · המוסכמות</h2>
+<!-- ============================================ -->
+<h2>3 · גודל הוא קצב · מרזח הוא זמן <span>size = pacing, gutter = time</span></h2>
 <table>
-  <tr><th>מי</th><th>איך</th></tr>
-  <tr><td>מוחמד</td><td><b>לא בפריים.</b> המצלמה היא הוא — רואים את מה שהוא רואה</td></tr>
-  <tr><td>גבריאל והמלאכים</td><td><b>לא בפריים.</b> אור, גוויל, שער שנפתח</td></tr>
-  <tr><td>שבעת הנביאים ברקיעים</td><td><b>לא בפריים.</b> כולם נביאים באסלאם</td></tr>
-  <tr><td>אלבראק · גן עדן · גהינום · אלאקצא · ירושלים</td><td><b>לא מצוירים כלל</b></td></tr>
-  <tr><td>ח'דיג'ה · אבו טאלב · אברהה · אנשי מכה · נופל · אבו בכר · מלך חבש</td>
-      <td><b>מצוירים, פנים מטושטשות</b> — שטיפה, בלי קלסתר</td></tr>
-  <tr><td>§§4–6 — הרובד העכשווי</td><td><b>אפס דימויים.</b> טיפוגרפיה בלבד</td></tr>
+  <tr><th>אמצעי</th><th>מה הוא עושה</th><th>איפה בפרק 3</th></tr>
+  <tr><td>פאנל <b>גדול</b></td><td>מאט את הזמן, מדגיש</td>
+      <td>§18 החיזיון · §31–32 שני המקרים בשנת העצב</td></tr>
+  <tr><td>פאנלים <b>קטנים ורצופים</b></td><td>מאיץ, יוצר דחיפות</td>
+      <td>§2 הציפורים · §26–27 חילופי הטענות במכה</td></tr>
+  <tr><td>מרזח <b>צר</b></td><td>רצף בלתי נפסק, מיידיות</td>
+      <td>§19 שלוש הפעמים של „אינני קורא"</td></tr>
+  <tr><td>מרזח <b>רחב</b></td><td>שהות, חלוף זמן</td>
+      <td>בין §12 (יתמות) ל-§13 (נערותו) — עוברות שנים</td></tr>
+  <tr><td><b>ללא מסגרת</b></td><td>בו־זמניות, או חלום</td>
+      <td>§10–11 פתיחת הלב · §39 הרקיעים</td></tr>
 </table>
 
-<h2>4 · הפלטה והקו</h2>
-<p class="note">אותם ערכים בדיוק שהאתר כבר מגדיר — אף צבע חדש. הקו הוא הדבר היחיד
-שנוסף, והוא מה שהופך שטיפה לקומיקס.</p>
+<!-- ============================================ -->
+<h2>4 · הדפדוף כאמצעי סיפורי <span>the page-turn reveal</span></h2>
+<p>זה מה שפספסתי לגמרי. ב-RTL הפאנל האחרון לפני ההיפוך הוא
+<b class="key">שמאל־תחתון של העמוד השמאלי</b> — והקורא <b>לא יכול לראות</b> מה
+מעבר לו. שם שמים שאלה, ואת התשובה מיד אחרי ההיפוך.</p>
 <div class="row">
-  <div class="sw"><i style="background:#EDE4D0"></i><span>נייר · paper</span></div>
-  <div class="sw"><i style="background:#e3cfa6"></i><span>חול</span></div>
-  <div class="sw"><i style="background:#c9ae86"></i><span>אבן</span></div>
-  <div class="sw"><i style="background:#8f7a5e"></i><span>צל</span></div>
-  <div class="sw"><i style="background:#2b3550"></i><span>לילה</span></div>
-  <div class="sw"><i style="background:#8a2733"></i><span>בורדו · הדגשה</span></div>
-  <div class="sw"><i style="background:#c79a3c"></i><span>זהב · מקודש</span></div>
-  <div class="sw"><i style="background:#4a3826"></i><span>קו הדיו</span></div>
+  <div>
+    <div class="pg" style="width:420px;height:250px;display:flex;gap:0;padding:0">
+      <div style="flex:1;padding:12px;border-inline-end:1px solid var(--edge);
+        background:linear-gradient(to left,rgba(0,0,0,.06),transparent 14%)">
+        <div class="grid" style="grid-template-rows:1fr 1fr;gap:10px;height:100%">
+          <div class="pn sand"></div>
+          <div class="pn stone" style="border-color:var(--stamp);border-width:3px">
+            <div class="num" style="color:var(--stamp);font-size:15px">השאלה</div></div>
+        </div>
+      </div>
+      <div style="flex:1;padding:12px;background:linear-gradient(to right,rgba(0,0,0,.06),transparent 14%)">
+        <div class="grid" style="grid-template-rows:1fr 1fr;gap:10px;height:100%">
+          <div class="pn"></div><div class="pn sand"></div>
+        </div>
+      </div>
+    </div>
+    <p class="cap">הפאנל האדום הוא הפאנל האחרון שהעין פוגשת לפני ההיפוך.</p>
+  </div>
+  <div style="flex:1;min-width:330px">
+    <div class="beat"><b></b><div><b class="key">„וציווה עליו קרא"</b> (§18) —
+      היפוך → הגווילים נפרסים אלינו.</div></div>
+    <div class="beat"><b></b><div><b class="key">אברהה מגיע עם הפיל</b> (§2) —
+      היפוך → הציפורים.</div></div>
+    <div class="beat"><b></b><div><b class="key">„בשנה זו מתו שני אישים"</b> (§31) —
+      היפוך → אבו טאלב.</div></div>
+    <div class="beat"><b></b><div><b class="key">גבריאל שואל בשער הרקיע</b> (§39) —
+      היפוך → השער נפתח.</div></div>
+    <div class="beat"><b></b><div><b class="key">„הובאו לפניו שני כדים"</b> (§37) —
+      היפוך → הבחירה.</div></div>
+  </div>
 </div>
 
-<h2>5 · הקופסה</h2>
-<p class="note">כל מילה בפרק חיה בקופסה כזו, <b>מילה במילה מהמקור</b>. אין בלונים
-של דיבור: הפרק הוא נרטיב מדווח ולא דיאלוג, והמקור לא מביא ציטוטים בגוף ראשון
-מלבד הפסוקים. הפסוקים מקבלים את הקופסה בזהב.</p>
+<!-- ============================================ -->
+<h2>5 · העמוד המלא, ובמשורה <span>splash</span></h2>
+<p>פאנל יחיד שתופס עמוד שלם — לרגע מכריע בלבד. <b class="key">שימוש תכוף שוחק
+אותו</b>. בפרק הזה: ארבעה, לא יותר.</p>
 <div class="row">
-  <div style="width:430px;position:relative;background:var(--surface);border:2.5px solid var(--line);height:120px">
-    <div class="box" style="position:static;margin:10px">בשנת 610, בהגיעו לגיל ארבעים, זכה מוחמד ל<b>„חיזיון אמת"</b>.</div>
-    <p class="cap" style="margin:0 10px 10px">קופסת סיפור · Ploni · דיו על נייר</p>
+  <div><div class="pg" style="width:210px;height:290px">
+    <div class="pn dark" style="height:100%"><em>§18</em></div></div>
+    <p class="cap"><b>ההתגלות.</b> הרגע שהפרק קיים בשבילו.</p></div>
+  <div><div class="pg" style="width:210px;height:290px">
+    <div class="pn dark" style="height:100%"><em>§39</em></div></div>
+    <p class="cap"><b>שבעת הרקיעים.</b> העמוד היחיד שאינו ציורי — טיפוגרפיה על שמיים.</p></div>
+  <div><div class="pg" style="width:210px;height:290px">
+    <div class="pn sand" style="height:100%"><em>§2</em></div></div>
+    <p class="cap"><b>האבאביל.</b> פותח את הפרק בתמונה שהקהל יזהה מיד.</p></div>
+  <div><div class="pg" style="width:210px;height:290px">
+    <div class="pn stone" style="height:100%"><em>§32</em></div></div>
+    <p class="cap"><b>מות ח'דיג'ה.</b> השקט הגדול של הפרק.</p></div>
+</div>
+
+<!-- ============================================ -->
+<h2>6 · הקופסה מובילה את העין <span>captions as road signs</span></h2>
+<p>קופסאות אינן רק טקסט — הן <b class="key">תמרורים</b>. קופסה בפינה
+שמאל־תחתונה של פאנל מושכת את העין לפאנל הבא או להיפוך העמוד. לכן מיקום
+הקופסה נקבע לפי המסלול, לא לפי המקום הפנוי.</p>
+<div class="row">
+  <div class="card" style="flex:1;min-width:300px;margin-top:0">
+    <h3>קופסת סיפור</h3>
+    <div style="background:var(--surface);border:1.5px solid var(--line);padding:9px 12px;
+      font-size:15px;line-height:1.55;margin-top:10px">
+      בשנת 610, בהגיעו לגיל ארבעים, זכה מוחמד ל<b class="key">„חיזיון אמת"</b>.</div>
+    <p class="cap" style="max-width:none">Ploni · דיו על קלף · מילה במילה מהמקור</p>
   </div>
-  <div style="width:430px;position:relative;background:var(--surface);border:2.5px solid var(--line);height:120px">
-    <div class="box" style="position:static;margin:10px;border-color:var(--gold);border-width:2px;
-      font-family:'Kedem',serif;font-weight:700;color:var(--maroon-deep);text-align:center;font-size:15px">
+  <div class="card" style="flex:1;min-width:300px;margin-top:0">
+    <h3>קופסת פסוק</h3>
+    <div style="background:var(--surface);border:2px solid var(--gold);padding:14px 16px;
+      font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+      text-align:center;font-size:17px;line-height:1.45;margin-top:10px;
+      box-shadow:inset 0 0 0 3px rgba(199,154,60,.18)">
       „קרא בשם ריבונך אשר ברא את האדם מטיפת דם קרוש..."</div>
-    <p class="cap" style="margin:0 10px 10px">קופסת פסוק · Kedem · מסגרת זהב</p>
+    <p class="cap" style="max-width:none">Kedem · מסגרת זהב — הכרטיס שכבר קיים בפרק</p>
   </div>
 </div>
+<p><b>אין בלוני דיבור.</b> הפרק הוא נרטיב מדווח; המקור אינו מביא דיבור ישיר
+מלבד הפסוקים ומשפט אחד (§19). זו החלטה שאפשר להפוך — תגידי.</p>
 
-<h2>6 · מה שהמוד־בורד לא מראה</h2>
-<ul class="rules">
-  <li>את הציור עצמו. הפאנלים כאן צוירו ידנית בקוד כדי להראות קומפוזיציה, מסגרת
-      וקופסה — <b>לא את איכות הקו הסופית</b>.</li>
-  <li>את הטיפוגרפיה בגודל אמיתי. בעמוד מודפס הקופסה תרוץ ~34 תווים לשורה.</li>
-  <li>את המעבר בין עמודים — אנימציית הדפדוף עצמה.</li>
-</ul>
+<!-- ============================================ -->
+<h2>7 · הקריין <span>the narrating voice</span></h2>
+<p>לפרק יש <b class="key">קול מספר</b> — לא הקראה קולית, אלא הנוכחות שמספרת את
+הסיפור מקופסה לקופסה. <b>וזה קול המקור עצמו:</b> כל קופסה נושאת את משפט
+המקור מילה במילה, ולכן הקריין לעולם אינו יכול להמציא, לפרש או לקצר.</p>
+<div class="card">
+  <h3>ולמה 58 פאנלים עובד</h3>
+  <p style="margin-top:8px">כלל „פאנל = ביט" מניח פאנל שנושא <b>קופסה אחת</b>.
+  אבל <b class="key">פאנל יכול לשאת שתיים או שלוש קופסאות שנקראות בסדר</b> —
+  וזו הדרך הרגילה בקומיקס לתת לכמה ביטים זמן נפרד באותו ריבוע.
+  הקורא מסיים קופסה, עוברת שנייה בזמן, קורא את הבאה.</p>
+  <p style="margin-top:14px">§2 („הצבא מגיע · הציפורים · מכה ניצלה") הופך לפאנל
+  אחד עם שלוש קופסאות במקום שלושה פאנלים. <b>58 נשאר.</b></p>
+</div>
+<div class="row">
+  <div class="pn sand" style="width:100%;height:230px;position:relative">
+    <em>§2 — פאנל אחד, שלושה ביטים</em>
+    <div style="position:absolute;top:34px;inset-inline-start:12px;width:44%;background:var(--surface);
+      border:1.5px solid var(--line);padding:7px 11px;font-size:14px;line-height:1.5">
+      כשאברהה הגיע עם חייליו, רכובים על פיל…</div>
+    <div style="position:absolute;top:112px;inset-inline-end:12px;width:44%;background:var(--surface);
+      border:1.5px solid var(--line);padding:7px 11px;font-size:14px;line-height:1.5">
+      …שלח אללה ציפורים אשר השליכו אבני טין ואש…</div>
+    <div style="position:absolute;bottom:12px;inset-inline-start:12px;width:44%;background:var(--surface);
+      border:1.5px solid var(--line);padding:7px 11px;font-size:14px;line-height:1.5">
+      …וכך העיר מכה נצלה.</div>
+  </div>
+  <p class="cap" style="max-width:none">שלוש הקופסאות יורדות לאורך מסלול ה-Z:
+  ימין־למעלה → אמצע → שמאל־למטה. <b>המיקום הוא מה שקובע את הסדר</b>, ולכן
+  הקופסה היא גם תמרור וגם טקסט.</p>
+</div>
+<div class="card">
+  <h3>הקראה קולית — שכבה מאוחרת, לא עכשיו</h3>
+  <p style="margin-top:8px">אם תתווסף בהמשך היא תרכב על אותן קופסאות בדיוק,
+  כמו ה-VTT של פרק 6. <b>סיכון שכדאי לזכור לאותו יום:</b> תעתיקים כמו
+  <b>אלתחנת'</b> ו<b>לילה' אלקדר</b> מרסקים מנועי הקראה בעברית, ויצטרכו בדיקה
+  לפני התחייבות.</p>
+</div>
+
+<!-- ============================================ -->
+<h2>8 · בועות דיבור — שלוש בפרק כולו <span>speech balloons</span></h2>
+<p>סרקתי כל מרכאה במקור: <b>27 ציטוטים</b>. רובם אינם דיבור — הם מונחים
+(„שנת הפיל", „מוץ נאכל"), פסוקי קוראן, או ניסוח של המסורת. <b class="key">דיבור
+ישיר יש בשלושה מקומות בלבד</b> — ושניים מהם באותה שיחה.</p>
+<div class="row">
+  <div style="flex:1;min-width:290px">
+    <div class="pn dark" style="height:190px;display:grid;place-items:center;position:relative">
+      <em>§18</em>
+      <div style="background:var(--surface);border:2px solid var(--line);border-radius:22px;
+        padding:10px 20px;font-family:var(--font-heading);font-weight:700;font-size:21px;
+        color:var(--maroon-deep);box-shadow:0 0 34px 12px rgba(217,180,91,.34)">קרא</div>
+    </div>
+    <p class="cap" style="max-width:none"><b>גבריאל.</b> בועה <b>בלי זנב</b> — אין לה
+    ממי לצאת, כי גבריאל אינו בפריים. הזוהר מסביבה הוא מה שמזהה את הדובר.</p>
+  </div>
+  <div style="flex:1;min-width:290px">
+    <div class="pn dark" style="height:190px;display:grid;place-items:center;position:relative">
+      <em>§19</em>
+      <div style="background:var(--surface);border:2px solid var(--line);border-radius:22px;
+        padding:10px 20px;font-family:var(--font-heading);font-weight:700;font-size:21px;
+        color:var(--maroon-deep);position:relative">אינני קורא
+        <span style="position:absolute;bottom:-14px;inset-inline-start:26px;width:0;height:0;
+          border-inline-start:10px solid transparent;border-inline-end:10px solid transparent;
+          border-top:16px solid var(--line)"></span></div>
+    </div>
+    <p class="cap" style="max-width:none"><b>מוחמד.</b> הזנב יורד אל <b>שולי
+    הפריים</b> — כלפי הקורא, כי הקורא הוא הדובר. זו המוסכמה של POV.</p>
+  </div>
+  <div style="flex:1;min-width:290px">
+    <div class="pn sand" style="height:190px;display:grid;place-items:center;position:relative">
+      <em>§27</em>
+      <div style="background:var(--surface);border:2px solid var(--line);border-radius:22px;
+        padding:10px 18px;font-family:var(--font-heading);font-weight:700;font-size:17px;
+        color:var(--maroon-deep);position:relative">„אגדות של הקדמונים"
+        <span style="position:absolute;bottom:-14px;inset-inline-end:24px;width:0;height:0;
+          border-inline-start:10px solid transparent;border-inline-end:10px solid transparent;
+          border-top:16px solid var(--line)"></span></div>
+    </div>
+    <p class="cap" style="max-width:none"><b>אנשי מכה.</b> בועה רגילה עם זנב אל
+    הדובר — היחידה בפרק שיש לה למי להצביע.</p>
+  </div>
+</div>
+<p><b class="key">והממצא היפה:</b> שתיים מתוך שלוש הבועות הן „קרא" ו„אינני קורא".
+<b>הדיאלוג היחיד בפרק הוא ההתגלות עצמה</b> — ולכן הבועות נדירות מספיק כדי
+שכשהן מופיעות, הן יכות.</p>
+
+<!-- ============================================ -->
+<h2>9 · מה עוד לא נקבע</h2>
+<div class="beat"><b></b><div><b class="key">איכות הקו.</b> המוד־בורד מראה מערכת,
+  לא ציור. הקו עצמו נקבע בסבב ההפקה הראשון.</div></div>
+<div class="beat"><b></b><div><b class="key">היקף.</b> 85–95 פאנלים לפי כלל הביט,
+  מול 58 שהצעתי. צריך אישור על ההיקף לפני שמתחילים.</div></div>
+<div class="beat"><b></b><div><b class="key">בלוני דיבור</b> — בפנים או בחוץ.</div></div>
+</div>

@@ -1191,6 +1191,9 @@ const TASK_PROP_SPOTS = [
   { dx: -1.5, dz: 0.7 },
   { dx: -0.4, dz: 1.5 },
   { dx: 1.2, dz: 1.0 },
+  { dx: -1.2, dz: -0.9 },
+  { dx: 1.4, dz: -0.6 },
+  { dx: 0.2, dz: -1.6 },
 ]
 function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
   url: string
@@ -1214,19 +1217,26 @@ function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
     </group>
   )
 }
-function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
+function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDrop }: {
   live: Live
   atTask: boolean
   chosen: string[]
   solvedTask: boolean
   found: string[]
   onChoose: (id: string) => void
+  onSortDrop: (itemId: string, binId: string) => void
 }) {
   const { camera, gl } = useThree()
   /* שני מצבים לאותה יד: גרירת-תשובות (כל אופציה היא חפץ) — ותכנון-מסלול,
      שבו יש אסימון שיירה אחד ושלוש דרכים על מפת בד; הדרך שבוחרים היא
      המקום שאליו הנחת אותו. */
   const planMode = REGION_TASK?.kind === 'plan'
+  /* מיון פיזי: לכל פריט חפץ, ולכל צד עמדה על הקרקע — מניחים ביד.
+     משימת מיון בלי חפצים (ית'רב) נשארת בפאנל כפי שהיא. */
+  const sortMode = ['sort', 'connect', 'observe'].includes(REGION_TASK?.kind ?? '') &&
+    (REGION_TASK?.options.some((o) => o.prop) ?? false)
+  /* observe: אי אפשר לשפוט לפני שראו הכול — עד אז החפצים מונחים ולא נגררים */
+  const sortLocked = !!REGION_TASK?.needsFinds && !REGION_TASK.needsFinds.every((f) => found.includes(f))
   const opts = useMemo(
     () =>
       REGION_TASK
@@ -1283,6 +1293,20 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
         : [],
     [planMode],
   )
+  const binSpots = useMemo(
+    () =>
+      sortMode && REGION_TASK
+        ? (REGION_TASK.bins ?? [])
+            .filter((b) => b.spot)
+            .map((b) => ({
+              id: b.id,
+              label: b.label,
+              x: REGION_TASK.x + b.spot!.dx,
+              z: REGION_TASK.z + b.spot!.dz,
+            }))
+        : [],
+    [sortMode],
+  )
   const dragging = useRef<number>(-1)
   const hovering = useRef<number>(-1)
   const nearTarget = useRef(false)
@@ -1293,6 +1317,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
   const targetRing = useRef<THREE.Mesh>(null)
   const hoverRing = useRef<THREE.Mesh>(null)
   const spotRings = useRef<(THREE.Mesh | null)[]>([])
+  const binRings = useRef<(THREE.Mesh | null)[]>([])
 
   useEffect(() => {
     if (!REGION_TASK || !state.current.length) return
@@ -1321,6 +1346,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
       for (let i = 0; i < state.current.length; i++) {
         const st = state.current[i]
         if (st.placed || chosen.includes(st.id)) continue
+        if (sortMode && sortLocked) continue
         if (!planMode && locked(opts[i])) continue
         const p = project(i)
         if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < 70) return i
@@ -1373,7 +1399,9 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
       st.lift = 0.55
       nearTarget.current = planMode
         ? nearestSpot(st.cur.x, st.cur.z) >= 0
-        : Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z) < 1.6
+        : sortMode
+          ? binSpots.some((b) => Math.hypot(st.cur.x - b.x, st.cur.z - b.z) < 1.6)
+          : Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z) < 1.6
     }
     const drop = (i: number) => {
       dragging.current = -1
@@ -1394,6 +1422,28 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
             st.hop = 1 /* המפה עונה: מהדרך הזאת חוזרים */
           }
           onChoose(sp.id)
+        } else {
+          st.returning = true
+        }
+      } else if (sortMode) {
+        let best = -1
+        let bd = 1.6
+        for (let k = 0; k < binSpots.length; k++) {
+          const d = Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z)
+          if (d < bd) { bd = d; best = k }
+        }
+        if (best >= 0) {
+          const bin = binSpots[best]
+          const opt = opts[i]
+          if (opt.bin === bin.id) {
+            st.placed = true
+            /* פיזור קטן סביב העמדה — חמישה חפצים לא נערמים לנקודה */
+            st.tgt = { x: bin.x + ((i % 3) - 1) * 0.55, z: bin.z + (i % 2 === 0 ? 0.35 : -0.3) }
+          } else {
+            st.returning = true
+            st.hop = 1 /* הצד הלא-נכון מחזיר — והנזיר מסביר למה */
+          }
+          onSortDrop(opt.id, bin.id)
         } else {
           st.returning = true
         }
@@ -1439,7 +1489,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
       gl.domElement.style.cursor = ''
       live.taskDrag = false
     }
-  }, [camera, gl, live, opts, spots, planMode, locked, chosen, solvedTask, onChoose])
+  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, onChoose, onSortDrop])
 
   useFrame((_, dt) => {
     if (!state.current.length) return
@@ -1491,6 +1541,21 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
         ;(ring.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.45
       }
     }
+    /* צדי המיון: דולקים ליד התחנה, הצד הקרוב לחפץ הנגרר מתרחב */
+    if (sortMode) {
+      const drag = dragging.current
+      for (let k = 0; k < binSpots.length; k++) {
+        const ring = binRings.current[k]
+        if (!ring) continue
+        ring.visible = !sortLocked && !solvedTask
+        const st = drag >= 0 ? state.current[drag] : null
+        const near = !!st && Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z) < 1.6
+        const target = near ? 1.4 : 1.0
+        ring.scale.x += (target - ring.scale.x) * Math.min(1, dt * 10)
+        ring.scale.y = ring.scale.z = ring.scale.x
+        ;(ring.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.4
+      }
+    }
     const hr = hoverRing.current
     if (hr) {
       const h = dragging.current < 0 ? hovering.current : -1
@@ -1520,6 +1585,10 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
           }
         }),
         target: tgtScreen,
+        bins: binSpots.map((b) => {
+          vv.set(b.x, groundYAt(b.x, b.z), b.z).project(camera)
+          return { id: b.id, x: (vv.x * 0.5 + 0.5) * r.width + r.left, y: (-vv.y * 0.5 + 0.5) * r.height + r.top }
+        }),
         dragging: dragging.current,
       }
     }
@@ -1590,6 +1659,25 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
           })()}
         </>
       )}
+      {sortMode &&
+        binSpots.map((b, k) => (
+          <group key={b.id}>
+            <mesh
+              ref={(el) => { binRings.current[k] = el }}
+              rotation-x={-Math.PI / 2}
+              position={[b.x, groundYAt(b.x, b.z) + 0.06, b.z]}
+              renderOrder={2}
+            >
+              <ringGeometry args={[0.85, 1.02, 44]} />
+              <meshBasicMaterial color={k === 0 ? '#e8bf76' : '#cbd6de'} transparent opacity={0.4} depthWrite={false} />
+            </mesh>
+            {atTask && !solvedTask && !sortLocked && (
+              <Html center position={[b.x, groundYAt(b.x, b.z) + 0.9, b.z]} zIndexRange={[4, 4]}>
+                <span className="ch1-prop-label">{b.label}</span>
+              </Html>
+            )}
+          </group>
+        ))}
       {!planMode &&
         opts.map((o, i) => {
           const st = state.current[i]
@@ -1603,7 +1691,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose }: {
                 x={st.home.x}
                 z={st.home.z}
                 label={o.label}
-                showLabel={atTask && !solvedTask}
+                showLabel={atTask && !solvedTask && !(sortMode && sortLocked)}
                 taken={st.placed || chosen.includes(o.id)}
               />
             </group>
@@ -3545,6 +3633,15 @@ export default function Game() {
     },
     [chooseTask],
   )
+  /* הנחה פיזית על צד של מיון — אותו מסלול, אותה הערה מלמדת */
+  const sortByDrop = useCallback(
+    (itemId: string, binId: string) => {
+      sortTask(itemId, binId)
+      cue('task')
+      setOpenTask(true)
+    },
+    [sortTask],
+  )
   const [soundOff, setSoundOff] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
   const onSceneReady = useCallback(() => setSceneReady(true), [])
@@ -4137,6 +4234,7 @@ export default function Game() {
                 solvedTask={taskSolved}
                 found={found}
                 onChoose={chooseByDrop}
+                onSortDrop={sortByDrop}
               />
             </Suspense>
           )}
