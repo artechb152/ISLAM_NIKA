@@ -1,0 +1,145 @@
+{
+  "region": "narrow-pass",
+  "phases": {
+    "locked": {
+      "opened": true,
+      "lockTexts": [
+        "· עוד לא נמצא — חפשו סביב (F)"
+      ]
+    },
+    "finds": [
+      {
+        "fx": 3.9,
+        "fz": 9.2,
+        "got": true
+      },
+      {
+        "fx": -4.36,
+        "fz": -10.64,
+        "got": true
+      }
+    ],
+    "open1902": {
+      "opened": true
+    },
+    "fit1902": {
+      "present": true,
+      "vw": 1902,
+      "vh": 942,
+      "card": {
+        "top": 47.1,
+        "bottom": 414.4,
+        "left": 681,
+        "right": 1221,
+        "w": 540,
+        "h": 367.3
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 366,
+      "clientH": 366,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "escape": {
+      "closedByEsc": true,
+      "reopened": true,
+      "progressAfter": null,
+      "selectedAfter": 0
+    },
+    "reload": {
+      "partialDesc": "clicked wrong option",
+      "progressBefore": null,
+      "noteBefore": "ותאבד את השיירה. שבט נודד אינו מחזיק צבא — הוא מחזיק דרך, ומאחוריו עומדת אימפריה שנתנה לו חסות. נגד זה לא שוכרים לוחמים.",
+      "nextDlg": false,
+      "hudAfter": "המעבר הצרמחברת: 5 מתוך 26עדויות: 2 מתוך 21",
+      "reopenAfterReload": true,
+      "progressAfterReload": null,
+      "findsStillNeeded": 0
+    },
+    "feedback": {
+      "steps": [
+        {
+          "act": "wrong",
+          "note": {
+            "cls": "ch1-task-note",
+            "text": "ותאבד את השיירה. שבט נודד אינו מחזיק צבא — הוא מחזיק דרך, ומאחוריו עומדת אימפריה שנתנה לו חסות. נגד זה לא שוכרים לוחמים."
+          },
+          "optsDisabled": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "act": "after-wait",
+          "optsDisabled": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "act": "right",
+          "note": {
+            "cls": "ch1-task-note is-right",
+            "text": "כך זה עובד. השבטים הנוודים בצפון היו בני חסות של האימפריות — גסאן היו בני חסות של הביזנטים, ולח׳ם של הסאסאנים. השבט שומר על הדרך, והאימפריה "
+          },
+          "done": "רשמתי: עוברים בחסות. השבטים נדדו צפונה מתימן ושימשו מתווכים — בני חסות של האימפריות, והמכס הוא מחיר הדרך הבטוחה."
+        }
+      ]
+    },
+    "postDone": {
+      "closedAfterDone": true,
+      "reopenAfterComplete": false,
+      "doneProgress": null,
+      "hud": "המעבר הצרמחברת: 5 מתוך 26עדויות: 2 מתוך 21"
+    },
+    "fit1366": {
+      "present": true,
+      "vw": 1366,
+      "vh": 768,
+      "card": {
+        "top": 38.4,
+        "bottom": 405.7,
+        "left": 413,
+        "right": 953,
+        "w": 540,
+        "h": 367.3
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 366,
+      "clientH": 366,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "keyboard": {
+      "openedB": true,
+      "focusTrace": [
+        {
+          "t": "BUTTON",
+          "txt": "בחסותך — תמורת מכס, כמו כולם",
+          "inPanel": true,
+          "cls": "hud-card-btn"
+        }
+      ],
+      "initialFocus": "BODY|self.__next_r=\"w8Wnn1iPiJdVbLd",
+      "foundRight": true,
+      "done": true,
+      "noteCls": "ch1-task-note is-right",
+      "advFocused": true,
+      "closed": false
+    }
+  },
+  "errorSummary": {
+    "count": 0,
+    "unique": [],
+    "phases": []
+  },
+  "errorsB": 0
+}

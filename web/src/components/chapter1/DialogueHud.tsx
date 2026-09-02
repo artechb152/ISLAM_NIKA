@@ -61,6 +61,11 @@ export function DialogueHud({
   const step = active[Math.min(i, active.length - 1)]
   const full = step?.text ?? ''
   const complete = revealed >= full.length
+  /* שתי לחיצות מהירות בין רינדורים קוראות את אותו closure ישן: הראשונה
+     משלימה את השורה, השנייה "משלימה" שוב במקום להתקדם — לחיצה שנבלעת
+     (דוח השחקנית, ממצא 5). ה-ref מתעדכן מיידית ולא מחכה לרינדור. */
+  const completeRef = useRef(complete)
+  completeRef.current = complete
 
   useEffect(() => {
     onSpeakerChange?.(step?.speaker ?? 'narrator')
@@ -102,8 +107,9 @@ export function DialogueHud({
   }, [atScriptEnd, filed, encounter, onFinished])
 
   const advance = useCallback(() => {
-    if (!complete) {
+    if (!completeRef.current) {
       setRevealed(full.length)
+      completeRef.current = true
       return
     }
     if (interlude) {
@@ -135,7 +141,16 @@ export function DialogueHud({
         if (showDone || showChoices) onClose()
         else advance()
       }
-      if (ev.key === 'Escape' && showDone) onClose()
+      if (ev.key === 'Escape') {
+        if (showDone || showChoices) onClose()
+        else {
+          /* דילוג: קפיצה לסוף המפגש — לחיצה שנייה תסגור. עדיף על מקש
+             שמתעלם ממך (דוח השחקנית). */
+          setInterlude(null)
+          setI(steps.length - 1)
+          setRevealed(Number.MAX_SAFE_INTEGER)
+        }
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)

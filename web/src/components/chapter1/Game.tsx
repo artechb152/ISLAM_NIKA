@@ -1366,6 +1366,9 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
   }, [camera, gl, live, opts, chosen, solvedTask, onChoose])
 
   useFrame((_, dt) => {
+    /* רוב התחנות בכלל בלי פרופים — בלי השומר הזה הפרסום ל-__ch1Task
+       ניגש ל-state.current[0] ריק וקרס ~50 פעם בשנייה (דוח השחקנית) */
+    if (!state.current.length) return
     for (let i = 0; i < state.current.length; i++) {
       const st = state.current[i]
       if (st.hop > 0) st.hop = Math.max(0, st.hop - dt * 3)
@@ -3559,9 +3562,10 @@ export default function Game() {
   const met = useCallback((who: string) => !nextFrom(who), [nextFrom])
 
   const finishEncounter = useCallback((e: Encounter) => {
-    /* ברכת ההיכרות של ראאווי אינה תוכן לימודי — היא לא תופסת רשומה.
-       27 הרשומות שמורות למה שנשען על המקור. */
-    if (e.notebook === 0) return
+    /* גם beat בלי רשומה (notebook 0) חייב להיזכר ב-seen — טריגר task:/after:
+       בודק את seen, ובלי הרישום הוא ירה שוב 900ms אחרי כל סגירה: לולאת
+       הדיאלוג האינסופית של המחנה מדוח השחקנית. הרשומה עצמה עדיין נתפסת
+       רק כשיש מספר מחברת. */
     const store = recordEncounter(e.id, e.notebook)
     setSeen(store.seen)
     setNotebook(notebookCount(store))
@@ -3759,6 +3763,11 @@ export default function Game() {
         const heard = readNotebook().seen
         const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.includes(x.id))
         if (next) setEncounter(next)
+        else if (coreMissingRef.current.length > 0) {
+          /* אין לראווי מונולוג כאן — אבל מקש מת גרוע יותר: הוא מפנה
+             אל מה שהאזור עוד מבקש (דוח השחקנית: R מת ברמות תימן) */
+          setEncounter(coreHoldBeat(coreMissingRef.current))
+        }
         return
       }
       /* F picks a thing up off the ground. It is deliberately not E: E is for

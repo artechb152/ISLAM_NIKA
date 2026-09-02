@@ -52,7 +52,7 @@ function write(store: NotebookStore) {
 export function recordEncounter(encounterId: string, notebookEntry: number): NotebookStore {
   const s = readNotebook()
   if (!s.seen.includes(encounterId)) s.seen = [...s.seen, encounterId]
-  if (!s.entries.includes(notebookEntry)) s.entries = [...s.entries, notebookEntry].sort((a, b) => a - b)
+  if (notebookEntry > 0 && !s.entries.includes(notebookEntry)) s.entries = [...s.entries, notebookEntry].sort((a, b) => a - b)
   write(s)
   return s
 }

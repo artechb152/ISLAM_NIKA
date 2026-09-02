@@ -1,0 +1,143 @@
+{
+  "region": "border-post",
+  "phases": {
+    "locked": {
+      "opened": true,
+      "lockTexts": [
+        "· עוד לא נמצא — חפשו סביב (F)"
+      ]
+    },
+    "finds": [
+      {
+        "fx": -2.97,
+        "fz": -3.44,
+        "got": true
+      },
+      {
+        "fx": 1.66,
+        "fz": 0.9,
+        "got": true
+      }
+    ],
+    "open1902": {
+      "opened": true
+    },
+    "fit1902": {
+      "present": true,
+      "vw": 1902,
+      "vh": 942,
+      "card": {
+        "top": 47.1,
+        "bottom": 370.4,
+        "left": 681,
+        "right": 1221,
+        "w": 540,
+        "h": 323.3
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 322,
+      "clientH": 322,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "escape": {
+      "closedByEsc": true,
+      "reopened": true,
+      "progressAfter": null,
+      "selectedAfter": 0
+    },
+    "reload": {
+      "partialDesc": "clicked wrong option",
+      "progressBefore": null,
+      "noteBefore": "חותם ביזנטי — הצד השני של הסיפור. מצפון־מערב יושבת האימפריה הנוצרית, וסחורה שנושאת חותם כזה באה מנתיביה. אבל הדרך הזאת — לא לשם היא פונה. הנ",
+      "nextDlg": false,
+      "hudAfter": "תחנת הגבולמחברת: 4 מתוך 26עדויות: 2 מתוך 21",
+      "reopenAfterReload": true,
+      "progressAfterReload": null,
+      "findsStillNeeded": 0
+    },
+    "feedback": {
+      "steps": [
+        {
+          "act": "wrong",
+          "note": {
+            "cls": "ch1-task-note",
+            "text": "חותם ביזנטי — הצד השני של הסיפור. מצפון־מערב יושבת האימפריה הנוצרית, וסחורה שנושאת חותם כזה באה מנתיביה. אבל הדרך הזאת — לא לשם היא פונה. הנ"
+          },
+          "optsDisabled": [
+            false,
+            false
+          ]
+        },
+        {
+          "act": "after-wait",
+          "optsDisabled": [
+            false,
+            false
+          ]
+        },
+        {
+          "act": "right",
+          "note": {
+            "cls": "ch1-task-note is-right",
+            "text": "דרהם כסף — ההטבעה של קטסיפון. הדרך שאתם עומדים עליה משלמת במטבע הזה: היא פונה צפון־מזרח, אל הספרה הסאסאנית. זה מה שרציתי שתראו."
+          },
+          "done": "המאזניים הכריעו: מצפון לחצי האי שתי אימפריות, והדרך הזאת פונה אל הסאסאנית."
+        }
+      ]
+    },
+    "postDone": {
+      "closedAfterDone": true,
+      "reopenAfterComplete": false,
+      "doneProgress": null,
+      "hud": "תחנת הגבולמחברת: 4 מתוך 26עדויות: 2 מתוך 21"
+    },
+    "fit1366": {
+      "present": true,
+      "vw": 1366,
+      "vh": 768,
+      "card": {
+        "top": 38.4,
+        "bottom": 361.7,
+        "left": 413,
+        "right": 953,
+        "w": 540,
+        "h": 323.3
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 322,
+      "clientH": 322,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "keyboard": {
+      "openedB": true,
+      "focusTrace": [
+        {
+          "t": "BUTTON",
+          "txt": "להניח את מטבע הכסף",
+          "inPanel": true,
+          "cls": "hud-card-btn"
+        }
+      ],
+      "initialFocus": "BODY|self.__next_r=\"EfkDmeVCKHbTTCl",
+      "foundRight": true,
+      "done": true,
+      "noteCls": "ch1-task-note is-right",
+      "advFocused": true,
+      "closed": false
+    }
+  },
+  "errorSummary": {
+    "count": 0,
+    "unique": [],
+    "phases": []
+  },
+  "errorsB": 0
+}

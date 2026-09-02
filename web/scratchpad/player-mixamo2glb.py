@@ -32,6 +32,19 @@ for fname, name in CLIPS:
     for o in objs:
         bpy.data.objects.remove(o, do_unlink=True)
 
+# Rawi-sourced talk clips live in another rig's hip space (collapses the
+# character): replace their location+scale tracks with idle's frame-1 pose.
+idle_act = bpy.data.actions['idle']
+for tname in ('talk', 'talk-ack', 'talk-happy', 'talk-nod'):
+    tact = bpy.data.actions[tname]
+    for fc in list(tact.fcurves):
+        if fc.data_path == 'location' or fc.data_path.endswith(('.location', '.scale')) or fc.data_path == 'scale':
+            tact.fcurves.remove(fc)
+    for fc in idle_act.fcurves:
+        if fc.data_path == 'location' or fc.data_path.endswith(('.location', '.scale')) or fc.data_path == 'scale':
+            nf = tact.fcurves.new(fc.data_path, index=fc.array_index)
+            nf.keyframe_points.insert(1.0, fc.evaluate(1.0))
+
 # 3) texture from the original GLB
 before = set(bpy.data.images)
 bpy.ops.import_scene.gltf(filepath=GLB_TEX)

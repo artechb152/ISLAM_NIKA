@@ -1,0 +1,487 @@
+/* Chapter 3 — ראשית חיי מוחמד.
+
+   The shell is chapter 6's: the route layout imports chapter6-article.css first,
+   so masthead, rail, type scale, reveals, `.key` and every colour token come
+   from that one sheet. There is exactly one :root in the product. Nothing below
+   introduces a colour or a font.
+
+   RTL CONVENTION, stated once and obeyed everywhere in this file:
+       inline-start = RIGHT = the reading edge  (every line begins here)
+       inline-end   = LEFT  = the outer edge
+
+   THIS CHAPTER HAS THREE DEVICES, and two of them are static markup with no
+   JavaScript at all. The subject — a prophet, an angel, a miraculous mount,
+   seven heavens — makes almost every pictorial device religiously impossible,
+   so what is left is typography. See concept/chapter3/STRUCTURE.md.
+
+   WHAT IS DELIBERATELY ABSENT, so it is not "added for balance" later:
+     · no gold quotation card. Chapter 2 deleted it with its CSS when the hadith
+       left; this chapter has no hadith and therefore no voice carrying that
+       authority.
+     · no bulleted lists. Chapter 6 has zero, and §29's comma chain is prose.
+     · no part markers, no promoted nouns, no overlay captions — the six devices
+       chapter 2's first build invented and its second build removed. */
+
+/* ============================ the flow rhythm ============================
+   ONE rule owns the vertical space between blocks; no device declares its own
+   outer margin. Chapter 2 measured six different values for the same
+   relationship before this existed. */
+.chapter-article{
+  --flow:clamp(24px,2.6vw,34px);      /* between two blocks of content       */
+  --flow-lead:clamp(32px,3.8vw,48px); /* after a heading, around a quotation */
+  --flow-part:clamp(44px,5.2vw,66px); /* before a sub-heading — a new move   */
+  --flow-tight:clamp(14px,1.8vw,20px);/* a sub-heading to its own first line */
+
+  --measure:880px;   /* the reading column's ceiling            */
+  --lh:1.82;         /* leading for every block set at --read   */
+}
+
+.chapter-article .article-section > * + *,
+.chapter-article .ch3-readings > * + *{margin-top:var(--flow)}
+
+.chapter-article .ch3-sub,
+.chapter-article .ch3-hero{margin-bottom:0}
+.chapter-article .section-heading + *,
+.chapter-article .ch3-hero + *{margin-top:var(--flow-lead)}
+.chapter-article * + .ch3-sub{margin-top:var(--flow-part)}
+.chapter-article .section-heading + .ch3-sub{margin-top:var(--flow-lead)}
+.chapter-article .ch3-sub + *{margin-top:var(--flow-tight)}
+
+/* a quotation and a statement are changes of voice: more air on both sides */
+.chapter-article .article-section > .ch3-verse,
+.chapter-article .article-section > .ch3-statement{margin-top:var(--flow-lead)}
+.chapter-article .ch3-verse + *,
+.chapter-article .ch3-statement + *{margin-top:var(--flow-lead)}
+/* each device is a movement of its own — a full step before what follows */
+.chapter-article .ch3-lineage + *,
+.chapter-article .ch3-heavens + *,
+.chapter-article .ch3-readings + *{margin-top:var(--flow-part)}
+
+/* ============================ running text ============================ */
+.ch3-body{display:grid;gap:16px;width:100%;max-width:var(--measure,880px)}
+.chapter-article .ch3-body{
+  font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink);
+}
+/* ============================ the sub-heading ============================
+   Chapter 6's `.scrolly-env`, restated because these are <h3> and must not pick
+   up a generic h3 size. Nine of them across eight sections — every one carrying
+   a name the SOURCE gives (אלתחנת', אלבראק, ההגירה הראשונה). */
+.ch3-sub{
+  font-family:var(--font-heading);font-size:var(--sub);font-weight:700;color:var(--maroon);
+  line-height:1.2;width:fit-content;max-width:100%;
+  margin:0;
+  padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);
+  scroll-margin-top:96px;
+}
+
+/* ============================ the banner ============================
+   Chapter 6's `.ch6-hero`, part for part. Flat scrim, not a gradient: a
+   gradient darkens the ground under the title and leaves the sky bare, which
+   reads as a caption plate rather than as one banner.
+
+   THE ASSET IS THE CAVE and it returns as the plate of section 05. */
+.ch3-hero{
+  position:relative;isolation:isolate;display:flex;align-items:center;
+  height:370px;
+  margin-inline:calc(-1 * var(--content-gutter));margin-block:-42px clamp(28px,4vh,52px);
+  padding:clamp(42px,5vw,76px) var(--content-gutter);
+  background:var(--maroon-deep);overflow:hidden;box-shadow:var(--shadow);
+}
+.ch3-hero-media{
+  position:absolute;inset:0;
+  background:var(--maroon-deep) url('/assets/chapter3/hero-cave.jpg') center center/cover no-repeat;
+}
+.ch3-hero-media img,.ch3-hero-media video{width:100%;height:100%;object-fit:cover;display:block}
+.ch3-hero-media::after{content:"";position:absolute;inset:0;pointer-events:none;background:rgba(30,18,8,.55)}
+.ch3-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;display:block}
+/* `.ch3-hero-media .ch3-hero-video` AND NOT `.ch3-hero-video`: a media query
+   adds no specificity, and in chapter 2 the descendant rule (0,1,1) beat the
+   reduce rule (0,1,0) so the banner went on playing for exactly the readers who
+   had asked it to stop. */
+@media (prefers-reduced-motion:reduce){.ch3-hero-media .ch3-hero-video{display:none}}
+.ch3-hero-copy{position:relative;z-index:1;width:min(1200px,94%);min-width:0;margin-inline-end:auto;text-align:right;direction:rtl}
+.ch3-hero-title{
+  font-family:var(--font-heading);font-weight:900;color:var(--paper);margin:0;
+  font-size:clamp(42px,4.5vw,70px);line-height:1.08;letter-spacing:-.015em;text-wrap:balance;
+  text-shadow:0 3px 22px rgba(20,10,4,.55);
+}
+
+/* ============================ the plate ============================
+   One picture inside a section, on paper, with no text burned into it and no
+   caption over it. Section 05 uses it to pay the banner's promise. */
+.ch3-plate{
+  margin:0;width:100%;max-width:var(--measure,880px);
+  overflow:hidden;border:1px solid var(--edge);box-shadow:var(--shadow);
+}
+.ch3-plate img{display:block;width:100%;height:auto;aspect-ratio:16/7;object-fit:cover}
+
+/* ============================ the two set-apart voices ============================
+   Two costumes, two uses each, and the audit fails at three. See
+   concept/chapter3/STRUCTURE.md — four of the chapter's six Quranic quotations
+   are printed by the source INSIDE their sentences and stay there. */
+
+/* §19 (sura 96) and §42 (17:1) — the two the event itself rests on.
+   On the reading edge with a gold rule, not centred in a frame: a frame would
+   make it an object, and these are text. */
+.ch3-verse{
+  margin:0;width:min(760px,100%);
+  padding-inline-start:clamp(18px,2.2vw,28px);
+  border-inline-start:3px solid var(--gold);
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(19px,1.9vw,25px);line-height:1.6;
+}
+
+/* §4 and §43 — the chapter's only present-tense voice, opening the loop out of
+   the seventh century and closing it. Centred, and the only centred running
+   text in the chapter. 35px and not 45: it follows a visible 56px section
+   title, and at 45 two display masses stack and neither leads. */
+.ch3-statement{
+  width:min(820px,100%);margin-inline:auto;text-align:center;
+  padding-block:clamp(10px,1.6vw,22px);
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon);
+  font-size:clamp(23px,2.6vw,35px);line-height:1.3;text-wrap:balance;
+}
+
+/* ============================ 1 · the lineage strip ============================
+   Static. No clicks, nothing focusable, nothing hidden from chapter search.
+   HTML and CSS and not SVG: Hebrew text in SVG flows right-to-left from its x,
+   and that trap has already cost this project a labelling bug. */
+.ch3-lineage{
+  width:100%;max-width:var(--measure,880px);
+  display:grid;gap:clamp(16px,2vw,26px);
+  padding:clamp(20px,2.6vw,30px);
+  background:var(--mat);border:1px solid var(--edge);
+}
+.ch3-lin-row{
+  margin:0;display:grid;gap:clamp(14px,1.8vw,22px);
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+}
+/* the second row is what happened AFTER — a hairline says so without a caption
+   that we would have had to write */
+.ch3-lin-row.is-care{padding-top:clamp(16px,2vw,24px);border-top:1px solid var(--rule)}
+.ch3-lin-node{display:grid;gap:5px;align-content:start}
+.ch3-lin-node dt{
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon);
+  font-size:clamp(17px,1.6vw,21px);line-height:1.25;
+}
+.ch3-lin-node dd{margin:0;font-size:15.5px;line-height:1.6;color:var(--muted)}
+
+/* ============================ 2 · the seven heavens ============================
+   An <ol> and a rail. No JavaScript. Order 1→7 top to bottom and NOT reversed:
+   `column-reverse` would give a literal ladder while keeping DOM order, but a
+   sighted reader scanning down would then meet Abraham first. The ascent is
+   carried by the source's own ordinals, which it already prints. */
+.ch3-heavens{
+  list-style:none;margin:0;padding:0;
+  width:100%;max-width:var(--measure,880px);
+  display:grid;gap:0;counter-reset:rung;
+  border-inline-start:2px solid var(--edge);
+}
+.ch3-rung{
+  counter-increment:rung;position:relative;
+  padding:clamp(13px,1.6vw,18px) clamp(20px,2.4vw,30px) clamp(13px,1.6vw,18px) 0;
+  display:grid;gap:4px;
+}
+.ch3-rung + .ch3-rung{border-top:1px solid var(--rule)}
+/* the marker sits ON the rail */
+.ch3-rung::before{
+  content:counter(rung);
+  position:absolute;inset-inline-start:0;top:50%;transform:translate(50%,-50%);
+  width:26px;height:26px;display:grid;place-items:center;
+  font-family:var(--font-heading);font-weight:700;font-size:14px;
+  color:var(--cream);background:var(--maroon);
+  font-variant-numeric:tabular-nums;
+}
+.ch3-rung-name{
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(17px,1.6vw,21px);line-height:1.25;
+}
+.ch3-rung-text{font-size:15.5px;line-height:1.65;color:var(--muted)}
+
+/* ============================ 3 · the two readings ============================
+   The chapter's only interactive device. A rule, two end points and two labels.
+   NO BUILDING, NO PHOTOGRAPH, NO MAP OF THE MODERN CITY: §44 disputes that the
+   journey reached Jerusalem at all, and §43 ties the city's sanctity to jihad
+   terror. Both sentences print as prose below the figure, always — the toggle
+   changes which rail is drawn and nothing else. */
+.ch3-readings{width:100%;max-width:var(--measure,880px);display:grid}
+.ch3-read-legend{display:flex;flex-wrap:wrap;gap:10px}
+.ch3-read-btn{
+  font-family:var(--font-body);font-size:15px;font-weight:600;
+  color:var(--maroon);background:var(--surface);
+  border:1px solid var(--edge);padding:9px 18px;min-height:44px;
+  cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease;
+}
+.ch3-read-btn:hover{border-color:var(--maroon)}
+.ch3-read-btn[aria-pressed="true"]{background:var(--maroon);color:var(--cream);border-color:var(--maroon)}
+
+.ch3-read-fig{
+  position:relative;height:76px;margin-top:var(--flow);
+  display:grid;align-items:center;
+}
+/* the rail runs from the reading edge outward; how far is the whole content of
+   the figure, so it is the one thing that animates */
+.ch3-read-rail{
+  position:absolute;inset-inline-start:0;top:50%;height:2px;
+  background:var(--maroon);transform:translateY(-50%);
+  transition:width .3s ease;
+}
+.ch3-read-fig.is-far .ch3-read-rail{width:100%}
+.ch3-read-fig.is-near .ch3-read-rail{width:38%}
+.ch3-read-dot{
+  position:absolute;top:50%;width:11px;height:11px;
+  transform:translate(50%,-50%) rotate(45deg);background:var(--maroon);
+}
+.ch3-read-dot.is-start{inset-inline-start:0}
+.ch3-read-dot.is-end{transition:inset-inline-start .3s ease}
+.ch3-read-fig.is-far .ch3-read-dot.is-end{inset-inline-start:calc(100% - 11px)}
+.ch3-read-fig.is-near .ch3-read-dot.is-end{inset-inline-start:calc(38% - 11px)}
+@media (prefers-reduced-motion:reduce){
+  .ch3-read-rail,.ch3-read-dot.is-end{transition:none}
+}
+
+/* ============================ the hand-off ============================
+   The same button as chapters 2 and 6, in the same colours — `--maroon-deep`
+   on `--cream`, which is what the palette declares primary buttons to be. */
+.ch3-end{
+  margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);
+  border-top:1px solid var(--rule);display:grid;justify-items:center;
+}
+.ch3-end-link{
+  display:inline-flex;align-items:center;text-decoration:none;
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(15px,1.3vw,18px);
+  color:var(--cream);background:var(--maroon-deep);
+  padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);
+  transition:background .2s ease,transform .2s ease;
+}
+.ch3-end-link:hover{background:var(--maroon);transform:translateY(-2px)}
+@media (prefers-reduced-motion:reduce){.ch3-end-link{transition:none}}
+
+/* ============================ narrow ============================ */
+@media (max-width:680px){
+  .ch3-hero{height:300px}
+  .ch3-lin-row{grid-template-columns:1fr}
+  .ch3-rung{padding-inline-start:26px}
+}
+
+
+/* ============================ the closing practice ============================
+   Chapter 2's practice surfaces, restated for this chapter. The exercises
+   themselves render inside chapter 6's PracticeNav and use chapter6-practice.css
+   for the place-a-label engine; everything below is the choice / match / order
+   engine, which is chapter 2's.
+
+   COPIED, NOT SHARED — deliberately, for now. Three copies of these surfaces
+   now exist (2, 3 and the ch6 practice sheet) and folding them into one is
+   booked as follow-up work, to be done when it is known from experience what
+   is genuinely common and what only looks alike. */
+/* the practice is the same chapter: same measure, same flow rhythm, and the
+   heading rule that keeps the question tied to its own answers. */
+.p3-main{padding-bottom:40px}
+.p3-main .section-heading > p{max-width:var(--measure,880px)}
+.p3-q > * + *{margin-top:var(--flow)}
+.p3-q h2 + *{margin-top:var(--flow-lead)}
+/* the page's title is the BANNER's title now, and it is cream over a painting —
+   `.p3-main h1{color:var(--maroon)}` stood here and, being two classes deep,
+   beat `.ch3-hero-title` and printed it maroon on the photograph. The banner
+   owns its own type; nothing here re-declares it. */
+.p3-lead{
+  margin-top:var(--flow-lead);font-size:var(--read);line-height:var(--lh,1.82);
+  color:var(--muted);max-width:var(--measure,880px);
+}
+
+/* NOTHING ON THIS PAGE IS LIGHTER THAN THE PAGE. Every raised inset here —
+   the answer chips, the option rows, the ordering cards, the picture frames,
+   the plate, the map legend — was painted `--surface`, the palette's brightest
+   tone, and against the parchment a field of them reads as white cards floating
+   on a warm page. They sit on the page's own colour now and are told apart by
+   one hairline each, which is what the trait cards in the article were changed
+   to for exactly this reason: „בלי הלבן — שהצבע יהיה בצבע של הרקע".
+
+   A filled slot then cannot say so with a paler fill, so it says it with the
+   gold border it already had and the weight of the word inside it. */
+
+/* ---- the answer bank and its slots ----
+   The matching questions used a native `<select>` per row: a government form on
+   parchment, and worse, it hid the whole answer set behind a click so nothing
+   could be compared with anything. This is chapter 6's own move instead — hold
+   an answer, give it to a row — drawn in the chapter's own parts: a pill on the
+   page tone with one hairline, gold when held, and a slot that is an empty line
+   until it is filled. */
+.p3-bank{display:flex;flex-wrap:wrap;gap:10px;list-style:none;margin:0 0 var(--flow) 0;padding:0}
+.p3-chip{
+  all:unset;box-sizing:border-box;cursor:pointer;
+  padding:9px 18px;border-radius:999px;
+  border:1px solid var(--rule);background:transparent;
+  font-family:var(--font-body);font-size:var(--read);line-height:1.4;color:var(--ink);
+  transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+.p3-chip:hover:not(:disabled){border-color:var(--gold)}
+.p3-chip.is-held{background:var(--maroon);border-color:var(--maroon);color:var(--cream)}
+.p3-chip.is-placed{opacity:.28;cursor:default}
+.p3-chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.p3-match{display:grid;gap:12px;list-style:none;margin:0;padding:0}
+.p3-match-row{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,320px);
+  gap:16px;align-items:center;padding:10px 0;border-top:1px solid var(--rule);
+}
+.p3-match-left{font-size:var(--read);line-height:1.45;color:var(--ink)}
+
+/* ---- the illustrated board ----
+   Where the chapter has already painted the subject, the exercise becomes a row
+   of boards and the answer goes UNDER its picture — chapter 6's own shape. The
+   rows lose their hairlines here: a rule between two boards reads as a divider
+   cutting a row that is meant to be read across. */
+/* flex and not `auto-fit`: with three boards in a 1157px row `auto-fit` laid
+   five tracks and packed the boards into the first three at their minimum, so
+   they sat small and left-heavy with dead tracks beside them. Flex gives every
+   board an equal share of whatever the row has, whatever the count. */
+.p3-match.is-boards{display:flex;flex-wrap:wrap;gap:clamp(16px,2vw,26px);max-width:var(--measure,880px)}
+.p3-match.is-boards .p3-match-row{
+  display:grid;grid-template-columns:1fr;gap:12px;border-top:0;padding:0;align-content:start;
+  flex:1 1 200px;min-width:0;
+}
+.p3-match.is-boards .p3-match-left{text-align:center;font-weight:700;color:var(--maroon-deep)}
+.p3-shot{
+  display:block;overflow:hidden;border-radius:12px;
+  aspect-ratio:4/3;background:transparent;border:1px solid var(--rule);
+}
+.p3-shot img{width:100%;height:100%;object-fit:cover;display:block}
+/* the ordering board: the frame sits between the number and the sentence, so a
+   step is a picture with its caption and the whole chain reads as a strip */
+.p3-order.is-illustrated li{grid-template-columns:auto 92px minmax(0,1fr) auto}
+.p3-order.is-illustrated .p3-shot{aspect-ratio:1/1;border-radius:10px}
+@media(max-width:680px){
+  .p3-order.is-illustrated li{grid-template-columns:auto 64px minmax(0,1fr) auto}
+}
+/* a question whose subject is one picture: the plate beside the options, the
+   way the article sets a plate beside its prose */
+.p3-work.has-plate{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:clamp(20px,2.6vw,36px);align-items:start}
+.p3-work.has-plate > .p3-plate{grid-column:2;grid-row:1/span 4}
+.p3-plate{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--rule);background:transparent}
+.p3-plate img{width:100%;height:auto;display:block}
+@media(max-width:760px){
+  .p3-work.has-plate{grid-template-columns:1fr}
+  .p3-work.has-plate > .p3-plate{grid-column:1;grid-row:auto;max-width:420px}
+}
+.p3-slot{
+  all:unset;box-sizing:border-box;cursor:pointer;
+  min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:8px 14px;border-radius:10px;
+  border:1px dashed var(--rule);background:transparent;
+  font-family:var(--font-body);font-size:var(--read);line-height:1.35;color:var(--ink);
+  transition:border-color .18s ease,background .18s ease;
+}
+.p3-slot:hover:not(:disabled){border-color:var(--gold)}
+.p3-slot.is-full{border-style:solid;border-color:var(--gold);color:var(--maroon-deep);font-weight:700}
+.p3-slot:disabled{cursor:default}
+.p3-slot:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:680px){.p3-match-row{grid-template-columns:1fr}}
+.p3-progress{display:flex;align-items:center;gap:14px;margin:0 0 clamp(28px,3.4vw,44px);width:100%;max-width:var(--measure,880px)}
+.p3-progress-bar{flex:1;height:7px;border-radius:999px;background:rgba(87,24,32,.12);overflow:hidden}
+.p3-progress-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));transition:width .45s ease}
+.p3-progress-n{font-size:15px;color:var(--muted);white-space:nowrap}
+
+.p3-list{list-style:none;margin:0;padding:0;display:grid;gap:clamp(34px,4.4vw,64px)}
+.p3-q{padding-top:clamp(26px,3.4vw,44px);border-top:1px solid var(--rule)}
+.p3-q:first-child{border-top:0;padding-top:0}
+.p3-q h2{
+  display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:baseline;
+  font-family:var(--font-heading);font-weight:800;color:var(--maroon);
+  font-size:clamp(23px,2.3vw,30px);line-height:1.3;margin:0 0 clamp(18px,2.2vw,26px);
+  width:100%;max-width:var(--measure,880px);
+}
+.p3-q-n{font-size:17px;color:var(--gold-text);font-weight:400}
+.p3-q.is-solved h2{color:var(--maroon-deep)}
+
+.p3-options{list-style:none;margin:0;padding:0;display:grid;gap:9px;width:100%;max-width:var(--measure,880px)}
+.p3-option{
+  all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;
+  padding:15px 18px;border:1px solid var(--edge);border-radius:14px;background:transparent;
+  font-size:18.5px;line-height:1.6;color:var(--ink);transition:border-color .18s ease,background .18s ease;
+}
+.p3-option:hover{border-color:var(--gold)}
+.p3-option:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.p3-option.is-picked{border-color:var(--maroon);background:rgba(138,39,51,.07)}
+.p3-option.is-right{border-color:var(--gold);background:rgba(199,154,60,.14)}
+.p3-hint{margin:9px 0 0;font-size:15px;color:var(--muted)}
+
+/* THE OLD MATCHING BLOCK STOOD HERE, and it outranked the new one simply by
+   coming later: a 620px ceiling on `.p3-match` held the illustrated boards to
+   two columns and wrapped the third onto a line of its own. It also styled the
+   `<select>`, and there are no selects on this page any more. The rules that
+   replaced it are above, beside the bank and the slots they belong to. */
+
+.p3-order{list-style:none;margin:0;padding:0;display:grid;gap:8px;width:100%;max-width:var(--measure,880px);counter-reset:none}
+.p3-order li{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;
+  padding:14px 18px;border:1px solid var(--edge);border-radius:14px;background:transparent;
+}
+.p3-order-n{font-family:var(--font-heading);font-size:21px;color:var(--gold-text);min-width:22px}
+.p3-order-text{font-size:18.5px;line-height:1.55;color:var(--ink)}
+.p3-order-moves{display:flex;gap:6px}
+.p3-order-moves button{
+  all:unset;box-sizing:border-box;cursor:pointer;width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--edge);display:grid;place-items:center;color:var(--maroon);font-size:16px;
+}
+.p3-order-moves button:hover:not(:disabled){background:rgba(138,39,51,.09)}
+.p3-order-moves button:disabled{opacity:.3;cursor:default}
+.p3-order-moves button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.p3-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:18px}
+.p3-check{
+  all:unset;box-sizing:border-box;cursor:pointer;background:var(--maroon);color:var(--mat);
+  border-radius:999px;padding:11px 28px;font-family:var(--font-heading);font-size:17px;
+  transition:background .2s ease;
+}
+.p3-check:hover:not(:disabled){background:var(--stamp)}
+.p3-check:disabled{opacity:.35;cursor:default}
+.p3-check:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.p3-feedback{margin:0;font-size:17px;line-height:1.6;color:var(--stamp);max-width:56ch}
+.p3-feedback.is-right{color:var(--gold-text)}
+
+.p3-done{margin-top:clamp(44px,5.4vw,76px);padding-top:clamp(36px,4.4vw,60px);border-top:1px solid var(--rule);display:grid;justify-items:center;gap:10px;text-align:center}
+.p3-done .title-ornament{margin:0 auto}
+.p3-done p{margin:0;font-family:var(--font-heading);font-size:clamp(26px,2.8vw,36px);color:var(--maroon)}
+
+/* the closing link — chapter 6 ends on exactly one link and nothing else */
+.ch3-end{margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);border-top:1px solid var(--rule);display:grid;justify-items:center}
+/* THE SAME BUTTON AS CHAPTER 6'S, IN THE SAME COLOURS. It was painted
+   `--maroon` on `--mat` with a `--stamp` hover — the token set for TITLES — and
+   chapter 6's hand-off is `--maroon-deep` on `--cream` with a `--maroon` hover,
+   which is what the palette says primary buttons are ("masthead + primary
+   buttons (flat)", where that token is declared). Two chapters ending on the
+   same act, in two different reds. `--mat` and `--cream` are the same value;
+   the token here is the one that means text on a dark band. The shadow comes
+   with it, because without it the same fill still reads as a flatter object.
+
+   THE DECLARATIONS BELOW ARE `.chapter-end-back`'s, PROPERTY FOR PROPERTY —
+   padding and type size included. 14px/32px against 12px/28px and a fixed 18px
+   against a size that answers the window are differences nobody can name and
+   everybody sees when the two pages sit side by side. */
+.ch3-end-link{
+  display:inline-flex;align-items:center;text-decoration:none;
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(15px,1.3vw,18px);color:var(--cream);
+  background:var(--maroon-deep);padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);
+  transition:background .2s ease,transform .2s ease;
+}
+.ch3-end-link:hover{background:var(--maroon);transform:translateY(-2px)}
+.ch3-end-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+
+/* the line that introduces a list keeps its OWN LINE — the items below belong
+   to it — but carries no rule. The rule was asked for, then asked away twice:
+   under a short sentence it read as a divider cutting the passage rather than
+   as an underline belonging to the words above it. The break is enough. */
+.ch3-intro{display:block;margin-bottom:2px}
+
+/* The dot that marks an item of a list. Small, maroon, and set on the reading
+   side of the line — 6px, which is the size at which it reads as a mark on the
+   line rather than as a bullet the line hangs off. The span is inline, so the
+   dot rides the first line box of the item and nothing about the paragraph's
+   measurement changes. */
+.ch3-item::before{
+  content:'';display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--maroon);vertical-align:0.28em;margin-inline-end:10px;
+}
+

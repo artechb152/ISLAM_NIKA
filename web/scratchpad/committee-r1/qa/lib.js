@@ -67,14 +67,9 @@ async function enter(page, region, { clickStart = true } = {}) {
   await page.waitForTimeout(400);
 }
 
-async function teleport(page, x, z) {
-  await page.evaluate(([x, z]) => window.__ch1Live.player.set(x, 0, z), [x, z]);
-  await page.waitForTimeout(250);
-  await page.keyboard.down('w'); await page.waitForTimeout(60); await page.keyboard.up('w');
-  await page.waitForTimeout(150);
-  await page.evaluate(([x, z]) => window.__ch1Live.player.set(x, 0, z), [x, z]);
-  await page.keyboard.down('s'); await page.waitForTimeout(40); await page.keyboard.up('s');
-  await page.waitForTimeout(400);
+async function teleport(page, x, z, off = 0) {
+  await page.evaluate(([x, z]) => window.__ch1Live.player.set(x, 0, z), [x + off, z + off]);
+  await page.waitForTimeout(700);
 }
 
 async function pressAt(page, x, z, key) {
@@ -122,25 +117,41 @@ module.exports = { launch, attachLogs, seedInit, enter, teleport, pressAt, shot,
 
 async function openStation(page, region) {
   const st = STATIONS[region];
-  await teleport(page, st.x, st.z);
-  await page.waitForFunction(() => !!document.querySelector('.poi-marker.is-task-marker.is-near'), null, { timeout: 8000 }).catch(() => {});
-  await page.keyboard.press('e');
-  await page.waitForTimeout(900);
+  const offs = [[0.9,0.9],[-0.9,0.9],[0.9,-0.9],[-0.9,-0.9],[1.5,0],[0,1.5],[0,0]];
+  for (const [dx, dz] of offs) {
+    await page.evaluate(([x, z]) => window.__ch1Live.player.set(x, 0, z), [st.x + dx, st.z + dz]);
+    await page.waitForTimeout(600);
+    const near = await page.waitForFunction(() => !!document.querySelector('.poi-marker.is-task-marker.is-near'), null, { timeout: 4000 }).then(() => true).catch(() => false);
+    if (!near) continue;
+    await page.keyboard.press('e');
+    await page.waitForTimeout(900);
+    if (await page.evaluate(() => !!document.querySelector('.ch1-task'))) return true;
+    // wrong overlay (dialogue?) — close and try next spot
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+  }
   return page.evaluate(() => !!document.querySelector('.ch1-task'));
 }
 
 async function pickFind(page, x, z) {
-  await teleport(page, x, z);
-  await page.waitForFunction(() => !!document.querySelector('.poi-marker.is-find-marker.is-near'), null, { timeout: 8000 }).catch(() => {});
-  await page.keyboard.press('f');
-  await page.waitForTimeout(800);
-  const open = await page.evaluate(() => !!document.querySelector('.ch1-find'));
-  if (open) {
-    const btn = page.locator('.ch1-find-foot button.is-primary');
-    if (await btn.count()) await btn.click(); else await page.keyboard.press('Escape');
-    await page.waitForTimeout(500);
+  const offs = [[0.9,0.9],[-0.9,0.9],[0.9,-0.9],[-0.9,-0.9],[1.4,0],[0,1.4],[0,0]];
+  for (const [dx, dz] of offs) {
+    await page.evaluate(([px, pz]) => window.__ch1Live.player.set(px, 0, pz), [x + dx, z + dz]);
+    await page.waitForTimeout(600);
+    const near = await page.waitForFunction(() => !!document.querySelector('.poi-marker.is-find-marker.is-near'), null, { timeout: 4000 }).then(() => true).catch(() => false);
+    if (!near) continue;
+    await page.keyboard.press('f');
+    await page.waitForTimeout(800);
+    if (await page.evaluate(() => !!document.querySelector('.ch1-find'))) {
+      const btn = page.locator('.ch1-find-foot button.is-primary');
+      if (await btn.count()) await btn.click(); else await page.keyboard.press('Escape');
+      await page.waitForTimeout(500);
+      return true;
+    }
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
   }
-  return open;
+  return false;
 }
 module.exports.openStation = openStation;
 module.exports.pickFind = pickFind;

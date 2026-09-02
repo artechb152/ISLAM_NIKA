@@ -21,6 +21,7 @@ import { CH6 } from '@/lib/chapter6/data'
 import { NOTEBOOK_KEY as CH1_STORE_KEY } from '@/lib/chapter1/notebook'
 import { NOTEBOOK_TOTAL as CH1_NOTEBOOK_TOTAL } from '@/lib/chapter1/dialogue'
 import { SECTION_ORDER as CH2_SECTIONS, STORE_KEY as CH2_STORE_KEY } from '@/lib/chapter2/progress'
+import { SECTION_ORDER as CH3_SECTIONS, STORE_KEY as CH3_STORE_KEY } from '@/lib/chapter3/progress'
 /* the number of chapter-6 screens progress is measured against (derived, not hardcoded) */
 const CH6_SCREEN_COUNT = CH6.screens.length
 
@@ -143,6 +144,16 @@ export default function ChaptersScreen() {
             const p = JSON.parse(raw) as { sections?: string[] } | null
             const n = Array.isArray(p?.sections) ? p.sections.length : 0
             if (n > 0) progress = Math.min(99, Math.round((n / CH2_SECTIONS.length) * 100))
+          }
+        }
+        /* chapter 3 is a reading chapter like chapter 2: progress is how many
+           of its eight sections were scrolled through. 100% belongs to its practice. */
+        if (chp.number === 3 && !done) {
+          const raw = localStorage.getItem(CH3_STORE_KEY)
+          if (raw) {
+            const p = JSON.parse(raw) as { sections?: string[] } | null
+            const n = Array.isArray(p?.sections) ? p.sections.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH3_SECTIONS.length) * 100))
           }
         }
         /* chapter 1 is the open world: progress is how full the notebook is */
