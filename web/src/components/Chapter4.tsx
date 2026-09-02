@@ -527,81 +527,42 @@ function Treaties({ r }: { r: string }) {
 /* ---------------- mechanism · the trench ----------------
 
    THE ONLY BATTLE IN THE CHAPTER WHOSE IDEA IS A SHAPE. Badr and Uhud are
-   numbers — three hundred against a thousand, a thousand against three
-   thousand — and the force balance carries them. The trench is geometry: a
-   Persian advised a ditch on the side the city was open on, the technique was
-   not one the Arabs used, and the siege broke on it. Read as prose that is a
-   clause in a thirty-eight-word sentence; drawn, it is the whole event.
+   numbers — three hundred against a thousand, a thousand against three thousand
+   — and the force balance carries them. The trench is geometry: a Persian
+   advised a ditch on the side the city was open on, the technique was not one
+   the Arabs used, and the siege broke on it. Read as prose that is a clause
+   inside a thirty-eight-word sentence; seen, it is the whole event.
+
+   IT WAS AN SVG FIRST, AND THE SVG WAS BAD. A blob for the town, empty rounded
+   rectangles for its houses, a ladder for the ditch and three chevrons for an
+   army — a programmer's schematic dropped into the middle of a chapter that is
+   otherwise painted. It is drawn now, in the same hand as the other seven
+   plates, and the drawing does what the schematic was trying to say: the town
+   among its palms behind, the cut across the open ground in front, the empty
+   plain beyond it.
 
    WHAT IT DOES NOT CLAIM. The source says the ditch was dug „סביבות העיר מדינה
-   מצפונה לו" and nothing more. It does not say what protected the other sides
-   — the lava fields and palm groves that the histories give are not in this
-   booklet — so the drawing shows a ditch on one side and leaves the rest of the
-   city's edge plain. Filling in the other three sides would be illustrating a
-   source we do not have.
+   מצפונה לו" and nothing more. It does not say what protected the other sides —
+   the lava fields and palm groves the histories give are not in this booklet —
+   so the view shows one cut and one open plain, and the rest of the town's edge
+   is simply not in frame. No compass label either: „צפון" is not a word of the
+   sentence, „מצפונה" is, and it is doing that work in the caption below.
 
-   NO COMPASS LABEL EITHER. „צפון" is not a word of the sentence; „מצפונה" is,
-   and it is doing its work in the paragraph beside the drawing. The picture
-   shows the geometry and the sentence names the direction — the same division
-   of labour as the route strip, which prints no distance of its own.
-
-   THREE LABELS, ALL PROVED. `pick` throws unless the word is in §24 at a word
-   boundary, so a legend cannot drift from the sentence it stands for. */
+   NO LABELS ON THE PICTURE. The three the schematic carried — city, ditch,
+   besiegers — were each proved to be words of §24 before they were printed, and
+   they are still all named in the sentence underneath. Set over the painting
+   they would only be a schematic wearing a landscape. */
 function Trench({ r }: { r: string }) {
-  const city = pick(r, 'מדינה')
-  const ditch = pick(r, 'שוחה')
-  const besiegers = pick(r, 'שבט קוריש')
   return (
     <figure className="ch4-trench" data-reveal>
-      <div className="ch4-trench-plate">
-        <svg viewBox="0 0 600 384" aria-hidden="true">
-          {/* the besieging force, pressing from the open side */}
-          <g className="ch4-trench-press">
-            {[170, 300, 430].map((x) => (
-              <path key={x} d={`M${x - 26} 46 L${x} 86 L${x + 26} 46`} />
-            ))}
-          </g>
-
-          {/* the ditch: two banks and the cut between them */}
-          <g className="ch4-trench-cut">
-            <path className="ch4-trench-bank" d="M70 150 Q300 116 530 150" />
-            <path className="ch4-trench-bank" d="M70 176 Q300 142 530 176" />
-            {Array.from({ length: 21 }, (_, i) => {
-              const t = i / 20
-              const x = 70 + t * 460
-              /* the quadratic's y at t, for both banks */
-              const y1 = (1 - t) * (1 - t) * 150 + 2 * (1 - t) * t * 116 + t * t * 150
-              const y2 = (1 - t) * (1 - t) * 176 + 2 * (1 - t) * t * 142 + t * t * 176
-              return <line key={i} className="ch4-trench-hatch" x1={x} y1={y1} x2={x} y2={y2} />
-            })}
-          </g>
-
-          {/* the city, open on the side the ditch now closes */}
-          <path
-            className="ch4-trench-city"
-            d="M96 210 Q300 176 504 210 L516 322 Q300 366 84 322 Z"
-          />
-          {/* a few roofs, so it reads as a settlement and not a stone */}
-          <g className="ch4-trench-roofs">
-            {[
-              [170, 248], [232, 262], [296, 252], [360, 264], [424, 250],
-              [200, 292], [266, 300], [332, 296], [398, 290],
-            ].map(([x, y]) => (
-              <rect key={`${x}-${y}`} x={x - 17} y={y - 12} width={34} height={24} rx={2} />
-            ))}
-          </g>
-        </svg>
-
-        <span className="ch4-trench-label is-press" style={{ top: '4%' }}>
-          {besiegers}
-        </span>
-        <span className="ch4-trench-label is-cut" style={{ top: '46%' }}>
-          {ditch}
-        </span>
-        <span className="ch4-trench-label is-city" style={{ top: '78%' }}>
-          {city}
-        </span>
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        className="ch4-trench-plate"
+        src="/assets/chapter4/trench.jpg"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+      />
       <figcaption className="ch4-trench-text">
         <T r={r} className="ch4-body" />
       </figcaption>

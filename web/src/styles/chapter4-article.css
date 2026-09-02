@@ -612,53 +612,21 @@
 .ch4-treaty-name{color:var(--ink)}
 
 /* ------------------------------- the trench ---------------------------
-   The one drawn mechanism in the chapter, and the only battle whose idea is a
-   shape rather than a number. Labels are HTML over the SVG, never inside it —
-   Hebrew in SVG flows right-to-left from its x and that trap has already cost
-   this project a bug. */
+   Drawn, not schematised. The first build put an SVG here — a blob with empty
+   rectangles in it — and it read as a placeholder in the middle of a painted
+   chapter. Same frame as the plates, with the sentence held underneath because
+   this one paragraph IS the mechanism: it names the adviser, the technique and
+   what it stopped. */
 .ch4-trench{
   border:1px solid var(--rule);
   background:var(--paper);
   overflow:hidden;
 }
-.ch4-trench-plate{position:relative}
-.ch4-trench-plate svg{display:block;width:100%;height:auto}
-
-/* the city: a settled ground, plain-edged everywhere the source does not
-   describe */
-.ch4-trench-city{fill:var(--mat);stroke:var(--rule);stroke-width:1.5}
-.ch4-trench-roofs rect{fill:none;stroke:var(--gold-soft);stroke-width:1.2}
-
-/* the ditch: two banks with the cut hatched between them */
-.ch4-trench-bank{fill:none;stroke:var(--maroon);stroke-width:2}
-.ch4-trench-hatch{stroke:var(--maroon);stroke-width:1;opacity:.45}
-
-/* the besieging force, pressing from the side the ditch closes */
-.ch4-trench-press path{fill:none;stroke:var(--gold-text);stroke-width:2.5;opacity:.8}
-
-/* the labels sit in the GAPS between the drawn parts, and each carries the
-   page ground behind it — the first build put them straight on the geometry
-   and the ditch label was unreadable over its own hatching */
-.ch4-trench-label{
-  position:absolute;
-  inset-inline-start:0;
-  inset-inline-end:0;
-  text-align:center;
-  font-family:var(--font-heading);
-  font-size:clamp(14px,1.6vw,18px);
-  pointer-events:none;
+.ch4-trench-plate{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:16/9;
+  object-fit:cover;
 }
-.ch4-trench-label > span,
-.ch4-trench-label{line-height:1}
-.ch4-trench-label::before{content:""}
-.ch4-trench-label{
-  --chip:var(--paper);
-}
-.ch4-trench-label.is-press{color:var(--gold-text)}
-.ch4-trench-label.is-press,
-.ch4-trench-label.is-cut,
-.ch4-trench-label.is-city{text-shadow:0 0 6px var(--paper),0 0 6px var(--paper),0 0 10px var(--paper)}
-.ch4-trench-label.is-cut{color:var(--maroon)}
-.ch4-trench-label.is-city{color:var(--ink)}
-
 .ch4-trench-text{padding:18px 24px 20px}
