@@ -70,7 +70,14 @@
 
 
 /* ============================ running text ============================ */
-.ch4-body{display:grid;gap:16px;width:100%;max-width:var(--measure,880px)}
+/* BLOCK, NOT GRID. It was a grid with a 16px gap, inherited from chapter 3,
+   and the moment a paragraph carried an emphasis it fell apart: in CSS Grid an
+   in-flow inline element becomes a grid item of its own and the text on either
+   side becomes two more, so „מוחמד בחר להגר ליישוב ית'רב הנמצא…" printed as
+   three stacked blocks with sixteen pixels between them. Chapter 3 never hit it
+   because its emphasised runs sit inside a span; this chapter emphasises plain
+   paragraphs, which is what chapters 2 and 6 do throughout. */
+.ch4-body{display:block;width:100%;max-width:var(--measure,880px)}
 
 .chapter-article .ch4-body{
   font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink);
@@ -228,6 +235,11 @@
    under a short sentence it read as a divider cutting the passage rather than
    as an underline belonging to the words above it. The break is enough. */
 .ch4-intro{display:block;margin-bottom:2px}
+/* the list items stacked because the paragraph was a grid; with the paragraph
+   set to block they carry their own stacking */
+.ch4-item{display:block}
+.ch4-item + .ch4-item{margin-block-start:10px}
+.ch4-intro + .ch4-item{margin-block-start:10px}
 
 
 /* The dot that marks an item of a list. Small, maroon, and set on the reading

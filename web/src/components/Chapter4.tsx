@@ -971,7 +971,7 @@ export default function Chapter4() {
                 <Head id="hijra" />
                 <T r="§0.a" className="ch4-body" reveal />
                 <Statement r="§0.b" />
-                <T r="§1.a" className="ch4-body" reveal />
+                <T r="§1.a" className="ch4-body" em={["ית'רב"]} reveal />
                 <T r="§1.b" className="ch4-body" reveal />
                 <Journey />
                 <Plate src="yathrib-oasis" />
@@ -992,11 +992,11 @@ export default function Chapter4() {
                 <SubHead section="hijra" id="covenant" />
                 <T r="§4.a" className="ch4-body" reveal />
                 <T r="§4.b" className="ch4-body" reveal />
-                <T r="§8.a" className="ch4-body" reveal />
+                <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                 <T r="§8.b" className="ch4-body" reveal />
                 <T r="§8.c" className="ch4-body" reveal />
                 <T r="§8.d" className="ch4-body" reveal />
-                <T r="§5.a" className="ch4-body" reveal />
+                <T r="§5.a" className="ch4-body" em={["אלהג'רה"]} reveal />
                 <T r="§5.b" className="ch4-body" reveal />
                 <Echo>
                   <T r="§6.echo1" className="ch4-body" />
@@ -1023,14 +1023,14 @@ export default function Chapter4() {
                 <Head id="badr" />
                 <T r="§10.a" className="ch4-body" reveal />
                 <T r="§10.b" className="ch4-body" reveal />
-                <T r="§11.a" className="ch4-body" reveal />
+                <T r="§11.a" className="ch4-body" em={["אבו ג'הל"]} reveal />
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
                 <Film src="badr-film">
                   <T r="§12.rain" className="ch4-body" />
                   <T r="§12.duel" className="ch4-body" />
                 </Film>
                 <T r="§13.a" className="ch4-body" reveal />
-                <T r="§13.b" className="ch4-body" reveal />
+                <T r="§13.b" className="ch4-body" em={['יום הישועה']} reveal />
 
                 <SubHead section="badr" id="badr-quran" />
                 <T r="§14.a" className="ch4-body" reveal />
@@ -1042,7 +1042,7 @@ export default function Chapter4() {
                 </Echo>
                 <T r="§16.a" className="ch4-body" reveal />
                 <Echo>
-                  <T r="§16.echo" className="ch4-body" />
+                  <T r="§16.echo" className="ch4-body" em={['מערכת בדר']} />
                 </Echo>
               </Section>
 
@@ -1050,7 +1050,7 @@ export default function Chapter4() {
                   §20.hind הוא הקשה בפרק, והוא נשאר טקסט. בלי דימוי. */}
               <Section id="uhud">
                 <Head id="uhud" />
-                <T r="§17.a" className="ch4-body" reveal />
+                <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
                 <Plate src="uhud-mount" />
                 <Forces muslims="§17.muslims" other="§17.quraysh" />
                 <T r="§18.a" className="ch4-body" reveal />
@@ -1063,10 +1063,10 @@ export default function Chapter4() {
 
                 <SubHead section="uhud" id="shahids" />
                 <T r="§21.a" className="ch4-body" reveal />
-                <T r="§21.b" className="ch4-body" reveal />
+                <T r="§21.b" className="ch4-body" em={['השהידים']} reveal />
                 <Verse r="§21.verse" />
                 <Echo>
-                  <T r="§22.echo" className="ch4-body" />
+                  <T r="§22.echo" className="ch4-body" em={['אבטאל']} />
                 </Echo>
               </Section>
 
@@ -1083,15 +1083,15 @@ export default function Chapter4() {
                 </div>
                 <Trench r="§24.trench" />
                 <T r="§24.storm" className="ch4-body" reveal />
-                <T r="§25.a" className="ch4-body" reveal />
-                <T r="§26.a" className="ch4-body ch4-quiet-body" reveal />
+                <T r="§25.a" className="ch4-body" em={['אלאחזאב']} reveal />
+                <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
                 <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
               </Section>
 
               {/* ============ 06 · הסכם חודיביה ============ */}
               <Section id="hudaybiyyah">
                 <Head id="hudaybiyyah" />
-                <T r="§27.a" className="ch4-body" reveal />
+                <T r="§27.a" className="ch4-body" em={['עמרה']} reveal />
                 <T r="§27.b" className="ch4-body" reveal />
                 <T r="§28.a" className="ch4-body" reveal />
                 <Plate src="hudaybiyyah-plain" />
@@ -1145,7 +1145,7 @@ export default function Chapter4() {
                 <T r="§48.b" className="ch4-body" reveal />
                 <T r="§49.a" className="ch4-body" reveal />
                 <Journey focus="mecca" />
-                <T r="§49.b" className="ch4-body" reveal />
+                <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
                 <Plate src="kaaba-precinct" />
               </Section>
 
@@ -1171,7 +1171,7 @@ export default function Chapter4() {
 
                 <SubHead section="today" id="maslaha" />
                 <Definition r="§34.a" />
-                <T r="§34.b" className="ch4-body" reveal />
+                <T r="§34.b" className="ch4-body" em={['המצלחה']} reveal />
                 <div className="ch4-rulings" data-reveal>
                   <article className="ch4-ruling">
                     <h3 className="ch4-ruling-name">{nameOf('§35.lead')}</h3>
@@ -1183,7 +1183,7 @@ export default function Chapter4() {
                     <h3 className="ch4-ruling-name">{nameOf('§37.lead')}</h3>
                     <T r="§37.lead" className="ch4-body" />
                     <T r="§37.point" className="ch4-body" />
-                    <T r="§37.b" className="ch4-body" />
+                    <T r="§37.b" className="ch4-body" em={['צלח']} />
                   </article>
                   <article className="ch4-ruling">
                     <h3 className="ch4-ruling-name">{nameOf('§38.lead')}</h3>
