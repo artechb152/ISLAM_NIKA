@@ -928,6 +928,7 @@ export default function Chapter4() {
                 <T r="§1.a" className="ch4-body" reveal />
                 <T r="§1.b" className="ch4-body" reveal />
                 <Journey />
+                <Plate src="yathrib-oasis" />
                 <div className="ch4-two" data-reveal>
                   <T r="§2.flight" className="ch4-body ch4-two-side" />
                   <T r="§2.invited" className="ch4-body ch4-two-side" />
@@ -1004,6 +1005,7 @@ export default function Chapter4() {
               <Section id="uhud">
                 <Head id="uhud" />
                 <T r="§17.a" className="ch4-body" reveal />
+                <Plate src="uhud-mount" />
                 <Forces muslims="§17.muslims" other="§17.quraysh" />
                 <T r="§18.a" className="ch4-body" reveal />
                 <T r="§18.b" className="ch4-body" reveal />
@@ -1046,6 +1048,7 @@ export default function Chapter4() {
                 <T r="§27.a" className="ch4-body" reveal />
                 <T r="§27.b" className="ch4-body" reveal />
                 <T r="§28.a" className="ch4-body" reveal />
+                <Plate src="hudaybiyyah-plain" />
                 <T r="§28.b" className="ch4-body" reveal />
                 <ol className="ch4-concessions" data-reveal>
                   <li>{text('§29.term1')}</li>
@@ -1097,6 +1100,7 @@ export default function Chapter4() {
                 <T r="§49.a" className="ch4-body" reveal />
                 <Journey focus="mecca" />
                 <T r="§49.b" className="ch4-body" reveal />
+                <Plate src="kaaba-precinct" />
               </Section>
 
               {/* ============ 09 · מותו של מוחמד ============
@@ -1104,6 +1108,7 @@ export default function Chapter4() {
               <Section id="death" className="ch4-quiet">
                 <Head id="death" />
                 <T r="§50.a" className="ch4-body" reveal />
+                <Plate src="medina-dusk" />
                 <T r="§50.b" className="ch4-body" reveal />
                 <T r="§51.a" className="ch4-body" reveal />
               </Section>

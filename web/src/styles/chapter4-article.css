@@ -509,3 +509,104 @@
 @media (max-width:640px){
   .ch4-journey{padding:16px 14px}
 }
+
+/* ------------------------------- the film -----------------------------
+   §12 is the chapter's one cinematic beat. The valley plays behind the two
+   sentences and they sit on it as a caption block — a documentary card, not
+   a decoration. Both sentences stay in the DOM; nothing is timed and nothing
+   is hidden behind a click. */
+.ch4-film{
+  border:1px solid var(--rule);
+  background:var(--paper);
+  overflow:hidden;
+}
+.ch4-film-media{position:relative;aspect-ratio:16/9;background:var(--maroon-deep)}
+.ch4-film-media video{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+.ch4-film-text{padding:20px 24px 22px}
+.ch4-film-text > * + *{margin-block-start:.7em}
+@media (prefers-reduced-motion:reduce){
+  .ch4-film-media video{display:none}
+  .ch4-film-media{background:var(--maroon-deep) url('/assets/chapter4/badr-film.jpg') center/cover}
+}
+
+/* ---------------------------- the pair of terms -----------------------
+   §9 is the hinge — preaching on one side, war on the other — and the source
+   puts both states in one thirty-three-word sentence, which is where the turn
+   gets lost. Two panels make the turn a shape. */
+.ch4-pair{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  border:1px solid var(--rule);
+  background:var(--paper);
+}
+.ch4-pair-side{padding:18px 20px}
+.ch4-pair-side + .ch4-pair-side{border-inline-end:1px solid var(--rule)}
+.ch4-pair-term{
+  margin:0 0 .45em;
+  font-family:var(--font-heading);
+  font-size:1.08em;
+  color:var(--maroon);
+}
+.ch4-pair-text{margin:0;color:var(--ink)}
+@media (max-width:640px){
+  .ch4-pair{grid-template-columns:1fr}
+  .ch4-pair-side + .ch4-pair-side{border-inline-end:0;border-block-start:1px solid var(--rule)}
+}
+
+/* --------------------------- what the battle left ---------------------
+   Uhud has no victory to report. Three panels give „ובוודאי לא בניצחון" the
+   same weight as the two facts around it, which is the section's point. */
+.ch4-outcomes{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:1px;
+  border:1px solid var(--rule);
+  background:var(--rule);
+}
+.ch4-outcome{margin:0;padding:16px 18px;background:var(--paper);color:var(--ink)}
+
+/* ------------------------------ a person ------------------------------
+   §46 hangs four roles on one man inside a parenthesis. The card lifts the
+   sentences out of the run so the roles are read rather than skimmed. */
+.ch4-figure{
+  padding:18px 20px;
+  border:1px solid var(--rule);
+  border-inline-start:3px solid var(--maroon);
+  background:var(--paper);
+}
+.ch4-figure-line{margin:0;color:var(--ink)}
+.ch4-figure-line + .ch4-figure-line{margin-block-start:.7em}
+
+/* --------------------------- the three treaties -----------------------
+   §32 lists them in one clause and part ה׳ argues about them for four hundred
+   words. Three dated marks make them the subject instead of a footnote. The
+   source's own order is kept — 1979, 1994, 1993 — because reordering is an
+   edit. */
+.ch4-treaties{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;
+  margin:0;
+  padding:0;
+  list-style:none;
+  border:1px solid var(--rule);
+  background:var(--rule);
+}
+.ch4-treaties li{
+  display:grid;
+  gap:2px;
+  padding:16px 18px;
+  background:var(--paper);
+}
+.ch4-treaty-year{
+  font-family:var(--font-heading);
+  font-size:1.35em;
+  color:var(--gold-text);
+}
+.ch4-treaty-name{color:var(--ink)}
