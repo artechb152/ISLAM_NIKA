@@ -47,6 +47,14 @@
 
 .chapter-article .ch4-sub + *{margin-top:var(--flow-tight)}
 
+/* PROSE TO PROSE IS NOT BLOCK TO BLOCK. Two running paragraphs are one voice
+   continuing, and --flow (34px) sets them apart as if each were an event.
+   Measured against the product: chapter 6 runs 12px between paragraphs and
+   reads as an article; the first build of this chapter ran 34-48px and read as
+   a list with no end — the complaint that started this pass. Everything else
+   keeps the full flow, so a device or a heading still lands as a break. */
+.chapter-article .ch4-body + .ch4-body{margin-top:14px}
+
 
 /* a quotation and a statement are changes of voice: more air on both sides */
 .chapter-article .article-section > .ch4-verse,
@@ -231,7 +239,14 @@
   content:'';display:inline-block;width:6px;height:6px;border-radius:50%;
   background:var(--maroon);vertical-align:0.28em;margin-inline-end:10px;
 }
-/* GROUND RULE FOR EVERY DEVICE BELOW: the ground is var(--paper), the page's
+/* NO DEVICE BELOW DECLARES AN OUTER MARGIN. The flow rhythm at the top of this
+   file owns every gap between blocks — that is the rule chapter 3 states in its
+   own header, and the first build of this sheet broke it in all seven devices:
+   each one added margin-block:var(--flow) on top of the .article-section rule,
+   so every card, echo box and plate sat in 68px of air instead of 34. The
+   chapter measured 16,154px tall against chapter 6's 14,095 for less material.
+
+   GROUND RULE FOR EVERY DEVICE BELOW: the ground is var(--paper), the page's
    own colour. --surface (#faf4e6) is the sheet's "brightest raised inset" and
    on screen it reads as a white card floating on parchment — the first build
    used it for the cards, the force balance and the ruling cards, and all three
@@ -251,7 +266,6 @@
    panel — a heavier treatment would compete with the section headings that
    sit under it, and those are the ones a reader navigates by. */
 .ch4-part{
-  margin-block:var(--flow-part,calc(var(--flow) * 2)) var(--flow);
   padding-block-end:.34em;
   border-block-end:1px solid var(--rule);
   font-family:var(--font-heading);
@@ -270,7 +284,6 @@
   display:grid;
   gap:var(--flow-tight,16px);
   grid-template-columns:1fr 1fr;
-  margin-block:var(--flow);
 }
 .ch4-two-side{
   margin:0;
@@ -290,7 +303,6 @@
   display:grid;
   gap:var(--flow-tight,16px);
   grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  margin-block:var(--flow);
 }
 .ch4-card{
   padding:16px 18px;
@@ -318,7 +330,6 @@
    without the ornament that would make it look like a pull-quote. Five uses,
    and the count is in STRUCTURE.md so a sixth has to be argued for. */
 .ch4-echo{
-  margin-block:var(--flow);
   padding:16px 18px;
   border-inline-start:3px solid var(--maroon);
   background:var(--paper);
@@ -336,7 +347,6 @@
   display:grid;
   gap:var(--flow-tight,16px);
   grid-template-columns:1fr 1fr;
-  margin-block:var(--flow);
   padding:14px 16px;
   border:1px solid var(--rule);
   background:var(--paper);
@@ -352,7 +362,6 @@
    §29's three clauses are the reason „on its face a surrender" is not an
    opinion. Numbered, because the source counts them. */
 .ch4-concessions{
-  margin-block:var(--flow);
   padding-inline-start:0;
   padding-inline-end:1.4em;
   color:var(--ink);
@@ -367,7 +376,6 @@
    sits above it as a tab rather than splitting the definition in two. */
 .ch4-def{
   position:relative;
-  margin-block:var(--flow);
   padding:20px 20px 18px;
   border:1px solid var(--gold-soft);
   background:var(--paper);
@@ -389,7 +397,6 @@
 .ch4-rulings{
   display:grid;
   gap:var(--flow);
-  margin-block:var(--flow);
 }
 .ch4-ruling{
   padding:18px 20px;
@@ -424,7 +431,6 @@
    the diamond belongs to the ten, and a second one at this level would say
    the two ranks are the same rank. */
 .ch4-sub{
-  margin-block:var(--flow) var(--flow-tight,16px);
   font-family:var(--font-heading);
   font-size:clamp(17px,1.8vw,21px);
   color:var(--maroon);
@@ -442,7 +448,6 @@
    caption, and a second one written by the page would be a sentence the
    source never wrote. */
 .ch4-plate{
-  margin-block:var(--flow);
   margin-inline:0;
 }
 .ch4-plate img{

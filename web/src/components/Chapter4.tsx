@@ -708,7 +708,8 @@ export default function Chapter4() {
                 <Head id="hijra" />
                 <T r="§0.a" className="ch4-body" reveal />
                 <Statement r="§0.b" />
-                <T r={['§1.a', '§1.b']} className="ch4-body" reveal />
+                <T r="§1.a" className="ch4-body" reveal />
+                <T r="§1.b" className="ch4-body" reveal />
                 <div className="ch4-two" data-reveal>
                   <T r="§2.flight" className="ch4-body ch4-two-side" />
                   <T r="§2.invited" className="ch4-body ch4-two-side" />
@@ -724,14 +725,21 @@ export default function Chapter4() {
                 </div>
 
                 <SubHead section="hijra" id="covenant" />
-                <T r={['§4.a', '§4.b']} className="ch4-body" reveal />
-                <T r={['§8.a', '§8.b']} className="ch4-body" reveal />
-                <T r={['§8.c', '§8.d']} className="ch4-body" reveal />
-                <T r={['§5.a', '§5.b']} className="ch4-body" reveal />
+                <T r="§4.a" className="ch4-body" reveal />
+                <T r="§4.b" className="ch4-body" reveal />
+                <T r="§8.a" className="ch4-body" reveal />
+                <T r="§8.b" className="ch4-body" reveal />
+                <T r="§8.c" className="ch4-body" reveal />
+                <T r="§8.d" className="ch4-body" reveal />
+                <T r="§5.a" className="ch4-body" reveal />
+                <T r="§5.b" className="ch4-body" reveal />
                 <Echo>
-                  <T r={['§6.echo1', '§6.echo2']} className="ch4-body" />
+                  <T r="§6.echo1" className="ch4-body" />
+                <T r="§6.echo2" className="ch4-body" />
                 </Echo>
-                <T r={['§7.a', '§7.b', '§7.c']} className="ch4-body" reveal />
+                <T r="§7.a" className="ch4-body" reveal />
+                <T r="§7.b" className="ch4-body" reveal />
+                <T r="§7.c" className="ch4-body" reveal />
                 <Plate src="mosque-courtyard" />
               </Section>
 
@@ -741,18 +749,22 @@ export default function Chapter4() {
               <Section id="jihad">
                 <Head id="jihad" />
                 <Statement r="§9.a" />
-                <T r={['§9.b', '§9.c']} className="ch4-body" reveal />
+                <T r="§9.b" className="ch4-body" reveal />
+                <T r="§9.c" className="ch4-body" reveal />
               </Section>
 
               {/* ============ 03 · קרב בדר ============ */}
               <Section id="badr">
                 <Head id="badr" />
-                <T r={['§10.a', '§10.b']} className="ch4-body" reveal />
+                <T r="§10.a" className="ch4-body" reveal />
+                <T r="§10.b" className="ch4-body" reveal />
                 <T r="§11.a" className="ch4-body" reveal />
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
                 <Plate src="badr-night" />
-                <T r={['§12.rain', '§12.duel']} className="ch4-body" reveal />
-                <T r={['§13.a', '§13.b']} className="ch4-body" reveal />
+                <T r="§12.rain" className="ch4-body" reveal />
+                <T r="§12.duel" className="ch4-body" reveal />
+                <T r="§13.a" className="ch4-body" reveal />
+                <T r="§13.b" className="ch4-body" reveal />
 
                 <SubHead section="badr" id="badr-quran" />
                 <T r="§14.a" className="ch4-body" reveal />
@@ -774,14 +786,19 @@ export default function Chapter4() {
                 <Head id="uhud" />
                 <T r="§17.a" className="ch4-body" reveal />
                 <Forces muslims="§17.muslims" other="§17.quraysh" />
-                <T r={['§18.a', '§18.b']} className="ch4-body" reveal />
-                <T r={['§19.a', '§19.b', '§19.c']} className="ch4-body" reveal />
+                <T r="§18.a" className="ch4-body" reveal />
+                <T r="§18.b" className="ch4-body" reveal />
+                <T r="§19.a" className="ch4-body" reveal />
+                <T r="§19.b" className="ch4-body" reveal />
+                <T r="§19.c" className="ch4-body" reveal />
                 <T r="§20.a" className="ch4-body" reveal />
                 <Verse r="§20.saying" />
-                <T r={['§20.translit', '§20.hind']} className="ch4-body" reveal />
+                <T r="§20.translit" className="ch4-body" reveal />
+                <T r="§20.hind" className="ch4-body" reveal />
 
                 <SubHead section="uhud" id="shahids" />
-                <T r={['§21.a', '§21.b']} className="ch4-body" reveal />
+                <T r="§21.a" className="ch4-body" reveal />
+                <T r="§21.b" className="ch4-body" reveal />
                 <Verse r="§21.verse" />
                 <Echo>
                   <T r="§22.echo" className="ch4-body" />
@@ -799,22 +816,27 @@ export default function Chapter4() {
                   <T r="§23.cause1" className="ch4-body ch4-two-side" />
                   <T r="§23.cause2" className="ch4-body ch4-two-side" />
                 </div>
-                <T r={['§24.trench', '§24.storm']} className="ch4-body" reveal />
+                <T r="§24.trench" className="ch4-body" reveal />
+                <T r="§24.storm" className="ch4-body" reveal />
                 <T r="§25.a" className="ch4-body" reveal />
-                <T r={['§26.a', '§26.b']} className="ch4-body ch4-quiet-body" reveal />
+                <T r="§26.a" className="ch4-body ch4-quiet-body" reveal />
+                <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
               </Section>
 
               {/* ============ 06 · הסכם חודיביה ============ */}
               <Section id="hudaybiyyah">
                 <Head id="hudaybiyyah" />
-                <T r={['§27.a', '§27.b']} className="ch4-body" reveal />
-                <T r={['§28.a', '§28.b']} className="ch4-body" reveal />
+                <T r="§27.a" className="ch4-body" reveal />
+                <T r="§27.b" className="ch4-body" reveal />
+                <T r="§28.a" className="ch4-body" reveal />
+                <T r="§28.b" className="ch4-body" reveal />
                 <ol className="ch4-concessions" data-reveal>
                   <li>{text('§29.term1')}</li>
                   <li>{text('§29.term2')}</li>
                   <li>{text('§29.term3')}</li>
                 </ol>
-                <T r={['§30.a', '§30.b']} className="ch4-body" reveal />
+                <T r="§30.a" className="ch4-body" reveal />
+                <T r="§30.b" className="ch4-body" reveal />
 
                 <SubHead section="hudaybiyyah" id="hudna" />
                 <Definition r="§31.a" />
@@ -832,11 +854,16 @@ export default function Chapter4() {
                   reveal
                 />
                 <T r="§42.a" className="ch4-body ch4-quiet-body" reveal />
-                <T r={['§43.a', '§43.b']} className="ch4-body ch4-quiet-body" reveal />
+                <T r="§43.a" className="ch4-body ch4-quiet-body" reveal />
+                <T r="§43.b" className="ch4-body ch4-quiet-body" reveal />
                 <Plate src="khaybar-forts" />
-                <T r={['§44.a', '§44.b']} className="ch4-body" reveal />
-                <T r={['§45.a', '§45.b']} className="ch4-body" reveal />
-                <T r={['§46.a', '§46.b', '§46.c']} className="ch4-body" reveal />
+                <T r="§44.a" className="ch4-body" reveal />
+                <T r="§44.b" className="ch4-body" reveal />
+                <T r="§45.a" className="ch4-body" reveal />
+                <T r="§45.b" className="ch4-body" reveal />
+                <T r="§46.a" className="ch4-body" reveal />
+                <T r="§46.b" className="ch4-body" reveal />
+                <T r="§46.c" className="ch4-body" reveal />
 
                 {/* החריגה היחידה בפרק מכלל תעתיק עברי בלבד:
                     הסיסמה מופיעה בערבית במקור. */}
@@ -850,15 +877,18 @@ export default function Chapter4() {
               {/* ============ 08 · כיבוש מכה ============ */}
               <Section id="mecca">
                 <Head id="mecca" />
-                <T r={['§48.a', '§48.b']} className="ch4-body" reveal />
-                <T r={['§49.a', '§49.b']} className="ch4-body" reveal />
+                <T r="§48.a" className="ch4-body" reveal />
+                <T r="§48.b" className="ch4-body" reveal />
+                <T r="§49.a" className="ch4-body" reveal />
+                <T r="§49.b" className="ch4-body" reveal />
               </Section>
 
               {/* ============ 09 · מותו של מוחמד ============
                   סוף שקט. בלי מנגנון ובלי הלאה. */}
               <Section id="death" className="ch4-quiet">
                 <Head id="death" />
-                <T r={['§50.a', '§50.b']} className="ch4-body" reveal />
+                <T r="§50.a" className="ch4-body" reveal />
+                <T r="§50.b" className="ch4-body" reveal />
                 <T r="§51.a" className="ch4-body" reveal />
               </Section>
 
@@ -867,7 +897,9 @@ export default function Chapter4() {
                   רביעי. החלק לא נסגר בהסכמה, וזו הנקודה. */}
               <Section id="today">
                 <Head id="today" />
-                <T r={['§32.a', '§32.list', '§32.b']} className="ch4-body" reveal />
+                <T r="§32.a" className="ch4-body" reveal />
+                <T r="§32.list" className="ch4-body" reveal />
+                <T r="§32.b" className="ch4-body" reveal />
                 <T r="§33.a" className="ch4-body" reveal />
 
                 <SubHead section="today" id="maslaha" />
@@ -894,7 +926,8 @@ export default function Chapter4() {
                 </div>
                 <T r="§39.a" className="ch4-body" reveal />
                 <Verse r="§39.verse" />
-                <T r={['§40.a', '§40.b']} className="ch4-body" reveal />
+                <T r="§40.a" className="ch4-body" reveal />
+                <T r="§40.b" className="ch4-body" reveal />
               </Section>
 
               <div className="ch4-end" ref={endRef} data-reveal>
