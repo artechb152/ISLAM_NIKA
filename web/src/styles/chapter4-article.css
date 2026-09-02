@@ -946,3 +946,35 @@
 .ch4-band.is-plain figure{position:absolute;inset:0}
 .ch4-band.is-plain::after{display:none}
 @media (max-width:820px){.ch4-band.is-plain{aspect-ratio:16/9}}
+
+/* The two range inputs came with the browser's own white track — the only pure
+   white anywhere in the product, and it showed. */
+.ch4-film-seek,
+.ch4-film-vol{
+  appearance:none;height:4px;border-radius:3px;
+  background:var(--gold-soft);
+}
+.ch4-film-seek::-webkit-slider-thumb,
+.ch4-film-vol::-webkit-slider-thumb{
+  appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--maroon);border:0;cursor:pointer;
+}
+.ch4-film-seek::-moz-range-thumb,
+.ch4-film-vol::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--maroon);border:0;cursor:pointer;
+}
+.ch4-film-seek::-moz-range-track,
+.ch4-film-vol::-moz-range-track{height:4px;border-radius:3px;background:var(--gold-soft)}
+
+/* ================================ the block ===========================
+   A SECTION IS MADE OF BLOCKS, NEVER OF LOOSE PARAGRAPHS. Measured against
+   the product: chapter 2 carries four bare paragraphs in its whole article and
+   chapter 6 carries two, while this chapter carried fifty — and a screen
+   holding five unrelated things is what „crowded" is, in numbers.
+
+   The block declares no colour and no border. It is a grouping, not a card:
+   what it changes is the rhythm, by making the gap BETWEEN two ideas larger
+   than the gap between two sentences of one idea. */
+.ch4-block > * + *{margin-block-start:14px}
+.chapter-article .article-section > .ch4-block + .ch4-block{margin-top:var(--flow-lead)}

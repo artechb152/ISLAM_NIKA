@@ -661,6 +661,17 @@ function Band({
 }
 
 
+/** A run of the chapter's sentences, held as one block.
+
+    THE RULE THIS ENFORCES: a section is made of blocks, never of loose
+    paragraphs. Chapter 2 has four bare paragraphs in the whole article and
+    chapter 6 has two; this chapter had fifty, and a screen holding five
+    unrelated things is what „עמוס" means in numbers. Grouping them changes
+    nothing about the words and everything about the rhythm. */
+function Block({ children }: { children: React.ReactNode }) {
+  return <div className="ch4-block">{children}</div>
+}
+
 /** A movement inside a section. With ten sections instead of twenty-eight,
     what used to be a section of its own is a sub-heading here — and the rail
     shows it nested, so no anchor was lost in the reduction. */
@@ -1042,20 +1053,28 @@ export default function Chapter4() {
                 </div>
                 <Head id="hijra" />
                 <Band img="stage-1-mecca" caption="מכה בעמקה · שחזור מצויר">
-                  <T r="§0.a" className="ch4-body" />
-                  <T r="§0.b" className="ch4-body" />
+                  <Block>
+                    <T r="§0.a" className="ch4-body" />
+                    <T r="§0.b" className="ch4-body" />
+                  </Block>
                 </Band>
                 <Band img="stage-4-arrival" caption="שער הנווה · שחזור מצויר" flip>
-                  <T r="§1.a" className="ch4-body" em={["ית'רב"]} />
-                  <T r="§1.b" className="ch4-body" />
+                  <Block>
+                    <T r="§1.a" className="ch4-body" em={["ית'רב"]} />
+                    <T r="§1.b" className="ch4-body" />
+                  </Block>
                 </Band>
                 <div className="ch4-two" data-reveal>
-                  <T r="§2.flight" className="ch4-body ch4-two-side" />
-                  <T r="§2.invited" className="ch4-body ch4-two-side" />
+                  <Block>
+                    <T r="§2.flight" className="ch4-body ch4-two-side" />
+                    <T r="§2.invited" className="ch4-body ch4-two-side" />
+                  </Block>
                 </div>
 
                 <SubHead section="hijra" id="groups" />
-                <T r={['§3.a', '§3.b']} className="ch4-body" reveal />
+                <Block>
+                  <T r={['§3.a', '§3.b']} className="ch4-body" reveal />
+                </Block>
                 <div className="ch4-cards" data-reveal>
                   <Card r="§3.muhajirun" />
                   <Card r="§3.ansar" />
@@ -1064,57 +1083,80 @@ export default function Chapter4() {
                 </div>
 
                 <SubHead section="hijra" id="covenant" />
-                <T r="§4.a" className="ch4-body" reveal />
-                <T r="§4.b" className="ch4-body" reveal />
+                <Block>
+                  <T r="§4.a" className="ch4-body" reveal />
+                  <T r="§4.b" className="ch4-body" reveal />
+                </Block>
                 <Band img="stage-5-yard" caption="החצר לפני שנבנה המסגד · שחזור מצויר">
-                  <T r="§7.a" className="ch4-body" />
-                  <T r="§7.b" className="ch4-body" />
-                  <T r="§7.c" className="ch4-body" />
+                  <Block>
+                    <T r="§7.a" className="ch4-body" />
+                    <T r="§7.b" className="ch4-body" />
+                    <T r="§7.c" className="ch4-body" />
+                  </Block>
                 </Band>
-                <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
-                <T r="§8.b" className="ch4-body" reveal />
-                <T r="§8.c" className="ch4-body" reveal />
-                <T r="§8.d" className="ch4-body" reveal />
-                <T r="§5.a" className="ch4-body" em={["אלהג'רה"]} reveal />
-                <T r="§5.b" className="ch4-body" reveal />
+                <Block>
+                  <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
+                  <T r="§8.b" className="ch4-body" reveal />
+                  <T r="§8.c" className="ch4-body" reveal />
+                  <T r="§8.d" className="ch4-body" reveal />
+                  <T r="§5.a" className="ch4-body" em={["אלהג'רה"]} reveal />
+                  <T r="§5.b" className="ch4-body" reveal />
+                </Block>
                 <Echo>
-                  <T r="§6.echo1" className="ch4-body" />
-                <T r="§6.echo2" className="ch4-body" />
+                  <Block>
+                    <T r="§6.echo1" className="ch4-body" />
+                  <T r="§6.echo2" className="ch4-body" />
+                  </Block>
                 </Echo>
               </Section>
 
               {/* ============ 02 · מהטפה לג'האד ============
                   שלושה קטעים, והוא נשאר ראשי משום שהמקור נותן לו כותרת רצה
                   משלו — וזה באמת הציר של הפרק. */}
-              <Section id="jihad">
-                <Head id="jihad" />
+              <SubHead section="hijra" id="jihad" />
                 <Pair a="§9.dawa" b="§9.jihad" terms={['דעוה', "ג'האד"]} />
-                <T r="§9.b" className="ch4-body" reveal />
-                <T r="§9.c" className="ch4-body" reveal />
-              </Section>
+                <Block>
+                  <T r="§9.b" className="ch4-body" reveal />
+                  <T r="§9.c" className="ch4-body" reveal />
+                </Block>
+              
 
               {/* ============ 03 · קרב בדר ============ */}
               <Section id="badr">
                 <Head id="badr" />
-                <T r="§10.a" className="ch4-body" reveal />
-                <T r="§10.b" className="ch4-body" reveal />
-                <T r="§11.a" className="ch4-body" em={["אבו ג'הל"]} reveal />
+                <Block>
+                  <T r="§10.a" className="ch4-body" reveal />
+                  <T r="§10.b" className="ch4-body" reveal />
+                  <T r="§11.a" className="ch4-body" em={["אבו ג'הל"]} reveal />
+                </Block>
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
                 <BadrFilm />
-                <T r="§13.a" className="ch4-body" reveal />
-                <T r="§13.b" className="ch4-body" em={['יום הישועה']} reveal />
+                <Block>
+                  <T r="§13.a" className="ch4-body" reveal />
+                  <T r="§13.b" className="ch4-body" em={['יום הישועה']} reveal />
+                </Block>
 
                 <SubHead section="badr" id="badr-quran" />
-                <T r="§14.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§14.a" className="ch4-body" reveal />
+                </Block>
                 <Verse r="§14.verse" />
-                <T r="§15.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§15.a" className="ch4-body" reveal />
+                </Block>
                 <Verse r="§15.verse" />
                 <Echo>
-                  <T r="§15.echo" className="ch4-body" />
+                  <Block>
+                    <T r="§15.echo" className="ch4-body" />
+                  </Block>
                 </Echo>
-                <T r="§16.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§16.a" className="ch4-body" reveal />
+                </Block>
                 <Echo>
-                  <T r="§16.echo" className="ch4-body" em={['מערכת בדר']} />
+                  <Block>
+                    <T r="§16.echo" className="ch4-body" em={['מערכת בדר']} />
+                  </Block>
                 </Echo>
               </Section>
 
@@ -1122,23 +1164,35 @@ export default function Chapter4() {
                   §20.hind הוא הקשה בפרק, והוא נשאר טקסט. בלי דימוי. */}
               <Section id="uhud">
                 <Head id="uhud" />
-                <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
+                <Block>
+                  <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
+                </Block>
                 <Band img="uhud-mount" caption="הר אֻחֻד מן המישור · שחזור מצויר" />
                 <Forces muslims="§17.muslims" other="§17.quraysh" />
-                <T r="§18.a" className="ch4-body" reveal />
-                <T r="§18.b" className="ch4-body" reveal />
+                <Block>
+                  <T r="§18.a" className="ch4-body" reveal />
+                  <T r="§18.b" className="ch4-body" reveal />
+                </Block>
                 <Outcomes refs={['§19.a', '§19.b', '§19.c']} />
-                <T r="§20.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§20.a" className="ch4-body" reveal />
+                </Block>
                 <Verse r="§20.saying" />
-                <T r="§20.translit" className="ch4-body" reveal />
-                <T r="§20.hind" className="ch4-body" reveal />
+                <Block>
+                  <T r="§20.translit" className="ch4-body" reveal />
+                  <T r="§20.hind" className="ch4-body" reveal />
+                </Block>
 
                 <SubHead section="uhud" id="shahids" />
-                <T r="§21.a" className="ch4-body" reveal />
-                <T r="§21.b" className="ch4-body" em={['השהידים']} reveal />
+                <Block>
+                  <T r="§21.a" className="ch4-body" reveal />
+                  <T r="§21.b" className="ch4-body" em={['השהידים']} reveal />
+                </Block>
                 <Verse r="§21.verse" />
                 <Echo>
-                  <T r="§22.echo" className="ch4-body" em={['אבטאל']} />
+                  <Block>
+                    <T r="§22.echo" className="ch4-body" em={['אבטאל']} />
+                  </Block>
                 </Echo>
               </Section>
 
@@ -1146,8 +1200,7 @@ export default function Chapter4() {
                   בני קוריזה יושבים כאן ולא במקטע משלהם: המקור מציב אותם
                   כהמשך ישיר של הקרב, ומקטע נפרד היה נותן לטבח כותרת משלו
                   בסרגל. טיפוגרפיה שקטה, טקסט מלא, בלי דימוי ובלי מנגנון. */}
-              <Section id="trench">
-                <Head id="trench" />
+              <SubHead section="uhud" id="trench" />
                 <Stage
                   label="קרב השוחה"
                   beats={[
@@ -1180,25 +1233,33 @@ export default function Chapter4() {
                     },
                   ]}
                 />
-                <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
-                <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
-              </Section>
+                <Block>
+                  <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
+                  <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
+                </Block>
+              
 
               {/* ============ 06 · הסכם חודיביה ============ */}
               <Section id="hudaybiyyah">
                 <Head id="hudaybiyyah" />
-                <T r="§27.a" className="ch4-body" em={['עמרה']} reveal />
-                <T r="§27.b" className="ch4-body" reveal />
-                <T r="§28.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§27.a" className="ch4-body" em={['עמרה']} reveal />
+                  <T r="§27.b" className="ch4-body" reveal />
+                  <T r="§28.a" className="ch4-body" reveal />
+                </Block>
                 <Band img="hudaybiyyah-plain" caption="המישור שבו נעצר · שחזור מצויר" flip />
-                <T r="§28.b" className="ch4-body" reveal />
+                <Block>
+                  <T r="§28.b" className="ch4-body" reveal />
+                </Block>
                 <ol className="ch4-concessions" data-reveal>
                   <li>{text('§29.term1')}</li>
                   <li>{text('§29.term2')}</li>
                   <li>{text('§29.term3')}</li>
                 </ol>
-                <T r="§30.a" className="ch4-body" reveal />
-                <T r="§30.b" className="ch4-body" reveal />
+                <Block>
+                  <T r="§30.a" className="ch4-body" reveal />
+                  <T r="§30.b" className="ch4-body" reveal />
+                </Block>
 
                 <SubHead section="hudaybiyyah" id="hudna" />
                 <Definition r="§31.a" />
@@ -1215,44 +1276,59 @@ export default function Chapter4() {
                   className="ch4-body ch4-quiet-body"
                   reveal
                 />
-                <T r="§42.a" className="ch4-body ch4-quiet-body" reveal />
-                <T r="§43.a" className="ch4-body ch4-quiet-body" reveal />
-                <T r="§43.b" className="ch4-body ch4-quiet-body" reveal />
+                <Block>
+                  <T r="§42.a" className="ch4-body ch4-quiet-body" reveal />
+                  <T r="§43.a" className="ch4-body ch4-quiet-body" reveal />
+                  <T r="§43.b" className="ch4-body ch4-quiet-body" reveal />
+                </Block>
                 <Band img="khaybar-forts" caption="מבצרי ח'יבר מעל המטעים · שחזור מצויר" />
-                <T r="§44.a" className="ch4-body" reveal />
-                <T r="§44.b" className="ch4-body" reveal />
-                <T r="§45.a" className="ch4-body" reveal />
-                <T r="§45.b" className="ch4-body" reveal />
+                <Block>
+                  <T r="§44.a" className="ch4-body" reveal />
+                  <T r="§44.b" className="ch4-body" reveal />
+                  <T r="§45.a" className="ch4-body" reveal />
+                  <T r="§45.b" className="ch4-body" reveal />
+                </Block>
                 <Figure refs={['§46.a', '§46.b', '§46.c']} />
 
                 {/* החריגה היחידה בפרק מכלל תעתיק עברי בלבד:
                     הסיסמה מופיעה בערבית במקור. */}
                 <SubHead section="khaybar" id="slogan" />
-                <T r="§47.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§47.a" className="ch4-body" reveal />
+                </Block>
                 <Echo>
-                  <T r="§47.echo" className="ch4-body" />
+                  <Block>
+                    <T r="§47.echo" className="ch4-body" />
+                  </Block>
                 </Echo>
               </Section>
 
               {/* ============ 08 · כיבוש מכה ============ */}
-              <Section id="mecca">
-                <Head id="mecca" />
-                <T r="§48.a" className="ch4-body" reveal />
-                <T r="§48.b" className="ch4-body" reveal />
-                <T r="§49.a" className="ch4-body" reveal />
+              <SubHead section="khaybar" id="mecca" />
+                <Block>
+                  <T r="§48.a" className="ch4-body" reveal />
+                  <T r="§48.b" className="ch4-body" reveal />
+                  <T r="§49.a" className="ch4-body" reveal />
+                </Block>
                 <Journey focus="mecca" />
-                <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
+                <Block>
+                  <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
+                </Block>
                 <Band img="kaaba-precinct" caption="מתחם הכעבה בשחר · שחזור מצויר" flip />
-              </Section>
+              
 
               {/* ============ 09 · מותו של מוחמד ============
                   סוף שקט. בלי מנגנון ובלי הלאה. */}
               <Section id="death" className="ch4-quiet">
                 <Head id="death" />
-                <T r="§50.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§50.a" className="ch4-body" reveal />
+                </Block>
                 <Band img="medina-dusk" caption="מדינה בין ערביים · שחזור מצויר" />
-                <T r="§50.b" className="ch4-body" reveal />
-                <T r="§51.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§50.b" className="ch4-body" reveal />
+                  <T r="§51.a" className="ch4-body" reveal />
+                </Block>
               </Section>
 
               {/* ============ 10 · חודיביה בפסקי ההלכה ============
@@ -1260,37 +1336,53 @@ export default function Chapter4() {
                   רביעי. החלק לא נסגר בהסכמה, וזו הנקודה. */}
               <Section id="today">
                 <Head id="today" />
-                <T r="§32.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§32.a" className="ch4-body" reveal />
+                </Block>
                 <Treaties r="§32.list" />
-                <T r="§32.b" className="ch4-body" reveal />
-                <T r="§33.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§32.b" className="ch4-body" reveal />
+                  <T r="§33.a" className="ch4-body" reveal />
+                </Block>
 
                 <SubHead section="today" id="maslaha" />
                 <Definition r="§34.a" />
-                <T r="§34.b" className="ch4-body" em={['המצלחה']} reveal />
+                <Block>
+                  <T r="§34.b" className="ch4-body" em={['המצלחה']} reveal />
+                </Block>
                 <div className="ch4-rulings" data-reveal>
                   <article className="ch4-ruling">
                     <h3 className="ch4-ruling-name">{nameOf('§35.lead')}</h3>
-                    <T r="§35.lead" className="ch4-body" />
-                    <T r="§35.points" className="ch4-body" />
-                    <T r="§36.a" className="ch4-body" />
+                    <Block>
+                      <T r="§35.lead" className="ch4-body" />
+                      <T r="§35.points" className="ch4-body" />
+                      <T r="§36.a" className="ch4-body" />
+                    </Block>
                   </article>
                   <article className="ch4-ruling">
                     <h3 className="ch4-ruling-name">{nameOf('§37.lead')}</h3>
-                    <T r="§37.lead" className="ch4-body" />
-                    <T r="§37.point" className="ch4-body" />
-                    <T r="§37.b" className="ch4-body" em={['צלח']} />
+                    <Block>
+                      <T r="§37.lead" className="ch4-body" />
+                      <T r="§37.point" className="ch4-body" />
+                      <T r="§37.b" className="ch4-body" em={['צלח']} />
+                    </Block>
                   </article>
                   <article className="ch4-ruling">
                     <h3 className="ch4-ruling-name">{nameOf('§38.lead')}</h3>
-                    <T r="§38.lead" className="ch4-body" />
+                    <Block>
+                      <T r="§38.lead" className="ch4-body" />
+                    </Block>
                     <blockquote className="ch4-verse">{text('§38.quote')}</blockquote>
                   </article>
                 </div>
-                <T r="§39.a" className="ch4-body" reveal />
+                <Block>
+                  <T r="§39.a" className="ch4-body" reveal />
+                </Block>
                 <Verse r="§39.verse" />
-                <T r="§40.a" className="ch4-body" reveal />
-                <T r="§40.b" className="ch4-body" reveal />
+                <Block>
+                  <T r="§40.a" className="ch4-body" reveal />
+                  <T r="§40.b" className="ch4-body" reveal />
+                </Block>
               </Section>
 
               <div className="ch4-end" ref={endRef} data-reveal>
