@@ -1,13 +1,13 @@
 /* A measuring probe for chapter 3, not a gate. It answers one question:
    WHERE is the page crowded, and WHAT repeats?
 
-   Run with the dev server up:  node scripts/ch3-probe.mjs (from web/)        */
+   Run with the dev server up:  node scripts/ch2-probe.mjs (from web/)        */
 import puppeteer from 'puppeteer-core'
 import { mkdir } from 'node:fs/promises'
 
 const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const PAGE = process.env.PAGE ?? 'http://localhost:3000/chapter3'
-const OUT = new URL('../../concept/chapter3/probe/', import.meta.url)
+const PAGE = process.env.PAGE ?? 'http://localhost:3000/chapter2'
+const OUT = new URL('../../concept/chapter2/probe/', import.meta.url)
 await mkdir(OUT, { recursive: true })
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new' })
@@ -25,10 +25,6 @@ await page.evaluate(async () => {
 })
 await new Promise((r) => setTimeout(r, 400))
 
-/* force every reveal on: a fullPage shot otherwise photographs opacity:0 */
-await page.addStyleTag({ content: '[data-reveal]{opacity:1!important;transform:none!important}' })
-await new Promise((r) => setTimeout(r, 200))
-
 const report = await page.evaluate(() => {
   const words = (s) => s.trim().split(/\s+/).filter(Boolean).length
   const secs = [...document.querySelectorAll('.article-section')]
@@ -43,27 +39,27 @@ const report = await page.evaluate(() => {
       paragraphs: paras.length,
       words: wpp.reduce((a, b) => a + b, 0),
       wordsPerPara: paras.length ? +(wpp.reduce((a, b) => a + b, 0) / paras.length).toFixed(1) : 0,
-      subs: s.querySelectorAll('.ch3-sub').length,
+      subs: s.querySelectorAll('.ch2-sub').length,
       devices: {
-        lineage: s.querySelectorAll('.ch3-lineage').length,
-        heavens: s.querySelectorAll('.ch3-heavens').length,
-        readings: s.querySelectorAll('.ch3-readings').length,
-        verse: s.querySelectorAll('.ch3-verse').length,
-        statement: s.querySelectorAll('.ch3-statement').length,
-        plate: s.querySelectorAll('.ch3-plate').length,
+        lineage: s.querySelectorAll('.ch2-lineage').length,
+        heavens: s.querySelectorAll('.ch2-heavens').length,
+        readings: s.querySelectorAll('.ch2-readings').length,
+        verse: s.querySelectorAll('.ch2-verse').length,
+        statement: s.querySelectorAll('.ch2-statement').length,
+        plate: s.querySelectorAll('.ch2-plate').length,
       },
       /* what shape does this section have, read top to bottom? */
       shape: [...s.children]
         .map((c) => {
           if (c.classList.contains('section-heading')) return 'H'
-          if (c.classList.contains('ch3-sub')) return 'h'
-          if (c.classList.contains('ch3-hero')) return 'BANNER'
-          if (c.classList.contains('ch3-plate')) return 'IMG'
-          if (c.classList.contains('ch3-verse')) return 'VERSE'
-          if (c.classList.contains('ch3-statement')) return 'STMT'
-          if (c.classList.contains('ch3-lineage')) return 'LINEAGE'
-          if (c.classList.contains('ch3-heavens')) return 'LADDER'
-          if (c.classList.contains('ch3-readings')) return 'READINGS'
+          if (c.classList.contains('ch2-sub')) return 'h'
+          if (c.classList.contains('ch2-hero')) return 'BANNER'
+          if (c.classList.contains('ch2-plate')) return 'IMG'
+          if (c.classList.contains('ch2-verse')) return 'VERSE'
+          if (c.classList.contains('ch2-statement')) return 'STMT'
+          if (c.classList.contains('ch2-lineage')) return 'LINEAGE'
+          if (c.classList.contains('ch2-heavens')) return 'LADDER'
+          if (c.classList.contains('ch2-readings')) return 'READINGS'
           if (c.tagName === 'P') return 'p'
           return c.tagName.toLowerCase()
         })
@@ -77,7 +73,7 @@ const report = await page.evaluate(() => {
     const k = el.getAttribute('src') || '(none)'
     imgs[k] = (imgs[k] ?? 0) + 1
   }
-  const bg = getComputedStyle(document.querySelector('.ch3-hero-media')).backgroundImage
+  const bg = getComputedStyle(document.querySelector('.ch2-hero-media')).backgroundImage
   if (bg && bg !== 'none') {
     const m = bg.match(/url\("?([^")]+)"?\)/)
     if (m) imgs[m[1].replace(location.origin, '') + ' (background)'] = 1
@@ -94,25 +90,12 @@ const report = await page.evaluate(() => {
     }
   }
 
-  /* the audit's own test: a section is off-axis if it centres something or
-     places a block wider than 920px */
-  const colW = document.querySelector('.ch3-body')?.getBoundingClientRect().width ?? 0
-  const offAxis = secs.filter((s) =>
-    [...s.querySelectorAll('*')].some((el) => {
-      const w = el.getBoundingClientRect().width
-      const cs = getComputedStyle(el)
-      return w > 920 || (cs.textAlign === 'center' && el.textContent.trim().length > 20)
-    }),
-  ).map((s) => s.id)
-
   const article = document.querySelector('.chapter-article')
   return {
     totalHeight: Math.round(article.scrollHeight),
     sections,
     imgs,
     gaps: [...new Set(gaps)].sort((a, b) => a - b),
-    offAxis,
-    colW: Math.round(colW),
   }
 })
 
@@ -137,5 +120,5 @@ for (const [k, n] of Object.entries(report.imgs)) console.log(`  ${n}×  ${k}`)
 console.log('\nמרווחים אנכיים שנמדדו בפועל:', report.gaps.join(', '))
 
 await page.screenshot({ path: new URL('full.png', OUT).pathname.slice(1), fullPage: true })
-console.log('\nצילום מלא: concept/chapter3/probe/full.png')
+console.log('\nצילום מלא: concept/chapter2/probe/full.png')
 await browser.close()

@@ -18,7 +18,7 @@
           "id": "opening",
           "speaker": "narrator",
           "kind": "cinematic",
-          "film": "scene2.mp4",
+          "film": "opening.mp4",
           "notebook": 1,
           "lines": [
             {
@@ -29,7 +29,8 @@
               "source": "§0",
               "text": "תקופה המכונה ג׳אהליה — תקופת הבערות והברבריות."
             }
-          ]
+          ],
+          "filmOnce": true
         }
       ],
       "core": [

@@ -46,7 +46,12 @@ interface Sub {
 }
 interface LayoutSection {
   id: string
-  title: string
+  /** most section titles are the source's running head, copied into the layout */
+  title?: string
+  /** …but where the running head IS a fragment of the source, the title reads it
+      from there instead. §4.ask was printed twice — once as this section's title
+      and once as a Statement under it, in two different sets of quote marks. */
+  titleRef?: string
   subs?: Sub[]
 }
 const LAYOUT = layoutData as unknown as { sections: LayoutSection[] }
@@ -235,11 +240,21 @@ const pick = (ref: string, phrase: string): string => {
 
 /** The section heading — chapter 6's `.section-heading` with its diamond.
     One ornament per heading and nowhere else; the audit fails on a loose one. */
+/** A section's title. Usually the source's running head copied into the layout;
+    where that head is itself a fragment, it is READ from the fragment so the
+    same words cannot appear twice in two different sets of quote marks. */
+const titleOf = (id: string): string => {
+  const s = meta(id)
+  if (s.titleRef) return text(s.titleRef)
+  if (!s.title) throw new Error(`chapter 3: section ${id} has no title`)
+  return s.title
+}
+
 function Head({ id }: { id: string }) {
   return (
     <header className="section-heading" data-reveal>
       <div>
-        <h2 id={`${id}-title`}>{meta(id).title}</h2>
+        <h2 id={`${id}-title`}>{titleOf(id)}</h2>
       </div>
       <div className="title-ornament section-ornament" aria-hidden="true">
         <span />
@@ -308,6 +323,56 @@ function Statement({ r }: { r: string }) {
     <p className="ch3-statement" data-reveal>
       {text(r)}
     </p>
+  )
+}
+
+/* ---------------- a note on the story, not the story ----------------
+
+   THE PAGE SHOWED EVERYTHING AT ONCE and read as a wall. Chapter 2 holds 950
+   source words and puts ~556 on screen, because its stage and its four dialogs
+   ABSORB the rest; this chapter refused those devices on fidelity grounds and
+   so printed all 1,544 words in one run.
+
+   What folds here is never the story. It is the material that comments ON the
+   story — an etymology, what the commentators make of a passage, a dispute
+   about a word, the counter-argument Mecca made. A first read runs clean; the
+   reader who wants the apparatus opens it.
+
+   NOTHING IS DELETED AND NOTHING LEAVES THE DOM. The text is always rendered
+   and only clipped by CSS — no `hidden`, no `inert`, no conditional render.
+   That is the same rule chapter 2's dialogs follow, and for the same two
+   reasons: the presence gate proves every fragment reaches the page, and
+   ChapterSearch walks the DOM. A note that holds a search hit opens itself. */
+function Note({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+
+  /* if the in-chapter search lands inside a closed note, the note opens: a hit
+     the reader cannot see is worse than no hit at all */
+  useEffect(() => {
+    const el = bodyRef.current
+    if (!el || open) return
+    const onFind = () => setOpen(true)
+    el.addEventListener('focusin', onFind)
+    return () => el.removeEventListener('focusin', onFind)
+  }, [open])
+
+  return (
+    <div className={'ch3-note' + (open ? ' is-open' : '')} data-reveal>
+      <button
+        type="button"
+        className="ch3-note-btn"
+        aria-expanded={open}
+        aria-controls={`${id}-body`}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="ch3-note-mark" aria-hidden="true" />
+        {label}
+      </button>
+      <div className="ch3-note-body" id={`${id}-body`} ref={bodyRef}>
+        <div className="ch3-body">{children}</div>
+      </div>
+    </div>
   )
 }
 
@@ -675,7 +740,7 @@ export default function Chapter3() {
                     }}
                   >
                     <span className="menu-num">{String(i + 1).padStart(2, '0')}</span>
-                    <span className="menu-label">{s.title}</span>
+                    <span className="menu-label">{titleOf(s.id)}</span>
                     {doneSections.has(s.id) && (
                       <svg className="menu-done" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M5 12.5 10 17.5 19 7.5" />
@@ -793,7 +858,6 @@ export default function Chapter3() {
                   Statement. */}
               <Section id="today">
                 <Head id="today" />
-                <Statement r="§4.ask" />
                 <div className="ch3-body" data-reveal>
                   <T r="§4.a" />
                   <T r="§4.b" />
@@ -816,17 +880,28 @@ export default function Chapter3() {
                   <T r={['§7.name', '§7.a']} em={['שבט קריש']} />
                   <T r="§7.b" />
                 </div>
-                <Lineage />
+                {/* THE STRIP IS THE SECTION'S EVENT, NOT A MARGIN NOTE. It sat
+                    beside the prose for a while and the hierarchy stopped
+                    reading: at .92fr against a column of text it looked like an
+                    aside, when it is what §8 and §12 are actually about. Full
+                    width, on its own ground, with a full step of air either
+                    side — an object in the column, which is what chapter 2's
+                    devices are too. */}
                 <div className="ch3-body" data-reveal>
                   <T r="§12.a" />
-                  {/* §9.a ends on a bracket, §9.b opens with a vav — one sentence */}
-                  <T r={['§9.a', '§9.b']} />
                 </div>
+                <Lineage />
                 <div className="ch3-body" data-reveal>
                   <T r="§10.a" />
+                </div>
+                <Note id="n-abdallah" label="על השם עבד אללה">
+                  {/* §9.a ends on a bracket, §9.b opens with a vav — one sentence */}
+                  <T r={['§9.a', '§9.b']} />
+                </Note>
+                <Note id="n-heart" label="מה אומרים פרשני המסורות">
                   <T r="§11.a" />
                   <T r="§11.verse" />
-                </div>
+                </Note>
               </Section>
 
               {/* ============ 04 · ח'דיג'ה ============
@@ -961,6 +1036,11 @@ export default function Chapter3() {
                   <T r="§36.a" em={['המסגד הקיצון']} />
                   <T r="§36.b" />
                   <T r="§37.a" />
+                </div>
+                {/* NO DEVICE FOR THE TWO JARS. A pair would have to split §37.b
+                    — one sentence naming both — into a half per jar, and the
+                    source does not divide it. Same rule that keeps §29 prose. */}
+                <div className="ch3-body" data-reveal>
                   <T r="§37.b" />
                   <T r="§37.c" />
                 </div>
@@ -968,16 +1048,32 @@ export default function Chapter3() {
                   <T r="§38.a" />
                   <T r="§38.b" />
                 </div>
-                <SubHead section="night" id="heavens" />
-                <div className="ch3-body" data-reveal>
-                  <T r="§39.a" />
-                </div>
-                <Heavens />
-                <div className="ch3-body" data-reveal>
-                  <T r="§40.a" />
-                  <T r="§40.b" />
-                  <T r="§40.c" />
-                  <T r="§40.d" />
+              </Section>
+
+              {/* ============ 09 · העליה לשמים ============
+                  SPLIT OUT OF SECTION 08 AFTER MEASUREMENT. The two halves ran
+                  3,398px together — a third of the page, read as one unbroken
+                  run. The argument against splitting was that the source's head
+                  joins them; the head is „המסע הלילי והעליה לשמים", which names
+                  TWO things and joins them with a vav. That is not one running
+                  head over one topic, which is the case chapter 2 had to undo.
+                  Both names are the source's own words, out of §42.a. */}
+              <Section id="ascent">
+                <Head id="ascent" />
+                <SubHead section="ascent" id="heavens" />
+                {/* the ladder beside the prose it explains. §40 depends on the
+                    geometry — Muhammad comes back DOWN past Moses — so the
+                    negotiation reads better with the rungs still on screen than
+                    scrolled off above it. */}
+                <div className="ch3-beside">
+                  <div className="ch3-body" data-reveal>
+                    <T r="§39.a" />
+                    <T r="§40.a" />
+                    <T r="§40.b" />
+                    <T r="§40.c" />
+                    <T r="§40.d" />
+                  </div>
+                  <Heavens />
                 </div>
                 <div className="ch3-body" data-reveal>
                   <T r="§41.a" />

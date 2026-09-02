@@ -16,7 +16,7 @@ def import_fbx(path):
 # 1) walk: mesh + armature + action
 objs = import_fbx(DIR + r"\player-walk.fbx")
 arm = next(o for o in objs if o.type == 'ARMATURE')
-mesh = next(o for o in objs if o.type == 'MESH')
+mesh = max((o for o in objs if o.type == 'MESH'), key=lambda o: len(o.data.vertices))
 walk_act = arm.animation_data.action
 walk_act.name = 'walk'
 
@@ -65,6 +65,12 @@ mat.node_tree.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
 bsdf.inputs['Roughness'].default_value = 0.85
 mesh.data.materials.clear()
 mesh.data.materials.append(mat)
+
+# Mixamo's stray icosphere survives the per-step sweeps — drop everything
+# that is not the rig or the body before export.
+for o in list(bpy.data.objects):
+    if o not in {arm, mesh}:
+        bpy.data.objects.remove(o, do_unlink=True)
 
 # 4) stash all actions on the armature so the glTF exporter emits 3 animations
 FINAL = ('idle', 'walk', 'run', 'talk', 'talk-ack', 'talk-happy', 'talk-nod')

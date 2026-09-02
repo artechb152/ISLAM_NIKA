@@ -33,6 +33,12 @@
   --flow-tight:clamp(14px,1.8vw,20px);/* a sub-heading to its own first line */
 
   --measure:880px;   /* the reading column's ceiling            */
+  /* A DEVICE IS AN EVENT, NOT A PARAGRAPH. All three sat at --measure, so they
+     were exactly as wide as the prose and broke nothing: the page read as one
+     880px ribbon from the banner to the hand-off. The audit counts a block as
+     leaving the reading column only above 920px, so on that test the chapter
+     scored a single off-axis moment — the centred statement — and not four. */
+  --wide:min(1120px,100%);
   --lh:1.82;         /* leading for every block set at --read   */
 }
 
@@ -147,7 +153,7 @@
    HTML and CSS and not SVG: Hebrew text in SVG flows right-to-left from its x,
    and that trap has already cost this project a labelling bug. */
 .ch3-lineage{
-  width:100%;max-width:var(--measure,880px);
+  width:100%;max-width:var(--wide);
   display:grid;gap:clamp(16px,2vw,26px);
   padding:clamp(20px,2.6vw,30px);
   background:var(--mat);border:1px solid var(--edge);
@@ -173,7 +179,7 @@
    carried by the source's own ordinals, which it already prints. */
 .ch3-heavens{
   list-style:none;margin:0;padding:0;
-  width:100%;max-width:var(--measure,880px);
+  width:100%;max-width:var(--wide);
   display:grid;gap:0;counter-reset:rung;
   border-inline-start:2px solid var(--edge);
 }
@@ -204,7 +210,7 @@
    journey reached Jerusalem at all, and §43 ties the city's sanctity to jihad
    terror. Both sentences print as prose below the figure, always — the toggle
    changes which rail is drawn and nothing else. */
-.ch3-readings{width:100%;max-width:var(--measure,880px);display:grid}
+.ch3-readings{width:100%;max-width:var(--wide);display:grid}
 .ch3-read-legend{display:flex;flex-wrap:wrap;gap:10px}
 .ch3-read-btn{
   font-family:var(--font-body);font-size:15px;font-weight:600;
@@ -485,3 +491,58 @@
   background:var(--maroon);vertical-align:0.28em;margin-inline-end:10px;
 }
 
+
+/* ============================ the rail's second level ============================
+   The nine sub-headings ride under their section in the rail, so eight entries
+   stay eight entries while the reader can still reach אלבראק or שבעה רקיעים
+   directly.
+
+   ⚠ COLLAPSED, THE RAIL IS A STRIP OF NUMBERS ONLY. Chapter 6 hides
+   `.menu-label` there, and these labels have to go with it — otherwise the strip
+   fills with wrapped Hebrew and stops being a strip. This whole block lived only
+   in chapter2-article.css, which this chapter does not load, so the sub-list
+   rendered unstyled: nine wrapped Hebrew labels between the section numbers,
+   with the section names pushed out of the 76px rail entirely. */
+.chapter-drawer.is-collapsed .menu-subs{display:none}
+.menu-subs{list-style:none;margin:2px 0 8px;padding:0}
+.menu-subs li{position:relative}
+.menu-subs a{
+  display:block;padding:5px 46px 5px 18px;font-size:15px;color:var(--muted);
+  text-decoration:none;border-radius:7px;
+}
+.menu-subs a:hover{color:var(--maroon);background:rgba(138,39,51,.06)}
+/* the movement the reader is actually in */
+.menu-subs a.is-current{color:var(--maroon);font-weight:700}
+.menu-subs a.is-current::before{
+  content:"";position:absolute;inset-inline-start:30px;width:5px;height:5px;border-radius:50%;
+  background:var(--maroon);translate:0 .95em;
+}
+/* the jump target clears the sticky masthead with room to spare — 96px landed
+   the heading above the fold once the reveal had settled */
+.ch3-sub{scroll-margin-top:calc(var(--header-height) + 84px)}
+
+/* ============================ prose beside a device ============================
+   THE PAGE WAS DENSE IN THE COLUMN AND EMPTY BESIDE IT. The prose ran at
+   --measure and every device sat UNDERNEATH it, so the reader met a wall on the
+   reading edge and a field of bare parchment on the outer one — and the devices
+   made the page taller instead of using the space that was already there.
+
+   Chapter 2's `.ch2-withmap` answers exactly this: the prose keeps the reading
+   edge, the device takes the outer one, and they share a row. Each column
+   carries its own ceiling rather than the pair being capped, so the device is
+   pinned to the outer edge instead of drifting inward on a wide screen. */
+@media (min-width:1100px){
+  .chapter-article .ch3-beside{
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);
+    /* the row step is the chapter's flow; the column gap is a different
+       relationship and must not share the same number */
+    gap:var(--flow) clamp(26px,2.8vw,44px);
+    align-content:start;
+  }
+  /* the wrapper's children are the two columns, so nothing inside them may
+     carry the flow rule's own top margin and push one column out of line */
+  .chapter-article .ch3-beside > * + *{margin-top:0}
+  .chapter-article .ch3-beside .ch3-body{max-width:none}
+  .chapter-article .ch3-beside .ch3-lineage,
+  .chapter-article .ch3-beside .ch3-heavens{max-width:none;margin-top:0}
+}

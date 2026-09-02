@@ -1501,7 +1501,8 @@ function WalkingExtra({ live, cx, cz, rx, rz, speed, phase, tint }: {
       }
       ;(m.material as THREE.Material).side = THREE.DoubleSide
     })
-    fitToGround(c, 1.72)
+    /* אותו ריג Mixamo כמו השחקן — Box3 לא מודד עור, הסקאלה מפורשת */
+    c.scale.setScalar(1.72 / 1.885)
     return c
   }, [walkScene, tint])
   const { actions } = useAnimations(walkAnims, model)
@@ -2047,9 +2048,10 @@ function Player({ live }: { live: Live }) {
         pm.metalness = 0
       }
     })
-    /* אותו נרמול כמו של ראאווי — עם עדכוני המטריצה שבלעדיהם Box3 מודד
-       גיאומטריה גולמית בסנטימטרים והדמות נעלמת */
-    fitToGround(c, 1.78)
+    /* ריג ה-Mixamo של השחקן: גיאומטריית ה-bind זעירה (‎~0.8 יח') ומתנפחת
+       דרך עצמות — Box3 מודד אותה, לא את העור, ו-fitToGround מגדיל פי מאות.
+       הגובה המסוקן האמיתי בסקאלה 1 נמדד ב-Blender: 1.885 מ', רגליים על אפס. */
+    c.scale.setScalar(1.78 / 1.885)
     return c
   }, [walkScene])
   const { actions } = useAnimations(walkAnims, model)

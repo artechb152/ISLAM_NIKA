@@ -825,12 +825,12 @@
       "r": 0.55
     },
     {
-      "model": "kaaba",
+      "model": "sanctuary-hero",
       "x": 9.115,
       "z": -8.875,
       "ry": 0.12,
-      "h": 4.6,
-      "r": 6.2
+      "h": 5.4,
+      "r": 2.4
     },
     {
       "model": "mudtower",
