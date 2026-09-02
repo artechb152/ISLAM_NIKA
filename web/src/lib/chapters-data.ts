@@ -59,8 +59,14 @@ export const chapterCategories: CategoryDef[] = [
     title: 'ראשית האסלאם',
     icon: 'person',
     chapters: [
-      ch(3, 'ראשית חיי מוחמד'),
-      ch(4, 'ההג׳רה והקרבות'),
+      ch(3, 'ראשית חיי מוחמד', {
+        href: '/chapter3',
+        available: true,
+      }),
+      ch(4, 'ההג׳רה והקרבות', {
+        href: '/chapter4',
+        available: true,
+      }),
       ch(5, 'שאלת הירושה והח׳ליפים ישרי הדרך'),
     ],
   },
