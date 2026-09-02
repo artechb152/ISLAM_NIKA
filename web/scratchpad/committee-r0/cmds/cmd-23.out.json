@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "value": [
+    {
+      "t": "✦",
+      "x": 0,
+      "y": 0,
+      "visible": false
+    },
+    {
+      "t": "✦",
+      "x": 1361,
+      "y": 438,
+      "visible": true
+    },
+    {
+      "t": "?",
+      "x": 0,
+      "y": 0,
+      "visible": false
+    }
+  ]
+}

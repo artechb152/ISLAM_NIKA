@@ -1,0 +1,13 @@
+await page.keyboard.press('m');
+await page.waitForTimeout(1200);
+const t = await page.evaluate(() => document.body.innerText);
+await page.screenshot({ path: base + '/15-map-open.png', timeout: 60000 });
+await page.keyboard.press('Escape');
+await page.waitForTimeout(600);
+await page.keyboard.press('j');
+await page.waitForTimeout(1200);
+const t2 = await page.evaluate(() => document.body.innerText);
+await page.screenshot({ path: base + '/16-notebook-open.png', timeout: 60000 });
+await page.keyboard.press('Escape');
+await page.waitForTimeout(600);
+return { map: t.slice(0, 1200), notebook: t2.slice(0, 1500) };

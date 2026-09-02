@@ -700,7 +700,7 @@ const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
    traveler-walk. The game stopped loading all three when the player took
    Rawi's skeleton and the walk came from traveler-anim instead; the constants
    outlived the code that used them. */
-const MODEL_TRAVELER_WALK = '/assets/chapter1/models/player2.glb'
+const MODEL_TRAVELER_WALK = '/assets/chapter1/models/player4.glb'
 const MODEL_PALM = '/assets/chapter1/models/palm.glb'
 const MODEL_WELL = '/assets/chapter1/models/well.glb'
 const MODEL_ROCKS = '/assets/chapter1/models/rocks.glb'
@@ -1226,16 +1226,28 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
     () => (REGION_TASK ? REGION_TASK.options.filter((o) => o.prop) : []),
     [],
   )
-  /* מיקומים חיים — בית קבוע לכל חפץ, ומיקום נוכחי שהגרירה מזיזה */
+  /* מיקומים חיים — בית קבוע לכל חפץ, יעד משלו (spot של האופציה או התחנה),
+     ומיקום נוכחי שהגרירה מזיזה */
   const state = useRef(
     opts.map((o, i) => {
       const spot = TASK_PROP_SPOTS[i % TASK_PROP_SPOTS.length]
       const home = { x: (REGION_TASK?.x ?? 0) + spot.dx, z: (REGION_TASK?.z ?? 0) + spot.dz }
-      return { id: o.id, home, cur: { ...home }, lift: 0, returning: false, placed: false }
+      const tgt = {
+        x: (REGION_TASK?.x ?? 0) + (o.spot?.dx ?? 0),
+        z: (REGION_TASK?.z ?? 0) + (o.spot?.dz ?? 0),
+      }
+      return { id: o.id, home, tgt, cur: { ...home }, lift: 0, hop: 0, returning: false, placed: false }
     }),
   )
   const dragging = useRef<number>(-1)
+  const hovering = useRef<number>(-1)
+  const nearTarget = useRef(false)
+  const solvedAt = useRef(0)
   const [, force] = useState(0)
+
+  /* טבעת יעד + טבעת hover — חומרים בסיסיים, מחוץ לטווח של Painterly */
+  const targetRing = useRef<THREE.Mesh>(null)
+  const hoverRing = useRef<THREE.Mesh>(null)
 
   useEffect(() => {
     if (!REGION_TASK || !opts.length) return
@@ -1260,24 +1272,39 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
         z: camera.position.z + dir.z * t,
       }
     }
+    const hitAt = (cx: number, cy: number) => {
+      for (let i = 0; i < state.current.length; i++) {
+        if (state.current[i].placed || chosen.includes(state.current[i].id)) continue
+        const p = project(i)
+        if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < 70) return i
+      }
+      return -1
+    }
     const down = (e: PointerEvent) => {
       /* פאנל פתוח מעל הקנבס: לחיצה עליו לא תופסת פרופ שמאחוריו */
       if (e.target !== gl.domElement) return
       if (solvedTask || dragging.current >= 0) return
-      for (let i = 0; i < state.current.length; i++) {
-        if (state.current[i].placed || chosen.includes(state.current[i].id)) continue
-        const p = project(i)
-        if (!p.behind && Math.hypot(p.x - e.clientX, p.y - e.clientY) < 70) {
-          dragging.current = i
-          state.current[i].returning = false
-          live.taskDrag = true
-          break
-        }
+      const i = hitAt(e.clientX, e.clientY)
+      if (i >= 0) {
+        dragging.current = i
+        state.current[i].returning = false
+        live.taskDrag = true
+        gl.domElement.style.cursor = 'grabbing'
+        /* מגע: בלי capture הדפדפן עלול לחטוף את הרצף באמצע */
+        ;(gl.domElement as Element).setPointerCapture?.(e.pointerId)
       }
     }
     const move = (e: PointerEvent) => {
       const i = dragging.current
-      if (i < 0) return
+      if (i < 0) {
+        /* hover: היד יודעת שאפשר להרים עוד לפני הלחיצה */
+        const h = solvedTask ? -1 : hitAt(e.clientX, e.clientY)
+        if (h !== hovering.current) {
+          hovering.current = h
+          gl.domElement.style.cursor = h >= 0 ? 'grab' : ''
+        }
+        return
+      }
       const st = state.current[i]
       const g = toPlane(e.clientX, e.clientY, groundYAt(st.home.x, st.home.z) + 0.3)
       /* לא נותנים לסחוב את התשובה מחוץ לזירה */
@@ -1288,32 +1315,52 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
       st.cur.x = (REGION_TASK?.x ?? 0) + dx * cap
       st.cur.z = (REGION_TASK?.z ?? 0) + dz * cap
       st.lift = 0.55
+      nearTarget.current = Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z) < 1.6
     }
-    const up = () => {
-      const i = dragging.current
-      if (i < 0) return
+    const drop = (i: number) => {
       dragging.current = -1
       live.taskDrag = false
+      gl.domElement.style.cursor = ''
       const st = state.current[i]
       st.lift = 0
-      const d = Math.hypot(st.cur.x - (REGION_TASK?.x ?? 0), st.cur.z - (REGION_TASK?.z ?? 0))
-      if (d < 1.05) {
+      /* נדיב: שחרור בקרבת היעד נספר — אף פעם לא דיוק-פיקסל */
+      const d = Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z)
+      if (d < 1.6) {
         const opt = opts[i]
         if (opt.right) st.placed = true
-        else st.returning = true
+        else {
+          st.returning = true
+          st.hop = 1 /* קפיצת סירוב — העולם עונה, לא רק הפאנל */
+        }
         onChoose(opt.id)
       } else {
         st.returning = true
       }
+      nearTarget.current = false
       force((n) => n + 1)
+    }
+    const up = () => {
+      if (dragging.current >= 0) drop(dragging.current)
+    }
+    const cancel = () => {
+      const i = dragging.current
+      if (i < 0) return
+      dragging.current = -1
+      live.taskDrag = false
+      gl.domElement.style.cursor = ''
+      state.current[i].lift = 0
+      state.current[i].returning = true
     }
     window.addEventListener('pointerdown', down, true)
     window.addEventListener('pointermove', move, true)
     window.addEventListener('pointerup', up, true)
+    window.addEventListener('pointercancel', cancel, true)
     return () => {
       window.removeEventListener('pointerdown', down, true)
       window.removeEventListener('pointermove', move, true)
       window.removeEventListener('pointerup', up, true)
+      window.removeEventListener('pointercancel', cancel, true)
+      gl.domElement.style.cursor = ''
       live.taskDrag = false
     }
   }, [camera, gl, live, opts, chosen, solvedTask, onChoose])
@@ -1321,14 +1368,66 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
   useFrame((_, dt) => {
     for (let i = 0; i < state.current.length; i++) {
       const st = state.current[i]
+      if (st.hop > 0) st.hop = Math.max(0, st.hop - dt * 3)
       if (st.placed) {
-        /* תשובה נכונה נחה על התחנה ונשארת שם */
-        st.cur.x += ((REGION_TASK?.x ?? 0) - st.cur.x) * Math.min(1, dt * 6)
-        st.cur.z += ((REGION_TASK?.z ?? 0) - st.cur.z) * Math.min(1, dt * 6)
+        st.cur.x += (st.tgt.x - st.cur.x) * Math.min(1, dt * 6)
+        st.cur.z += (st.tgt.z - st.cur.z) * Math.min(1, dt * 6)
+        /* אחרי הפתרון: החפצים שוקעים אל תוך התחנה — הארגז "נסגר" */
+        if (solvedTask && solvedAt.current > 0) {
+          const k = Math.min(1, (performance.now() - solvedAt.current) / 700)
+          st.lift = -0.35 * k
+        }
       } else if (st.returning) {
         st.cur.x += (st.home.x - st.cur.x) * Math.min(1, dt * 5)
         st.cur.z += (st.home.z - st.cur.z) * Math.min(1, dt * 5)
         if (Math.hypot(st.cur.x - st.home.x, st.cur.z - st.home.z) < 0.03) st.returning = false
+      }
+    }
+    if (solvedTask && solvedAt.current === 0) solvedAt.current = performance.now()
+    /* טבעות: יעד בזמן גרירה (מודגשת בקרבה), hover על חפץ פנוי */
+    const tr = targetRing.current
+    if (tr) {
+      const d = dragging.current
+      tr.visible = d >= 0 && !solvedTask
+      if (tr.visible) {
+        const st = state.current[d]
+        tr.position.set(st.tgt.x, groundYAt(st.tgt.x, st.tgt.z) + 0.03, st.tgt.z)
+        const near = nearTarget.current
+        const target = near ? 1.35 : 1.0
+        tr.scale.x += (target - tr.scale.x) * Math.min(1, dt * 10)
+        tr.scale.y = tr.scale.z = tr.scale.x
+        ;(tr.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.55
+      }
+    }
+    const hr = hoverRing.current
+    if (hr) {
+      const h = dragging.current < 0 ? hovering.current : -1
+      hr.visible = h >= 0 && !solvedTask
+      if (hr.visible) {
+        const st = state.current[h]
+        hr.position.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + 0.03, st.cur.z)
+      }
+    }
+    /* חלון לסוכני Playwright: מיקומי מסך חיים של החפצים והיעד */
+    if (process.env.NODE_ENV !== 'production' && atTask) {
+      const r = gl.domElement.getBoundingClientRect()
+      const vv = new THREE.Vector3()
+      const d0 = dragging.current >= 0 ? dragging.current : 0
+      const st0 = state.current[d0]
+      vv.set(st0.tgt.x, groundYAt(st0.tgt.x, st0.tgt.z), st0.tgt.z).project(camera)
+      const tgtScreen = { x: (vv.x * 0.5 + 0.5) * r.width + r.left, y: (-vv.y * 0.5 + 0.5) * r.height + r.top }
+      ;(window as unknown as Record<string, unknown>).__ch1Task = {
+        props: state.current.map((st) => {
+          vv.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + 0.3, st.cur.z).project(camera)
+          return {
+            id: st.id,
+            x: (vv.x * 0.5 + 0.5) * r.width + r.left,
+            y: (-vv.y * 0.5 + 0.5) * r.height + r.top,
+            placed: st.placed || chosen.includes(st.id),
+          }
+        }),
+        target: tgtScreen,
+        dragging: dragging.current,
       }
     }
   })
@@ -1336,10 +1435,20 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
   if (!REGION_TASK || !opts.length) return null
   return (
     <group>
+      {/* טבעת היעד — נדלקת בזמן גרירה, מתרחבת ומתבהרת בקרבת snap */}
+      <mesh ref={targetRing} rotation-x={-Math.PI / 2} visible={false} renderOrder={2}>
+        <ringGeometry args={[0.55, 0.72, 40]} />
+        <meshBasicMaterial color="#e8bf76" transparent opacity={0.55} depthWrite={false} />
+      </mesh>
+      {/* טבעת hover — "את זה אפשר להרים" */}
+      <mesh ref={hoverRing} rotation-x={-Math.PI / 2} visible={false} renderOrder={2}>
+        <ringGeometry args={[0.3, 0.4, 32]} />
+        <meshBasicMaterial color="#f5ecd6" transparent opacity={0.8} depthWrite={false} />
+      </mesh>
       {opts.map((o, i) => {
         const st = state.current[i]
         return (
-          <group key={o.id} position={[st.cur.x - st.home.x, st.lift, st.cur.z - st.home.z]}>
+          <group key={o.id} position={[st.cur.x - st.home.x, st.lift + Math.sin(st.hop * Math.PI) * 0.3, st.cur.z - st.home.z]}>
             <TaskProp
               url={`/assets/chapter1/models/${o.prop!.model}.glb`}
               tint={o.prop!.tint}

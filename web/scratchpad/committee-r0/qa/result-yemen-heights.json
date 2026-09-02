@@ -1,0 +1,148 @@
+{
+  "region": "yemen-heights",
+  "task": "task-compare",
+  "results": {
+    "A.open": {
+      "opened": true,
+      "atTask": true
+    },
+    "A.fit1902": {
+      "vw": 1902,
+      "vh": 942,
+      "card": {
+        "top": 47.1,
+        "bottom": 414.4,
+        "left": 681,
+        "right": 1221,
+        "w": 540,
+        "h": 367.3
+      },
+      "fitsViewport": true,
+      "scrolls": false,
+      "scrollBy": 0,
+      "closeBtnText": "אחר כך",
+      "closeBtnVisible": true,
+      "footRect": {
+        "top": 355.8,
+        "bottom": 391.8
+      }
+    },
+    "A.lockedState": {
+      "observe": false,
+      "observeText": null,
+      "lockedBtns": [
+        "שחיו כאן אנשים שבנו, עיבדו וכתבו · עוד לא נמצא — חפשו סביב (F)",
+        "שכל מה שמסופר על התקופה נכון · עוד לא נמצא — חפשו סביב (F)",
+        "שאי אפשר לדעת דבר על התקופה · עוד לא נמצא — חפשו סביב (F)"
+      ],
+      "disabledBtns": 3
+    },
+    "A.escape": {
+      "closedOnEscape": true,
+      "reopened": true
+    },
+    "A.find.find-terrace-inscription": {
+      "near": "find-terrace-inscription",
+      "opened": true
+    },
+    "A.reopenAfterFinds": {
+      "opened": true,
+      "atTask": true
+    },
+    "A.wrongNote": {
+      "text": "זה בדיוק מה שהיא לא יכולה להוכיח. המסורת נכתבה מאוחר, ובמבט ביקורתי יש לקחת אותה בעירבון מוגבל. האבן מעידה על עצמה — לא עליה.",
+      "right": false
+    },
+    "A.firstRightNote": {
+      "text": "בדיוק. אבן לא משקרת על מה שחקוק בה: נוכחות, בנייה, שפה. זו עדות חומרית — הסוג שאפשר לגעת בו.",
+      "right": true
+    },
+    "A.solvedAfterFirstRight": [
+      "task-compare"
+    ],
+    "A.reload.overlay": {
+      "dialog": false,
+      "issues": "[data-next-badge-root]{--timing:cubic-bezier(0.23,0.88,0.26,0.92);--duration-long:250ms;--color-outer-border:#171717;--c"
+    },
+    "A.reload.state": {
+      "opened": false,
+      "taken": [],
+      "progress": null,
+      "solved": [
+        "task-compare"
+      ],
+      "found": [
+        "find-terrace-inscription"
+      ],
+      "doneShown": false
+    },
+    "A.done": {
+      "done": null,
+      "solved": [
+        "task-compare"
+      ]
+    },
+    "A.fitDone1902": null,
+    "A.closedAfterDone": true,
+    "B.open": {
+      "opened": true,
+      "atTask": true
+    },
+    "B.fit1366": {
+      "vw": 1366,
+      "vh": 768,
+      "card": {
+        "top": 38.4,
+        "bottom": 405.7,
+        "left": 413,
+        "right": 953,
+        "w": 540,
+        "h": 367.3
+      },
+      "fitsViewport": true,
+      "scrolls": false,
+      "scrollBy": 0,
+      "closeBtnText": "אחר כך",
+      "closeBtnVisible": true,
+      "footRect": {
+        "top": 347.1,
+        "bottom": 383.1
+      }
+    },
+    "B.keyboard": {
+      "steps": [
+        {
+          "step": "שבנו",
+          "ok": true,
+          "tabs": 6
+        }
+      ],
+      "doneB": {
+        "done": true,
+        "focusInPanel": false,
+        "focusedTag": "BODY"
+      },
+      "closeKb": {
+        "ok": true,
+        "tabs": 1,
+        "focused": {
+          "tag": "BUTTON",
+          "cls": "hud-card-btn is-primary",
+          "text": "הלאה"
+        }
+      },
+      "closed": true
+    }
+  },
+  "shots": [
+    "yemen-heights-A-fresh-1902.png",
+    "yemen-heights-A-wrong.png",
+    "yemen-heights-A-right.png",
+    "yemen-heights-A-after-reload.png",
+    "yemen-heights-A-done.png",
+    "yemen-heights-B-fresh-1366.png",
+    "yemen-heights-B-done-1366.png"
+  ],
+  "errorsA": [],
+  "errorsB": []
+}

@@ -1,0 +1,4 @@
+{
+  "ok": false,
+  "error": "page.evaluate: TypeError: (l.markerEls || []).map is not a function\n    at eval (eval at evaluate (:311:30), <anonymous>:4:39)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)\n    at eval (<anonymous>:3:37)\n    at eval (<anonymous>:11:3)\n    at C:\\Users\\nikag\\ISLAM_NIKA\\web\\scratchpad\\committee-r0\\driver.js:33:43"
+}

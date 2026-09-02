@@ -200,11 +200,13 @@ try {
     }
     const doneB = await pb.evaluate(() => ({
       done: !!document.querySelector('.ch1-task-done'),
-      focused: (document.activeElement && document.activeElement.textContent || '').trim().slice(0, 40),
+      focusInPanel: !!(document.activeElement && document.activeElement.closest && document.activeElement.closest('.ch1-task')),
+      focusedTag: document.activeElement ? document.activeElement.tagName : null,
     }));
-    if (doneB.done) { await pb.keyboard.press('Enter'); await pb.waitForTimeout(300); }
+    let closeKb = null;
+    if (doneB.done) { closeKb = await tabToAndEnter(pb, 'הלאה', 40); await pb.waitForTimeout(300); }
     const closedB = await pb.locator('.ch1-task').count() === 0;
-    log('B.keyboard', { steps: kb, doneB, closedByEnter: closedB });
+    log('B.keyboard', { steps: kb, doneB, closeKb, closed: closedB });
     R.shots.push(await shot(pb, region + '-B-done-1366'));
   }
   R.errorsB = B.errors;

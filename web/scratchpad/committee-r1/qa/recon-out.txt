@@ -1,0 +1,353 @@
+=== WORLD UI ===
+<div>
+<script #_R_> "self.__next_r="yRL-atXXbB7qaNfOx7Vb8""
+<script>
+<script> "(self.__next_f=self.__next_f||[]).push([0])"
+<script> "self.__next_f.push([1,"7:\"$Sreact.fragment\"\n9:I[\"(app-pages-browser)/./node_"
+<script> "self.__next_f.push([1,"ll,\"$2d\",1],\"templateStyles\":\"$undefined\",\"templat"
+<script> "self.__next_f.push([1,"0:{\"P\":\"$1\",\"c\":[\"\",\"chapter1?region=night-camp\"
+<script> "self.__next_f.push([1,"71:[]\n53:D\"$72\"\n53:\"$W71\"\n60:D\"$73\"\n60:[[\"$\","
+<script>
+  <nextjs-portal>
+<next-route-announcer>
+<div .ch1-page>
+  <header .chapter-site-header>
+    <div .chapter-site-header-inner>
+      <div .chapter-hdr-start>
+        <button .chapter-logo>
+          <img>
+      <div .ch1-topbar-actions>
+        <button .ch1-sound-btn>
+          <svg>
+            <path>
+            <path>
+        <button .ch1-journal-btn>
+          <svg>
+            <path>
+  <div .ch1-stage>
+    <div>
+      <div>
+        <canvas>
+    <div .ch1-vignette>
+    <div .ch1-arrive.is-gone>
+      <span> "מחנה הלילה"
+    <div .poi-marker.is-find-marker>
+      <span .poi-find-pin> "✦"
+      <span .poi-act>
+        <b> "F"
+      <span .poi-marker-stem>
+      <span .poi-marker-foot>
+      <span .ch1-visually-hidden> "חרסים ליד הבאר"
+    <div .poi-marker.is-find-marker>
+      <span .poi-find-pin> "✦"
+      <span .poi-act>
+        <b> "F"
+      <span .poi-marker-stem>
+      <span .poi-marker-foot>
+      <span .ch1-visually-hidden> "צרור לבונה"
+    <div .poi-marker.is-task-marker>
+      <span .poi-task-badge> "?"
+      <span .poi-act>
+        <b> "E"
+      <span .poi-marker-stem>
+      <span .poi-marker-foot>
+      <span .ch1-visually-hidden> "לאן יוצאים עם שחר"
+    <button .hud-controls-peek>
+      <i .hud-key> "H"
+    <div .poi-hints>
+      <div .hud-panel.poi-hint.is-rawi-hint>
+        <i .hud-key> "R"
+        <span> "דברו עם רָאוִי"
+    <div .hud-panel.hud-goal>
+      <span> "מחנה הלילה"
+      <span .hud-progress>
+        <i>
+      <span> "מחברת: 2 מתוך 26"
+      <span .hud-goal-evidence> "עדויות: 0 מתוך 21"
+    <div .hud-panel.hud-map>
+      <svg>
+        <defs>
+          <clippath #mapClip>
+            <circle>
+        <circle>
+        <g>
+          <circle>
+          <polyline>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <g>
+            <circle>
+          <g>
+            <circle>
+            <circle>
+          <g>
+            <circle>
+          <g>
+            <circle>
+          <g>
+            <circle>
+            <circle>
+          <g>
+            <path>
+        <circle>
+        <circle>
+        <text> "N"
+=== STATION UI ===
+<div>
+<script #_R_> "self.__next_r="yRL-atXXbB7qaNfOx7Vb8""
+<script>
+<script> "(self.__next_f=self.__next_f||[]).push([0])"
+<script> "self.__next_f.push([1,"7:\"$Sreact.fragment\"\n9:I[\"(app-pages-browser)/./node_"
+<script> "self.__next_f.push([1,"ll,\"$2d\",1],\"templateStyles\":\"$undefined\",\"templat"
+<script> "self.__next_f.push([1,"0:{\"P\":\"$1\",\"c\":[\"\",\"chapter1?region=night-camp\"
+<script> "self.__next_f.push([1,"71:[]\n53:D\"$72\"\n53:\"$W71\"\n60:D\"$73\"\n60:[[\"$\","
+<script>
+  <nextjs-portal>
+<next-route-announcer>
+<div .ch1-page>
+  <header .chapter-site-header>
+    <div .chapter-site-header-inner>
+      <div .chapter-hdr-start>
+        <button .chapter-logo>
+          <img>
+      <div .ch1-topbar-actions>
+        <button .ch1-sound-btn>
+          <svg>
+            <path>
+            <path>
+        <button .ch1-journal-btn>
+          <svg>
+            <path>
+  <div .ch1-stage>
+    <div>
+      <div>
+        <canvas>
+    <div .ch1-vignette>
+    <div .ch1-arrive.is-gone>
+      <span> "מחנה הלילה"
+    <div .poi-marker.is-find-marker>
+      <span .poi-find-pin> "✦"
+      <span .poi-act>
+        <b> "F"
+      <span .poi-marker-stem>
+      <span .poi-marker-foot>
+      <span .ch1-visually-hidden> "חרסים ליד הבאר"
+    <div .poi-marker.is-find-marker>
+      <span .poi-find-pin> "✦"
+      <span .poi-act>
+        <b> "F"
+      <span .poi-marker-stem>
+      <span .poi-marker-foot>
+      <span .ch1-visually-hidden> "צרור לבונה"
+    <div .poi-marker.is-task-marker.is-near>
+      <span .poi-task-badge> "?"
+      <span .poi-act>
+        <b> "E"
+      <span .poi-marker-stem>
+      <span .poi-marker-foot>
+      <span .ch1-visually-hidden> "לאן יוצאים עם שחר"
+    <button .hud-controls-peek>
+      <i .hud-key> "H"
+    <div .poi-hints>
+      <div .hud-panel.poi-hint.is-rawi-hint>
+        <i .hud-key> "R"
+        <span> "דברו עם רָאוִי"
+    <div .hud-panel.hud-goal>
+      <span> "מחנה הלילה"
+      <span .hud-progress>
+        <i>
+      <span> "מחברת: 2 מתוך 26"
+      <span .hud-goal-evidence> "עדויות: 0 מתוך 21"
+    <div .hud-panel.hud-map>
+      <svg>
+        <defs>
+          <clippath #mapClip>
+            <circle>
+        <circle>
+        <g>
+          <circle>
+          <polyline>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <circle>
+          <g>
+            <circle>
+          <g>
+            <circle>
+            <circle>
+          <g>
+            <circle>
+          <g>
+            <circle>
+          <g>
+            <circle>
+            <circle>
+          <g>
+            <path>
+        <circle>
+        <circle>
+        <text> "N"
+    <div .ch1-task>
+      <div .ch1-task-card>
+        <p .ch1-task-eyebrow> "רָאוִי"
+        <h3 #ch1-task-title> "לאן יוצאים עם שחר"
+        <p .ch1-task-question> "המפה פרושה על החול לאור המדורה. אנחנו כאן, ברמות תימן — והשיירה יוצאת עם שחר. הר"
+        <svg>
+          <rect>
+          <path>
+          <text> "הים האדום"
+          <text> "הרובע הריק"
+          <text> "אין בארות"
+          <path>
+          <circle>
+          <text> "המחנה · רמות תימן"
+          <circle>
+          <text> "תחנת הגבול"
+          <circle>
+          <text> "ית׳רב"
+          <circle>
+          <text> "מכה"
+          <path>
+          <path>
+        <div .ch1-task-options>
+          <button .hud-card-btn> "צפונה — בדרך הבשמים"
+          <button .hud-card-btn> "מזרחה — לקצר דרך המדבר"
+          <button .hud-card-btn> "דרומה — חזרה אל הנמלים"
+        <div .ch1-task-foot>
+          <button .hud-card-btn> "אחר כך"
+=== ERRORS ===
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')
+[pageerror] TypeError: Cannot read properties of undefined (reading 'tgt')

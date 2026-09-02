@@ -1,0 +1,178 @@
+{
+  "region": "night-camp",
+  "phases": {
+    "finds": [],
+    "open1902": {
+      "opened": true
+    },
+    "fit1902": {
+      "present": true,
+      "vw": 1902,
+      "vh": 942,
+      "card": {
+        "top": 47.1,
+        "bottom": 711.9,
+        "left": 681,
+        "right": 1221,
+        "w": 540,
+        "h": 664.8
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 664,
+      "clientH": 664,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "escape": {
+      "closedByEsc": true,
+      "reopened": true,
+      "progressAfter": null,
+      "selectedAfter": 0
+    },
+    "reload": {
+      "partialDesc": "clicked wrong option",
+      "progressBefore": null,
+      "noteBefore": "תסתכל מה יש שם על המפה: כלום. מדבר החול הגדול בעולם, בלי באר אחת. שיירה הולכת עם הדרך, לא נגדה.",
+      "nextDlg": false,
+      "hudAfter": "מחנה הלילהמחברת: 2 מתוך 26עדויות: 0 מתוך 21",
+      "reopenAfterReload": true,
+      "progressAfterReload": null,
+      "findsStillNeeded": 0
+    },
+    "feedback": {
+      "steps": [
+        {
+          "act": "wrong",
+          "note": {
+            "cls": "ch1-task-note",
+            "text": "תסתכל מה יש שם על המפה: כלום. מדבר החול הגדול בעולם, בלי באר אחת. שיירה הולכת עם הדרך, לא נגדה."
+          },
+          "optsDisabled": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "act": "after-wait",
+          "optsDisabled": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "act": "right",
+          "note": {
+            "cls": "ch1-task-note is-right",
+            "text": "זו הדרך. לאורך ההרים במערב חצי האי — מים בכל תחנה ושווקים בדרך, וכל מה שמחכה לנו: תחנת הגבול, ית׳רב, ומכה."
+          },
+          "done": "המסלול סומן: צפונה בדרך הבשמים. עם שחר — יוצאים."
+        }
+      ]
+    },
+    "postDone": {
+      "closedAfterDone": true,
+      "reopenAfterComplete": false,
+      "doneProgress": null,
+      "hud": "מחנה הלילהמחברת: 2 מתוך 26עדויות: 0 מתוך 21"
+    },
+    "fit1366": {
+      "present": true,
+      "vw": 1366,
+      "vh": 768,
+      "card": {
+        "top": 38.4,
+        "bottom": 703.2,
+        "left": 413,
+        "right": 953,
+        "w": 540,
+        "h": 664.8
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 664,
+      "clientH": 664,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "keyboard": {
+      "openedB": true,
+      "focusTrace": [
+        {
+          "t": "NEXTJS-PORTAL",
+          "txt": "",
+          "inPanel": false,
+          "cls": ""
+        },
+        {
+          "t": "NEXTJS-PORTAL",
+          "txt": "",
+          "inPanel": false,
+          "cls": ""
+        },
+        {
+          "t": "NEXTJS-PORTAL",
+          "txt": "",
+          "inPanel": false,
+          "cls": ""
+        },
+        {
+          "t": "BUTTON",
+          "txt": "",
+          "inPanel": false,
+          "cls": "chapter-logo"
+        },
+        {
+          "t": "BUTTON",
+          "txt": "",
+          "inPanel": false,
+          "cls": "ch1-sound-btn"
+        },
+        {
+          "t": "BUTTON",
+          "txt": "מחברת המסע",
+          "inPanel": false,
+          "cls": "ch1-journal-btn"
+        },
+        {
+          "t": "BUTTON",
+          "txt": "H מקשים",
+          "inPanel": false,
+          "cls": "hud-controls-peek"
+        },
+        {
+          "t": "BUTTON",
+          "txt": "צפונה — בדרך הבשמים",
+          "inPanel": true,
+          "cls": "hud-card-btn"
+        }
+      ],
+      "initialFocus": "BODY|self.__next_r=\"f_G1OFpvc_6kjyC",
+      "foundRight": true,
+      "done": true,
+      "noteCls": "ch1-task-note is-right",
+      "advFocused": true,
+      "closed": false
+    }
+  },
+  "errorSummary": {
+    "count": 280,
+    "unique": [
+      "TypeError: Cannot read properties of undefined (reading 'tgt')"
+    ],
+    "phases": [
+      "open-1902",
+      "escape",
+      "partial",
+      "reload",
+      "feedback"
+    ]
+  },
+  "errorsB": 100
+}

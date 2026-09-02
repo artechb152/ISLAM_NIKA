@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "value": {
+    "me": {
+      "x": 3.2,
+      "y": 0,
+      "z": -9.7
+    },
+    "yaw": 13.750000000000004,
+    "nearWho": null,
+    "nearFind": null,
+    "atTask": false,
+    "rawiPos": {
+      "x": 2.4300542040306867,
+      "z": -10.979624049492742
+    },
+    "markerKeys": []
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "value": {
+    "keys": [
+      "player",
+      "yaw",
+      "keys",
+      "markerEls",
+      "nearWho",
+      "nearFind",
+      "atTask",
+      "colliders",
+      "dynamic",
+      "lastDrag",
+      "rawiPos",
+      "talk",
+      "riseAt",
+      "taskDrag"
+    ],
+    "player": "x,y,z"
+  }
+}

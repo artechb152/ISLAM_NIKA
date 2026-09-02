@@ -1,0 +1,12 @@
+await page.keyboard.down('a');
+await page.waitForTimeout(600);
+await page.keyboard.up('a');
+await page.keyboard.down('w');
+await page.waitForTimeout(1000);
+await page.keyboard.up('w');
+await page.waitForTimeout(300);
+await page.keyboard.press('f');
+await page.waitForTimeout(1500);
+const t = await page.evaluate(() => document.body.innerText);
+await page.screenshot({ path: base + '/20-yemen-evidence1.png', timeout: 60000 });
+return t.slice(0, 1200);

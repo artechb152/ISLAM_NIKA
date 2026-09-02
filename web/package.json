@@ -32,7 +32,8 @@
     "check-walkable": "node scripts/check-walkable.mjs",
     "check-playable": "node scripts/check-playable.mjs",
     "check-layouts": "node scripts/check-layouts.mjs",
-    "check-interactions": "node scripts/check-interactions.mjs"
+    "check-interactions": "node scripts/check-interactions.mjs",
+    "ch3:verify": "node ../concept/chapter3/verify-chapter3.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

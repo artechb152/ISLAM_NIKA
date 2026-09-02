@@ -26,6 +26,10 @@ export interface TaskOption {
   right?: boolean
   /** present tasks: locked until this evidence was picked up (F) */
   needsFind?: string
+  /** הצבה בעולם: יעד ההנחה של הפרופ הזה, כהיסט מהתחנה (מטרים).
+      בלעדיו — היעד הוא התחנה עצמה. במכה כל חפץ פולחן מתיישב בעמדה
+      משלו סביב האבנים. */
+  spot?: { dx: number; dz: number }
   /** which bin this item belongs in (`sort` tasks) */
   bin?: string
   /** `sort` tasks: what is said when it lands on the wrong side. The

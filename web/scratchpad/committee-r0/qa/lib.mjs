@@ -18,6 +18,8 @@ export async function openRegion(browser, region, opts = {}) {
   const nb = { seen, entries: [], region, found, solved };
   await page.addInitScript(({ region, nb }) => {
     try {
+      if (localStorage.getItem('qa:seeded')) return; // seed once; reloads keep real progress
+      localStorage.setItem('qa:seeded', '1');
       localStorage.setItem('ch1:intro:v1', '1');
       localStorage.setItem('ch1:arrived:' + region + ':v1', '1');
       localStorage.setItem('ch1:notebook:v1', JSON.stringify(nb));
@@ -43,17 +45,25 @@ export async function teleport(page, x, z, ms = 800) {
   await page.waitForTimeout(ms);
 }
 
+async function teleportUntil(page, x, z, check, tries = 14) {
+  for (let i = 0; i < tries; i++) {
+    await page.evaluate(([x, z]) => { window.__ch1Live.player.set(x, 0, z); }, [x, z]);
+    await page.waitForTimeout(i === 0 ? 800 : 400);
+    const v = await page.evaluate(check);
+    if (v) return v;
+  }
+  return null;
+}
+
 export async function openStation(page, x, z) {
-  await teleport(page, x, z);
-  const at = await page.evaluate(() => window.__ch1Live.atTask);
+  const at = await teleportUntil(page, x, z, () => window.__ch1Live.atTask);
   await page.keyboard.press('e');
-  try { await page.waitForSelector('.ch1-task', { state: 'visible', timeout: 4000 }); return { opened: true, atTask: at }; }
-  catch { return { opened: false, atTask: at }; }
+  try { await page.waitForSelector('.ch1-task', { state: 'visible', timeout: 4000 }); return { opened: true, atTask: !!at }; }
+  catch { return { opened: false, atTask: !!at }; }
 }
 
 export async function pickFind(page, x, z) {
-  await teleport(page, x, z);
-  const near = await page.evaluate(() => window.__ch1Live.nearFind);
+  const near = await teleportUntil(page, x, z, () => window.__ch1Live.nearFind);
   await page.keyboard.press('f');
   let opened = false;
   try { await page.waitForSelector('.ch1-find', { state: 'visible', timeout: 4000 }); opened = true; } catch {}
@@ -106,12 +116,15 @@ export async function errorOverlay(page) {
   return page.evaluate(() => {
     const dlg = document.querySelector('[data-nextjs-dialog]');
     const portal = document.querySelector('nextjs-portal');
-    let badge = null;
+    let issues = null;
     if (portal && portal.shadowRoot) {
-      const b = portal.shadowRoot.querySelector('[data-issues]') || portal.shadowRoot.querySelector('[data-nextjs-toast]');
-      if (b) badge = b.textContent.trim().slice(0, 120);
+      const sr = portal.shadowRoot;
+      for (const el of sr.querySelectorAll('[data-issues], [data-nextjs-toast], [data-next-badge], button, [role="button"]')) {
+        const t = (el.textContent || '').trim();
+        if (t && /issue|error/i.test(t) && t.length < 200) { issues = t.slice(0, 120); break; }
+      }
     }
-    return { dialog: !!dlg, portal: !!portal, badge };
+    return { dialog: !!dlg, issues };
   });
 }
 

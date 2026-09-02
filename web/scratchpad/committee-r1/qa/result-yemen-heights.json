@@ -1,0 +1,150 @@
+{
+  "region": "yemen-heights",
+  "phases": {
+    "locked": {
+      "opened": true,
+      "lockTexts": [
+        "· עוד לא נמצא — חפשו סביב (F)"
+      ]
+    },
+    "finds": [
+      {
+        "fx": -9.4,
+        "fz": 12.6,
+        "got": true
+      }
+    ],
+    "open1902": {
+      "opened": true
+    },
+    "fit1902": {
+      "present": true,
+      "vw": 1902,
+      "vh": 942,
+      "card": {
+        "top": 47.1,
+        "bottom": 414.4,
+        "left": 681,
+        "right": 1221,
+        "w": 540,
+        "h": 367.3
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 366,
+      "clientH": 366,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "escape": {
+      "closedByEsc": true,
+      "reopened": true,
+      "progressAfter": null,
+      "selectedAfter": 0
+    },
+    "reload": {
+      "partialDesc": "clicked wrong option",
+      "progressBefore": null,
+      "noteBefore": "זה בדיוק מה שהיא לא יכולה להוכיח. המסורת נכתבה מאוחר, ובמבט ביקורתי יש לקחת אותה בעירבון מוגבל. האבן מעידה על עצמה — לא עליה.",
+      "nextDlg": false,
+      "hudAfter": "רמות תימןמחברת: 1 מתוך 26עדויות: 1 מתוך 21",
+      "reopenAfterReload": true,
+      "progressAfterReload": null,
+      "findsStillNeeded": 0
+    },
+    "feedback": {
+      "steps": [
+        {
+          "act": "wrong",
+          "note": {
+            "cls": "ch1-task-note",
+            "text": "זה בדיוק מה שהיא לא יכולה להוכיח. המסורת נכתבה מאוחר, ובמבט ביקורתי יש לקחת אותה בעירבון מוגבל. האבן מעידה על עצמה — לא עליה."
+          },
+          "optsDisabled": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "act": "after-wait",
+          "optsDisabled": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "act": "right",
+          "note": {
+            "cls": "ch1-task-note is-right",
+            "text": "בדיוק. אבן לא משקרת על מה שחקוק בה: נוכחות, בנייה, שפה. זו עדות חומרית — הסוג שאפשר לגעת בו."
+          },
+          "done": "רשמתי את הכלל הראשון של המסע: מה שחקוק מוכיח; מה שמסופר — נבחן בזהירות."
+        }
+      ]
+    },
+    "postDone": {
+      "closedAfterDone": true,
+      "reopenAfterComplete": false,
+      "doneProgress": null,
+      "hud": "רמות תימןמחברת: 1 מתוך 26עדויות: 1 מתוך 21"
+    },
+    "fit1366": {
+      "present": true,
+      "vw": 1366,
+      "vh": 768,
+      "card": {
+        "top": 38.4,
+        "bottom": 405.7,
+        "left": 413,
+        "right": 953,
+        "w": 540,
+        "h": 367.3
+      },
+      "cardInView": true,
+      "overflowY": "visible",
+      "scrollH": 366,
+      "clientH": 366,
+      "scrollable": false,
+      "closeText": "אחר כך",
+      "closeInView": true,
+      "anyBtnClipped": false
+    },
+    "keyboard": {
+      "openedB": true,
+      "focusTrace": [
+        {
+          "t": "BUTTON",
+          "txt": "שחיו כאן אנשים שבנו, עיבדו וכת",
+          "inPanel": true,
+          "cls": "hud-card-btn"
+        }
+      ],
+      "initialFocus": "BODY|self.__next_r=\"YU_oezCD8mlXVH9",
+      "foundRight": true,
+      "done": true,
+      "noteCls": "ch1-task-note is-right",
+      "advFocused": true,
+      "closed": false
+    }
+  },
+  "errorSummary": {
+    "count": 554,
+    "unique": [
+      "TypeError: Cannot read properties of undefined (reading 'tgt')"
+    ],
+    "phases": [
+      "locked-open",
+      "finds",
+      "open-1902",
+      "escape",
+      "partial",
+      "reload",
+      "feedback"
+    ]
+  },
+  "errorsB": 102
+}
