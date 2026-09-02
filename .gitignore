@@ -23,3 +23,7 @@ web/scratchpad/scene-*/
 web/scratchpad/keys/
 web/scratchpad/sort-*/
 web/scratchpad/transition/
+
+# Playwright committee recordings are evidence, not source — too big for GitHub
+web/scratchpad/committee-*/video/
+*.webm
