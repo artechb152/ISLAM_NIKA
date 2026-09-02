@@ -630,3 +630,17 @@
   object-fit:cover;
 }
 .ch4-trench-text{padding:18px 24px 20px}
+
+/* ------------------- the rail when it is collapsed --------------------
+   THE BUG THIS FIXES. Collapsed, the rail is a slim column of numbers:
+   chapter6-article.css hides `.menu-label`, and every section keeps only its
+   two digits. The sub-headings this chapter added have no number and no
+   `.menu-label` around them, so they went on printing their full titles into a
+   column too narrow to hold them — „ארבע קבוצות אנשים" broke over three lines
+   between 01 and 02, and the rail read as rubble.
+
+   A slim rail is a rail of numbers. The movements inside a section are not
+   numbered and have nothing to show there, so they step out until it opens
+   again; every one of their anchors is still on the page and still reachable
+   from the open rail. */
+.chapter-drawer.is-collapsed .menu-subs{display:none}
