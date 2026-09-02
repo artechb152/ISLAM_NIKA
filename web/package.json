@@ -27,6 +27,7 @@
     "camp:export": "node scripts/camp.mjs export",
     "camp:import": "node scripts/camp.mjs import",
     "ch2:verify": "node ../concept/chapter2/verify-chapter2.mjs",
+    "ch4:verify": "node ../concept/chapter4/verify-chapter4.mjs",
     "ch2:audit": "node ../concept/chapter2/audit.mjs",
     "check-journey": "node scripts/check-journey.mjs",
     "check-walkable": "node scripts/check-walkable.mjs",

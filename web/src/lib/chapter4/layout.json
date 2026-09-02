@@ -1,0 +1,310 @@
+{
+  "$note": "הפריסה: אילו קטעים יושבים בכל מקטע, ובאיזה תפקיד. הקומפוננטה קוראת מכאן ולא כותבת טקסט. verify-chapter4.mjs מוודא שכל 118 הקטעים נצרכים כאן בדיוק פעם אחת — חוץ מ-§41.year, שמסומן omitted ולכן אסור לו להופיע.\n\nמבנה: חמישה חלקים ו-28 מקטעים, לפי concept/chapter4/STRUCTURE.md. הסדר ההיסטורי רץ נקי 622→632, ו-§32–§40 מוזזים לחלק ה׳ — הם דיון בפסיקת הלכה מודרנית, והמקור עצמו נתן להם כותרת נפרדת.\n\nשדה device הוא הצהרת כוונה לקומפוננטה, לא קוד. הגייט לא בודק אותו.",
+  "parts": [
+    { "id": "opening", "title": "פתיחה" },
+    { "id": "hijra", "title": "חלק א׳ · ההגירה" },
+    { "id": "battles", "title": "חלק ב׳ · הקרבות" },
+    { "id": "treaty", "title": "חלק ג׳ · ההסכם" },
+    { "id": "decision", "title": "חלק ד׳ · ההכרעה" },
+    { "id": "today", "title": "חלק ה׳ · חודיביה היום" }
+  ],
+  "sections": [
+    {
+      "id": "leaving",
+      "part": "opening",
+      "title": "למה הוא נאלץ לעזוב",
+      "device": "hero video + lead",
+      "$note": "שתים-עשרה שנים במכה שלא הצליחו. §0.b נושא את המספר, והוא משפט המפתח של הבאנר.",
+      "slots": { "lead": ["§0.a"], "key": ["§0.b"] }
+    },
+
+    {
+      "id": "road",
+      "part": "hijra",
+      "title": "הדרך לית'רב",
+      "device": "map-timeline · 622",
+      "$note": "המופע הראשון של המפה-ציר: 300 ק\"מ צפונה. §2 נושא את המתח בין „בריחה“ ל„הזמנה“ — שתי הגרסאות זו לצד זו, בלי הכרעה, ולכן שני סלוטים ולא פסקה אחת.",
+      "slots": {
+        "lead": ["§1.a", "§1.b"],
+        "versionFlight": ["§2.flight"],
+        "versionInvited": ["§2.invited"]
+      }
+    },
+    {
+      "id": "groups",
+      "part": "hijra",
+      "title": "ארבע הקבוצות",
+      "device": "four cards",
+      "$note": "רשימת הנפשות הפועלות. כל הפרק נשען עליה, ולכן היא מקטע ולא פסקה.",
+      "slots": {
+        "lead": ["§3.a", "§3.b"],
+        "cards": ["§3.muhajirun", "§3.ansar", "§3.jews", "§3.quraysh"]
+      }
+    },
+    {
+      "id": "covenant",
+      "part": "hijra",
+      "title": "חוזה האומה",
+      "device": "running text",
+      "$note": "§4 מה נהיה, §8 מה החוזה כלל ואיך התפרק. שני הסעיפים לא צמודים במקור אבל הם נושא אחד.",
+      "slots": {
+        "became": ["§4.a", "§4.b"],
+        "terms": ["§8.a", "§8.b"],
+        "unravel": ["§8.c", "§8.d"]
+      }
+    },
+    {
+      "id": "meaning",
+      "part": "hijra",
+      "title": "מה ההגירה אומרת",
+      "device": "running text + echo box",
+      "slots": {
+        "lead": ["§5.a", "§5.b"],
+        "echo": ["§6.echo1", "§6.echo2"]
+      }
+    },
+    {
+      "id": "mosque",
+      "part": "hijra",
+      "title": "הגמל והמסגד",
+      "device": "running text + illustration",
+      "slots": { "lead": ["§7.a", "§7.b", "§7.c"] }
+    },
+
+    {
+      "id": "turn",
+      "part": "battles",
+      "title": "מהטפה לג'האד",
+      "device": "turning point",
+      "$note": "צומת הפרק. מכאן והלאה זה קרבות — טיפוגרפיה שמסמנת מעבר, לא כותרת רגילה.",
+      "slots": { "lead": ["§9.a"], "consequence": ["§9.b", "§9.c"] }
+    },
+    {
+      "id": "badr",
+      "part": "battles",
+      "title": "קרב בדר",
+      "device": "map-timeline · 624 + force-balance + film",
+      "$note": "סרט הפרק יושב כאן: הגשם על מחנה אבו ג'הל, הדו-קרב. §11.muslims ו-§11.quraysh הם שני פסי מאזן הכוחות — 300 מול 1000 — ולכן סלוט משלהם.",
+      "slots": {
+        "lead": ["§10.a", "§10.b"],
+        "approach": ["§11.a"],
+        "forceMuslims": ["§11.muslims"],
+        "forceQuraysh": ["§11.quraysh"],
+        "film": ["§12.rain", "§12.duel"],
+        "outcome": ["§13.a", "§13.b"]
+      }
+    },
+    {
+      "id": "badr-quran",
+      "part": "battles",
+      "title": "בדר בקוראן",
+      "device": "verse cards + echo box",
+      "slots": {
+        "lead": ["§14.a"],
+        "verse1": ["§14.verse"],
+        "intro2": ["§15.a"],
+        "verse2": ["§15.verse"],
+        "echo": ["§15.echo"]
+      }
+    },
+    {
+      "id": "ramadan",
+      "part": "battles",
+      "title": "רמדאן וההשראה",
+      "device": "echo box",
+      "slots": { "lead": ["§16.a"], "echo": ["§16.echo"] }
+    },
+    {
+      "id": "uhud",
+      "part": "battles",
+      "title": "קרב אֻחֻד",
+      "device": "map-timeline · 625 + force-balance",
+      "$note": "אותו מנגנון מאזן כוחות כמו בדר, והיחס מתהפך: 1000 מול 3000. זה מה שהמנגנון אומר, ולכן הוא מופיע פעמיים בלבד בפרק.",
+      "slots": {
+        "lead": ["§17.a"],
+        "forceQuraysh": ["§17.quraysh"],
+        "forceMuslims": ["§17.muslims"],
+        "fear": ["§18.a", "§18.b"],
+        "outcome": ["§19.a", "§19.b", "§19.c"]
+      }
+    },
+    {
+      "id": "hamza",
+      "part": "battles",
+      "title": "חמזה",
+      "device": "saying card",
+      "$note": "בלי דימוי. §20.hind הוא הקשה בפרק, והוא נשאר טקסט.",
+      "slots": {
+        "lead": ["§20.a"],
+        "saying": ["§20.saying"],
+        "translit": ["§20.translit"],
+        "hind": ["§20.hind"]
+      }
+    },
+    {
+      "id": "shahids",
+      "part": "battles",
+      "title": "פסוק השהידים",
+      "device": "verse card + echo box",
+      "slots": {
+        "lead": ["§21.a"],
+        "intro": ["§21.b"],
+        "verse": ["§21.verse"],
+        "echo": ["§22.echo"]
+      }
+    },
+    {
+      "id": "trench",
+      "part": "battles",
+      "title": "קרב השוחה",
+      "device": "trench diagram · 627",
+      "$note": "הקרב היחיד שהרעיון שלו הוא גאומטריה — העיר, הצד הצפוני החשוף, החפירה. הדיאגרמה היא הנכס היחיד בפרק שנבנה מאפס. §23 נושא את שתי גרסאות הרקע, ולכן שני סלוטים.",
+      "slots": {
+        "lead": ["§23.a"],
+        "cause1": ["§23.cause1"],
+        "cause2": ["§23.cause2"],
+        "diagram": ["§24.trench"],
+        "storm": ["§24.storm"]
+      }
+    },
+    {
+      "id": "ahzab",
+      "part": "battles",
+      "title": "המחנות",
+      "device": "running text",
+      "slots": { "lead": ["§25.a"] }
+    },
+    {
+      "id": "qurayza",
+      "part": "battles",
+      "title": "בני קוריזה",
+      "device": "quiet typography · no image, no mechanism",
+      "$note": "הכרעת STRUCTURE: הגירוש וההריגה של השבטים היהודים מקבלים טקסט מלא וטיפוגרפיה שקטה, כמו „ואד אלבנת“ בפרק 2.",
+      "slots": { "lead": ["§26.a", "§26.b"] }
+    },
+
+    {
+      "id": "hudaybiyyah",
+      "part": "treaty",
+      "title": "חודיביה",
+      "device": "map-timeline · 628",
+      "slots": { "dream": ["§27.a", "§27.b"], "stopped": ["§28.a", "§28.b"] }
+    },
+    {
+      "id": "terms",
+      "part": "treaty",
+      "title": "מה נחתם",
+      "device": "concessions table",
+      "$note": "„על פניו כניעה“ — צריך לראות את שלושת הסעיפים כדי להבין למה. §30 הוא הטענה שכנגד.",
+      "slots": {
+        "concessions": ["§29.term1", "§29.term2", "§29.term3"],
+        "counter": ["§30.a", "§30.b"]
+      }
+    },
+    {
+      "id": "hudna",
+      "part": "treaty",
+      "title": "הודנה",
+      "device": "definition card",
+      "$note": "אחד משני המונחים שמחברים את חלק ג׳ לחלק ה׳. השני הוא מצלחה.",
+      "slots": { "definition": ["§31.a"] }
+    },
+
+    {
+      "id": "three-tribes",
+      "part": "decision",
+      "title": "שלושת השבטים",
+      "device": "quiet typography · no image, no mechanism",
+      "$note": "§41.year (השנה השגויה 246) מסומן omitted ואינו נצרך כאן — הגירוש מוצג ביחסו לקרב בדר, כפי שהמקור עושה לבני נדיר. ההשמטה ממתינה להכרעה ב-DECISIONS.md.",
+      "slots": {
+        "qaynuqa": ["§41.qaynuqa"],
+        "nadir": ["§41.nadir"],
+        "qurayza": ["§42.a"],
+        "khaybar": ["§43.a", "§43.b"]
+      }
+    },
+    {
+      "id": "khaybar",
+      "part": "decision",
+      "title": "ח'יבר",
+      "device": "map-timeline",
+      "slots": {
+        "forts": ["§44.a", "§44.b"],
+        "participants": ["§45.a", "§45.b"],
+        "ali": ["§46.a", "§46.b", "§46.c"]
+      }
+    },
+    {
+      "id": "slogan",
+      "part": "decision",
+      "title": "הסיסמה",
+      "device": "echo box · the chapter's one Arabic line",
+      "$note": "החריגה היחידה מכלל „תעתיק עברי בלבד“: הסיסמה מופיעה בערבית במקור.",
+      "slots": { "lead": ["§47.a"], "echo": ["§47.echo"] }
+    },
+    {
+      "id": "mecca",
+      "part": "decision",
+      "title": "כיבוש מכה",
+      "device": "map-timeline · 630",
+      "$note": "המעגל נסגר — הוא חוזר לעיר שממנה נאלץ לצאת ב-§0.",
+      "slots": { "breach": ["§48.a", "§48.b"], "conquest": ["§49.a", "§49.b"] }
+    },
+    {
+      "id": "death",
+      "part": "decision",
+      "title": "מותו של מוחמד",
+      "device": "quiet close · no mechanism, no next",
+      "slots": { "lead": ["§50.a", "§50.b"], "close": ["§51.a"] }
+    },
+
+    {
+      "id": "question",
+      "part": "today",
+      "title": "השאלה",
+      "device": "running text",
+      "slots": {
+        "lead": ["§32.a"],
+        "treaties": ["§32.list"],
+        "question": ["§32.b"],
+        "sources": ["§33.a"]
+      }
+    },
+    {
+      "id": "maslaha",
+      "part": "today",
+      "title": "מצלחה",
+      "device": "definition card",
+      "slots": { "definition": ["§34.a"], "applied": ["§34.b"] }
+    },
+    {
+      "id": "rulings",
+      "part": "today",
+      "title": "שלוש הפסיקות",
+      "device": "three mufti cards",
+      "$note": "אותה תבנית לשלושתם. §36 נספח לכרטיס של ג'ד אלחק ולא כרטיס רביעי.",
+      "slots": {
+        "egyptLead": ["§35.lead"],
+        "egyptPoints": ["§35.points"],
+        "egyptNote": ["§36.a"],
+        "saudiLead": ["§37.lead"],
+        "saudiPoint": ["§37.point"],
+        "saudiNote": ["§37.b"],
+        "arafatLead": ["§38.lead"],
+        "arafatQuote": ["§38.quote"]
+      }
+    },
+    {
+      "id": "against",
+      "part": "today",
+      "title": "מנגד",
+      "device": "running text + verse card",
+      "$note": "החלק לא נסגר בהסכמה, וזו הנקודה. אין מקטע סיכום אחריו.",
+      "slots": {
+        "qaradawi": ["§39.a"],
+        "verse": ["§39.verse"],
+        "charter": ["§40.a", "§40.b"]
+      }
+    }
+  ]
+}
