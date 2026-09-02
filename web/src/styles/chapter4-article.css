@@ -231,7 +231,14 @@
   content:'';display:inline-block;width:6px;height:6px;border-radius:50%;
   background:var(--maroon);vertical-align:0.28em;margin-inline-end:10px;
 }
-/* ======================= chapter 4's own devices =======================
+/* GROUND RULE FOR EVERY DEVICE BELOW: the ground is var(--paper), the page's
+   own colour. --surface (#faf4e6) is the sheet's "brightest raised inset" and
+   on screen it reads as a white card floating on parchment — the first build
+   used it for the cards, the force balance and the ruling cards, and all three
+   looked pasted on. Separation comes from the rule and the edge, never from a
+   lighter ground.
+
+   ======================= chapter 4's own devices =======================
    Five. Every one is markup around sentences that already exist; none of them
    introduces a colour, a font or a radius — the tokens all come from
    chapter6-article.css, which the route layout loads first.
@@ -289,7 +296,7 @@
   padding:16px 18px;
   border:1px solid var(--rule);
   border-block-start:2px solid var(--gold);
-  background:var(--surface);
+  background:var(--paper);
 }
 .ch4-card-name{
   margin:0 0 .4em;
@@ -314,7 +321,7 @@
   margin-block:var(--flow);
   padding:16px 18px;
   border-inline-start:3px solid var(--maroon);
-  background:var(--mat,var(--surface));
+  background:var(--paper);
 }
 .ch4-echo > *{margin:0}
 .ch4-echo > * + *{margin-block-start:.7em}
@@ -332,7 +339,7 @@
   margin-block:var(--flow);
   padding:14px 16px;
   border:1px solid var(--rule);
-  background:var(--surface);
+  background:var(--paper);
 }
 .ch4-force{margin:0}
 .ch4-force-a{color:var(--maroon)}
@@ -363,7 +370,7 @@
   margin-block:var(--flow);
   padding:20px 20px 18px;
   border:1px solid var(--gold-soft);
-  background:var(--paper,var(--surface));
+  background:var(--paper);
 }
 .ch4-def-term{
   display:inline-block;
@@ -388,7 +395,7 @@
   padding:18px 20px;
   border:1px solid var(--rule);
   border-inline-start:3px solid var(--gold);
-  background:var(--surface);
+  background:var(--paper);
 }
 .ch4-ruling-name{
   margin:0 0 .5em;
@@ -410,3 +417,21 @@
 .ch4-quiet .ch4-echo,
 .ch4-quiet .ch4-cards,
 .ch4-quiet .ch4-forces{display:none}
+
+/* --------------------------- a movement inside a section --------------
+   Ten sections instead of twenty-eight means the ones that were folded in
+   are sub-headings now. Quieter than a section heading and with no ornament:
+   the diamond belongs to the ten, and a second one at this level would say
+   the two ranks are the same rank. */
+.ch4-sub{
+  margin-block:var(--flow) var(--flow-tight,16px);
+  font-family:var(--font-heading);
+  font-size:clamp(17px,1.8vw,21px);
+  color:var(--maroon);
+}
+
+/* The quiet passages that sit INSIDE a louder section — the massacre of the
+   Qurayza inside the trench, the three tribes inside Khaybar. The section
+   around them carries a device; these paragraphs do not, and must not grow
+   one later. */
+.ch4-quiet-body{color:var(--read,var(--ink))}

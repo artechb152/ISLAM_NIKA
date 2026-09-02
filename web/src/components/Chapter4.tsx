@@ -52,7 +52,12 @@ interface LayoutSection {
 const LAYOUT = layoutData as unknown as { sections: LayoutSection[] }
 const SECTIONS = LAYOUT.sections
 /** the five parts — their titles are data, never literals in JSX */
-const PARTS = (layoutData as unknown as { parts: { id: string; title: string }[] }).parts
+/** a sub-heading own record — its title is data, never a literal in JSX */
+const sub = (sectionId: string, subId: string): Sub => {
+  const t = meta(sectionId).subs?.find((x) => x.id === subId)
+  if (!t) throw new Error(`chapter 4: unknown sub ${sectionId}/${subId}`)
+  return t
+}
 
 const meta = (id: string): LayoutSection => {
   const s = SECTIONS.find((x) => x.id === id)
@@ -291,14 +296,14 @@ function Statement({ r }: { r: string }) {
    their sections print their sentences in full — nothing is withheld from the
    reader, only from the page's decoration. */
 
-/** The head of one of the five parts. Its title is data, from layout.json. */
-function PartHead({ id }: { id: string }) {
-  const p = PARTS.find((x) => x.id === id)
-  if (!p) throw new Error(`chapter 4: unknown part ${id}`)
+/** A movement inside a section. With ten sections instead of twenty-eight,
+    what used to be a section of its own is a sub-heading here — and the rail
+    shows it nested, so no anchor was lost in the reduction. */
+function SubHead({ section, id }: { section: string; id: string }) {
   return (
-    <h2 className="ch4-part" id={`part-${id}`} data-reveal>
-      {p.title}
-    </h2>
+    <h3 className="ch4-sub" id={id} data-reveal>
+      {sub(section, id).title}
+    </h3>
   )
 }
 
@@ -646,10 +651,11 @@ export default function Chapter4() {
         <div className="chapter-content">
           <div className="chapter-layout">
             <main className="chapter-article" ref={articleRef}>
-              {/* ============ פתיחה · למה הוא נאלץ לעזוב ============
-                  הבאנר נושא את הדרך צפונה. §0.b הוא משפט המפתח — שתים־עשרה
-                  שנים שלא הצליחו — והוא היחיד בחלק הזה שיוצא מהעמודה. */}
-              <Section id="leaving" className="opening-section">
+              {/* ============ 01 · ההגירה למדינה ============
+                  המקטע הגדול בפרק, 25 קטעים, ולכן היחיד שנושא שתי תנועות.
+                  §2 נושא שתי גרסאות של אותו אירוע והמקור לא מכריע ביניהן —
+                  זו הסיבה שהן עומדות זו מול זו ולא זו אחרי זו. */}
+              <Section id="hijra" className="opening-section">
                 <div className="ch4-hero">
                   <div className="ch4-hero-media" aria-hidden="true">
                     <video
@@ -669,30 +675,16 @@ export default function Chapter4() {
                     <h1 className="ch4-hero-title">{CH4.title}</h1>
                   </div>
                 </div>
-                <Head id="leaving" />
+                <Head id="hijra" />
                 <T r="§0.a" className="ch4-body" reveal />
                 <Statement r="§0.b" />
-              </Section>
-
-              {/* ============ חלק א׳ · ההגירה ============ */}
-              <PartHead id="hijra" />
-
-              {/* §2 נושא שתי גרסאות של אותו אירוע, והמקור לא מכריע ביניהן.
-                  שתי הפסקאות עומדות זו מול זו ולא זו אחרי זו, כדי שהקורא
-                  יראה שזו מחלוקת ולא רצף. */}
-              <Section id="road">
-                <Head id="road" />
                 <T r={['§1.a', '§1.b']} className="ch4-body" reveal />
                 <div className="ch4-two" data-reveal>
                   <T r="§2.flight" className="ch4-body ch4-two-side" />
                   <T r="§2.invited" className="ch4-body ch4-two-side" />
                 </div>
-              </Section>
 
-              {/* ארבע הקבוצות. רשימת הנפשות הפועלות של הפרק — כל מה שקורה
-                  אחר כך, מהחוזה ועד ח'יבר, מדבר על אחת מהן. */}
-              <Section id="groups">
-                <Head id="groups" />
+                <SubHead section="hijra" id="groups" />
                 <T r={['§3.a', '§3.b']} className="ch4-body" reveal />
                 <div className="ch4-cards" data-reveal>
                   <Card r="§3.muhajirun" />
@@ -700,40 +692,28 @@ export default function Chapter4() {
                   <Card r="§3.jews" />
                   <Card r="§3.quraysh" />
                 </div>
-              </Section>
 
-              <Section id="covenant">
-                <Head id="covenant" />
+                <SubHead section="hijra" id="covenant" />
                 <T r={['§4.a', '§4.b']} className="ch4-body" reveal />
                 <T r={['§8.a', '§8.b']} className="ch4-body" reveal />
                 <T r={['§8.c', '§8.d']} className="ch4-body" reveal />
-              </Section>
-
-              <Section id="meaning">
-                <Head id="meaning" />
                 <T r={['§5.a', '§5.b']} className="ch4-body" reveal />
                 <Echo>
                   <T r={['§6.echo1', '§6.echo2']} className="ch4-body" />
                 </Echo>
-              </Section>
-
-              <Section id="mosque">
-                <Head id="mosque" />
                 <T r={['§7.a', '§7.b', '§7.c']} className="ch4-body" reveal />
               </Section>
 
-              {/* ============ חלק ב׳ · הקרבות ============ */}
-              <PartHead id="battles" />
-
-              {/* צומת הפרק. עד כאן הטפה, מכאן קרבות. */}
-              <Section id="turn">
-                <Head id="turn" />
+              {/* ============ 02 · מהטפה לג'האד ============
+                  שלושה קטעים, והוא נשאר ראשי משום שהמקור נותן לו כותרת רצה
+                  משלו — וזה באמת הציר של הפרק. */}
+              <Section id="jihad">
+                <Head id="jihad" />
                 <Statement r="§9.a" />
                 <T r={['§9.b', '§9.c']} className="ch4-body" reveal />
               </Section>
 
-              {/* קרב בדר. מאזן הכוחות הוא המנגנון — 300 מול 1000 — והוא
-                  יופיע שוב בקרב אֻחֻד ביחס הפוך. שם זו כל הנקודה. */}
+              {/* ============ 03 · קרב בדר ============ */}
               <Section id="badr">
                 <Head id="badr" />
                 <T r={['§10.a', '§10.b']} className="ch4-body" reveal />
@@ -741,10 +721,8 @@ export default function Chapter4() {
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
                 <T r={['§12.rain', '§12.duel']} className="ch4-body" reveal />
                 <T r={['§13.a', '§13.b']} className="ch4-body" reveal />
-              </Section>
 
-              <Section id="badr-quran">
-                <Head id="badr-quran" />
+                <SubHead section="badr" id="badr-quran" />
                 <T r="§14.a" className="ch4-body" reveal />
                 <Verse r="§14.verse" />
                 <T r="§15.a" className="ch4-body" reveal />
@@ -752,34 +730,25 @@ export default function Chapter4() {
                 <Echo>
                   <T r="§15.echo" className="ch4-body" />
                 </Echo>
-              </Section>
-
-              <Section id="ramadan">
-                <Head id="ramadan" />
                 <T r="§16.a" className="ch4-body" reveal />
                 <Echo>
                   <T r="§16.echo" className="ch4-body" />
                 </Echo>
               </Section>
 
+              {/* ============ 04 · קרב אֻחֻד ============
+                  §20.hind הוא הקשה בפרק, והוא נשאר טקסט. בלי דימוי. */}
               <Section id="uhud">
                 <Head id="uhud" />
                 <T r="§17.a" className="ch4-body" reveal />
                 <Forces muslims="§17.muslims" other="§17.quraysh" />
                 <T r={['§18.a', '§18.b']} className="ch4-body" reveal />
                 <T r={['§19.a', '§19.b', '§19.c']} className="ch4-body" reveal />
-              </Section>
-
-              {/* בלי דימוי. §20.hind הוא הקשה בפרק והוא נשאר טקסט. */}
-              <Section id="hamza">
-                <Head id="hamza" />
                 <T r="§20.a" className="ch4-body" reveal />
                 <Verse r="§20.saying" />
                 <T r={['§20.translit', '§20.hind']} className="ch4-body" reveal />
-              </Section>
 
-              <Section id="shahids">
-                <Head id="shahids" />
+                <SubHead section="uhud" id="shahids" />
                 <T r={['§21.a', '§21.b']} className="ch4-body" reveal />
                 <Verse r="§21.verse" />
                 <Echo>
@@ -787,9 +756,10 @@ export default function Chapter4() {
                 </Echo>
               </Section>
 
-              {/* קרב השוחה. הדיאגרמה — העיר, הצד הצפוני החשוף, החפירה —
-                  היא הנכס היחיד בפרק שנבנה מאפס, והיא עוד לא קיימת.
-                  עד שתיבנה, §24.trench מודפס כפסקה מלאה ואף מילה לא חסרה. */}
+              {/* ============ 05 · קרב השוחה ============
+                  בני קוריזה יושבים כאן ולא במקטע משלהם: המקור מציב אותם
+                  כהמשך ישיר של הקרב, ומקטע נפרד היה נותן לטבח כותרת משלו
+                  בסרגל. טיפוגרפיה שקטה, טקסט מלא, בלי דימוי ובלי מנגנון. */}
               <Section id="trench">
                 <Head id="trench" />
                 <T r="§23.a" className="ch4-body" reveal />
@@ -798,107 +768,78 @@ export default function Chapter4() {
                   <T r="§23.cause2" className="ch4-body ch4-two-side" />
                 </div>
                 <T r={['§24.trench', '§24.storm']} className="ch4-body" reveal />
-              </Section>
-
-              <Section id="ahzab">
-                <Head id="ahzab" />
                 <T r="§25.a" className="ch4-body" reveal />
+                <T r={['§26.a', '§26.b']} className="ch4-body ch4-quiet-body" reveal />
               </Section>
 
-              {/* טיפוגרפיה שקטה. בלי דימוי, בלי מנגנון, טקסט מלא —
-                  אותה הכרעה כמו ואד אלבנת בפרק 2. */}
-              <Section id="qurayza" className="ch4-quiet">
-                <Head id="qurayza" />
-                <T r={['§26.a', '§26.b']} className="ch4-body" reveal />
-              </Section>
-
-              {/* ============ חלק ג׳ · ההסכם ============ */}
-              <PartHead id="treaty" />
-
+              {/* ============ 06 · הסכם חודיביה ============ */}
               <Section id="hudaybiyyah">
                 <Head id="hudaybiyyah" />
                 <T r={['§27.a', '§27.b']} className="ch4-body" reveal />
                 <T r={['§28.a', '§28.b']} className="ch4-body" reveal />
-              </Section>
-
-              {/* על פניו כניעה — צריך לראות את שלושת הסעיפים כדי להבין למה. */}
-              <Section id="terms">
-                <Head id="terms" />
                 <ol className="ch4-concessions" data-reveal>
                   <li>{text('§29.term1')}</li>
                   <li>{text('§29.term2')}</li>
                   <li>{text('§29.term3')}</li>
                 </ol>
                 <T r={['§30.a', '§30.b']} className="ch4-body" reveal />
-              </Section>
 
-              <Section id="hudna">
-                <Head id="hudna" />
+                <SubHead section="hudaybiyyah" id="hudna" />
                 <Definition r="§31.a" />
               </Section>
 
-              {/* ============ חלק ד׳ · ההכרעה ============ */}
-              <PartHead id="decision" />
-
-              {/* §41.year — התאריך השגוי — מסומן omitted ואינו מודפס.
+              {/* ============ 07 · טבח יהודי ח'יבר ============
+                  §41.year — התאריך השגוי — מסומן omitted ואינו מודפס.
                   הגירוש מוצג ביחסו לקרב בדר, כפי שהמקור עצמו עושה לבני נדיר.
                   אין כאן תיקון של המקור ואין הדפסה של טעות. */}
-              <Section id="three-tribes" className="ch4-quiet">
-                <Head id="three-tribes" />
-                <T r={['§41.qaynuqa', '§41.nadir']} className="ch4-body" reveal />
-                <T r="§42.a" className="ch4-body" reveal />
-                <T r={['§43.a', '§43.b']} className="ch4-body" reveal />
-              </Section>
-
               <Section id="khaybar">
                 <Head id="khaybar" />
+                <T
+                  r={['§41.qaynuqa', '§41.nadir']}
+                  className="ch4-body ch4-quiet-body"
+                  reveal
+                />
+                <T r="§42.a" className="ch4-body ch4-quiet-body" reveal />
+                <T r={['§43.a', '§43.b']} className="ch4-body ch4-quiet-body" reveal />
                 <T r={['§44.a', '§44.b']} className="ch4-body" reveal />
                 <T r={['§45.a', '§45.b']} className="ch4-body" reveal />
                 <T r={['§46.a', '§46.b', '§46.c']} className="ch4-body" reveal />
-              </Section>
 
-              {/* החריגה היחידה בפרק מכלל תעתיק עברי בלבד:
-                  הסיסמה מופיעה בערבית במקור. */}
-              <Section id="slogan">
-                <Head id="slogan" />
+                {/* החריגה היחידה בפרק מכלל תעתיק עברי בלבד:
+                    הסיסמה מופיעה בערבית במקור. */}
+                <SubHead section="khaybar" id="slogan" />
                 <T r="§47.a" className="ch4-body" reveal />
                 <Echo>
                   <T r="§47.echo" className="ch4-body" />
                 </Echo>
               </Section>
 
+              {/* ============ 08 · כיבוש מכה ============ */}
               <Section id="mecca">
                 <Head id="mecca" />
                 <T r={['§48.a', '§48.b']} className="ch4-body" reveal />
                 <T r={['§49.a', '§49.b']} className="ch4-body" reveal />
               </Section>
 
-              {/* סוף שקט. בלי מנגנון ובלי הלאה. */}
+              {/* ============ 09 · מותו של מוחמד ============
+                  סוף שקט. בלי מנגנון ובלי הלאה. */}
               <Section id="death" className="ch4-quiet">
                 <Head id="death" />
                 <T r={['§50.a', '§50.b']} className="ch4-body" reveal />
                 <T r="§51.a" className="ch4-body" reveal />
               </Section>
 
-              {/* ============ חלק ה׳ · חודיביה היום ============ */}
-              <PartHead id="today" />
-
-              <Section id="question">
-                <Head id="question" />
+              {/* ============ 10 · חודיביה בפסקי ההלכה ============
+                  שלוש עמדות, אותה תבנית. §36 נספח לכרטיס הראשון ולא כרטיס
+                  רביעי. החלק לא נסגר בהסכמה, וזו הנקודה. */}
+              <Section id="today">
+                <Head id="today" />
                 <T r={['§32.a', '§32.list', '§32.b']} className="ch4-body" reveal />
                 <T r="§33.a" className="ch4-body" reveal />
-              </Section>
 
-              <Section id="maslaha">
-                <Head id="maslaha" />
+                <SubHead section="today" id="maslaha" />
                 <Definition r="§34.a" />
                 <T r="§34.b" className="ch4-body" reveal />
-              </Section>
-
-              {/* שלוש עמדות, אותה תבנית. §36 נספח לכרטיס הראשון
-                  ולא כרטיס רביעי. */}
-              <Section id="rulings">
-                <Head id="rulings" />
                 <div className="ch4-rulings" data-reveal>
                   <article className="ch4-ruling">
                     <h3 className="ch4-ruling-name">{nameOf('§35.lead')}</h3>
@@ -918,11 +859,6 @@ export default function Chapter4() {
                     <blockquote className="ch4-verse">{text('§38.quote')}</blockquote>
                   </article>
                 </div>
-              </Section>
-
-              {/* החלק לא נסגר בהסכמה, וזו הנקודה. אין מקטע סיכום אחריו. */}
-              <Section id="against">
-                <Head id="against" />
                 <T r="§39.a" className="ch4-body" reveal />
                 <Verse r="§39.verse" />
                 <T r={['§40.a', '§40.b']} className="ch4-body" reveal />
