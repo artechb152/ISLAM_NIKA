@@ -45,12 +45,12 @@ interface PassagesFile {
 
 const data = raw as unknown as PassagesFile
 
-export const CH3 = { number: data.number, title: data.title, menuTitle: data.menuTitle }
+export const CH4 = { number: data.number, title: data.title, menuTitle: data.menuTitle }
 
 /** `§9` → its fragments, in source order. */
 export function passage(section: string): Fragment[] {
   const found = data.passages[section]
-  if (!found) throw new Error(`chapter 2: unknown passage ${section}`)
+  if (!found) throw new Error(`chapter 4: unknown passage ${section}`)
   return found
 }
 
@@ -58,7 +58,7 @@ export function passage(section: string): Fragment[] {
 export function frag(ref: string): Fragment {
   const [section, id] = ref.split('.')
   const found = passage(section).find((f) => f.id === id)
-  if (!found) throw new Error(`chapter 2: unknown fragment ${ref}`)
+  if (!found) throw new Error(`chapter 4: unknown fragment ${ref}`)
   return found
 }
 
@@ -67,14 +67,14 @@ export function frag(ref: string): Fragment {
 export function text(ref: string): string {
   const f = frag(ref)
   if (f.page) return f.page
-  if (!f.text) throw new Error(`chapter 2: ${ref} carries no text`)
+  if (!f.text) throw new Error(`chapter 4: ${ref} carries no text`)
   return f.text
 }
 
 /** The list at `ref`. */
 export function list(ref: string): string[] {
   const f = frag(ref)
-  if (!f.list) throw new Error(`chapter 2: ${ref} carries no list`)
+  if (!f.list) throw new Error(`chapter 4: ${ref} carries no list`)
   return f.list
 }
 

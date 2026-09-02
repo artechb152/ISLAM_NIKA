@@ -1,4 +1,4 @@
-/* Scroll-progress persistence for chapter 2 — the same discipline as chapter 6:
+/* Scroll-progress persistence for chapter 4 — the same discipline as chapter 6:
    a versioned key, a section is credited only when the reader scrolls PAST it,
    and reaching the closing block hands the chapter over to its practice.
 
@@ -9,12 +9,12 @@
 
 import layout from './layout.json'
 
-export const STORE_KEY = 'ch3:v1'
+export const STORE_KEY = 'ch4:v1'
 
 /** article order — the anchors, in the order they are read */
 export const SECTION_ORDER: string[] = (layout as { sections: { id: string }[] }).sections.map((s) => s.id)
 
-export interface Ch3Store {
+export interface Ch4Store {
   /** anchors the reader has scrolled past */
   sections: string[]
   /** the anchor last seen — the resume point */
@@ -23,14 +23,14 @@ export interface Ch3Store {
   completed: boolean
 }
 
-const EMPTY: Ch3Store = { sections: [], completed: false }
+const EMPTY: Ch4Store = { sections: [], completed: false }
 
-export function readStore(): Ch3Store {
+export function readStore(): Ch4Store {
   if (typeof window === 'undefined') return EMPTY
   try {
     const raw = window.localStorage.getItem(STORE_KEY)
     if (!raw) return EMPTY
-    const p = JSON.parse(raw) as Partial<Ch3Store> | null
+    const p = JSON.parse(raw) as Partial<Ch4Store> | null
     if (!p || typeof p !== 'object') return EMPTY
     return {
       sections: Array.isArray(p.sections) ? p.sections.filter((s): s is string => typeof s === 'string') : [],
@@ -42,7 +42,7 @@ export function readStore(): Ch3Store {
   }
 }
 
-function write(store: Ch3Store): void {
+function write(store: Ch4Store): void {
   try {
     window.localStorage.setItem(STORE_KEY, JSON.stringify(store))
   } catch {
@@ -58,7 +58,7 @@ export function saveCurrentSection(id: string): void {
   write(store)
 }
 
-export function markSectionDone(id: string): Ch3Store {
+export function markSectionDone(id: string): Ch4Store {
   const store = readStore()
   if (!store.sections.includes(id)) {
     store.sections = [...store.sections, id]
@@ -68,7 +68,7 @@ export function markSectionDone(id: string): Ch3Store {
 }
 
 /** the reader reached the closing block: the CONTENT is read */
-export function markContentComplete(): Ch3Store {
+export function markContentComplete(): Ch4Store {
   const store = readStore()
   store.sections = [...SECTION_ORDER]
   store.completed = true
@@ -77,7 +77,7 @@ export function markContentComplete(): Ch3Store {
 }
 
 /** the chapter is finished only once the practice is finished */
-export function markChapterComplete(): Ch3Store {
+export function markChapterComplete(): Ch4Store {
   const store = markContentComplete()
   try {
     window.localStorage.setItem('islam:chapter:4', 'done')
