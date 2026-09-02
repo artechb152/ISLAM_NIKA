@@ -484,42 +484,74 @@ function Treaties({ r }: { r: string }) {
 
 /* ---------------- mechanism · the stage ----------------
 
-   ONE PLACE, SEEN IN SUCCESSIVE STATES, ADVANCED BY THE READER. The chapter
-   uses it twice and wears it differently each time, which is the whole reason
-   it is a component and not two:
+   ONE PLACE, SEEN IN SUCCESSIVE STATES, ADVANCED BY THE READER.
 
-     · `bleed`  — the migration. Full width, the picture under the words, the
-                  sentence set large on it. The chapter's one cinematic moment.
-     · `inset`  — the siege. The same machine held inside the reading column,
-                  framed, the sentence beneath the picture rather than on it.
-                  A second full-bleed run would read as a repeat instead of a
-                  second thought.
+   TWO COLUMNS, NOT A PICTURE WITH WORDS ON IT. The first build set the sentence
+   over the photograph and it was neither: the type fought the picture for
+   attention and the picture lost detail behind a scrim. Here the plate keeps
+   its own frame and its own caption, and the words get a column of their own —
+   an eyebrow that says which beat this is, the source's sentence set large, a
+   rule, and the sentences that carry on from it.
 
-   EVERY BEAT IS IN THE DOM AT ALL TIMES. The beats that are not showing are
-   `visibility:hidden`, not unmounted — chapter search has to find them, a
-   screen reader has to read them, and a device that keeps the chapter's words
-   behind a click is a device that hides the chapter. The picture changes; the
-   text is all there.
+   THE CAPTION IS OURS AND SAYS SO. Every plate in this chapter is a painted
+   reconstruction, not a photograph of anything, and the caption ends by saying
+   so. That is a label on our own illustration, which this file may write; the
+   chapter's sentences are not, and they come from passages.json like all the
+   rest.
 
-   NO KEYBOARD TRAP, NO AUTOPLAY. Dots and arrows are real buttons, the group
-   is a tablist, and nothing advances on its own — the reader sets the pace.
-   Reduced motion turns the cross-fade off and leaves the switch instant. */
+   THE CHIPS CARRY ONLY WHAT THE BEAT ITSELF SAYS. Each one is proved by `pick`
+   against that beat's own sentence, so the row cannot drift into facts the
+   booklet never states. A beat whose sentence names no place and no year shows
+   no chips rather than borrowed ones.
+
+   EVERY BEAT IS IN THE DOM AT ALL TIMES — hidden with `hidden`, never
+   unmounted, so chapter search and a screen reader still reach the whole
+   chapter. Nothing advances on its own. */
 interface Beat {
-  /** the image for this state — every one of them made for this stage */
   img: string
-  /** the fragment whose sentence this state carries */
-  r: string | string[]
-  /** the short label under the dots, in the source's own words */
+  /** the sentence set large */
+  r: string
+  /** what carries on from it, in smaller type */
+  note?: string[]
+  /** our label on our own drawing */
+  caption: string
+  /** words lifted out of THIS beat's sentence, proved to be in it */
+  chips?: string[]
+  /** the name on the dot, in the source's words */
   label: string
+}
+
+function PalmRule() {
+  return (
+    <div className="ch4-stage-orn" aria-hidden="true">
+      <span />
+      <svg viewBox="0 0 40 24" fill="currentColor" aria-hidden="true">
+        {/* a date palm: one trunk, six fronds, three dates. Drawn as filled
+            shapes because a stroked palm at 26px reads as a dagger — which is
+            exactly what the first attempt looked like. */}
+        <path d="M19.4 23.5c-.2-4.2.1-7.6.9-10.2l1.2.3c-.7 2.5-1 5.7-.8 9.9z" />
+        <path d="M20.6 12.6c-2.6-2.4-5.7-3.3-9.2-2.6 1.3-1.9 4.6-2.3 9.4 1.5z" />
+        <path d="M20.6 12.6c2.6-2.4 5.7-3.3 9.2-2.6-1.3-1.9-4.6-2.3-9.4 1.5z" />
+        <path d="M20.6 12c-1.6-2.9-4-4.7-7.2-5.3 1.9-1.2 5 .3 8.1 4.6z" />
+        <path d="M20.6 12c1.6-2.9 4-4.7 7.2-5.3-1.9-1.2-5 .3-8.1 4.6z" />
+        <path d="M20.6 11.6c.2-2.6 1.1-4.7 2.8-6.3-2.3.2-3.7 2.2-4 5.9z" />
+        <path d="M20.6 11.6c-.2-2.6-1.1-4.7-2.8-6.3 2.3.2 3.7 2.2 4 5.9z" />
+        <circle cx="19.2" cy="10.4" r="1" />
+        <circle cx="22" cy="10.7" r="1" />
+        <circle cx="20.6" cy="12.4" r="1" />
+      </svg>
+      <span />
+    </div>
+  )
 }
 
 function Stage({
   beats,
-  variant = 'bleed',
+  variant = 'wide',
   label,
 }: {
   beats: Beat[]
-  variant?: 'bleed' | 'inset'
+  variant?: 'wide' | 'inset'
   label: string
 }) {
   const [at, setAt] = useState(0)
@@ -529,62 +561,55 @@ function Stage({
   )
   return (
     <section className={`ch4-stage is-${variant}`} aria-label={label} data-reveal>
-      <div className="ch4-stage-box">
-        <div className="ch4-stage-frame">
-        {beats.map((b, i) => (
-          <img
-            key={b.img}
-            className={`ch4-stage-img${i === at ? ' is-on' : ''}`}
-            src={`/assets/chapter4/${b.img}.jpg`}
-            alt=""
-            aria-hidden="true"
-            loading={i === 0 ? 'eager' : 'lazy'}
-          />
-        ))}
-        </div>
-        <div className="ch4-stage-words">
-          {beats.map((b, i) => (
-            <p
-              key={b.label}
-              className={`ch4-stage-line${i === at ? ' is-on' : ''}`}
-              /* present for search and for a screen reader even when unseen */
-              aria-hidden={i === at ? undefined : 'true'}
-            >
-              {(Array.isArray(b.r) ? b.r : [b.r]).map((ref) => text(ref)).join(' ')}
+      {beats.map((b, i) => (
+        <div className="ch4-stage-grid" key={b.img} hidden={i !== at}>
+          <figure className="ch4-stage-plate">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/assets/chapter4/${b.img}.jpg`} alt="" aria-hidden="true" loading={i ? 'lazy' : 'eager'} />
+            <figcaption>{b.caption}</figcaption>
+          </figure>
+
+          <div className="ch4-stage-copy">
+            <p className="ch4-stage-eyebrow">
+              {b.label} <span>/ {String(i + 1).padStart(2, '0')}</span>
             </p>
-          ))}
+            <p className="ch4-stage-lead">{text(b.r)}</p>
+            <PalmRule />
+            {b.note?.length ? (
+              <p className="ch4-stage-note">{b.note.map((ref) => text(ref)).join(' ')}</p>
+            ) : null}
+            {b.chips?.length ? (
+              <ul className="ch4-stage-chips">
+                {b.chips.map((c) => (
+                  <li key={c}>{pick(b.r, c)}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
         </div>
-      </div>
+      ))}
 
       <div className="ch4-stage-rail" role="tablist" aria-label={label}>
-        <button
-          type="button"
-          className="ch4-stage-arrow"
-          onClick={() => go(at - 1)}
-          aria-label="הקודם"
-        >
+        <button type="button" className="ch4-stage-arrow" onClick={() => go(at - 1)} aria-label="הקודם">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
             <path d="M15 6l-6 6 6 6" />
           </svg>
         </button>
-        {beats.map((b, i) => (
-          <button
-            key={b.label}
-            type="button"
-            role="tab"
-            aria-selected={i === at}
-            className={`ch4-stage-dot${i === at ? ' is-on' : ''}`}
-            onClick={() => go(i)}
-          >
-            <span>{b.label}</span>
-          </button>
-        ))}
-        <button
-          type="button"
-          className="ch4-stage-arrow"
-          onClick={() => go(at + 1)}
-          aria-label="הבא"
-        >
+        <div className="ch4-stage-track">
+          {beats.map((b, i) => (
+            <button
+              key={b.label}
+              type="button"
+              role="tab"
+              aria-selected={i === at}
+              className={`ch4-stage-dot${i === at ? ' is-on' : ''}`}
+              onClick={() => go(i)}
+            >
+              <span>{b.label}</span>
+            </button>
+          ))}
+        </div>
+        <button type="button" className="ch4-stage-arrow" onClick={() => go(at + 1)} aria-label="הבא">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
             <path d="M9 6l6 6-6 6" />
           </svg>
@@ -996,19 +1021,45 @@ export default function Chapter4() {
                 <Stage
                   label="ההגירה למדינה"
                   beats={[
-                    { img: 'stage-1-mecca', r: '§0.a', label: 'מכה' },
-                    { img: 'stage-2-road', r: '§0.b', label: 'שתים־עשרה שנים' },
-                    { img: 'stage-3-night', r: '§1.a', label: 'הדרך' },
-                    { img: 'stage-4-arrival', r: '§1.b', label: "ית'רב" },
-                    { img: 'stage-5-yard', r: '§7.a', label: 'המסגד' },
+                    {
+                      img: 'stage-1-mecca',
+                      r: '§0.a',
+                      note: ['§0.b'],
+                      caption: 'מכה בעמקה, מבט מן המעבר היוצא צפונה · שחזור מצויר',
+                      chips: ['מכה'],
+                      label: 'מכה',
+                    },
+                    {
+                      img: 'stage-2-road',
+                      r: '§1.a',
+                      caption: 'דרך השיירות צפונה, בשעת הצהריים · שחזור מצויר',
+                      chips: ["ית'רב"],
+                      label: 'הדרך',
+                    },
+                    {
+                      img: 'stage-3-night',
+                      r: '§2.flight',
+                      note: ['§2.invited'],
+                      caption: 'הדרך בלילה, בין שני רכסים · שחזור מצויר',
+                      label: 'שתי גרסאות',
+                    },
+                    {
+                      img: 'stage-4-arrival',
+                      r: '§1.b',
+                      caption: 'שער נווה מדבר בין חומות גן ודקלים · שחזור מצויר',
+                      chips: ['בני נדיר'],
+                      label: "ית'רב",
+                    },
+                    {
+                      img: 'stage-5-yard',
+                      r: '§7.a',
+                      note: ['§7.b', '§7.c'],
+                      caption: 'חצר עם גזעי דקל כרותים, לפני שנבנה המסגד · שחזור מצויר',
+                      chips: ['יתומים מקומיים'],
+                      label: 'המסגד',
+                    },
                   ]}
                 />
-                <T r="§7.b" className="ch4-body" reveal />
-                <T r="§7.c" className="ch4-body" reveal />
-                <div className="ch4-two" data-reveal>
-                  <T r="§2.flight" className="ch4-body ch4-two-side" />
-                  <T r="§2.invited" className="ch4-body ch4-two-side" />
-                </div>
 
                 <SubHead section="hijra" id="groups" />
                 <T r={['§3.a', '§3.b']} className="ch4-body" reveal />
@@ -1104,16 +1155,35 @@ export default function Chapter4() {
                   variant="inset"
                   label="קרב השוחה"
                   beats={[
-                    { img: 'siege-1-open', r: '§23.a', label: 'המצור' },
-                    { img: 'siege-2-digging', r: '§24.trench', label: 'החפירה' },
-                    { img: 'siege-3-finished', r: '§25.a', label: 'המחנות' },
-                    { img: 'siege-4-storm', r: '§24.storm', label: 'הסערה' },
+                    {
+                      img: 'siege-1-open',
+                      r: '§23.a',
+                      note: ['§23.cause1', '§23.cause2'],
+                      caption: 'הקרקע הפתוחה שלפני העיר · שחזור מצויר',
+                      chips: ['מדינה'],
+                      label: 'המצור',
+                    },
+                    {
+                      img: 'siege-2-digging',
+                      r: '§24.trench',
+                      caption: 'תעלה בחפירה, סלים ומכוש · שחזור מצויר',
+                      chips: ['סלמאן אלפראסי'],
+                      label: 'החפירה',
+                    },
+                    {
+                      img: 'siege-3-finished',
+                      r: '§25.a',
+                      caption: 'התעלה הגמורה, ומחנות מעברה · שחזור מצויר',
+                      label: 'המחנות',
+                    },
+                    {
+                      img: 'siege-4-storm',
+                      r: '§24.storm',
+                      caption: 'סערה על המישור בלילה · שחזור מצויר',
+                      label: 'הסערה',
+                    },
                   ]}
                 />
-                <div className="ch4-two" data-reveal>
-                  <T r="§23.cause1" className="ch4-body ch4-two-side" />
-                  <T r="§23.cause2" className="ch4-body ch4-two-side" />
-                </div>
                 <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
                 <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
               </Section>

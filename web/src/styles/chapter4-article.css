@@ -705,107 +705,153 @@
    from the open rail. */
 .chapter-drawer.is-collapsed .menu-subs{display:none}
 
+
 /* ================================ the stage ===========================
-   One place seen in successive states, advanced by the reader. Twice in the
-   chapter and dressed differently each time — a second identical full-bleed
-   run would read as a repeat rather than a second thought.
+   TWO COLUMNS: the plate keeps its own frame and caption, the words get a
+   column of their own. The first build set the sentence over the picture and
+   it served neither — the type fought the picture and the picture lost its
+   detail behind a scrim.
 
-   is-bleed — the migration. Out of the reading column, edge to edge, the
-              sentence set large ON the picture.
-   is-inset — the siege. The same machine held inside the column, framed, the
-              sentence UNDER the picture.
-
-   Every beat stays in the DOM. The ones not showing are hidden with
-   visibility, never unmounted, so chapter search and a screen reader still
-   reach the whole chapter. */
+   `is-wide`  — the migration, out past the reading column.
+   `is-inset` — the siege, held inside it. Same machine, different dress; a
+                second identical run would read as a repeat. */
 .ch4-stage{display:block}
+/* --wide is 1120px and the section is narrower than that, so the first build
+   pushed the plate off the edge of the page. The stage fills its section and
+   gets its width from the two columns, not from breaking out of the page. */
+.ch4-stage.is-wide{width:100%}
 
-.ch4-stage-frame{
-  position:relative;
-  aspect-ratio:16/9;
-  overflow:hidden;
-  background:var(--maroon-deep);
+/* [hidden] must win: display:grid on the element overrides the user agent
+   [hidden]{display:none}, and the first build printed all five beats stacked
+   on top of each other. */
+.ch4-stage-grid[hidden]{display:none}
+.ch4-stage-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  gap:clamp(22px,3.4vw,54px);
 }
-.ch4-stage.is-inset .ch4-stage-frame{border:1px solid var(--rule)}
+.ch4-stage.is-inset .ch4-stage-grid{grid-template-columns:1fr}
 
-.ch4-stage-img{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  object-fit:cover;
-  opacity:0;
-  transition:opacity .5s ease;
+/* --- the plate ------------------------------------------------------- */
+/* min-width:0 or the caption, which is a flex row that does not wrap, sets the
+   floor for the whole column and pushes the plate past the section edge. */
+.ch4-stage-plate{margin:0;min-width:0}
+.ch4-stage-plate img{
+  display:block;width:100%;height:auto;
+  aspect-ratio:4/3;object-fit:cover;
+  border-radius:10px;
+  box-shadow:var(--shadow,0 18px 40px rgba(60,32,14,.22));
 }
-.ch4-stage-img.is-on{opacity:1}
+.ch4-stage.is-inset .ch4-stage-plate img{aspect-ratio:16/9}
+.ch4-stage-plate figcaption{
+  display:flex;align-items:center;gap:12px;min-width:0;
+  margin-block-start:12px;
+  font-size:clamp(11px,1.1vw,13px);
+  color:var(--muted);
+}
+.ch4-stage-plate figcaption::after{
+  content:'';flex:1 1 auto;min-width:18px;height:1px;background:var(--rule);
+}
 
-.ch4-stage-box{position:relative}
-/* the words are a SIBLING of the picture, not a child of it: inside the frame
-   they were clipped by its overflow, and the inset variant showed a picture
-   with no sentence at all. */
-.ch4-stage-words{display:grid;align-items:end}
-.ch4-stage.is-bleed .ch4-stage-words{position:absolute;inset:0}
-.ch4-stage-line{
-  grid-area:1/1;
+/* --- the words ------------------------------------------------------- */
+.ch4-stage-copy{min-width:0}
+.ch4-stage-eyebrow{
+  margin:0 0 .7em;
+  font-size:clamp(12px,1.2vw,14px);
+  letter-spacing:.04em;
+  color:var(--maroon);
+}
+.ch4-stage-eyebrow span{color:var(--gold-text)}
+
+.ch4-stage-lead{
   margin:0;
-  visibility:hidden;
-  opacity:0;
-  transition:opacity .4s ease;
-}
-.ch4-stage-line.is-on{visibility:visible;opacity:1}
-
-.ch4-stage.is-bleed .ch4-stage-words{
-  padding:clamp(20px,5vw,64px);
-  background:linear-gradient(to top,rgba(28,16,10,.82) 0%,rgba(28,16,10,.45) 45%,transparent 100%);
-}
-.ch4-stage.is-bleed .ch4-stage-line{
-  max-width:min(760px,92%);
   font-family:var(--font-heading);
-  font-size:clamp(19px,2.5vw,32px);
-  line-height:1.42;
-  color:var(--cream);
-  text-shadow:0 2px 18px rgba(20,12,6,.75);
-}
-
-.ch4-stage.is-inset .ch4-stage-words{position:relative;display:block}
-.ch4-stage.is-inset .ch4-stage-line{
-  position:absolute;inset-inline:0;top:0;
-  padding:16px 2px 0;
-  font-size:var(--read);
-  line-height:var(--lh,1.82);
+  font-size:clamp(20px,2.3vw,31px);
+  line-height:1.38;
   color:var(--ink);
 }
-.ch4-stage.is-inset .ch4-stage-line.is-on{position:static}
+.ch4-stage.is-inset .ch4-stage-lead{font-size:clamp(18px,1.9vw,25px)}
 
+/* the palm rule — one ornament, and the chapter has no other */
+.ch4-stage-orn{
+  display:flex;align-items:center;gap:14px;
+  margin-block:clamp(16px,2.4vh,26px);
+  color:var(--gold-text);
+}
+.ch4-stage-orn span{flex:1 1 auto;height:1px;background:var(--gold-soft)}
+.ch4-stage-orn svg{width:42px;height:26px;flex:none}
+
+.ch4-stage-note{
+  margin:0;
+  font-size:var(--read);
+  line-height:var(--lh,1.82);
+  color:var(--read,var(--ink));
+}
+
+/* --- the chips ------------------------------------------------------- */
+.ch4-stage-chips{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin:clamp(16px,2.4vh,26px) 0 0;padding:0;
+  list-style:none;
+}
+.ch4-stage-chips li{
+  padding:7px 14px;
+  border:1px solid var(--rule);
+  border-radius:999px;
+  background:var(--mat);
+  font-size:clamp(12px,1.2vw,14px);
+  color:var(--ink);
+}
+
+/* --- the rail -------------------------------------------------------- */
 .ch4-stage-rail{
   display:flex;align-items:center;justify-content:center;
-  gap:6px;padding-block-start:14px;
+  gap:clamp(10px,2vw,22px);
+  margin-block-start:clamp(20px,3vh,34px);
+}
+.ch4-stage-track{
+  display:flex;align-items:flex-start;
+  gap:clamp(10px,2.4vw,34px);
+  position:relative;
+}
+/* the line the dots sit on */
+.ch4-stage-track::before{
+  content:'';position:absolute;
+  inset-inline:10px;top:5px;height:1px;
+  background:var(--gold-soft);
 }
 .ch4-stage-dot{
-  display:grid;gap:5px;justify-items:center;
-  padding:6px 10px;border:0;background:none;cursor:pointer;
-  font:inherit;font-size:clamp(12px,1.2vw,14px);color:var(--muted);
+  position:relative;
+  display:grid;gap:12px;justify-items:center;
+  padding:0;border:0;background:none;cursor:pointer;
+  font:inherit;font-size:clamp(11px,1.1vw,13px);
+  color:var(--muted);
 }
 .ch4-stage-dot::before{
-  content:'';width:8px;height:8px;border-radius:50%;
+  content:'';width:11px;height:11px;border-radius:50%;
   background:var(--gold-soft);
-  transition:background .2s ease,transform .2s ease;
+  outline:4px solid var(--paper);
+  transition:background .2s ease;
 }
 .ch4-stage-dot.is-on{color:var(--maroon)}
-.ch4-stage-dot.is-on::before{background:var(--maroon);transform:scale(1.25)}
+.ch4-stage-dot.is-on::before{background:var(--maroon)}
+.ch4-stage-dot.is-on span{border-block-end:1px solid var(--maroon);padding-block-end:3px}
 .ch4-stage-dot:hover::before{background:var(--gold-text)}
-.ch4-stage-dot:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px;border-radius:6px}
+.ch4-stage-dot:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px;border-radius:6px}
 
 .ch4-stage-arrow{
-  display:grid;place-items:center;width:34px;height:34px;
+  display:grid;place-items:center;flex:none;
+  width:38px;height:38px;
   border:1px solid var(--rule);border-radius:50%;
   background:var(--paper);color:var(--maroon);cursor:pointer;
 }
-.ch4-stage-arrow svg{width:17px;height:17px}
+.ch4-stage-arrow svg{width:18px;height:18px}
 .ch4-stage-arrow:hover{border-color:var(--gold-text)}
 .ch4-stage-arrow:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
 
-@media (prefers-reduced-motion:reduce){
-  .ch4-stage-img,.ch4-stage-line{transition:none}
-}
-@media (max-width:640px){
+@media (max-width:860px){
+  .ch4-stage-grid{grid-template-columns:1fr}
   .ch4-stage-dot span{display:none}
+  .ch4-stage-track{gap:16px}
 }
