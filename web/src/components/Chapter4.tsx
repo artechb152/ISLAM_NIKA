@@ -1,21 +1,33 @@
 'use client'
 
-/* Chapter 4 — ראשית חיי מוחמד.
+/* Chapter 4 — ההג׳רה והקרבות.
 
-   Same product as chapters 2 and 6: the masthead, the collapsible rail, the type
-   scale, the reveal behaviour and every colour come from chapter6-article.css,
-   which the route layout loads first. chapter4-article.css adds only this
-   chapter's own devices and declares no colour, no font and no radius.
+   Same product as chapters 2, 3 and 6: the masthead, the collapsible rail, the
+   type scale, the reveal behaviour and every colour come from
+   chapter6-article.css, which the route layout loads first. chapter4-article.css
+   adds only this chapter's own devices and declares no colour, no font and no
+   radius. This file is the FOURTH copy of that shell; the fold-into-one-module
+   that Chapter3.tsx books is still owed, and taking it here would have meant
+   editing a file another session had open.
 
-   THE SHAPE. Eight sections — exactly the eight running heads the source
-   prints, in the order the document gives them. The source is 1,627 words,
-   1.7× chapter 2, and it gets FEWER devices, not more: three, one of them
-   interactive. The recurring finding in concept/chapter2/DECISIONS.md is that
-   most of this material needs to be printed rather than installed, and this
-   chapter's subject — a prophet, an angel, a miraculous mount, seven heavens —
-   makes almost every pictorial device religiously impossible. See
-   concept/chapter4/STRUCTURE.md for the full argument, including why a timeline
-   was refused even though the material is genuinely chronological.
+   THE SHAPE. Ten sections — exactly the ten running heads the source prints.
+   The first build ran on twenty-eight and read as a list with no end: the rail
+   alone carried twenty-eight numbered lines, and eleven of those sections held
+   a paragraph or two, which is a heading larger than the thing beneath it.
+   Nothing was lost in the reduction — what had been a section is a SubHead now,
+   and the rail shows it nested. See concept/chapter4/STRUCTURE.md.
+
+   THE ONE DISTINCTION THE CHAPTER CANNOT DO WITHOUT is the echo box. Half this
+   material is seventh-century narrative and half is what has been done with it
+   in the last fifty years — a verse recited at a missile launch, an operation
+   named after a battle, a slogan chanted at a march — and the source puts the
+   two in adjacent sentences. A reader must never have to work out which one
+   they are reading.
+
+   WHAT IS DRAWN AND WHAT IS NOT. Three plates, all of them places, none of them
+   people: the events turn on a prophet, and drawing one is religiously
+   impossible. The massacres — §26 and §41–§43 — get no picture and no device at
+   all, the same call chapter 2 made for ואד אלבנת.
 
    WHAT THIS FILE MAY NOT DO: write a sentence of the chapter. Every content
    string comes from passages.json through `text()` / `list()` / `nameOf()`,
@@ -51,7 +63,6 @@ interface LayoutSection {
 }
 const LAYOUT = layoutData as unknown as { sections: LayoutSection[] }
 const SECTIONS = LAYOUT.sections
-/** the five parts — their titles are data, never literals in JSX */
 /** a sub-heading own record — its title is data, never a literal in JSX */
 const sub = (sectionId: string, subId: string): Sub => {
   const t = meta(sectionId).subs?.find((x) => x.id === subId)
@@ -295,6 +306,25 @@ function Statement({ r }: { r: string }) {
    drawing would assert a geography the source does not give. Until they exist,
    their sections print their sentences in full — nothing is withheld from the
    reader, only from the page's decoration. */
+
+/** A plate: one painted view, sitting under the sentences it belongs to and
+    never instead of them. Three in the chapter, and each one shows a PLACE the
+    source describes — the courtyard of mud and palm, the valley of wells in the
+    rain, the basalt strongholds. None of them shows a person, and that is not
+    squeamishness: the chapter's events turn on a prophet, and every drawing of
+    one is religiously impossible. Landscape is what is left, and it is enough.
+
+    alt is empty and aria-hidden is set. The picture carries nothing the
+    paragraph beside it does not already carry, and a screen reader must not be
+    handed a description this file invented. */
+function Plate({ src }: { src: string }) {
+  return (
+    <figure className="ch4-plate" data-reveal>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/assets/chapter4/${src}.jpg`} alt="" aria-hidden="true" loading="lazy" />
+    </figure>
+  )
+}
 
 /** A movement inside a section. With ten sections instead of twenty-eight,
     what used to be a section of its own is a sub-heading here — and the rail
@@ -702,6 +732,7 @@ export default function Chapter4() {
                   <T r={['§6.echo1', '§6.echo2']} className="ch4-body" />
                 </Echo>
                 <T r={['§7.a', '§7.b', '§7.c']} className="ch4-body" reveal />
+                <Plate src="mosque-courtyard" />
               </Section>
 
               {/* ============ 02 · מהטפה לג'האד ============
@@ -719,6 +750,7 @@ export default function Chapter4() {
                 <T r={['§10.a', '§10.b']} className="ch4-body" reveal />
                 <T r="§11.a" className="ch4-body" reveal />
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
+                <Plate src="badr-night" />
                 <T r={['§12.rain', '§12.duel']} className="ch4-body" reveal />
                 <T r={['§13.a', '§13.b']} className="ch4-body" reveal />
 
@@ -801,6 +833,7 @@ export default function Chapter4() {
                 />
                 <T r="§42.a" className="ch4-body ch4-quiet-body" reveal />
                 <T r={['§43.a', '§43.b']} className="ch4-body ch4-quiet-body" reveal />
+                <Plate src="khaybar-forts" />
                 <T r={['§44.a', '§44.b']} className="ch4-body" reveal />
                 <T r={['§45.a', '§45.b']} className="ch4-body" reveal />
                 <T r={['§46.a', '§46.b', '§46.c']} className="ch4-body" reveal />

@@ -435,3 +435,21 @@
    around them carries a device; these paragraphs do not, and must not grow
    one later. */
 .ch4-quiet-body{color:var(--read,var(--ink))}
+
+/* -------------------------------- the plates --------------------------
+   Three painted views, each under the sentences it belongs to. Full bleed
+   of the reading column and no caption: the paragraph above it is the
+   caption, and a second one written by the page would be a sentence the
+   source never wrote. */
+.ch4-plate{
+  margin-block:var(--flow);
+  margin-inline:0;
+}
+.ch4-plate img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  border:1px solid var(--rule);
+}
