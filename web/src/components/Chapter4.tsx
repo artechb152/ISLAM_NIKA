@@ -302,16 +302,6 @@ function Verse({ r }: { r: string }) {
   )
 }
 
-/** The chapter's only present-tense voice. Two uses, and the symmetry IS the
-    design: §4 opens the loop out of the seventh century and §43 closes it. A
-    third would break the pair and fail the gate in the same stroke. */
-function Statement({ r }: { r: string }) {
-  return (
-    <p className="ch4-statement" data-reveal>
-      {text(r)}
-    </p>
-  )
-}
 
 
 /* ---------------- chapter 4's own devices ----------------
@@ -524,49 +514,116 @@ function Treaties({ r }: { r: string }) {
   )
 }
 
-/* ---------------- mechanism · the trench ----------------
 
-   THE ONLY BATTLE IN THE CHAPTER WHOSE IDEA IS A SHAPE. Badr and Uhud are
-   numbers — three hundred against a thousand, a thousand against three thousand
-   — and the force balance carries them. The trench is geometry: a Persian
-   advised a ditch on the side the city was open on, the technique was not one
-   the Arabs used, and the siege broke on it. Read as prose that is a clause
-   inside a thirty-eight-word sentence; seen, it is the whole event.
+/* ---------------- mechanism · the stage ----------------
 
-   IT WAS AN SVG FIRST, AND THE SVG WAS BAD. A blob for the town, empty rounded
-   rectangles for its houses, a ladder for the ditch and three chevrons for an
-   army — a programmer's schematic dropped into the middle of a chapter that is
-   otherwise painted. It is drawn now, in the same hand as the other seven
-   plates, and the drawing does what the schematic was trying to say: the town
-   among its palms behind, the cut across the open ground in front, the empty
-   plain beyond it.
+   ONE PLACE, SEEN IN SUCCESSIVE STATES, ADVANCED BY THE READER. The chapter
+   uses it twice and wears it differently each time, which is the whole reason
+   it is a component and not two:
 
-   WHAT IT DOES NOT CLAIM. The source says the ditch was dug „סביבות העיר מדינה
-   מצפונה לו" and nothing more. It does not say what protected the other sides —
-   the lava fields and palm groves the histories give are not in this booklet —
-   so the view shows one cut and one open plain, and the rest of the town's edge
-   is simply not in frame. No compass label either: „צפון" is not a word of the
-   sentence, „מצפונה" is, and it is doing that work in the caption below.
+     · `bleed`  — the migration. Full width, the picture under the words, the
+                  sentence set large on it. The chapter's one cinematic moment.
+     · `inset`  — the siege. The same machine held inside the reading column,
+                  framed, the sentence beneath the picture rather than on it.
+                  A second full-bleed run would read as a repeat instead of a
+                  second thought.
 
-   NO LABELS ON THE PICTURE. The three the schematic carried — city, ditch,
-   besiegers — were each proved to be words of §24 before they were printed, and
-   they are still all named in the sentence underneath. Set over the painting
-   they would only be a schematic wearing a landscape. */
-function Trench({ r }: { r: string }) {
+   EVERY BEAT IS IN THE DOM AT ALL TIMES. The beats that are not showing are
+   `visibility:hidden`, not unmounted — chapter search has to find them, a
+   screen reader has to read them, and a device that keeps the chapter's words
+   behind a click is a device that hides the chapter. The picture changes; the
+   text is all there.
+
+   NO KEYBOARD TRAP, NO AUTOPLAY. Dots and arrows are real buttons, the group
+   is a tablist, and nothing advances on its own — the reader sets the pace.
+   Reduced motion turns the cross-fade off and leaves the switch instant. */
+interface Beat {
+  /** the image for this state — every one of them made for this stage */
+  img: string
+  /** the fragment whose sentence this state carries */
+  r: string | string[]
+  /** the short label under the dots, in the source's own words */
+  label: string
+}
+
+function Stage({
+  beats,
+  variant = 'bleed',
+  label,
+}: {
+  beats: Beat[]
+  variant?: 'bleed' | 'inset'
+  label: string
+}) {
+  const [at, setAt] = useState(0)
+  const go = useCallback(
+    (i: number) => setAt(((i % beats.length) + beats.length) % beats.length),
+    [beats.length],
+  )
   return (
-    <figure className="ch4-trench" data-reveal>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        className="ch4-trench-plate"
-        src="/assets/chapter4/trench.jpg"
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-      />
-      <figcaption className="ch4-trench-text">
-        <T r={r} className="ch4-body" />
-      </figcaption>
-    </figure>
+    <section className={`ch4-stage is-${variant}`} aria-label={label} data-reveal>
+      <div className="ch4-stage-box">
+        <div className="ch4-stage-frame">
+        {beats.map((b, i) => (
+          <img
+            key={b.img}
+            className={`ch4-stage-img${i === at ? ' is-on' : ''}`}
+            src={`/assets/chapter4/${b.img}.jpg`}
+            alt=""
+            aria-hidden="true"
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        ))}
+        </div>
+        <div className="ch4-stage-words">
+          {beats.map((b, i) => (
+            <p
+              key={b.label}
+              className={`ch4-stage-line${i === at ? ' is-on' : ''}`}
+              /* present for search and for a screen reader even when unseen */
+              aria-hidden={i === at ? undefined : 'true'}
+            >
+              {(Array.isArray(b.r) ? b.r : [b.r]).map((ref) => text(ref)).join(' ')}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      <div className="ch4-stage-rail" role="tablist" aria-label={label}>
+        <button
+          type="button"
+          className="ch4-stage-arrow"
+          onClick={() => go(at - 1)}
+          aria-label="הקודם"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
+        </button>
+        {beats.map((b, i) => (
+          <button
+            key={b.label}
+            type="button"
+            role="tab"
+            aria-selected={i === at}
+            className={`ch4-stage-dot${i === at ? ' is-on' : ''}`}
+            onClick={() => go(i)}
+          >
+            <span>{b.label}</span>
+          </button>
+        ))}
+        <button
+          type="button"
+          className="ch4-stage-arrow"
+          onClick={() => go(at + 1)}
+          aria-label="הבא"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    </section>
   )
 }
 
@@ -969,12 +1026,18 @@ export default function Chapter4() {
                   </div>
                 </div>
                 <Head id="hijra" />
-                <T r="§0.a" className="ch4-body" reveal />
-                <Statement r="§0.b" />
-                <T r="§1.a" className="ch4-body" em={["ית'רב"]} reveal />
-                <T r="§1.b" className="ch4-body" reveal />
-                <Journey />
-                <Plate src="yathrib-oasis" />
+                <Stage
+                  label="ההגירה למדינה"
+                  beats={[
+                    { img: 'stage-1-mecca', r: '§0.a', label: 'מכה' },
+                    { img: 'stage-2-road', r: '§0.b', label: 'שתים־עשרה שנים' },
+                    { img: 'stage-3-night', r: '§1.a', label: 'הדרך' },
+                    { img: 'stage-4-arrival', r: '§1.b', label: "ית'רב" },
+                    { img: 'stage-5-yard', r: '§7.a', label: 'המסגד' },
+                  ]}
+                />
+                <T r="§7.b" className="ch4-body" reveal />
+                <T r="§7.c" className="ch4-body" reveal />
                 <div className="ch4-two" data-reveal>
                   <T r="§2.flight" className="ch4-body ch4-two-side" />
                   <T r="§2.invited" className="ch4-body ch4-two-side" />
@@ -1002,10 +1065,6 @@ export default function Chapter4() {
                   <T r="§6.echo1" className="ch4-body" />
                 <T r="§6.echo2" className="ch4-body" />
                 </Echo>
-                <T r="§7.a" className="ch4-body" reveal />
-                <T r="§7.b" className="ch4-body" reveal />
-                <T r="§7.c" className="ch4-body" reveal />
-                <Plate src="mosque-courtyard" />
               </Section>
 
               {/* ============ 02 · מהטפה לג'האד ============
@@ -1076,14 +1135,20 @@ export default function Chapter4() {
                   בסרגל. טיפוגרפיה שקטה, טקסט מלא, בלי דימוי ובלי מנגנון. */}
               <Section id="trench">
                 <Head id="trench" />
-                <T r="§23.a" className="ch4-body" reveal />
+                <Stage
+                  variant="inset"
+                  label="קרב השוחה"
+                  beats={[
+                    { img: 'siege-1-open', r: '§23.a', label: 'המצור' },
+                    { img: 'siege-2-digging', r: '§24.trench', label: 'החפירה' },
+                    { img: 'siege-3-finished', r: '§25.a', label: 'המחנות' },
+                    { img: 'siege-4-storm', r: '§24.storm', label: 'הסערה' },
+                  ]}
+                />
                 <div className="ch4-two" data-reveal>
                   <T r="§23.cause1" className="ch4-body ch4-two-side" />
                   <T r="§23.cause2" className="ch4-body ch4-two-side" />
                 </div>
-                <Trench r="§24.trench" />
-                <T r="§24.storm" className="ch4-body" reveal />
-                <T r="§25.a" className="ch4-body" em={['אלאחזאב']} reveal />
                 <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
                 <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
               </Section>
