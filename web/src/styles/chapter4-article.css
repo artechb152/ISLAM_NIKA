@@ -909,7 +909,10 @@
 }
 
 .ch4-band-copy{position:relative;z-index:1;min-width:0}
-.ch4-band.is-flip .ch4-band-copy{grid-column:1}
+/* on a flipped band the fade lightens the LEFT, so the words belong in the
+   left column. Column 1 is the right one in RTL, and putting them there sat
+   the sentence straight on the picture. */
+.ch4-band.is-flip .ch4-band-copy{grid-column:2}
 .ch4-band-copy > * + *{margin-block-start:14px}
 
 /* the caption belongs over the PICTURE, never over the faded half where cream
