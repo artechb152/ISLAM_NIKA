@@ -41,6 +41,8 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import BadrFilm from '@/components/chapter4/BadrFilm'
 import Ditch from '@/components/chapter4/Ditch'
+import Forces from '@/components/chapter4/Forces'
+import Spots from '@/components/chapter4/Spots'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
 import { layoutLabels, px, py, ROUTE } from '@/lib/chapter4/art'
@@ -673,6 +675,41 @@ function Block({ children }: { children: React.ReactNode }) {
   return <div className="ch4-block">{children}</div>
 }
 
+/** §2 gives two accounts of one departure and refuses to choose between them.
+    Printed one under the other they read as a sequence — first this happened,
+    then that. As one switch they read as what they are: two readings of a
+    single event, where picking up one means putting the other down.
+
+    BOTH STAY IN THE DOCUMENT. The account not showing is still in the DOM for
+    chapter search and for a screen reader; only the eye is asked to choose. */
+function Versions({ a, b, labels }: { a: string; b: string; labels: [string, string] }) {
+  const [at, setAt] = useState(0)
+  const refs = [a, b] as const
+  return (
+    <div className="ch4-versions" data-reveal>
+      <div className="ch4-versions-tabs" role="tablist" aria-label="שתי גרסאות">
+        {labels.map((l, i) => (
+          <button
+            key={l}
+            type="button"
+            role="tab"
+            aria-selected={at === i}
+            className={at === i ? 'is-on' : undefined}
+            onClick={() => setAt(i)}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+      {refs.map((r, i) => (
+        <p className={`ch4-versions-text${at === i ? ' is-on' : ''}`} key={r}>
+          {text(r)}
+        </p>
+      ))}
+    </div>
+  )
+}
+
 /** A movement inside a section. With ten sections instead of twenty-eight,
     what used to be a section of its own is a sub-heading here — and the rail
     shows it nested, so no anchor was lost in the reduction. */
@@ -710,22 +747,6 @@ function Echo({ children }: { children: React.ReactNode }) {
   )
 }
 
-/** The force balance. TWICE in the chapter and there is no third: Badr is 300
-    against 1000 and Uhud is 1000 against 3000, and the REVERSAL is the whole
-    argument. A third use would make it a habit instead of a point.
-
-    No bars yet. A bar needs a number lifted out of the sentence and set to a
-    width, and a width is a claim about proportion that has to be looked at
-    before it is trusted — which cannot be done while the dev server is held.
-    The two sentences stand side by side, which is already the comparison. */
-function Forces({ muslims, other }: { muslims: string; other: string }) {
-  return (
-    <div className="ch4-forces" data-reveal>
-      <p className="ch4-force ch4-force-a">{text(muslims)}</p>
-      <p className="ch4-force ch4-force-b">{text(other)}</p>
-    </div>
-  )
-}
 
 /** הודנה and מצלחה. The two terms that carry chapter 4's argument across a
     thousand years — part ג׳ defines them and part ה׳ is people arguing about
@@ -1065,12 +1086,7 @@ export default function Chapter4() {
                     <T r="§1.b" className="ch4-body" />
                   </Block>
                 </Band>
-                <div className="ch4-two" data-reveal>
-                  <Block>
-                    <T r="§2.flight" className="ch4-body ch4-two-side" />
-                    <T r="§2.invited" className="ch4-body ch4-two-side" />
-                  </Block>
-                </div>
+                <Versions a="§2.flight" b="§2.invited" labels={['בריחה', 'הזמנה']} />
 
                 <SubHead section="hijra" id="groups" />
                 <Block>
@@ -1088,6 +1104,15 @@ export default function Chapter4() {
                   <T r="§4.a" className="ch4-body" reveal />
                   <T r="§4.b" className="ch4-body" reveal />
                 </Block>
+                <Spots
+                  img="stage-5-yard"
+                  caption="החצר לפני שנבנה המסגד · שחזור מצויר"
+                  spots={[
+                    { x: 0.7, y: 0.74, label: pick('§7.c', 'עצי הדקל') },
+                    { x: 0.45, y: 0.66, label: pick('§7.a', 'בחצר') },
+                    { x: 0.28, y: 0.56, label: pick('§7.c', 'המסגד') },
+                  ]}
+                />
                 <Band img="stage-5-yard" caption="החצר לפני שנבנה המסגד · שחזור מצויר">
                   <Block>
                     <T r="§7.a" className="ch4-body" />
@@ -1130,7 +1155,12 @@ export default function Chapter4() {
                   <T r="§10.b" className="ch4-body" reveal />
                   <T r="§11.a" className="ch4-body" em={["אבו ג'הל"]} reveal />
                 </Block>
-                <Forces muslims="§11.muslims" other="§11.quraysh" />
+                <Forces
+                  rows={[
+                    { num: 300, label: pick('§11.muslims', 'מוחמד'), text: text('§11.muslims'), side: 'a' },
+                    { num: 1000, label: pick('§11.quraysh', "אבו ג'הל"), text: text('§11.quraysh'), side: 'b' },
+                  ]}
+                />
                 <BadrFilm />
                 <Block>
                   <T r="§13.a" className="ch4-body" reveal />
@@ -1169,7 +1199,12 @@ export default function Chapter4() {
                   <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
                 </Block>
                 <Band img="uhud-mount" caption="הר אֻחֻד מן המישור · שחזור מצויר" />
-                <Forces muslims="§17.muslims" other="§17.quraysh" />
+                <Forces
+                  rows={[
+                    { num: 1000, label: pick('§17.muslims', 'מוחמד'), text: text('§17.muslims'), side: 'a' },
+                    { num: 3000, label: pick('§17.quraysh', 'קוריש'), text: text('§17.quraysh'), side: 'b' },
+                  ]}
+                />
                 <Block>
                   <T r="§18.a" className="ch4-body" reveal />
                   <T r="§18.b" className="ch4-body" reveal />

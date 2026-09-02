@@ -77,6 +77,32 @@ export default function Looks() {
 }
 
 /* eslint-disable @next/next/no-img-element */
+
+const Station = ({ head, pic, children }: { head: string; pic?: string; children: React.ReactNode }) => (
+  <section className="lk-st">
+    <h3>{head}</h3>
+    <div>
+      {pic && <Pic src={pic} cap={head} />}
+      <div>{children}</div>
+    </div>
+  </section>
+)
+
+const Pair = ({ pic, cap, children }: { pic: string; cap: string; children: React.ReactNode }) => (
+  <section className="lk-sticky">
+    <div className="lk-sticky-pic"><Pic src={pic} cap={cap} /></div>
+    <div className="lk-sticky-text">{children}</div>
+  </section>
+)
+
+const Card = ({ head, pic, children }: { head: string; pic?: string; children: React.ReactNode }) => (
+  <section className="lk-card">
+    {pic && <Pic src={pic} />}
+    <h3>{head}</h3>
+    {children}
+  </section>
+)
+
 const Pic = ({ src, cap }: { src: string; cap?: string }) => (
   <figure>
     <img src={`/assets/chapter4/${src}.jpg`} alt="" aria-hidden="true" loading="lazy" />
@@ -88,15 +114,6 @@ const Title = () => <h2 className="lk-title">ההגירה למדינה</h2>
 
 /* ---------- 1 · יומן מסע ---------- */
 function Journal() {
-  const Station = ({ head, pic, children }: { head: string; pic?: string; children: React.ReactNode }) => (
-    <section className="lk-st">
-      <h3>{head}</h3>
-      <div>
-        {pic && <Pic src={pic} cap={head} />}
-        <div>{children}</div>
-      </div>
-    </section>
-  )
   return (
     <article>
       <Title />
@@ -116,12 +133,6 @@ function Journal() {
 
 /* ---------- 2 · תמונה נעוצה ---------- */
 function Sticky() {
-  const Pair = ({ pic, cap, children }: { pic: string; cap: string; children: React.ReactNode }) => (
-    <section className="lk-sticky">
-      <div className="lk-sticky-pic"><Pic src={pic} cap={cap} /></div>
-      <div className="lk-sticky-text">{children}</div>
-    </section>
-  )
   return (
     <article>
       <Title />
@@ -189,13 +200,6 @@ function Column() {
 
 /* ---------- 5 · כרטיסי נושא ---------- */
 function Grid() {
-  const Card = ({ head, pic, children }: { head: string; pic?: string; children: React.ReactNode }) => (
-    <section className="lk-card">
-      {pic && <Pic src={pic} />}
-      <h3>{head}</h3>
-      {children}
-    </section>
-  )
   return (
     <article>
       <Title />
