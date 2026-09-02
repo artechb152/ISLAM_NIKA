@@ -51,6 +51,16 @@
 
 .chapter-article .article-section > * + *,
 .chapter-article .ch3-readings > * + *{margin-top:var(--flow)}
+/* PARAGRAPHS ARE PARAGRAPHS, whichever wrapper they sit in. Splitting a
+   section's prose across several .ch3-body blocks was putting --flow (34px)
+   between two consecutive paragraphs while the gap inside a block stayed 16px.
+   Measured at 1500px, one section's runs read 16 · 34 · 16 · 16 here against a
+   flat 16 · 16 in both siblings — the chapter's own text breathing unevenly
+   with no rule behind it. --flow is for a block meeting a DEVICE, not for two
+   paragraphs that happen to be in different divs. */
+.chapter-article .ch3-body + .ch3-body,
+.chapter-article .ch3-body + .ch3-withplate,
+.chapter-article .ch3-withplate + .ch3-body{margin-top:16px}
 
 .chapter-article .ch3-sub,
 .chapter-article .ch3-hero{margin-bottom:0}
@@ -67,7 +77,8 @@
 .chapter-article .ch3-statement + *{margin-top:var(--flow-lead)}
 /* each device is a movement of its own — a full step before what follows */
 .chapter-article .ch3-lineage + *,
-.chapter-article .ch3-heavens + *,
+.chapter-article .ch3-ascent + *,
+.chapter-article .ch3-reuse + *,
 .chapter-article .ch3-readings + *{margin-top:var(--flow-part)}
 
 /* ============================ running text ============================ */
@@ -121,15 +132,53 @@
 
 /* ============================ the plate ============================
    One picture inside a section, on paper, with no text burned into it and no
-   caption over it. Section 05 uses it to pay the banner's promise. */
+   caption over it.
+
+   THREE SIZES, AND THE REASON IS A MEASUREMENT. Every plate rendered at exactly
+   453px — seven identical thumbnails down eleven thousand pixels. Measured at
+   1500px, the rendered image widths in the three chapters were:
+
+     chapter 6   1284 ×5 · 1080 · 1028 · 579 · 475 · 244 ×3 · 82 ×5
+     chapter 2   1185 ×7 · 760 · 469 · 373 · 331 ×2 · 248 ×4
+     chapter 3   453 ×7
+
+   Both siblings are dominated by pictures at or beyond the column and keep the
+   small ones for rhythm. This chapter had NO large image at all — its biggest
+   was smaller than chapter 2's second-smallest tier, seven times over. That is
+   why it read as a text with illustrations while the others read as chapters. */
 .ch3-plate{
   margin:0;width:100%;max-width:var(--measure,880px);
   overflow:hidden;border:1px solid var(--edge);box-shadow:var(--shadow);
 }
-/* 4:3 — the ratio the plates were made at. At 16/7 the crop was eating the
-   hills out of the precinct and the sky out of the town, which is most of what
-   those two pictures are. */
+/* 4:3 — the ratio the plates were painted at. At 16/7 the crop ate the hills
+   out of the precinct and the sky out of the town, which is most of what those
+   two pictures are. */
 .ch3-plate img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+
+/* `wide` — the full reading column, for a picture that must not be cropped hard.
+   §17's cave is framed by its own opening and a band would cut the arch off. */
+.chapter-article .ch3-plate.is-wide{max-width:none;width:100%}
+.ch3-plate.is-wide img{aspect-ratio:3/2}
+
+/* `bleed` — past the gutter, on the ascent's own trick, for the two paintings
+   that ARE wide: a flock strung across a valley, and a dusk horizon. Boxed at
+   453 the birds were specks and the horizon was a stripe. */
+.chapter-article .ch3-plate.is-bleed{
+  max-width:none;width:auto;
+  margin-inline:calc(var(--content-gutter) * -1);
+  border-inline:0;
+}
+.ch3-plate.is-bleed img{aspect-ratio:21/9}
+
+/* `cut` — a watercolour on a transparent ground that FLOATS on the parchment:
+   no border, no shadow, no crop. This is chapter 6's shahada illustration part
+   for part, and it was the one object type chapter 3 had none of. The alpha is
+   real (keyed off the flat painted ground), so it survives whatever the page
+   surface becomes. */
+.ch3-plate.is-cut{
+  border:0;box-shadow:none;overflow:visible;background:none;
+}
+.ch3-plate.is-cut img{aspect-ratio:auto;object-fit:contain}
 
 /* ============================ the two set-apart voices ============================
    Two costumes, two uses each, and the audit fails at three. See
@@ -137,15 +186,29 @@
    are printed by the source INSIDE their sentences and stay there. */
 
 /* §19 (sura 96) and §42 (17:1) — the two the event itself rests on.
-   On the reading edge with a gold rule, not centred in a frame: a frame would
-   make it an object, and these are text. */
+
+   THIS WAS A GOLD RULE ON THE READING EDGE, on the argument that „a frame would
+   make it an object, and these are text". That was my call and it was the wrong
+   one for this chapter: it left the first words ever revealed looking like a
+   pulled paragraph, in a chapter whose siblings both give their central
+   declaration a real object. Chapter 6 sets its testimony in exactly this card —
+   gold border, inset ring, two corner marks — and §19 carries the same weight.
+
+   The two-costume ceiling is untouched: still two costumes, two uses each. */
 .ch3-verse{
-  margin:0;width:min(760px,100%);
-  padding-inline-start:clamp(18px,2.2vw,28px);
-  border-inline-start:3px solid var(--gold);
+  position:relative;margin:0;width:min(660px,100%);
+  padding:clamp(26px,3.2vw,38px) clamp(26px,4vw,44px);
+  background:linear-gradient(180deg,var(--cream),var(--panel));
+  border:1.5px solid var(--gold);border-radius:16px;
+  box-shadow:inset 0 0 0 4px rgba(199,154,60,.16),0 10px 26px rgba(87,24,32,.1);
   font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
-  font-size:clamp(19px,1.9vw,25px);line-height:1.6;
+  font-size:clamp(20px,2.3vw,28px);line-height:1.45;text-align:center;
 }
+.ch3-verse::before,.ch3-verse::after{
+  content:"";position:absolute;width:18px;height:18px;border:2px solid var(--gold);opacity:.9;
+}
+.ch3-verse::before{top:7px;inset-inline-start:7px;border-inline-end:none;border-block-end:none;border-start-start-radius:8px}
+.ch3-verse::after{bottom:7px;inset-inline-end:7px;border-inline-start:none;border-block-start:none;border-end-end-radius:8px}
 
 /* §4 and §43 — the chapter's only present-tense voice, opening the loop out of
    the seventh century and closing it. Centred, and the only centred running
@@ -161,10 +224,15 @@
 /* ============================ 1 · the lineage strip ============================
    Static. No clicks, nothing focusable, nothing hidden from chapter search.
    HTML and CSS and not SVG: Hebrew text in SVG flows right-to-left from its x,
-   and that trap has already cost this project a labelling bug. */
+   and that trap has already cost this project a labelling bug.
+
+   THE RULES ARE THE POINT. This drew two flat lists and no connecting line for
+   a while, which meant the one thing it exists to show — that עבד אלמטלב stands
+   in both rows in two different roles — was not on the page at all. A rail
+   joins the rows, and both of his appearances carry the same gold lozenge. */
 .ch3-lineage{
   width:100%;max-width:var(--wide);
-  display:grid;gap:clamp(16px,2vw,26px);
+  display:grid;gap:0;
   padding:clamp(20px,2.6vw,30px);
   background:var(--mat);border:1px solid var(--edge);
 }
@@ -172,54 +240,197 @@
   margin:0;display:grid;gap:clamp(14px,1.8vw,22px);
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 }
-/* the second row is what happened AFTER — a hairline says so without a caption
-   that we would have had to write */
-.ch3-lin-row.is-care{padding-top:clamp(16px,2vw,24px);border-top:1px solid var(--rule)}
 .ch3-lin-node{display:grid;gap:5px;align-content:start}
 .ch3-lin-node dt{
   font-family:var(--font-heading);font-weight:700;color:var(--maroon);
   font-size:clamp(17px,1.6vw,21px);line-height:1.25;
 }
 .ch3-lin-node dd{margin:0;font-size:15.5px;line-height:1.6;color:var(--muted)}
+/* the same person, twice, in two roles — one mark on both, no caption needed */
+.ch3-lin-node.is-tied dt::before{
+  content:"";display:inline-block;width:9px;height:9px;
+  margin-inline-end:9px;vertical-align:middle;
+  background:var(--gold);transform:rotate(45deg);
+}
+/* the rail: a horizontal rule between the generations, dropped into on the
+   inline-start (RIGHT in RTL — the reading edge, where both tied nodes sit) */
+.ch3-lin-rail{position:relative;height:clamp(26px,3vw,38px)}
+.ch3-lin-rail::before{
+  content:"";position:absolute;top:50%;
+  inset-inline-start:4px;width:calc(100% - 8px);height:1px;background:var(--edge);
+}
+.ch3-lin-rail::after{
+  content:"";position:absolute;top:0;height:50%;
+  inset-inline-start:4px;width:1px;background:var(--edge);
+}
+.ch3-lin-drop{
+  position:absolute;top:50%;height:50%;
+  inset-inline-start:4px;width:1px;background:var(--edge);
+}
 
-/* ============================ 2 · the seven heavens ============================
-   An <ol> and a rail. No JavaScript. Order 1→7 top to bottom and NOT reversed:
-   `column-reverse` would give a literal ladder while keeping DOM order, but a
-   sighted reader scanning down would then meet Abraham first. The ascent is
-   carried by the source's own ordinals, which it already prints. */
-.ch3-heavens{
-  list-style:none;margin:0;padding:0;
+/* ==================== 1b · the ancient word, reused today ====================
+   §§4–6, the chapter's register change, which had no visual event at all.
+   NO IMAGERY — no drones, no ordnance, no organisation marks, no operations
+   graphics. Two rows, one per claim on the same phrase. */
+.ch3-reuse{
   width:100%;max-width:var(--wide);
-  display:grid;gap:0;counter-reset:rung;
-  border-inline-start:2px solid var(--edge);
+  display:grid;gap:0;
+  background:var(--mat);border:1px solid var(--edge);
 }
+.ch3-reuse-row{
+  position:relative;
+  padding:clamp(16px,2vw,24px);
+  padding-inline-start:clamp(40px,4.4vw,60px);
+}
+.ch3-reuse-row + .ch3-reuse-row{border-top:1px solid var(--rule)}
+.ch3-reuse-mark{
+  position:absolute;inset-inline-start:clamp(17px,2vw,25px);
+  top:calc(clamp(16px,2vw,24px) + .74em);
+  width:9px;height:9px;background:var(--maroon);transform:rotate(45deg);
+}
+
+/* ============================ 2 · the ascent ============================
+   The chapter's one set piece, and the only place a scroll mechanism belongs:
+   the ascent is the passage whose CONTENT is a movement upward.
+
+   FULL-BLEED, ON CHAPTER 6'S OWN PATTERN — `.scrolly-fullstage`, part for part,
+   because this is the site's existing language for exactly this and a device
+   boxed inside the reading column was not it. Measured against chapter 6 at
+   1500px: its stage runs 0→1200 (the content area less the rail) by pulling one
+   content gutter off each side, sticks at the header, and stands
+   `100dvh - header` tall while the copy is pulled back up over it. Same here.
+
+   NO SCROLL LOCKING AND NO LAYOUT SHIFT. The sky is `position:sticky`, which
+   means it is an ordinary block that happens to hold still while its parent
+   passes; scrolling past the ascent behaves exactly as it does anywhere else.
+
+   ⚠ `overflow` MUST NOT go on `.ch3-ascent`. An overflow other than `visible`
+   on an ancestor turns it into a scroll container and silently kills the
+   sticky, which is the same trap `chapter6-article.css` documents on `body`
+   („overflow-x:CLIP, not hidden"). The clipping belongs to `.ch3-sky` itself.
+
+   ORDER 1 TO 7 TOP TO BOTTOM AND NOT REVERSED: a sighted reader scanning down
+   must not meet Abraham first. NO ORDINAL NUMERALS on the rungs either — the
+   source writes the ordinals inside the sentences themselves, and a numeral
+   beside them would be the page saying it twice. */
+.ch3-ascent{
+  display:block;position:relative;
+  margin-inline:calc(var(--content-gutter) * -1);
+  width:auto;max-width:none;
+  background:var(--maroon-deep);
+}
+/* feather the entry seam: the hard edge where parchment meets the full-bleed
+   painting is washed out with paper→transparent, so the sky fades in rather
+   than cutting. Chapter 6 does this on its own stage and for the same reason. */
+.ch3-ascent::before{
+  content:"";position:absolute;inset-inline:0;top:0;z-index:4;pointer-events:none;
+  height:clamp(90px,14vh,175px);
+  background:linear-gradient(to bottom,var(--paper) 0%,rgba(237,228,208,.72) 34%,rgba(237,228,208,.32) 64%,transparent 100%);
+}
+/* and the exit seam the same way — chapter 6 feathers both ends on its own
+   full stage, and without this the black sky cut straight to parchment. */
+.ch3-ascent::after{
+  content:"";position:absolute;inset-inline:0;bottom:0;z-index:4;pointer-events:none;
+  height:clamp(150px,24vh,320px);
+  background:linear-gradient(to top,
+    var(--paper) 0%, rgba(237,228,208,.82) 20%, rgba(237,228,208,.5) 46%, rgba(237,228,208,.2) 72%, transparent 100%);
+}
+.ch3-sky{
+  position:sticky;top:var(--header-height);z-index:1;
+  height:calc(100dvh - var(--header-height));overflow:hidden;
+  background-image:url('/assets/chapter3/heavens-sky.jpg');
+  background-repeat:no-repeat;background-size:cover;
+  /* THE PICTURE IS STORED FLIPPED — horizon at its head. The rungs run Adam
+     (lowest) at the top to Abraham (highest) at the foot, so a sky darkening
+     upward on screen fought the list and put the warm horizon beside the
+     HIGHEST heaven. Flipped, the panel top is the horizon and its foot is deep
+     space, which is the order the rungs are actually in. 0 rests on the horizon
+     beside Adam; 1 has travelled past Abraham into the dark. */
+  background-position:50% calc(var(--asc,0) * 100%);
+}
+/* a flat scrim, not a gradient ramp: the rungs have to stay legible at every
+   pan position, and the picture's own brightness changes as it travels */
+.ch3-sky::after{
+  content:"";position:absolute;inset:0;background:rgba(12,10,26,.52);
+}
+/* THE DEVICE'S OWN OPENING SCREEN — §39.a over the horizon, before Adam.
+   It used to sit on parchment above the block, so the reader crossed the seam
+   into the sky with no lead and met the first heaven cold. This carries the
+   pull-up now; the list follows it in normal flow. */
+.ch3-asc-lead{
+  position:relative;z-index:2;
+  margin-top:calc(0px - (100dvh - var(--header-height)));
+  min-height:calc(100dvh - var(--header-height));
+  display:flex;align-items:center;
+  padding-inline:clamp(16px,4vw,60px);
+}
+.ch3-asc-lead p{
+  max-width:min(680px,92%);margin:0;
+  font-family:var(--font-heading);font-weight:700;color:var(--cream);
+  font-size:clamp(22px,2.6vw,34px);line-height:1.42;text-wrap:balance;
+  text-shadow:0 2px 18px rgba(10,8,20,.65);
+}
+.ch3-heavens{
+  position:relative;z-index:2;list-style:none;margin-top:0;
+  padding-inline:clamp(16px,4vw,60px);
+}
+/* NO RAIL ANY MORE. A continuous hairline down the column was the right marker
+   when all seven rungs shared one panel; at one screen per rung it would be a
+   line joining things that are never on screen together. The ascent is carried
+   by the sky's own travel now. */
 .ch3-rung{
-  counter-increment:rung;position:relative;
-  padding:clamp(13px,1.6vw,18px) clamp(20px,2.4vw,30px) clamp(13px,1.6vw,18px) 0;
-  display:grid;gap:4px;
+  position:relative;
+  display:flex;flex-direction:column;justify-content:center;
+  /* chapter 6 sets its steps to 74vh, but its steps are whole paragraphs. A
+     rung is a name and one line — roughly a third of that — so 64vh keeps the
+     same one-screen-per-beat feeling without adding five thousand pixels of
+     dead scroll to a page that is already twelve. */
+  min-height:52vh;
+  padding-block:clamp(14px,1.8vw,20px);
+  padding-inline-start:clamp(28px,3vw,40px);
+  opacity:.42;transition:opacity .4s ease;
 }
-.ch3-rung + .ch3-rung{border-top:1px solid var(--rule)}
-/* the marker sits ON the rail */
-.ch3-rung::before{
-  content:counter(rung);
-  position:absolute;inset-inline-start:0;top:50%;transform:translate(50%,-50%);
-  width:26px;height:26px;display:grid;place-items:center;
-  font-family:var(--font-heading);font-weight:700;font-size:14px;
-  color:var(--cream);background:var(--maroon);
-  font-variant-numeric:tabular-nums;
+
+.ch3-ascent.is-live .ch3-rung.is-here{opacity:1}
+/* no JS, or reduced motion: every rung stands at full strength */
+.ch3-ascent:not(.is-live) .ch3-rung{opacity:1}
+/* the rung's own text block — chapter 6's `.stage-card` measure, so a rung
+   reads at the same width as a step card anywhere else on the site */
+.ch3-rung-mark{
+  position:absolute;inset-inline-start:0;top:50%;
+  width:13px;height:13px;
+  transform:translate(50%,-50%) rotate(45deg);
+  background:var(--gold-soft);
+  transition:transform .4s ease,background .4s ease;
+}
+.ch3-ascent.is-live .ch3-rung.is-here .ch3-rung-mark{
+  background:var(--cream);
+  transform:translate(50%,-50%) rotate(45deg) scale(1.5);
 }
 .ch3-rung-name{
-  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
-  font-size:clamp(17px,1.6vw,21px);line-height:1.25;
+  display:block;max-width:min(640px,92%);
+  font-family:var(--font-heading);font-weight:700;color:var(--cream);
+  font-size:clamp(26px,3.4vw,46px);line-height:1.14;text-wrap:balance;
+  text-shadow:0 2px 18px rgba(10,8,20,.6);
 }
-.ch3-rung-text{font-size:15.5px;line-height:1.65;color:var(--muted)}
+.ch3-rung-text{
+  display:block;max-width:min(640px,92%);margin-top:14px;
+  font-size:var(--read);line-height:1.8;color:rgba(245,236,214,.88);
+  text-shadow:0 1px 14px rgba(10,8,20,.7);
+}
 
 /* ============================ 3 · the two readings ============================
-   The chapter's only interactive device. A rule, two end points and two labels.
-   NO BUILDING, NO PHOTOGRAPH, NO MAP OF THE MODERN CITY: §44 disputes that the
-   journey reached Jerusalem at all, and §43 ties the city's sanctity to jihad
-   terror. Both sentences print as prose below the figure, always — the toggle
-   changes which rail is drawn and nothing else. */
+   The chapter's only toggle. NO BUILDING, NO PHOTOGRAPH, NO MAP OF THE MODERN
+   CITY: section 44 disputes that the journey reached Jerusalem at all, and
+   section 43 ties the city's sanctity to jihad terror. Both sentences print as
+   prose below the figure, always — the toggle changes which span is drawn and
+   nothing else.
+
+   The figure was a rule and two dots, which read as an unfinished sketch. It
+   now draws the one thing the two readings differ on: how far the line runs.
+   A dashed ground rule is the full measure, the solid span is what this reading
+   claims, and an unlabelled bracket marks the peninsula's own extent so
+   inside and beyond are legible without naming a place. */
 .ch3-readings{width:100%;max-width:var(--wide);display:grid}
 .ch3-read-legend{display:flex;flex-wrap:wrap;gap:10px}
 .ch3-read-btn{
@@ -232,28 +443,39 @@
 .ch3-read-btn[aria-pressed="true"]{background:var(--maroon);color:var(--cream);border-color:var(--maroon)}
 
 .ch3-read-fig{
-  position:relative;height:76px;margin-top:var(--flow);
-  display:grid;align-items:center;
+  position:relative;height:104px;margin-top:var(--flow);
+  padding-inline:2px;
 }
-/* the rail runs from the reading edge outward; how far is the whole content of
-   the figure, so it is the one thing that animates */
-.ch3-read-rail{
-  position:absolute;inset-inline-start:0;top:50%;height:2px;
+.ch3-read-ground{
+  position:absolute;inset-inline:0;top:46%;height:1px;transform:translateY(-50%);
+  background:repeating-linear-gradient(to right,var(--edge) 0 7px,transparent 7px 14px);
+}
+.ch3-read-span{
+  position:absolute;inset-inline-start:0;top:46%;height:3px;
   background:var(--maroon);transform:translateY(-50%);
-  transition:width .3s ease;
+  transition:width .32s ease;
 }
-.ch3-read-fig.is-far .ch3-read-rail{width:100%}
-.ch3-read-fig.is-near .ch3-read-rail{width:38%}
+.ch3-read-fig.is-far .ch3-read-span{width:100%}
+.ch3-read-fig.is-near .ch3-read-span{width:38%}
+/* the peninsula's own extent — a bracket under the rule, never a label */
+.ch3-read-extent{
+  position:absolute;inset-inline-start:0;width:38%;
+  top:calc(46% + 16px);height:14px;
+  /* --edge was too faint to read as a bracket on parchment at all; this is the
+     rule colour the rest of the sheet uses for a real hairline */
+  border:1px solid rgba(87,24,32,.34);border-top:0;
+}
 .ch3-read-dot{
-  position:absolute;top:50%;width:11px;height:11px;
+  position:absolute;top:46%;width:13px;height:13px;
   transform:translate(50%,-50%) rotate(45deg);background:var(--maroon);
 }
 .ch3-read-dot.is-start{inset-inline-start:0}
-.ch3-read-dot.is-end{transition:inset-inline-start .3s ease}
-.ch3-read-fig.is-far .ch3-read-dot.is-end{inset-inline-start:calc(100% - 11px)}
-.ch3-read-fig.is-near .ch3-read-dot.is-end{inset-inline-start:calc(38% - 11px)}
+.ch3-read-dot.is-end{background:var(--stamp);transition:inset-inline-start .32s ease}
+.ch3-read-fig.is-far .ch3-read-dot.is-end{inset-inline-start:calc(100% - 13px)}
+.ch3-read-fig.is-near .ch3-read-dot.is-end{inset-inline-start:calc(38% - 13px)}
+
 @media (prefers-reduced-motion:reduce){
-  .ch3-read-rail,.ch3-read-dot.is-end{transition:none}
+  .ch3-read-span,.ch3-read-dot.is-end,.ch3-rung,.ch3-rung-mark{transition:none}
 }
 
 /* ============================ the hand-off ============================
@@ -546,7 +768,8 @@
    a column of text the ladder read as a margin note, when it is what §39 IS.
    The width saved 500px and cost the hierarchy, which was the wrong trade. */
 .chapter-article .ch3-lineage,
-.chapter-article .ch3-heavens,
+.chapter-article .ch3-ascent,
+.chapter-article .ch3-reuse,
 .chapter-article .ch3-readings{margin-top:var(--flow-part)}
 
 /* ============================ 6 · the note ============================

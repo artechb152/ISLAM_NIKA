@@ -337,9 +337,31 @@ function Statement({ r }: { r: string }) {
     crowd, not a faceless silhouette — chapter 2 drafted exactly that for its
     own opening and it was rejected and deleted. These three are a town, a
     cargo and a precinct: places, objects, light. */
-function Plate({ src }: { src: string }) {
+/* THREE SIZES, AND THE REASON IS A MEASUREMENT. Every plate in this chapter
+   rendered at exactly 453px — seven identical thumbnails down eleven thousand
+   pixels. Measured against the siblings at 1500px, the image widths run:
+
+     chapter 6   1284 ×5 · 1080 · 1028 · 579 · 475 · 244 ×3 · 82 ×5
+     chapter 2   1185 ×7 · 760 · 469 · 373 · 331 ×2 · 248 ×4
+     chapter 3   453 ×7
+
+   Both siblings are dominated by pictures at or beyond the column, with small
+   ones for rhythm. This chapter had no large image at all: its biggest was
+   smaller than chapter 2's second-smallest tier. A picture that never becomes
+   an event is why the chapter read as a text with illustrations while the
+   others read as chapters.
+
+   `bleed` breaks the content gutter for a wide landscape band; `wide` fills the
+   column for a picture that must not be cropped hard; the default inset keeps
+   the beside-the-prose treatment for the three intimate subjects.
+
+   `cut` is a different object entirely — a watercolour on transparent ground
+   that floats on the parchment with no frame, no rule and no crop, which is
+   how chapter 6 sets its shahada illustration. It was the one object type this
+   chapter did not have at all. */
+function Plate({ src, size = 'inset' }: { src: string; size?: 'inset' | 'wide' | 'bleed' | 'cut' }) {
   return (
-    <figure className="ch3-plate">
+    <figure className={'ch3-plate' + (size === 'inset' ? '' : ` is-${size}`)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`/assets/chapter3/${src}`} alt="" aria-hidden="true" loading="lazy" decoding="async" />
     </figure>
@@ -416,60 +438,174 @@ function Note({ id, label, children }: { id: string; label: string; children: Re
    that trap has already cost this project a labelling bug. It does not exist
    here. */
 function Lineage() {
-  const parents = ['§8.father', '§8.mother']
-  const care = ['§12.b', '§12.c']
+  /* THE TWO ROWS ARE NOW ACTUALLY JOINED. For a while this drew two flat
+     definition lists side by side and not one connecting rule — which meant the
+     one thing it exists to show, that עבד אלמטלב stands in both rows in two
+     different roles, was not on the page at all. The rules are drawn in CSS off
+     `.ch3-lin-rail` and `.ch3-lin-drop`; the tie between the two occurrences is
+     marked with `is-tied` on both nodes.
+
+     The sr-only line is a UI string describing the FIGURE, in the same category
+     as alt text and control labels — the figure's shape is information a
+     sighted reader gets from the rules, and it has to reach everyone else. It
+     is not a sentence of the chapter and carries no fact the prose lacks. */
+  const parents: [string, boolean][] = [['§8.father', true], ['§8.mother', false]]
+  const care: [string, boolean][] = [['§12.b', true], ['§12.c', false]]
+  const node = ([r, tied]: [string, boolean]) => (
+    <div className={'ch3-lin-node' + (tied ? ' is-tied' : '')} key={r}>
+      <dt>{nameOf(r)}</dt>
+      <dd>{text(r)}</dd>
+    </div>
+  )
   return (
-    <div className="ch3-lineage" data-reveal>
-      <dl className="ch3-lin-row">
-        {parents.map((r) => (
-          <div className="ch3-lin-node" key={r}>
-            <dt>{nameOf(r)}</dt>
-            <dd>{text(r)}</dd>
+    <figure className="ch3-lineage" data-reveal>
+      <span className="sr-only">
+        תרשים הייחוס: עבד אללה ואאמנה בשורה העליונה, ומתחתיהם שני האפוטרופוסים.
+        עבד אלמטלב מופיע בשתי השורות — פעם כשם האב ופעם כסב שגידל את מוחמד.
+      </span>
+      <dl className="ch3-lin-row is-parents">{parents.map(node)}</dl>
+      <div className="ch3-lin-rail" aria-hidden="true">
+        <span className="ch3-lin-drop" />
+      </div>
+      <dl className="ch3-lin-row is-care">{care.map(node)}</dl>
+    </figure>
+  )
+}
+
+/* ---------------- the ancient word, reused today ----------------
+
+   §§4–6 IS THE CHAPTER'S REGISTER CHANGE and it had nothing on it. It ran as
+   two plain prose blocks — five fragments, no picture, no device — in a
+   chapter whose neighbours all carry one.
+
+   NO IMAGERY, and that has not moved: no drones, no ordnance, no organisation
+   marks, no operations graphics. The event here is typographic, which is the
+   only kind this material can safely have.
+
+   WHAT THE DEVICE SHOWS is a structure the source states and the prose cannot
+   hold in one view: one phrase out of the Quranic account of the elephant,
+   „מוץ נאכל", claimed as an operation name TWICE — by two different
+   organisations, twelve years and one border apart (§5, §6). Two rows, one per
+   claim, so the repetition is the shape of the figure instead of something the
+   reader has to notice across two paragraphs.
+
+   §4.ababil STAYS IN THE PROSE ABOVE. It is a different word being reused for a
+   different thing, and it sits under a different running head; pulling it in
+   here would put a row about אבאביל beneath a sub-heading that reads
+   „מוץ נאכל".
+
+   IT ADDS NO WORDS AND CONSUMES NOTHING TWICE. Each row prints its fragment in
+   full, exactly once, and the recurring term is marked inside the sentence by
+   `emphasise` — the mechanism already used everywhere else in this file. */
+function Reuse() {
+  const rows: { r: string; em: string[] }[] = [
+    { r: '§5.a', em: ['מוץ נאכל'] },
+    { r: '§6.a', em: ['מוץ נאכל'] },
+  ]
+  return (
+    <div className="ch3-reuse" data-reveal>
+      {rows.map(({ r, em }) => (
+        <div className="ch3-reuse-row" key={r}>
+          <span className="ch3-reuse-mark" aria-hidden="true" />
+          <div className="ch3-body">
+            <T r={r} em={em} />
           </div>
-        ))}
-      </dl>
-      <dl className="ch3-lin-row is-care">
-        {care.map((r) => (
-          <div className="ch3-lin-node" key={r}>
-            <dt>{nameOf(r)}</dt>
-            <dd>{text(r)}</dd>
-          </div>
-        ))}
-      </dl>
+        </div>
+      ))}
     </div>
   )
 }
 
-/* ---------------- mechanism 2 · the seven heavens ----------------
+/* ---------------- mechanism 2 · the ascent ----------------
 
-   An <ol> and a CSS rail. No JavaScript at all.
+   THE ASCENT IS A SCROLL MECHANISM — the chapter's one set piece.
 
-   WHY THIS IS NOT PROSE. §39 is a single 87-word sentence carrying an ordered
-   enumeration of seven, one rung of which holds two prophets. Read as prose the
-   reader cannot answer „מי היה ברביעי?" without going back. And the order is
-   not decoration, it is the content: Moses stands BELOW Abraham, and §40
-   depends on it — Muhammad comes back down past Moses to renegotiate.
+   It began as a bare <ol> with a CSS rail and no JavaScript, and measured
+   against chapters 2 and 6 that was the wrong call: every other chapter has one
+   thing the reader remembers it by (the desert stage, the story film, the hajj
+   route map) and this one had nothing. The ascent is the obvious place — it is
+   the only passage in the chapter whose CONTENT is a movement upward.
 
-   NOT a tablist (RamadanTimeline). Two measured reasons: the panels would be
-   four to nine words each, which is precisely what the words-per-paragraph
-   floor exists to catch; and a tablist shows one rung and hides six, while the
-   presence gate requires every fragment to reach the page.
+   HOW IT WORKS. The seven rungs are ordinary blocks in the flow. A layer behind
+   them carries one tall photograph of the night sky, and the reader's scroll
+   position pans it from the warm horizon at its foot to the black at its head.
+   Nothing is scroll-jacked, nothing is pinned, and scrolling past the block
+   works exactly as it does anywhere else on the page. The pan is a pure
+   function of scroll position, so it rewinds on the way back up.
 
-   ORDER 1→7, TOP TO BOTTOM, NOT REVERSED. A literal ladder wants seven at the
-   top, and `column-reverse` would give it while keeping DOM order for screen
-   readers — but a sighted reader scanning down would then meet Abraham first.
-   The ascent is carried by the source's own ordinals, which it already prints. */
-function Heavens() {
+   WHAT DID NOT CHANGE, because both were load-bearing:
+     · DOM ORDER IS 1→7, TOP TO BOTTOM. A literal ladder wants seven at the top
+       and `column-reverse` would give it — but a sighted reader scanning down
+       would meet Abraham first. The ascent is carried by the source's own
+       ordinals, which it already prints.
+     · EVERY RUNG IS IN THE DOM AT ALL TIMES. The highlight is opacity and
+       nothing else: no tablist, no panels, nothing revealed on demand. The
+       presence gate requires every fragment to reach the page and chapter
+       search walks this markup like any other paragraph.
+     · NO ORDINAL NUMERALS ARE PRINTED ON THE RAIL. The source writes
+       „ברקיע השלישי", „ברביעי" inside the sentences themselves; a numeral
+       beside them would be the page saying it twice.
+
+   Under prefers-reduced-motion the sky is held at one frame and the rungs are
+   all at full strength — the same information, without the movement. */
+function Ascent() {
   const rungs = ['§39.r1', '§39.r2', '§39.r3', '§39.r4', '§39.r5', '§39.r6', '§39.r7']
+  const wrapRef = useRef<HTMLDivElement | null>(null)
+  const [active, setActive] = useState(0)
+
+  useEffect(() => {
+    const wrap = wrapRef.current
+    if (!wrap) return
+    const steps = Array.from(wrap.querySelectorAll<HTMLElement>('.ch3-rung'))
+    if (!steps.length) return
+    if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) return
+    wrap.classList.add('is-live')
+    let raf = 0
+
+    function measure(): void {
+      raf = 0
+      if (!wrap) return
+      const mid = window.innerHeight * 0.55
+      const tops = steps.map((s) => s.getBoundingClientRect().top)
+      let idx = 0
+      for (let i = 0; i < tops.length; i++) if (tops[i] <= mid) idx = i
+      setActive((a) => (a === idx ? a : idx))
+      /* 0 at the first rung, 1 at the last — the sky's own travel */
+      const span = Math.max(1, tops[tops.length - 1] - tops[0])
+      const t = Math.min(1, Math.max(0, (mid - tops[0]) / span))
+      wrap.style.setProperty('--asc', t.toFixed(3))
+    }
+    function onScroll(): void {
+      if (!raf) raf = requestAnimationFrame(measure)
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    measure()
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+      wrap.classList.remove('is-live')
+    }
+  }, [])
+
   return (
-    <ol className="ch3-heavens" data-reveal>
-      {rungs.map((r) => (
-        <li className="ch3-rung" key={r}>
-          <b className="ch3-rung-name">{nameOf(r)}</b>
-          <span className="ch3-rung-text">{text(r)}</span>
-        </li>
-      ))}
-    </ol>
+    <div className="ch3-ascent" ref={wrapRef} data-reveal>
+      <div className="ch3-sky" aria-hidden="true" />
+      <div className="ch3-asc-lead">
+        <T r="§39.a" />
+      </div>
+      <ol className="ch3-heavens">
+        {rungs.map((r, i) => (
+          <li className={'ch3-rung' + (i === active ? ' is-here' : '')} key={r}>
+            <span className="ch3-rung-mark" aria-hidden="true" />
+            <b className="ch3-rung-name">{nameOf(r)}</b>
+            <span className="ch3-rung-text">{text(r)}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   )
 }
 
@@ -517,8 +653,25 @@ function TwoReadings() {
           {labels[1]}
         </button>
       </div>
+      {/* THE FIGURE WAS THREE EMPTY SPANS — a rule and two dots, which was the
+          weakest object on the page and read as an unfinished sketch rather
+          than a diagram. It is still abstract, and must stay that way: §44
+          disputes that the journey left the peninsula at all, and §43 ties the
+          city's sanctity to jihad terror. A building, a photograph, an aerial
+          or a map of the modern city would settle in pictures a question the
+          source deliberately leaves open.
+
+          What it draws now is the ONE thing the two readings actually differ
+          on: how far the line runs. A fixed origin at the reading edge, a
+          measured ground rule, the travelled span drawn solid, the rest of the
+          rule left as a dashed remainder, and the destination marker sitting
+          where that reading puts it. Two unlabelled points on the ground rule
+          mark the peninsula's own extent, so „inside" and „beyond" are legible
+          without naming anything. */}
       <div className={'ch3-read-fig' + (far ? ' is-far' : ' is-near')} aria-hidden="true">
-        <span className="ch3-read-rail" />
+        <span className="ch3-read-ground" />
+        <span className="ch3-read-span" />
+        <span className="ch3-read-extent" />
         <span className="ch3-read-dot is-start" />
         <span className="ch3-read-dot is-end" />
       </div>
@@ -857,14 +1010,38 @@ export default function Chapter3() {
                   </div>
                 </div>
                 <Head id="elephant" />
-                <div className="ch3-body" data-reveal>
-                  <T r={['§0.a', '§0.name']} em={['שנת הפיל']} />
-                  <T r="§1.a" />
-                </div>
-                <div className="ch3-body" data-reveal>
-                  <T r="§2.a" em={['אבאביל']} />
-                  <T r="§2.sura" />
-                  <T r={['§3.a', '(§3.aside)']} />
+                {/* THE ELEPHANT, BESIDE THE SENTENCES THAT NAME IT. The text holds
+                    the reading edge (RIGHT in RTL) and the illustration the
+                    outer edge — the shape chapter 6 gives its shahada section.
+
+                    A WATERCOLOUR, NOT ONE OF THIS CHAPTER'S OIL PLATES, and
+                    that is the point: chapter 6's illustration is that medium,
+                    it floats on the parchment with no frame and no crop, and a
+                    cut-out was the one object type chapter 3 had none of.
+
+                    NO RIDER. The source has Abraha arriving with soldiers
+                    mounted on the elephant; the animal is drawn alone, with no
+                    mahout, no soldiers, and nothing on its back implying one.
+
+                    It faces INTO the column: painted in profile facing left, it
+                    would have looked away from the text it stands beside, so
+                    the file is mirrored. */}
+                {/* THE WHOLE SECTION'S PROSE SITS BESIDE IT. Only §0 and §1 were
+                    in this column at first, and the illustration is portrait:
+                    the text ran out after two paragraphs while the elephant went
+                    on for another five hundred pixels, so the grid row was sized
+                    by the picture and left a void beside it with the rest of the
+                    section stranded underneath. All four paragraphs make a
+                    column tall enough to stand next to it. */}
+                <div className="ch3-withplate" data-reveal>
+                  <div className="ch3-body">
+                    <T r={['§0.a', '§0.name']} em={['שנת הפיל']} />
+                    <T r="§1.a" />
+                    <T r="§2.a" em={['אבאביל']} />
+                    <T r="§2.sura" />
+                    <T r={['§3.a', '(§3.aside)']} />
+                  </div>
+                  <Plate src="elephant.webp" size="cut" />
                 </div>
               </Section>
 
@@ -884,10 +1061,7 @@ export default function Chapter3() {
                   <T r="§4.ababil" em={['אבאביל']} />
                 </div>
                 <SubHead section="today" id="maakul" />
-                <div className="ch3-body" data-reveal>
-                  <T r="§5.a" em={['מוץ נאכל']} />
-                  <T r="§6.a" />
-                </div>
+                <Reuse />
               </Section>
 
               {/* ============ 03 · הלידה, המשפחה והילדות ============ */}
@@ -952,12 +1126,19 @@ export default function Chapter3() {
               <Section id="revelation">
                 <Head id="revelation" />
                 <SubHead section="revelation" id="tahannuth" />
-                {/* THE PLATE IS OUT UNTIL THE ASSET EXISTS. The design is that
-                    the banner's cave returns here — same ridge, same light — so
-                    §17 pays what the banner promised. With the interim poster
-                    standing in for both, it was literally the same file twice on
-                    one page, which reads as a repetition rather than a rhyme.
-                    It comes back when the banner is a film and this is a still. */}
+                {/* THE PROMISE IS PAID HERE. The banner is a film of the ridge
+                    with the cave mouth in it; this is the cave from the inside,
+                    looking out at the same ranges in the same light. The reader
+                    met it seventeen sections before §17 named it.
+
+                    It was out for a while, and correctly: the banner was
+                    standing on a placeholder still, so a plate here was the
+                    same file printed twice on one page — a repetition, not a
+                    rhyme. Two different pictures now, one place. */}
+                {/* THE CHAPTER'S CENTRE GETS THE COLUMN. `wide` and not `bleed`:
+                    the painting is a cave interior framed by its own opening,
+                    and a 21:9 band would cut the arch off at both ends. */}
+                <Plate src="cave-mouth.jpg" size="wide" />
                 <div className="ch3-body" data-reveal>
                   <T r="§17.a" />
                   <T r="§17.b" em={["אלתחנת'"]} />
@@ -1033,6 +1214,16 @@ export default function Chapter3() {
                   {/* §31.b has no full stop — the bracketed remark closes it */}
                   <T r={['§31.b', '(§31.aside)']} />
                 </div>
+                {/* ONE PLATE, AND IT IS STILL NOT A PICTURE OF GRIEF. The rule
+                    this section was written under was „no image" — but that
+                    rule was aimed at illustrating the deaths, which would need
+                    people, a burial or a mourner, and all three are out. An
+                    empty stony plain at last light names nothing and mourns
+                    nobody; it carries the register the section is already
+                    written in. Without it this was the one section in the
+                    chapter with neither a picture nor a device, in a chapter
+                    whose neighbours all have one. */}
+                <Plate src="dusk-plain.jpg" size="bleed" />
                 <div className="ch3-body" data-reveal>
                   <T r="§32.a" />
                   <T r="§32.b" />
@@ -1058,6 +1249,13 @@ export default function Chapter3() {
               <Section id="night">
                 <Head id="night" />
                 <SubHead section="night" id="buraq" />
+                {/* NOT THE BURAQ — the road. The mount is described vividly and
+                    any drawing of it has to settle what the source leaves open,
+                    the face above all, which the Persian tradition gives as a
+                    woman's and which many hold to be an illegitimate addition.
+                    What can be shown is the hour and the place: a track leaving
+                    a town at night under stars, empty. */}
+                <Plate src="night-road.jpg" size="wide" />
                 <div className="ch3-body" data-reveal>
                   <T r="§35.a" em={['אלבראק']} />
                   <T r="§35.b" />
@@ -1098,14 +1296,17 @@ export default function Chapter3() {
                     geometry — Muhammad comes back DOWN past Moses — so the
                     negotiation reads better with the rungs still on screen than
                     scrolled off above it. */}
-                <div className="ch3-body" data-reveal>
-                  <T r="§39.a" />
-                </div>
-                <Heavens />
+                {/* §39.a IS THE ASCENT'S OWN OPENING SCREEN, not a paragraph
+                    above it. It sat on parchment before the device began, so
+                    the reader crossed the seam into the sky with no lead and met
+                    Adam cold. Chapter 6 opens every full-screen stage with its
+                    own line over the scene; this is the same move, and the
+                    fragment is still consumed exactly once. */}
+                <Ascent />
                 <div className="ch3-body" data-reveal>
                   <T r="§40.a" />
-                  <T r="§40.b" />
-                  <T r="§40.c" />
+                  <T r="§40.b" em={['חמישים תפילות']} />
+                  <T r="§40.c" em={['חמש תפילות ביום']} />
                 </div>
                 <Note id="n-intent" label="על תפילה בכוונה">
                   <T r="§40.d" />

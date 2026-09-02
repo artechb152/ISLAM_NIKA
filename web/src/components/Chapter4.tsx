@@ -39,6 +39,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import BadrFilm from '@/components/chapter4/BadrFilm'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
 import { layoutLabels, px, py, ROUTE } from '@/lib/chapter4/art'
@@ -386,40 +387,6 @@ function Journey({ focus }: { focus?: string }) {
   )
 }
 
-/* ---------------- mechanism · the film ----------------
-
-   §12 is the chapter's one cinematic beat: rain on one army's camp the night
-   before, and a duel at dawn. It was two paragraphs in the middle of a wall of
-   them. Here the valley plays behind the words and the two sentences sit on it
-   as a caption block — a documentary card, not a decoration.
-
-   BOTH SENTENCES STAY IN THE DOM. Chapter 3's note about the desert stage is
-   the reason: a device that keeps its text behind a click is a device that
-   hides the chapter from search and from a screen reader. Nothing here is
-   timed, nothing appears and disappears.
-
-   THE LOOP IS A PALINDROME. The clip runs forward and then backward, so the
-   last frame is the first and the banner never jumps. */
-function Film({ src, children }: { src: string; children: React.ReactNode }) {
-  return (
-    <figure className="ch4-film" data-reveal>
-      <div className="ch4-film-media" aria-hidden="true">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster={`/assets/chapter4/${src}.jpg`}
-          tabIndex={-1}
-        >
-          <source src={`/assets/chapter4/${src}.mp4`} type="video/mp4" />
-        </video>
-      </div>
-      <figcaption className="ch4-film-text">{children}</figcaption>
-    </figure>
-  )
-}
 
 /* ---------------- mechanism · a pair of terms ----------------
 
@@ -1085,10 +1052,7 @@ export default function Chapter4() {
                 <T r="§10.b" className="ch4-body" reveal />
                 <T r="§11.a" className="ch4-body" em={["אבו ג'הל"]} reveal />
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
-                <Film src="badr-battle">
-                  <T r="§12.rain" className="ch4-body" />
-                  <T r="§12.duel" className="ch4-body" />
-                </Film>
+                <BadrFilm />
                 <T r="§13.a" className="ch4-body" reveal />
                 <T r="§13.b" className="ch4-body" em={['יום הישועה']} reveal />
 
