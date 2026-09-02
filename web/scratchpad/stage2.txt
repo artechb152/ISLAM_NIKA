@@ -1,0 +1,128 @@
+/* ---------------- mechanism · the stage ----------------
+
+   ONE PLACE, SEEN IN SUCCESSIVE STATES, ADVANCED BY THE READER.
+
+   TWO COLUMNS, NOT A PICTURE WITH WORDS ON IT. The first build set the sentence
+   over the photograph and it was neither: the type fought the picture for
+   attention and the picture lost detail behind a scrim. Here the plate keeps
+   its own frame and its own caption, and the words get a column of their own —
+   an eyebrow that says which beat this is, the source's sentence set large, a
+   rule, and the sentences that carry on from it.
+
+   THE CAPTION IS OURS AND SAYS SO. Every plate in this chapter is a painted
+   reconstruction, not a photograph of anything, and the caption ends by saying
+   so. That is a label on our own illustration, which this file may write; the
+   chapter's sentences are not, and they come from passages.json like all the
+   rest.
+
+   THE CHIPS CARRY ONLY WHAT THE BEAT ITSELF SAYS. Each one is proved by `pick`
+   against that beat's own sentence, so the row cannot drift into facts the
+   booklet never states. A beat whose sentence names no place and no year shows
+   no chips rather than borrowed ones.
+
+   EVERY BEAT IS IN THE DOM AT ALL TIMES — hidden with `hidden`, never
+   unmounted, so chapter search and a screen reader still reach the whole
+   chapter. Nothing advances on its own. */
+interface Beat {
+  img: string
+  /** the sentence set large */
+  r: string
+  /** what carries on from it, in smaller type */
+  note?: string[]
+  /** our label on our own drawing */
+  caption: string
+  /** words lifted out of THIS beat's sentence, proved to be in it */
+  chips?: string[]
+  /** the name on the dot, in the source's words */
+  label: string
+}
+
+function PalmRule() {
+  return (
+    <div className="ch4-stage-orn" aria-hidden="true">
+      <span />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round">
+        <path d="M12 21v-9" />
+        <path d="M12 12c-2.6-2.2-5.4-2.6-7.6-1.2 2-2.4 4.8-2.6 7.6-.6" />
+        <path d="M12 12c2.6-2.2 5.4-2.6 7.6-1.2-2-2.4-4.8-2.6-7.6-.6" />
+        <path d="M12 12c-.9-3 0-5.6 2.2-7.2-3 .5-4.6 3-4.9 6" />
+        <path d="M12 12c.9-3 0-5.6-2.2-7.2 3 .5 4.6 3 4.9 6" />
+      </svg>
+      <span />
+    </div>
+  )
+}
+
+function Stage({
+  beats,
+  variant = 'wide',
+  label,
+}: {
+  beats: Beat[]
+  variant?: 'wide' | 'inset'
+  label: string
+}) {
+  const [at, setAt] = useState(0)
+  const go = useCallback(
+    (i: number) => setAt(((i % beats.length) + beats.length) % beats.length),
+    [beats.length],
+  )
+  return (
+    <section className={`ch4-stage is-${variant}`} aria-label={label} data-reveal>
+      {beats.map((b, i) => (
+        <div className="ch4-stage-grid" key={b.img} hidden={i !== at}>
+          <figure className="ch4-stage-plate">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/assets/chapter4/${b.img}.jpg`} alt="" aria-hidden="true" loading={i ? 'lazy' : 'eager'} />
+            <figcaption>{b.caption}</figcaption>
+          </figure>
+
+          <div className="ch4-stage-copy">
+            <p className="ch4-stage-eyebrow">
+              {b.label} <span>/ {String(i + 1).padStart(2, '0')}</span>
+            </p>
+            <p className="ch4-stage-lead">{text(b.r)}</p>
+            <PalmRule />
+            {b.note?.length ? (
+              <p className="ch4-stage-note">{b.note.map((ref) => text(ref)).join(' ')}</p>
+            ) : null}
+            {b.chips?.length ? (
+              <ul className="ch4-stage-chips">
+                {b.chips.map((c) => (
+                  <li key={c}>{pick(b.r, c)}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        </div>
+      ))}
+
+      <div className="ch4-stage-rail" role="tablist" aria-label={label}>
+        <button type="button" className="ch4-stage-arrow" onClick={() => go(at - 1)} aria-label="הקודם">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
+        </button>
+        <div className="ch4-stage-track">
+          {beats.map((b, i) => (
+            <button
+              key={b.label}
+              type="button"
+              role="tab"
+              aria-selected={i === at}
+              className={`ch4-stage-dot${i === at ? ' is-on' : ''}`}
+              onClick={() => go(i)}
+            >
+              <span>{b.label}</span>
+            </button>
+          ))}
+        </div>
+        <button type="button" className="ch4-stage-arrow" onClick={() => go(at + 1)} aria-label="הבא">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
+            <path d="M9 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    </section>
+  )
+}

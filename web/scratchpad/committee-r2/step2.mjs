@@ -1,0 +1,10 @@
+import { getPage, shot, safeEval, text, pos } from './lib2.mjs';
+const { browser, page } = await getPage();
+await page.waitForTimeout(9000);
+const gl = await safeEval(page, () => { const c = document.createElement('canvas'); const g = c.getContext('webgl2') || c.getContext('webgl'); return g ? g.getParameter(g.RENDERER) : 'NO WEBGL'; });
+console.log('WEBGL:', JSON.stringify(gl).slice(0,150));
+console.log('URL:', page.url());
+console.log('POS:', JSON.stringify(await pos(page)));
+console.log('TXT:', JSON.stringify(await text(page, 600)));
+await shot(page, '94-camp-arrive');
+await browser.close();

@@ -1,0 +1,17 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+import { pos2 } from './lib3.mjs';
+import { ensureGame } from './lib4.mjs';
+import { goto } from './nav.mjs';
+const { browser, page } = await getPage();
+const task = () => safeEval(page, () => window.__ch1Task ? JSON.parse(JSON.stringify(window.__ch1Task)) : null);
+await ensureGame(page);
+console.log('P:', JSON.stringify(await pos2(page)));
+console.log('TXT:', JSON.stringify(await text(page, 700)));
+let p = await pos2(page);
+if (!p || !p.atTask) p = await goto(page, 0, -2.9, { maxIter: 22, tol: 1.5, log: false });
+console.log('P2:', JSON.stringify(p));
+await page.keyboard.press('e');
+await page.waitForTimeout(1600);
+console.log('PANEL:', JSON.stringify(await text(page, 1100)));
+await shot(page, '182-panel-state');
+await browser.close();

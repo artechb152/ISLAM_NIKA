@@ -1,6 +1,6 @@
 // שחזור התקיעה: פאנל תכנון-המסלול ב-942px גובה — הכפתורים חייבים להיות נגישים
 import { chromium } from 'playwright-core'
-const browser = await chromium.launch({ channel: 'chrome', headless: false })
+const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true, args: ['--use-gl=angle', '--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await (await browser.newContext({ viewport: { width: 1902, height: 942 } })).newPage()
 await page.addInitScript(() => {
   localStorage.setItem('ch1:intro:v1', '1')

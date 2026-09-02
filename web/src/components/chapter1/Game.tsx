@@ -692,7 +692,7 @@ function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1 }: {
 }
 
 /** hand-authored camp assets supplied by the author (Blender → GLB) */
-const MODEL_TENT = '/assets/chapter1/models/blacktent.glb'
+const MODEL_TENT = '/assets/chapter1/models/blacktent-hero.glb'
 const MODEL_FIREPIT = '/assets/chapter1/models/firepit.glb'
 const MODEL_TORCH = '/assets/chapter1/models/torch.glb'
 const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'

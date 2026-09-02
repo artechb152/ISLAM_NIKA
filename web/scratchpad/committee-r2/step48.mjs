@@ -1,0 +1,12 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+import { pos2 } from './lib3.mjs';
+import { ensureGame } from './lib4.mjs';
+const { browser, page } = await getPage();
+await ensureGame(page);
+console.log('P:', JSON.stringify(await pos2(page)));
+await page.keyboard.press('e');
+await page.waitForTimeout(1800);
+const t = await text(page, 900);
+console.log('TXT:', JSON.stringify(t));
+await shot(page, '170-double-e');
+await browser.close();

@@ -1,26 +1,21 @@
 import { chromium } from 'playwright-core'
-const browser = await chromium.launch({ channel: 'chrome', headless: false })
-const page = await (await browser.newContext({ viewport: { width: 1280, height: 720 } })).newPage()
-await page.addInitScript(() => {
-  localStorage.setItem('ch1:intro:v1', '1')
-  localStorage.setItem('ch1:arrived:mecca:v1', '1')
-  localStorage.setItem('ch1:notebook:v1', JSON.stringify({
-    seen: ['abraha-story'], entries: [24], region: 'mecca', found: [], solved: [],
-  }))
-})
-await page.goto('http://localhost:3000/chapter1?region=mecca', { waitUntil: 'domcontentloaded' })
+const b = await chromium.launch({ channel: 'chrome', headless: true })
+const page = await (await b.newContext({ viewport: { width: 1400, height: 1000 } })).newPage()
+const errs = []
+page.on('pageerror', (e) => errs.push(e.message.slice(0, 200)))
+await page.goto('http://localhost:3000/chapter4', { waitUntil: 'domcontentloaded', timeout: 180000 })
+await page.waitForTimeout(9000)
+const f = await page.$('.ch4-film')
+await f?.scrollIntoViewIfNeeded(); await page.waitForTimeout(900)
+await f?.screenshot({ path: 'scratchpad/film-idle.png' })
+await page.evaluate(() => { const v = document.querySelector('.ch4-film-video'); if (v) { v.muted = true; v.currentTime = 9; v.play() } })
 await page.waitForTimeout(2500)
-for (const b of await page.$$('button')) {
-  const t = await b.innerText().catch(() => '')
-  if (t.includes('התחילו') || t.includes('המשיכו')) { await b.click(); break }
-}
-await page.waitForFunction(() => window.__ch1Live, null, { timeout: 60000 })
-await page.waitForSelector('.has-film', { timeout: 30000 })
-await page.waitForTimeout(4000)
-await page.screenshot({ path: 'scratchpad/cinema-abraha.png' })
-const v = await page.evaluate(() => {
-  const vid = document.querySelector('video.hud-film')
-  return vid ? { src: vid.src.split('/').pop(), muted: vid.muted, loop: vid.loop, playing: !vid.paused, t: +vid.currentTime.toFixed(1), w: vid.clientWidth, h: vid.clientHeight } : null
-})
-console.log(JSON.stringify(v))
-await browser.close()
+console.log(JSON.stringify(await page.evaluate(() => ({
+  cue: document.querySelector('.ch4-film-cue')?.textContent ?? null,
+  t: Math.round(document.querySelector('.ch4-film-video')?.currentTime ?? 0),
+  dur: Math.round(document.querySelector('.ch4-film-video')?.duration ?? 0),
+  hasAudioTrack: !!document.querySelector('track'),
+}))))
+await f?.screenshot({ path: 'scratchpad/film-playing.png' })
+console.log('errors:', errs.length ? errs : 'none')
+await b.close()

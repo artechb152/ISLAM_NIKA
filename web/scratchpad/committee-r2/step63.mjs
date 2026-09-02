@@ -1,0 +1,10 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+import { ensureGame } from './lib4.mjs';
+const { browser, page } = await getPage();
+await ensureGame(page);
+await shot(page, '194-pass-arrival');
+await page.getByText('המשך', {exact:false}).first().click().catch(()=>{});
+await page.waitForTimeout(1500);
+await shot(page, '195-pass-view');
+console.log('TXT:', JSON.stringify(await text(page, 800)));
+await browser.close();

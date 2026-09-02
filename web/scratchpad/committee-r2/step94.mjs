@@ -1,0 +1,15 @@
+import { getPage, safeEval, text, hold, shot } from './lib2.mjs';
+import { pos2 } from './lib3.mjs';
+import { ensureGame } from './lib4.mjs';
+import { goto } from './nav.mjs';
+const { browser, page } = await getPage();
+const T = async (n=400) => { const t = await text(page, n); return typeof t === 'string' ? t : ''; };
+await ensureGame(page);
+let p = await goto(page, 0, -35, { run: true, maxIter: 30, tol: 3, log: false });
+console.log('P:', JSON.stringify(p));
+let t = await T(400);
+if (t.includes('טוען')) await page.waitForTimeout(9000);
+t = await T(600);
+console.log('TXT:', JSON.stringify(t));
+await shot(page, '225-after-road-exit');
+await browser.close();

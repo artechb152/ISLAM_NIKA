@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core'
-const b = await chromium.launch({ channel: 'chrome', headless: false })
+const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true, args: ['--use-gl=angle', '--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage()
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(m.type().toUpperCase(), m.text().slice(0, 180)) })
 page.on('pageerror', (e) => console.log('PAGEERROR', e.message.slice(0, 300)))

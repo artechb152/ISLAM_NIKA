@@ -12,6 +12,7 @@ import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter4-article.css'
+import '@/styles/chapter4-looks.css'
 
 export const metadata: Metadata = {
   title: 'פרק רביעי · ההג׳רה והקרבות',

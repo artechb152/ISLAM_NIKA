@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/icon.svg/route": "app/icon.svg/route.js",
+  "/(chapter1)/chapter1/dev-character/page": "app/(chapter1)/chapter1/dev-character/page.js",
+  "/(chapter1)/chapter1/page": "app/(chapter1)/chapter1/page.js",
+  "/(chapter2)/chapter2/page": "app/(chapter2)/chapter2/page.js",
+  "/(chapter2)/chapter2/practice/page": "app/(chapter2)/chapter2/practice/page.js",
+  "/(chapter3)/chapter3/page": "app/(chapter3)/chapter3/page.js",
+  "/(chapter3)/chapter3/practice/page": "app/(chapter3)/chapter3/practice/page.js",
+  "/(chapter4)/chapter4/page": "app/(chapter4)/chapter4/page.js",
+  "/(chapter6)/chapter6/page": "app/(chapter6)/chapter6/page.js",
+  "/(chapter6)/chapter6/practice/page": "app/(chapter6)/chapter6/practice/page.js",
+  "/(chapters)/chapters/page": "app/(chapters)/chapters/page.js",
+  "/(entrance)/page": "app/(entrance)/page.js"
+}

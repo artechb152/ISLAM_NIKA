@@ -1,5 +1,5 @@
 import { chromium } from 'playwright-core'
-const browser = await chromium.launch({ channel: 'chrome', headless: false })
+const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true, args: ['--use-gl=angle', '--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await (await browser.newContext({ viewport: { width: 1100, height: 620 } })).newPage()
 await page.addInitScript(() => {
   try {

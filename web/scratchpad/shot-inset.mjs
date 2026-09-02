@@ -1,0 +1,13 @@
+import { chromium } from 'playwright-core'
+const b = await chromium.launch({ channel: 'chrome', headless: true })
+const page = await (await b.newContext({ viewport: { width: 1400, height: 1100 } })).newPage()
+await page.goto('http://localhost:3000/chapter4', { waitUntil: 'domcontentloaded', timeout: 180000 })
+await page.waitForTimeout(9000)
+const ins = await page.$('.ch4-stage.is-inset')
+await ins?.scrollIntoViewIfNeeded()
+await page.waitForTimeout(2500)
+await page.evaluate(() => { document.querySelectorAll('img').forEach((i) => { i.loading = 'eager' }) })
+await page.waitForTimeout(2000)
+await ins?.screenshot({ path: 'scratchpad/inset2.png' })
+console.log('ok')
+await b.close()

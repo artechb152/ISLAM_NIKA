@@ -1,0 +1,12 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+const { browser, page } = await getPage();
+await page.keyboard.press('r');
+await page.waitForTimeout(1800);
+console.log('TXT:', JSON.stringify(await text(page, 900)));
+await page.mouse.click(640, 570);
+await page.waitForTimeout(1500);
+console.log('TXT2:', JSON.stringify(await text(page, 900)));
+await shot(page, '102-rawi-reopen');
+await page.keyboard.press('Escape');
+await page.waitForTimeout(800);
+await browser.close();

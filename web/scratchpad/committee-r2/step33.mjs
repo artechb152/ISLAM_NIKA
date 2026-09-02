@@ -1,0 +1,10 @@
+import { getPage, shot, text } from './lib2.mjs';
+import { ensureGame } from './lib4.mjs';
+import { goto } from './nav.mjs';
+const { browser, page } = await getPage();
+await ensureGame(page);
+const p = await goto(page, 0, -30, { run: true });
+console.log('AT:', JSON.stringify(p));
+console.log('TXT:', JSON.stringify(await text(page, 600)));
+await shot(page, '138-north-road');
+await browser.close();

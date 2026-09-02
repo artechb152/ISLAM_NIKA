@@ -1,0 +1,10 @@
+import { getPage, shot, safeEval, text, hold } from './lib2.mjs';
+import { pos2 } from './lib3.mjs';
+import { ensureGame, walkUntil } from './lib4.mjs';
+const { browser, page } = await getPage();
+await ensureGame(page);
+const p = await walkUntil(page, ['Shift','w'], 900, 12, q => !!q.atTask || !!q.nearWho);
+console.log('AT:', JSON.stringify(p));
+console.log('TXT:', JSON.stringify(await text(page, 700)));
+await shot(page, '151-approach-station');
+await browser.close();

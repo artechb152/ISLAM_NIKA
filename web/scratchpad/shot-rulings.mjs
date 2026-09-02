@@ -1,0 +1,10 @@
+import { chromium } from 'playwright-core'
+const b = await chromium.launch({ channel: 'chrome', headless: true })
+const page = await (await b.newContext({ viewport: { width: 1400, height: 1100 } })).newPage()
+await page.goto('http://localhost:3000/chapter4', { waitUntil: 'domcontentloaded', timeout: 180000 })
+await page.waitForTimeout(9000)
+const el = await page.$('.ch4-rulings')
+await el?.scrollIntoViewIfNeeded(); await page.waitForTimeout(1000)
+await el?.screenshot({ path: 'scratchpad/rulings.png' })
+console.log('ok')
+await b.close()

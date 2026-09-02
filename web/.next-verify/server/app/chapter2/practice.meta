@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(chapter2)/layout,_N_T_/(chapter2)/chapter2/layout,_N_T_/(chapter2)/chapter2/practice/layout,_N_T_/(chapter2)/chapter2/practice/page,_N_T_/chapter2/practice"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGNoYXB0ZXIyKQ/chapter2/practice/__PAGE__",
+    "/!KGNoYXB0ZXIyKQ/chapter2/practice",
+    "/!KGNoYXB0ZXIyKQ/chapter2",
+    "/!KGNoYXB0ZXIyKQ",
+    "/_index",
+    "/_head"
+  ]
+}

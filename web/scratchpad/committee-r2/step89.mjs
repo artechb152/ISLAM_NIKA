@@ -1,0 +1,23 @@
+import { getPage, safeEval, text } from './lib2.mjs';
+import { pos2 } from './lib3.mjs';
+import { ensureGame } from './lib4.mjs';
+import { goto } from './nav.mjs';
+const { browser, page } = await getPage();
+const B = (t) => page.locator('button', { hasText: t }).last();
+const T = async (n=400) => { const t = await text(page, n); return typeof t === 'string' ? t : ''; };
+await ensureGame(page);
+let p = await goto(page, 2.3, 0.7, { maxIter: 20, tol: 1.5, log: false });
+console.log('P:', JSON.stringify(p));
+await page.keyboard.press('e'); await page.waitForTimeout(1500);
+console.log('panel:', JSON.stringify((await T(900)).slice(-250)));
+await B('משי').click().catch(()=>{});
+await page.waitForTimeout(1800);
+await B('תבלינים').click().catch(()=>{});
+await page.waitForTimeout(2200);
+console.log('crate:', JSON.stringify((await T(1500)).slice(-300)));
+await B('הלאה').click().catch(()=>{});
+await page.waitForTimeout(1200);
+for (let i=0;i<5;i++){ const t = await T(400); if (t.includes('להמשך')||t.includes('להשלמת')) { await page.keyboard.press(' '); await page.waitForTimeout(900); } else if (t.includes('המשך ←')) { await B('המשך').click().catch(()=>{}); await page.waitForTimeout(900); } else break; }
+const nb = await safeEval(page, () => localStorage.getItem('ch1:notebook:v1'));
+console.log('NB:', nb);
+await browser.close();

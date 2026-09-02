@@ -1,0 +1,11 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+const { browser, page } = await getPage();
+const t0 = await safeEval(page, () => window.__ch1Task ? JSON.parse(JSON.stringify(window.__ch1Task)) : null);
+console.log('TASK(panel open):', JSON.stringify(t0));
+await page.getByText('אחר כך').click().catch(()=>{});
+await page.waitForTimeout(1000);
+const t1 = await safeEval(page, () => window.__ch1Task ? JSON.parse(JSON.stringify(window.__ch1Task)) : null);
+console.log('TASK(closed):', JSON.stringify(t1));
+await shot(page, '214-crate-scene');
+console.log('TXT:', JSON.stringify(await text(page, 600)));
+await browser.close();

@@ -1,0 +1,13 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+import { ensureGame } from './lib4.mjs';
+import { seekFind } from './seek.mjs';
+const { browser, page } = await getPage();
+await ensureGame(page);
+const p = await seekFind(page, 'incense');
+console.log('AT:', JSON.stringify(p));
+await shot(page, '131-incense-near');
+await page.keyboard.press('f');
+await page.waitForTimeout(2500);
+await shot(page, '132-incense-card');
+console.log('TXT:', JSON.stringify(await text(page, 1000)));
+await browser.close();

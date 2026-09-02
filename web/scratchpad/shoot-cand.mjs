@@ -2,7 +2,7 @@
 import { chromium } from 'playwright-core'
 const model = process.argv[2]
 const tag = process.argv[3]
-const browser = await chromium.launch({ channel: 'chrome', headless: false })
+const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true, args: ['--use-gl=angle', '--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] })
 const page = await (await browser.newContext({ viewport: { width: 1100, height: 800 } })).newPage()
 await page.goto(`http://localhost:3000/chapter1/dev-character?model=${model}&raw=1`, { waitUntil: 'domcontentloaded' })
 await page.waitForTimeout(6000)

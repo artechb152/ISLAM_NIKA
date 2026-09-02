@@ -1,0 +1,35 @@
+/* ---------------- the band ----------------
+
+   THE CHAPTER'S MAIN FIGURE, chosen off four side-by-side drafts. The picture
+   runs the full width of the window and fades into the page on the side the
+   words are on, so the sentences sit on the paper and never on the photograph.
+   Nothing is set over the image; the fade does the work that a scrim used to.
+
+   IT ALTERNATES. Consecutive bands flip, so the reader's eye crosses the page
+   instead of running down one gutter — and the fade flips with them.
+
+   THE CAPTION SITS OVER THE PICTURE, never over the faded half, where cream
+   type on cream ground is invisible. It says „שחזור מצויר" because every plate
+   in this chapter is a painting and not a photograph of anything. */
+function Band({
+  img,
+  caption,
+  flip = false,
+  children,
+}: {
+  img: string
+  caption: string
+  flip?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <div className={`ch4-band${flip ? ' is-flip' : ''}`} data-reveal>
+      <figure>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/assets/chapter4/${img}.jpg`} alt="" aria-hidden="true" loading="lazy" />
+        <figcaption>{caption}</figcaption>
+      </figure>
+      <div className="ch4-band-copy">{children}</div>
+    </div>
+  )
+}

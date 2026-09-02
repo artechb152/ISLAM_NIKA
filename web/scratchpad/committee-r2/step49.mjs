@@ -1,0 +1,13 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+import { pos2 } from './lib3.mjs';
+import { ensureGame } from './lib4.mjs';
+const { browser, page } = await getPage();
+await ensureGame(page);
+console.log('P:', JSON.stringify(await pos2(page)));
+await page.keyboard.press('e');
+await page.waitForTimeout(2200);
+console.log('TXT:', JSON.stringify(await text(page, 1200)));
+const t = await safeEval(page, () => window.__ch1Task ? JSON.parse(JSON.stringify(window.__ch1Task)) : null);
+console.log('TASK:', JSON.stringify(t));
+await shot(page, '171-scales-before-collect');
+await browser.close();

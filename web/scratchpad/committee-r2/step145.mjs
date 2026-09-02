@@ -1,0 +1,17 @@
+import { getPage, safeEval, text, shot } from './lib2.mjs';
+import { ensureGame } from './lib4.mjs';
+const { browser, page } = await getPage();
+const B = (t) => page.locator('button', { hasText: t }).last();
+const T = async (n=1200) => { const t = await text(page, n); return typeof t === 'string' ? t : ''; };
+await ensureGame(page);
+await B('פתחו את המחברת').click().catch(e=>console.log('nbErr'));
+await page.waitForTimeout(2000);
+await shot(page, '306-notebook');
+console.log('NOTEBOOK:', JSON.stringify((await T(1600)).slice(0, 800)));
+await page.keyboard.press('Escape');
+await page.waitForTimeout(1200);
+await B('מפת המסע').click().catch(e=>console.log('mapErr'));
+await page.waitForTimeout(2000);
+await shot(page, '307-journey-map');
+console.log('MAP:', JSON.stringify((await T(1200)).slice(0, 500)));
+await browser.close();

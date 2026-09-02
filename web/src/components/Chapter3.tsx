@@ -265,11 +265,16 @@ function Head({ id }: { id: string }) {
 
 /** A movement inside a section. Its title is the name the SOURCE gives the
     thing — אלתחנת', אלבראק, ההגירה הראשונה — never a label we compose. */
+/* The transliterated term rides IN the heading when the layout records one.
+   It was already sitting in layout.json unused, so „מוץ נאכל" stood alone and
+   the reader had to reach the middle of the first example to learn what the
+   phrase is. Same data, one line higher. */
 function SubHead({ section, id }: { section: string; id: string }) {
   const s = sub(section, id)
   return (
     <h3 className="ch3-sub" id={id} data-reveal>
       {s.title}
+      {s.term && s.term !== s.title ? <span className="ch3-sub-term">{s.term}</span> : null}
     </h3>
   )
 }
@@ -399,20 +404,31 @@ function Note({ id, label, children }: { id: string; label: string; children: Re
     return () => el.removeEventListener('focusin', onFind)
   }, [open])
 
+  /* ⚠ `data-reveal` AND THE OPEN CLASS MUST NOT SHARE AN ELEMENT.
+     The reveal observer adds `is-inview` straight to the DOM node. React owns
+     `className` on any element whose class it renders, and it rewrites the whole
+     attribute whenever the value changes — so the first click replaced
+     "ch3-note is-inview" with "ch3-note is-open", the reveal class was gone, and
+     the note faded to opacity 0. Clicking a note made it disappear.
+     The outer element keeps a CONSTANT className (React never writes it after
+     mount) and carries the reveal; the state class lives on an inner element
+     that is not revealed. */
   return (
-    <div className={'ch3-note' + (open ? ' is-open' : '')} data-reveal>
-      <button
-        type="button"
-        className="ch3-note-btn"
-        aria-expanded={open}
-        aria-controls={`${id}-body`}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="ch3-note-mark" aria-hidden="true" />
-        {label}
-      </button>
-      <div className="ch3-note-body" id={`${id}-body`} ref={bodyRef}>
-        <div className="ch3-body">{children}</div>
+    <div className="ch3-note" data-reveal>
+      <div className={'ch3-note-in' + (open ? ' is-open' : '')}>
+        <button
+          type="button"
+          className="ch3-note-btn"
+          aria-expanded={open}
+          aria-controls={`${id}-body`}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span className="ch3-note-mark" aria-hidden="true" />
+          {label}
+        </button>
+        <div className="ch3-note-body" id={`${id}-body`} ref={bodyRef}>
+          <div className="ch3-body">{children}</div>
+        </div>
       </div>
     </div>
   )
@@ -498,15 +514,20 @@ function Lineage() {
    full, exactly once, and the recurring term is marked inside the sentence by
    `emphasise` — the mechanism already used everywhere else in this file. */
 function Reuse() {
-  const rows: { r: string; em: string[] }[] = [
-    { r: '§5.a', em: ['מוץ נאכל'] },
-    { r: '§6.a', em: ['מוץ נאכל'] },
+  /* Each row is labelled with the organisation that made the claim, so the two
+     read as two EXAMPLES of the same phrase being taken rather than as two
+     paragraphs that happen to sit in a box. `pick` guarantees the label is a
+     word of the row's own source sentence and throws if it ever stops being
+     one — the label can never drift from the text under it. */
+  const rows: { r: string; who: string; em: string[] }[] = [
+    { r: '§5.a', who: 'חמאס', em: ['מוץ נאכל'] },
+    { r: '§6.a', who: 'חזבאללה', em: ['מוץ נאכל'] },
   ]
   return (
     <div className="ch3-reuse" data-reveal>
-      {rows.map(({ r, em }) => (
+      {rows.map(({ r, who, em }) => (
         <div className="ch3-reuse-row" key={r}>
-          <span className="ch3-reuse-mark" aria-hidden="true" />
+          <b className="ch3-reuse-who">{pick(r, who)}</b>
           <div className="ch3-body">
             <T r={r} em={em} />
           </div>
@@ -548,6 +569,32 @@ function Reuse() {
 
    Under prefers-reduced-motion the sky is held at one frame and the rungs are
    all at full strength — the same information, without the movement. */
+/* WHERE EACH HEAVEN HANGS IN THE SKY.
+
+   The rungs used to sit on one rail down the reading edge, seven markers in a
+   column — a list with a photograph behind it. Scattered, they are seven STARS
+   the reader travels past, which is what the ascent is.
+
+   `x` is the offset from the reading edge as a percentage; `d` is depth, 0 far
+   to 1 near. Depth drives the star's size, its glow and the strength of its
+   text, so the near ones feel close enough to pass and the far ones sit back.
+   They alternate near/far rather than running in one direction, so the reader
+   moves BETWEEN them instead of towards them.
+
+   DOM ORDER IS STILL 1→7 AND UNTOUCHED. Only the horizontal placement varies —
+   a sighted reader still meets Adam first and Abraham last, screen readers read
+   the source's own ordinals in order, and chapter search walks the same markup
+   it always did. Nothing here is positioned absolutely and nothing overlaps. */
+const SKY: { x: number; d: number }[] = [
+  { x: 4, d: 1.0 },   // אדם — the first heaven, and the nearest
+  { x: 27, d: 0.68 },
+  { x: 11, d: 0.92 },
+  { x: 33, d: 0.62 },
+  { x: 17, d: 0.86 },
+  { x: 6, d: 1.0 },   // משה — §40 turns on him, so he is not a distant one
+  { x: 29, d: 0.8 },  // אברהם — the seventh, held back in the deep
+]
+
 function Ascent() {
   const rungs = ['§39.r1', '§39.r2', '§39.r3', '§39.r4', '§39.r5', '§39.r6', '§39.r7']
   const wrapRef = useRef<HTMLDivElement | null>(null)
@@ -574,6 +621,13 @@ function Ascent() {
       const span = Math.max(1, tops[tops.length - 1] - tops[0])
       const t = Math.min(1, Math.max(0, (mid - tops[0]) / span))
       wrap.style.setProperty('--asc', t.toFixed(3))
+      /* WHERE THE CAMERA IS POINTED. The layers scale out of this point, so the
+         zoom converges on whichever star the reader is at instead of on the
+         middle of the frame. SKY[i].x is measured from the reading edge, which
+         in RTL is the RIGHT, so the origin from the left is (100 - x). CSS
+         transitions it, which is what makes the move between stars read as the
+         camera swinging round rather than as a jump. */
+      wrap.style.setProperty('--ox', `${100 - SKY[idx].x}%`)
     }
     function onScroll(): void {
       if (!raf) raf = requestAnimationFrame(measure)
@@ -592,13 +646,29 @@ function Ascent() {
 
   return (
     <div className="ch3-ascent" ref={wrapRef} data-reveal>
-      <div className="ch3-sky" aria-hidden="true" />
+      {/* TWO STARFIELDS OVER THE PAINTED SKY, at different speeds. The painting
+          alone panned as one flat plane, so the ascent read as a photograph
+          sliding past rather than as movement through anything. Parallax is
+          what makes it depth: the far field barely shifts, the near field
+          drifts several times faster, and the reader is between them.
+          Both are driven by the same `--asc` the sky uses, so they rewind on
+          the way back up and hold still under reduced motion (where `--asc` is
+          never set and the transform resolves to zero). */}
+      <div className="ch3-sky" aria-hidden="true">
+        <span className="ch3-skyimg" />
+        <span className="ch3-stars is-far" />
+        <span className="ch3-stars is-near" />
+      </div>
       <div className="ch3-asc-lead">
         <T r="§39.a" />
       </div>
       <ol className="ch3-heavens">
         {rungs.map((r, i) => (
-          <li className={'ch3-rung' + (i === active ? ' is-here' : '')} key={r}>
+          <li
+            className={'ch3-rung' + (i === active ? ' is-here' : '')}
+            key={r}
+            style={{ '--x': SKY[i].x, '--d': SKY[i].d } as React.CSSProperties}
+          >
             <span className="ch3-rung-mark" aria-hidden="true" />
             <b className="ch3-rung-name">{nameOf(r)}</b>
             <span className="ch3-rung-text">{text(r)}</span>

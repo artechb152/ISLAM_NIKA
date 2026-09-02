@@ -1,0 +1,20 @@
+import { getPage, shot, safeEval, text } from './lib2.mjs';
+import { pos2 } from './lib3.mjs';
+import { ensureGame } from './lib4.mjs';
+import { goto } from './nav.mjs';
+const { browser, page } = await getPage();
+const task = () => safeEval(page, () => window.__ch1Task ? JSON.parse(JSON.stringify(window.__ch1Task)) : null);
+await ensureGame(page);
+let p = await goto(page, 0, -2.9, { maxIter: 20, tol: 1.5, log: false });
+console.log('P:', JSON.stringify(p));
+if (!p.atTask) { console.log('not at task'); await browser.close(); process.exit(0); }
+await page.keyboard.press('e');
+await page.waitForTimeout(1800);
+console.log('PANEL:', JSON.stringify(await text(page, 1000)));
+await shot(page, '176-scales-ready2');
+await page.getByText('אחר כך').click().catch(()=>{});
+await page.waitForTimeout(900);
+const t = await task();
+console.log('TASK:', JSON.stringify(t));
+await shot(page, '176b-scene-items');
+await browser.close();

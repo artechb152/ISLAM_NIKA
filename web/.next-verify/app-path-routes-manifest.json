@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/_global-error/page": "/_global-error",
+  "/icon.svg/route": "/icon.svg",
+  "/(chapter1)/chapter1/dev-character/page": "/chapter1/dev-character",
+  "/(chapter1)/chapter1/page": "/chapter1",
+  "/(chapter2)/chapter2/page": "/chapter2",
+  "/(chapter2)/chapter2/practice/page": "/chapter2/practice",
+  "/(chapter3)/chapter3/page": "/chapter3",
+  "/(chapter3)/chapter3/practice/page": "/chapter3/practice",
+  "/(chapter4)/chapter4/page": "/chapter4",
+  "/(chapter6)/chapter6/page": "/chapter6",
+  "/(chapter6)/chapter6/practice/page": "/chapter6/practice",
+  "/(chapters)/chapters/page": "/chapters",
+  "/(entrance)/page": "/"
+}

@@ -592,7 +592,7 @@ function Stage({
       <div className="ch4-stage-rail" role="tablist" aria-label={label}>
         <button type="button" className="ch4-stage-arrow" onClick={() => go(at - 1)} aria-label="הקודם">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M15 6l-6 6 6 6" />
+            <path d="M9 6l6 6-6 6" />
           </svg>
         </button>
         <div className="ch4-stage-track">
@@ -611,11 +611,52 @@ function Stage({
         </div>
         <button type="button" className="ch4-stage-arrow" onClick={() => go(at + 1)} aria-label="הבא">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M9 6l6 6-6 6" />
+            <path d="M15 6l-6 6 6 6" />
           </svg>
         </button>
       </div>
     </section>
+  )
+}
+
+/* ---------------- the band ----------------
+
+   THE CHAPTER'S MAIN FIGURE, chosen off four side-by-side drafts. The picture
+   runs the full width of the window and fades into the page on the side the
+   words are on, so the sentences sit on the paper and never on the photograph.
+   Nothing is set over the image; the fade does the work that a scrim used to.
+
+   IT ALTERNATES. Consecutive bands flip, so the reader's eye crosses the page
+   instead of running down one gutter — and the fade flips with them.
+
+   THE CAPTION SITS OVER THE PICTURE, never over the faded half, where cream
+   type on cream ground is invisible. It says „שחזור מצויר" because every plate
+   in this chapter is a painting and not a photograph of anything. */
+function Band({
+  img,
+  caption,
+  flip = false,
+  children,
+}: {
+  img: string
+  caption: string
+  flip?: boolean
+  children?: React.ReactNode
+}) {
+  /* a band with no words is a full-width picture and nothing else — the fade
+     exists to carry type, and with no type it would only wash the image out */
+  return (
+    <div
+      className={`ch4-band${flip ? ' is-flip' : ''}${children ? '' : ' is-plain'}`}
+      data-reveal
+    >
+      <figure>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/assets/chapter4/${img}.jpg`} alt="" aria-hidden="true" loading="lazy" />
+        <figcaption>{caption}</figcaption>
+      </figure>
+      {children ? <div className="ch4-band-copy">{children}</div> : null}
+    </div>
   )
 }
 
@@ -1018,48 +1059,18 @@ export default function Chapter4() {
                   </div>
                 </div>
                 <Head id="hijra" />
-                <Stage
-                  label="ההגירה למדינה"
-                  beats={[
-                    {
-                      img: 'stage-1-mecca',
-                      r: '§0.a',
-                      note: ['§0.b'],
-                      caption: 'מכה בעמקה, מבט מן המעבר היוצא צפונה · שחזור מצויר',
-                      chips: ['מכה'],
-                      label: 'מכה',
-                    },
-                    {
-                      img: 'stage-2-road',
-                      r: '§1.a',
-                      caption: 'דרך השיירות צפונה, בשעת הצהריים · שחזור מצויר',
-                      chips: ["ית'רב"],
-                      label: 'הדרך',
-                    },
-                    {
-                      img: 'stage-3-night',
-                      r: '§2.flight',
-                      note: ['§2.invited'],
-                      caption: 'הדרך בלילה, בין שני רכסים · שחזור מצויר',
-                      label: 'שתי גרסאות',
-                    },
-                    {
-                      img: 'stage-4-arrival',
-                      r: '§1.b',
-                      caption: 'שער נווה מדבר בין חומות גן ודקלים · שחזור מצויר',
-                      chips: ['בני נדיר'],
-                      label: "ית'רב",
-                    },
-                    {
-                      img: 'stage-5-yard',
-                      r: '§7.a',
-                      note: ['§7.b', '§7.c'],
-                      caption: 'חצר עם גזעי דקל כרותים, לפני שנבנה המסגד · שחזור מצויר',
-                      chips: ['יתומים מקומיים'],
-                      label: 'המסגד',
-                    },
-                  ]}
-                />
+                <Band img="stage-1-mecca" caption="מכה בעמקה · שחזור מצויר">
+                  <T r="§0.a" className="ch4-body" />
+                  <T r="§0.b" className="ch4-body" />
+                </Band>
+                <Band img="stage-4-arrival" caption="שער הנווה · שחזור מצויר" flip>
+                  <T r="§1.a" className="ch4-body" em={["ית'רב"]} />
+                  <T r="§1.b" className="ch4-body" />
+                </Band>
+                <div className="ch4-two" data-reveal>
+                  <T r="§2.flight" className="ch4-body ch4-two-side" />
+                  <T r="§2.invited" className="ch4-body ch4-two-side" />
+                </div>
 
                 <SubHead section="hijra" id="groups" />
                 <T r={['§3.a', '§3.b']} className="ch4-body" reveal />
@@ -1073,7 +1084,11 @@ export default function Chapter4() {
                 <SubHead section="hijra" id="covenant" />
                 <T r="§4.a" className="ch4-body" reveal />
                 <T r="§4.b" className="ch4-body" reveal />
-                <Plate src="yathrib-oasis" />
+                <Band img="stage-5-yard" caption="החצר לפני שנבנה המסגד · שחזור מצויר">
+                  <T r="§7.a" className="ch4-body" />
+                  <T r="§7.b" className="ch4-body" />
+                  <T r="§7.c" className="ch4-body" />
+                </Band>
                 <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                 <T r="§8.b" className="ch4-body" reveal />
                 <T r="§8.c" className="ch4-body" reveal />
@@ -1126,7 +1141,7 @@ export default function Chapter4() {
               <Section id="uhud">
                 <Head id="uhud" />
                 <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
-                <Plate src="uhud-mount" />
+                <Band img="uhud-mount" caption="הר אֻחֻד מן המישור · שחזור מצויר" />
                 <Forces muslims="§17.muslims" other="§17.quraysh" />
                 <T r="§18.a" className="ch4-body" reveal />
                 <T r="§18.b" className="ch4-body" reveal />
@@ -1152,7 +1167,6 @@ export default function Chapter4() {
               <Section id="trench">
                 <Head id="trench" />
                 <Stage
-                  variant="inset"
                   label="קרב השוחה"
                   beats={[
                     {
@@ -1194,7 +1208,7 @@ export default function Chapter4() {
                 <T r="§27.a" className="ch4-body" em={['עמרה']} reveal />
                 <T r="§27.b" className="ch4-body" reveal />
                 <T r="§28.a" className="ch4-body" reveal />
-                <Plate src="hudaybiyyah-plain" />
+                <Band img="hudaybiyyah-plain" caption="המישור שבו נעצר · שחזור מצויר" flip />
                 <T r="§28.b" className="ch4-body" reveal />
                 <ol className="ch4-concessions" data-reveal>
                   <li>{text('§29.term1')}</li>
@@ -1222,7 +1236,7 @@ export default function Chapter4() {
                 <T r="§42.a" className="ch4-body ch4-quiet-body" reveal />
                 <T r="§43.a" className="ch4-body ch4-quiet-body" reveal />
                 <T r="§43.b" className="ch4-body ch4-quiet-body" reveal />
-                <Plate src="khaybar-forts" />
+                <Band img="khaybar-forts" caption="מבצרי ח'יבר מעל המטעים · שחזור מצויר" />
                 <T r="§44.a" className="ch4-body" reveal />
                 <T r="§44.b" className="ch4-body" reveal />
                 <T r="§45.a" className="ch4-body" reveal />
@@ -1246,7 +1260,7 @@ export default function Chapter4() {
                 <T r="§49.a" className="ch4-body" reveal />
                 <Journey focus="mecca" />
                 <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
-                <Plate src="kaaba-precinct" />
+                <Band img="kaaba-precinct" caption="מתחם הכעבה בשחר · שחזור מצויר" flip />
               </Section>
 
               {/* ============ 09 · מותו של מוחמד ============
@@ -1254,7 +1268,7 @@ export default function Chapter4() {
               <Section id="death" className="ch4-quiet">
                 <Head id="death" />
                 <T r="§50.a" className="ch4-body" reveal />
-                <Plate src="medina-dusk" />
+                <Band img="medina-dusk" caption="מדינה בין ערביים · שחזור מצויר" />
                 <T r="§50.b" className="ch4-body" reveal />
                 <T r="§51.a" className="ch4-body" reveal />
               </Section>

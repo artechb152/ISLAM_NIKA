@@ -1,0 +1,16 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/(chapters)/layout,_N_T_/(chapters)/chapters/layout,_N_T_/(chapters)/chapters/page,_N_T_/chapters"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/!KGNoYXB0ZXJzKQ/chapters/__PAGE__",
+    "/!KGNoYXB0ZXJzKQ/chapters",
+    "/!KGNoYXB0ZXJzKQ",
+    "/_index",
+    "/_head"
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "onMatchHeaders": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/chapter1",
+      "regex": "^/chapter1(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter1(?:/)?$"
+    },
+    {
+      "page": "/chapter1/dev-character",
+      "regex": "^/chapter1/dev\\-character(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter1/dev\\-character(?:/)?$"
+    },
+    {
+      "page": "/chapter2",
+      "regex": "^/chapter2(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter2(?:/)?$"
+    },
+    {
+      "page": "/chapter2/practice",
+      "regex": "^/chapter2/practice(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter2/practice(?:/)?$"
+    },
+    {
+      "page": "/chapter3",
+      "regex": "^/chapter3(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter3(?:/)?$"
+    },
+    {
+      "page": "/chapter3/practice",
+      "regex": "^/chapter3/practice(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter3/practice(?:/)?$"
+    },
+    {
+      "page": "/chapter4",
+      "regex": "^/chapter4(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter4(?:/)?$"
+    },
+    {
+      "page": "/chapter6",
+      "regex": "^/chapter6(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter6(?:/)?$"
+    },
+    {
+      "page": "/chapter6/practice",
+      "regex": "^/chapter6/practice(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter6/practice(?:/)?$"
+    },
+    {
+      "page": "/chapters",
+      "regex": "^/chapters(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapters(?:/)?$"
+    },
+    {
+      "page": "/icon.svg",
+      "regex": "^/icon\\.svg(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/icon\\.svg(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}
