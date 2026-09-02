@@ -1078,10 +1078,10 @@ export default function Chapter4() {
                 <RouteMap
                   label="הדרך ממכה למדינה"
                   stops={[
-                    { id: 'mecca', name: 'מכה', x: 62, y: 79 },
-                    { id: 'badr', name: 'בדר', year: '624', x: 55, y: 52 },
-                    { id: 'medina', name: 'ית'+String.fromCharCode(39)+'רב', year: '622', x: 68, y: 38 },
-                    { id: 'khaybar', name: 'ח'+String.fromCharCode(39)+'יבר', x: 72, y: 21 },
+                    { id: 'mecca', name: 'מכה', x: 71, y: 76 },
+                    { id: 'badr', name: 'בדר', year: '624', x: 33, y: 49 },
+                    { id: 'medina', name: 'ית'+String.fromCharCode(39)+'רב', year: '622', x: 71, y: 33 },
+                    { id: 'khaybar', name: 'ח'+String.fromCharCode(39)+'יבר', x: 34, y: 15 },
                   ]}
                 />
                 <Band img="stage-1-mecca" caption="מכה בעמקה · שחזור מצויר">

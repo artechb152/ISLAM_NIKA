@@ -1148,30 +1148,29 @@
 
 .ch4-map-pin{
   position:absolute;transform:translate(-50%,-50%);
-  display:flex;align-items:center;gap:8px;
+  display:grid;justify-items:center;gap:5px;
   padding:0;border:0;background:none;cursor:pointer;font:inherit;
 }
 .ch4-map-dot{
   display:grid;place-items:center;flex:none;
-  width:26px;height:26px;border-radius:50%;
-  background:var(--maroon);color:var(--cream);
-  border:2px solid var(--cream);
-  box-shadow:0 2px 8px rgba(20,12,6,.45);
-  font-family:var(--font-heading);font-size:13px;
-  transition:transform .18s ease;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--cream);color:var(--maroon);
+  border:1px solid var(--maroon);
+  font-family:var(--font-heading);font-size:14px;
+  transition:transform .18s ease,background .18s ease;
 }
 .ch4-map-pin:hover .ch4-map-dot,
 .ch4-map-pin.is-on .ch4-map-dot{transform:scale(1.15)}
-.ch4-map-pin.is-on .ch4-map-dot{background:var(--gold-text)}
+.ch4-map-pin.is-on .ch4-map-dot{background:var(--maroon);color:var(--cream)}
 .ch4-map-pin:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px;border-radius:999px}
 
+/* chapter 6 sets the name under the number, on the map itself — no chip, no
+   border, no shadow. A pill read as a button dropped on a painting. */
 .ch4-map-name{
-  display:flex;align-items:baseline;gap:7px;
-  padding:5px 12px;border-radius:999px;white-space:nowrap;
-  background:var(--cream);color:var(--maroon);
-  border:1px solid var(--gold-soft);
+  display:flex;align-items:baseline;gap:6px;white-space:nowrap;
+  color:var(--maroon);
   font-family:var(--font-heading);font-size:clamp(12px,1.2vw,14px);
-  box-shadow:0 2px 8px rgba(20,12,6,.2);
+  text-shadow:0 1px 3px rgba(247,240,222,.95),0 0 6px rgba(247,240,222,.9);
 }
 .ch4-map-name i{font-style:normal;font-size:.86em;color:var(--muted)}
 

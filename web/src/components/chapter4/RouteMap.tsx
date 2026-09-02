@@ -80,7 +80,7 @@ export default function RouteMap({ stops, label }: { stops: Stop[]; label: strin
           </button>
         ))}
       </div>
-      <figcaption>{label} · מפה מצוירת</figcaption>
+      <figcaption>לחצו על מקום במפה · מפה מצוירת</figcaption>
     </figure>
   )
 }
