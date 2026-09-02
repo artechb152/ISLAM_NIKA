@@ -1031,3 +1031,13 @@ body{
 .poi-gate-hold{display:block;font-size:11px;color:rgba(245,236,214,.8);background:rgba(20,10,8,.55);border-radius:8px;padding:2px 8px;margin-top:3px}
 
 .nb-card.nb-enrich{border:1px dashed rgba(199,154,60,.45);background:rgba(199,154,60,.05)}
+
+/* כפתור הדילוג של סרט — יושב על פינת הווידאו, גלוי אך לא צועק */
+.hud-film-skip{
+  position:absolute;inset-inline-start:14px;top:14px;z-index:3;
+  border:1px solid rgba(245,236,214,.45);background:rgba(24,16,10,.62);
+  color:#f5ecd6;border-radius:999px;padding:6px 14px;font-size:.85rem;
+  cursor:pointer;backdrop-filter:blur(3px);transition:background .15s;
+}
+.hud-film-skip:hover{background:rgba(24,16,10,.85)}
+.hud-dialogue.has-film .hud-dialogue-body{position:relative}

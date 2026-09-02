@@ -202,6 +202,22 @@ export function DialogueHud({
             aria-hidden="true"
           />
         )}
+        {/* דילוג נראה — Escape עושה את אותו הדבר, אבל מקש סמוי אינו הזמנה
+            (דוח הוועדה: "דילוג לא אומת — אין כפתור נראה") */}
+        {encounter.film && !showDone && !showChoices && (
+          <button
+            type="button"
+            className="hud-film-skip"
+            onClick={(ev) => {
+              ev.stopPropagation()
+              setInterlude(null)
+              setI(steps.length - 1)
+              setRevealed(Number.MAX_SAFE_INTEGER)
+            }}
+          >
+            דלגו על הסרט ‹
+          </button>
+        )}
         {/* מספר הסעיף במקור (§) הוא סימון של הכותבים, לא של הלומד — הוא
             נשאר בנתונים בשביל שער הנאמנות ואינו מוצג עוד. */}
         <h3 className="hud-title">{SPEAKERS[step.speaker]}</h3>
