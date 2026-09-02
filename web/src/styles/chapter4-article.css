@@ -1119,3 +1119,67 @@
   margin-block-start:10px;
   font-size:clamp(11px,1.1vw,13px);color:var(--muted);
 }
+
+/* ================================ the route map =======================
+   Chapter 6's device, carrying chapter 4's places: a painted map with numbered
+   pins. The artwork is in the same hand as chapter 6's pilgrimage map and was
+   painted for this chapter.
+
+   The pins hold names and years, not paragraphs — this chapter's gate prints
+   every sentence exactly once, in the section it belongs to. */
+.ch4-map{margin:0}
+.ch4-map-plane{
+  position:relative;
+  border:1px solid var(--gold-soft);
+  background:var(--mat);
+  overflow:hidden;
+}
+.ch4-map-plane img{display:block;width:100%;height:auto}
+
+.ch4-map-road{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;
+}
+.ch4-map-road polyline{
+  fill:none;stroke:var(--maroon);
+  stroke-width:.55;stroke-dasharray:2 1.6;
+  opacity:.75;vector-effect:non-scaling-stroke;
+}
+
+.ch4-map-pin{
+  position:absolute;transform:translate(-50%,-50%);
+  display:flex;align-items:center;gap:8px;
+  padding:0;border:0;background:none;cursor:pointer;font:inherit;
+}
+.ch4-map-dot{
+  display:grid;place-items:center;flex:none;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--maroon);color:var(--cream);
+  border:2px solid var(--cream);
+  box-shadow:0 2px 8px rgba(20,12,6,.45);
+  font-family:var(--font-heading);font-size:13px;
+  transition:transform .18s ease;
+}
+.ch4-map-pin:hover .ch4-map-dot,
+.ch4-map-pin.is-on .ch4-map-dot{transform:scale(1.15)}
+.ch4-map-pin.is-on .ch4-map-dot{background:var(--gold-text)}
+.ch4-map-pin:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px;border-radius:999px}
+
+.ch4-map-name{
+  display:flex;align-items:baseline;gap:7px;
+  padding:5px 12px;border-radius:999px;white-space:nowrap;
+  background:var(--cream);color:var(--maroon);
+  border:1px solid var(--gold-soft);
+  font-family:var(--font-heading);font-size:clamp(12px,1.2vw,14px);
+  box-shadow:0 2px 8px rgba(20,12,6,.2);
+}
+.ch4-map-name i{font-style:normal;font-size:.86em;color:var(--muted)}
+
+.ch4-map figcaption{
+  margin-block-start:10px;
+  font-size:clamp(11px,1.1vw,13px);color:var(--muted);
+}
+@media (max-width:640px){
+  .ch4-map-name{display:none}
+  .ch4-map-pin.is-on .ch4-map-name{display:flex}
+}

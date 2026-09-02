@@ -42,6 +42,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import BadrFilm from '@/components/chapter4/BadrFilm'
 import Ditch from '@/components/chapter4/Ditch'
 import Forces from '@/components/chapter4/Forces'
+import RouteMap from '@/components/chapter4/RouteMap'
 import Spots from '@/components/chapter4/Spots'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
@@ -1074,6 +1075,15 @@ export default function Chapter4() {
                   </div>
                 </div>
                 <Head id="hijra" />
+                <RouteMap
+                  label="הדרך ממכה למדינה"
+                  stops={[
+                    { id: 'mecca', name: 'מכה', x: 62, y: 79 },
+                    { id: 'badr', name: 'בדר', year: '624', x: 55, y: 52 },
+                    { id: 'medina', name: 'ית'+String.fromCharCode(39)+'רב', year: '622', x: 68, y: 38 },
+                    { id: 'khaybar', name: 'ח'+String.fromCharCode(39)+'יבר', x: 72, y: 21 },
+                  ]}
+                />
                 <Band img="stage-1-mecca" caption="מכה בעמקה · שחזור מצויר">
                   <Block>
                     <T r="§0.a" className="ch4-body" />
