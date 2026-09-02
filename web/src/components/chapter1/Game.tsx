@@ -1261,6 +1261,8 @@ function TaskProps({ live, atTask, chosen, solvedTask, onChoose }: {
       }
     }
     const down = (e: PointerEvent) => {
+      /* פאנל פתוח מעל הקנבס: לחיצה עליו לא תופסת פרופ שמאחוריו */
+      if (e.target !== gl.domElement) return
       if (solvedTask || dragging.current >= 0) return
       for (let i = 0; i < state.current.length; i++) {
         if (state.current[i].placed || chosen.includes(state.current[i].id)) continue
@@ -3234,6 +3236,18 @@ export default function Game() {
      side it was put on, and the miss carries its own correction. */
   const [taskLastOk, setTaskLastOk] = useState(false)
   const taskSolved = REGION_TASK ? solved.includes(REGION_TASK.id) : false
+  /* ההשלמה נבדקת כאן ולא בתוך ה-updater: setState בתוך updater רץ בפאזת
+     הרנדור (וב-StrictMode פעמיים), וזה בדיוק ה-"Issue" האדום שקפץ ברגע
+     שפתרו משימה. אפקט אחד לשני מסלולי המענה. */
+  useEffect(() => {
+    if (!REGION_TASK || taskSolved) return
+    const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
+    const needed = (sortLike ? REGION_TASK.options : REGION_TASK.options.filter((o) => o.right)).map((o) => o.id)
+    if (needed.length && needed.every((n) => taskChosen.includes(n))) {
+      setSolved(recordTask(REGION_TASK.id).solved)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskChosen, taskSolved])
   const chooseTask = useCallback(
     (id: string) => {
       if (!REGION_TASK) return
@@ -3242,12 +3256,7 @@ export default function Game() {
       setTaskLast(id)
       setTaskLastOk(!!opt.right)
       if (!opt.right) return
-      setTaskChosen((prev) => {
-        const next = prev.includes(id) ? prev : [...prev, id]
-        const needed = REGION_TASK.options.filter((o) => o.right).map((o) => o.id)
-        if (needed.every((n) => next.includes(n))) setSolved(recordTask(REGION_TASK.id).solved)
-        return next
-      })
+      setTaskChosen((prev) => (prev.includes(id) ? prev : [...prev, id]))
     },
     [],
   )
@@ -3263,13 +3272,7 @@ export default function Game() {
       const ok = opt.bin === binId
       setTaskLastOk(ok)
       if (!ok) return
-      setTaskChosen((prev) => {
-        const next = prev.includes(itemId) ? prev : [...prev, itemId]
-        if (REGION_TASK.options.every((o) => next.includes(o.id))) {
-          setSolved(recordTask(REGION_TASK.id).solved)
-        }
-        return next
-      })
+      setTaskChosen((prev) => (prev.includes(itemId) ? prev : [...prev, itemId]))
     },
     [],
   )

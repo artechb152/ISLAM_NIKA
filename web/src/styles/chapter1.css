@@ -893,9 +893,14 @@ body{
 
 /* the card you get for looking closely — a page, not a speech bubble */
 .ch1-find,.ch1-task{
-  position:absolute;inset:0;z-index:26;display:grid;place-items:center;
+  /* fixed ולא absolute: הבמה חותכת ב-overflow:hidden, וכרטיס גבוה ממסך
+     איבד את כפתורי הסגירה מתחת לקו בלי שום גלילה — התקיעה שדווחה.
+     אותו דפוס כמו .ch1-overlay: מיושר לראש, padding נושם, וגלילה. */
+  position:fixed;inset:0;z-index:26;display:grid;place-items:start center;
+  padding:clamp(10px,2.4vh,30px);overflow-y:auto;
   background:rgba(20,13,8,.55);animation:ch1-end-in .28s ease both;
 }
+.ch1-find>*,.ch1-task>*{margin-block-start:clamp(6px,2.6vh,40px)}
 .ch1-find-card,.ch1-task-card{
   max-width:min(540px,88vw);padding:26px 30px 22px;
   background:linear-gradient(180deg,rgba(48,34,21,.97),rgba(31,21,13,.98));

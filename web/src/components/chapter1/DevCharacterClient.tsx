@@ -62,6 +62,12 @@ function Rig({ url, clip, timeScale }: {
   const { scene, animations } = useGLTF(url)
   const cloned = useMemo(() => {
     const c = SkeletonUtils.clone(scene)
+    {
+      /* מודל סטטי שמרכזו בטבור יושב חצי מתחת לרצפה — מרימים לקרקע.
+         בלי שינוי קנה-מידה (הלקח מהפעם הקודמת). */
+      const box = new THREE.Box3().setFromObject(c)
+      if (isFinite(box.min.y)) c.position.y -= box.min.y
+    }
     /* נרמול קנה מידה — כלל הצינור מאז ה-POC: כל נכס נמדד ומוצב לגובה
        אדם, לא סומכים על היחידות של הכלי שייצא אותו. */
     return c

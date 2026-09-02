@@ -1,0 +1,13 @@
+▲ Next.js 16.2.10 (webpack)
+- Local:         http://localhost:3002
+- Network:       http://10.80.3.85:3002
+✓ Ready in 9.2s
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          26372
+- Dir:          C:\Users\nikag\ISLAM_NIKA\web
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 26372 /F to stop it.
+[?25h
