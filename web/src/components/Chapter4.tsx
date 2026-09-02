@@ -660,24 +660,6 @@ function Band({
   )
 }
 
-/** A plate: one painted view, sitting under the sentences it belongs to and
-    never instead of them. Three in the chapter, and each one shows a PLACE the
-    source describes — the courtyard of mud and palm, the valley of wells in the
-    rain, the basalt strongholds. None of them shows a person, and that is not
-    squeamishness: the chapter's events turn on a prophet, and every drawing of
-    one is religiously impossible. Landscape is what is left, and it is enough.
-
-    alt is empty and aria-hidden is set. The picture carries nothing the
-    paragraph beside it does not already carry, and a screen reader must not be
-    handed a description this file invented. */
-function Plate({ src }: { src: string }) {
-  return (
-    <figure className="ch4-plate" data-reveal>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/assets/chapter4/${src}.jpg`} alt="" aria-hidden="true" loading="lazy" />
-    </figure>
-  )
-}
 
 /** A movement inside a section. With ten sections instead of twenty-eight,
     what used to be a section of its own is a sub-heading here — and the rail
