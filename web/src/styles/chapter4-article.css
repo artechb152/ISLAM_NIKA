@@ -543,7 +543,7 @@
 .ch4-film-text > * + *{margin-block-start:.7em}
 @media (prefers-reduced-motion:reduce){
   .ch4-film-media video{display:none}
-  .ch4-film-media{background:var(--maroon-deep) url('/assets/chapter4/badr-film.jpg') center/cover}
+  .ch4-film-media{background:var(--maroon-deep) url('/assets/chapter4/badr-battle.jpg') center/cover}
 }
 
 /* ---------------------------- the pair of terms -----------------------

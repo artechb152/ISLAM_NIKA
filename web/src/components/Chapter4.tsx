@@ -1055,6 +1055,7 @@ export default function Chapter4() {
                 <SubHead section="hijra" id="covenant" />
                 <T r="§4.a" className="ch4-body" reveal />
                 <T r="§4.b" className="ch4-body" reveal />
+                <Plate src="yathrib-oasis" />
                 <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                 <T r="§8.b" className="ch4-body" reveal />
                 <T r="§8.c" className="ch4-body" reveal />
@@ -1084,7 +1085,7 @@ export default function Chapter4() {
                 <T r="§10.b" className="ch4-body" reveal />
                 <T r="§11.a" className="ch4-body" em={["אבו ג'הל"]} reveal />
                 <Forces muslims="§11.muslims" other="§11.quraysh" />
-                <Film src="badr-film">
+                <Film src="badr-battle">
                   <T r="§12.rain" className="ch4-body" />
                   <T r="§12.duel" className="ch4-body" />
                 </Film>
