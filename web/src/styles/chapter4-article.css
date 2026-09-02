@@ -122,7 +122,7 @@
 .ch4-hero-copy{position:relative;z-index:1;width:min(1200px,94%);min-width:0;margin-inline-end:auto;text-align:right;direction:rtl}
 
 .ch4-hero-title{
-  font-family:var(--font-heading);font-weight:900;color:var(--paper);margin:0;
+  font-family:var(--font-heading);font-weight:900;color:var(--panel);margin:0;
   font-size:clamp(42px,4.5vw,70px);line-height:1.08;letter-spacing:-.015em;text-wrap:balance;
   text-shadow:0 3px 22px rgba(20,10,4,.55);
 }
@@ -258,7 +258,7 @@
    so every card, echo box and plate sat in 68px of air instead of 34. The
    chapter measured 16,154px tall against chapter 6's 14,095 for less material.
 
-   GROUND RULE FOR EVERY DEVICE BELOW: the ground is var(--paper), the page's
+   GROUND RULE FOR EVERY DEVICE BELOW: the ground is var(--panel), the page's
    own colour. --surface (#faf4e6) is the sheet's "brightest raised inset" and
    on screen it reads as a white card floating on parchment — the first build
    used it for the cards, the force balance and the ruling cards, and all three
@@ -320,7 +320,7 @@
   padding:16px 18px;
   border:1px solid var(--rule);
   border-block-start:2px solid var(--gold);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-card-name{
   margin:0 0 .4em;
@@ -344,7 +344,7 @@
 .ch4-echo{
   padding:16px 18px;
   border-inline-start:3px solid var(--maroon);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-echo > *{margin:0}
 .ch4-echo > * + *{margin-block-start:.7em}
@@ -361,7 +361,7 @@
   grid-template-columns:1fr 1fr;
   padding:14px 16px;
   border:1px solid var(--rule);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-force{margin:0}
 .ch4-force-a{color:var(--maroon)}
@@ -390,7 +390,7 @@
   position:relative;
   padding:20px 20px 18px;
   border:1px solid var(--gold-soft);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-def-term{
   display:inline-block;
@@ -417,7 +417,7 @@
   padding:18px 20px;
   border:1px solid var(--rule);
   border-inline-start:3px solid var(--gold);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-ruling-name{
   margin:0 0 .5em;
@@ -486,7 +486,7 @@
   justify-content:center;
   padding:22px 26px;
   border:1px solid var(--rule);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-journey-strip{position:relative;width:150px;margin-inline-start:168px}
 .ch4-journey-strip svg{display:block;overflow:visible}
@@ -498,7 +498,7 @@
   stroke-dasharray:5 5;
   opacity:.75;
 }
-.ch4-journey-dot{fill:var(--maroon);stroke:var(--paper);stroke-width:2}
+.ch4-journey-dot{fill:var(--maroon);stroke:var(--panel);stroke-width:2}
 .ch4-journey-dot.is-here{fill:var(--gold-text);stroke-width:3}
 .ch4-journey-leader{stroke:var(--gold-soft);stroke-width:1}
 
@@ -535,7 +535,7 @@
    in a reading page is an ambush. */
 .ch4-film{
   border:1px solid var(--rule);
-  background:var(--paper);
+  background:var(--panel);
   overflow:hidden;
 }
 .ch4-film-media{position:relative;aspect-ratio:16/9;background:var(--maroon-deep)}
@@ -606,7 +606,7 @@
   grid-template-columns:1fr 1fr;
   gap:0;
   border:1px solid var(--rule);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-pair-side{padding:18px 20px}
 .ch4-pair-side + .ch4-pair-side{border-inline-end:1px solid var(--rule)}
@@ -632,7 +632,7 @@
   border:1px solid var(--rule);
   background:var(--rule);
 }
-.ch4-outcome{margin:0;padding:16px 18px;background:var(--paper);color:var(--ink)}
+.ch4-outcome{margin:0;padding:16px 18px;background:var(--panel);color:var(--ink)}
 
 /* ------------------------------ a person ------------------------------
    §46 hangs four roles on one man inside a parenthesis. The card lifts the
@@ -641,7 +641,7 @@
   padding:18px 20px;
   border:1px solid var(--rule);
   border-inline-start:3px solid var(--maroon);
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-figure-line{margin:0;color:var(--ink)}
 .ch4-figure-line + .ch4-figure-line{margin-block-start:.7em}
@@ -665,7 +665,7 @@
   display:grid;
   gap:2px;
   padding:16px 18px;
-  background:var(--paper);
+  background:var(--panel);
 }
 .ch4-treaty-year{
   font-family:var(--font-heading);
@@ -682,7 +682,7 @@
    what it stopped. */
 .ch4-trench{
   border:1px solid var(--rule);
-  background:var(--paper);
+  background:var(--panel);
   overflow:hidden;
 }
 .ch4-trench-plate{
@@ -840,7 +840,7 @@
 .ch4-stage-dot::before{
   content:'';width:11px;height:11px;border-radius:50%;
   background:var(--gold-soft);
-  outline:4px solid var(--paper);
+  outline:4px solid var(--panel);
   transition:background .2s ease;
 }
 .ch4-stage-dot.is-on{color:var(--maroon)}
@@ -853,7 +853,7 @@
   display:grid;place-items:center;flex:none;
   width:38px;height:38px;
   border:1px solid var(--rule);border-radius:50%;
-  background:var(--paper);color:var(--maroon);cursor:pointer;
+  background:var(--panel);color:var(--maroon);cursor:pointer;
 }
 .ch4-stage-arrow svg{width:18px;height:18px}
 .ch4-stage-arrow:hover{border-color:var(--gold-text)}
@@ -880,9 +880,11 @@
   grid-template-columns:1fr 1fr;
   align-items:center;
   min-height:min(72vh,600px);
-  /* edge to edge of the CONTENT, not of the window: the chapter has a rail on
-     the reading edge, and 100vw slid the band under it and clipped the words */
-  width:100%;
+  /* edge to edge of the READING AREA: the chapter has a rail on the reading
+     edge, so 100vw slid the band under it and clipped the words. The article
+     sits inside --content-gutter, and the band steps back out over it. */
+  width:calc(100% + var(--content-gutter) * 2);
+  margin-inline:calc(var(--content-gutter) * -1);
   padding:clamp(26px,5vw,66px) clamp(20px,6vw,90px);
   overflow:hidden;
 }
@@ -892,16 +894,18 @@
 /* the fade: clear over the picture, the page colour where the words are */
 .ch4-band::after{
   content:'';position:absolute;inset:0;pointer-events:none;
+  /* opaque BEFORE the words start, not level with them: at 56% the first
+     letters still sat over the picture */
   background:linear-gradient(to right,
-    rgba(237,228,208,0) 26%,
-    rgba(237,228,208,.72) 44%,
-    var(--paper) 56%);
+    rgba(243,234,214,0) 18%,
+    rgba(243,234,214,.86) 38%,
+    var(--panel) 48%);
 }
 .ch4-band.is-flip::after{
   background:linear-gradient(to left,
-    rgba(237,228,208,0) 26%,
-    rgba(237,228,208,.72) 44%,
-    var(--paper) 56%);
+    rgba(243,234,214,0) 18%,
+    rgba(243,234,214,.86) 38%,
+    var(--panel) 48%);
 }
 
 .ch4-band-copy{position:relative;z-index:1;min-width:0}

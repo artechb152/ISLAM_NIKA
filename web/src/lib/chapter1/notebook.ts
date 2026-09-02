@@ -17,9 +17,12 @@ export interface NotebookStore {
   found: string[]
   /** Ids of the region tasks already worked out — see tasks.ts. */
   solved: string[]
+  /** Correct answers already given inside an unfinished task, as
+      "taskId:optionId" — a reload mid-task must not undo half a crate. */
+  chosen: string[]
 }
 
-const EMPTY: NotebookStore = { seen: [], entries: [], region: 'yemen-heights', found: [], solved: [] }
+const EMPTY: NotebookStore = { seen: [], entries: [], region: 'yemen-heights', found: [], solved: [], chosen: [] }
 
 export function readNotebook(): NotebookStore {
   if (typeof window === 'undefined') return EMPTY
@@ -35,6 +38,7 @@ export function readNotebook(): NotebookStore {
          them is missing the keys entirely rather than carrying empty ones. */
       found: Array.isArray(p.found) ? p.found.filter((x): x is string => typeof x === 'string') : [],
       solved: Array.isArray(p.solved) ? p.solved.filter((x): x is string => typeof x === 'string') : [],
+      chosen: Array.isArray(p.chosen) ? p.chosen.filter((x): x is string => typeof x === 'string') : [],
     }
   } catch {
     return EMPTY
@@ -61,6 +65,15 @@ export function recordEncounter(encounterId: string, notebookEntry: number): Not
 export function recordFind(findId: string): NotebookStore {
   const s = readNotebook()
   if (!s.found.includes(findId)) s.found = [...s.found, findId]
+  write(s)
+  return s
+}
+
+/** Write down one correct answer inside a task still in progress. */
+export function recordChoice(taskId: string, optionId: string): NotebookStore {
+  const s = readNotebook()
+  const key = taskId + ':' + optionId
+  if (!s.chosen.includes(key)) s.chosen = [...s.chosen, key]
   write(s)
   return s
 }

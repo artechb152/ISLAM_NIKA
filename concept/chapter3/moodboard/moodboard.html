@@ -1,0 +1,236 @@
+<meta charset="utf-8">
+<title>פרק 3 · מוד־בורד הקומיקס</title>
+<style>
+@font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-bold-aaa.otf") format("opentype");font-weight:700}
+@font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-black-aaa.otf") format("opentype");font-weight:900}
+@font-face{font-family:"Ploni";src:url("../../../web/public/assets/fonts/ploni-regular-aaa.otf") format("opentype");font-weight:400}
+@font-face{font-family:"Ploni";src:url("../../../web/public/assets/fonts/ploni-demibold-aaa.otf") format("opentype");font-weight:600}
+:root{
+  --paper:#EDE4D0; --panel:#f3ead6; --surface:#faf4e6; --edge:#d8c7a3;
+  --maroon:#8a2733; --maroon-deep:#571820; --stamp:#a5322f;
+  --ink:#3c2c1d; --muted:#6f5c43; --cream:#f5ecd6;
+  --gold:#c79a3c; --gold-text:#856016;
+  --line:#4a3826;                  /* the comic's ink line */
+  --wash-sand:#e3cfa6; --wash-stone:#c9ae86; --wash-shadow:#8f7a5e;
+  --wash-sky:#cfd8dc; --wash-night:#2b3550;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); direction:rtl;
+  font-family:"Ploni",Arial,sans-serif; font-size:16px; line-height:1.7;
+  padding:56px 64px 90px;
+}
+h1{font-family:"Kedem",serif;font-weight:900;font-size:54px;color:var(--maroon);line-height:1.05}
+.sub{font-size:19px;color:var(--muted);margin-top:10px;max-width:900px}
+h2{font-family:"Kedem",serif;font-weight:700;font-size:30px;color:var(--maroon);
+   margin:64px 0 6px;padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);width:fit-content}
+.note{font-size:15px;color:var(--muted);margin:10px 0 24px;max-width:1000px}
+.warn{border-inline-start:4px solid var(--stamp);padding:12px 18px;background:var(--surface);
+      max-width:1000px;margin:18px 0 26px;font-size:15px}
+.row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.cap{font-family:"Ploni";font-size:12.5px;color:var(--muted);margin-top:9px;letter-spacing:.02em}
+
+/* ---- the page: what a spread looks like when you turn it ---- */
+.book{display:flex;gap:0;box-shadow:0 18px 50px rgba(60,35,18,.22);width:fit-content;margin-top:8px}
+.leaf{width:430px;height:600px;background:var(--panel);padding:22px;position:relative}
+.leaf.l{border-inline-end:1px solid var(--edge);
+        background:linear-gradient(to left,rgba(0,0,0,.07),transparent 12%),var(--panel)}
+.leaf.r{background:linear-gradient(to right,rgba(0,0,0,.07),transparent 12%),var(--panel)}
+.folio{position:absolute;bottom:10px;inset-inline-start:22px;font-size:11px;color:var(--muted);letter-spacing:.12em}
+
+/* ---- panels ---- */
+.grid{display:grid;gap:12px;height:100%}
+.g-a{grid-template-columns:1fr 1fr;grid-template-rows:1.25fr 1fr}
+.g-a .p1{grid-column:1/3}
+.g-b{grid-template-rows:1fr 1.5fr;grid-template-columns:1fr}
+.g-c{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1.4fr}
+.g-c .p4{grid-column:1/4}
+.g-d{grid-template-rows:1fr}
+.panel{border:2.5px solid var(--line);background:var(--surface);position:relative;overflow:hidden}
+.panel svg{display:block;width:100%;height:100%}
+/* the caption box — every word of the chapter lives in one of these */
+.box{position:absolute;inset-inline:8px;bottom:8px;background:rgba(250,244,230,.94);
+     border:1.5px solid var(--line);padding:7px 10px;font-size:12.5px;line-height:1.5;color:var(--ink)}
+.box.top{top:8px;bottom:auto}
+.box b{color:var(--maroon)}
+.src{position:absolute;top:6px;inset-inline-start:8px;font-size:10px;color:var(--gold-text);
+     letter-spacing:.08em;background:rgba(250,244,230,.85);padding:1px 5px;border:1px solid var(--edge)}
+
+/* ---- swatches ---- */
+.sw{width:112px}
+.sw i{display:block;height:64px;border:1.5px solid var(--line)}
+.sw span{display:block;font-size:11.5px;color:var(--muted);margin-top:6px;letter-spacing:.03em}
+.rules{max-width:1020px;font-size:15.5px}
+.rules li{margin:8px 0 8px 0;padding-inline-start:14px;list-style:none;position:relative}
+.rules li::before{content:"";position:absolute;inset-inline-start:0;top:.62em;width:7px;height:7px;
+  background:var(--maroon);transform:rotate(45deg)}
+table{border-collapse:collapse;font-size:15px;margin-top:8px}
+td,th{border:1px solid var(--edge);padding:8px 14px;text-align:start}
+th{background:var(--surface);font-family:"Kedem";font-weight:700;color:var(--maroon)}
+</style>
+
+<h1>פרק 3 · מוד־בורד הקומיקס</h1>
+<p class="sub">איך הפרק ייראה לפני שמופק ולו נכס אחד. אף תמונה כאן אינה מיוצרת —
+כל מה שמופיע צויר ידנית כדי להראות את <b>המערכת</b>: הפורמט, הרשת, הקופסאות,
+המוסכמות והפלטה. זה מה שיהפוך את 58 הפאנלים לרצף אחד ולא לאוסף.</p>
+
+<div class="warn"><b>המדיום משתנה, וזו הכרעה שצריך לאשר.</b>
+הנכסים שהופקו עד כה הם „שמן על בד במסורת האוריינטליזם של המאה ה-19" — מדיום
+<b>בלי קו</b>. קומיקס הוא קו. ההצעה: <b>קו דיו על שטיפת אקוורל</b> — משמר את
+הפלטה, את הנייר ואת האור של האתר, ומוסיף את הקו שהצורה מחייבת.
+<b>אף אחד מהנכסים הקיימים לא ישמש.</b></div>
+
+<h2>1 · הפורמט — דפדוף</h2>
+<p class="note">פריסה כפולה, דפדוף מימין לשמאל כמו ספר עברי. אין גלילה אינסופית:
+הקורא מסיים פריסה ומדפדף. זה מה שפותר את בעיית האורך של 18,000 הפיקסלים.</p>
+<div class="book">
+  <div class="leaf l">
+    <div class="grid g-a">
+      <div class="panel p1"><svg viewBox="0 0 380 210" preserveAspectRatio="none">
+        <rect width="380" height="210" fill="#dfe6e6"/>
+        <path d="M0 150 L60 118 L110 134 L170 96 L232 126 L290 104 L340 128 L380 116 L380 210 L0 210Z" fill="#c9ae86"/>
+        <path d="M0 176 L70 158 L150 172 L240 152 L320 170 L380 158 L380 210 L0 210Z" fill="#e3cfa6"/>
+        <g fill="none" stroke="#4a3826" stroke-width="2">
+          <path d="M0 150 L60 118 L110 134 L170 96 L232 126 L290 104 L340 128 L380 116"/>
+          <path d="M0 176 L70 158 L150 172 L240 152 L320 170 L380 158"/></g>
+        <g fill="#8f7a5e"><rect x="120" y="176" width="26" height="18"/><rect x="156" y="180" width="20" height="14"/>
+          <rect x="188" y="174" width="30" height="20"/><rect x="228" y="181" width="18" height="13"/></g>
+        <g fill="none" stroke="#4a3826" stroke-width="1.6"><rect x="120" y="176" width="26" height="18"/>
+          <rect x="156" y="180" width="20" height="14"/><rect x="188" y="174" width="30" height="20"/>
+          <rect x="228" y="181" width="18" height="13"/></g>
+      </svg>
+        <span class="src">§0</span>
+        <div class="box">לפי המסורת מוחמד נולד בשנת 570 לספירה. שנה זו מכונה באסלאם <b>„שנת הפיל"</b>.</div>
+      </div>
+      <div class="panel"><svg viewBox="0 0 184 170">
+        <rect width="184" height="170" fill="#e8dcc0"/>
+        <g fill="#8f7a5e" stroke="#4a3826" stroke-width="1.8">
+          <ellipse cx="92" cy="112" rx="34" ry="40"/><ellipse cx="70" cy="86" rx="15" ry="19"/>
+          <ellipse cx="114" cy="86" rx="15" ry="19"/></g>
+        <ellipse cx="92" cy="74" rx="20" ry="22" fill="#d8c7a3" opacity=".85"/>
+        <ellipse cx="92" cy="74" rx="13" ry="15" fill="#c9ae86" opacity=".6"/>
+      </svg>
+        <span class="src">§8</span>
+        <div class="box">פנים מטושטשות — שטיפה, בלי עיניים ובלי פה.</div>
+      </div>
+      <div class="panel"><svg viewBox="0 0 184 170">
+        <rect width="184" height="170" fill="#2b3550"/>
+        <g fill="#f5ecd6"><circle cx="40" cy="36" r="1.6"/><circle cx="96" cy="24" r="1.2"/>
+          <circle cx="140" cy="52" r="1.8"/><circle cx="62" cy="78" r="1.1"/><circle cx="120" cy="98" r="1.4"/>
+          <circle cx="30" cy="120" r="1.2"/><circle cx="158" cy="128" r="1.5"/></g>
+        <path d="M0 140 L52 122 L104 136 L184 120 L184 170 L0 170Z" fill="#1b2233"/>
+        <path d="M0 140 L52 122 L104 136 L184 120" fill="none" stroke="#4a3826" stroke-width="2"/>
+      </svg>
+        <span class="src">§35</span>
+        <div class="box">הדרך בלילה. <b>אלבראק אינו מצויר.</b></div>
+      </div>
+    </div>
+    <div class="folio">14 ·</div>
+  </div>
+  <div class="leaf r">
+    <div class="grid g-b">
+      <div class="panel"><svg viewBox="0 0 380 176">
+        <rect width="380" height="176" fill="#efe4c8"/>
+        <g fill="#c9ae86" stroke="#4a3826" stroke-width="2">
+          <path d="M30 176 L30 96 Q30 74 52 74 L96 74 Q118 74 118 96 L118 176Z"/>
+          <path d="M150 176 L150 88 Q150 66 172 66 L216 66 Q238 66 238 88 L238 176Z"/>
+          <path d="M266 176 L266 100 Q266 78 288 78 L332 78 Q354 78 354 100 L354 176Z"/></g>
+        <g fill="#d8c7a3" opacity=".9"><ellipse cx="74" cy="62" rx="19" ry="21"/>
+          <ellipse cx="194" cy="54" rx="19" ry="21"/><ellipse cx="310" cy="66" rx="19" ry="21"/></g>
+        <g fill="#c9ae86" opacity=".55"><ellipse cx="74" cy="62" rx="12" ry="14"/>
+          <ellipse cx="194" cy="54" rx="12" ry="14"/><ellipse cx="310" cy="66" rx="12" ry="14"/></g>
+      </svg>
+        <span class="src">§26</span>
+        <div class="box top">מרבית תושבי מכה לא אבו לשמוע למסרי ההטפה, ואף פתחו עוינות כלפיו.</div>
+      </div>
+      <div class="panel"><svg viewBox="0 0 380 268">
+        <rect width="380" height="268" fill="#1a1712"/>
+        <path d="M0 0 L0 268 L110 268 Q86 190 96 120 Q104 58 138 0Z" fill="#3a2f22"/>
+        <path d="M380 0 L380 268 L268 268 Q296 186 286 118 Q276 56 244 0Z" fill="#3a2f22"/>
+        <ellipse cx="190" cy="140" rx="72" ry="96" fill="#efe4c8"/>
+        <ellipse cx="190" cy="140" rx="58" ry="80" fill="#f7f0dd"/>
+        <g fill="none" stroke="#4a3826" stroke-width="2.4">
+          <path d="M138 0 Q104 58 96 120 Q86 190 110 268"/>
+          <path d="M244 0 Q276 56 286 118 Q296 186 268 268"/></g>
+        <g fill="#e3cfa6" stroke="#4a3826" stroke-width="1.6">
+          <rect x="150" y="108" width="82" height="26" rx="3"/>
+          <rect x="158" y="140" width="66" height="22" rx="3"/></g>
+      </svg>
+        <span class="src">§18</span>
+        <div class="box">POV: הגווילים נפרסים אלינו. <b>גבריאל הוא האור, לא גוף.</b></div>
+      </div>
+    </div>
+    <div class="folio">· 15</div>
+  </div>
+</div>
+<p class="cap">פריסה כפולה · 430×600 לעמוד · המספור בשוליים החיצוניים · הדפדוף מימין לשמאל</p>
+
+<h2>2 · הרשת — מה שהופך 58 פאנלים לרצף אחד</h2>
+<p class="note">ארבע פריסות בלבד, וכל עמוד בפרק בנוי מאחת מהן. אותו מרזח (12px),
+אותו קו מסגרת (2.5px), אותה קופסה. <b>הרציפות היא הרשת, לא הציור.</b></p>
+<div class="row">
+  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
+    <div class="grid g-a"><div class="panel p1"></div><div class="panel"></div><div class="panel"></div></div></div>
+    <p class="cap">א · רחב מלמעלה, שניים מתחת<br>לפתיחת סצנה</p></div>
+  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
+    <div class="grid g-b"><div class="panel"></div><div class="panel"></div></div></div>
+    <p class="cap">ב · שניים, התחתון גדול<br>לרגע מכריע</p></div>
+  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
+    <div class="grid g-c"><div class="panel"></div><div class="panel"></div><div class="panel"></div>
+      <div class="panel p4"></div></div></div>
+    <p class="cap">ג · שלושה קצרים ורצועה<br>לרצף מהיר</p></div>
+  <div><div class="leaf" style="width:230px;height:300px;box-shadow:none;border:1px solid var(--edge)">
+    <div class="grid g-d"><div class="panel"></div></div></div>
+    <p class="cap">ד · פאנל יחיד<br>לשבעת הרקיעים ולמסע</p></div>
+</div>
+
+<h2>3 · המוסכמות</h2>
+<table>
+  <tr><th>מי</th><th>איך</th></tr>
+  <tr><td>מוחמד</td><td><b>לא בפריים.</b> המצלמה היא הוא — רואים את מה שהוא רואה</td></tr>
+  <tr><td>גבריאל והמלאכים</td><td><b>לא בפריים.</b> אור, גוויל, שער שנפתח</td></tr>
+  <tr><td>שבעת הנביאים ברקיעים</td><td><b>לא בפריים.</b> כולם נביאים באסלאם</td></tr>
+  <tr><td>אלבראק · גן עדן · גהינום · אלאקצא · ירושלים</td><td><b>לא מצוירים כלל</b></td></tr>
+  <tr><td>ח'דיג'ה · אבו טאלב · אברהה · אנשי מכה · נופל · אבו בכר · מלך חבש</td>
+      <td><b>מצוירים, פנים מטושטשות</b> — שטיפה, בלי קלסתר</td></tr>
+  <tr><td>§§4–6 — הרובד העכשווי</td><td><b>אפס דימויים.</b> טיפוגרפיה בלבד</td></tr>
+</table>
+
+<h2>4 · הפלטה והקו</h2>
+<p class="note">אותם ערכים בדיוק שהאתר כבר מגדיר — אף צבע חדש. הקו הוא הדבר היחיד
+שנוסף, והוא מה שהופך שטיפה לקומיקס.</p>
+<div class="row">
+  <div class="sw"><i style="background:#EDE4D0"></i><span>נייר · paper</span></div>
+  <div class="sw"><i style="background:#e3cfa6"></i><span>חול</span></div>
+  <div class="sw"><i style="background:#c9ae86"></i><span>אבן</span></div>
+  <div class="sw"><i style="background:#8f7a5e"></i><span>צל</span></div>
+  <div class="sw"><i style="background:#2b3550"></i><span>לילה</span></div>
+  <div class="sw"><i style="background:#8a2733"></i><span>בורדו · הדגשה</span></div>
+  <div class="sw"><i style="background:#c79a3c"></i><span>זהב · מקודש</span></div>
+  <div class="sw"><i style="background:#4a3826"></i><span>קו הדיו</span></div>
+</div>
+
+<h2>5 · הקופסה</h2>
+<p class="note">כל מילה בפרק חיה בקופסה כזו, <b>מילה במילה מהמקור</b>. אין בלונים
+של דיבור: הפרק הוא נרטיב מדווח ולא דיאלוג, והמקור לא מביא ציטוטים בגוף ראשון
+מלבד הפסוקים. הפסוקים מקבלים את הקופסה בזהב.</p>
+<div class="row">
+  <div style="width:430px;position:relative;background:var(--surface);border:2.5px solid var(--line);height:120px">
+    <div class="box" style="position:static;margin:10px">בשנת 610, בהגיעו לגיל ארבעים, זכה מוחמד ל<b>„חיזיון אמת"</b>.</div>
+    <p class="cap" style="margin:0 10px 10px">קופסת סיפור · Ploni · דיו על נייר</p>
+  </div>
+  <div style="width:430px;position:relative;background:var(--surface);border:2.5px solid var(--line);height:120px">
+    <div class="box" style="position:static;margin:10px;border-color:var(--gold);border-width:2px;
+      font-family:'Kedem',serif;font-weight:700;color:var(--maroon-deep);text-align:center;font-size:15px">
+      „קרא בשם ריבונך אשר ברא את האדם מטיפת דם קרוש..."</div>
+    <p class="cap" style="margin:0 10px 10px">קופסת פסוק · Kedem · מסגרת זהב</p>
+  </div>
+</div>
+
+<h2>6 · מה שהמוד־בורד לא מראה</h2>
+<ul class="rules">
+  <li>את הציור עצמו. הפאנלים כאן צוירו ידנית בקוד כדי להראות קומפוזיציה, מסגרת
+      וקופסה — <b>לא את איכות הקו הסופית</b>.</li>
+  <li>את הטיפוגרפיה בגודל אמיתי. בעמוד מודפס הקופסה תרוץ ~34 תווים לשורה.</li>
+  <li>את המעבר בין עמודים — אנימציית הדפדוף עצמה.</li>
+</ul>

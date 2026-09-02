@@ -26,7 +26,7 @@ import { Notebook } from './Notebook'
 import { WorldMap } from './WorldMap'
 import { MODEL, NOTEBOOK_TOTAL, SPEAKERS, regionById, type Encounter, type Gesture } from '@/lib/chapter1/dialogue'
 import { PLACEMENTS, type Placement } from '@/lib/chapter1/placements'
-import { notebookCount, readNotebook, recordEncounter, recordFind, recordTask, setRegion } from '@/lib/chapter1/notebook'
+import { notebookCount, readNotebook, recordEncounter, recordFind, recordTask, setRegion, recordChoice } from '@/lib/chapter1/notebook'
 
 /* The open world, one region at a time. There are no stations and no info
    cards: every word taught here is spoken by somebody, and lives in
@@ -3514,6 +3514,7 @@ export default function Game() {
       setTaskLast(id)
       setTaskLastOk(!!opt.right)
       if (!opt.right) return
+      recordChoice(REGION_TASK.id, id)
       setTaskChosen((prev) => (prev.includes(id) ? prev : [...prev, id]))
     },
     [],
@@ -3530,6 +3531,7 @@ export default function Game() {
       const ok = opt.bin === binId
       setTaskLastOk(ok)
       if (!ok) return
+      recordChoice(REGION_TASK.id, itemId)
       setTaskChosen((prev) => (prev.includes(itemId) ? prev : [...prev, itemId]))
     },
     [],
@@ -3687,6 +3689,11 @@ export default function Game() {
     setSeen(store.seen)
     setFound(store.found)
     setSolved(store.solved)
+    /* חצי-ארגז שנארז לפני רענון נשאר ארוז (דוח הוועדה) */
+    if (REGION_TASK) {
+      const pre = store.chosen.filter((c) => c.startsWith(REGION_TASK.id + ':')).map((c) => c.slice(REGION_TASK.id.length + 1))
+      if (pre.length) setTaskChosen(pre)
+    }
     setNotebook(notebookCount(store))
     /* The map has to know which pin is „you are here“ even on a cold start. */
     setRegion(REGION.id)
