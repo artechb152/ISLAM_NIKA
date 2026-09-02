@@ -40,6 +40,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import BadrFilm from '@/components/chapter4/BadrFilm'
+import Ditch from '@/components/chapter4/Ditch'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
 import { layoutLabels, px, py, ROUTE } from '@/lib/chapter4/art'
@@ -1201,6 +1202,7 @@ export default function Chapter4() {
                   כהמשך ישיר של הקרב, ומקטע נפרד היה נותן לטבח כותרת משלו
                   בסרגל. טיפוגרפיה שקטה, טקסט מלא, בלי דימוי ובלי מנגנון. */}
               <SubHead section="uhud" id="trench" />
+              <Ditch before="siege-1-open" after="trench-after" alt="גררו כדי לראות את התעלה נחפרת" />
                 <Stage
                   label="קרב השוחה"
                   beats={[

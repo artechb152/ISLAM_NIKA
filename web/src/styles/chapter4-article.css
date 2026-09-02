@@ -978,3 +978,57 @@
    than the gap between two sentences of one idea. */
 .ch4-block > * + *{margin-block-start:14px}
 .chapter-article .article-section > .ch4-block + .ch4-block{margin-top:var(--flow-lead)}
+
+/* ================================ the ditch ===========================
+   The one thing in this chapter the reader performs rather than reads. Both
+   paintings are the same painting — the second was edited from the first, and
+   both were cropped to put their horizons at the same height, so the only
+   thing that moves under the handle is the ground.
+
+   The clip and the handle position come from React inline: var() inside
+   clip-path resolved to `none` in the first build. */
+.ch4-ditch{margin:0}
+.ch4-ditch-frame{
+  position:relative;
+  aspect-ratio:16/9;
+  overflow:hidden;
+  border:1px solid var(--rule);
+  background:var(--maroon-deep);
+  touch-action:pan-y;
+}
+.ch4-ditch-frame img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+}
+.ch4-ditch-clip{position:absolute;inset:0}
+
+.ch4-ditch-handle{
+  position:absolute;inset-block:0;
+  width:0;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.ch4-ditch-handle span{
+  position:absolute;inset-block:0;inset-inline-start:-1px;
+  width:2px;background:var(--cream);
+  box-shadow:0 0 12px rgba(20,12,6,.6);
+}
+.ch4-ditch-handle i{
+  position:relative;flex:none;
+  display:grid;place-items:center;
+  width:44px;height:44px;border-radius:50%;
+  background:var(--cream);color:var(--maroon);
+  box-shadow:0 4px 16px rgba(20,12,6,.4);
+}
+.ch4-ditch-handle i svg{width:20px;height:20px}
+
+/* the real control: invisible, over the whole frame, still a range input */
+.ch4-ditch-range{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  margin:0;padding:0;opacity:0;cursor:ew-resize;
+  appearance:none;background:none;
+}
+.ch4-ditch-range::-webkit-slider-thumb{appearance:none;width:44px;height:44px}
+.ch4-ditch-range:focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
