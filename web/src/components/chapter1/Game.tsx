@@ -746,6 +746,8 @@ const FIRE_FRAMES = 32
 function FireSprite({ y, size, fps = 20, phase = 0 }: { y: number; size: number; fps?: number; phase?: number }) {
   const src = useLoader(THREE.TextureLoader, '/assets/chapter1/tex/fire-atlas.png')
   const mesh = useRef<THREE.Mesh>(null)
+  const fireW = useRef(new THREE.Vector3())
+  const fireD = useRef(new THREE.Vector3())
   const tex = useMemo(() => {
     const t = src.clone()
     t.needsUpdate = true
@@ -762,7 +764,16 @@ function FireSprite({ y, size, fps = 20, phase = 0 }: { y: number; size: number;
     const row = Math.floor(f / FIRE_COLS)
     tex.offset.set(col / FIRE_COLS, (FIRE_ROWS - 1 - row) / FIRE_ROWS)
     // billboard: always face the camera
-    if (mesh.current) mesh.current.quaternion.copy(camera.quaternion)
+    if (mesh.current) {
+      mesh.current.quaternion.copy(camera.quaternion)
+      /* בתקריב המשימה המצלמה כמעט אנכית, והלהבה — One/One מעל חול בהיר —
+         נשרפת ללבן ממלא-פריים. ככל שהמבט תלול יותר, הלהבה שקופה יותר. */
+      const m = mesh.current
+      fireW.current.setFromMatrixPosition(m.matrixWorld)
+      fireD.current.copy(camera.position).sub(fireW.current).normalize()
+      const k = 1 - Math.min(1, Math.max(0, (fireD.current.y - 0.55) / 0.3)) * 0.85
+      ;(m.material as THREE.MeshBasicMaterial).color.setScalar(k)
+    }
   })
 
   useEffect(() => {
@@ -1233,6 +1244,47 @@ function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
     </group>
   )
 }
+/* מה שהנחת נשאר מונח: אחרי שמשימה פיזית נפתרת, החפצים לא נעלמים —
+   הם עומדים היכן שהושמו. המשי בתוך הארגז, המחתה בצד שחצה למכה, המטבע
+   על המאזניים. העולם זוכר את הפעולה. */
+function SolvedTaskProps() {
+  if (!REGION_TASK) return null
+  const T = REGION_TASK
+  const items: { id: string; model: string; tint?: string; h: number; x: number; z: number }[] = []
+  T.options.forEach((o, i) => {
+    if (!o.prop) return
+    let x: number
+    let z: number
+    if (o.spot) {
+      x = T.x + o.spot.dx
+      z = T.z + o.spot.dz
+    } else if (o.bin && T.bins) {
+      const bin = T.bins.find((bb) => bb.id === o.bin)
+      if (!bin?.spot) return
+      x = T.x + bin.spot.dx + ((i % 3) - 1) * 0.55
+      z = T.z + bin.spot.dz + (i % 2 ? 0.3 : -0.25)
+    } else return
+    items.push({ id: o.id, model: o.prop.model, tint: o.prop.tint, h: o.prop.h, x, z })
+  })
+  return (
+    <group>
+      {items.map((it) => (
+        <TaskProp
+          key={it.id}
+          url={`/assets/chapter1/models/${it.model}.glb`}
+          tint={it.tint}
+          h={it.h}
+          x={it.x}
+          z={it.z}
+          label=""
+          showLabel={false}
+          taken={false}
+        />
+      ))}
+    </group>
+  )
+}
+
 /* השיירה יוצאת: ברגע שהמסלול נבחר על המפה, שלושה גמלים עמוסים קמים
    מן המחנה והולכים את הדרך דרומה, אל שער הגבול — הבחירה שנעשתה על הבד
    קורית בעולם, מול העיניים. */
@@ -4102,6 +4154,38 @@ export default function Game() {
     return () => window.clearTimeout(t)
   }, [sceneReady, seen, solved, encounter])
 
+  /* ראווי מדבר מעצמו. R היה מקש שצריך לדעת עליו — ומי שלא לחץ, עבר
+     פרק שלם לצד בן-לוויה אילם. עכשיו מה שיש לו לומר נפתח לבד, ברגע
+     שקט: כמה שניות אחרי שהמסך התפנה (שיחה/פאנל נסגרו), כשלא באמצע
+     גרירה, ועדיף כשעומדים — הליכה ארוכה לא חוסמת לנצח (תקרה 12ש).
+     סדר הטריגרים נשמר: beat שממתין ל-task/after לא יידחף מוקדם. R
+     נשאר כקיצור למי שרוצה את השורה הבאה מיד. */
+  const quietSince = useRef(0)
+  useEffect(() => {
+    quietSince.current = performance.now()
+  }, [encounter, openFind, openTask, finale, sceneReady])
+  const rawiAutoNext = useMemo(() => {
+    const heard = new Set(seen)
+    const worked = new Set(solved)
+    const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.has(x.id))
+    if (!next) return null
+    const t = next.trigger ?? 'arrive'
+    if (t.startsWith('after:') && !heard.has(t.slice(6))) return null
+    if (t.startsWith('task:') && !worked.has(t.slice(5))) return null
+    return next
+  }, [seen, solved])
+  useEffect(() => {
+    if (!sceneReady || !rawiAutoNext || encounter || openFind || openTask || finale === 'card') return
+    const iv = window.setInterval(() => {
+      if (encounterRef.current || openRef.current || live.taskDrag) return
+      const quiet = performance.now() - quietSince.current
+      const standing = live.keys.size === 0
+      if (quiet > 4200 && (standing || quiet > 12000)) setEncounter(rawiAutoNext)
+    }, 400)
+    return () => window.clearInterval(iv)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sceneReady, rawiAutoNext, encounter, openFind, openTask, finale])
+
   /* A read-only handle on where the traveller is standing. This used to be
      dev-only, which meant the built chapter — the one people actually play —
      was the one build no test could steer through, and the walkthrough that
@@ -4407,6 +4491,12 @@ export default function Game() {
               באזור (חותם, מצבה), ובתוך הגבול של העולם הטעינה שלהם החביאה
               את העולם כולו — הפרוג'קטור מת לשניות ארוכות, ובאזור גדול
               עדות נשארה בלי שם. בגבול משלהם הם מגיעים כשהם מגיעים. */}
+          {/* העולם זוכר: החפצים שהושמו נשארים מונחים אחרי הפתרון */}
+          {REGION_TASK && taskSolved && (
+            <Suspense fallback={null}>
+              <SolvedTaskProps />
+            </Suspense>
+          )}
           {/* הבחירה על המפה קורית בעולם: השיירה קמה ויוצאת דרומה */}
           {REGION.id === 'night-camp' && depart && (
             <Suspense fallback={null}>
