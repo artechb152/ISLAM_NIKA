@@ -1009,101 +1009,119 @@
   .ch4-map-pin.is-on .ch4-map-name{display:flex}
 }
 
-
 /* ------------------------- who met whom in Medina ----------------------
-   §3's four groups, set around the town they are named in relation to. Three
-   beside it and the fourth past a rule, because the source puts that one in
-   Mecca — see Groups.tsx.
+   §3's four groups, standing ON the town they are named in relation to. Three
+   over the oasis and the fourth outside the frame, because the source puts that
+   one in Mecca — see Groups.tsx.
 
-   THE RING BECOMES A COLUMN under 900px. Four labelled circles around a picture
-   need width; below that they stack, the picture goes first, and the connector
-   lines are not drawn at all — a line crossing stacked cards is noise, not
-   information. Groups.tsx stops measuring them at the same breakpoint, so the
-   SVG is empty rather than hidden. */
+   THE PICTURE IS THE GROUND, not a panel between two text columns: the faces
+   sit at its corners on --x/--y, each on a dotted line pointing in. The stage
+   keeps room around the picture so a face at a corner is never clipped, and
+   the away face has that room to stand in.
+
+   THE RING BECOMES A COLUMN under 900px. Four labelled circles over a landscape
+   need width; below that the picture goes first, the faces stack, every sentence
+   is simply printed, and the connectors are not drawn at all. */
 .ch4-who{margin:0;width:100%}
 
-.ch4-who-head{margin-bottom:clamp(18px,2.4vw,30px);text-align:center}
+.ch4-who-head{margin-bottom:clamp(16px,2vw,26px);text-align:center}
 .ch4-who-head h3{
   margin:0;font-family:var(--font-heading);font-weight:700;color:var(--maroon);
   font-size:clamp(22px,2.4vw,30px);line-height:1.25;
 }
 .ch4-who-head p{margin:6px 0 0;font-size:14.5px;color:var(--muted)}
 
-.ch4-who-stage{
-  position:relative;
-  display:grid;grid-template-columns:1fr;gap:clamp(20px,3vw,34px);
-  align-items:center;
-}
-@media (min-width:900px){
-  .ch4-who-stage{
-    grid-template-columns:minmax(180px,.85fr) minmax(0,2.1fr) minmax(180px,.85fr);
-    gap:clamp(24px,3.4vw,52px);
-  }
-}
+.ch4-who-stage{position:relative;display:grid;gap:clamp(18px,2.4vw,28px)}
 
-.ch4-who-town{position:relative;z-index:1;order:-1}
-@media (min-width:900px){.ch4-who-town{order:0}}
-.ch4-who-town img{
+.ch4-who-town{
   display:block;width:100%;height:auto;
   border:1px solid var(--gold-soft);
-  opacity:0;scale:.985;
+  opacity:0;scale:.99;
   transition:opacity .7s ease,scale .7s ease;
 }
-.ch4-who.is-on .ch4-who-town img{opacity:1;scale:1}
+.ch4-who.is-on .ch4-who-town{opacity:1;scale:1}
 
-.ch4-who-side{display:grid;gap:clamp(18px,2.4vw,30px);position:relative;z-index:2}
-
-/* the connectors, drawn over the gap between a circle and the town */
-.ch4-who-web{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.ch4-who-web{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
 .ch4-who-line{
-  stroke:var(--gold);stroke-width:1.4;stroke-linecap:round;stroke-dasharray:2 5;
-  opacity:.75;
-  /* drawn from the group toward the town: the dash pattern is the texture, the
-     offset is the reveal, so both are set on the same property in sequence */
+  stroke:var(--maroon);stroke-width:1.4;stroke-linecap:round;stroke-dasharray:2 5;
+  opacity:.7;
   stroke-dashoffset:var(--len);
-  animation:ch4-draw .8s ease forwards var(--step,.6s);
+  animation:ch4-draw .85s ease forwards var(--step,.8s);
 }
-.ch4-who-line.is-on{stroke:var(--maroon);opacity:1;stroke-width:1.9}
+.ch4-who-line.is-on{opacity:1;stroke-width:2}
 @keyframes ch4-draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
 
 .ch4-who-card{
-  text-align:center;
-  opacity:0;translate:0 10px;
+  opacity:0;translate:0 8px;
   transition:opacity .55s ease,translate .55s ease;
   transition-delay:var(--step,.6s);
 }
 .ch4-who.is-on .ch4-who-card{opacity:1;translate:0 0}
 
-/* the one group the source puts somewhere else */
-.ch4-who-card.is-away{
-  margin-top:clamp(14px,2vw,22px);
-  padding-top:clamp(14px,2vw,22px);
-  border-top:1px solid var(--rule);
+/* ---- the wide arrangement: faces placed over the picture ---- */
+@media (min-width:900px){
+  .ch4-who-stage{
+    display:block;
+    /* room at the edges for a face standing at a corner, and for Mecca below */
+    padding:clamp(34px,4.4vw,64px) clamp(104px,12vw,182px) clamp(96px,10vw,150px);
+  }
+  .ch4-who-card{
+    position:absolute;z-index:2;
+    left:var(--x);top:var(--y);translate:-50% -50%;
+    display:flex;align-items:center;gap:12px;
+    width:max-content;max-width:min(300px,26vw);
+  }
+  .ch4-who.is-on .ch4-who-card{translate:-50% -50%}
+  /* the label reads OUTWARD from the circle: away from the middle of the town */
+  .ch4-who-card.is-start{flex-direction:row}
+  .ch4-who-card.is-end{flex-direction:row-reverse}
+  .ch4-who-card.is-start .ch4-who-copy{text-align:start}
+  .ch4-who-card.is-end .ch4-who-copy{text-align:end}
+  .ch4-who-copy{min-width:0;max-width:215px}
+  /* over a light painting the type still needs to hold: a soft plate of the
+     page's own ground, not a dark scrim */
+  .ch4-who-copy > *{
+    background:color-mix(in srgb,var(--panel) 86%,transparent);
+    padding:3px 8px;border-radius:6px;
+  }
 }
 
 .ch4-who-dot{
-  display:block;margin:0 auto 10px;padding:0;cursor:pointer;
-  width:clamp(94px,10vw,132px);aspect-ratio:1;border-radius:50%;
-  border:2px solid var(--gold-soft);background:var(--mat);overflow:hidden;
+  flex:none;display:block;padding:0;cursor:pointer;
+  width:clamp(92px,9.5vw,124px);aspect-ratio:1;border-radius:50%;
+  border:2px solid var(--gold);background:var(--mat);overflow:hidden;
+  box-shadow:0 4px 14px rgba(60,35,18,.22);
   transition:border-color .2s ease,scale .2s ease,box-shadow .2s ease;
 }
 .ch4-who-dot img{width:100%;height:100%;object-fit:cover;display:block}
-.ch4-who-dot:hover{border-color:var(--gold);scale:1.03}
+.ch4-who-dot:hover{border-color:var(--maroon);scale:1.04}
 .ch4-who-dot:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px}
-.ch4-who-card.is-on .ch4-who-dot{border-color:var(--maroon);box-shadow:0 6px 18px rgba(87,24,32,.18)}
+.ch4-who-card.is-on .ch4-who-dot{border-color:var(--maroon);scale:1.05;box-shadow:0 8px 22px rgba(87,24,32,.3)}
+
+/* Mecca: outside the frame, and in gold rather than maroon */
+.ch4-who-card.is-away .ch4-who-dot{border-style:dashed;border-color:var(--gold-soft)}
+.ch4-who-card.is-away.is-on .ch4-who-dot{border-style:solid;border-color:var(--gold-text)}
+.ch4-who-card.is-away .ch4-who-name{color:var(--gold-text)}
 
 .ch4-who-name{
-  margin:0 0 4px;font-family:var(--font-heading);font-weight:700;
+  margin:0;font-family:var(--font-heading);font-weight:700;
   font-size:clamp(16px,1.7vw,20px);line-height:1.25;color:var(--maroon);
 }
-.ch4-who-card.is-away .ch4-who-name{color:var(--gold-text)}
-.ch4-who-text{margin:0;font-size:15px;line-height:1.6;color:var(--ink)}
-/* the two groups the source does not name: the sentence IS the label, so it is
-   set in the name's type and no second line follows it */
-.ch4-who-name.is-only{font-weight:600;font-size:clamp(15px,1.5vw,17.5px);line-height:1.5}
+.ch4-who-text{margin:5px 0 0;font-size:14.5px;line-height:1.55;color:var(--ink)}
+.ch4-who-name + .ch4-who-text{margin-top:5px}
+
+/* ---- the narrow arrangement: a plain column, nothing hidden ---- */
+@media (max-width:899px){
+  .ch4-who-card{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;text-align:start}
+  .ch4-who-card.is-away{
+    margin-top:clamp(12px,2vw,18px);padding-top:clamp(12px,2vw,18px);
+    border-top:1px solid var(--rule);
+  }
+  .ch4-who-dot{width:clamp(76px,17vw,96px)}
+}
 
 /* NOTHING MOVES for a reader who asked for that: no draw, no fade, no delay —
    the figure is simply already in its finished state. */
-.ch4-who.is-still .ch4-who-town img,
-.ch4-who.is-still .ch4-who-card{opacity:1;scale:1;translate:0 0;transition:none}
+.ch4-who.is-still .ch4-who-town,
+.ch4-who.is-still .ch4-who-card{opacity:1;scale:1;transition:none}
 .ch4-who.is-still .ch4-who-line{animation:none;stroke-dashoffset:0}

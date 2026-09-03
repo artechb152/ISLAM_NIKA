@@ -223,6 +223,22 @@ function T({
 
 
 
+/** A phrase LIFTED OUT of a fragment for a label, proved to be in it. A legend
+    that names a thing has to be able to name it, but the name must still be the
+    source's words and not a caption we compose. Throws if the phrase is not in
+    the fragment at a word boundary, so a label cannot drift from its sentence. */
+const EDGE = /[\s,.;:—"'„”()[\]–-]/
+const pick = (ref: string, phrase: string): string => {
+  const t = text(ref)
+  const at = t.indexOf(phrase)
+  const before = at > 0 ? t[at - 1] : ' '
+  const after = at + phrase.length < t.length ? t[at + phrase.length] : ' '
+  if (at < 0 || !EDGE.test(before) || !EDGE.test(after)) {
+    throw new Error(`chapter 4: "${phrase}" is not a word of ${ref}`)
+  }
+  return phrase
+}
+
 /** The source's own name for a group or a person (המהגרים, התומכים…). Never a
     literal: if the source did not name it, the label has to be `pick`ed out of
     its sentence instead. */
@@ -624,23 +640,59 @@ export default function Chapter4() {
                     figure; §3.b's „ארבע קבוצות אנשים" is the sentence that hands
                     off to it.
 
-                    TWO OF THE FOUR HAVE A NAME IN THE SOURCE and two do not, so
-                    two carry `nameOf` above their sentence and two are set as
-                    the sentence alone. Nothing here is captioned in words this
-                    file composed.
+                    EVERY LABEL IS THE SOURCE'S WORDS. Two groups have a `name`
+                    in passages.json; the other two are labelled with a phrase
+                    lifted out of their own sentence by `pick`, which throws if
+                    the phrase is not there. And for those two the reveal earns
+                    its click: what the label leaves out is exactly the PLACE —
+                    „…במדינה" against „ובמכה התגוררו…", which is the whole point
+                    of standing them around a picture of one town.
 
                     THE FOURTH IS MARKED `away` because the source puts it
-                    somewhere else: „ובמכה התגוררו הכופרים משבט קריש". */}
+                    somewhere else. */}
                 <Groups
                   city="medina-622"
                   cityAlt="ית'רב — שחזור מצויר"
                   question="מי פגש את מי במדינה?"
                   hint="לחצו על קבוצה"
                   groups={[
-                    { id: 'muhajirun', name: nameOf('§3.muhajirun'), text: text('§3.muhajirun'), img: 'who-muhajirun' },
-                    { id: 'ansar', name: nameOf('§3.ansar'), text: text('§3.ansar'), img: 'who-ansar' },
-                    { id: 'jews', text: text('§3.jews'), img: 'who-jews' },
-                    { id: 'quraysh', text: text('§3.quraysh'), img: 'who-quraysh', away: true },
+                    {
+                      id: 'muhajirun',
+                      name: nameOf('§3.muhajirun'),
+                      text: text('§3.muhajirun'),
+                      img: 'who-muhajirun',
+                      x: 88,
+                      y: 22,
+                      side: 'end',
+                    },
+                    {
+                      id: 'ansar',
+                      name: nameOf('§3.ansar'),
+                      text: text('§3.ansar'),
+                      img: 'who-ansar',
+                      x: 12,
+                      y: 22,
+                      side: 'start',
+                    },
+                    {
+                      id: 'jews',
+                      name: pick('§3.jews', 'שלושת השבטים היהודים'),
+                      text: text('§3.jews'),
+                      img: 'who-jews',
+                      x: 12,
+                      y: 74,
+                      side: 'start',
+                    },
+                    {
+                      id: 'quraysh',
+                      name: pick('§3.quraysh', 'הכופרים משבט קריש'),
+                      text: text('§3.quraysh'),
+                      img: 'who-quraysh',
+                      x: 80,
+                      y: 88,
+                      side: 'end',
+                      away: true,
+                    },
                   ]}
                 />
                 <SubHead section="hijra" id="covenant" />
