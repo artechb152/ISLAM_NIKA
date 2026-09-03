@@ -1104,20 +1104,20 @@ export default function Chapter4() {
                   <T r="§6.echo2" className="ch4-body" />
                   </Block>
                 </Echo>
-              </Section>
-
-              {/* ============ 02 · מהטפה לג'האד ============
-                  שלושה קטעים, והוא נשאר ראשי משום שהמקור נותן לו כותרת רצה
-                  משלו — וזה באמת הציר של הפרק. */}
-              <SubHead section="hijra" id="jihad" />
+                {/* ============ 02 · מהטפה לג'האד ============
+                שלושה קטעים, והוא נשאר ראשי משום שהמקור נותן לו כותרת רצה
+                משלו — וזה באמת הציר של הפרק. */}
+                <SubHead section="hijra" id="jihad" />
                 <Pair a="§9.dawa" b="§9.jihad" terms={['דעוה', "ג'האד"]} />
                 <Block>
-                  <T r="§9.b" className="ch4-body" reveal />
-                  <T r="§9.c" className="ch4-body" reveal />
+                <T r="§9.b" className="ch4-body" reveal />
+                <T r="§9.c" className="ch4-body" reveal />
                 </Block>
-              
 
-              {/* ============ 03 · קרב בדר ============ */}
+
+                {/* ============ 03 · קרב בדר ============ */}
+              </Section>
+
               <Section id="badr">
                 <Head id="badr" />
                 <BadrFilm />
@@ -1161,53 +1161,53 @@ export default function Chapter4() {
                     <T r="§22.echo" className="ch4-body" em={['אבטאל']} />
                   </Block>
                 </Echo>
-              </Section>
-
-              {/* ============ 05 · קרב השוחה ============
-                  בני קוריזה יושבים כאן ולא במקטע משלהם: המקור מציב אותם
-                  כהמשך ישיר של הקרב, ומקטע נפרד היה נותן לטבח כותרת משלו
-                  בסרגל. טיפוגרפיה שקטה, טקסט מלא, בלי דימוי ובלי מנגנון. */}
-              <SubHead section="uhud" id="trench" />
-              <Ditch before="siege-1-open" after="trench-after" alt="גררו כדי לראות את התעלה נחפרת" />
+                {/* ============ 05 · קרב השוחה ============
+                בני קוריזה יושבים כאן ולא במקטע משלהם: המקור מציב אותם
+                כהמשך ישיר של הקרב, ומקטע נפרד היה נותן לטבח כותרת משלו
+                בסרגל. טיפוגרפיה שקטה, טקסט מלא, בלי דימוי ובלי מנגנון. */}
+                <SubHead section="uhud" id="trench" />
+                <Ditch before="siege-1-open" after="trench-after" alt="גררו כדי לראות את התעלה נחפרת" />
                 <Stage
-                  label="קרב השוחה"
-                  beats={[
-                    {
-                      img: 'siege-1-open',
-                      r: '§23.a',
-                      note: ['§23.cause1', '§23.cause2'],
-                      caption: 'הקרקע הפתוחה שלפני העיר · שחזור מצויר',
-                      chips: ['מדינה'],
-                      label: 'המצור',
-                    },
-                    {
-                      img: 'siege-2-digging',
-                      r: '§24.trench',
-                      caption: 'תעלה בחפירה, סלים ומכוש · שחזור מצויר',
-                      chips: ['סלמאן אלפראסי'],
-                      label: 'החפירה',
-                    },
-                    {
-                      img: 'siege-3-finished',
-                      r: '§25.a',
-                      caption: 'התעלה הגמורה, ומחנות מעברה · שחזור מצויר',
-                      label: 'המחנות',
-                    },
-                    {
-                      img: 'siege-4-storm',
-                      r: '§24.storm',
-                      caption: 'סערה על המישור בלילה · שחזור מצויר',
-                      label: 'הסערה',
-                    },
-                  ]}
+                label="קרב השוחה"
+                beats={[
+                {
+                img: 'siege-1-open',
+                r: '§23.a',
+                note: ['§23.cause1', '§23.cause2'],
+                caption: 'הקרקע הפתוחה שלפני העיר · שחזור מצויר',
+                chips: ['מדינה'],
+                label: 'המצור',
+                },
+                {
+                img: 'siege-2-digging',
+                r: '§24.trench',
+                caption: 'תעלה בחפירה, סלים ומכוש · שחזור מצויר',
+                chips: ['סלמאן אלפראסי'],
+                label: 'החפירה',
+                },
+                {
+                img: 'siege-3-finished',
+                r: '§25.a',
+                caption: 'התעלה הגמורה, ומחנות מעברה · שחזור מצויר',
+                label: 'המחנות',
+                },
+                {
+                img: 'siege-4-storm',
+                r: '§24.storm',
+                caption: 'סערה על המישור בלילה · שחזור מצויר',
+                label: 'הסערה',
+                },
+                ]}
                 />
                 <Block>
-                  <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
-                  <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
+                <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
+                <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
                 </Block>
-              
 
-              {/* ============ 06 · הסכם חודיביה ============ */}
+
+                {/* ============ 06 · הסכם חודיביה ============ */}
+              </Section>
+
               <Section id="hudaybiyyah">
                 <Head id="hudaybiyyah" />
                 <Block>
@@ -1267,23 +1267,23 @@ export default function Chapter4() {
                     <T r="§47.echo" className="ch4-body" />
                   </Block>
                 </Echo>
-              </Section>
-
-              {/* ============ 08 · כיבוש מכה ============ */}
-              <SubHead section="khaybar" id="mecca" />
+                {/* ============ 08 · כיבוש מכה ============ */}
+                <SubHead section="khaybar" id="mecca" />
                 <Block>
-                  <T r="§48.a" className="ch4-body" reveal />
-                  <T r="§48.b" className="ch4-body" reveal />
-                  <T r="§49.a" className="ch4-body" reveal />
+                <T r="§48.a" className="ch4-body" reveal />
+                <T r="§48.b" className="ch4-body" reveal />
+                <T r="§49.a" className="ch4-body" reveal />
                 </Block>
                 <Journey focus="mecca" />
                 <Block>
-                  <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
+                <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
                 </Block>
-              
 
-              {/* ============ 09 · מותו של מוחמד ============
-                  סוף שקט. בלי מנגנון ובלי הלאה. */}
+
+                {/* ============ 09 · מותו של מוחמד ============
+                סוף שקט. בלי מנגנון ובלי הלאה. */}
+              </Section>
+
               <Section id="death" className="ch4-quiet">
                 <Head id="death" />
                 <Block>
