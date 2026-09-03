@@ -12,7 +12,7 @@
    lines in a 114px column.
 
    Both faults have one cause: the page did not have the shape of its art. So
-   the page is now 690×600 and its picture is 690×517, which is 4:3 exactly —
+   the page is now 690×620 and its picture is 690×517, which is 4:3 exactly —
    nothing is cropped — and the narration lives UNDER the picture on paper,
    where it can never cover anything.
 
@@ -132,6 +132,14 @@ export default function Chapter3Comic() {
     return out
   }, [])
 
+  /* WHERE THE CLOSING LEAF GOES. The last sheet is never turned — its front is
+     the last page — so its back is never seen. The leaf the reader actually
+     ends on is the back of the sheet BEFORE it, which is the first back with no
+     page on it. Putting the ending on the last sheet left the reader staring at
+     a blank left page with the ending hidden behind the one leaf the book will
+     not turn. */
+  const endAt = useMemo(() => sheets.findIndex((s) => !s.back), [sheets])
+
   const TURN_MS = 800
   const goTo = useCallback((n: number) => {
     setAt((v) => {
@@ -157,12 +165,25 @@ export default function Chapter3Comic() {
     const fit = () => {
       const book = bookRef.current
       if (!book) return
-      const availW = window.innerWidth - (window.innerWidth < 860 ? 84 : 132)
+      const narrow = window.innerWidth < 860
+      const availW = window.innerWidth - (narrow ? 12 : 132)
       const availH = window.innerHeight - 56 - 46
       const ASPECT = 1380 / 620          /* two landscape pages side by side */
-      const w = Math.min(availW, Math.round(availH * ASPECT))
-      const h = Math.round(w / ASPECT)
-      book.style.width = `${at === 0 ? Math.round(w / 2) : w}px`
+      /* ON A PHONE THE SPREAD IS SIZED BY HEIGHT AND PANNED ACROSS.
+         Fitting a spread of ratio 2.23 into 390px of width leaves a book 137px
+         tall with 3.6px captions — measured, not guessed. So the narrow layout
+         gives the spread the full height it wants, lets it be wider than the
+         screen, and the reader pans across it the way you would tilt a real
+         book. The page turn itself is untouched. */
+      let w = narrow ? Math.round(availH * ASPECT) : Math.min(availW, Math.round(availH * ASPECT))
+      let h = Math.round(w / ASPECT)
+      /* the closed book is one leaf, so it is fitted as one leaf */
+      if (at === 0) {
+        w = Math.min(w / 2, availW)
+        h = Math.min(Math.round(w / (690 / 620)), availH)
+        w = Math.round(h * (690 / 620))
+      }
+      book.style.width = `${Math.round(w)}px`
       book.style.height = `${h}px`
       /* one unit for every measurement inside the page */
       book.style.setProperty('--u', String(h / 620))
@@ -216,6 +237,11 @@ export default function Chapter3Comic() {
      own depth, so the picture, the atmosphere and the motes travel at three
      different speeds. Written straight to the element rather than through
      state — a re-render per mouse move would re-render 39 sheets. */
+  /* a turn puts the reader back at the start of the new spread, which on a
+     panned narrow screen is the RIGHT edge — folio 2·at−1, the earlier page */
+  const stageRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => { if (stageRef.current) stageRef.current.scrollLeft = 0 }, [at])
+
   const raf = useRef(0)
   const onMove = useCallback((e: React.PointerEvent) => {
     if (raf.current) return
@@ -323,7 +349,7 @@ export default function Chapter3Comic() {
           leaf back. It lives on the stage rather than on two overlay buttons
           because an overlay would have to sit above the sheets, and then it
           would swallow the one link the book contains. */}
-      <div className={'c3-stage' + (peak ? ' is-peak' : '')} onClick={onStage} onPointerMove={onMove}>
+      <div className={'c3-stage' + (peak ? ' is-peak' : '')} ref={stageRef} onClick={onStage} onPointerMove={onMove}>
         <div className={'c3-scene' + (peak ? ' is-on' : '')} aria-hidden="true"
              style={peak ? { backgroundImage: `url(/assets/chapter3/comic/${peak.a}.jpg)` } : undefined} />
         <div className={'c3-book' + (at === 0 ? ' is-closed' : '')} ref={bookRef}>
@@ -341,7 +367,7 @@ export default function Chapter3Comic() {
                               fresh={settled && openNow.includes(s.front?.folio ?? -1)} />}
               </div>
               <div className="c3-face is-back">
-                {!s.back && i === sheets.length - 1
+                {i === endAt
                   ? <EndPage />
                   : <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l"
                               live={openNow.includes(s.back?.folio ?? -1)}

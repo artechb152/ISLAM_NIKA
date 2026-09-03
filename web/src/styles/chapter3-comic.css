@@ -278,6 +278,15 @@
 .c3-arrow.is-prev{inset-inline-end:20px}
 
 @media (max-width:860px){
+  /* A SPREAD OF RATIO 2.23 CANNOT FIT A PHONE'S WIDTH. Measured at 390px: the
+     book came out 306 wide and 137 tall, with captions at 3.6px. So on a narrow
+     screen the spread is given the height it wants, allowed to be wider than the
+     screen, and panned across — the page turn itself is unchanged. */
+  .c3-stage{
+    overflow-x:auto;overflow-y:hidden;justify-items:start;
+    scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  }
+  .c3-stage::-webkit-scrollbar{display:none}
   .c3-arrow{width:40px;height:40px}
   .c3-arrow svg{width:19px;height:19px}
   .c3-arrow.is-next{inset-inline-start:6px}

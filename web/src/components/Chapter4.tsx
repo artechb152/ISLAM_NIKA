@@ -40,12 +40,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import BadrFilm from '@/components/chapter4/BadrFilm'
-import Ditch from '@/components/chapter4/Ditch'
-import Forces from '@/components/chapter4/Forces'
-import Spots from '@/components/chapter4/Spots'
+import Groups from '@/components/chapter4/Groups'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
-import { layoutLabels, px, py, ROUTE } from '@/lib/chapter4/art'
 import layoutData from '@/lib/chapter4/layout.json'
 import {
   completedSections,
@@ -224,13 +221,6 @@ function T({
   )
 }
 
-/** The source's own name for a person (אברהה, אבו טאלב, אדם…). Never a literal. */
-const nameOf = (r: string): string => {
-  const n = frag(r).name
-  if (!n) throw new Error(`chapter 4: ${r} carries no name`)
-  return n
-}
-
 
 /** A word LIFTED OUT of a fragment for a label, proved to be in it. A legend
     that names a thing has to be able to name it, but the name must still be the
@@ -246,6 +236,15 @@ const pick = (ref: string, phrase: string): string => {
     throw new Error(`chapter 4: "${phrase}" is not a word of ${ref}`)
   }
   return phrase
+}
+
+/** The source's own name for a group or a person (המהגרים, התומכים…). Never a
+    literal: if the source did not name it, the label has to be `pick`ed out of
+    its sentence instead. */
+const nameOf = (r: string): string => {
+  const n = frag(r).name
+  if (!n) throw new Error(`chapter 4: ${r} carries no name`)
+  return n
 }
 
 /* ---------------- structure ---------------- */
@@ -295,18 +294,6 @@ function Section({
    their sentences, emphasised, with no costume at all. Only the two the EVENT
    rests on stand alone. */
 
-/** The founding verse. Two uses, and there is no third: §19 (sura 96, the first
-    words revealed) and §42 (17:1, which the source introduces in plain terms
-    rather than as a hint). */
-function Verse({ r }: { r: string }) {
-  return (
-    <blockquote className="ch4-verse" data-reveal>
-      {text(r)}
-    </blockquote>
-  )
-}
-
-
 
 /* ---------------- chapter 4's own devices ----------------
 
@@ -317,312 +304,6 @@ function Verse({ r }: { r: string }) {
    drawing would assert a geography the source does not give. Until they exist,
    their sections print their sentences in full — nothing is withheld from the
    reader, only from the page's decoration. */
-
-/* ---------------- mechanism · the route strip ----------------
-
-   §1 says the town he chose is „למעלה מ-300 ק"מ צפונית לעיר מכה". In prose that
-   is a number the reader takes on trust and forgets by the next paragraph. Here
-   it is the height of the drawing, and the four other places the chapter visits
-   hang on the same line — so when §49 brings him back to Mecca at the bottom,
-   the reader has already seen how far back that is.
-
-   IT PRINTS NO NUMBER OF ITS OWN. The distance the coordinates give is 339 km,
-   which agrees with the source, but 339 is this file's fact and not the
-   booklet's — and the rule here is that the page prints the source's words and
-   nothing else. So the figure carries names and years only, art.ts asserts the
-   agreement at module load, and the sentence beside the map does the telling.
-
-   TRUE SCALE, NO CHEATING. The five places span 1.2° of longitude against 4.5°
-   of latitude, so a true-scale map of them is a tall narrow ribbon and this one
-   is drawn as one. Widening it would make a friendlier picture of a country
-   that is not shaped that way; the board's ruling on the qibla map in chapter 6
-   was that a map has to be right about direction first.
-
-   NO TEXT INSIDE THE SVG. Hebrew flows right-to-left from its x and that trap
-   has already cost this project a labelling bug. The geometry is SVG; every
-   name is an HTML span positioned over it. Where two dots are too close to
-   label apart — Mecca and Hudaybiyyah are twenty kilometres apart on a
-   five-hundred-kilometre ribbon — the LABEL steps down and a leader line runs
-   back to the dot. The dot itself never moves. */
-const STRIP = 430
-const LABELS = layoutLabels(STRIP)
-const STRIP_BOX = Math.max(STRIP, ...LABELS.map((l) => l.labelY * STRIP)) + 24
-
-function Journey({ focus }: { focus?: string }) {
-  const w = 150
-  const xy = (p: { lat: number; lon: number }) => [px(p.lon) * w, py(p.lat) * STRIP] as const
-  const road = ROUTE.map((p) => xy(p).join(',')).join(' ')
-  return (
-    <figure className={`ch4-journey${focus ? " is-focused" : ""}`} data-reveal>
-      <div className="ch4-journey-strip" style={{ height: STRIP_BOX }}>
-        <svg viewBox={`0 0 ${w} ${STRIP_BOX}`} width={w} height={STRIP_BOX} aria-hidden="true">
-          <polyline className="ch4-journey-road" points={road} />
-          {LABELS.map(({ place, dotY, labelY }) => {
-            const [x, y] = xy(place)
-            const stepped = Math.abs(labelY - dotY) * STRIP > 1
-            return (
-              <g key={place.id}>
-                {stepped && (
-                  <line className="ch4-journey-leader" x1={x} y1={y} x2={w} y2={labelY * STRIP} />
-                )}
-                <circle
-                  className={`ch4-journey-dot${focus === place.id ? " is-here" : ""}`}
-                  cx={x}
-                  cy={y}
-                  r={focus === place.id ? 7 : 5}
-                />
-              </g>
-            )
-          })}
-        </svg>
-        {LABELS.map(({ place, labelY }) => (
-          <span
-            className={`ch4-journey-name${focus === place.id ? " is-here" : ""}`}
-            key={place.id}
-            style={{ top: labelY * STRIP }}
-          >
-            {place.name}
-            {place.year && <i className="ch4-journey-year">{place.year}</i>}
-          </span>
-        ))}
-      </div>
-    </figure>
-  )
-}
-
-
-/* ---------------- mechanism · a pair of terms ----------------
-
-   §9 is the chapter's hinge: preaching before it, war after it. The source
-   names both states inside one sentence — דעוה and ג'האד — and the sentence is
-   thirty-three words long, which is where the turn gets lost. Two cards put the
-   two states side by side so the hinge is a shape and not a clause.
-
-   The cards carry the SOURCE's sentences; the two words above them are lifted
-   out of those same sentences and proved to be in them by `pick`. */
-function Pair({ a, b, terms }: { a: string; b: string; terms: [string, string] }) {
-  return (
-    <div className="ch4-pair" data-reveal>
-      <article className="ch4-pair-side">
-        <h3 className="ch4-pair-term">{pick(a, terms[0])}</h3>
-        <p className="ch4-pair-text">{text(a)}</p>
-      </article>
-      <article className="ch4-pair-side">
-        <h3 className="ch4-pair-term">{pick(b, terms[1])}</h3>
-        <p className="ch4-pair-text">{text(b)}</p>
-      </article>
-    </div>
-  )
-}
-
-/* ---------------- mechanism · what the battle left ----------------
-
-   Uhud has no victory to report, and §19 says three separate things about how
-   it ended: who shaped the fighters' morale, that it ended undecided, and who
-   fell. In prose the middle one — „ובוודאי לא בניצחון צבא מוחמד" — is a clause
-   inside a longer run and slides past. Three panels give the undecided ending
-   the same weight as the two facts around it, which is the point of the
-   section. */
-function Outcomes({ refs }: { refs: string[] }) {
-  return (
-    <div className="ch4-outcomes" data-reveal>
-      {refs.map((r) => (
-        <p className="ch4-outcome" key={r}>
-          {text(r)}
-        </p>
-      ))}
-    </div>
-  )
-}
-
-/* ---------------- mechanism · a person the chapter turns on ----------------
-
-   §46 hangs four roles on one man in a single parenthesis — cousin, son-in-law,
-   fourth caliph, first Shia imam — and then tells the story of the poisoned
-   goat. The roles are the reason the later chapters have anyone to talk about,
-   and inside a bracket they are furniture. The card lifts the name out and
-   lets the three sentences run under it. */
-function Figure({ refs }: { refs: string[] }) {
-  return (
-    <div className="ch4-figure" data-reveal>
-      {refs.map((r) => (
-        <p className="ch4-figure-line" key={r}>
-          {text(r)}
-        </p>
-      ))}
-    </div>
-  )
-}
-
-/* ---------------- mechanism · the treaties on a line ----------------
-
-   §32 lists three agreements in one clause — Egypt 1979, Oslo 1993, Jordan 1994
-   — and the whole of part ה׳ is jurists arguing about them. Read as a clause
-   they are a footnote; read as three dated marks they are the subject. The
-   years and the names both come out of the source sentence. */
-function Treaties({ r }: { r: string }) {
-  /* the source prints them out of order — 1979, 1994, 1993 — and this keeps
-     that order, because reordering would be an edit */
-  const items = text(r)
-    .replace(/^למשל,\s*/, '')
-    .replace(/\.$/, '')
-    .split(/,\s*/)
-    .map((s) => s.trim())
-    .filter(Boolean)
-  return (
-    <ol className="ch4-treaties" data-reveal>
-      {items.map((s) => {
-        const year = s.match(/\((\d{4})\)/)?.[1] ?? ''
-        return (
-          <li key={s}>
-            <b className="ch4-treaty-year">{year}</b>
-            <span className="ch4-treaty-name">{s.replace(/\s*\(\d{4}\)/, '')}</span>
-          </li>
-        )
-      })}
-    </ol>
-  )
-}
-
-
-/* ---------------- mechanism · the stage ----------------
-
-   ONE PLACE, SEEN IN SUCCESSIVE STATES, ADVANCED BY THE READER.
-
-   TWO COLUMNS, NOT A PICTURE WITH WORDS ON IT. The first build set the sentence
-   over the photograph and it was neither: the type fought the picture for
-   attention and the picture lost detail behind a scrim. Here the plate keeps
-   its own frame and its own caption, and the words get a column of their own —
-   an eyebrow that says which beat this is, the source's sentence set large, a
-   rule, and the sentences that carry on from it.
-
-   THE CAPTION IS OURS AND SAYS SO. Every plate in this chapter is a painted
-   reconstruction, not a photograph of anything, and the caption ends by saying
-   so. That is a label on our own illustration, which this file may write; the
-   chapter's sentences are not, and they come from passages.json like all the
-   rest.
-
-   THE CHIPS CARRY ONLY WHAT THE BEAT ITSELF SAYS. Each one is proved by `pick`
-   against that beat's own sentence, so the row cannot drift into facts the
-   booklet never states. A beat whose sentence names no place and no year shows
-   no chips rather than borrowed ones.
-
-   EVERY BEAT IS IN THE DOM AT ALL TIMES — hidden with `hidden`, never
-   unmounted, so chapter search and a screen reader still reach the whole
-   chapter. Nothing advances on its own. */
-interface Beat {
-  img: string
-  /** the sentence set large */
-  r: string
-  /** what carries on from it, in smaller type */
-  note?: string[]
-  /** our label on our own drawing */
-  caption: string
-  /** words lifted out of THIS beat's sentence, proved to be in it */
-  chips?: string[]
-  /** the name on the dot, in the source's words */
-  label: string
-}
-
-function PalmRule() {
-  return (
-    <div className="ch4-stage-orn" aria-hidden="true">
-      <span />
-      <svg viewBox="0 0 40 24" fill="currentColor" aria-hidden="true">
-        {/* a date palm: one trunk, six fronds, three dates. Drawn as filled
-            shapes because a stroked palm at 26px reads as a dagger — which is
-            exactly what the first attempt looked like. */}
-        <path d="M19.4 23.5c-.2-4.2.1-7.6.9-10.2l1.2.3c-.7 2.5-1 5.7-.8 9.9z" />
-        <path d="M20.6 12.6c-2.6-2.4-5.7-3.3-9.2-2.6 1.3-1.9 4.6-2.3 9.4 1.5z" />
-        <path d="M20.6 12.6c2.6-2.4 5.7-3.3 9.2-2.6-1.3-1.9-4.6-2.3-9.4 1.5z" />
-        <path d="M20.6 12c-1.6-2.9-4-4.7-7.2-5.3 1.9-1.2 5 .3 8.1 4.6z" />
-        <path d="M20.6 12c1.6-2.9 4-4.7 7.2-5.3-1.9-1.2-5 .3-8.1 4.6z" />
-        <path d="M20.6 11.6c.2-2.6 1.1-4.7 2.8-6.3-2.3.2-3.7 2.2-4 5.9z" />
-        <path d="M20.6 11.6c-.2-2.6-1.1-4.7-2.8-6.3 2.3.2 3.7 2.2 4 5.9z" />
-        <circle cx="19.2" cy="10.4" r="1" />
-        <circle cx="22" cy="10.7" r="1" />
-        <circle cx="20.6" cy="12.4" r="1" />
-      </svg>
-      <span />
-    </div>
-  )
-}
-
-function Stage({
-  beats,
-  variant = 'wide',
-  label,
-}: {
-  beats: Beat[]
-  variant?: 'wide' | 'inset'
-  label: string
-}) {
-  const [at, setAt] = useState(0)
-  const go = useCallback(
-    (i: number) => setAt(((i % beats.length) + beats.length) % beats.length),
-    [beats.length],
-  )
-  return (
-    <section className={`ch4-stage is-${variant}`} aria-label={label} data-reveal>
-      {beats.map((b, i) => (
-        <div className="ch4-stage-grid" key={b.img} hidden={i !== at}>
-          <figure className="ch4-stage-plate">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/assets/chapter4/${b.img}.jpg`} alt="" aria-hidden="true" loading={i ? 'lazy' : 'eager'} />
-            <figcaption>{b.caption}</figcaption>
-          </figure>
-
-          <div className="ch4-stage-copy">
-            <p className="ch4-stage-eyebrow">
-              {b.label} <span>/ {String(i + 1).padStart(2, '0')}</span>
-            </p>
-            <p className="ch4-stage-lead">{text(b.r)}</p>
-            <PalmRule />
-            {b.note?.length ? (
-              <p className="ch4-stage-note">{b.note.map((ref) => text(ref)).join(' ')}</p>
-            ) : null}
-            {b.chips?.length ? (
-              <ul className="ch4-stage-chips">
-                {b.chips.map((c) => (
-                  <li key={c}>{pick(b.r, c)}</li>
-                ))}
-              </ul>
-            ) : null}
-          </div>
-        </div>
-      ))}
-
-      <div className="ch4-stage-rail" role="tablist" aria-label={label}>
-        <button type="button" className="ch4-stage-arrow" onClick={() => go(at - 1)} aria-label="הקודם">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M9 6l6 6-6 6" />
-          </svg>
-        </button>
-        <div className="ch4-stage-track">
-          {beats.map((b, i) => (
-            <button
-              key={b.label}
-              type="button"
-              role="tab"
-              aria-selected={i === at}
-              className={`ch4-stage-dot${i === at ? ' is-on' : ''}`}
-              onClick={() => go(i)}
-            >
-              <span>{b.label}</span>
-            </button>
-          ))}
-        </div>
-        <button type="button" className="ch4-stage-arrow" onClick={() => go(at + 1)} aria-label="הבא">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M15 6l-6 6 6 6" />
-          </svg>
-        </button>
-      </div>
-    </section>
-  )
-}
-
-
 
 /** A run of the chapter's sentences, held as one block.
 
@@ -635,40 +316,6 @@ function Block({ children }: { children: React.ReactNode }) {
   return <div className="ch4-block">{children}</div>
 }
 
-/** §2 gives two accounts of one departure and refuses to choose between them.
-    Printed one under the other they read as a sequence — first this happened,
-    then that. As one switch they read as what they are: two readings of a
-    single event, where picking up one means putting the other down.
-
-    BOTH STAY IN THE DOCUMENT. The account not showing is still in the DOM for
-    chapter search and for a screen reader; only the eye is asked to choose. */
-function Versions({ a, b, labels }: { a: string; b: string; labels: [string, string] }) {
-  const [at, setAt] = useState(0)
-  const refs = [a, b] as const
-  return (
-    <div className="ch4-versions" data-reveal>
-      <div className="ch4-versions-tabs" role="tablist" aria-label="שתי גרסאות">
-        {labels.map((l, i) => (
-          <button
-            key={l}
-            type="button"
-            role="tab"
-            aria-selected={at === i}
-            className={at === i ? 'is-on' : undefined}
-            onClick={() => setAt(i)}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-      {refs.map((r, i) => (
-        <p className={`ch4-versions-text${at === i ? ' is-on' : ''}`} key={r}>
-          {text(r)}
-        </p>
-      ))}
-    </div>
-  )
-}
 
 /** A movement inside a section. With ten sections instead of twenty-eight,
     what used to be a section of its own is a sub-heading here — and the rail
@@ -678,47 +325,6 @@ function SubHead({ section, id }: { section: string; id: string }) {
     <h3 className="ch4-sub" id={id} data-reveal>
       {sub(section, id).title}
     </h3>
-  )
-}
-
-/** One of the four groups of §3. The source names two of them and describes
-    all four; a card with no name prints its sentence alone rather than invent
-    a label for it. */
-function Card({ r }: { r: string }) {
-  const f = frag(r)
-  return (
-    <article className="ch4-card">
-      {f.name && <h3 className="ch4-card-name">{f.name}</h3>}
-      <p className="ch4-card-text">{text(r)}</p>
-    </article>
-  )
-}
-
-/** „איפה זה פוגש אותנו" — the modern echo, held apart from the tradition it
-    echoes. This is the chapter's one recurring visual distinction and it earns
-    its place: half the material is seventh-century narrative and half is what
-    was done with it in the last fifty years, and a reader must never have to
-    guess which one they are reading. Five uses: §6, §15, §16, §22, §47. */
-function Echo({ children }: { children: React.ReactNode }) {
-  return (
-    <aside className="ch4-echo" data-reveal>
-      {children}
-    </aside>
-  )
-}
-
-
-/** הודנה and מצלחה. The two terms that carry chapter 4's argument across a
-    thousand years — part ג׳ defines them and part ה׳ is people arguing about
-    them — and the source defines both INSIDE a sentence, so the card holds the
-    sentence whole rather than splitting term from gloss. */
-function Definition({ r }: { r: string }) {
-  const f = frag(r)
-  return (
-    <div className="ch4-def" data-reveal>
-      {f.term && <span className="ch4-def-term">{f.term}</span>}
-      <p className="ch4-def-text">{text(r)}</p>
-    </div>
   )
 }
 
@@ -1009,97 +615,73 @@ export default function Chapter4() {
         <div className="chapter-content">
           <div className="chapter-layout">
             <main className="chapter-article" ref={articleRef}>
+
               {/* ============ 01 · ההגירה למדינה ============
                   המקטע הגדול בפרק, 25 קטעים, ולכן היחיד שנושא שתי תנועות.
                   §2 נושא שתי גרסאות של אותו אירוע והמקור לא מכריע ביניהן —
                   זו הסיבה שהן עומדות זו מול זו ולא זו אחרי זו. */}
               <Section id="hijra" className="opening-section">
-                <div className="ch4-hero">
-                  <div className="ch4-hero-media" aria-hidden="true">
-                    <video
-                      className="ch4-hero-video"
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      preload="auto"
-                      poster="/assets/chapter4/hero-road.jpg"
-                      tabIndex={-1}
-                    >
-                      <source src="/assets/chapter4/hero-road.mp4" type="video/mp4" />
-                    </video>
-                  </div>
-                  <div className="ch4-hero-copy">
-                    <h1 className="ch4-hero-title">{CH4.title}</h1>
-                  </div>
-                </div>
                 <Head id="hijra" />
                 <Block>
-                  <T r="§0.a" className="ch4-body" />
-                  <T r="§0.b" className="ch4-body" />
+                  <T r="§0.a" className="ch4-body" reveal />
+                  <T r="§0.b" className="ch4-body" reveal />
+                  <T r="§1.a" className="ch4-body" em={["ית'רב"]} reveal />
+                  <T r="§1.b" className="ch4-body" reveal />
+                  <T r="§2.flight" className="ch4-body" reveal />
+                  <T r="§2.invited" className="ch4-body" reveal />
                 </Block>
-                <Block>
-                  <T r="§1.a" className="ch4-body" em={["ית'רב"]} />
-                  <T r="§1.b" className="ch4-body" />
-                </Block>
-                <Versions a="§2.flight" b="§2.invited" labels={['בריחה', 'הזמנה']} />
-
                 <SubHead section="hijra" id="groups" />
                 <Block>
-                  <T r={['§3.a', '§3.b']} className="ch4-body" reveal />
+                  <T r="§3.a" className="ch4-body" reveal />
+                  <T r="§3.b" className="ch4-body" reveal />
                 </Block>
-                <div className="ch4-cards" data-reveal>
-                  <Card r="§3.muhajirun" />
-                  <Card r="§3.ansar" />
-                  <Card r="§3.jews" />
-                  <Card r="§3.quraysh" />
-                </div>
-
+                {/* §3 ends on a colon and then lists four groups. The list is the
+                    figure; §3.b's „ארבע קבוצות אנשים" is the sentence that hands
+                    off to it. Every label below is the source's own word — two
+                    have a `name` in passages.json, two are lifted out of their
+                    own sentence by `pick`, which throws if the phrase is not
+                    there. */}
+                <Groups
+                  city="medina-622"
+                  cityAlt="ית'רב — שחזור מצויר"
+                  question="מי פגש את מי במדינה?"
+                  hint="לחצו על קבוצה"
+                  groups={[
+                    { id: 'muhajirun', name: nameOf('§3.muhajirun'), text: text('§3.muhajirun'), img: 'who-muhajirun' },
+                    { id: 'ansar', name: nameOf('§3.ansar'), text: text('§3.ansar'), img: 'who-ansar' },
+                    { id: 'jews', name: pick('§3.jews', 'שלושת השבטים היהודים'), text: text('§3.jews'), img: 'who-jews' },
+                    {
+                      id: 'quraysh',
+                      name: pick('§3.quraysh', 'הכופרים משבט קריש'),
+                      text: text('§3.quraysh'),
+                      img: 'who-quraysh',
+                      away: true,
+                    },
+                  ]}
+                />
                 <SubHead section="hijra" id="covenant" />
                 <Block>
                   <T r="§4.a" className="ch4-body" reveal />
                   <T r="§4.b" className="ch4-body" reveal />
-                </Block>
-                <Spots
-                  img="stage-5-yard"
-                  caption="החצר לפני שנבנה המסגד · שחזור מצויר"
-                  spots={[
-                    { x: 0.7, y: 0.74, label: pick('§7.c', 'עצי הדקל') },
-                    { x: 0.45, y: 0.66, label: pick('§7.a', 'בחצר') },
-                    { x: 0.28, y: 0.56, label: pick('§7.c', 'המסגד') },
-                  ]}
-                />
-                <Block>
-                  <T r="§7.a" className="ch4-body" />
-                  <T r="§7.b" className="ch4-body" />
-                  <T r="§7.c" className="ch4-body" />
-                </Block>
-                <Block>
+                  <T r="§7.c" className="ch4-body" reveal />
+                  <T r="§7.a" className="ch4-body" reveal />
+                  <T r="§7.b" className="ch4-body" reveal />
                   <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                   <T r="§8.b" className="ch4-body" reveal />
                   <T r="§8.c" className="ch4-body" reveal />
                   <T r="§8.d" className="ch4-body" reveal />
                   <T r="§5.a" className="ch4-body" em={["אלהג'רה"]} reveal />
                   <T r="§5.b" className="ch4-body" reveal />
+                  <T r="§6.echo1" className="ch4-body" reveal />
+                  <T r="§6.echo2" className="ch4-body" reveal />
                 </Block>
-                <Echo>
-                  <Block>
-                    <T r="§6.echo1" className="ch4-body" />
-                  <T r="§6.echo2" className="ch4-body" />
-                  </Block>
-                </Echo>
-                {/* ============ 02 · מהטפה לג'האד ============
-                שלושה קטעים, והוא נשאר ראשי משום שהמקור נותן לו כותרת רצה
-                משלו — וזה באמת הציר של הפרק. */}
                 <SubHead section="hijra" id="jihad" />
-                <Pair a="§9.dawa" b="§9.jihad" terms={['דעוה', "ג'האד"]} />
                 <Block>
-                <T r="§9.b" className="ch4-body" reveal />
-                <T r="§9.c" className="ch4-body" reveal />
+                  <T r="§9.dawa" className="ch4-body" reveal />
+                  <T r="§9.jihad" className="ch4-body" reveal />
+                  <T r="§9.b" className="ch4-body" reveal />
+                  <T r="§9.c" className="ch4-body" reveal />
                 </Block>
-
-
-                {/* ============ 03 · קרב בדר ============ */}
               </Section>
 
               <Section id="badr">
@@ -1113,83 +695,36 @@ export default function Chapter4() {
                 <Head id="uhud" />
                 <Block>
                   <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
-                </Block>
-                <Forces
-                  rows={[
-                    { num: 1000, label: pick('§17.muslims', 'מוחמד'), text: text('§17.muslims'), side: 'a' },
-                    { num: 3000, label: pick('§17.quraysh', 'קוריש'), text: text('§17.quraysh'), side: 'b' },
-                  ]}
-                />
-                <Block>
+                  <T r="§17.muslims" className="ch4-body" reveal />
+                  <T r="§17.quraysh" className="ch4-body" reveal />
                   <T r="§18.a" className="ch4-body" reveal />
                   <T r="§18.b" className="ch4-body" reveal />
-                </Block>
-                <Outcomes refs={['§19.a', '§19.b', '§19.c']} />
-                <Block>
+                  <T r="§19.a" className="ch4-body" reveal />
+                  <T r="§19.b" className="ch4-body" reveal />
+                  <T r="§19.c" className="ch4-body" reveal />
                   <T r="§20.a" className="ch4-body" reveal />
-                </Block>
-                <Verse r="§20.saying" />
-                <Block>
+                  <T r="§20.saying" className="ch4-body" reveal />
                   <T r="§20.translit" className="ch4-body" reveal />
                   <T r="§20.hind" className="ch4-body" reveal />
                 </Block>
-
                 <SubHead section="uhud" id="shahids" />
                 <Block>
                   <T r="§21.a" className="ch4-body" reveal />
                   <T r="§21.b" className="ch4-body" em={['השהידים']} reveal />
+                  <T r="§21.verse" className="ch4-body" reveal />
+                  <T r="§22.echo" className="ch4-body" em={['אבטאל']} reveal />
                 </Block>
-                <Verse r="§21.verse" />
-                <Echo>
-                  <Block>
-                    <T r="§22.echo" className="ch4-body" em={['אבטאל']} />
-                  </Block>
-                </Echo>
-                {/* ============ 05 · קרב השוחה ============
-                בני קוריזה יושבים כאן ולא במקטע משלהם: המקור מציב אותם
-                כהמשך ישיר של הקרב, ומקטע נפרד היה נותן לטבח כותרת משלו
-                בסרגל. טיפוגרפיה שקטה, טקסט מלא, בלי דימוי ובלי מנגנון. */}
                 <SubHead section="uhud" id="trench" />
-                <Ditch before="siege-1-open" after="trench-after" alt="גררו כדי לראות את התעלה נחפרת" />
-                <Stage
-                label="קרב השוחה"
-                beats={[
-                {
-                img: 'siege-1-open',
-                r: '§23.a',
-                note: ['§23.cause1', '§23.cause2'],
-                caption: 'הקרקע הפתוחה שלפני העיר · שחזור מצויר',
-                chips: ['מדינה'],
-                label: 'המצור',
-                },
-                {
-                img: 'siege-2-digging',
-                r: '§24.trench',
-                caption: 'תעלה בחפירה, סלים ומכוש · שחזור מצויר',
-                chips: ['סלמאן אלפראסי'],
-                label: 'החפירה',
-                },
-                {
-                img: 'siege-3-finished',
-                r: '§25.a',
-                caption: 'התעלה הגמורה, ומחנות מעברה · שחזור מצויר',
-                label: 'המחנות',
-                },
-                {
-                img: 'siege-4-storm',
-                r: '§24.storm',
-                caption: 'סערה על המישור בלילה · שחזור מצויר',
-                label: 'הסערה',
-                },
-                ]}
-                />
                 <Block>
-                <T r="§26.a" className="ch4-body ch4-quiet-body" em={['בני קוריזה']} reveal />
-                <T r="§26.b" className="ch4-body ch4-quiet-body" reveal />
+                  <T r="§23.a" className="ch4-body" reveal />
+                  <T r="§23.cause1" className="ch4-body" reveal />
+                  <T r="§23.cause2" className="ch4-body" reveal />
+                  <T r="§24.trench" className="ch4-body" reveal />
+                  <T r="§25.a" className="ch4-body" reveal />
+                  <T r="§24.storm" className="ch4-body" reveal />
+                  <T r="§26.a" className="ch4-body" em={['בני קוריזה']} reveal />
+                  <T r="§26.b" className="ch4-body" reveal />
                 </Block>
-
-
-                {/* ============ 06 · הסכם חודיביה ============ */}
               </Section>
 
               <Section id="hudaybiyyah">
@@ -1198,22 +733,18 @@ export default function Chapter4() {
                   <T r="§27.a" className="ch4-body" em={['עמרה']} reveal />
                   <T r="§27.b" className="ch4-body" reveal />
                   <T r="§28.a" className="ch4-body" reveal />
-                </Block>
-                <Block>
                   <T r="§28.b" className="ch4-body" reveal />
-                </Block>
-                <ol className="ch4-concessions" data-reveal>
-                  <li>{text('§29.term1')}</li>
-                  <li>{text('§29.term2')}</li>
-                  <li>{text('§29.term3')}</li>
-                </ol>
-                <Block>
+                  <T r="§29.term1" className="ch4-body" reveal />
+                  <T r="§29.term2" className="ch4-body" reveal />
+                  <T r="§29.term3" className="ch4-body" reveal />
                   <T r="§30.a" className="ch4-body" reveal />
                   <T r="§30.b" className="ch4-body" reveal />
                 </Block>
-
                 <SubHead section="hudaybiyyah" id="hudna" />
-                <Definition r="§31.a" />
+                <Block>
+                  <T r="§31.a" className="ch4-body" reveal />
+                  <T r="§41.year" className="ch4-body" reveal />
+                </Block>
               </Section>
 
               {/* ============ 07 · טבח יהודי ח'יבר ============
@@ -1222,58 +753,38 @@ export default function Chapter4() {
                   אין כאן תיקון של המקור ואין הדפסה של טעות. */}
               <Section id="khaybar">
                 <Head id="khaybar" />
-                <T
-                  r={['§41.qaynuqa', '§41.nadir']}
-                  className="ch4-body ch4-quiet-body"
-                  reveal
-                />
                 <Block>
-                  <T r="§42.a" className="ch4-body ch4-quiet-body" reveal />
-                  <T r="§43.a" className="ch4-body ch4-quiet-body" reveal />
-                  <T r="§43.b" className="ch4-body ch4-quiet-body" reveal />
-                </Block>
-                <Block>
+                  <T r="§41.qaynuqa" className="ch4-body" reveal />
+                  <T r="§41.nadir" className="ch4-body" reveal />
+                  <T r="§42.a" className="ch4-body" reveal />
+                  <T r="§43.a" className="ch4-body" reveal />
+                  <T r="§43.b" className="ch4-body" reveal />
                   <T r="§44.a" className="ch4-body" reveal />
                   <T r="§44.b" className="ch4-body" reveal />
                   <T r="§45.a" className="ch4-body" reveal />
                   <T r="§45.b" className="ch4-body" reveal />
+                  <T r="§46.a" className="ch4-body" reveal />
+                  <T r="§46.b" className="ch4-body" reveal />
+                  <T r="§46.c" className="ch4-body" reveal />
                 </Block>
-                <Figure refs={['§46.a', '§46.b', '§46.c']} />
-
-                {/* החריגה היחידה בפרק מכלל תעתיק עברי בלבד:
-                    הסיסמה מופיעה בערבית במקור. */}
                 <SubHead section="khaybar" id="slogan" />
                 <Block>
                   <T r="§47.a" className="ch4-body" reveal />
+                  <T r="§47.echo" className="ch4-body" reveal />
                 </Block>
-                <Echo>
-                  <Block>
-                    <T r="§47.echo" className="ch4-body" />
-                  </Block>
-                </Echo>
-                {/* ============ 08 · כיבוש מכה ============ */}
                 <SubHead section="khaybar" id="mecca" />
                 <Block>
-                <T r="§48.a" className="ch4-body" reveal />
-                <T r="§48.b" className="ch4-body" reveal />
-                <T r="§49.a" className="ch4-body" reveal />
+                  <T r="§48.a" className="ch4-body" reveal />
+                  <T r="§48.b" className="ch4-body" reveal />
+                  <T r="§49.a" className="ch4-body" reveal />
+                  <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
                 </Block>
-                <Journey focus="mecca" />
-                <Block>
-                <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
-                </Block>
-
-
-                {/* ============ 09 · מותו של מוחמד ============
-                סוף שקט. בלי מנגנון ובלי הלאה. */}
               </Section>
 
               <Section id="death" className="ch4-quiet">
                 <Head id="death" />
                 <Block>
                   <T r="§50.a" className="ch4-body" reveal />
-                </Block>
-                <Block>
                   <T r="§50.b" className="ch4-body" reveal />
                   <T r="§51.a" className="ch4-body" reveal />
                 </Block>
@@ -1286,48 +797,23 @@ export default function Chapter4() {
                 <Head id="today" />
                 <Block>
                   <T r="§32.a" className="ch4-body" reveal />
-                </Block>
-                <Treaties r="§32.list" />
-                <Block>
+                  <T r="§32.list" className="ch4-body" reveal />
                   <T r="§32.b" className="ch4-body" reveal />
                   <T r="§33.a" className="ch4-body" reveal />
                 </Block>
-
                 <SubHead section="today" id="maslaha" />
-                <Definition r="§34.a" />
                 <Block>
+                  <T r="§34.a" className="ch4-body" reveal />
                   <T r="§34.b" className="ch4-body" em={['המצלחה']} reveal />
-                </Block>
-                <div className="ch4-rulings" data-reveal>
-                  <article className="ch4-ruling">
-                    <h3 className="ch4-ruling-name">{nameOf('§35.lead')}</h3>
-                    <Block>
-                      <T r="§35.lead" className="ch4-body" />
-                      <T r="§35.points" className="ch4-body" />
-                      <T r="§36.a" className="ch4-body" />
-                    </Block>
-                  </article>
-                  <article className="ch4-ruling">
-                    <h3 className="ch4-ruling-name">{nameOf('§37.lead')}</h3>
-                    <Block>
-                      <T r="§37.lead" className="ch4-body" />
-                      <T r="§37.point" className="ch4-body" />
-                      <T r="§37.b" className="ch4-body" em={['צלח']} />
-                    </Block>
-                  </article>
-                  <article className="ch4-ruling">
-                    <h3 className="ch4-ruling-name">{nameOf('§38.lead')}</h3>
-                    <Block>
-                      <T r="§38.lead" className="ch4-body" />
-                    </Block>
-                    <blockquote className="ch4-verse">{text('§38.quote')}</blockquote>
-                  </article>
-                </div>
-                <Block>
+                  <T r={['§35.lead', '§35.points']} className="ch4-body" reveal />
+                  <T r="§36.a" className="ch4-body" reveal />
+                  <T r="§37.lead" className="ch4-body" reveal />
+                  <T r="§37.point" className="ch4-body" reveal />
+                  <T r="§37.b" className="ch4-body" em={['צלח']} reveal />
+                  <T r="§38.lead" className="ch4-body" reveal />
+                  <T r="§38.quote" className="ch4-body" reveal />
                   <T r="§39.a" className="ch4-body" reveal />
-                </Block>
-                <Verse r="§39.verse" />
-                <Block>
+                  <T r="§39.verse" className="ch4-body" reveal />
                   <T r="§40.a" className="ch4-body" reveal />
                   <T r="§40.b" className="ch4-body" reveal />
                 </Block>
