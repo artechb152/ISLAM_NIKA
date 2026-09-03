@@ -1,21 +1,30 @@
 'use client'
 
-/* Chapter 3 — ראשית חיי מוחמד, as a comic you turn.
+/* Chapter 3 — ראשית חיי מוחמד, as a book you turn.
 
-   THE CHAPTER USED TO BE AN ARTICLE. It is now a book of 75 panels over 37
-   landscape pages, and the reasoning for every part of that shape is recorded
-   in concept/chapter3/STRUCTURE-COMIC.md and in the mockup builder it came
-   from. What matters here:
+   ONE PAGE HOLDS ONE PICTURE, and that is a measurement, not a taste. Every
+   picture in this chapter was painted 4:3. The previous build cut each
+   landscape page into two or three columns, so a 4:3 painting was poured into a
+   frame of ratio 0.46–0.70 and `object-fit:cover` threw away up to 58% of its
+   width — the elephant lost its head, the army lost its ranks. An audit of all
+   75 panels put the median caption over 13% of its picture and the worst over
+   45%, with boxes crossing the panel border and captions running to eight
+   lines in a 114px column.
 
-     · NO SENTENCE OF THE CHAPTER IS WRITTEN IN THIS FILE. Every caption comes
-       from beats.json, every panel placement from panels75.json. UI strings —
-       an aria-label, the page counter — are this file's to write.
-     · The eight verbatim quotations (Quranic verses and the three lines of
-       direct speech) are marked `v` in the data and carry the gold card. They
-       are never reworded; concept/chapter3/verify-beats.mjs checks them
-       against SOURCE-TEXT.md on every run.
-     · Reading is RTL: the right-hand page is the earlier one, the panel number
-       runs with the story, and the LEFT arrow moves forward.
+   Both faults have one cause: the page did not have the shape of its art. So
+   the page is now 690×600 and its picture is 690×517, which is 4:3 exactly —
+   nothing is cropped — and the narration lives UNDER the picture on paper,
+   where it can never cover anything.
+
+     · NO SENTENCE OF THE CHAPTER IS WRITTEN IN THIS FILE. Every word comes from
+       comic.json, which concept/chapter3/sync-comic.mjs builds from the
+       manifest. UI strings — an aria-label, the page counter — are this file's.
+     · FOUR VOICES, and the data says which is which (see sync-comic.mjs):
+       the narrator's band, the dated stamp, the gold verse card, and a speech
+       balloon WHOSE TAIL LEAVES THE PANEL — because the two who speak in this
+       book, Muhammad and Gabriel, are never drawn.
+     · Reading is RTL: the right-hand page is the earlier one, and the LEFT
+       arrow moves forward.
 
    ⚠ TWO TRAPS THAT COST THIS BUILD REAL TIME, RECORDED SO THEY ARE NOT REPEATED:
      1. `perspective` and `transform: scale()` must never sit on the same
@@ -27,115 +36,63 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import beatsData from '@/lib/chapter3/beats.json'
-import panelsData from '@/lib/chapter3/panels75.json'
+import comicData from '@/lib/chapter3/comic.json'
 import { markContentComplete } from '@/lib/chapter3/progress'
 
-interface Beat { s: string; t: string; v?: boolean }
-interface Panel {
-  id: string
-  part: string
-  epilogue?: boolean
-  grid: 'six' | 'nine' | 'splash'
-  beats: Beat[]
-  assetId: string
-}
-const PANELS = (panelsData as unknown as { panels: Panel[] }).panels
-const PARTS = (beatsData as unknown as { parts: { title: string }[] }).parts
+interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
+interface Page { a: string; p: number; e?: number; b: Beat[] }
+interface Part { title: string; first: number }
+const PAGES = (comicData as unknown as { pages: Page[] }).pages
+const PARTS = (comicData as unknown as { parts: Part[] }).parts
+/* folio → the part that opens on it */
+const OPENS = new Map(PARTS.map((p, i) => [p.first, i]))
 
-/* ---------------- page templates ----------------
-   Landscape pages: one or two panels each, and one shape per page carries a
-   panel larger than its neighbour so the eye is told what matters. */
-type Tpl = { n: number; css: string; areas: string[] }
-const T: Record<string, Tpl> = {
-  duo: { n: 2, css: 'grid-template-columns:1fr 1fr;grid-template-rows:1fr;',
-         areas: ['1/1/2/2', '1/2/2/3'] },
-  wide2: { n: 2, css: 'grid-template-columns:1.5fr 1fr;grid-template-rows:1fr;',
-           areas: ['1/1/2/2', '1/2/2/3'] },
-  stack3: { n: 3, css: 'grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr;',
-            areas: ['1/1/3/2', '1/2/2/3', '2/2/3/3'] },
-  /* the epilogue is the one page shape with no emphasis anywhere — §§4–6 are
-     not narrative, and a rigid even row is what that material is */
-  rigid3: { n: 3, css: 'grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr;',
-            areas: ['1/1/2/2', '1/2/2/3', '1/3/2/4'] },
-  splash: { n: 1, css: 'grid-template-columns:1fr;grid-template-rows:1fr;', areas: ['1/1/2/2'] },
-}
-
-interface Leaf { t: string; ps: Panel[] }
-function paginate(): Leaf[] {
-  const leaves: Leaf[] = []
-  const rotation = ['duo', 'wide2', 'stack3', 'duo', 'wide2', 'duo']
-  let i = 0
-  let r = 0
-  while (i < PANELS.length) {
-    const p = PANELS[i]
-    if (p.grid === 'splash') { leaves.push({ t: 'splash', ps: [p] }); i++; continue }
-    if (p.epilogue) {
-      const run: Panel[] = []
-      while (i < PANELS.length && PANELS[i].epilogue) run.push(PANELS[i++])
-      for (let k = 0; k < run.length; k += 3) leaves.push({ t: 'rigid3', ps: run.slice(k, k + 3) })
-      continue
-    }
-    let name = rotation[r++ % rotation.length]
-    const run: Panel[] = []
-    while (run.length < T[name].n && i < PANELS.length &&
-           PANELS[i].grid !== 'splash' && !PANELS[i].epilogue) run.push(PANELS[i++])
-    if (run.length < T[name].n) name = run.length >= 2 ? 'duo' : 'splash'
-    leaves.push({ t: name, ps: run })
-  }
-  return leaves
-}
-
-/** the panel's place in the STORY — never its place in the render, which is
-    paginated out of order (page 2 is built before page 1, on the cover's back) */
-const ORDER = new Map(PANELS.map((p, k) => [p.id, k + 1]))
-
-function PanelView({ p, area }: { p: Panel; area: string }) {
+function PageView({ page, folio }: { page: Page | null; folio: number }) {
+  if (!page) return <div className="c3-page is-blank" />
+  const opens = OPENS.get(folio)
+  const time = page.b.find((b) => b.k === 'time')
+  const says = page.b.filter((b) => b.k === 'say')
+  const verses = page.b.filter((b) => b.k === 'v')
+  const caps = page.b.filter((b) => !b.k)
   return (
-    <figure className="c3-pn" style={{ gridArea: area }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/assets/chapter3/comic/${p.assetId}.jpg`} alt="" aria-hidden="true"
-           loading="lazy" decoding="async" />
-      <span className="c3-num" aria-hidden="true">{ORDER.get(p.id)}</span>
-      <div className="c3-boxes">
-        {p.beats.map((b, k) => (
-          <div className={'c3-box' + (b.v ? ' is-verse' : '')} key={k}>{b.t}</div>
+    <div className={'c3-page' + (page.e ? ' is-today' : '')}>
+      <figure className="c3-art">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/assets/chapter3/comic/${page.a}.jpg`} alt="" aria-hidden="true"
+             loading="lazy" decoding="async" />
+        {(opens !== undefined || time) && (
+          <div className="c3-top">
+            {opens !== undefined && (
+              <div className="c3-plate">
+                <span className="c3-plate-n">{String(opens + 1).padStart(2, '0')}</span>
+                <span className="c3-plate-t">{PARTS[opens].title}</span>
+              </div>
+            )}
+            {time && <span className="c3-stamp">{time.t}</span>}
+          </div>
+        )}
+        {says.map((b, k) => (
+          <p className="c3-say" key={k}>{b.t}</p>
         ))}
-      </div>
-    </figure>
-  )
-}
-
-function PageView({ leaf, folio }: { leaf: Leaf | null; folio: number }) {
-  if (!leaf) return <div className="c3-page is-blank" />
-  const tpl = T[leaf.t]
-  const oneScene = new Set(leaf.ps.map((p) => p.part)).size === 1
-  return (
-    <div className="c3-page">
-      <div className={'c3-grid' + (oneScene ? ' is-tight' : ' is-loose')}
-           style={{ gridTemplateColumns: '', ...cssOf(tpl.css) }}>
-        {leaf.ps.map((p, k) => <PanelView p={p} area={tpl.areas[k]} key={p.id} />)}
-      </div>
+        {verses.map((b, k) => (
+          <p className="c3-verse" key={k}>{b.t}</p>
+        ))}
+      </figure>
+      {caps.length > 0 && (
+        <div className="c3-band">
+          {caps.map((b, k) => <p className="c3-cap" key={k}>{b.t}</p>)}
+        </div>
+      )}
       <span className="c3-folio">{folio}</span>
     </div>
   )
 }
-/** the template's grid declaration, as a style object */
-function cssOf(css: string): React.CSSProperties {
-  const out: Record<string, string> = {}
-  for (const rule of css.split(';')) {
-    const [k, v] = rule.split(':')
-    if (!k || !v) continue
-    out[k.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase())] = v.trim()
-  }
-  return out as React.CSSProperties
-}
 
 export default function Chapter3Comic() {
   const router = useRouter()
-  const leaves = useMemo(paginate, [])
   const bookRef = useRef<HTMLDivElement | null>(null)
   const [at, setAt] = useState(0)
+  const [drawer, setDrawer] = useState(false)
   /* the sheet currently in motion. It must sit ABOVE the stack for the whole
      rotation: given its resting z-index the moment the turn starts, it spends
      the first ninety degrees behind the unturned sheets and simply vanishes,
@@ -144,27 +101,32 @@ export default function Chapter3Comic() {
 
   /* SHEETS. After n turns the reader sees sheet[n-1]'s BACK on the left and
      sheet[n]'s FRONT on the right, and in an RTL book the right page is the
-     earlier one. So page 1 is the front of the sheet under the cover, and
-     page 2 rides on the COVER'S BACK — which is what an inside front cover is
+     earlier one. So folio 1 is the front of the sheet under the cover, and
+     folio 2 rides on the COVER'S BACK — which is what an inside front cover is
      for, and is why no blank page opens the book. */
   const sheets = useMemo(() => {
-    const page = (n: number) => (leaves[n] ? { leaf: leaves[n], folio: n + 1 } : null)
+    const page = (n: number) => (PAGES[n] ? { page: PAGES[n], folio: n + 1 } : null)
     const out: { front: 'cover' | ReturnType<typeof page>; back: ReturnType<typeof page> }[] =
       [{ front: 'cover', back: page(1) }]
-    for (let k = 1; k * 2 - 2 < leaves.length; k++) {
+    for (let k = 1; k * 2 - 2 < PAGES.length; k++) {
       out.push({ front: page(2 * k - 2), back: page(2 * k + 1) })
     }
     return out
-  }, [leaves])
+  }, [])
 
   const TURN_MS = 800
-  const turn = useCallback((d: number) => {
+  const goTo = useCallback((n: number) => {
     setAt((v) => {
-      const n = Math.min(Math.max(v + d, 0), sheets.length - 1)
-      if (n !== v) setMoving(d > 0 ? v : n)
-      return n
+      const t = Math.min(Math.max(n, 0), sheets.length - 1)
+      if (t !== v) setMoving(t > v ? v : t)
+      return t
     })
   }, [sheets.length])
+  const turn = useCallback((d: number) => setAt((v) => {
+    const n = Math.min(Math.max(v + d, 0), sheets.length - 1)
+    if (n !== v) setMoving(d > 0 ? v : n)
+    return n
+  }), [sheets.length])
 
   useEffect(() => {
     if (moving < 0) return
@@ -177,15 +139,15 @@ export default function Chapter3Comic() {
     const fit = () => {
       const book = bookRef.current
       if (!book) return
-      const availW = window.innerWidth - 150
-      const availH = window.innerHeight - 56 - 52
-      const ASPECT = 1380 / 500          /* two landscape pages side by side */
+      const availW = window.innerWidth - (window.innerWidth < 860 ? 84 : 132)
+      const availH = window.innerHeight - 56 - 46
+      const ASPECT = 1380 / 600          /* two landscape pages side by side */
       const w = Math.min(availW, Math.round(availH * ASPECT))
       const h = Math.round(w / ASPECT)
       book.style.width = `${at === 0 ? Math.round(w / 2) : w}px`
       book.style.height = `${h}px`
       /* one unit for every measurement inside the page */
-      book.style.setProperty('--u', String(h / 500))
+      book.style.setProperty('--u', String(h / 600))
     }
     fit()
     window.addEventListener('resize', fit)
@@ -195,14 +157,17 @@ export default function Chapter3Comic() {
   /* RTL: the LEFT arrow moves forward, because forward is leftward */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setDrawer(false); return }
       if (e.key === 'ArrowLeft') turn(1)
       else if (e.key === 'ArrowRight') turn(-1)
+      else if (e.key === 'Home') goTo(0)
+      else if (e.key === 'End') goTo(sheets.length - 1)
       else return
       e.preventDefault()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [turn])
+  }, [turn, goTo, sheets.length])
 
   /* reaching the last page records the READING; the chapter itself is
      completed by the closing practice, which is the only place that writes
@@ -212,15 +177,92 @@ export default function Chapter3Comic() {
   }, [at, sheets.length])
 
   const atEnd = at >= sheets.length - 1
+  const shown = at === 0 ? 0 : Math.min(at * 2, PAGES.length)
+  /* the part the reader is standing in, by the later of the two open folios */
+  const partNow = PARTS.reduce((acc, p, i) => (p.first <= Math.max(shown, 1) ? i : acc), 0)
 
   return (
     <div className="c3-shell">
-      <header className="chapter-site-header c3-head">
-        <button type="button" className="c3-home" onClick={() => router.push('/chapters')}>
-          אסלאם · דת ותרבות
-        </button>
-        <span className="c3-title">03 · ראשית חיי מוחמד</span>
+      <header className="chapter-site-header">
+        <div className="chapter-site-header-inner">
+          <div className="chapter-hdr-start">
+            <button
+              type="button"
+              className="chapter-burger"
+              aria-label="פתיחת תפריט הפרק"
+              aria-controls="chapter-menu"
+              aria-expanded={drawer}
+              onClick={() => setDrawer(true)}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16" /></svg>
+            </button>
+            <button type="button" className="chapter-logo" onClick={() => router.push('/chapters')}
+                    aria-label="חזרה לעמוד הפרקים">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/assets/logo-cream.png" alt="אסלאם" />
+            </button>
+          </div>
+          {/* the article's search field has no meaning in a book whose pages are
+              turned rather than scrolled; the reader's place stands in for it */}
+          <div className="c3-place">
+            <span className="c3-place-part">{PARTS[partNow].title}</span>
+            <span className="c3-place-n">
+              {at === 0 ? 'הכריכה' : `${shown} מתוך ${PAGES.length}`}
+            </span>
+            <span className="c3-place-bar" aria-hidden="true">
+              <i style={{ transform: `scaleX(${shown / PAGES.length})` }} />
+            </span>
+          </div>
+        </div>
       </header>
+
+      <aside id="chapter-menu" className={'chapter-drawer c3-drawer' + (drawer ? ' is-open' : '')}
+             aria-label="תפריט הפרק" aria-hidden={!drawer ? true : undefined} inert={!drawer}>
+        <div className="menu-head">
+          <button type="button" className="menu-close" aria-label="סגירת התפריט"
+                  onClick={() => setDrawer(false)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                 strokeWidth={1.9} strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
+          <h2 className="menu-title">תוכן הפרק</h2>
+          <span className="menu-sub">פרק 3 · ראשית חיי מוחמד</span>
+        </div>
+        <nav className="chapter-menu-nav" aria-label="ניווט בפרק">
+          <ol>
+            {PARTS.map((part, i) => (
+              <li key={part.title}>
+                <a href={`#p${part.first}`}
+                   className={i === partNow && at > 0 ? 'is-current' : undefined}
+                   aria-current={i === partNow && at > 0 ? 'true' : undefined}
+                   onClick={(e) => {
+                     e.preventDefault()
+                     /* folio f sits on sheet ceil(f/2) — turning to it opens the
+                        spread that carries it */
+                     goTo(Math.ceil(part.first / 2))
+                     setDrawer(false)
+                   }}>
+                  <span className="menu-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="menu-label">{part.title}</span>
+                  <span className="menu-folio">{part.first}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <div className="menu-extra">
+          <Link className="menu-x-item" href="/chapter3/practice" onClick={() => setDrawer(false)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            לתרגול המסכם
+          </Link>
+          <Link className="menu-x-item" href="/chapters" onClick={() => setDrawer(false)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            לכל פרקי הלמידה
+          </Link>
+        </div>
+      </aside>
+      {drawer && <div className="chapter-scrim" onClick={() => setDrawer(false)} aria-hidden="true" />}
 
       <div className="c3-stage">
         <div className={'c3-book' + (at === 0 ? ' is-closed' : '')} ref={bookRef}>
@@ -229,34 +271,42 @@ export default function Chapter3Comic() {
           </div>
           {sheets.map((s, i) => (
             <div className={'c3-sheet' + (i < at ? ' is-turned' : '')} key={i}
-                 style={{ zIndex: i === moving ? sheets.length + 5 : i < at ? i + 1 : sheets.length - i }}
-                 onClick={() => turn(1)}>
+                 style={{ zIndex: i === moving ? sheets.length + 5 : i < at ? i + 1 : sheets.length - i }}>
               <div className="c3-face is-front">
                 {s.front === 'cover'
                   ? <Cover />
-                  : <PageView leaf={s.front?.leaf ?? null} folio={s.front?.folio ?? 0} />}
+                  : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} />}
               </div>
               <div className="c3-face is-back">
-                <PageView leaf={s.back?.leaf ?? null} folio={s.back?.folio ?? 0} />
+                <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} />
               </div>
             </div>
           ))}
+          {/* the halves of the spread are the page-turn targets: in an RTL book
+              the left leaf carries you forward and the right leaf back */}
+          <button type="button" className="c3-tap is-next" onClick={() => turn(1)}
+                  disabled={atEnd} aria-label="העמוד הבא" tabIndex={-1} />
+          <button type="button" className="c3-tap is-prev" onClick={() => turn(-1)}
+                  disabled={at === 0} aria-label="העמוד הקודם" tabIndex={-1} />
         </div>
       </div>
 
       <button className="c3-arrow is-next" onClick={() => turn(1)}
-              disabled={atEnd} aria-label="העמוד הבא">‹</button>
+              disabled={atEnd} aria-label="העמוד הבא">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 5l-7 7 7 7" /></svg>
+      </button>
       <button className="c3-arrow is-prev" onClick={() => turn(-1)}
-              disabled={at === 0} aria-label="העמוד הקודם">›</button>
+              disabled={at === 0} aria-label="העמוד הקודם">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 5l7 7-7 7" /></svg>
+      </button>
 
-      <div className="c3-foot">
-        <span className="c3-count">
-          {at === 0 ? 'לחצו לפתיחה' : `${Math.min(at * 2, leaves.length)} / ${leaves.length}`}
-        </span>
-        {atEnd && (
+      {atEnd && (
+        <div className="c3-foot">
           <Link className="c3-practice" href="/chapter3/practice">לתרגול המסכם</Link>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -272,7 +322,7 @@ function Cover() {
         <div className="c3-cover-rule" />
       </div>
       <div className="c3-cover-foot">
-        {PARTS.length} חלקים · {PANELS.length} פאנלים
+        {PARTS.length} חלקים · {PAGES.length} עמודים · לחצו לפתיחה
       </div>
     </div>
   )

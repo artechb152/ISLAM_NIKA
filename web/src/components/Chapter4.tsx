@@ -319,6 +319,38 @@ function Verse({ r }: { r: string }) {
    their sections print their sentences in full — nothing is withheld from the
    reader, only from the page's decoration. */
 
+/* ---------------- the bridge to chapter 3 ----------------
+
+   The chapter's first sentence opens on „גם לאחר אירוע זה" — a demonstrative
+   pointing at the end of chapter 3. In the booklet that works, because the
+   reader turned the page to get here; on the site they can land on chapter 4
+   cold and the pronoun points at nothing.
+
+   THIS SENTENCE IS NOT FROM THE SOURCE. It was written for the product, with
+   the user's approval, and bridge.json records that; verify-chapter4.mjs prints
+   it every run and its headline counts it instead of saying „אפס משפטים
+   מומצאים". It claims nothing about history — only what the previous chapter
+   ends with, and what the pronoun refers to.
+
+   The words „פרק שלישי" inside it are the link. The sentence is split on that
+   phrase rather than written out in halves, and the split throws if the phrase
+   is missing, so the text and its link cannot drift apart. */
+function Bridge() {
+  const cut = BRIDGE.text.indexOf(BRIDGE.link)
+  if (cut < 0) throw new Error(`bridge.json: "${BRIDGE.link}" אינו במשפט`)
+  return (
+    <aside className="ch4-bridge" data-reveal>
+      <p className="ch4-bridge-text">
+        {BRIDGE.text.slice(0, cut)}
+        <a className="ch4-bridge-back" href={BRIDGE.href}>
+          {BRIDGE.link}
+        </a>
+        {BRIDGE.text.slice(cut + BRIDGE.link.length)}
+      </p>
+    </aside>
+  )
+}
+
 /* ---------------- mechanism · the route strip ----------------
 
    §1 says the town he chose is „למעלה מ-300 ק"מ צפונית לעיר מכה". In prose that
@@ -1035,15 +1067,7 @@ export default function Chapter4() {
                   </div>
                 </div>
                 <Head id="hijra" />
-                <aside className="ch4-bridge" data-reveal>
-                  <a className="ch4-bridge-back" href={BRIDGE.href}>
-                    {BRIDGE.eyebrow}
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M14 6l-6 6 6 6" />
-                    </svg>
-                  </a>
-                  <p className="ch4-bridge-text">{BRIDGE.text}</p>
-                </aside>
+                <Bridge />
                 <Block>
                   <T r="§0.a" className="ch4-body" />
                   <T r="§0.b" className="ch4-body" />

@@ -114,12 +114,20 @@ if (layout) {
 
 /* ---------- 4 · the bridge ---------- */
 /* The chapter opens on „גם לאחר אירוע זה" — a demonstrative pointing at the end
-   of chapter 3. bridge.json answers it with a sentence from CHAPTER 3, quoted
-   word for word, and this checks it against chapter 3's own source file. A
-   sentence from a neighbouring chapter is still not a sentence anyone wrote
-   here, but it is not in THIS chapter's source either, so it cannot pass the
-   fidelity check above and gets its own — against the file it actually came
-   from. Reported every run, for the same reason the rewordings are. */
+   of chapter 3. In the booklet that works, because the reader turned the page;
+   on the site they can land here cold and the pronoun points at nothing.
+   bridge.json answers it.
+
+   IT IS EITHER QUOTED OR WRITTEN, AND IT MUST SAY WHICH.
+     `from`      — a sentence lifted verbatim from another chapter. It cannot
+                   pass the fidelity check above (it is not in THIS chapter's
+                   source), so it is checked against the file it came from.
+     `authored`  — a sentence written for the product. Then there is nothing to
+                   check it against, and the only honest thing this gate can do
+                   is refuse to let it be invisible: it demands a named approval
+                   and it CHANGES THE HEADLINE. „אפס משפטים מומצאים" is the
+                   whole worth of this file; the moment one exists, the line has
+                   to count it instead of claiming it away. */
 let bridge = null
 try {
   bridge = JSON.parse(await readFile(new URL('../../web/src/lib/chapter4/bridge.json', here), 'utf8'))
@@ -127,23 +135,32 @@ try {
   /* no bridge declared — nothing to check */
 }
 if (bridge) {
-  const from = bridge.from ?? {}
-  if (!from.ref || !from.source) errors.push('bridge.json: אין ניקוב למקור שממנו נלקח המשפט')
-  else {
-    let other = ''
-    try {
-      other = await readFile(new URL('../../' + from.source, here), 'utf8')
-    } catch {
-      errors.push(`bridge.json: לא נמצא קובץ המקור ${from.source}`)
+  if (!bridge.text?.trim()) errors.push('bridge.json: אין משפט')
+  if (bridge.authored && bridge.from) errors.push('bridge.json: גם נכתב וגם צוטט — אחד מהם')
+  else if (bridge.authored) {
+    if (!bridge.approvedBy) errors.push('bridge.json: משפט שנכתב בפרויקט חייב לנקוב במי שאישר אותו')
+    if (flatSrc.includes(flat(bridge.text))) {
+      errors.push('bridge.json: המשפט מסומן כנכתב אך הוא במקור — צטט אותו במקום')
     }
-    if (other) {
-      const section = new RegExp(`^### ${from.ref}\\n([\\s\\S]*?)(?=\\n#{2,3} |$)`, 'm').exec(other)
-      if (!section) errors.push(`bridge.json: ${from.ref} לא קיים ב-${from.source}`)
-      else if (!flat(section[1]).includes(flat(bridge.text))) {
-        errors.push(`bridge.json: המשפט אינו מופיע ב-${from.ref} של ${from.source}`)
+  } else if (bridge.from) {
+    const from = bridge.from
+    if (!from.ref || !from.source) errors.push('bridge.json: אין ניקוב לסעיף ולקובץ שממנו נלקח המשפט')
+    else {
+      let other = ''
+      try {
+        other = await readFile(new URL('../../' + from.source, here), 'utf8')
+      } catch {
+        errors.push(`bridge.json: לא נמצא קובץ המקור ${from.source}`)
+      }
+      if (other) {
+        const section = new RegExp(`^### ${from.ref}\\n([\\s\\S]*?)(?=\\n#{2,3} |$)`, 'm').exec(other)
+        if (!section) errors.push(`bridge.json: ${from.ref} לא קיים ב-${from.source}`)
+        else if (!flat(section[1]).includes(flat(bridge.text))) {
+          errors.push(`bridge.json: המשפט אינו מופיע ב-${from.ref} של ${from.source}`)
+        }
       }
     }
-  }
+  } else errors.push('bridge.json: לא מצוין אם המשפט צוטט ממקור או נכתב בפרויקט')
 }
 
 const external = [...src.matchAll(/^#{3} (§\d+)/gm)].map((m) => m[1])
@@ -162,11 +179,21 @@ if (omitted.length) {
 if (reworded.length) {
   console.log(`⚠ ניסוחים מאושרים על ידי המשתמשת (מודפסים במקום משפט המקור): ${reworded.join(', ')}`)
 }
-if (bridge) {
+if (bridge?.authored) {
+  console.log(`⚠ משפט גשר שנכתב בפרויקט (לא מהמקור), באישור ${bridge.approvedBy}, ${bridge.approvedOn ?? 'ללא תאריך'}:`)
+  console.log(`  „${bridge.text}"`)
+} else if (bridge) {
   console.log(`⚠ משפט גשר מפרק ${bridge.from.chapter} (${bridge.from.ref}) נדפס בפתח הפרק — מאומת מול ${bridge.from.source}`)
 }
+/* THE HEADLINE COUNTS WHAT IS NOT FROM THE SOURCE. It used to say „אפס משפטים
+   מומצאים" unconditionally; with an authored bridge on the page that sentence
+   would be false, and a gate that lies about its own result is worse than no
+   gate. */
+const written = (reworded.length ? [`${reworded.length} ניסוחים מאושרים`] : []).concat(
+  bridge?.authored ? ['משפט גשר אחד שנכתב בפרויקט'] : [],
+)
 console.log(
   `✅ נאמנות מלאה · ${external.length} סעיפים · ` +
-    `${reworded.length ? `${reworded.length} ניסוחים מאושרים, כל השאר מהמקור` : 'אפס משפטים מומצאים'}` +
+    (written.length ? `${written.join(' ו')}, כל השאר מהמקור` : 'אפס משפטים מומצאים') +
     `${layout ? ' · כל קטע פעם אחת בדיוק' : ''}`,
 )

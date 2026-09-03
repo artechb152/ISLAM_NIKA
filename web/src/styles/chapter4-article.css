@@ -1011,34 +1011,26 @@
 
 /* ------------------------------ the bridge -----------------------------
    The chapter's first sentence begins „גם לאחר אירוע זה", pointing back at the
-   end of chapter 3. This carries chapter 3's own sentence — the one that names
-   the Night Journey — so a reader who landed here cold knows what the event
-   was before the pronoun asks them to.
+   end of chapter 3. This line says what that event was, and the words „פרק
+   שלישי" inside it are the link there.
 
-   QUIETER THAN THE BODY, on purpose: it is the previous chapter speaking, not
-   this one. Muted ink, one step down in size, and a gold rule on the reading
-   edge — the same rule the Quranic quotations use, because both are voices
-   from outside the running text. */
+   QUIETER THAN THE BODY, on purpose: it is the product speaking about the
+   chapter, not the chapter speaking. Muted ink, one step down in size, and a
+   gold rule on the reading edge — the same rule the Quranic quotations use,
+   because both are voices from outside the running text. */
 .ch4-bridge{
   width:min(760px,100%);
   padding-inline-start:clamp(18px,2.2vw,28px);
   border-inline-start:3px solid var(--gold-soft);
 }
-.ch4-bridge-back{
-  display:inline-flex;align-items:center;gap:6px;
-  font-size:13px;font-weight:600;letter-spacing:.04em;
-  color:var(--maroon);text-decoration:none;
-}
-.ch4-bridge-back svg{
-  width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;
-  stroke-linecap:round;stroke-linejoin:round;
-  /* RTL: „back" is to the LEFT of the label, and the chevron points that way */
-  transition:transform .18s ease;
-}
-.ch4-bridge-back:hover{color:var(--gold-text)}
-.ch4-bridge-back:hover svg{transform:translateX(-3px)}
-.ch4-bridge-back:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px;border-radius:4px}
 .ch4-bridge-text{
-  margin:6px 0 0;
+  margin:0;
   font-size:calc(var(--read) - 1px);line-height:1.7;color:var(--muted);
 }
+.ch4-bridge-back{
+  color:var(--maroon);font-weight:600;text-decoration:none;
+  border-block-end:1px solid var(--gold);
+  transition:color .18s ease,border-color .18s ease;
+}
+.ch4-bridge-back:hover{color:var(--gold-text);border-color:var(--gold-text)}
+.ch4-bridge-back:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px;border-radius:3px}
