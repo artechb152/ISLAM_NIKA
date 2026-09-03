@@ -1535,7 +1535,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       for (let i = 0; i < state.current.length; i++) {
         const st = state.current[i]
         if (st.placed || chosen.includes(st.id)) continue
-        if (sortMode && sortLocked) continue
+        if (sortLocked) continue
         if (!planMode && locked(opts[i])) continue
         const p = project(i)
         if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < 70) return i
@@ -1886,7 +1886,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
                 x={st.home.x}
                 z={st.home.z}
                 label={o.label}
-                showLabel={atTask && !solvedTask && !(sortMode && sortLocked)}
+                showLabel={atTask && !solvedTask && !sortLocked}
                 taken={st.placed || chosen.includes(o.id)}
               />
             </group>
@@ -4142,7 +4142,9 @@ export default function Game() {
      after the crate closes. No marker to find, no key to press: a payoff is
      not something the player goes and collects. */
   useEffect(() => {
-    if (!sceneReady || encounter) return
+    /* כרטיס עדות פתוח — הסרט (birds-cinematic) נדחף מעליו בריצת R3.
+       ה-payoff מחכה שהכרטיס ייסגר; הוא יירה כשה-deps יתחלפו. */
+    if (!sceneReady || encounter || openFind || openTask) return
     const heard = new Set(seen)
     const worked = new Set(solved)
     const due = REGION.encounters.find((e) => {
@@ -4155,7 +4157,7 @@ export default function Game() {
     if (!due) return
     const t = window.setTimeout(() => setEncounter(due), 900)
     return () => window.clearTimeout(t)
-  }, [sceneReady, seen, solved, encounter])
+  }, [sceneReady, seen, solved, encounter, openFind, openTask])
 
   /* ראווי מדבר מעצמו. R היה מקש שצריך לדעת עליו — ומי שלא לחץ, עבר
      פרק שלם לצד בן-לוויה אילם. עכשיו מה שיש לו לומר נפתח לבד, ברגע

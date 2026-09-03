@@ -194,12 +194,15 @@ export const TASKS: Task[] = [
     prompt: 'בקשו מעבר',
     title: 'איך עוברים את המעבר',
     asker: 'ראש השבט',
+    hint: 'גררו אל ראש השבט את הראיה שמצאתם בדרך — היא התשובה שלכם',
     question:
       'הסתכלת בדרך לפה? הסימן על הסלע — שלנו. המטבע שנפל — של מי ששילם. ' +
       'עכשיו אמור: איך שיירה כמו שלך עוברת מעבר כמו שלי?',
     options: [
       {
         id: 'patronage',
+        prop: { model: 'find-inscription', h: 0.5 },
+        spot: { dx: 0.35, dz: 0.85 },
         label: 'בחסותך — תמורת מכס, כמו כולם',
         needsFind: 'find-pass-inscription',
         right: true,
@@ -209,6 +212,8 @@ export const TASKS: Task[] = [
       },
       {
         id: 'force',
+        prop: { model: 'find-coin', h: 0.28 },
+        spot: { dx: -0.6, dz: 0.8 },
         label: 'בכוח — נשכור לוחמים',
         needsFind: 'find-pass-coin',
         note:
@@ -411,12 +416,14 @@ export const TASKS: Task[] = [
     prompt: 'עמדו מול האבנים',
     title: 'שלוש האבנים',
     asker: 'הסוחר',
-    hint: 'התקרבו לחפצים סביב האבנים ובחנו אותם לפני שתשפטו',
+    hint: 'בחנו את שלושת החפצים סביב האבנים — ואז גררו אליהן את לוח השמות הנכון',
     question:
       'שלוש אבנים כאן, ולכל אחת שם. הקוראן עצמו מזכיר אותן. מי הן?',
     options: [
       {
         id: 'three',
+        prop: { model: 'find-inscription', h: 0.48, tint: '#d9ccb2' },
+        spot: { dx: 0.2, dz: 1.05 },
         label: 'אללאת, אלעזה ומנאת',
         right: true,
         note:
@@ -425,12 +432,16 @@ export const TASKS: Task[] = [
       },
       {
         id: 'wadd',
+        prop: { model: 'find-inscription', h: 0.48, tint: '#c8b79c' },
+        spot: { dx: -1.05, dz: 0.75 },
         label: 'ודּ, סֻוַאע ויע׳וּת',
         note:
           'שמות שמופיעים במקום אחר. האבנים שכאן, במכה, הן אללאת, אלעזה ומנאת.',
       },
       {
         id: 'nameless',
+        prop: { model: 'find-inscription', h: 0.48, tint: '#b7a88f' },
+        spot: { dx: 1.25, dz: 0.75 },
         label: 'אין להן שמות',
         note:
           'יש להן. הן היו מפורסמות דיין שהקוראן טרח לנקוב בשמן.',
