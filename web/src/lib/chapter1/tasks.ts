@@ -240,14 +240,14 @@ export const TASKS: Task[] = [
       {
         id: 'silk',
         label: 'משי',
-        prop: { model: 'fodder', h: 0.4 },
+        prop: { model: 'prop-silk', h: 0.38 },
         right: true,
         note: 'נכנס. משי ותבלינים הם בדיוק מה שהדרך הזו קיימת בשבילו.',
       },
       {
         id: 'spice',
         label: 'תבלינים',
-        prop: { model: 'claypot', h: 0.36 },
+        prop: { model: 'prop-spice', h: 0.36 },
         right: true,
         note: 'נכנס. עוד סחורה שהשבטים שמרו על נתיב המעבר שלה.',
       },
@@ -349,7 +349,7 @@ export const TASKS: Task[] = [
     options: [
       {
         id: 'modesty',
-        prop: { model: 'fodder', h: 0.36 },
+        prop: { model: 'prop-robe', h: 0.34 },
         label: 'צניעות ופרישות',
         bin: 'crossed',
         wrong: 'זה דווקא הלך. את זה אדם לוקח בלי שילמדו אותו.',
@@ -365,7 +365,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'solitude',
-        prop: { model: 'find-scroll', h: 0.3 },
+        prop: { model: 'prop-writing', h: 0.28 },
         label: 'התבודדות וכתיבת שירה',
         bin: 'crossed',
         wrong: 'לא. גם אורחות החיים הקטנות עברו, לא רק הגדולות.',
@@ -373,7 +373,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'ritual',
-        prop: { model: 'find-incense', h: 0.32 },
+        prop: { model: 'prop-censer', h: 0.4 },
         label: 'מנהגים פולחניים',
         bin: 'crossed',
         wrong: 'לא. דווקא אלה עברו — ורוב הריטואלים שיהיו באסלאם מקורם בדתות שקדמו לו.',
@@ -381,7 +381,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'doctrine',
-        prop: { model: 'find-inscription', h: 0.4 },
+        prop: { model: 'prop-codex', h: 0.3 },
         label: 'שורשי האמונה הנוצרית עצמה',
         bin: 'stayed',
         wrong:
