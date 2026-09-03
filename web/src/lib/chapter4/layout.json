@@ -85,54 +85,24 @@
     {
       "id": "badr",
       "title": "קרב בדר",
-      "device": "map-timeline · 624 + force-balance + film",
-      "subs": [
-        {
-          "id": "badr-quran",
-          "title": "בדר בקוראן"
-        }
-      ],
+      "device": "film",
       "slots": {
-        "lead": [
-          "§10.a",
-          "§10.b"
-        ],
-        "approach": [
-          "§11.a"
-        ],
-        "forceMuslims": [
-          "§11.muslims"
-        ],
-        "forceQuraysh": [
-          "§11.quraysh"
-        ],
         "film": [
+          "§10.a",
+          "§10.b",
+          "§11.a",
+          "§11.muslims",
+          "§11.quraysh",
           "§12.rain",
-          "§12.duel"
-        ],
-        "outcome": [
+          "§12.duel",
           "§13.a",
-          "§13.b"
-        ],
-        "quranLead": [
-          "§14.a"
-        ],
-        "verse1": [
-          "§14.verse"
-        ],
-        "intro2": [
-          "§15.a"
-        ],
-        "verse2": [
-          "§15.verse"
-        ],
-        "echo": [
-          "§15.echo"
-        ],
-        "ramadan": [
-          "§16.a"
-        ],
-        "ramadanEcho": [
+          "§13.b",
+          "§14.a",
+          "§14.verse",
+          "§15.a",
+          "§15.verse",
+          "§15.echo",
+          "§16.a",
           "§16.echo"
         ]
       }

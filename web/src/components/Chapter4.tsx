@@ -1120,45 +1120,7 @@ export default function Chapter4() {
               {/* ============ 03 · קרב בדר ============ */}
               <Section id="badr">
                 <Head id="badr" />
-                <Block>
-                  <T r="§10.a" className="ch4-body" reveal />
-                  <T r="§10.b" className="ch4-body" reveal />
-                  <T r="§11.a" className="ch4-body" em={["אבו ג'הל"]} reveal />
-                </Block>
-                <Forces
-                  rows={[
-                    { num: 300, label: pick('§11.muslims', 'מוחמד'), text: text('§11.muslims'), side: 'a' },
-                    { num: 1000, label: pick('§11.quraysh', "אבו ג'הל"), text: text('§11.quraysh'), side: 'b' },
-                  ]}
-                />
                 <BadrFilm />
-                <Block>
-                  <T r="§13.a" className="ch4-body" reveal />
-                  <T r="§13.b" className="ch4-body" em={['יום הישועה']} reveal />
-                </Block>
-
-                <SubHead section="badr" id="badr-quran" />
-                <Block>
-                  <T r="§14.a" className="ch4-body" reveal />
-                </Block>
-                <Verse r="§14.verse" />
-                <Block>
-                  <T r="§15.a" className="ch4-body" reveal />
-                </Block>
-                <Verse r="§15.verse" />
-                <Echo>
-                  <Block>
-                    <T r="§15.echo" className="ch4-body" />
-                  </Block>
-                </Echo>
-                <Block>
-                  <T r="§16.a" className="ch4-body" reveal />
-                </Block>
-                <Echo>
-                  <Block>
-                    <T r="§16.echo" className="ch4-body" em={['מערכת בדר']} />
-                  </Block>
-                </Echo>
               </Section>
 
               {/* ============ 04 · קרב אֻחֻד ============
