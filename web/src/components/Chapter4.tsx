@@ -623,46 +623,6 @@ function Stage({
   )
 }
 
-/* ---------------- the band ----------------
-
-   THE CHAPTER'S MAIN FIGURE, chosen off four side-by-side drafts. The picture
-   runs the full width of the window and fades into the page on the side the
-   words are on, so the sentences sit on the paper and never on the photograph.
-   Nothing is set over the image; the fade does the work that a scrim used to.
-
-   IT ALTERNATES. Consecutive bands flip, so the reader's eye crosses the page
-   instead of running down one gutter — and the fade flips with them.
-
-   THE CAPTION SITS OVER THE PICTURE, never over the faded half, where cream
-   type on cream ground is invisible. It says „שחזור מצויר" because every plate
-   in this chapter is a painting and not a photograph of anything. */
-function Band({
-  img,
-  caption,
-  flip = false,
-  children,
-}: {
-  img: string
-  caption: string
-  flip?: boolean
-  children?: React.ReactNode
-}) {
-  /* a band with no words is a full-width picture and nothing else — the fade
-     exists to carry type, and with no type it would only wash the image out */
-  return (
-    <div
-      className={`ch4-band${flip ? ' is-flip' : ''}${children ? '' : ' is-plain'}`}
-      data-reveal
-    >
-      <figure>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`/assets/chapter4/${img}.jpg`} alt="" aria-hidden="true" loading="lazy" />
-        <figcaption>{caption}</figcaption>
-      </figure>
-      {children ? <div className="ch4-band-copy">{children}</div> : null}
-    </div>
-  )
-}
 
 
 /** A run of the chapter's sentences, held as one block.
@@ -1084,18 +1044,18 @@ export default function Chapter4() {
                     { id: 'khaybar', name: 'ח'+String.fromCharCode(39)+'יבר', x: 34, y: 15 },
                   ]}
                 />
-                <Band img="stage-1-mecca" caption="מכה בעמקה · שחזור מצויר">
+                <Block>
                   <Block>
-                    <T r="§0.a" className="ch4-body" />
-                    <T r="§0.b" className="ch4-body" />
+                  <T r="§0.a" className="ch4-body" />
+                  <T r="§0.b" className="ch4-body" />
                   </Block>
-                </Band>
-                <Band img="stage-4-arrival" caption="שער הנווה · שחזור מצויר" flip>
+                </Block>
+                <Block>
                   <Block>
-                    <T r="§1.a" className="ch4-body" em={["ית'רב"]} />
-                    <T r="§1.b" className="ch4-body" />
+                  <T r="§1.a" className="ch4-body" em={["ית'רב"]} />
+                  <T r="§1.b" className="ch4-body" />
                   </Block>
-                </Band>
+                </Block>
                 <Versions a="§2.flight" b="§2.invited" labels={['בריחה', 'הזמנה']} />
 
                 <SubHead section="hijra" id="groups" />
@@ -1123,13 +1083,13 @@ export default function Chapter4() {
                     { x: 0.28, y: 0.56, label: pick('§7.c', 'המסגד') },
                   ]}
                 />
-                <Band img="stage-5-yard" caption="החצר לפני שנבנה המסגד · שחזור מצויר">
+                <Block>
                   <Block>
-                    <T r="§7.a" className="ch4-body" />
-                    <T r="§7.b" className="ch4-body" />
-                    <T r="§7.c" className="ch4-body" />
+                  <T r="§7.a" className="ch4-body" />
+                  <T r="§7.b" className="ch4-body" />
+                  <T r="§7.c" className="ch4-body" />
                   </Block>
-                </Band>
+                </Block>
                 <Block>
                   <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                   <T r="§8.b" className="ch4-body" reveal />
@@ -1208,7 +1168,6 @@ export default function Chapter4() {
                 <Block>
                   <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
                 </Block>
-                <Band img="uhud-mount" caption="הר אֻחֻד מן המישור · שחזור מצויר" />
                 <Forces
                   rows={[
                     { num: 1000, label: pick('§17.muslims', 'מוחמד'), text: text('§17.muslims'), side: 'a' },
@@ -1294,7 +1253,6 @@ export default function Chapter4() {
                   <T r="§27.b" className="ch4-body" reveal />
                   <T r="§28.a" className="ch4-body" reveal />
                 </Block>
-                <Band img="hudaybiyyah-plain" caption="המישור שבו נעצר · שחזור מצויר" flip />
                 <Block>
                   <T r="§28.b" className="ch4-body" reveal />
                 </Block>
@@ -1328,7 +1286,6 @@ export default function Chapter4() {
                   <T r="§43.a" className="ch4-body ch4-quiet-body" reveal />
                   <T r="§43.b" className="ch4-body ch4-quiet-body" reveal />
                 </Block>
-                <Band img="khaybar-forts" caption="מבצרי ח'יבר מעל המטעים · שחזור מצויר" />
                 <Block>
                   <T r="§44.a" className="ch4-body" reveal />
                   <T r="§44.b" className="ch4-body" reveal />
@@ -1361,7 +1318,6 @@ export default function Chapter4() {
                 <Block>
                   <T r="§49.b" className="ch4-body" em={['אבו סופיאן']} reveal />
                 </Block>
-                <Band img="kaaba-precinct" caption="מתחם הכעבה בשחר · שחזור מצויר" flip />
               
 
               {/* ============ 09 · מותו של מוחמד ============
@@ -1371,7 +1327,6 @@ export default function Chapter4() {
                 <Block>
                   <T r="§50.a" className="ch4-body" reveal />
                 </Block>
-                <Band img="medina-dusk" caption="מדינה בין ערביים · שחזור מצויר" />
                 <Block>
                   <T r="§50.b" className="ch4-body" reveal />
                   <T r="§51.a" className="ch4-body" reveal />
