@@ -3908,7 +3908,10 @@ export default function Game() {
      סגר. דגל ההשלמה של מסך הפרקים נכתב ברגע שהמסע הושלם. */
   const [finale, setFinale] = useState<'none' | 'rising' | 'card' | 'closed'>('none')
   const finaleEligible =
-    !ONWARD && !encounter && REGION.encounters.length > 0 && REGION.encounters.every((e) => seen.includes(e.id))
+    !ONWARD && !encounter && REGION.encounters.length > 0 && REGION.encounters.every((e) => seen.includes(e.id)) &&
+    /* הכרטיס עלה לפני שנאספה הכתובת שבמשקיף — 20/21 לנצח (דוח R3).
+       העדויות של אזור הסיום הן חלק מהסיום. */
+    REGION_FINDS.every((f) => found.includes(f.id))
   useEffect(() => {
     if (!finaleEligible || finale !== 'none') return
     live.riseAt = performance.now()
@@ -4177,7 +4180,9 @@ export default function Game() {
   useEffect(() => {
     if (!sceneReady || !rawiAutoNext || encounter || openFind || openTask || finale === 'card') return
     const iv = window.setInterval(() => {
-      if (encounterRef.current || openRef.current || live.taskDrag) return
+      /* ליד תחנת משימה E שייך לתחנה — שיחה אוטומטית כאן חסמה את
+         "שלוש האבנים" (דוח R3). ראווי ימתין צעד אחד הצידה. */
+      if (encounterRef.current || openRef.current || live.taskDrag || live.atTask) return
       const quiet = performance.now() - quietSince.current
       const standing = live.keys.size === 0
       if (quiet > 4200 && (standing || quiet > 12000)) setEncounter(rawiAutoNext)
