@@ -7,13 +7,13 @@
        inline-start = RIGHT = the reading edge
        inline-end   = LEFT  = the outer edge
 
-   --u is the page's share of its design height (600px), set from JS on every
+   --u is the page's share of its design height (620px), set from JS on every
    resize. EVERY measurement inside a page is a multiple of it, so a caption
    keeps the same share of its page at any window size.
 
-   THE PAGE HAS THE SHAPE OF ITS ART. 690 wide, 600 tall: 517 of that is the
+   THE PAGE HAS THE SHAPE OF ITS ART. 690 wide, 620 tall: 517 of that is the
    picture, which is 690:517 — 4:3 to the pixel, the ratio every picture in this
-   chapter was painted at. Nothing is cropped. The remaining 83 is the
+   chapter was painted at. Nothing is cropped. The remaining 103 is the
    narrator's band, which is paper, not picture, so no caption can ever cover
    anything. The previous build poured 4:3 paintings into columns of ratio 0.46
    and lost more than half of some of them behind boxes; that is what these two
@@ -61,7 +61,7 @@
 .c3-drawer .chapter-menu-nav a.is-current{background:rgba(165,50,47,.12);color:var(--maroon)}
 
 .c3-stage{
-  flex:1;display:grid;place-items:center;min-height:0;
+  flex:1;cursor:pointer;display:grid;place-items:center;min-height:0;
   background:radial-gradient(circle at 50% 46%,#f7f1e1,var(--panel) 68%);
 }
 
@@ -100,19 +100,6 @@
   .c3-sheet,.c3-book,.c3-under,.c3-place-bar i{transition:none}
 }
 
-/* the two halves of the spread ARE the buttons: in an RTL book the left leaf
-   carries you forward and the right leaf back. They sit above the sheets so a
-   click anywhere on the paper turns the page the way that paper would. */
-.c3-tap{
-  position:absolute;top:0;height:100%;width:50%;z-index:21;
-  border:0;background:none;padding:0;cursor:pointer;
-}
-.c3-tap:disabled{cursor:default}
-.c3-tap.is-next{inset-inline-end:0}
-.c3-tap.is-prev{inset-inline-start:0}
-.c3-book.is-closed .c3-tap.is-next{width:100%;inset-inline-end:0}
-.c3-book.is-closed .c3-tap.is-prev{display:none}
-
 /* ---------------- the page ---------------- */
 .c3-page{width:100%;height:100%;position:relative;background:var(--surface);display:flex;flex-direction:column}
 .c3-page.is-blank{background:var(--surface)}
@@ -135,19 +122,19 @@
 .c3-band{
   flex:1;min-height:0;overflow:hidden;display:flex;align-items:stretch;
   background:var(--surface);border-top:calc(2.5px * var(--u)) solid var(--line);
-  padding:calc(10px * var(--u)) calc(20px * var(--u)) calc(12px * var(--u));
-  gap:calc(16px * var(--u));
+  padding:calc(12px * var(--u)) calc(22px * var(--u)) calc(16px * var(--u));
+  gap:calc(18px * var(--u));
 }
 .c3-cap{
   flex:1;min-width:0;margin:0;display:flex;align-items:center;
-  font-size:calc(15.5px * var(--u));line-height:1.42;font-weight:600;color:var(--ink);
+  font-size:calc(16.5px * var(--u));line-height:1.44;font-weight:600;color:var(--ink);
   text-wrap:pretty;
 }
 /* the divider falls between two captions: in RTL the later one sits to the
    LEFT, so the rule belongs on its inline-start */
 .c3-cap + .c3-cap{
   border-inline-start:1px solid var(--edge);
-  padding-inline-start:calc(16px * var(--u));
+  padding-inline-start:calc(18px * var(--u));
 }
 
 /* ---- voice 2 · the date the story leaps to ---- */
@@ -232,10 +219,16 @@
 .c3-page.is-today .c3-band{background:var(--maroon-deep);border-top-color:var(--maroon-deep)}
 .c3-page.is-today .c3-cap{color:var(--cream)}
 .c3-page.is-today .c3-cap + .c3-cap{border-inline-start-color:rgba(245,236,214,.32)}
+/* on a page with no band the folio stands on the picture, and the picture is
+   as often night rock as it is pale sky */
+.c3-page.is-full .c3-folio{color:rgba(245,236,214,.78);text-shadow:0 1px calc(4px * var(--u)) rgba(14,6,2,.85)}
+.c3-page.is-recto .c3-folio{inset-inline-end:auto;inset-inline-start:calc(22px * var(--u))}
 .c3-page.is-today .c3-folio{color:rgba(245,236,214,.5)}
 
+/* the folio sits on the OUTER edge of its leaf, the way a book prints it: the
+   right-hand page numbers at the right, the left-hand page at the left */
 .c3-folio{
-  position:absolute;bottom:calc(9px * var(--u));inset-inline-end:calc(20px * var(--u));
+  position:absolute;bottom:calc(10px * var(--u));inset-inline-end:calc(22px * var(--u));
   z-index:5;font-size:calc(11.5px * var(--u));color:var(--muted);
   letter-spacing:.08em;font-variant-numeric:tabular-nums;
 }
@@ -284,19 +277,6 @@
 .c3-arrow.is-next{inset-inline-start:20px}
 .c3-arrow.is-prev{inset-inline-end:20px}
 
-.c3-foot{
-  position:fixed;bottom:16px;inset-inline:0;z-index:30;
-  display:flex;align-items:center;justify-content:center;pointer-events:none;
-}
-.c3-foot > *{pointer-events:auto}
-.c3-practice{
-  font-family:var(--font-heading);font-weight:700;font-size:15px;
-  color:var(--cream);background:var(--maroon-deep);text-decoration:none;
-  padding:10px 26px;display:inline-flex;align-items:center;min-height:44px;
-  box-shadow:0 6px 18px rgba(40,16,6,.28);
-}
-.c3-practice:hover{background:var(--maroon)}
-
 @media (max-width:860px){
   .c3-arrow{width:40px;height:40px}
   .c3-arrow svg{width:19px;height:19px}
@@ -304,3 +284,26 @@
   .c3-arrow.is-prev{inset-inline-end:6px}
   .c3-place-part{display:none}
 }
+
+/* ---------------- the closing leaf ---------------- */
+.c3-page.is-end{background:var(--surface);display:grid;place-items:center}
+.c3-end{text-align:center;padding:0 12%}
+.c3-end-mark{
+  display:block;width:calc(46px * var(--u));height:calc(2px * var(--u));
+  background:var(--gold);margin:0 auto calc(26px * var(--u));
+}
+.c3-end-t{
+  margin:0;font-family:var(--font-heading);font-weight:900;color:var(--maroon);
+  font-size:calc(34px * var(--u));line-height:1.1;
+}
+.c3-end-s{
+  margin:calc(10px * var(--u)) 0 calc(30px * var(--u));
+  font-size:calc(14px * var(--u));color:var(--muted);letter-spacing:.1em;
+}
+.c3-end-go{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-heading);font-weight:700;font-size:calc(16px * var(--u));
+  color:var(--cream);background:var(--maroon-deep);text-decoration:none;
+  padding:calc(11px * var(--u)) calc(30px * var(--u));min-height:44px;
+}
+.c3-end-go:hover{background:var(--maroon)}

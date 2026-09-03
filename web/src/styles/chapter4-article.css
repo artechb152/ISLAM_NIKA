@@ -1008,29 +1008,3 @@
   .ch4-map-name{display:none}
   .ch4-map-pin.is-on .ch4-map-name{display:flex}
 }
-
-/* ------------------------------ the bridge -----------------------------
-   The chapter's first sentence begins „גם לאחר אירוע זה", pointing back at the
-   end of chapter 3. This line says what that event was, and the words „פרק
-   שלישי" inside it are the link there.
-
-   QUIETER THAN THE BODY, on purpose: it is the product speaking about the
-   chapter, not the chapter speaking. Muted ink, one step down in size, and a
-   gold rule on the reading edge — the same rule the Quranic quotations use,
-   because both are voices from outside the running text. */
-.ch4-bridge{
-  width:min(760px,100%);
-  padding-inline-start:clamp(18px,2.2vw,28px);
-  border-inline-start:3px solid var(--gold-soft);
-}
-.ch4-bridge-text{
-  margin:0;
-  font-size:calc(var(--read) - 1px);line-height:1.7;color:var(--muted);
-}
-.ch4-bridge-back{
-  color:var(--maroon);font-weight:600;text-decoration:none;
-  border-block-end:1px solid var(--gold);
-  transition:color .18s ease,border-color .18s ease;
-}
-.ch4-bridge-back:hover{color:var(--gold-text);border-color:var(--gold-text)}
-.ch4-bridge-back:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px;border-radius:3px}

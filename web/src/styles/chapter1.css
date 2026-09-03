@@ -1041,3 +1041,13 @@ body{
 }
 .hud-film-skip:hover{background:rgba(24,16,10,.85)}
 .hud-dialogue.has-film .hud-dialogue-body{position:relative}
+
+/* מה עושים כאן — שורת ההנחיה הפיזית של המשימה, מעל פרומפט ה-E.
+   יושבת באותו טור flex של poi-hints, ולכן רק צריכה להיראות כמו כותרת. */
+.ch1-task-hint{
+  width:fit-content;max-width:min(560px,86vw);
+  padding:9px 20px;font-size:15.5px;font-weight:600;text-align:center;
+  color:#f7ecd2;background:rgba(41,29,17,.84);
+  border:1px solid rgba(232,191,118,.55);border-radius:999px;
+  animation:poi-hint-in .22s ease both;
+}

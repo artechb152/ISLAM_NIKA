@@ -177,6 +177,13 @@ export default function Chapter3Comic() {
   }, [at, sheets.length])
 
   const atEnd = at >= sheets.length - 1
+
+  const onStage = useCallback((e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a,button')) return
+    const r = bookRef.current?.getBoundingClientRect()
+    if (!r) return
+    turn(at === 0 || e.clientX < (r.left + r.right) / 2 ? 1 : -1)
+  }, [at, turn])
   const shown = at === 0 ? 0 : Math.min(at * 2, PAGES.length)
   /* the part the reader is standing in, by the later of the two open folios */
   const partNow = PARTS.reduce((acc, p, i) => (p.first <= Math.max(shown, 1) ? i : acc), 0)
@@ -264,7 +271,12 @@ export default function Chapter3Comic() {
       </aside>
       {drawer && <div className="chapter-scrim" onClick={() => setDrawer(false)} aria-hidden="true" />}
 
-      <div className="c3-stage">
+      {/* CLICKING THE PAPER TURNS IT. The direction comes from where the click
+          landed: in an RTL book the left leaf carries you forward and the right
+          leaf back. It lives on the stage rather than on two overlay buttons
+          because an overlay would have to sit above the sheets, and then it
+          would swallow the one link the book contains. */}
+      <div className="c3-stage" onClick={onStage}>
         <div className={'c3-book' + (at === 0 ? ' is-closed' : '')} ref={bookRef}>
           <div className="c3-under" aria-hidden="true">
             <span className="c3-half is-l" /><span className="c3-half is-r" />
@@ -278,16 +290,12 @@ export default function Chapter3Comic() {
                   : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} side="r" />}
               </div>
               <div className="c3-face is-back">
-                <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l" />
+                {!s.back && i === sheets.length - 1
+                  ? <EndPage />
+                  : <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l" />}
               </div>
             </div>
           ))}
-          {/* the halves of the spread are the page-turn targets: in an RTL book
-              the left leaf carries you forward and the right leaf back */}
-          <button type="button" className="c3-tap is-next" onClick={() => turn(1)}
-                  disabled={atEnd} aria-label="העמוד הבא" tabIndex={-1} />
-          <button type="button" className="c3-tap is-prev" onClick={() => turn(-1)}
-                  disabled={at === 0} aria-label="העמוד הקודם" tabIndex={-1} />
         </div>
       </div>
 
@@ -302,11 +310,22 @@ export default function Chapter3Comic() {
              strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 5l7 7-7 7" /></svg>
       </button>
 
-      {atEnd && (
-        <div className="c3-foot">
-          <Link className="c3-practice" href="/chapter3/practice">לתרגול המסכם</Link>
-        </div>
-      )}
+    </div>
+  )
+}
+
+/* the leaf that follows the last page. A book ends on a blank verso; a
+   screen that does so looks unfinished, and this is also the one place the
+   reader is meant to be handed on to the practice. */
+function EndPage() {
+  return (
+    <div className="c3-page is-end">
+      <div className="c3-end">
+        <span className="c3-end-mark" aria-hidden="true" />
+        <p className="c3-end-t">סוף הפרק</p>
+        <p className="c3-end-s">ראשית חיי מוחמד · {PAGES.length} עמודים</p>
+        <Link className="c3-end-go" href="/chapter3/practice">לתרגול המסכם</Link>
+      </div>
     </div>
   )
 }

@@ -77,6 +77,9 @@ interface Live {
   nearFind: string | null
   /** true when standing at this region's task station */
   atTask: boolean
+  /** staged close-up over the task surface — TaskProps writes it while the
+      player stands at an unsolved physical task, the camera reads it */
+  taskFocus: { x: number; z: number; y: number; dist: number; fov: number; look: number } | null
   /** static props (tents, palms, well…) */
   colliders: Collider[]
   /** moving props (wandering camels) — mutated in place each frame */
@@ -133,6 +136,7 @@ function makeLive(): Live {
     nearWho: null,
     nearFind: null,
     atTask: false,
+    taskFocus: null,
     colliders: [],
     dynamic: [],
     lastDrag: 0,
@@ -1229,6 +1233,110 @@ function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
     </group>
   )
 }
+/* השיירה יוצאת: ברגע שהמסלול נבחר על המפה, שלושה גמלים עמוסים קמים
+   מן המחנה והולכים את הדרך דרומה, אל שער הגבול — הבחירה שנעשתה על הבד
+   קורית בעולם, מול העיניים. */
+const DEPART_PATH = [
+  { x: 1.6, z: 1.5 },
+  { x: 0.9, z: -5 },
+  { x: -0.4, z: -11.5 },
+  { x: 0.3, z: -17 },
+  { x: 0, z: -20.5 },
+]
+const DEPART_LENS: number[] = [0]
+for (let i = 1; i < DEPART_PATH.length; i++) {
+  const a = DEPART_PATH[i - 1]
+  const b = DEPART_PATH[i]
+  DEPART_LENS.push(DEPART_LENS[i - 1] + Math.hypot(b.x - a.x, b.z - a.z))
+}
+const DEPART_TOTAL = DEPART_LENS[DEPART_LENS.length - 1]
+
+function DepartCamel({ offset, speed }: { offset: number; speed: number }) {
+  const g = useRef<THREE.Group>(null)
+  const { obj, legs, phase } = useWalkingCamel(2.0)
+  const s = useRef(offset)
+  useFrame((_, dt) => {
+    const el = g.current
+    if (!el) return
+    s.current += dt * speed
+    const t = Math.max(0, Math.min(DEPART_TOTAL, s.current))
+    let i = 1
+    while (i < DEPART_LENS.length - 1 && DEPART_LENS[i] < t) i++
+    const a = DEPART_PATH[i - 1]
+    const b = DEPART_PATH[i]
+    const seg = DEPART_LENS[i] - DEPART_LENS[i - 1] || 1
+    const k = (t - DEPART_LENS[i - 1]) / seg
+    const x = a.x + (b.x - a.x) * k
+    const z = a.z + (b.z - a.z) * k
+    phase.current.value += dt * (speed / 0.62) * Math.PI
+    const ph = phase.current.value
+    for (const leg of legs) {
+      const sideShift = leg.name.endsWith('L') ? 0 : Math.PI
+      leg.rotation.x = Math.sin(ph + sideShift) * 0.34
+    }
+    el.position.set(x, 0, z)
+    el.rotation.y = Math.atan2(b.x - a.x, b.z - a.z)
+    el.rotation.z = Math.sin(ph) * 0.028
+    el.visible = s.current > -0.2 && s.current < DEPART_TOTAL - 0.05
+  })
+  return (
+    <group ref={g} visible={false}>
+      <primitive object={obj} />
+    </group>
+  )
+}
+
+function DepartingCaravan({ onDone }: { onDone: () => void }) {
+  useEffect(() => {
+    const ms = ((DEPART_TOTAL + 8) / 1.7) * 1000
+    const t = setTimeout(onDone, ms)
+    return () => clearTimeout(t)
+  }, [onDone])
+  return (
+    <group>
+      <DepartCamel offset={0} speed={1.7} />
+      <DepartCamel offset={-3.4} speed={1.7} />
+      <DepartCamel offset={-6.8} speed={1.7} />
+    </group>
+  )
+}
+
+/* דרך מצוירת על מפת הבד: שובל נקודות דיו בקשת עדינה מ"אנחנו כאן" אל
+   קצה הדרך. חומר בסיסי — מחוץ להישג ידו של Painterly, כמו הטבעות. */
+function InkRoute({ x0, z0, x1, z1, bend = 0.35 }: { x0: number; z0: number; x1: number; z1: number; bend?: number }) {
+  const pts = useMemo(() => {
+    const mx = (x0 + x1) / 2
+    const mz = (z0 + z1) / 2
+    const dx = x1 - x0
+    const dz = z1 - z0
+    const L = Math.hypot(dx, dz) || 1
+    const px = -dz / L
+    const pz = dx / L
+    const cx = mx + px * bend
+    const cz = mz + pz * bend
+    const n = Math.max(8, Math.round(L / 0.2))
+    const out: { x: number; z: number }[] = []
+    for (let i = 1; i < n; i++) {
+      const t = i / n
+      const a = (1 - t) * (1 - t)
+      const b = 2 * (1 - t) * t
+      const c = t * t
+      out.push({ x: a * x0 + b * cx + c * x1, z: a * z0 + b * cz + c * z1 })
+    }
+    return out
+  }, [x0, z0, x1, z1, bend])
+  return (
+    <group>
+      {pts.map((pt, i) => (
+        <mesh key={i} rotation-x={-Math.PI / 2} position={[pt.x, groundYAt(pt.x, pt.z) + 0.085, pt.z]} renderOrder={2}>
+          <circleGeometry args={[0.042, 10]} />
+          <meshBasicMaterial color="#54402a" transparent opacity={0.8} depthWrite={false} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
 function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDrop }: {
   live: Live
   atTask: boolean
@@ -1319,6 +1427,23 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         : [],
     [sortMode],
   )
+  /* תקריב המשימה: המסגור נגזר מהפריסה בפועל — הכול חייב להיכנס לפריים.
+     בתכנון המבט תלול כמעט-אנכי אל הבד; בשאר — אלכסון נמוך מעל המשטח. */
+  const focusSpec = useMemo(() => {
+    if (!REGION_TASK) return null
+    const cx = REGION_TASK.x
+    const cz = REGION_TASK.z
+    let spread = 1.2
+    const consider = (x: number, z: number) => { spread = Math.max(spread, Math.hypot(x - cx, z - cz)) }
+    for (const st of state.current) { consider(st.home.x, st.home.z); consider(st.tgt.x, st.tgt.z) }
+    for (const sp of spots) consider(sp.x, sp.z)
+    for (const b of binSpots) consider(b.x, b.z)
+    return planMode
+      ? { x: cx, z: cz, y: 3.3 + spread * 0.95, dist: 1.0 + spread * 0.5, fov: 42, look: 0.1 }
+      : { x: cx, z: cz, y: 2.3 + spread * 0.55, dist: 2.2 + spread * 0.7, fov: 46, look: 0.55 }
+  }, [planMode, spots, binSpots])
+  /* המשימה נפתרה או שעזבנו את האזור — המצלמה חוזרת אל הגב */
+  useEffect(() => () => { live.taskFocus = null }, [live])
   const dragging = useRef<number>(-1)
   const hovering = useRef<number>(-1)
   const nearTarget = useRef(false)
@@ -1568,6 +1693,8 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         ;(ring.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.4
       }
     }
+    live.taskFocus =
+      atTask && !solvedTask && (planMode || sortMode || opts.length > 0) ? focusSpec : null
     const hr = hoverRing.current
     if (hr) {
       const h = dragging.current < 0 ? hovering.current : -1
@@ -1624,6 +1751,19 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         <>
           {/* בד המפה האמיתי — אריג עם רכס ההרים ממערב ונתיב מנוקד צפונה */}
           <PlanCloth x={T.x} z={T.z} />
+          {/* דרכי הדיו — מן המחנה אל שלוש הדרכים, כל אחת בקשת משלה */}
+          {spots.map((sp, k) => (
+            <InkRoute key={`ink-${sp.id}`} x0={T.x - 0.85} z0={T.z + 0.95} x1={sp.x} z1={sp.z} bend={k === 1 ? -0.4 : 0.35} />
+          ))}
+          {/* נקודת המוצא — טבעת אדומה: מכאן הדרכים נמתחות */}
+          <mesh
+            rotation-x={-Math.PI / 2}
+            position={[T.x - 0.85, groundYAt(T.x - 0.85, T.z + 0.95) + 0.082, T.z + 0.95]}
+            renderOrder={2}
+          >
+            <ringGeometry args={[0.16, 0.24, 28]} />
+            <meshBasicMaterial color="#8a2f23" transparent opacity={0.85} depthWrite={false} />
+          </mesh>
           {/* שלוש הדרכים — עמדות על הבד, עם שמות */}
           {spots.map((sp, k) => (
             <group key={sp.id}>
@@ -1885,6 +2025,10 @@ function Player({ live }: { live: Live }) {
      scratchpad/lab2.mjs `twoshot`. */
   const talkBlend = useRef(0)
   const talkAnchor = useRef({ x: 0, z: 0 })
+  /* תקריב המשימה: בלנד משלו + צד קבוע-למחצה שממנו המצלמה משקיפה */
+  const taskBlend = useRef(0)
+  const taskDir = useRef({ x: 0, z: 1 })
+  const taskCamV = useRef(new THREE.Vector3())
   const twoShotV = useRef(new THREE.Vector3())
   const lookV = useRef(new THREE.Vector3())
 
@@ -2113,10 +2257,25 @@ function Player({ live }: { live: Live }) {
        נשאר false לתמיד, ולכן ההשמה הזאת התכנסה ל-0 ו-Math.max לא עשה כלום —
        מחוות היציאה (`riseAt`) היא היחידה שמרימה את המצלמה אל הדגם. */
 
+    /* תקריב המשימה — נכנס רק כשאין שיחה ואין המראה; יוצא כשהמשימה
+       נפתרת, כשמתרחקים או כשמתחילים לדבר. הצד שממנו משקיפים נמשך לאט
+       אל הצד שבו השחקן עומד, כדי שהתמונה לא תסתובב עם כל צעד. */
+    const tf = live.taskFocus
+    taskBlend.current += ((tf && tb < 0.02 && !riseK ? 1 : 0) - taskBlend.current) * Math.min(1, dt * 2.0)
+    const kf = taskBlend.current
+    if (tf) {
+      const ddx = live.player.x - tf.x
+      const ddz = live.player.z - tf.z
+      const dl = Math.hypot(ddx, ddz) || 1
+      taskDir.current.x += (ddx / dl - taskDir.current.x) * Math.min(1, dt * 1.1)
+      taskDir.current.z += (ddz / dl - taskDir.current.z) * Math.min(1, dt * 1.1)
+    }
+
     const CAM_DIST = 3.7 + rb * 0.65
     const camOffset = new THREE.Vector3(0, 2.45 - rb * 0.15, CAM_DIST).applyAxisAngle(new THREE.Vector3(0, 1, 0), -live.yaw)
     const followFov = 55 + rb * 7 + (34 - (55 + rb * 7)) * tb
-    const wantFov = followFov + (28 - followFov) * riseK
+    let wantFov = followFov + (28 - followFov) * riseK
+    if (tf && kf > 0.002) wantFov += (tf.fov - wantFov) * kf
     if (Math.abs((camera as THREE.PerspectiveCamera).fov - wantFov) > 0.01) {
       ;(camera as THREE.PerspectiveCamera).fov = wantFov
       ;(camera as THREE.PerspectiveCamera).updateProjectionMatrix()
@@ -2225,6 +2384,17 @@ function Player({ live }: { live: Live }) {
       lookV.current.lerp(twoShotV.current.set(live.player.x, 0.9, live.player.z - 1.5), riseK)
     }
 
+    if (tf && kf > 0.002) {
+      const dl = Math.hypot(taskDir.current.x, taskDir.current.z) || 1
+      taskCamV.current.set(
+        tf.x + (taskDir.current.x / dl) * tf.dist,
+        groundYAt(tf.x, tf.z) + tf.y,
+        tf.z + (taskDir.current.z / dl) * tf.dist,
+      )
+      target.lerp(taskCamV.current, kf)
+      lookV.current.lerp(taskCamV.current.set(tf.x, groundYAt(tf.x, tf.z) + tf.look, tf.z), kf)
+    }
+
     /* Keep the lens out of the actors.
        Both blends above are straight lerps between two good camera positions,
        and the chord between them runs through whoever is standing in the
@@ -2233,7 +2403,7 @@ function Player({ live }: { live: Live }) {
        and adding them there would also shove the follow camera around
        harmlessly-standing NPCs. This is the narrower rule: never end up inside
        the two bodies this shot is actually about. */
-    const KEEP_OUT = 1.15
+    const KEEP_OUT = 1.15 * (1 - kf)
     for (const body of [live.player, talkAnchor.current]) {
       const dx = target.x - body.x
       const dz = target.z - body.z
@@ -3585,6 +3755,15 @@ export default function Game() {
      side it was put on, and the miss carries its own correction. */
   const [taskLastOk, setTaskLastOk] = useState(false)
   const taskSolved = REGION_TASK ? solved.includes(REGION_TASK.id) : false
+  /* היציאה נראית רק כשהמסלול נבחר עכשיו, בישיבה הזאת — טעינה של שמירה
+     שכבר פתורה לא משחזרת את הרגע */
+  const [depart, setDepart] = useState(false)
+  const departPrev = useRef(taskSolved)
+  useEffect(() => {
+    if (REGION.id === 'night-camp' && taskSolved && !departPrev.current) setDepart(true)
+    departPrev.current = taskSolved
+  }, [taskSolved])
+  const departDone = useCallback(() => setDepart(false), [])
   /* ההשלמה נבדקת כאן ולא בתוך ה-updater: setState בתוך updater רץ בפאזת
      הרנדור (וב-StrictMode פעמיים), וזה בדיוק ה-"Issue" האדום שקפץ ברגע
      שפתרו משימה. אפקט אחד לשני מסלולי המענה. */
@@ -4228,6 +4407,18 @@ export default function Game() {
               באזור (חותם, מצבה), ובתוך הגבול של העולם הטעינה שלהם החביאה
               את העולם כולו — הפרוג'קטור מת לשניות ארוכות, ובאזור גדול
               עדות נשארה בלי שם. בגבול משלהם הם מגיעים כשהם מגיעים. */}
+          {/* הבחירה על המפה קורית בעולם: השיירה קמה ויוצאת דרומה */}
+          {REGION.id === 'night-camp' && depart && (
+            <Suspense fallback={null}>
+              <DepartingCaravan onDone={departDone} />
+            </Suspense>
+          )}
+          {/* הארגז נטען — הגמל העמוס עומד מוכן ליד הארגז מרגע שהמשימה נפתרה */}
+          {REGION.id === 'loading-road' && taskSolved && (
+            <Suspense fallback={null}>
+              <Prop url="/assets/chapter1/models/camel-load.glb" x={5.7} z={1.1} ry={0.6} height={2.1} />
+            </Suspense>
+          )}
           {REGION_TASK && !taskSolved && (
             <Suspense fallback={null}>
               <TaskProps
@@ -4353,10 +4544,18 @@ export default function Game() {
             </div>
           )}
           {atTask && !encounter && !openTask && !openFind && REGION_TASK && (
-            <div className="hud-panel poi-hint is-task-hint">
-              <i className="hud-key">E</i>
-              <span>{REGION_TASK.prompt}</span>
-            </div>
+            <>
+              {/* מה עושים כאן, במילים — מעל הפרומפט של E */}
+              {REGION_TASK.hint && !taskSolved && (
+                <div className="hud-panel ch1-task-hint" role="status">
+                  <span>{REGION_TASK.hint}</span>
+                </div>
+              )}
+              <div className="hud-panel poi-hint is-task-hint">
+                <i className="hud-key">E</i>
+                <span>{REGION_TASK.prompt}</span>
+              </div>
+            </>
           )}
           {nearPending && !encounter && (
             <div className="hud-panel poi-hint">
