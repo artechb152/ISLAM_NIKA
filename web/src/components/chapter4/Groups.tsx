@@ -35,8 +35,11 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
 export interface Group {
   id: string
-  /** the source's own words for this group */
-  name: string
+  /** The source's own name for the group, where it gives one — המהגרים,
+      התומכים. Left out for the two it does not name: their sentence is so short
+      that a label lifted out of it would print the same words twice, so the
+      SENTENCE is set in the name's type and there is no second line. */
+  name?: string
   /** the group's own sentence, verbatim */
   text: string
   /** the painted vignette, without extension */
@@ -179,10 +182,18 @@ export default function Groups({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/assets/chapter4/${g.img}.jpg`} alt="" aria-hidden="true" loading="lazy" />
       </button>
-      <h4 className="ch4-who-name">{g.name}</h4>
-      <p className="ch4-who-text" id={`${uid}-${g.id}`}>
-        {g.text}
-      </p>
+      {g.name ? (
+        <>
+          <h4 className="ch4-who-name">{g.name}</h4>
+          <p className="ch4-who-text" id={`${uid}-${g.id}`}>
+            {g.text}
+          </p>
+        </>
+      ) : (
+        <h4 className="ch4-who-name is-only" id={`${uid}-${g.id}`}>
+          {g.text}
+        </h4>
+      )}
     </article>
   )
 

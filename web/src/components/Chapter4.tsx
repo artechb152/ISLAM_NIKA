@@ -222,21 +222,6 @@ function T({
 }
 
 
-/** A word LIFTED OUT of a fragment for a label, proved to be in it. A legend
-    that names a thing has to be able to name it, but the name must still be the
-    source's word and not a caption we compose. Throws if the word is not in the
-    fragment at a word boundary, so a label cannot drift from its sentence. */
-const EDGE = /[\s,.;:—"'„”()[\]–-]/
-const pick = (ref: string, phrase: string): string => {
-  const t = text(ref)
-  const at = t.indexOf(phrase)
-  const before = at > 0 ? t[at - 1] : ' '
-  const after = at + phrase.length < t.length ? t[at + phrase.length] : ' '
-  if (at < 0 || !EDGE.test(before) || !EDGE.test(after)) {
-    throw new Error(`chapter 4: "${phrase}" is not a word of ${ref}`)
-  }
-  return phrase
-}
 
 /** The source's own name for a group or a person (המהגרים, התומכים…). Never a
     literal: if the source did not name it, the label has to be `pick`ed out of
@@ -637,10 +622,15 @@ export default function Chapter4() {
                 </Block>
                 {/* §3 ends on a colon and then lists four groups. The list is the
                     figure; §3.b's „ארבע קבוצות אנשים" is the sentence that hands
-                    off to it. Every label below is the source's own word — two
-                    have a `name` in passages.json, two are lifted out of their
-                    own sentence by `pick`, which throws if the phrase is not
-                    there. */}
+                    off to it.
+
+                    TWO OF THE FOUR HAVE A NAME IN THE SOURCE and two do not, so
+                    two carry `nameOf` above their sentence and two are set as
+                    the sentence alone. Nothing here is captioned in words this
+                    file composed.
+
+                    THE FOURTH IS MARKED `away` because the source puts it
+                    somewhere else: „ובמכה התגוררו הכופרים משבט קריש". */}
                 <Groups
                   city="medina-622"
                   cityAlt="ית'רב — שחזור מצויר"
@@ -649,14 +639,8 @@ export default function Chapter4() {
                   groups={[
                     { id: 'muhajirun', name: nameOf('§3.muhajirun'), text: text('§3.muhajirun'), img: 'who-muhajirun' },
                     { id: 'ansar', name: nameOf('§3.ansar'), text: text('§3.ansar'), img: 'who-ansar' },
-                    { id: 'jews', name: pick('§3.jews', 'שלושת השבטים היהודים'), text: text('§3.jews'), img: 'who-jews' },
-                    {
-                      id: 'quraysh',
-                      name: pick('§3.quraysh', 'הכופרים משבט קריש'),
-                      text: text('§3.quraysh'),
-                      img: 'who-quraysh',
-                      away: true,
-                    },
+                    { id: 'jews', text: text('§3.jews'), img: 'who-jews' },
+                    { id: 'quraysh', text: text('§3.quraysh'), img: 'who-quraysh', away: true },
                   ]}
                 />
                 <SubHead section="hijra" id="covenant" />

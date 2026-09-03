@@ -1036,7 +1036,7 @@
 }
 @media (min-width:900px){
   .ch4-who-stage{
-    grid-template-columns:minmax(190px,1fr) minmax(0,1.35fr) minmax(190px,1fr);
+    grid-template-columns:minmax(180px,.85fr) minmax(0,2.1fr) minmax(180px,.85fr);
     gap:clamp(24px,3.4vw,52px);
   }
 }
@@ -1098,6 +1098,9 @@
 }
 .ch4-who-card.is-away .ch4-who-name{color:var(--gold-text)}
 .ch4-who-text{margin:0;font-size:15px;line-height:1.6;color:var(--ink)}
+/* the two groups the source does not name: the sentence IS the label, so it is
+   set in the name's type and no second line follows it */
+.ch4-who-name.is-only{font-weight:600;font-size:clamp(15px,1.5vw,17.5px);line-height:1.5}
 
 /* NOTHING MOVES for a reader who asked for that: no draw, no fade, no delay —
    the figure is simply already in its finished state. */
