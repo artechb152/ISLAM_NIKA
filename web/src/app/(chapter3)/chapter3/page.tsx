@@ -1,5 +1,5 @@
-import Chapter3 from '@/components/Chapter3'
+import Chapter3Comic from '@/components/Chapter3Comic'
 
 export default function Page() {
-  return <Chapter3 />
+  return <Chapter3Comic />
 }

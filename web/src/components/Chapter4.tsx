@@ -42,7 +42,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import BadrFilm from '@/components/chapter4/BadrFilm'
 import Ditch from '@/components/chapter4/Ditch'
 import Forces from '@/components/chapter4/Forces'
-import RouteMap from '@/components/chapter4/RouteMap'
 import Spots from '@/components/chapter4/Spots'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
@@ -1035,26 +1034,13 @@ export default function Chapter4() {
                   </div>
                 </div>
                 <Head id="hijra" />
-                <RouteMap
-                  label="הדרך ממכה למדינה"
-                  stops={[
-                    { id: 'mecca', name: 'מכה', x: 71, y: 76 },
-                    { id: 'badr', name: 'בדר', year: '624', x: 33, y: 49 },
-                    { id: 'medina', name: 'ית'+String.fromCharCode(39)+'רב', year: '622', x: 71, y: 33 },
-                    { id: 'khaybar', name: 'ח'+String.fromCharCode(39)+'יבר', x: 34, y: 15 },
-                  ]}
-                />
                 <Block>
-                  <Block>
                   <T r="§0.a" className="ch4-body" />
                   <T r="§0.b" className="ch4-body" />
-                  </Block>
                 </Block>
                 <Block>
-                  <Block>
                   <T r="§1.a" className="ch4-body" em={["ית'רב"]} />
                   <T r="§1.b" className="ch4-body" />
-                  </Block>
                 </Block>
                 <Versions a="§2.flight" b="§2.invited" labels={['בריחה', 'הזמנה']} />
 
@@ -1084,11 +1070,9 @@ export default function Chapter4() {
                   ]}
                 />
                 <Block>
-                  <Block>
                   <T r="§7.a" className="ch4-body" />
                   <T r="§7.b" className="ch4-body" />
                   <T r="§7.c" className="ch4-body" />
-                  </Block>
                 </Block>
                 <Block>
                   <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />

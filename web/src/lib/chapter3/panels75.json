@@ -1,0 +1,2375 @@
+{
+  "$note": "הפאנלים של הקומיקס: 151 ביטים על 75 פאנלים. שדה art מצביע על נכס קיים מתוך 58 שכבר הופקו; needsArt מסמן פאנל שאין לו עדיין ציור.",
+  "$art": "panels.json נשאר כמות שהוא — הוא הרישום של מה שכל אחת מ-58 התמונות נבדקה מולו, ואסור למחוק אותו.",
+  "panels": [
+    {
+      "id": "q01",
+      "part": "שנת הפיל",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§0",
+          "t": "שנת 570. מכה.",
+          "v": false
+        },
+        {
+          "s": "§0",
+          "t": "לפי המסורת — כאן נולד מוחמד.",
+          "v": false
+        }
+      ],
+      "art": "p01",
+      "must": [
+        "מכה כעיירה קטנה בעמק צחיח, לא עיר גדולה",
+        "אור שחר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "כתב"
+      ],
+      "needsArt": false,
+      "assetId": "p01"
+    },
+    {
+      "id": "q02",
+      "part": "שנת הפיל",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§0",
+          "t": "באסלאם קוראים לשנה הזאת שנת הפיל.",
+          "v": false
+        },
+        {
+          "s": "§1",
+          "t": "אברהה, מלך אקסום, יצא לכבוש את הכעבה.",
+          "v": false
+        }
+      ],
+      "art": "p02",
+      "must": [
+        "אברהה וחייליו — מותר, אינם נביאים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "תנועה מתימן לעבר מכה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p02"
+    },
+    {
+      "id": "q03",
+      "part": "שנת הפיל",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§1",
+          "t": "ממלכתו הנוצרית השתרעה מחבש עד תימן.",
+          "v": false
+        },
+        {
+          "s": "§1",
+          "t": "הכעבה — אתר פולחן אלילי.",
+          "v": false
+        }
+      ],
+      "art": "A plain cube of dark dry-laid granite standing alone on open sand in a shallow desert valley, ringed at a distance by rough upright pagan standing-stones, bare hills beyond, early light. No people. No mosque, no dome, no minaret, no cloth covering.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§1 · הכעבה כאתר פולחן אלילי",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q03"
+    },
+    {
+      "id": "q04",
+      "part": "שנת הפיל",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§2",
+          "t": "הצבא הגיע. בראשו פיל.",
+          "v": false
+        },
+        {
+          "s": "§2",
+          "t": "ואז שלח אללה את האבאביל.",
+          "v": false
+        }
+      ],
+      "art": "p03",
+      "must": [
+        "להקת ציפורים רבות, לא בודדות",
+        "פיל אפריקאי — אוזניים גדולות ופרושות, גב משופע, חטים ארוכים קדימה. אברהה אקסומי, ולא הודי",
+        "הפיל נושא רוכבים",
+        "אבנים נופלות מן הציפורים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "מהומה ובריחה — לא זירת טבח"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "פיל הודי",
+        "גופות",
+        "דם"
+      ],
+      "needsArt": false,
+      "assetId": "p03"
+    },
+    {
+      "id": "q05",
+      "part": "שנת הפיל",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§2",
+          "t": "ציפורים, ובפיהן אבני טין ואש.",
+          "v": false
+        },
+        {
+          "s": "§2",
+          "t": "מכה ניצלה.",
+          "v": false
+        }
+      ],
+      "art": "p04",
+      "must": [
+        "אחרי: הדרך ריקה, מכה עומדת",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "גופות",
+        "דם"
+      ],
+      "needsArt": false,
+      "assetId": "p04"
+    },
+    {
+      "id": "q06",
+      "part": "שנת הפיל",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§2",
+          "t": "הקוראן מספר זאת בסורת הפיל.",
+          "v": false
+        },
+        {
+          "s": "§3",
+          "t": "ולמה הכשיל אללה את אברהה?",
+          "v": false
+        }
+      ],
+      "art": "p05",
+      "must": [
+        "מכה בלילה מלמעלה, שקטה ושלמה — העיר שניצלה, לפני שנולד בה מישהו",
+        "בית אחד מואר בין הבתים החשוכים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "משה",
+        "תיבה",
+        "נילוס"
+      ],
+      "needsArt": false,
+      "assetId": "p05"
+    },
+    {
+      "id": "q07",
+      "part": "שנת הפיל",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§3",
+          "t": "כי כאן, בעוד חודשים ספורים, ייוולד מוחמד.",
+          "v": false
+        },
+        {
+          "s": "§3",
+          "t": "כמו משה בתיבה — הצלה בשביל ייעוד שעוד לא התחיל.",
+          "v": false
+        }
+      ],
+      "art": "A small 6th-century desert town seen from a ridge at night, quiet and whole, dark hills around it, one window lit among the dark houses. No people.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§3 · העיר שניצלה, בלילה",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q07"
+    },
+    {
+      "id": "q08",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§7",
+          "t": "מוחמד. משמעו: מהולל, משובח.",
+          "v": false
+        },
+        {
+          "s": "§7",
+          "t": "נולד במכה, למשפחת האשם.",
+          "v": false
+        }
+      ],
+      "art": "p09",
+      "must": [
+        "בית האשם במכה — מבנה אבן צנוע",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "needsArt": false,
+      "assetId": "p09"
+    },
+    {
+      "id": "q09",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§7",
+          "t": "על שם אבי סבו.",
+          "v": false
+        },
+        {
+          "s": "§7",
+          "t": "המשפחה משתייכת לשבט קריש — שבט אצולה.",
+          "v": false
+        }
+      ],
+      "art": "p10",
+      "must": [
+        "קריש כשבט אצולה — מעמד נראה בלבוש ובמיקום",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "needsArt": false,
+      "assetId": "p10"
+    },
+    {
+      "id": "q10",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§8",
+          "t": "אביו: עבד אללה בן עבד אלמטלב.",
+          "v": false
+        },
+        {
+          "s": "§8",
+          "t": "אמו: אאמנה בנת והב, בת למשפחה עשירה במכה.",
+          "v": false
+        }
+      ],
+      "art": "p11",
+      "must": [
+        "עבד אללה ואאמנה — שניהם מותרים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p11"
+    },
+    {
+      "id": "q11",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§9",
+          "t": "„עבד אללה” — עבדו של אללה.",
+          "v": false
+        },
+        {
+          "s": "§9",
+          "t": "הפגאנים הכירו את אללה כאל עליון.",
+          "v": false
+        }
+      ],
+      "art": "p12",
+      "must": [
+        "אנצאב — אבני פולחן ניצבות סביב מתחם פתוח, בשעת בין־ערביים",
+        "אחת מהן גבוהה מן השאר ומעט מרוחקת"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "צלם",
+        "פסל בפוקוס"
+      ],
+      "needsArt": false,
+      "assetId": "p12"
+    },
+    {
+      "id": "q12",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§9",
+          "t": "והוסיפו לו אלילים נחותים ממנו.",
+          "v": false
+        },
+        {
+          "s": "§10",
+          "t": "על ילדותו כמעט לא מסופר.",
+          "v": false
+        }
+      ],
+      "art": "p13",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "עדר במדבר",
+        "שני אנשים ניגשים — מלאכים, ולכן אור ולא גוף"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "יד",
+        "צללית",
+        "כנפיים"
+      ],
+      "needsArt": false,
+      "assetId": "p13"
+    },
+    {
+      "id": "q13",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§10",
+          "t": "אבל פעם, כשרעה בהמות במדבר עם אחיו —",
+          "v": false
+        },
+        {
+          "s": "§10",
+          "t": "באו אליו שני אנשים נושאי שלג.",
+          "v": false
+        }
+      ],
+      "art": "Point of view of a boy on stony desert ground beside a scatter of sheep: an intense pale white light is close now, filling the middle of the frame, cold and bright against the warm desert. No person, no hands, no figure, no silhouette anywhere.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§10 · שני האנשים מתקרבים",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, ANY human figure or person of any kind, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q13"
+    },
+    {
+      "id": "q14",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§10",
+          "t": "הם פתחו את ליבו, ניקו ממנו נקודה שחורה,",
+          "v": false
+        },
+        {
+          "s": "§10",
+          "t": "שטפו במים ממעיין זמזם, והחזירו אותו למקומו.",
+          "v": false
+        }
+      ],
+      "art": "A small clear spring welling up between bare desert rocks into a shallow stone basin, water catching the light, nobody there. No people, no hands.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§10 · מעיין זמזם",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q14"
+    },
+    {
+      "id": "q15",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§11",
+          "t": "פרשני המסורות: אלה היו גבריאל ועוזרו.",
+          "v": false
+        },
+        {
+          "s": "§11",
+          "t": "והנקודה השחורה — כתם שדבק בו בסביבת עובדי האלילים.",
+          "v": false
+        }
+      ],
+      "art": "p14",
+      "must": [
+        "הר וסלע ריקים באור קר — הנוף שבו קרה הדבר, בלי הדבר עצמו",
+        "שכבת פרשנות — מה אומרים הפרשנים. שקט"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "לב אנטומי",
+        "דם"
+      ],
+      "needsArt": false,
+      "assetId": "p14"
+    },
+    {
+      "id": "q16",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§11",
+          "t": "היה צריך להסירו כדי להכשירו לשליחות.",
+          "v": false
+        },
+        {
+          "s": "§11",
+          "t": "הקוראן רומז לכך בפרשה 94:",
+          "v": false
+        }
+      ],
+      "art": "p15",
+      "must": [
+        "שמיים פתוחים ורחבים מעל מדבר ריק — מרחב, לא סצנה",
+        "קופסת פסוק בזהב, על רקע שקט"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי"
+      ],
+      "needsArt": false,
+      "assetId": "p15"
+    },
+    {
+      "id": "q17",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§11",
+          "t": "„האם לא הבאנו רווחה ללבך?”",
+          "v": true
+        }
+      ],
+      "art": "An empty rocky summit under a wide cold sky, one bare boulder in the foreground, nothing else — the place a thing was done, with the thing itself absent. No people.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§11 · ההכשרה לשליחות",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q17"
+    },
+    {
+      "id": "q18",
+      "part": "הלידה, המשפחה והילדות",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§12",
+          "t": "עד גיל שש התייתם מאביו ואחר כך מאמו.",
+          "v": false
+        },
+        {
+          "s": "§12",
+          "t": "תחילה גדל בבית סבו, עבד אלמטלב.",
+          "v": false
+        },
+        {
+          "s": "§12",
+          "t": "וכשזה מת — עבר לדודו אבו טאלב.",
+          "v": false
+        }
+      ],
+      "art": "p16",
+      "must": [
+        "יתמות — בית ריק או שני סימני קבר, בלי גופה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "גופה",
+        "טקס קבורה"
+      ],
+      "needsArt": false,
+      "assetId": "p16"
+    },
+    {
+      "id": "q19",
+      "part": "ח'דיג'ה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§13",
+          "t": "כנער החל לעבוד אצל סוחרת מכאית עשירה — ח'דיג'ה.",
+          "v": false
+        },
+        {
+          "s": "§13",
+          "t": "ויצא בשליחותה למסעות מסחר בחצי האי ובלבנט.",
+          "v": false
+        }
+      ],
+      "art": "p18",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "שיירת מסחר יוצאת ללבנט — גמלים ומטען"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p18"
+    },
+    {
+      "id": "q20",
+      "part": "ח'דיג'ה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§14",
+          "t": "לימים נשא אותה לאישה. הוא בן 25, היא בת 40.",
+          "v": false
+        },
+        {
+          "s": "§14",
+          "t": "נולדו להם ארבע בנות: פאטמה, זינב, אום כלת'ום ורקיה.",
+          "v": false
+        }
+      ],
+      "art": "p19",
+      "must": [
+        "ח׳דיג׳ה מצוירת — סוחרת אמידה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "הפרש הגילים נראה: היא המבוגרת"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "טקס חתונה מודרני"
+      ],
+      "needsArt": false,
+      "assetId": "p19"
+    },
+    {
+      "id": "q21",
+      "part": "ח'דיג'ה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§15",
+          "t": "יש מסורות על בנים — אחד מהם קאסם.",
+          "v": false
+        },
+        {
+          "s": "§15",
+          "t": "כולם מתו בילדותם.",
+          "v": false
+        }
+      ],
+      "art": "p20",
+      "must": [
+        "ארבע בנות — ארבע דמויות בדיוק",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p20"
+    },
+    {
+      "id": "q22",
+      "part": "ח'דיג'ה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§16",
+          "t": "על היתמות ועל השינוי במעמדו רומז הקוראן בפרשה 93:",
+          "v": false
+        },
+        {
+          "s": "§16",
+          "t": "„הלא מצאך יתום ואספך.”",
+          "v": true
+        }
+      ],
+      "art": "p21",
+      "must": [
+        "בית אבן צנוע שהפך אמיד — חצר מסודרת, כדים מלאים, אור חם",
+        "קופסת פסוק בזהב"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי"
+      ],
+      "needsArt": false,
+      "assetId": "p21"
+    },
+    {
+      "id": "q23",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§17",
+          "t": "חודש בשנה הוא עלה להר.",
+          "v": false
+        },
+        {
+          "s": "§17",
+          "t": "למערת חראא', מעל מכה.",
+          "v": false
+        }
+      ],
+      "art": "p22",
+      "must": [
+        "הדרך במעלה ההר אל המערה",
+        "המערה נראית מבחוץ כפתח בסלע"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מנזר",
+        "צלב"
+      ],
+      "needsArt": false,
+      "assetId": "p22"
+    },
+    {
+      "id": "q24",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§17",
+          "t": "להתבודד כמנהג נזירים — אלתחנת'.",
+          "v": false
+        },
+        {
+          "s": "§17",
+          "t": "מחשבה, התבוננות, צדקה, הקפת הכעבה.",
+          "v": false
+        }
+      ],
+      "art": "p23",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "פנים המערה — ריקה, בלי חפצים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "נזיר",
+        "נר",
+        "ספר"
+      ],
+      "needsArt": false,
+      "assetId": "p23"
+    },
+    {
+      "id": "q25",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§18",
+          "t": "שנת 610. הוא בן ארבעים.",
+          "v": false
+        },
+        {
+          "s": "§18",
+          "t": "גיל סמלי — „בן ארבעים לבינה”.",
+          "v": false
+        }
+      ],
+      "art": "p24",
+      "must": [
+        "שקט לפני — המערה בלילה, לפני האור"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "אור על־טבעי"
+      ],
+      "needsArt": false,
+      "assetId": "p24"
+    },
+    {
+      "id": "q26",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§18",
+          "t": "ואז בא החיזיון.",
+          "v": false
+        },
+        {
+          "s": "§18",
+          "t": "המלאך גבריאל, וחמישה גווילים נפרסים לפניו.",
+          "v": false
+        }
+      ],
+      "art": "p25",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "פנים המערה — פתח מעוגל וסלע ממסגר מכל צד. חייב להיקרא כמערה",
+        "בדיוק חמישה גווילים",
+        "הגווילים פרוסים ופונים אל הצופה",
+        "אור חזק שנקרא כנוכחות ולא כתאורה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש",
+        "יד",
+        "צללית",
+        "כנפיים",
+        "כתב על הגווילים"
+      ],
+      "needsArt": false,
+      "assetId": "p25"
+    },
+    {
+      "id": "q27",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§19",
+          "t": "„קרא.”",
+          "v": true
+        }
+      ],
+      "art": "p26",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "אותה מערה, אותו אור — המשך ישיר של p25"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש",
+        "יד"
+      ],
+      "needsArt": false,
+      "assetId": "p26"
+    },
+    {
+      "id": "q28",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§19",
+          "t": "„אינני קורא.”",
+          "v": true
+        }
+      ],
+      "art": "p27",
+      "must": [
+        "פנים המערה בבוקר שאחרי, ריקה, האור רגיל שוב",
+        "קופסת פסוק בזהב — סורה 96, המילים הראשונות שנתגלו"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי"
+      ],
+      "needsArt": false,
+      "assetId": "p27"
+    },
+    {
+      "id": "q29",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§19",
+          "t": "שלוש פעמים.",
+          "v": false
+        },
+        {
+          "s": "§19",
+          "t": "עד שגבריאל סייע לו — והוא קרא את פרשה 96:",
+          "v": false
+        }
+      ],
+      "art": "Interior of the same bare rock cave from the same seated point of view, the warm golden light dimmer now and the five blank scrolls drawn back a little further into it. No person, no hands, no figure.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§19 · הסירוב",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, ANY human figure or person of any kind, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q29"
+    },
+    {
+      "id": "q30",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "splash",
+      "beats": [
+        {
+          "s": "§19",
+          "t": "„קרא בשם ריבונך אשר ברא את האדם מטיפת דם קרוש, קרא הן ריבונך רב חסד...”",
+          "v": true
+        }
+      ],
+      "art": "Interior of the same bare rock cave from the same seated point of view, the golden light at its brightest, the five blank scrolls very close and filling the frame. No person, no hands, no figure.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§19 · והוא קרא",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, ANY human figure or person of any kind, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q30"
+    },
+    {
+      "id": "q31",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§20",
+          "t": "על „אינני קורא” נחלקו המסורות.",
+          "v": false
+        },
+        {
+          "s": "§20",
+          "t": "יש המפרשים כפשוטו: הוא לא ידע קרוא וכתוב.",
+          "v": false
+        },
+        {
+          "s": "§20",
+          "t": "כך הנס גדל — וגם נסתמת הטענה שדבריו נכתבו בהשפעת זרים.",
+          "v": false
+        }
+      ],
+      "art": "p28",
+      "must": [
+        "גוויל וקולמוס מונחים על אבן, לא בשימוש — השאלה אם ידע לקרוא",
+        "שני צללים נופלים עליהם משני כיוונים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "ספר",
+        "קולמוס בפוקוס"
+      ],
+      "needsArt": false,
+      "assetId": "p28"
+    },
+    {
+      "id": "q32",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§21",
+          "t": "זה קרה בליל ה-27 לרמדאן.",
+          "v": false
+        },
+        {
+          "s": "§21",
+          "t": "לילה' אלקדר — ליל הגורל.",
+          "v": false
+        },
+        {
+          "s": "§22",
+          "t": "הוא חזר הביתה וסיפר לח'דיג'ה.",
+          "v": false
+        }
+      ],
+      "art": "p29",
+      "must": [
+        "ליל הגורל — שמי לילה, בלי דמות"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "סהר כסמל",
+        "מסגד"
+      ],
+      "needsArt": false,
+      "assetId": "p29"
+    },
+    {
+      "id": "q33",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§22",
+          "t": "וביקש שיעטו אותו בשמיכה, מרוב התרגשות.",
+          "v": false
+        },
+        {
+          "s": "§22",
+          "t": "ח'דיג'ה, נבוכה, התייעצה עם דודה הנוצרי נופל.",
+          "v": false
+        },
+        {
+          "s": "§22",
+          "t": "נופל אישר: החיזיון הוא סימן לנבואת אמת.",
+          "v": false
+        }
+      ],
+      "art": "p30",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "הבית מבפנים; שמיכה נפרסת אלינו"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p30"
+    },
+    {
+      "id": "q34",
+      "part": "ההתגלות הראשונה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§23",
+          "t": "מאותה שעה האמינה בו.",
+          "v": false
+        },
+        {
+          "s": "§23",
+          "t": "וזכתה לכינוי „אם המאמינים” — ראשונת המתאסלמים.",
+          "v": false
+        }
+      ],
+      "art": "p32",
+      "must": [
+        "ח׳דיג׳ה מאמינה — תנוחה של קבלה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p32"
+    },
+    {
+      "id": "q35",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§24",
+          "t": "הבשורה שלו על האל:",
+          "v": false
+        },
+        {
+          "s": "§24",
+          "t": "אללה הוא ריבון העולם ובוראו. אין בלתו. הוא נצחי.",
+          "v": false
+        },
+        {
+          "s": "§24",
+          "t": "והאנושות חוטאת ללא הרף בשיתוף אלילים — שרכ.",
+          "v": false
+        }
+      ],
+      "art": "p33",
+      "must": [
+        "מתחם הכעבה מרחוק בשעת בוקר, אנצאב סביב — העולם שאליו מופנית הבשורה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "אללה כדמות"
+      ],
+      "needsArt": false,
+      "assetId": "p33"
+    },
+    {
+      "id": "q36",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§25",
+          "t": "הוא החל להטיף לתושבי מכה על ייחוד האל.",
+          "v": false
+        },
+        {
+          "s": "§25",
+          "t": "ועל יום הדין, שבו ייענשו הכופרים.",
+          "v": false
+        }
+      ],
+      "art": "p34",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "קהל מקשיב במתחם",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "קבורת תינוקת",
+        "גופת ילדה"
+      ],
+      "needsArt": false,
+      "assetId": "p34"
+    },
+    {
+      "id": "q37",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§25",
+          "t": "וביקר קשות מנהגים מהתקופה שקדמה — כגון קבורת בנות.",
+          "v": false
+        },
+        {
+          "s": "§26",
+          "t": "מרבית תושבי מכה לא רצו לשמוע.",
+          "v": false
+        }
+      ],
+      "art": "p35",
+      "must": [
+        "מרבית תושבי מכה — קהל ולא קבוצה קטנה",
+        "שפת גוף של סירוב ועוינות",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "needsArt": false,
+      "assetId": "p35"
+    },
+    {
+      "id": "q38",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§26",
+          "t": "ואף פתחו בעוינות.",
+          "v": false
+        },
+        {
+          "s": "§26",
+          "t": "כי מכה הייתה מרכז עובדי האלילים בחצי האי.",
+          "v": false
+        }
+      ],
+      "art": "p36",
+      "must": [
+        "היריד השנתי — שבטים, סחורה, תנועה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "needsArt": false,
+      "assetId": "p36"
+    },
+    {
+      "id": "q39",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§26",
+          "t": "מדי שנה הגיעו שבטים לחגוג ביריד שבעיר.",
+          "v": false
+        },
+        {
+          "s": "§26",
+          "t": "עיר של אל אחד — פירושה כלכלה מרוסקת.",
+          "v": false
+        }
+      ],
+      "art": "A narrow street of a small 6th-century desert town with every door shut and every window shuttered, a few robed figures turning into doorways with their backs to the viewer, dust in the light.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§26 · העיר מסתגרת",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q39"
+    },
+    {
+      "id": "q40",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§27",
+          "t": "וטענה נוספת: מונותאיזם כבר מוכר לנו.",
+          "v": false
+        },
+        {
+          "s": "§27",
+          "t": "מהיהדות ומהנצרות. ולו רצינו — היינו בוחרים בהן.",
+          "v": false
+        }
+      ],
+      "art": "p37",
+      "must": [
+        "שיירה נוצרית ויהודית עוברת במדבר — הדתות שאנשי מכה כבר הכירו",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "ספר תורה",
+        "ברית חדשה",
+        "צלב"
+      ],
+      "needsArt": false,
+      "assetId": "p37"
+    },
+    {
+      "id": "q41",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§27",
+          "t": "„אגדות של הקדמונים”",
+          "v": true
+        }
+      ],
+      "art": "A worn desert crossroads with two faint diverging tracks running off toward distant hills, a weathered stone marker where they part, empty. No people, no crosses, no buildings.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§27 · הדתות שכבר הכירו",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q41"
+    },
+    {
+      "id": "q42",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§28",
+          "t": "בכל שתים־עשרה שנות ההטפה במכה —",
+          "v": false
+        },
+        {
+          "s": "§28",
+          "t": "לא יותר מ-150 איש הצטרפו אליו.",
+          "v": false
+        },
+        {
+          "s": "§29",
+          "t": "הראשונים: ח'דיג'ה אשתו, אבו בכר ידידו,",
+          "v": false
+        }
+      ],
+      "art": "p38",
+      "must": [
+        "מיעוט קטן מול עיר — הניגוד הכמותי נראה בפריים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p38"
+    },
+    {
+      "id": "q43",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§29",
+          "t": "עלי בן דודו, וזיד עבדו המשוחרר.",
+          "v": false
+        },
+        {
+          "s": "§29",
+          "t": "ועוד מעטים — אלצחאבה, ממשיכי דרכו.",
+          "v": false
+        }
+      ],
+      "art": "p39",
+      "must": [
+        "המתאסלמים הראשונים — קבוצה מצומצמת ומזוהה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p39"
+    },
+    {
+      "id": "q44",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§30",
+          "t": "הרדיפות גברו.",
+          "v": false
+        },
+        {
+          "s": "§30",
+          "t": "מוחמד שלח קבוצה מתומכיו לחבש.",
+          "v": false
+        }
+      ],
+      "art": "p40",
+      "must": [
+        "קבוצה יוצאת להגירה — רדיפה מאחור, דרך לפנים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p40"
+    },
+    {
+      "id": "q45",
+      "part": "הטפה למונותאיזם",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§30",
+          "t": "מלך חבש קיבל אותם יפה, אף שהיה נוצרי.",
+          "v": false
+        },
+        {
+          "s": "§30",
+          "t": "זו ההגירה הראשונה — אלהג'רה' אלאולא.",
+          "v": false
+        }
+      ],
+      "art": "p41",
+      "must": [
+        "מלך חבש מקבל אותם — מותר, אינו נביא",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "חבש: נוף ולבוש שונים ממכה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "צלב גדול",
+        "כנסייה מונומנטלית"
+      ],
+      "needsArt": false,
+      "assetId": "p41"
+    },
+    {
+      "id": "q46",
+      "part": "שנת העצב",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§31",
+          "t": "שנת 619. שנת העצב.",
+          "v": false
+        },
+        {
+          "s": "§31",
+          "t": "בשנה אחת מתו שני האנשים הקרובים לו ביותר.",
+          "v": false
+        }
+      ],
+      "art": "p42",
+      "must": [
+        "אבו טאלב — מותר",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "רגיסטר שקט, אור אחרון"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "גופה",
+        "טקס קבורה"
+      ],
+      "needsArt": false,
+      "assetId": "p42"
+    },
+    {
+      "id": "q47",
+      "part": "שנת העצב",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§31",
+          "t": "הראשון: אבו טאלב, דודו.",
+          "v": false
+        },
+        {
+          "s": "§31",
+          "t": "הוא מעולם לא התאסלם — והגן עליו כל השנים.",
+          "v": false
+        }
+      ],
+      "art": "An empty stone bench against a courtyard wall in the last light of day, a folded cloak left on it, nobody sitting there. Long shadows. No people, no body, no funeral.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§31 · המגן שנעלם",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q47"
+    },
+    {
+      "id": "q48",
+      "part": "שנת העצב",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§32",
+          "t": "שבועות אחר כך מתה ח'דיג'ה, בת 65.",
+          "v": false
+        },
+        {
+          "s": "§32",
+          "t": "בכל שנות נישואיהם לא נשא אישה אחרת לצדה.",
+          "v": false
+        }
+      ],
+      "art": "p43",
+      "must": [
+        "השקט הגדול של הפרק — בית ריק, ארבע בנות",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "גופה",
+        "אבל מוחצן"
+      ],
+      "needsArt": false,
+      "assetId": "p43"
+    },
+    {
+      "id": "q49",
+      "part": "שנת העצב",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§32",
+          "t": "עכשיו נותר לבד עם ארבע בנותיו.",
+          "v": false
+        },
+        {
+          "s": "§33",
+          "t": "לבנותיו מסר תנחומים:",
+          "v": false
+        }
+      ],
+      "art": "p44",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "המסר לבנות — שקט. גבריאל אינו בפריים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "גן עדן",
+        "ענן"
+      ],
+      "needsArt": false,
+      "assetId": "p44"
+    },
+    {
+      "id": "q50",
+      "part": "שנת העצב",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§33",
+          "t": "גבריאל בישר לו שמקומה בגן עדן, כאם המאמינים.",
+          "v": false
+        },
+        {
+          "s": "§34",
+          "t": "הוא עבר עם הבנות לקרובים רחוקים.",
+          "v": false
+        }
+      ],
+      "art": "p45",
+      "must": [
+        "לילות למרגלות הכעבה; הדרך לטאא׳ף",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p45"
+    },
+    {
+      "id": "q51",
+      "part": "שנת העצב",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§34",
+          "t": "וכשההתנכלויות גברו — יצא בלילות למרגלות הכעבה.",
+          "v": false
+        },
+        {
+          "s": "§34",
+          "t": "ולעיתים למסגד בטאא'ף, וחזר לפנות בוקר.",
+          "v": false
+        }
+      ],
+      "art": "A bare mountain road climbing east away from a dark valley town at night under stars, empty, winding up between rocks. No people, no animals.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§34 · הדרך לטאא׳ף",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q51"
+    },
+    {
+      "id": "q52",
+      "part": "המסע הלילי",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§35",
+          "t": "לילה אחד בשנת 621.",
+          "v": false
+        },
+        {
+          "s": "§35",
+          "t": "הגיעה אליו בהמה פלאית — אלבראק.",
+          "v": false
+        }
+      ],
+      "art": "p46",
+      "must": [
+        "הדרך היוצאת ממכה בלילה, תחת כוכבים",
+        "אלבראק מתואר בכתוב ואינו מצויר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אלבראק",
+        "בהמה פלאית",
+        "כנפיים"
+      ],
+      "needsArt": false,
+      "assetId": "p46"
+    },
+    {
+      "id": "q53",
+      "part": "המסע הלילי",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§35",
+          "t": "גבוהה מחמור, נמוכה מפרד, ופסיעותיה כטווח ראייתה.",
+          "v": false
+        },
+        {
+          "s": "§36",
+          "t": "הוא רכב עליה עד „המסגד הקיצון” — אלאקצא.",
+          "v": false
+        }
+      ],
+      "art": "p47",
+      "must": [
+        "מבנה תפילה רחוק ומופשט לחלוטין — צללית אבן פשוטה על אופק, בלי פרט מזהה",
+        "בהמה קשורה ליד אבן — נראית רק כחבל ויתד, הבהמה מחוץ לפריים",
+        "„המסגד הקיצון\" — מופשט לחלוטין, בלי מבנה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אלאקצא",
+        "כיפת הסלע",
+        "ירושלים",
+        "עיר מודרנית",
+        "מסגד",
+        "כיפה",
+        "מינרט"
+      ],
+      "needsArt": false,
+      "assetId": "p47"
+    },
+    {
+      "id": "q54",
+      "part": "המסע הלילי",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§36",
+          "t": "וקשר אותה „במקום בו קושרים הנביאים את בהמותיהם”.",
+          "v": false
+        },
+        {
+          "s": "§37",
+          "t": "גבריאל ערך לו מבחן נבואה.",
+          "v": false
+        }
+      ],
+      "art": "p48",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "שני כדים מוגשים אלינו — יין וחלב"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "יד"
+      ],
+      "needsArt": false,
+      "assetId": "p48"
+    },
+    {
+      "id": "q55",
+      "part": "המסע הלילי",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§37",
+          "t": "שני כדים: אחד יין, אחד חלב.",
+          "v": false
+        },
+        {
+          "s": "§37",
+          "t": "עליו לבחור.",
+          "v": false
+        }
+      ],
+      "art": "p49",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "כד החלב נבחר — הכד השני נותר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "יד"
+      ],
+      "needsArt": false,
+      "assetId": "p49"
+    },
+    {
+      "id": "q56",
+      "part": "המסע הלילי",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§37",
+          "t": "הוא בחר בחלב — טהרה וזכות. היין אסור באסלאם.",
+          "v": false
+        },
+        {
+          "s": "§38",
+          "t": "ואז התפלל כאמאם, בראש כל הנביאים שקדמו לו.",
+          "v": false
+        }
+      ],
+      "art": "p50",
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "שורות תפילה ריקות לחלוטין — אף אדם בפריים",
+        "מבנה פשוט וחשוף, לא מסגד"
+      ],
+      "mustNot": [
+        "כל דמות אנוש",
+        "מוחמד",
+        "גבריאל",
+        "אברהם",
+        "משה",
+        "ישוע",
+        "מסגד",
+        "כיפה",
+        "מינרט"
+      ],
+      "needsArt": false,
+      "assetId": "p50"
+    },
+    {
+      "id": "q57",
+      "part": "המסע הלילי",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§38",
+          "t": "האסלאם רואה בכך הוכחה שהוא „חותם הנביאים”.",
+          "v": false
+        },
+        {
+          "s": "§38",
+          "t": "אחרת — אברהם, משה או ישו היו מובילים.",
+          "v": false
+        }
+      ],
+      "art": "Point of view from the very front of a simple open desert prayer enclosure looking back at long empty rows of reed mats on bare earth, low mud walls, open sky. Completely deserted — not one person anywhere.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§38 · חותם הנביאים",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, ANY human figure or person of any kind, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q57"
+    },
+    {
+      "id": "q58",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§39",
+          "t": "משם עלה גבריאל איתו לשמים.",
+          "v": false
+        },
+        {
+          "s": "§39",
+          "t": "שבעה רקיעים. בכל אחד — נביא.",
+          "v": false
+        }
+      ],
+      "art": "p51",
+      "must": [
+        "שמיים מרובדים בלילה, שכבה מעל שכבה, נמתחות כלפי מעלה",
+        "פתיחת העלייה — שמיים מרובדים, בלי דמות"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "סולם",
+        "מדרגות"
+      ],
+      "needsArt": false,
+      "assetId": "p51"
+    },
+    {
+      "id": "q59",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§39",
+          "t": "ברקיע הראשון: אדם. הוא הראה להם את גן העדן והגהינום.",
+          "v": false
+        },
+        {
+          "s": "§39",
+          "t": "בשני: ישוע מנצרת ויוחנן המטביל.",
+          "v": false
+        }
+      ],
+      "art": "p52",
+      "must": [
+        "שבעה רבדי שמיים, כל אחד כהה מקודמו — טיפוגרפיה תרכב עליהם",
+        "סדר 1→7 מלמעלה למטה",
+        "סדר 1→7 מלמעלה למטה, בלי היפוך"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אדם",
+        "ישוע",
+        "יוחנן",
+        "יוסף",
+        "אהרון",
+        "חנוך",
+        "משה",
+        "אברהם",
+        "כל דמות אנוש",
+        "גן עדן",
+        "גהינום"
+      ],
+      "needsArt": false,
+      "assetId": "p52"
+    },
+    {
+      "id": "q60",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§39",
+          "t": "בשלישי: יוסף בן יעקב.",
+          "v": false
+        },
+        {
+          "s": "§39",
+          "t": "ברביעי: אהרון.",
+          "v": false
+        }
+      ],
+      "art": "A completely abstract night sky in which a single band of deep indigo brightens along one horizontal edge, as though a seam has opened across it, fine stars either side. No ground, no gate, no architecture, no figures.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§39 · הרקיע הראשון נפתח",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q60"
+    },
+    {
+      "id": "q61",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§39",
+          "t": "בחמישי: חנוך.",
+          "v": false
+        },
+        {
+          "s": "§39",
+          "t": "בשישי: משה.",
+          "v": false
+        }
+      ],
+      "art": "A completely abstract vertical field of night sky in several horizontal strata, each darker than the one below, stars thinning with height. No ground, no horizon line, no stairs, no ladder, no figures, no symbols.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§39 · העלייה ברקיעים",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q61"
+    },
+    {
+      "id": "q62",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§39",
+          "t": "ובשביעי: אברהם.",
+          "v": false
+        },
+        {
+          "s": "§40",
+          "t": "בהגיעו לאללה — נצטווה על התפילה.",
+          "v": false
+        }
+      ],
+      "art": "p53",
+      "must": [
+        "שמי לילה עמוקים וריקים לגמרי — המרחב שבו ניתן הציווי"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אללה",
+        "כס",
+        "משה",
+        "מלאך"
+      ],
+      "needsArt": false,
+      "assetId": "p53"
+    },
+    {
+      "id": "q63",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§40",
+          "t": "חמישים תפילות ביום.",
+          "v": false
+        },
+        {
+          "s": "§40",
+          "t": "הוא ירד למשה, וחשש שעמו לא יעמוד בזה.",
+          "v": false
+        }
+      ],
+      "art": "p54",
+      "must": [
+        "אותם שמיים, מעט בהירים יותר — שינוי מצב, לא סצנה חדשה",
+        "חמישים יורד לחמש — שני המספרים באותו פריים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "משה",
+        "אללה",
+        "התמקחות כסצנה"
+      ],
+      "needsArt": false,
+      "assetId": "p54"
+    },
+    {
+      "id": "q64",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§40",
+          "t": "משה יעץ לו לבקש הנחה. וכך התמקח — עד חמש.",
+          "v": false
+        },
+        {
+          "s": "§40",
+          "t": "והמסורת: תפילה בכוונה נחשבת כעשר.",
+          "v": false
+        }
+      ],
+      "art": "A completely empty deep night sky, very dark and perfectly still, with a faint clearing of light near one edge. Nothing else at all. No people, no throne, no figures.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§40 · חמישים יורד לחמש",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q64"
+    },
+    {
+      "id": "q65",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§41",
+          "t": "באותו לילה שב למכה.",
+          "v": false
+        },
+        {
+          "s": "§41",
+          "t": "ופגש את אבו בכר, שהאמין לו.",
+          "v": false
+        }
+      ],
+      "art": "p55",
+      "must": [
+        "אבו בכר — מותר",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "מכה עם שחר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "needsArt": false,
+      "assetId": "p55"
+    },
+    {
+      "id": "q66",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§41",
+          "t": "ובשל כך נקרא אלצדיק — איש האמת.",
+          "v": false
+        },
+        {
+          "s": "§42",
+          "t": "זה היה בליל ה-27 לחודש רג'ב.",
+          "v": false
+        }
+      ],
+      "art": "p56",
+      "must": [
+        "ליל ה-27 — סהר דק מעל מדבר, בלי שום סמל"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "לוח שנה מודרני",
+        "סהר כסמל"
+      ],
+      "needsArt": false,
+      "assetId": "p56"
+    },
+    {
+      "id": "q67",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "splash",
+      "beats": [
+        {
+          "s": "§42",
+          "t": "הקוראן מתייחס לכך בסורת המסע הלילי (17):",
+          "v": false
+        },
+        {
+          "s": "§42",
+          "t": "„ישתבח שמו של המסיע את עבדו בלילה מהמסגד הקדוש אל המסגד הקיצון אשר ברכנו את סביבותיו...”",
+          "v": true
+        }
+      ],
+      "art": "p57",
+      "must": [
+        "אופק לילי רחב, נקודת אור אחת רחוקה מאוד",
+        "שתי קופסאות פסוק בזהב"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי",
+        "אלאקצא",
+        "ירושלים"
+      ],
+      "needsArt": false,
+      "assetId": "p57"
+    },
+    {
+      "id": "q68",
+      "part": "העליה לשמים",
+      "epilogue": false,
+      "grid": "splash",
+      "beats": [
+        {
+          "s": "§42",
+          "t": "והעלייה מרומזת בסרת הכוכב (53):",
+          "v": false
+        },
+        {
+          "s": "§42",
+          "t": "„הן ראהו גם בפעם אחרת אצל הלוטוס אשר בקצה המרום.”",
+          "v": true
+        }
+      ],
+      "art": "A thin crescent moon low over an empty dark desert horizon at night, a scatter of stars, bare land below. No symbol, no building, no people.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§42 · ליל ה-27 ברג׳ב",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q68"
+    },
+    {
+      "id": "q69",
+      "part": "מחלוקת שלא הוכרעה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§43",
+          "t": "המילה ירושלים אינה נזכרת בקוראן.",
+          "v": false
+        },
+        {
+          "s": "§43",
+          "t": "אך לפי מסורת מקובלת — לשם היה המסע.",
+          "v": false
+        },
+        {
+          "s": "§43",
+          "t": "ובין היתר בשל כך התקדשה העיר באסלאם.",
+          "v": false
+        }
+      ],
+      "art": "p58",
+      "must": [
+        "שני קווי אופק מופשטים זה מעל זה — קרוב ורחוק, בלי עיר ובלי מבנה",
+        "תרשים שתי הקריאות — מופשט, קו ושתי נקודות קצה",
+        "שני הסעיפים מודפסים תמיד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "ירושלים",
+        "אלאקצא",
+        "כיפת הסלע",
+        "עיר מודרנית",
+        "מפה מדינית",
+        "נשק",
+        "דגל"
+      ],
+      "needsArt": false,
+      "assetId": "p58"
+    },
+    {
+      "id": "q70",
+      "part": "מחלוקת שלא הוכרעה",
+      "epilogue": false,
+      "grid": "six",
+      "beats": [
+        {
+          "s": "§44",
+          "t": "דעות מיעוט: המסע לא יצא מגבולות חצי האי.",
+          "v": false
+        },
+        {
+          "s": "§44",
+          "t": "ו„המסגד הקיצון” הוא מסגד רחוק ממכה, שאליו הלך להתפלל.",
+          "v": false
+        }
+      ],
+      "art": "A completely abstract diagram on an empty cream field: one long solid horizontal rule with a mark at each end, and beneath it a much shorter broken rule with its own end marks. Nothing else — no landscape, no buildings, no city, no people.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§44 · דעות המיעוט",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q70"
+    },
+    {
+      "id": "q71",
+      "part": "„איפה זה פוגש אותנו\"?",
+      "epilogue": true,
+      "grid": "nine",
+      "beats": [
+        {
+          "s": "§43",
+          "t": "קדושתה של ירושלים היא העילה המרכזית לטרור הג'האד.",
+          "v": false
+        },
+        {
+          "s": "§4",
+          "t": "ארגוני הטרור נוטים להשתמש במוטיבים אסלאמיסטיים.",
+          "v": false
+        }
+      ],
+      "art": "p06",
+      "must": [
+        "גוויל קוראן פתוח על אבן, בסגנון הפרק — הטקסט שממנו שואבים",
+        "חצי הפריים בצל, כאילו משהו עומד מעליו"
+      ],
+      "mustNot": [
+        "רחפן",
+        "טיל",
+        "סמל ארגון",
+        "מפה",
+        "גרפיקת מבצעים"
+      ],
+      "needsArt": false,
+      "assetId": "p06"
+    },
+    {
+      "id": "q72",
+      "part": "„איפה זה פוגש אותנו\"?",
+      "epilogue": true,
+      "grid": "nine",
+      "beats": [
+        {
+          "s": "§4",
+          "t": "בעיקר מהקוראן ומהמסורת הנבואית שבעל־פה.",
+          "v": false
+        },
+        {
+          "s": "§4",
+          "t": "כדי להתרפק על העבר ההרואי, ולהעניק תוקף וצידוק לאנשיהם.",
+          "v": false
+        }
+      ],
+      "art": "p07",
+      "must": [
+        "אותן ציפורי אבאביל של p03, דהויות ורחוקות — הד של הדימוי הקודם",
+        "שמיים ריקים ברובם"
+      ],
+      "mustNot": [
+        "רחפן",
+        "טיל",
+        "סמל ארגון",
+        "ציפורים"
+      ],
+      "needsArt": false,
+      "assetId": "p07"
+    },
+    {
+      "id": "q73",
+      "part": "„איפה זה פוגש אותנו\"?",
+      "epilogue": true,
+      "grid": "nine",
+      "beats": [
+        {
+          "s": "§4",
+          "t": "כך למשל: כל כלי נשק קינטי — רחפן, רקטה, טיל — מכונה אבאביל.",
+          "v": false
+        },
+        {
+          "s": "§5",
+          "t": "חמאס כינה את מבצע „צוק איתן” (קיץ 2014) בשם „מוץ נאכל”.",
+          "v": false
+        }
+      ],
+      "art": "p08",
+      "must": [
+        "שדה מוץ שרוף — הדימוי שממנו „מוץ נאכל\" לקוח",
+        "קש מפוחם ואפר, רוח, בלי נפש"
+      ],
+      "mustNot": [
+        "סמל ארגון",
+        "דגל",
+        "מפה"
+      ],
+      "needsArt": false,
+      "assetId": "p08"
+    },
+    {
+      "id": "q74",
+      "part": "„איפה זה פוגש אותנו\"?",
+      "epilogue": true,
+      "grid": "nine",
+      "beats": [
+        {
+          "s": "§5",
+          "t": "ביטוי קוראני מפרשת הפיל — גורלו של צבא אברהה.",
+          "v": false
+        },
+        {
+          "s": "§6",
+          "t": "וחזבאללה כינה כך את „שאגת הארי” (חורף 2026).",
+          "v": false
+        }
+      ],
+      "art": "A burnt field of chaff and straw after fire, charred stalks and drifting ash under a pale sky, wind moving across it, flat empty land to the horizon. No people, no buildings, no vehicles.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§5–§6 · שדה המוץ",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q74"
+    },
+    {
+      "id": "q75",
+      "part": "„איפה זה פוגש אותנו\"?",
+      "epilogue": true,
+      "grid": "nine",
+      "beats": [
+        {
+          "s": "§6",
+          "t": "כדי להתברך מכך, לפי אמונתם — ולבטא משאלה לגבי סופם של הישראלים.",
+          "v": false
+        }
+      ],
+      "art": "Close on bare scorched ground: fine grey ash, a few blackened stalks, faint smoke, nothing standing. No people, no buildings, no vehicles, no weapons.",
+      "must": null,
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש"
+      ],
+      "needsArt": true,
+      "$label": "§6 · האפר שנותר",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, text or lettering, any mosque, any dome, any minaret or tower.",
+      "assetId": "q75"
+    }
+  ],
+  "$assetId": "איזה קובץ ציור הפאנל מציג. שדה art נושא בפאנלים החדשים את הפרומפט האנגלי, ולכן אסור להשתמש בו כמזהה."
+}

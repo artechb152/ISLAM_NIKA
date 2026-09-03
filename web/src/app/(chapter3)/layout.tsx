@@ -1,4 +1,4 @@
-/* Root layout for the chapter-3 article.
+/* Root layout for chapter 3 — now a comic you turn, not an article.
 
    Its own route group, like chapters 2 and 6, so the editorial layout cannot
    leak into the chapters menu — but it loads chapter 6's stylesheet FIRST and
@@ -12,6 +12,9 @@ import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter3-article.css'
+/* the comic's own sheet, loaded last. chapter3-article.css stays because the
+   closing practice still runs on it. */
+import '@/styles/chapter3-comic.css'
 
 export const metadata: Metadata = {
   title: 'פרק שלישי · ראשית חיי מוחמד',

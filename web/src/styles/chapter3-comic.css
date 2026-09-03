@@ -1,0 +1,178 @@
+/* Chapter 3 — the comic.
+
+   Every colour, font and token comes from chapter6-article.css, which the route
+   layout loads first. Nothing below declares a colour or a font family.
+
+   RTL CONVENTION, obeyed throughout:
+       inline-start = RIGHT = the reading edge
+       inline-end   = LEFT  = the outer edge
+
+   --u is the page's share of its design height (500px), set from JS on every
+   resize. EVERY measurement inside a page is a multiple of it, so a caption
+   keeps the same share of its panel at any window size. This exists because
+   fixed pixel captions swallowed the picture as the page shrank. */
+
+.c3-shell{height:100vh;overflow:hidden;display:flex;flex-direction:column;background:var(--panel)}
+
+.c3-head{
+  height:var(--header-height);display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(16px,2.4vw,30px);background:var(--maroon-deep);color:var(--cream);
+  position:relative;z-index:30;flex:none;
+}
+.c3-home{
+  background:none;border:0;color:var(--cream);cursor:pointer;
+  font-family:var(--font-heading);font-weight:700;font-size:18px;letter-spacing:.04em;
+  padding:8px 0;min-height:44px;
+}
+.c3-title{font-family:var(--font-body);font-size:14px;font-weight:600;opacity:.85}
+
+.c3-stage{
+  flex:1;display:grid;place-items:center;min-height:0;
+  background:radial-gradient(circle at 50% 44%,#f7f1e1,var(--panel) 66%);
+}
+
+/* ⚠ PERSPECTIVE LIVES HERE AND NOTHING ELSE DOES. `perspective` together with
+   `transform:scale()` on one element applies the scale AFTER the 3-D
+   projection and skews it — that is what made the page turn look crooked. The
+   book is never scaled; it is sized in real pixels from JS. */
+.c3-book{position:relative;perspective:2600px;--u:1;transition:width .45s ease .15s}
+.c3-book::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:20;
+  box-shadow:0 24px 58px rgba(60,35,18,.26);
+}
+.c3-under{position:absolute;inset:0;display:flex;transition:opacity .35s ease .25s}
+.c3-book.is-closed .c3-under{opacity:0}
+.c3-half{width:50%;height:100%;background:var(--surface)}
+.c3-half.is-l{background:linear-gradient(to left,rgba(0,0,0,.085),transparent 12%),var(--surface)}
+.c3-half.is-r{background:linear-gradient(to right,rgba(0,0,0,.085),transparent 12%),var(--surface)}
+
+/* each sheet is the RIGHT leaf, hinged on the spine — its own left edge.
+   ⚠ TWO FACES, ALWAYS. A single-faced leaf with backface-visibility:hidden
+   disappears at ninety degrees, which reads as a broken turn rather than a
+   page. */
+.c3-sheet{
+  position:absolute;top:0;inset-inline-start:0;width:50%;height:100%;cursor:pointer;
+  transform-origin:left center;transform-style:preserve-3d;
+  transition:transform .8s cubic-bezier(.36,.05,.24,1);
+}
+.c3-book.is-closed .c3-sheet{width:100%}
+.c3-face{
+  position:absolute;inset:0;backface-visibility:hidden;overflow:hidden;
+  background:var(--surface);box-shadow:0 0 0 1px var(--edge);
+}
+.c3-face.is-back{transform:rotateY(180deg)}
+.c3-sheet.is-turned{transform:rotateY(-180deg)}
+@media (prefers-reduced-motion:reduce){
+  .c3-sheet,.c3-book,.c3-under{transition:none}
+}
+
+/* ---------------- the page ---------------- */
+.c3-page{width:100%;height:100%;padding:2.6%;position:relative;background:var(--surface)}
+.c3-page.is-blank{background:var(--surface)}
+.c3-grid{display:grid;height:100%}
+.c3-grid.is-tight{gap:1.2%}    /* one scene: the panels read as one run       */
+.c3-grid.is-loose{gap:2.4%}    /* crossing parts: the gap is the time passing */
+.c3-pn{
+  position:relative;overflow:hidden;min-height:0;
+  border:calc(3px * var(--u)) solid var(--line);background:var(--paper);
+}
+.c3-pn img{display:block;width:100%;height:100%;object-fit:cover}
+
+/* THE PANEL NUMBER. The grid order is correct and the captions read top to
+   bottom, but neither TELLS the reader the order. A teaching comic may say
+   plainly what a trade comic leaves implicit. */
+.c3-num{
+  position:absolute;top:0;inset-inline-start:0;z-index:3;
+  min-width:calc(27px * var(--u));height:calc(27px * var(--u));
+  display:grid;place-items:center;padding:0 calc(7px * var(--u));
+  background:var(--maroon-deep);color:var(--cream);
+  font-family:var(--font-heading);font-weight:700;
+  font-size:calc(14px * var(--u));font-variant-numeric:tabular-nums;
+}
+
+/* THE CAPTIONS OPEN OUT THE MIDDLE OF THE PANEL. Stacked tight at the top they
+   read in order but sat as one slab over the picture, and on a wide panel that
+   slab covered the subject. Spread along the reading edge — first at the top,
+   last at the bottom — the order is still top-to-bottom on ONE edge, which is
+   what made it legible, and the centre of the picture stays clear. */
+.c3-boxes{
+  position:absolute;z-index:2;pointer-events:none;
+  top:calc(33px * var(--u));bottom:calc(10px * var(--u));
+  inset-inline-start:calc(9px * var(--u));
+  display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;
+  gap:calc(8px * var(--u));max-width:46%;
+}
+.c3-box{
+  background:var(--surface);border:calc(1.5px * var(--u)) solid var(--line);
+  padding:calc(6px * var(--u)) calc(11px * var(--u));
+  font-size:calc(15px * var(--u));line-height:1.4;font-weight:600;color:var(--ink);
+}
+/* the eight verbatim quotations keep the gold card they carry everywhere else
+   in the product; they are never reworded */
+.c3-box.is-verse{
+  border:calc(2px * var(--u)) solid var(--gold);
+  box-shadow:inset 0 0 0 calc(2px * var(--u)) rgba(199,154,60,.2);
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);text-align:center;
+}
+.c3-folio{
+  position:absolute;bottom:calc(8px * var(--u));inset-inline-start:calc(20px * var(--u));
+  font-size:calc(11px * var(--u));color:var(--muted);letter-spacing:.1em;
+}
+
+/* ---------------- the cover ---------------- */
+.c3-cover{width:100%;height:100%;position:relative;overflow:hidden;background:var(--maroon-deep)}
+.c3-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.c3-cover::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(24,14,6,.6) 0%,rgba(24,14,6,.16) 42%,transparent 64%);
+}
+.c3-cover-type{position:absolute;inset-inline:0;top:7%;z-index:2;text-align:center;padding:0 8%}
+.c3-eyebrow{
+  font-size:calc(14px * var(--u));letter-spacing:.34em;color:var(--gold-soft);
+  font-weight:600;margin-bottom:calc(16px * var(--u));
+}
+.c3-cover-title{
+  font-family:var(--font-heading);font-weight:900;color:var(--cream);
+  font-size:calc(54px * var(--u));line-height:1.05;margin:0;
+  text-shadow:0 3px 22px rgba(20,10,4,.72);
+}
+.c3-cover-rule{
+  width:calc(88px * var(--u));height:2px;background:var(--gold);
+  margin:calc(20px * var(--u)) auto 0;opacity:.9;
+}
+.c3-cover-foot{
+  position:absolute;inset-inline:0;bottom:5%;z-index:2;text-align:center;
+  font-size:calc(13px * var(--u));letter-spacing:.22em;color:rgba(245,236,214,.74);
+}
+
+/* ---------------- controls ----------------
+   At the window's edges, off the page. A button bar under the page crowded it
+   and read as a toolbar bolted onto a book. */
+.c3-arrow{
+  position:fixed;top:50%;transform:translateY(-50%);z-index:30;
+  width:54px;height:104px;border:0;background:none;cursor:pointer;
+  font-family:var(--font-heading);font-size:46px;line-height:1;color:var(--maroon);
+  opacity:.4;transition:opacity .2s ease;
+}
+.c3-arrow:hover{opacity:1}
+.c3-arrow:disabled{opacity:.1;cursor:default}
+.c3-arrow.is-next{inset-inline-start:16px}
+.c3-arrow.is-prev{inset-inline-end:16px}
+
+.c3-foot{
+  position:fixed;bottom:14px;inset-inline:0;z-index:30;
+  display:flex;align-items:center;justify-content:center;gap:20px;pointer-events:none;
+}
+.c3-foot > *{pointer-events:auto}
+.c3-count{font-size:13px;color:var(--muted);letter-spacing:.14em;font-variant-numeric:tabular-nums}
+.c3-practice{
+  font-family:var(--font-heading);font-weight:700;font-size:15px;
+  color:var(--cream);background:var(--maroon-deep);text-decoration:none;
+  padding:10px 24px;display:inline-flex;align-items:center;min-height:44px;
+}
+
+@media (max-width:860px){
+  .c3-arrow{width:40px;font-size:34px}
+  .c3-arrow.is-next{inset-inline-start:4px}
+  .c3-arrow.is-prev{inset-inline-end:4px}
+}
