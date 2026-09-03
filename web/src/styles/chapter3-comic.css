@@ -7,28 +7,62 @@
        inline-start = RIGHT = the reading edge
        inline-end   = LEFT  = the outer edge
 
-   --u is the page's share of its design height (500px), set from JS on every
+   --u is the page's share of its design height (600px), set from JS on every
    resize. EVERY measurement inside a page is a multiple of it, so a caption
-   keeps the same share of its panel at any window size. This exists because
-   fixed pixel captions swallowed the picture as the page shrank. */
+   keeps the same share of its page at any window size.
 
-.c3-shell{height:100vh;overflow:hidden;display:flex;flex-direction:column;background:var(--panel)}
+   THE PAGE HAS THE SHAPE OF ITS ART. 690 wide, 600 tall: 517 of that is the
+   picture, which is 690:517 — 4:3 to the pixel, the ratio every picture in this
+   chapter was painted at. Nothing is cropped. The remaining 83 is the
+   narrator's band, which is paper, not picture, so no caption can ever cover
+   anything. The previous build poured 4:3 paintings into columns of ratio 0.46
+   and lost more than half of some of them behind boxes; that is what these two
+   numbers exist to prevent. */
 
-.c3-head{
-  height:var(--header-height);display:flex;align-items:center;justify-content:space-between;
-  padding:0 clamp(16px,2.4vw,30px);background:var(--maroon-deep);color:var(--cream);
-  position:relative;z-index:30;flex:none;
+.c3-shell{height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column;background:var(--panel)}
+
+/* the site's own header, unmodified — same markup, same classes as chapters 2,
+   4 and 6. Only the search field is replaced: a book that is turned rather than
+   scrolled has nothing to scroll to. */
+.chapter-site-header{flex:none}
+.c3-place{display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);color:var(--cream);min-width:0}
+.c3-place-part{
+  font-family:var(--font-heading);font-weight:700;font-size:15px;letter-spacing:.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw;
 }
-.c3-home{
-  background:none;border:0;color:var(--cream);cursor:pointer;
-  font-family:var(--font-heading);font-weight:700;font-size:18px;letter-spacing:.04em;
-  padding:8px 0;min-height:44px;
+.c3-place-n{font-size:12.5px;color:rgba(245,236,214,.66);white-space:nowrap;font-variant-numeric:tabular-nums}
+.c3-place-bar{
+  width:clamp(56px,9vw,132px);height:3px;background:rgba(245,236,214,.22);
+  overflow:hidden;flex:none;
 }
-.c3-title{font-family:var(--font-body);font-size:14px;font-weight:600;opacity:.85}
+.c3-place-bar i{display:block;height:100%;background:var(--gold);transform-origin:right center;transition:transform .45s ease}
+
+/* the drawer stays off-canvas at EVERY width. chapter6-article.css turns it
+   into a persistent 300px rail above 1024px, which is right for an article and
+   wrong here: that rail would come out of the book's width, and the book is the
+   only thing on this screen. */
+@media (min-width:1024px){
+  .c3-drawer.chapter-drawer{
+    position:fixed;inset-block:0;inset-inline-start:0;top:0;width:min(330px,90vw);
+    height:100vh;height:100dvh;align-self:auto;z-index:70;
+    box-shadow:-16px 0 40px rgba(28,10,2,.24);
+    transform:translateX(105%);visibility:hidden;
+    transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s linear .32s;
+  }
+  .c3-drawer.chapter-drawer.is-open{transform:none;visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s}
+  .c3-drawer .menu-head{display:block}
+  .c3-shell .chapter-site-header-inner{padding-inline:clamp(18px,4vw,60px)}
+  .c3-shell .chapter-scrim{display:block}
+}
+.c3-drawer .menu-folio{
+  margin-inline-start:auto;font-size:12px;color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.c3-drawer .chapter-menu-nav a.is-current{background:rgba(165,50,47,.12);color:var(--maroon)}
 
 .c3-stage{
   flex:1;display:grid;place-items:center;min-height:0;
-  background:radial-gradient(circle at 50% 44%,#f7f1e1,var(--panel) 66%);
+  background:radial-gradient(circle at 50% 46%,#f7f1e1,var(--panel) 68%);
 }
 
 /* ⚠ PERSPECTIVE LIVES HERE AND NOTHING ELSE DOES. `perspective` together with
@@ -51,7 +85,7 @@
    disappears at ninety degrees, which reads as a broken turn rather than a
    page. */
 .c3-sheet{
-  position:absolute;top:0;inset-inline-start:0;width:50%;height:100%;cursor:pointer;
+  position:absolute;top:0;inset-inline-start:0;width:50%;height:100%;
   transform-origin:left center;transform-style:preserve-3d;
   transition:transform .8s cubic-bezier(.36,.05,.24,1);
 }
@@ -63,60 +97,147 @@
 .c3-face.is-back{transform:rotateY(180deg)}
 .c3-sheet.is-turned{transform:rotateY(-180deg)}
 @media (prefers-reduced-motion:reduce){
-  .c3-sheet,.c3-book,.c3-under{transition:none}
+  .c3-sheet,.c3-book,.c3-under,.c3-place-bar i{transition:none}
 }
+
+/* the two halves of the spread ARE the buttons: in an RTL book the left leaf
+   carries you forward and the right leaf back. They sit above the sheets so a
+   click anywhere on the paper turns the page the way that paper would. */
+.c3-tap{
+  position:absolute;top:0;height:100%;width:50%;z-index:21;
+  border:0;background:none;padding:0;cursor:pointer;
+}
+.c3-tap:disabled{cursor:default}
+.c3-tap.is-next{inset-inline-end:0}
+.c3-tap.is-prev{inset-inline-start:0}
+.c3-book.is-closed .c3-tap.is-next{width:100%;inset-inline-end:0}
+.c3-book.is-closed .c3-tap.is-prev{display:none}
 
 /* ---------------- the page ---------------- */
-.c3-page{width:100%;height:100%;padding:2.6%;position:relative;background:var(--surface)}
+.c3-page{width:100%;height:100%;position:relative;background:var(--surface);display:flex;flex-direction:column}
 .c3-page.is-blank{background:var(--surface)}
-.c3-grid{display:grid;height:100%}
-.c3-grid.is-tight{gap:1.2%}    /* one scene: the panels read as one run       */
-.c3-grid.is-loose{gap:2.4%}    /* crossing parts: the gap is the time passing */
-.c3-pn{
-  position:relative;overflow:hidden;min-height:0;
-  border:calc(3px * var(--u)) solid var(--line);background:var(--paper);
-}
-.c3-pn img{display:block;width:100%;height:100%;object-fit:cover}
 
-/* THE PANEL NUMBER. The grid order is correct and the captions read top to
-   bottom, but neither TELLS the reader the order. A teaching comic may say
-   plainly what a trade comic leaves implicit. */
-.c3-num{
-  position:absolute;top:0;inset-inline-start:0;z-index:3;
-  min-width:calc(27px * var(--u));height:calc(27px * var(--u));
-  display:grid;place-items:center;padding:0 calc(7px * var(--u));
+/* THE PICTURE. 690:517 is 4:3, which is what every picture in this chapter was
+   painted at, so `cover` crops nothing. */
+.c3-art{
+  position:relative;margin:0;flex:none;overflow:hidden;background:var(--paper);
+  height:calc(517px * var(--u));
+}
+.c3-page.is-full .c3-art{height:100%}
+.c3-art img{display:block;width:100%;height:100%;object-fit:cover}
+/* a verse takes the picture over; the plate needs ground to stand on */
+.c3-art.has-verse::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(28,13,4,.5),rgba(28,13,4,.12) 46%,transparent 72%);
+}
+
+/* ---- voice 1 · the narrator, in the band under the picture ---- */
+.c3-band{
+  flex:1;min-height:0;overflow:hidden;display:flex;align-items:stretch;
+  background:var(--surface);border-top:calc(2.5px * var(--u)) solid var(--line);
+  padding:calc(10px * var(--u)) calc(20px * var(--u)) calc(12px * var(--u));
+  gap:calc(16px * var(--u));
+}
+.c3-cap{
+  flex:1;min-width:0;margin:0;display:flex;align-items:center;
+  font-size:calc(15.5px * var(--u));line-height:1.42;font-weight:600;color:var(--ink);
+  text-wrap:pretty;
+}
+/* the divider falls between two captions: in RTL the later one sits to the
+   LEFT, so the rule belongs on its inline-start */
+.c3-cap + .c3-cap{
+  border-inline-start:1px solid var(--edge);
+  padding-inline-start:calc(16px * var(--u));
+}
+
+/* ---- voice 2 · the date the story leaps to ---- */
+.c3-top{
+  position:absolute;top:0;inset-inline:0;z-index:3;
+  display:flex;flex-direction:column;align-items:flex-start;
+  gap:calc(10px * var(--u));pointer-events:none;
+}
+.c3-stamp{
+  margin-inline-start:calc(22px * var(--u));
   background:var(--maroon-deep);color:var(--cream);
-  font-family:var(--font-heading);font-weight:700;
-  font-size:calc(14px * var(--u));font-variant-numeric:tabular-nums;
+  font-family:var(--font-heading);font-weight:700;letter-spacing:.05em;
+  font-size:calc(14.5px * var(--u));
+  padding:calc(5px * var(--u)) calc(14px * var(--u)) calc(6px * var(--u));
+  box-shadow:0 calc(3px * var(--u)) calc(10px * var(--u)) rgba(20,8,2,.42);
 }
 
-/* THE CAPTIONS OPEN OUT THE MIDDLE OF THE PANEL. Stacked tight at the top they
-   read in order but sat as one slab over the picture, and on a wide panel that
-   slab covered the subject. Spread along the reading edge — first at the top,
-   last at the bottom — the order is still top-to-bottom on ONE edge, which is
-   what made it legible, and the centre of the picture stays clear. */
-.c3-boxes{
-  position:absolute;z-index:2;pointer-events:none;
-  top:calc(33px * var(--u));bottom:calc(10px * var(--u));
-  inset-inline-start:calc(9px * var(--u));
-  display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;
-  gap:calc(8px * var(--u));max-width:46%;
+/* ---- the part's name, on the page the part opens ---- */
+.c3-plate{
+  align-self:stretch;display:flex;align-items:baseline;gap:calc(13px * var(--u));
+  padding:calc(12px * var(--u)) calc(22px * var(--u)) calc(20px * var(--u));
+  background:linear-gradient(to bottom,rgba(30,13,5,.9),rgba(30,13,5,.6) 58%,transparent);
+  color:var(--cream);
 }
-.c3-box{
-  background:var(--surface);border:calc(1.5px * var(--u)) solid var(--line);
-  padding:calc(6px * var(--u)) calc(11px * var(--u));
-  font-size:calc(15px * var(--u));line-height:1.4;font-weight:600;color:var(--ink);
+.c3-plate-n{
+  font-family:var(--font-heading);font-weight:700;color:var(--gold);
+  font-size:calc(13px * var(--u));letter-spacing:.2em;flex:none;
 }
-/* the eight verbatim quotations keep the gold card they carry everywhere else
-   in the product; they are never reworded */
-.c3-box.is-verse{
-  border:calc(2px * var(--u)) solid var(--gold);
-  box-shadow:inset 0 0 0 calc(2px * var(--u)) rgba(199,154,60,.2);
-  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);text-align:center;
+.c3-plate-t{
+  font-family:var(--font-heading);font-weight:900;font-size:calc(24px * var(--u));
+  line-height:1.15;text-shadow:0 calc(2px * var(--u)) calc(12px * var(--u)) rgba(18,8,2,.6);
 }
+
+/* ---- voice 3 · direct speech.
+   THE TAIL LEAVES THE PANEL. Muhammad and Gabriel speak in this book and are
+   never drawn, so a tail pointing at someone in the frame would put the words
+   in the wrong mouth. A tail running off the edge is the one comics device
+   that says the speaker is outside it — which is the truth here, on every
+   page. ---- */
+.c3-say{
+  position:absolute;z-index:4;top:calc(30px * var(--u));
+  inset-inline-start:calc(52px * var(--u));max-width:46%;margin:0;
+  background:var(--surface);border:calc(2.5px * var(--u)) solid var(--line);
+  border-radius:calc(30px * var(--u)) / calc(22px * var(--u));
+  padding:calc(11px * var(--u)) calc(22px * var(--u)) calc(13px * var(--u));
+  font-family:var(--font-heading);font-weight:700;color:var(--ink);
+  font-size:calc(20px * var(--u));line-height:1.34;text-align:center;
+  box-shadow:0 calc(4px * var(--u)) calc(14px * var(--u)) rgba(20,8,2,.22);
+}
+.c3-say::before,.c3-say::after{content:"";position:absolute;width:0;height:0}
+.c3-say::before{                       /* the ink outline of the tail */
+  top:52%;inset-inline-start:calc(-2px * var(--u));
+  border-block:calc(14px * var(--u)) solid transparent;
+  border-inline-end:calc(78px * var(--u)) solid var(--line);
+}
+.c3-say::after{                        /* the paper inside it */
+  top:52%;inset-inline-start:calc(-2px * var(--u));
+  margin-block-start:calc(3.5px * var(--u));
+  border-block:calc(10px * var(--u)) solid transparent;
+  border-inline-end:calc(66px * var(--u)) solid var(--surface);
+}
+
+/* ---- voice 4 · the five Quranic verses, in the gold card they carry
+   everywhere else in the product. They are never reworded. ---- */
+.c3-verse{
+  position:absolute;z-index:4;bottom:calc(24px * var(--u));
+  inset-inline:calc(48px * var(--u));margin:0;
+  background:rgba(250,244,230,.96);border:calc(2.5px * var(--u)) solid var(--gold);
+  box-shadow:inset 0 0 0 calc(2px * var(--u)) rgba(199,154,60,.24),
+             0 calc(6px * var(--u)) calc(22px * var(--u)) rgba(20,8,2,.4);
+  padding:calc(15px * var(--u)) calc(26px * var(--u)) calc(17px * var(--u));
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:calc(19.5px * var(--u));line-height:1.46;text-align:center;text-wrap:balance;
+}
+.c3-page.is-full .c3-verse{bottom:calc(40px * var(--u));font-size:calc(22px * var(--u))}
+
+/* ---- §§4–6 · „איפה זה פוגש אותנו?".
+   The one voice in the chapter that speaks about today. It gets the dark plate
+   the article gives the same material, so the reader can see at a glance that
+   the book has stepped out of the seventh century — and it rides on the same
+   pictures as everything else, rather than sitting on blank paper. ---- */
+.c3-page.is-today .c3-band{background:var(--maroon-deep);border-top-color:var(--maroon-deep)}
+.c3-page.is-today .c3-cap{color:var(--cream)}
+.c3-page.is-today .c3-cap + .c3-cap{border-inline-start-color:rgba(245,236,214,.32)}
+.c3-page.is-today .c3-folio{color:rgba(245,236,214,.5)}
+
 .c3-folio{
-  position:absolute;bottom:calc(8px * var(--u));inset-inline-start:calc(20px * var(--u));
-  font-size:calc(11px * var(--u));color:var(--muted);letter-spacing:.1em;
+  position:absolute;bottom:calc(9px * var(--u));inset-inline-end:calc(20px * var(--u));
+  z-index:5;font-size:calc(11.5px * var(--u));color:var(--muted);
+  letter-spacing:.08em;font-variant-numeric:tabular-nums;
 }
 
 /* ---------------- the cover ---------------- */
@@ -124,7 +245,7 @@
 .c3-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .c3-cover::after{
   content:"";position:absolute;inset:0;
-  background:linear-gradient(to bottom,rgba(24,14,6,.6) 0%,rgba(24,14,6,.16) 42%,transparent 64%);
+  background:linear-gradient(to bottom,rgba(24,14,6,.62) 0%,rgba(24,14,6,.16) 44%,transparent 66%);
 }
 .c3-cover-type{position:absolute;inset-inline:0;top:7%;z-index:2;text-align:center;padding:0 8%}
 .c3-eyebrow{
@@ -142,37 +263,44 @@
 }
 .c3-cover-foot{
   position:absolute;inset-inline:0;bottom:5%;z-index:2;text-align:center;
-  font-size:calc(13px * var(--u));letter-spacing:.22em;color:rgba(245,236,214,.74);
+  font-size:calc(13px * var(--u));letter-spacing:.2em;color:rgba(245,236,214,.76);
 }
 
 /* ---------------- controls ----------------
-   At the window's edges, off the page. A button bar under the page crowded it
-   and read as a toolbar bolted onto a book. */
+   At the window's edges, off the page, and shaped like every other control in
+   the product: a filled maroon disc with a cream chevron. */
 .c3-arrow{
-  position:fixed;top:50%;transform:translateY(-50%);z-index:30;
-  width:54px;height:104px;border:0;background:none;cursor:pointer;
-  font-family:var(--font-heading);font-size:46px;line-height:1;color:var(--maroon);
-  opacity:.4;transition:opacity .2s ease;
+  position:fixed;top:calc(50% + 5px);transform:translateY(-50%);z-index:30;
+  width:52px;height:52px;border:0;border-radius:50%;cursor:pointer;
+  display:grid;place-items:center;
+  background:var(--maroon-deep);color:var(--cream);
+  box-shadow:0 6px 18px rgba(40,16,6,.28);
+  opacity:.9;transition:opacity .2s ease,transform .2s ease,background .2s ease;
 }
-.c3-arrow:hover{opacity:1}
-.c3-arrow:disabled{opacity:.1;cursor:default}
-.c3-arrow.is-next{inset-inline-start:16px}
-.c3-arrow.is-prev{inset-inline-end:16px}
+.c3-arrow svg{width:24px;height:24px}
+.c3-arrow:hover{opacity:1;background:var(--maroon)}
+.c3-arrow:focus-visible{outline:2px solid var(--maroon-deep);outline-offset:3px}
+.c3-arrow:disabled{opacity:.16;cursor:default;background:var(--maroon-deep)}
+.c3-arrow.is-next{inset-inline-start:20px}
+.c3-arrow.is-prev{inset-inline-end:20px}
 
 .c3-foot{
-  position:fixed;bottom:14px;inset-inline:0;z-index:30;
-  display:flex;align-items:center;justify-content:center;gap:20px;pointer-events:none;
+  position:fixed;bottom:16px;inset-inline:0;z-index:30;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;
 }
 .c3-foot > *{pointer-events:auto}
-.c3-count{font-size:13px;color:var(--muted);letter-spacing:.14em;font-variant-numeric:tabular-nums}
 .c3-practice{
   font-family:var(--font-heading);font-weight:700;font-size:15px;
   color:var(--cream);background:var(--maroon-deep);text-decoration:none;
-  padding:10px 24px;display:inline-flex;align-items:center;min-height:44px;
+  padding:10px 26px;display:inline-flex;align-items:center;min-height:44px;
+  box-shadow:0 6px 18px rgba(40,16,6,.28);
 }
+.c3-practice:hover{background:var(--maroon)}
 
 @media (max-width:860px){
-  .c3-arrow{width:40px;font-size:34px}
-  .c3-arrow.is-next{inset-inline-start:4px}
-  .c3-arrow.is-prev{inset-inline-end:4px}
+  .c3-arrow{width:40px;height:40px}
+  .c3-arrow svg{width:19px;height:19px}
+  .c3-arrow.is-next{inset-inline-start:6px}
+  .c3-arrow.is-prev{inset-inline-end:6px}
+  .c3-place-part{display:none}
 }

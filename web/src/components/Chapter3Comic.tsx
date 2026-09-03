@@ -47,7 +47,7 @@ const PARTS = (comicData as unknown as { parts: Part[] }).parts
 /* folio → the part that opens on it */
 const OPENS = new Map(PARTS.map((p, i) => [p.first, i]))
 
-function PageView({ page, folio }: { page: Page | null; folio: number }) {
+function PageView({ page, folio, side }: { page: Page | null; folio: number; side: 'r' | 'l' }) {
   if (!page) return <div className="c3-page is-blank" />
   const opens = OPENS.get(folio)
   const time = page.b.find((b) => b.k === 'time')
@@ -55,8 +55,8 @@ function PageView({ page, folio }: { page: Page | null; folio: number }) {
   const verses = page.b.filter((b) => b.k === 'v')
   const caps = page.b.filter((b) => !b.k)
   return (
-    <div className={'c3-page' + (page.e ? ' is-today' : '')}>
-      <figure className="c3-art">
+    <div className={'c3-page' + (page.e ? ' is-today' : '') + (caps.length ? '' : ' is-full') + (side === 'r' ? ' is-recto' : '')}>
+      <figure className={'c3-art' + (verses.length ? ' has-verse' : '')}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/assets/chapter3/comic/${page.a}.jpg`} alt="" aria-hidden="true"
              loading="lazy" decoding="async" />
@@ -141,13 +141,13 @@ export default function Chapter3Comic() {
       if (!book) return
       const availW = window.innerWidth - (window.innerWidth < 860 ? 84 : 132)
       const availH = window.innerHeight - 56 - 46
-      const ASPECT = 1380 / 600          /* two landscape pages side by side */
+      const ASPECT = 1380 / 620          /* two landscape pages side by side */
       const w = Math.min(availW, Math.round(availH * ASPECT))
       const h = Math.round(w / ASPECT)
       book.style.width = `${at === 0 ? Math.round(w / 2) : w}px`
       book.style.height = `${h}px`
       /* one unit for every measurement inside the page */
-      book.style.setProperty('--u', String(h / 600))
+      book.style.setProperty('--u', String(h / 620))
     }
     fit()
     window.addEventListener('resize', fit)
@@ -275,10 +275,10 @@ export default function Chapter3Comic() {
               <div className="c3-face is-front">
                 {s.front === 'cover'
                   ? <Cover />
-                  : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} />}
+                  : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} side="r" />}
               </div>
               <div className="c3-face is-back">
-                <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} />
+                <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l" />
               </div>
             </div>
           ))}
