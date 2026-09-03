@@ -112,6 +112,40 @@ if (layout) {
   warn.push('layout.json עדיין לא קיים — בדיקת „פעם אחת בלבד“ תרוץ כשייווצר')
 }
 
+/* ---------- 4 · the bridge ---------- */
+/* The chapter opens on „גם לאחר אירוע זה" — a demonstrative pointing at the end
+   of chapter 3. bridge.json answers it with a sentence from CHAPTER 3, quoted
+   word for word, and this checks it against chapter 3's own source file. A
+   sentence from a neighbouring chapter is still not a sentence anyone wrote
+   here, but it is not in THIS chapter's source either, so it cannot pass the
+   fidelity check above and gets its own — against the file it actually came
+   from. Reported every run, for the same reason the rewordings are. */
+let bridge = null
+try {
+  bridge = JSON.parse(await readFile(new URL('../../web/src/lib/chapter4/bridge.json', here), 'utf8'))
+} catch {
+  /* no bridge declared — nothing to check */
+}
+if (bridge) {
+  const from = bridge.from ?? {}
+  if (!from.ref || !from.source) errors.push('bridge.json: אין ניקוב למקור שממנו נלקח המשפט')
+  else {
+    let other = ''
+    try {
+      other = await readFile(new URL('../../' + from.source, here), 'utf8')
+    } catch {
+      errors.push(`bridge.json: לא נמצא קובץ המקור ${from.source}`)
+    }
+    if (other) {
+      const section = new RegExp(`^### ${from.ref}\\n([\\s\\S]*?)(?=\\n#{2,3} |$)`, 'm').exec(other)
+      if (!section) errors.push(`bridge.json: ${from.ref} לא קיים ב-${from.source}`)
+      else if (!flat(section[1]).includes(flat(bridge.text))) {
+        errors.push(`bridge.json: המשפט אינו מופיע ב-${from.ref} של ${from.source}`)
+      }
+    }
+  }
+}
+
 const external = [...src.matchAll(/^#{3} (§\d+)/gm)].map((m) => m[1])
 console.log(
   `סעיפי מקור: ${sections.size} · קטעים: ${allFragments.length} · ` +
@@ -127,6 +161,9 @@ if (omitted.length) {
 }
 if (reworded.length) {
   console.log(`⚠ ניסוחים מאושרים על ידי המשתמשת (מודפסים במקום משפט המקור): ${reworded.join(', ')}`)
+}
+if (bridge) {
+  console.log(`⚠ משפט גשר מפרק ${bridge.from.chapter} (${bridge.from.ref}) נדפס בפתח הפרק — מאומת מול ${bridge.from.source}`)
 }
 console.log(
   `✅ נאמנות מלאה · ${external.length} סעיפים · ` +

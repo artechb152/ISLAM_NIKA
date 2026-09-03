@@ -47,6 +47,7 @@ import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
 import { layoutLabels, px, py, ROUTE } from '@/lib/chapter4/art'
 import layoutData from '@/lib/chapter4/layout.json'
+import BRIDGE from '@/lib/chapter4/bridge.json'
 import {
   completedSections,
   markContentComplete,
@@ -1034,6 +1035,15 @@ export default function Chapter4() {
                   </div>
                 </div>
                 <Head id="hijra" />
+                <aside className="ch4-bridge" data-reveal>
+                  <a className="ch4-bridge-back" href={BRIDGE.href}>
+                    {BRIDGE.eyebrow}
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M14 6l-6 6 6 6" />
+                    </svg>
+                  </a>
+                  <p className="ch4-bridge-text">{BRIDGE.text}</p>
+                </aside>
                 <Block>
                   <T r="§0.a" className="ch4-body" />
                   <T r="§0.b" className="ch4-body" />
