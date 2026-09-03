@@ -1187,6 +1187,18 @@ function GrassTufts() {
    the drag plane itself, and while a prop is in hand the camera's own
    mouse-look is locked out (`live.taskDrag`) — two hands on one mouse drag
    each other. */
+/* הבד המצויר של מפת-המסע: טקסטורה אחת על מישור, מחוץ לטווח Painterly.
+   קומפוננטה נפרדת כדי שהטעינה תקרה רק במחנה — לא בכל תחנת חפצים. */
+function PlanCloth({ x, z }: { x: number; z: number }) {
+  const tex = useLoader(THREE.TextureLoader, '/assets/chapter1/tex/plan-map-cloth.jpg')
+  return (
+    <mesh rotation-x={-Math.PI / 2} rotation-z={0.07} position={[x, groundYAt(x, z) + 0.05, z]} renderOrder={1}>
+      <planeGeometry args={[4.6, 4.7]} />
+      <meshBasicMaterial map={tex} toneMapped={false} transparent opacity={0.96} depthWrite={false} />
+    </mesh>
+  )
+}
+
 const TASK_PROP_SPOTS = [
   { dx: -1.5, dz: 0.7 },
   { dx: -0.4, dz: 1.5 },
@@ -1610,17 +1622,8 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       </mesh>
       {planMode && (
         <>
-          {/* בד המפה, פרוש על החול לאור המדורה */}
-          <group position={[T.x, groundYAt(T.x, T.z) + 0.05, T.z]}>
-            <mesh rotation-x={-Math.PI / 2} renderOrder={1}>
-              <circleGeometry args={[2.2, 48]} />
-              <meshBasicMaterial color="#d9c69b" transparent opacity={0.88} depthWrite={false} />
-            </mesh>
-            <mesh rotation-x={-Math.PI / 2} position-y={0.006} renderOrder={1}>
-              <ringGeometry args={[2.06, 2.2, 48]} />
-              <meshBasicMaterial color="#8a6a3f" transparent opacity={0.8} depthWrite={false} />
-            </mesh>
-          </group>
+          {/* בד המפה האמיתי — אריג עם רכס ההרים ממערב ונתיב מנוקד צפונה */}
+          <PlanCloth x={T.x} z={T.z} />
           {/* שלוש הדרכים — עמדות על הבד, עם שמות */}
           {spots.map((sp, k) => (
             <group key={sp.id}>
