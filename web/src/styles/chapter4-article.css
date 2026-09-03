@@ -1035,7 +1035,9 @@
 
 .ch4-who-town{
   display:block;width:100%;height:auto;
-  border:1px solid var(--gold-soft);
+  /* dissolves into the page instead of sitting in a frame */
+  -webkit-mask-image:radial-gradient(ellipse 58% 62% at 50% 50%,#000 55%,rgba(0,0,0,.45) 80%,transparent 100%);
+  mask-image:radial-gradient(ellipse 58% 62% at 50% 50%,#000 55%,rgba(0,0,0,.45) 80%,transparent 100%);
   opacity:0;scale:.99;
   transition:opacity .7s ease,scale .7s ease;
 }
@@ -1063,7 +1065,7 @@
   .ch4-who-stage{
     display:block;
     /* room at the edges for a face standing at a corner, and for Mecca below */
-    padding:clamp(34px,4.4vw,64px) clamp(104px,12vw,182px) clamp(96px,10vw,150px);
+    padding:clamp(20px,2.6vw,38px) clamp(112px,13vw,196px) clamp(86px,9vw,132px);
   }
   .ch4-who-card{
     position:absolute;z-index:2;
@@ -1077,13 +1079,7 @@
   .ch4-who-card.is-end{flex-direction:row-reverse}
   .ch4-who-card.is-start .ch4-who-copy{text-align:start}
   .ch4-who-card.is-end .ch4-who-copy{text-align:end}
-  .ch4-who-copy{min-width:0;max-width:215px}
-  /* over a light painting the type still needs to hold: a soft plate of the
-     page's own ground, not a dark scrim */
-  .ch4-who-copy > *{
-    background:color-mix(in srgb,var(--panel) 86%,transparent);
-    padding:3px 8px;border-radius:6px;
-  }
+  .ch4-who-copy{min-width:0;max-width:240px}
 }
 
 .ch4-who-dot{

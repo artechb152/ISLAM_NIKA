@@ -174,10 +174,20 @@
 .c3-page.is-peak.is-live .c3-lens img{animation-duration:30s}
 .c3-page.is-peak.is-live .c3-fx{filter:brightness(1.3)}
 
+/* ⚠ THE OVERRIDES MUST MATCH THE SELECTORS THEY OVERRIDE, NOT BE SHORTER THAN
+   THEM. `.c3-lens img{animation:none}` loses to
+   `.c3-page.is-live .c3-lens img{animation:…}` on specificity and the camera
+   went on running for a reader who had asked it not to — measured at scale
+   1.052 with reduce set. Each line below carries the full selector. */
 @media (prefers-reduced-motion:reduce){
   .c3-lens,.c3-haze,.c3-fx{transition:none;transform:none}
-  .c3-lens img,.c3-haze,.c3-fx,.c3-fx::before,.c3-fx::after,
-  .c3-page.is-fresh .c3-cap,.c3-page.is-fresh .c3-plate,.c3-page.is-fresh .c3-stamp,
-  .c3-page.is-fresh .c3-say,.c3-page.is-fresh .c3-verse{animation:none}
+  .c3-page.is-live .c3-lens img,
+  .c3-page.is-live[data-c="out"] .c3-lens img,
+  .c3-page.is-peak.is-live .c3-lens img{animation:none;transform:none}
+  [data-m] .c3-haze,[data-m] .c3-fx::before,[data-m] .c3-fx::after,.c3-fx{animation:none}
+  .c3-page.is-fresh .c3-cap,.c3-page.is-fresh .c3-cap:nth-child(2),
+  .c3-page.is-fresh .c3-cap:nth-child(3),.c3-page.is-fresh .c3-plate,
+  .c3-page.is-fresh .c3-stamp,.c3-page.is-fresh .c3-say,
+  .c3-page.is-fresh .c3-verse{animation:none}
   .c3-scene{transition:opacity .3s ease;transform:scale(1.14)}
 }
