@@ -6,22 +6,50 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { FILM_CUES } from './film-cues'
 
-const SRC = '/assets/ch6-story.mp4'
-const POSTER = '/assets/ch6-story-poster.jpg'
+export interface FilmProps {
+  /** the mp4; defaults to chapter 6's opening film */
+  src?: string
+  poster?: string
+  /** the standard caption resource offered to assistive tech and native caption UI */
+  captions?: string
+  /** [start, end, text] — the styled subtitles drawn over the picture */
+  cues?: Array<[number, number, string]>
+  /** opening title card drawn in OUR font over the first seconds; '' disables it */
+  title?: string
+  titleFrom?: number
+  titleTo?: number
+  /** the one line that breaks out of its plate and fills the frame; '' disables it */
+  reveal?: string
+  label?: string
+}
 
-/* Opening title card, rendered as HTML over the first seconds of the film (so its FONT is ours,
-   not baked into the video). Set the FROM/TO seconds to match where it should sit in the new
-   video; set FILM_TITLE to '' to disable it. */
-const FILM_TITLE: string = 'מדינה'
-const FILM_TITLE_FROM = 0.3
-const FILM_TITLE_TO = 4.5
+const CH6 = {
+  src: '/assets/ch6-story.mp4',
+  poster: '/assets/ch6-story-poster.jpg',
+  captions: '/assets/ch6-story.vtt',
+  title: 'מדינה',
+  titleFrom: 0.3,
+  titleTo: 4.5,
+  reveal: 'גבריאל',
+  label: 'סרטון הפתיחה של פרק 6',
+}
 
 function formatTime(value: number): string {
   const seconds = Math.max(0, Math.round(value))
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
-export default function StoryFilm() {
+export default function StoryFilm({
+  src = CH6.src,
+  poster = CH6.poster,
+  captions = CH6.captions,
+  cues = FILM_CUES,
+  title = CH6.title,
+  titleFrom = CH6.titleFrom,
+  titleTo = CH6.titleTo,
+  reveal = CH6.reveal,
+  label = CH6.label,
+}: FilmProps = {}) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const rootRef = useRef<HTMLDivElement | null>(null)
   const [playing, setPlaying] = useState(false)
@@ -52,12 +80,12 @@ export default function StoryFilm() {
     }
   }, [])
 
-  const showTitle = FILM_TITLE !== '' && time >= FILM_TITLE_FROM && time <= FILM_TITLE_TO
+  const showTitle = title !== '' && time >= titleFrom && time <= titleTo
 
   const caption = useMemo(() => {
-    const cue = FILM_CUES.find(([start, end]) => time >= start && time <= end)
+    const cue = cues.find(([start, end]) => time >= start && time <= end)
     return cue ? cue[2] : ''
-  }, [time])
+  }, [time, cues])
 
   function togglePlayback(): void {
     const video = videoRef.current
@@ -105,12 +133,12 @@ export default function StoryFilm() {
   const shownVolume = muted ? 0 : volume
 
   return (
-    <div className="story-film" ref={rootRef} aria-label="סרטון הפתיחה של פרק 6">
+    <div className="story-film" ref={rootRef} aria-label={label}>
       <div className="story-film-stage">
         <video
           ref={videoRef}
-          src={SRC}
-          poster={POSTER}
+          src={src}
+          poster={poster}
           playsInline
           preload="metadata"
           muted={muted}
@@ -127,15 +155,15 @@ export default function StoryFilm() {
           {/* standard caption resource (same narration as the on-screen captions); not shown by
               default so it never double-renders over the styled captions, but available to
               assistive tech and any native caption UI */}
-          <track kind="captions" src="/assets/ch6-story.vtt" srcLang="he" label="עברית" />
+          <track kind="captions" src={captions} srcLang="he" label="עברית" />
         </video>
         <span className="story-film-grade" aria-hidden="true" />
-        {FILM_TITLE && (
+        {title && (
           <span className={'story-film-title' + (showTitle ? ' is-on' : '')} aria-hidden="true">
-            {FILM_TITLE}
+            {title}
           </span>
         )}
-        <p className={'story-film-caption' + (caption.includes('גבריאל') ? ' is-reveal' : '')} aria-live="polite">
+        <p className={'story-film-caption' + (reveal !== '' && caption.includes(reveal) ? ' is-reveal' : '')} aria-live="polite">
           {caption}
         </p>
         {!playing && !finished && (
