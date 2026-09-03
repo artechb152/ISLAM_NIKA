@@ -40,14 +40,25 @@ import comicData from '@/lib/chapter3/comic.json'
 import { markContentComplete } from '@/lib/chapter3/progress'
 
 interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
-interface Page { a: string; p: number; e?: number; b: Beat[] }
+interface Page { a: string; p: number; e?: number; b: Beat[]; m: string; c: string; peak?: number }
 interface Part { title: string; first: number }
 const PAGES = (comicData as unknown as { pages: Page[] }).pages
 const PARTS = (comicData as unknown as { parts: Part[] }).parts
 /* folio → the part that opens on it */
 const OPENS = new Map(PARTS.map((p, i) => [p.first, i]))
 
-function PageView({ page, folio, side }: { page: Page | null; folio: number; side: 'r' | 'l' }) {
+/* THE MOTION LAYER.
+   `live`  — this page is one of the two the reader is looking at. Only these
+             two carry the drifting layers, so the book animates two pages at a
+             time and never seventy-eight.
+   `fresh` — the turn has finished and this page has just arrived. It runs the
+             entrance once. It is deliberately NOT the same flag as `live`: a
+             page being turned AWAY from must keep its text on screen for the
+             whole rotation, and tying the entrance to visibility made the
+             outgoing page go blank in mid-air. */
+function PageView({ page, folio, side, live, fresh }: {
+  page: Page | null; folio: number; side: 'r' | 'l'; live: boolean; fresh: boolean
+}) {
   if (!page) return <div className="c3-page is-blank" />
   const opens = OPENS.get(folio)
   const time = page.b.find((b) => b.k === 'time')
@@ -55,11 +66,18 @@ function PageView({ page, folio, side }: { page: Page | null; folio: number; sid
   const verses = page.b.filter((b) => b.k === 'v')
   const caps = page.b.filter((b) => !b.k)
   return (
-    <div className={'c3-page' + (page.e ? ' is-today' : '') + (caps.length ? '' : ' is-full') + (side === 'r' ? ' is-recto' : '')}>
+    <div className={'c3-page' + (page.e ? ' is-today' : '') + (caps.length ? '' : ' is-full') +
+                    (side === 'r' ? ' is-recto' : '') + (live ? ' is-live' : '') +
+                    (fresh ? ' is-fresh' : '') + (page.peak ? ' is-peak' : '')}
+         data-m={page.m} data-c={page.c}>
       <figure className={'c3-art' + (verses.length ? ' has-verse' : '')}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={`/assets/chapter3/comic/${page.a}.jpg`} alt="" aria-hidden="true"
-             loading="lazy" decoding="async" />
+        <span className="c3-lens">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={`/assets/chapter3/comic/${page.a}.jpg`} alt="" aria-hidden="true"
+               loading="lazy" decoding="async" />
+        </span>
+        {live && <><span className="c3-haze" aria-hidden="true" />
+                   <span className="c3-fx" aria-hidden="true" /></>}
         {(opens !== undefined || time) && (
           <div className="c3-top">
             {opens !== undefined && (
@@ -188,6 +206,35 @@ export default function Chapter3Comic() {
   /* the part the reader is standing in, by the later of the two open folios */
   const partNow = PARTS.reduce((acc, p, i) => (p.first <= Math.max(shown, 1) ? i : acc), 0)
 
+  /* the two folios the reader is looking at: the right leaf is 2·at−1 and the
+     left leaf 2·at, which is the whole of what the motion layer runs on */
+  const openNow = at === 0 ? [] : [at * 2 - 1, at * 2]
+  const settled = moving < 0
+
+  /* THE POINTER MOVES THE LAYERS AGAINST EACH OTHER. Two numbers, written on
+     the book once per frame; every layer reads them and multiplies them by its
+     own depth, so the picture, the atmosphere and the motes travel at three
+     different speeds. Written straight to the element rather than through
+     state — a re-render per mouse move would re-render 39 sheets. */
+  const raf = useRef(0)
+  const onMove = useCallback((e: React.PointerEvent) => {
+    if (raf.current) return
+    const x = e.clientX, y = e.clientY
+    raf.current = requestAnimationFrame(() => {
+      raf.current = 0
+      const book = bookRef.current
+      if (!book) return
+      book.style.setProperty('--px', String(((x / window.innerWidth) * 2 - 1).toFixed(3)))
+      book.style.setProperty('--py', String(((y / window.innerHeight) * 2 - 1).toFixed(3)))
+    })
+  }, [])
+  useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current) }, [])
+
+  /* THE FOUR PAGES THE CHAPTER TURNS ON. Nothing about the page itself changes
+     — the room around the book does: the stage takes the colour of the picture
+     the reader has just arrived at. */
+  const peak = settled ? openNow.map((f) => PAGES[f - 1]).find((p) => p?.peak) : undefined
+
   return (
     <div className="c3-shell">
       <header className="chapter-site-header">
@@ -276,7 +323,9 @@ export default function Chapter3Comic() {
           leaf back. It lives on the stage rather than on two overlay buttons
           because an overlay would have to sit above the sheets, and then it
           would swallow the one link the book contains. */}
-      <div className="c3-stage" onClick={onStage}>
+      <div className={'c3-stage' + (peak ? ' is-peak' : '')} onClick={onStage} onPointerMove={onMove}>
+        <div className={'c3-scene' + (peak ? ' is-on' : '')} aria-hidden="true"
+             style={peak ? { backgroundImage: `url(/assets/chapter3/comic/${peak.a}.jpg)` } : undefined} />
         <div className={'c3-book' + (at === 0 ? ' is-closed' : '')} ref={bookRef}>
           <div className="c3-under" aria-hidden="true">
             <span className="c3-half is-l" /><span className="c3-half is-r" />
@@ -287,12 +336,16 @@ export default function Chapter3Comic() {
               <div className="c3-face is-front">
                 {s.front === 'cover'
                   ? <Cover />
-                  : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} side="r" />}
+                  : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} side="r"
+                              live={openNow.includes(s.front?.folio ?? -1)}
+                              fresh={settled && openNow.includes(s.front?.folio ?? -1)} />}
               </div>
               <div className="c3-face is-back">
                 {!s.back && i === sheets.length - 1
                   ? <EndPage />
-                  : <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l" />}
+                  : <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l"
+                              live={openNow.includes(s.back?.folio ?? -1)}
+                              fresh={settled && openNow.includes(s.back?.folio ?? -1)} />}
               </div>
             </div>
           ))}

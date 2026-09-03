@@ -15,6 +15,9 @@ import '@/styles/chapter3-article.css'
 /* the comic's own sheet, loaded last. chapter3-article.css stays because the
    closing practice still runs on it. */
 import '@/styles/chapter3-comic.css'
+/* and the motion layer on top of that — it changes no measurement of the book,
+   only what moves inside the two pages the reader has open */
+import '@/styles/chapter3-motion.css'
 
 export const metadata: Metadata = {
   title: 'פרק שלישי · ראשית חיי מוחמד',

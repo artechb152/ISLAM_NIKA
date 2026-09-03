@@ -27,7 +27,7 @@
   --flow-tight:clamp(14px,1.8vw,20px);/* a sub-heading to its own first line */
 
   --measure:880px;   /* the reading column's ceiling            */
-  --lh:1.82;         /* leading for every block set at --read   */
+  --lh:1.7;          /* leading — see the note below on why it is not 1.82 */
 }
 
 
@@ -77,7 +77,7 @@
    three stacked blocks with sixteen pixels between them. Chapter 3 never hit it
    because its emphasised runs sit inside a span; this chapter emphasises plain
    paragraphs, which is what chapters 2 and 6 do throughout. */
-.ch4-body{display:block;width:100%;max-width:var(--measure,880px)}
+.ch4-body{display:block;width:100%}
 
 .chapter-article .ch4-body{
   font-size:var(--read);line-height:var(--lh,1.82);color:var(--ink);
@@ -803,7 +803,7 @@
    what it changes is the rhythm, by making the gap BETWEEN two ideas larger
    than the gap between two sentences of one idea. */
 .ch4-block > * + *{margin-block-start:14px}
-.chapter-article .article-section > .ch4-block + .ch4-block{margin-top:var(--flow-lead)}
+.chapter-article .article-section > .ch4-block + .ch4-block{margin-top:14px}
 
 /* ================================ the ditch ===========================
    The one thing in this chapter the reader performs rather than reads. Both
