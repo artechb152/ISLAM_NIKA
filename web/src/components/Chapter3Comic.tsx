@@ -136,6 +136,11 @@ export default function Chapter3Comic() {
   const leaves = useMemo(paginate, [])
   const bookRef = useRef<HTMLDivElement | null>(null)
   const [at, setAt] = useState(0)
+  /* the sheet currently in motion. It must sit ABOVE the stack for the whole
+     rotation: given its resting z-index the moment the turn starts, it spends
+     the first ninety degrees behind the unturned sheets and simply vanishes,
+     then reappears on the left — which reads as a glitch, not a page. */
+  const [moving, setMoving] = useState(-1)
 
   /* SHEETS. After n turns the reader sees sheet[n-1]'s BACK on the left and
      sheet[n]'s FRONT on the right, and in an RTL book the right page is the
@@ -152,9 +157,20 @@ export default function Chapter3Comic() {
     return out
   }, [leaves])
 
+  const TURN_MS = 800
   const turn = useCallback((d: number) => {
-    setAt((v) => Math.min(Math.max(v + d, 0), sheets.length - 1))
+    setAt((v) => {
+      const n = Math.min(Math.max(v + d, 0), sheets.length - 1)
+      if (n !== v) setMoving(d > 0 ? v : n)
+      return n
+    })
   }, [sheets.length])
+
+  useEffect(() => {
+    if (moving < 0) return
+    const t = setTimeout(() => setMoving(-1), TURN_MS)
+    return () => clearTimeout(t)
+  }, [moving])
 
   /* the page is sized in real pixels; nothing is transform-scaled */
   useEffect(() => {
@@ -213,7 +229,7 @@ export default function Chapter3Comic() {
           </div>
           {sheets.map((s, i) => (
             <div className={'c3-sheet' + (i < at ? ' is-turned' : '')} key={i}
-                 style={{ zIndex: i < at ? i + 1 : sheets.length - i }}
+                 style={{ zIndex: i === moving ? sheets.length + 5 : i < at ? i + 1 : sheets.length - i }}
                  onClick={() => turn(1)}>
               <div className="c3-face is-front">
                 {s.front === 'cover'

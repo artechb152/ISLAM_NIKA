@@ -152,6 +152,14 @@ a{color:inherit}
     align-self:flex-start;transform:none;visibility:visible;box-shadow:none;
     border-inline-end:1px solid var(--edge);
     transition:width .24s cubic-bezier(.2,.8,.2,1);
+    /* THE WHEEL MUST REACH THE PAGE. `overscroll-behavior:contain` is right for
+       the off-canvas drawer, where a scroll inside an overlay should not drag
+       the page underneath it. Here the same element is a sticky column standing
+       IN the page, and containment made a dead zone: measured on chapter 4, the
+       rail's content was 944px inside a 944px box — nothing of its own to
+       scroll — and a wheel anywhere in its 300px, a fifth of the window and the
+       side an RTL reader's mouse rests on, moved nothing at all. */
+    overscroll-behavior:auto;
   }
   .chapter-drawer.is-collapsed{width:var(--ch6-side-rail)}
   .chapter-scrim{display:none}
