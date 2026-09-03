@@ -663,7 +663,6 @@ export default function Chapter4() {
                       img: 'who-muhajirun',
                       x: 80,
                       y: 30,
-                      side: 'end',
                     },
                     {
                       id: 'ansar',
@@ -672,7 +671,6 @@ export default function Chapter4() {
                       img: 'who-ansar',
                       x: 20,
                       y: 30,
-                      side: 'start',
                     },
                     {
                       id: 'jews',
@@ -681,7 +679,6 @@ export default function Chapter4() {
                       img: 'who-jews',
                       x: 20,
                       y: 74,
-                      side: 'start',
                     },
                     {
                       id: 'quraysh',
@@ -690,7 +687,6 @@ export default function Chapter4() {
                       img: 'who-quraysh',
                       x: 78,
                       y: 92,
-                      side: 'end',
                       away: true,
                     },
                   ]}

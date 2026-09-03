@@ -1010,28 +1010,27 @@
 }
 
 /* ------------------------- who met whom in Medina ----------------------
-   §3's four groups, standing ON the town they are named in relation to. Three
-   over the oasis and the fourth outside the frame, because the source puts that
-   one in Mecca — see Groups.tsx.
+   §3's four groups. The picture carries the four faces and nothing else; every
+   word is in the panel under it — see Groups.tsx.
 
-   THE PICTURE IS THE GROUND, not a panel between two text columns: the faces
-   sit at its corners on --x/--y, each on a dotted line pointing in. The stage
-   keeps room around the picture so a face at a corner is never clipped, and
-   the away face has that room to stand in.
+   WHY NO TEXT AROUND THE PICTURE. It was built that way first and it did not
+   read: four labels at four corners give the eye no order to follow, and a
+   Hebrew group name is longer than the column a corner leaves for it. One panel
+   at full measure, in the chapter's own reading size, is legible by
+   construction.
 
-   THE RING BECOMES A COLUMN under 900px. Four labelled circles over a landscape
-   need width; below that the picture goes first, the faces stack, every sentence
-   is simply printed, and the connectors are not drawn at all. */
-.ch4-who{margin:0;width:100%}
+   BELOW 900px the faces come off the picture and become a row beneath it, and
+   the connectors are not drawn at all. */
+.ch4-who{margin:0;width:min(100%,860px);margin-inline:auto}
 
-.ch4-who-head{margin-bottom:clamp(16px,2vw,26px);text-align:center}
+.ch4-who-head{margin-bottom:clamp(14px,1.8vw,22px);text-align:center}
 .ch4-who-head h3{
   margin:0;font-family:var(--font-heading);font-weight:700;color:var(--maroon);
   font-size:clamp(22px,2.4vw,30px);line-height:1.25;
 }
 .ch4-who-head p{margin:6px 0 0;font-size:14.5px;color:var(--muted)}
 
-.ch4-who-stage{position:relative;display:grid;gap:clamp(18px,2.4vw,28px)}
+.ch4-who-stage{position:relative}
 
 .ch4-who-town{
   display:block;width:100%;height:auto;
@@ -1046,78 +1045,68 @@
 .ch4-who-web{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:visible}
 .ch4-who-line{
   stroke:var(--maroon);stroke-width:1.4;stroke-linecap:round;stroke-dasharray:2 5;
-  opacity:.7;
-  stroke-dashoffset:var(--len);
+  opacity:.6;stroke-dashoffset:var(--len);
   animation:ch4-draw .85s ease forwards var(--step,.8s);
+  transition:opacity .2s ease,stroke-width .2s ease;
 }
 .ch4-who-line.is-on{opacity:1;stroke-width:2}
 @keyframes ch4-draw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
 
-.ch4-who-card{
-  opacity:0;translate:0 8px;
-  transition:opacity .55s ease,translate .55s ease;
-  transition-delay:var(--step,.6s);
-}
-.ch4-who.is-on .ch4-who-card{opacity:1;translate:0 0}
-
-/* ---- the wide arrangement: faces placed over the picture ---- */
-@media (min-width:900px){
-  .ch4-who-stage{
-    display:block;
-    /* room at the edges for a face standing at a corner, and for Mecca below */
-    padding:clamp(20px,2.6vw,38px) clamp(112px,13vw,196px) clamp(86px,9vw,132px);
-  }
-  .ch4-who-card{
-    position:absolute;z-index:2;
-    left:var(--x);top:var(--y);translate:-50% -50%;
-    display:flex;align-items:center;gap:12px;
-    width:max-content;max-width:min(300px,26vw);
-  }
-  .ch4-who.is-on .ch4-who-card{translate:-50% -50%}
-  /* the label reads OUTWARD from the circle: away from the middle of the town */
-  .ch4-who-card.is-start{flex-direction:row}
-  .ch4-who-card.is-end{flex-direction:row-reverse}
-  .ch4-who-card.is-start .ch4-who-copy{text-align:start}
-  .ch4-who-card.is-end .ch4-who-copy{text-align:end}
-  .ch4-who-copy{min-width:0;max-width:240px}
-}
+/* the label is there for a screen reader; the picture is the label for everyone else */
+.ch4-who-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 .ch4-who-dot{
-  flex:none;display:block;padding:0;cursor:pointer;
-  width:clamp(92px,9.5vw,124px);aspect-ratio:1;border-radius:50%;
+  display:block;padding:0;cursor:pointer;
+  width:clamp(84px,9vw,120px);aspect-ratio:1;border-radius:50%;
   border:2px solid var(--gold);background:var(--mat);overflow:hidden;
   box-shadow:0 4px 14px rgba(60,35,18,.22);
-  transition:border-color .2s ease,scale .2s ease,box-shadow .2s ease;
+  opacity:0;
+  transition:border-color .2s ease,scale .2s ease,box-shadow .2s ease,opacity .55s ease;
+  transition-delay:0s,0s,0s,var(--step,.6s);
 }
+.ch4-who.is-on .ch4-who-dot{opacity:1}
 .ch4-who-dot img{width:100%;height:100%;object-fit:cover;display:block}
-.ch4-who-dot:hover{border-color:var(--maroon);scale:1.04}
+.ch4-who-dot:hover{border-color:var(--maroon);scale:1.05}
 .ch4-who-dot:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px}
-.ch4-who-card.is-on .ch4-who-dot{border-color:var(--maroon);scale:1.05;box-shadow:0 8px 22px rgba(87,24,32,.3)}
-
+.ch4-who-dot.is-on{border-color:var(--maroon);border-width:3px;scale:1.07;box-shadow:0 8px 22px rgba(87,24,32,.32)}
 /* Mecca: outside the frame, and in gold rather than maroon */
-.ch4-who-card.is-away .ch4-who-dot{border-style:dashed;border-color:var(--gold-soft)}
-.ch4-who-card.is-away.is-on .ch4-who-dot{border-style:solid;border-color:var(--gold-text)}
-.ch4-who-card.is-away .ch4-who-name{color:var(--gold-text)}
+.ch4-who-dot.is-away{border-style:dashed;border-color:var(--gold-soft)}
+.ch4-who-dot.is-away.is-on{border-style:solid;border-color:var(--gold-text)}
 
-.ch4-who-name{
-  margin:0;font-family:var(--font-heading);font-weight:700;
-  font-size:clamp(16px,1.7vw,20px);line-height:1.25;color:var(--maroon);
+/* ---- wide: the faces stand on the picture ---- */
+@media (min-width:900px){
+  .ch4-who-stage{padding:clamp(18px,2.2vw,32px) clamp(28px,3vw,44px) clamp(64px,7vw,104px)}
+  .ch4-who-ring{position:absolute;inset:0;z-index:2}
+  .ch4-who-dot{position:absolute;left:var(--x);top:var(--y);translate:-50% -50%}
 }
-.ch4-who-text{margin:5px 0 0;font-size:14.5px;line-height:1.55;color:var(--ink)}
-.ch4-who-name + .ch4-who-text{margin-top:5px}
 
-/* ---- the narrow arrangement: a plain column, nothing hidden ---- */
+/* ---- narrow: the faces come off the picture and line up under it ---- */
 @media (max-width:899px){
-  .ch4-who-card{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;text-align:start}
-  .ch4-who-card.is-away{
-    margin-top:clamp(12px,2vw,18px);padding-top:clamp(12px,2vw,18px);
-    border-top:1px solid var(--rule);
+  .ch4-who-ring{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(14px,4vw,26px);
+    margin-top:clamp(14px,3vw,22px);
   }
-  .ch4-who-dot{width:clamp(76px,17vw,96px)}
+  .ch4-who-dot{width:clamp(72px,17vw,96px)}
 }
 
-/* NOTHING MOVES for a reader who asked for that: no draw, no fade, no delay —
-   the figure is simply already in its finished state. */
+/* ---- the panel: where all the reading happens ---- */
+.ch4-who-panel{
+  margin-top:clamp(16px,2vw,26px);
+  padding:clamp(16px,2vw,24px) clamp(18px,2.4vw,30px);
+  border:1px solid var(--gold-soft);background:var(--mat);
+  animation:ch4-who-in .32s ease;
+}
+.ch4-who-panel.is-away{border-color:var(--gold);background:var(--panel)}
+.ch4-who-panel h4{
+  margin:0 0 6px;font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(19px,2vw,24px);line-height:1.25;color:var(--maroon);
+}
+.ch4-who-panel.is-away h4{color:var(--gold-text)}
+.ch4-who-panel p{margin:0;font-size:var(--read);line-height:var(--lh,1.7);color:var(--ink)}
+@keyframes ch4-who-in{from{opacity:0;translate:0 5px}to{opacity:1;translate:0 0}}
+
+/* NOTHING MOVES for a reader who asked for that: no draw, no fade, no delay. */
 .ch4-who.is-still .ch4-who-town,
-.ch4-who.is-still .ch4-who-card{opacity:1;scale:1;transition:none}
+.ch4-who.is-still .ch4-who-dot{opacity:1;scale:1;transition:none}
 .ch4-who.is-still .ch4-who-line{animation:none;stroke-dashoffset:0}
+.ch4-who.is-still .ch4-who-panel{animation:none}

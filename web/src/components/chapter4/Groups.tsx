@@ -4,45 +4,43 @@
 
    §3 is a single sentence that ends in a colon and then lists four groups of
    people. As running text the list is four clauses the reader skims; here each
-   group is a face standing ON the town it is named in relation to, which is
-   what the sentence is actually about.
+   group is a face standing on the town it is named in relation to.
 
-   THE FACES SIT OVER THE PICTURE, at the four corners, each with a dotted line
-   running in toward the middle of the oasis. The name is always legible; the
-   group's sentence is not printed until the reader asks for it. That is the one
-   thing this figure does that a paragraph cannot: it makes the four groups a
-   place before it makes them a text.
+   NO TEXT AROUND THE PICTURE. It was tried and it does not read: four labels at
+   four corners give the eye no order to follow, and a Hebrew group name is
+   longer than the column a corner leaves for it. So the picture carries only
+   the four faces and their lines, and every word sits in ONE panel underneath —
+   full measure, page ground, the chapter's own reading size. Press a face and
+   the panel is about that group.
 
    THE FOURTH GROUP IS NOT IN MEDINA, AND THE PICTURE SAYS SO. „ובמכה התגוררו
-   הכופרים משבט קריש" — they are the one group the source puts somewhere else,
-   so their face stands outside the frame at the bottom, in gold rather than
-   maroon, on the longest line of the four. The distance is the point: it is
-   what section 02 and section 03 are about.
+   הכופרים משבט קריש" — the one group the source puts somewhere else, so its face
+   stands outside the frame, in gold rather than maroon, on the longest line of
+   the four. The distance is the point: it is what sections 02 and 03 are about.
 
-   EVERY WORD HERE IS THE SOURCE'S. The name is the source's own name for the
-   group (`name` in passages.json — המהגרים, התומכים) and the sentence that
-   opens is that group's own fragment. The two groups the source does not name
-   carry no label until they are opened, and then the sentence is the label.
+   EVERY WORD IS THE SOURCE'S. The heading is the source's own name for the group
+   where it gives one, and otherwise a phrase lifted out of that group's own
+   sentence; the paragraph is the sentence itself.
+
+   IT IS A TABLIST, and behaves like one: arrow keys move between the faces,
+   Home and End jump to the ends, and only the selected face is in the tab order,
+   so a keyboard reader tabs past the whole figure in one step.
 
    THE ANIMATION IS THE SENTENCE. On entering view the town settles first, then
    each line draws itself from its face in toward the oasis and the face arrives
-   with it — the three around the town, and Mecca's last and slowest, from
-   outside. It runs once. Under prefers-reduced-motion nothing moves.
+   with it — Mecca last and slowest, from outside. Once. Under
+   prefers-reduced-motion nothing moves.
 
-   THE LINES ARE MEASURED, NOT GUESSED — their endpoints are read off the
-   laid-out DOM through a ResizeObserver, so they stay attached at any width.
-   Below 900px the picture goes first and the four become a plain column: four
-   labelled circles over a landscape need width, and connectors across stacked
-   cards are noise. Groups.tsx stops measuring them at that breakpoint, so the
-   SVG is empty rather than hidden. */
+   THE LINES ARE MEASURED, NOT GUESSED — endpoints read off the laid-out DOM
+   through a ResizeObserver, so they stay attached at any width. Below 900px the
+   faces leave the picture and become a row beneath it, and no lines are drawn. */
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
 export interface Group {
   id: string
-  /** The source's own name for the group, where it gives one. Where it does
-      not, the sentence itself is the label once the group is opened. */
-  name?: string
+  /** the source's words: its own name for the group, or a phrase from its sentence */
+  name: string
   /** the group's own sentence, verbatim */
   text: string
   /** the painted vignette, without extension */
@@ -50,8 +48,6 @@ export interface Group {
   /** position over the picture, in per cent from its left and top edges */
   x: number
   y: number
-  /** which way the label reads out from the circle */
-  side: 'start' | 'end'
   /** true for the one group the source places outside the town */
   away?: boolean
 }
@@ -82,38 +78,32 @@ export default function Groups({
   const uid = useId().replace(/:/g, '')
   const stage = useRef<HTMLDivElement | null>(null)
   const town = useRef<HTMLImageElement | null>(null)
-  const dots = useRef<Record<string, HTMLElement | null>>({})
+  const dots = useRef<Array<HTMLButtonElement | null>>([])
   const [lines, setLines] = useState<Line[]>([])
   const [box, setBox] = useState({ w: 0, h: 0 })
-  const [at, setAt] = useState<string | null>(null)
+  const [at, setAt] = useState(0)
   const [shown, setShown] = useState(false)
   const [still, setStill] = useState(false)
-  const [wide, setWide] = useState(true)
 
   useEffect(() => {
-    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const room = window.matchMedia('(min-width: 900px)')
-    const sync = () => {
-      setStill(motion.matches)
-      setWide(room.matches)
-    }
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setStill(mq.matches)
     sync()
-    motion.addEventListener('change', sync)
-    room.addEventListener('change', sync)
-    return () => {
-      motion.removeEventListener('change', sync)
-      room.removeEventListener('change', sync)
-    }
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
   }, [])
 
-  /* the connector geometry, read off the real layout */
   const measure = useCallback(() => {
     const root = stage.current
     const pic = town.current
     if (!root || !pic) return
     const r = root.getBoundingClientRect()
     setBox({ w: r.width, h: r.height })
-    if (r.width < 900) {
+    /* THE BREAKPOINT IS THE WINDOW'S, NOT THE STAGE'S. The figure has its own
+       measure — narrower than 900px even on a wide screen — so testing the
+       stage's width switched the layout off everywhere. It has to be the same
+       query the stylesheet uses, or the lines and the arrangement disagree. */
+    if (!window.matchMedia('(min-width: 900px)').matches) {
       setLines([])
       return
     }
@@ -121,9 +111,9 @@ export default function Groups({
     const cx = t.left - r.left + t.width / 2
     const cy = t.top - r.top + t.height / 2
     const next: Line[] = []
-    for (const g of groups) {
-      const el = dots.current[g.id]
-      if (!el) continue
+    groups.forEach((g, i) => {
+      const el = dots.current[i]
+      if (!el) return
       const d = el.getBoundingClientRect()
       const x1 = d.left - r.left + d.width / 2
       const y1 = d.top - r.top + d.height / 2
@@ -133,7 +123,7 @@ export default function Groups({
       const from = d.width / 2 + 8
       /* stop well short of the middle: a line that reaches the centre of the
          oasis crosses the town instead of pointing at it */
-      const to = Math.max(from + 4, dist - t.width * 0.14)
+      const to = Math.max(from + 4, dist - t.width * 0.16)
       next.push({
         id: g.id,
         x1: x1 + (dx / dist) * from,
@@ -142,7 +132,7 @@ export default function Groups({
         y2: y1 + (dy / dist) * to,
         len: Math.max(0, to - from),
       })
-    }
+    })
     setLines(next)
   }, [groups])
 
@@ -159,7 +149,6 @@ export default function Groups({
     }
   }, [measure])
 
-  /* run the arrival once, when the figure is actually looked at */
   useEffect(() => {
     const root = stage.current
     if (!root) return
@@ -176,21 +165,22 @@ export default function Groups({
     return () => io.disconnect()
   }, [])
 
-  /* Escape closes the open group and hands focus back to the face that opened it */
-  useEffect(() => {
-    if (!at) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return
-      e.preventDefault()
-      const el = dots.current[at]
-      setAt(null)
-      el?.focus()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [at])
+  /* tablist keys. RTL: ArrowLeft advances, ArrowRight goes back. */
+  const onKey = (e: React.KeyboardEvent) => {
+    const last = groups.length - 1
+    let to = -1
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') to = at === last ? 0 : at + 1
+    else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') to = at === 0 ? last : at - 1
+    else if (e.key === 'Home') to = 0
+    else if (e.key === 'End') to = last
+    if (to < 0) return
+    e.preventDefault()
+    setAt(to)
+    dots.current[to]?.focus()
+  }
 
   const on = shown || still
+  const open = groups[at]
 
   return (
     <figure className={`ch4-who${on ? ' is-on' : ''}${still ? ' is-still' : ''}`}>
@@ -207,56 +197,52 @@ export default function Groups({
           {lines.map((l, i) => (
             <line
               key={l.id}
-              className={`ch4-who-line${at === l.id ? ' is-on' : ''}`}
+              className={`ch4-who-line${groups[at]?.id === l.id ? ' is-on' : ''}`}
               x1={l.x1}
               y1={l.y1}
               x2={l.x2}
               y2={l.y2}
-              style={{
-                ['--len' as string]: `${Math.round(l.len)}`,
-                ['--step' as string]: `${0.8 + i * 0.3}s`,
-              }}
+              style={{ ['--len' as string]: `${Math.round(l.len)}`, ['--step' as string]: `${0.8 + i * 0.3}s` }}
             />
           ))}
         </svg>
 
-        {groups.map((g, i) => (
-          <article
-            key={g.id}
-            className={`ch4-who-card is-${g.side}${at === g.id ? ' is-on' : ''}${g.away ? ' is-away' : ''}`}
-            style={{
-              ['--x' as string]: `${g.x}%`,
-              ['--y' as string]: `${g.y}%`,
-              ['--step' as string]: `${0.6 + i * 0.3}s`,
-            }}
-          >
+        <div className="ch4-who-ring" role="tablist" aria-label={question} onKeyDown={onKey}>
+          {groups.map((g, i) => (
             <button
+              key={g.id}
               type="button"
-              className="ch4-who-dot"
+              role="tab"
+              id={`${uid}-tab-${g.id}`}
+              aria-selected={at === i}
+              aria-controls={`${uid}-panel`}
+              tabIndex={at === i ? 0 : -1}
               ref={(el) => {
-                dots.current[g.id] = el
+                dots.current[i] = el
               }}
-              aria-expanded={at === g.id}
-              aria-controls={`${uid}-${g.id}`}
-              onClick={() => setAt((v) => (v === g.id ? null : g.id))}
+              className={`ch4-who-dot${at === i ? ' is-on' : ''}${g.away ? ' is-away' : ''}`}
+              style={{ ['--x' as string]: `${g.x}%`, ['--y' as string]: `${g.y}%`, ['--step' as string]: `${0.6 + i * 0.3}s` }}
+              onClick={() => setAt(i)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`/assets/chapter4/${g.img}.jpg`} alt="" aria-hidden="true" loading="lazy" />
+              <span className="ch4-who-sr">{g.name}</span>
             </button>
-            <div className="ch4-who-copy">
-              {g.name && <h4 className="ch4-who-name">{g.name}</h4>}
-              {/* A DISCLOSURE, and hidden the way one should be: the paragraph
-                  stays in the document (chapter search still matches its words)
-                  and the button beside it carries aria-expanded/aria-controls,
-                  so a screen reader is told there is something to open and can
-                  open it. BELOW THE BREAKPOINT NOTHING IS HIDDEN — the figure is
-                  a plain column there and every sentence is simply printed. */}
-              <p className="ch4-who-text" id={`${uid}-${g.id}`} hidden={wide && at !== g.id}>
-                {g.text}
-              </p>
-            </div>
-          </article>
-        ))}
+          ))}
+        </div>
+      </div>
+
+      {/* one panel, full measure, on the page's own ground — this is where all
+          the reading happens */}
+      <div
+        className={`ch4-who-panel${open?.away ? ' is-away' : ''}`}
+        id={`${uid}-panel`}
+        role="tabpanel"
+        aria-labelledby={`${uid}-tab-${open?.id}`}
+        key={open?.id}
+      >
+        <h4>{open?.name}</h4>
+        <p>{open?.text}</p>
       </div>
     </figure>
   )
