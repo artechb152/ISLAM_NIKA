@@ -62,7 +62,7 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onCh
           /* שופטים רק את מה שראו: עד ששלוש התצפיות נראו, המיון נשאר סגור
              והלוח אומר בדיוק מה עוד יש לראות. */
           <div className="ch1-task-observe" role="status">
-            <p className="ch1-task-hint">לפני שתשיבו — הסתובבו וראו במו עיניכם (F):</p>
+            <p className="ch1-task-hint">לפני שתשיבו — הסתובבו וראו במו עיניכם:</p>
             <ul className="ch1-observe-list">
               {(task.needsFinds ?? []).map((f) => (
                 <li key={f} className={found.includes(f) ? 'is-seen' : ''}>
@@ -156,7 +156,7 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onCh
                     onClick={() => onChoose(o.id)}
                   >
                     {o.label}
-                    {missing && <span className="ch1-task-lock"> · עוד לא נמצא — חפשו סביב (F)</span>}
+                    {missing && <span className="ch1-task-lock"> · עוד לא נמצא — חפשו סביב</span>}
                   </button>
                 )
               })}

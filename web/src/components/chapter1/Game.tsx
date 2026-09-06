@@ -5211,6 +5211,8 @@ export default function Game() {
     ;(window as unknown as Record<string, unknown>).__ch1Where = {
       region: REGION.id, stage, host: HOST_NAME, objective,
       finds: REGION_FINDS.map((f) => ({ id: f.id, x: f.x, z: f.z, done: found.includes(f.id) })),
+      bound: WORLD.layout.bound ?? 24,
+      gate: ONWARD ? (campLayout.exits ?? []).find((e) => e.to === ONWARD) ?? null : null,
       task: REGION_TASK ? { id: REGION_TASK.id, x: REGION_TASK.x, z: REGION_TASK.z, solved: solved.includes(REGION_TASK.id) } : null,
       cast: CAST.map((c) => ({ who: c.who, x: c.x, z: c.z })),
     }
