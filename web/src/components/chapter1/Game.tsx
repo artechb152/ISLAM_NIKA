@@ -5231,7 +5231,10 @@ export default function Game() {
   /* מה עכשיו — משפט אחד, שמשתנה עם השלב ולא עם המיקום. */
   const objective =
     stage === 'brief'
-      ? `דברו עם ${HOST_NAME}`
+      /* כשהמארח הוא ראאווי אין למי ללחוץ E: הוא צועד לצידך ומדבר
+         מעצמו אחרי רגע של עמידה. הוראה ללחוץ מקש שאין לו יעד היא
+         בדיוק מה שגורם למשחק להיקרא כשבור. */
+      ? (HOST_NAME === SPEAKERS.rawi ? 'עצרו רגע — לרָאוִי יש מה לומר כאן' : `דברו עם ${HOST_NAME}`)
       : stage === 'act'
         ? ACT_LINE
         : stage === 'wrap'
@@ -5655,7 +5658,9 @@ export default function Game() {
           if (st === 'brief') {
             setTaskNote({
               who: HOST_NAME,
-              text: `לפני שנתחיל — ${HOST_NAME} מחכה לך. דבר איתו, ואז נעבור לעבודה.`,
+              text: HOST_NAME === SPEAKERS.rawi
+                ? 'רגע. עמוד שנייה ותן לי לספר לך איפה אנחנו — ואז נעבוד.'
+                : `לפני שנתחיל — ${HOST_NAME} מחכה לך. דבר איתו, ואז נעבור לעבודה.`,
               ok: false,
             })
             cue('ui')
@@ -6036,7 +6041,7 @@ export default function Game() {
                 <i className="hud-key">E</i>
                 <span>
                   {stage === 'brief'
-                    ? `דברו קודם עם ${HOST_NAME}`
+                    ? (HOST_NAME === SPEAKERS.rawi ? 'עצרו רגע — ראאווי מדבר' : `דברו קודם עם ${HOST_NAME}`)
                     : stage === 'wrap'
                       ? 'סכמו את מה שעשיתם'
                       : REGION_TASK.prompt}

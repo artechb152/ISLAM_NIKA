@@ -1169,14 +1169,17 @@ body{
    השתקה ודילוג — יושבים בשוליים ולא על התמונה. */
 .ch1-film{
   position:fixed;inset:0;z-index:80;background:#0a0705;
-  display:grid;grid-template-rows:1fr auto;align-items:center;
+  /* minmax(0,1fr) ולא 1fr: גובה הווידאו האמיתי (720) דוחף את השורה
+     מעבר לגובה המסך, ושורת הכפתורים יורדת מתחת לקצה. נמדד — לחיצה על
+     „דלגו" נכשלה עם element is outside of the viewport. */
+  display:grid;grid-template-rows:minmax(0,1fr) auto;align-items:center;
 }
 .ch1-film-video{
   width:100%;height:100%;object-fit:contain;background:#0a0705;
 }
 .ch1-film-video::cue{
-  font-family:inherit;font-size:.9em;line-height:1.5;
-  background:rgba(10,7,5,.72);color:#f4e3c1;
+  font-family:inherit;font-size:.76em;line-height:1.45;
+  background:rgba(10,7,5,.8);color:#f4e3c1;
 }
 .ch1-film-bar{
   display:flex;gap:10px;justify-content:center;align-items:center;
