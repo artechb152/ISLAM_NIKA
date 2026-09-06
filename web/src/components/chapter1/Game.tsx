@@ -18,6 +18,7 @@ import { FINDS_TOTAL, FIND_RANGE, findsIn, type Find } from '@/lib/chapter1/find
 import { TASK_RANGE, taskIn } from '@/lib/chapter1/tasks'
 import { FindCard } from './FindCard'
 import { wrapPi } from '@/lib/chapter1/angles'
+import { MAP_PINS } from '@/lib/chapter1/journey'
 import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
 import { TaskPanel } from './TaskPanel'
 import { ContactShadow, Npc, Rawi, type RawiClip } from './Characters'
@@ -2992,6 +2993,12 @@ const SUN_POS = MOOD.sun.position as [number, number, number]
    directions and no sign of which one is onward is a region you get lost in. */
 const ONWARD: string | null = PLAYABLE[PLAYABLE.indexOf(REGION.id) + 1] ?? null
 
+/* „תחנה X מתוך 9“ — הסדר נלקח מ-MAP_PINS, שהוא כבר סדר המסע ומקור האמת
+   של המפה. נגזר משם ולא מרשימה שנייה, כדי ששינוי סדר תחנות לא ייתן מספר
+   אחד ב-HUD ומקום אחר על הקלף. */
+const STATION_COUNT = MAP_PINS.length
+const STATION_INDEX = Math.max(1, MAP_PINS.findIndex((p) => p.id === REGION.id) + 1)
+
 /* What there is to do here besides listen: the evidence lying about, and the
    one thing this region asks you to work out. Both are data — adding either to
    a region is an edit to finds.ts or tasks.ts, never to this file. */
@@ -3479,7 +3486,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
 /* ---------------- HUD ---------------- */
 
 
-function ControlsPanel({ pressed }: { pressed: Set<string> }) {
+function ControlsPanel({ pressed, notebookDone }: { pressed: Set<string>; notebookDone: number }) {
   /* לוח המקשים תפס רבע מהמסך לאורך כל המשחק. הוא נחוץ בדקה
      הראשונה ומיותר אחריה, ונוכחות קבועה שלו היא מה שגורם למסך
      להיקרא כהדגמה טכנית ולא כמשחק. הוא נסגר מעצמו ברגע שברור
@@ -3539,16 +3546,22 @@ function ControlsPanel({ pressed }: { pressed: Set<string> }) {
         <span>{key('a', 'A')} שמאלה</span>
         <span>{key('d', 'D')} ימינה</span>
         <span>{key('shift', 'Shift')} ריצה</span>
+        <span>גרירת עכבר — סיבוב מבט</span>
         {/* מקש שמלמדים אותו ואין לו יעד באזור הזה נקרא כמשחק שבור,
             לא כאזור ריק: ברמות תימן אין דמויות ואין לראוי מה לומר,
-            ומי שילחץ E או R יקבל שום דבר. המקשים מופיעים היכן
-            שאפשר להשתמש בהם. */}
-        {CAST.length > 0 && <span><i className="hud-key">E</i> שיחה עם דמות</span>}
-        {REGION_TASK && <span><i className="hud-key">E</i> {REGION_TASK.prompt}</span>}
-        <span><i className="hud-key">F</i> להביט מקרוב</span>
-        <span><i className="hud-key">J</i> מחברת</span>
-        <span><i className="hud-key">M</i> מפה</span>
-        <span>גרירת עכבר — סיבוב מבט</span>
+            ומי שילחץ E יקבל שום דבר. המקשים מופיעים היכן שאפשר
+            להשתמש בהם — וגם רק כשהגיע הרגע שבו הם נחוצים.
+            E הוא מקש הפעולה היחיד (ראו את מטפל המקלדת), ולכן שורה
+            אחת ולא שלוש: „דבר“, „פתח משימה“ ו„הבט מקרוב“ הם אותה
+            פעולה על שלושה דברים שונים שעומדים מולך. */}
+        {(CAST.length > 0 || REGION_TASK || REGION_FINDS.length > 0) && (
+          <span><i className="hud-key">E</i> {REGION_TASK?.prompt ?? 'פעולה — לדבר, לבחון, לפעול'}</span>
+        )}
+        {/* המחברת נלמדת ברגע שיש בה משהו לראות. לוח מקשים שמציע „J
+            מחברת“ לפני שנרשמה שורה אחת מלמד מקש שנפתח על דף ריק. */}
+        {notebookDone > 0 && <span><i className="hud-key">J</i> מחברת</span>}
+        {/* המפה נלמדת אחרי התחנה הראשונה — לפניה אין מסע להראות. */}
+        {STATION_INDEX > 1 && <span><i className="hud-key">M</i> מפה</span>}
       </div>
     </section>
   )
@@ -3899,7 +3912,7 @@ export default function Game() {
       if (opt && REGION_TASK)
         setTaskNote({ who: REGION_TASK.asker, text: opt.right ? opt.note : (opt.wrong ?? opt.note), ok: !!opt.right })
     },
-    [chooseTask],
+    [chooseTask, setTaskNote],
   )
   /* הנחה פיזית על צד של מיון — אותה הערה מלמדת, באותה שורת עולם */
   const sortByDrop = useCallback(
@@ -3912,7 +3925,7 @@ export default function Game() {
         setTaskNote({ who: REGION_TASK.asker, text: ok ? opt.note : (opt.wrong ?? opt.note), ok })
       }
     },
-    [sortTask],
+    [sortTask, setTaskNote],
   )
   const [soundOff, setSoundOff] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
@@ -3928,6 +3941,28 @@ export default function Game() {
   const [seen, setSeen] = useState<string[]>([])
   const encounterRef = useRef<Encounter | null>(null)
   encounterRef.current = encounter
+
+  /* רמז אחרי עצירה.
+     תקיעה בפרק הזה כמעט אף פעם אינה „לא יודע ללחוץ“ — היא „לא יודע לאן
+     ללכת“. אחרי 25 שניות שבהן לא נרשמה שום התקדמות (שורה חדשה, עדות
+     חדשה, משימה שנפתרה) מופיעה שורה אחת שאומרת מה הדבר הבא שהאזור
+     מבקש. היא נעלמת ברגע שמשהו זז, כדי שלא תהפוך לרעש קבוע, ואינה
+     מופיעה כשפאנל פתוח — מי שקורא כרטיס אינו תקוע. */
+  const progressKey = seen.length + found.length + solved.length
+  const [idleHint, setIdleHint] = useState(false)
+  useEffect(() => {
+    setIdleHint(false)
+    const t = window.setTimeout(() => setIdleHint(true), 25000)
+    return () => window.clearTimeout(t)
+  }, [progressKey])
+  const hintText = (() => {
+    if (REGION_TASK && !taskSolved) return REGION_TASK.prompt
+    const unheard = CAST.find((p) => REGION.encounters.some((e) => e.speaker === p.who && !seen.includes(e.id)))
+    if (unheard) return 'יש כאן מי שעוד לא סיפר את שלו — התקרבו ולחצו E'
+    if (REGION_FINDS.some((f) => !found.includes(f.id))) return 'נשארה כאן עדות שלא נבחנה — חפשו את הסימן על הקרקע'
+    if (ONWARD) return 'הדרך ממשיכה — צאו מהאזור בכיוון שהמצפן מסמן בזהב'
+    return null
+  })()
   /* מצלמת השיחה קוראת מ-live, לא מ-props — כמו כל מה שרץ בקצב פריימים.
      קריין אין לו גוף בעולם, ולכן שיחה שלו לא מזיזה את המצלמה. */
   useEffect(() => {
@@ -4071,11 +4106,6 @@ export default function Game() {
     setRegion(REGION.id)
   }, [])
 
-  /** The next thing Rawi himself has to say here, or null when he is done. */
-  const pendingEncounter = useMemo(
-    () => REGION.encounters.find((e) => e.speaker === 'rawi' && !seen.includes(e.id)) ?? null,
-    [seen],
-  )
 
   /** The next thing a placed character has to say, in dialogue.json order. */
   const nextFrom = useCallback(
@@ -4331,37 +4361,46 @@ export default function Game() {
         }
         return
       }
-      /* F picks a thing up off the ground. It is deliberately not E: E is for
-         people, and a learner who has just been told "E talks" should not find
-         that the same key sometimes means "kneel down and look at a stone". */
-      if (e.code === 'KeyF' && live.nearFind && !encounterRef.current && !openRef.current) {
+      /* מקש פעולה אחד.
+         קודם היו שניים — E לאנשים ולמשימות, F לעדויות — מתוך חשש שמי
+         שלמד „E מדבר“ ייבהל כשאותו מקש כורע ליד אבן. בפועל המחיר היה
+         הפוך: לומד שעומד מול כתובת ולוחץ E, המקש הנכון-לכאורה, לא מקבל
+         כלום ומסיק שאין שם מה לעשות. עדות אופציונלית שנבלעת כך היא
+         עדות שלא נראתה.
+         עכשיו E הוא „פעולה“ על מה שלפניך, בסדר עדיפויות קבוע וניתן
+         לחיזוי: אדם שיש לו עוד מה לומר, אחר כך תחנת משימה, אחר כך
+         עדות. F לא בוטל — הוא נשאר קיצור שמעדיף עדות, כך שמי שכבר
+         למד אותו לא מאבד כלום. */
+      const interact = e.code === 'KeyE' || e.code === 'KeyF'
+      const examineFind = () => {
         const fd = REGION_FINDS.find((x) => x.id === live.nearFind)
-        if (fd) {
-          const store = recordFind(fd.id)
-          setFound(store.found)
-          cue('find')
-          setOpenFind(fd)
-        }
-        return
+        if (!fd) return false
+        const store = recordFind(fd.id)
+        setFound(store.found)
+        cue('find')
+        setOpenFind(fd)
+        return true
       }
-      /* E מטפל בשניים — אדם ותחנת משימה — ובמעבר הגבול הם עומדים
-         2.25 מטר זה מזה. האדם קודם כל עוד נשאר לו מה לומר, ורק
-         כשנגמרו דבריו המקש נופל דרכו אל התחנה. זה גם הסדר הנכון
-         מבחינת התוכן: קודם שומעים למה גובים מכס, אחר כך שוקלים. */
-      if (e.code === 'KeyE' && live.nearWho && !encounterRef.current && !openRef.current) {
-        const heard = readNotebook().seen
-        const next = REGION.encounters.find((x) => x.speaker === live.nearWho && !heard.includes(x.id))
-        if (next) {
-          setEncounter(next)
+      if (interact && !encounterRef.current && !openRef.current) {
+        /* F שומר על משמעותו הישנה: עדות קודם */
+        if (e.code === 'KeyF' && live.nearFind && examineFind()) return
+        /* האדם קודם כל עוד נשאר לו מה לומר, ורק כשנגמרו דבריו המקש
+           נופל דרכו הלאה. זה גם הסדר הנכון מבחינת התוכן: קודם שומעים
+           למה גובים מכס, אחר כך שוקלים. */
+        if (live.nearWho) {
+          const heard = readNotebook().seen
+          const next = REGION.encounters.find((x) => x.speaker === live.nearWho && !heard.includes(x.id))
+          if (next) {
+            setEncounter(next)
+            return
+          }
+        }
+        if (live.atTask) {
+          cue('task')
+          setOpenTask(true)
           return
         }
-        /* אין לו יותר מה לומר — נופלים דרך אל התחנה במקום לבלוע
-           את הלחיצה, שזה מה שהפך את משימת המכס לבלתי ניתנת לפתיחה. */
-      }
-      if (e.code === 'KeyE' && live.atTask && !encounterRef.current && !openRef.current) {
-        cue('task')
-        setOpenTask(true)
-        return
+        if (live.nearFind && examineFind()) return
       }
       /* לא הולכים בזמן שיחה או כרטיס. עד עכשיו רק המחברת והמפה חסמו
          תנועה, ולכן אפשר היה לצאת מטווח השיחה תוך כדי שהדמות מדברת —
@@ -4675,7 +4714,7 @@ export default function Game() {
           </div>
         )}
 
-        <ControlsPanel pressed={pressed} />
+        <ControlsPanel pressed={pressed} notebookDone={notebook.done} />
         {/* One slot used to hold all four prompts, so standing where a find and
             a person overlap — which is where the border post puts you, 1.9 m
             from both — drew two panels on top of each other. They stack now
@@ -4721,22 +4760,25 @@ export default function Game() {
             onClose={() => setEncounter(null)}
           />
         )}
-        {/* the notebook is the only progress surface: no score, no failure */}
+        {/* ההתקדמות היא המסע, לא המלאי.
+            עד כאן ה-HUD ספר שני מלאים בבת אחת — „מחברת: 0 מתוך 26“ ו„עדויות:
+            0 מתוך 21“ — 47 פריטים שרובם אופציונליים. מי שעמד בתחנה השנייה
+            וראה 0/26 קרא את זה כ„לא התקדמתי“, בעוד שבפועל הוא סיים תחנה
+            שלמה. המונה הנכון הוא זה שסופר את מה שהפרק באמת מבקש: תשע תחנות.
+            שני המלאים לא נמחקו — הם חיים במחברת (Notebook.tsx), שם הם
+            מידע שמבקשים, ולא ציון שרודף. */}
         <div className="hud-panel hud-goal">
           <span style={{ whiteSpace: 'nowrap' }}>{REGION.name}</span>
           <span className="hud-progress">
-            <i style={{ width: `${Math.min(100, (notebook.done / NOTEBOOK_TOTAL) * 100)}%` }} />
+            <i style={{ width: `${Math.min(100, (STATION_INDEX / STATION_COUNT) * 100)}%` }} />
           </span>
           <span style={{ whiteSpace: 'nowrap' }}>
-            מחברת: {notebook.done} מתוך {NOTEBOOK_TOTAL}
-          </span>
-          {/* עד עכשיו המונה היחיד על המסך ספר רק ערכי מחברת, ולכן כל 17
-              העדויות ו-6 המשימות — הדבר התובעני ביותר במשחק — לא הזיזו
-              שום מספר. פעולה שלא נרשמת בשום מקום נקראת כפעולה שלא קרתה. */}
-          <span className="hud-goal-evidence" style={{ whiteSpace: 'nowrap' }}>
-            עדויות: {found.length} מתוך {FINDS_TOTAL}
+            תחנה {STATION_INDEX} מתוך {STATION_COUNT}
           </span>
         </div>
+        {idleHint && hintText && !overlay && !openFind && !openTask && !encounter && (
+          <p className="hud-panel hud-hint" role="status">{hintText}</p>
+        )}
         <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />
 
         {/* the road stops here, and everything this place had to say is said */}

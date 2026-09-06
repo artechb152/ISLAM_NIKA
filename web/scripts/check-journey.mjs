@@ -142,10 +142,23 @@ for (const [id, layout] of Object.entries(layouts)) {
   const bound = layout.bound ?? 24
   for (const e of layout.exits ?? []) {
     const d = Math.hypot(e.x, e.z)
-    if (d > bound - e.r) {
+    /* The engine fires an exit when the player's step comes within `e.r` of the
+       centre (ExitWatcher: `segmentHitsCircle(...) < e.r`), so what has to be
+       reachable is the circle's NEAR EDGE at `d - e.r`, not its centre. The old
+       rule asked for `d <= bound - e.r` — the whole circle inside the walkable
+       disc — which is stricter by a full 2r and failed three correct exits.
+       Measured, not reasoned: walking north out of the night camp, the crossing
+       to Yemen fires at z = 13.4 against a bound of 24 (scratchpad/exitback.mjs),
+       exactly the near edge of a circle centred at 18.8 with r = 5.5.
+       The margin keeps the player off the clamp line itself — an exit you can
+       only touch by pressing into the boundary reads as broken even when it
+       fires. */
+    const MARGIN = 1.5
+    if (d - e.r > bound - MARGIN) {
       problems.push(
-        `${id}: the exit to '${e.to}' sits ${d.toFixed(1)}m out but the region is only walkable to ${bound}m — ` +
-        `the player is turned back before reaching it. Move it inside ${(bound - e.r).toFixed(1)}m.`,
+        `${id}: the exit to '${e.to}' has its near edge ${(d - e.r).toFixed(1)}m out, but the region is only ` +
+        `walkable to ${bound}m — the player is turned back before reaching it. ` +
+        `Move it so the near edge sits inside ${(bound - MARGIN).toFixed(1)}m.`,
       )
     }
     if (!layouts[e.to] && !dialogue.regions.some((r) => r.id === e.to)) {

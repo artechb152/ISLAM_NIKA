@@ -175,6 +175,23 @@ export function Notebook({ seen, found, solved, onClose }: {
         </header>
 
         <div className="nb-body">
+          {/* ארבע השאלות שהפרק שואל, בעמוד הראשון של המחברת ולא ככרטיסי
+              ממשק. הן נכתבות ביד בתחילת מסע, לפני שיודעים את התשובות,
+              וזה בדיוק תפקידן כאן: לתת לתשע התחנות כיוון במקום להשאיר
+              אותן רצף של עצירות. נשארות גלויות לכל אורך הדרך, כי שאלה
+              שנעלמת אחרי הקריאה הראשונה אינה מלווה שום דבר. */}
+          {tab === 'all' && (
+            <section className="nb-questions" aria-labelledby="nb-q-title">
+              <h3 className="nb-questions-title" id="nb-q-title">מה שואלים בדרך הזאת</h3>
+              <ol className="nb-questions-list">
+                <li>אילו מקורות מספרים לנו על ערב לפני האסלאם?</li>
+                <li>כיצד הייתה ערב מחוברת למסחר ולאימפריות?</li>
+                <li>אילו דתות וקהילות פעלו בה?</li>
+                <li>מה ידוע בוודאות, ומה נשאר שנוי במחלוקת?</li>
+              </ol>
+            </section>
+          )}
+
           {empty && tab !== 'finds' && (
             <p className="nb-empty">
               המחברת עדיין ריקה. דברו עם רָאוִי (<i className="hud-key">R</i>) ועם מי שתפגשו בדרך

@@ -421,6 +421,15 @@ body{
   display:flex;align-items:center;gap:14px;padding:10px 18px;font-size:14px;
 }
 .hud-goal .hud-progress{max-width:130px}
+/* שורת הרמז יושבת מעל שורת המטרה ובאותו רוחב, כדי שתיקרא כהמשך שלה
+   ולא כהתראה חדשה. נכנסת ברכות — רמז שקופץ קורא כשגיאה. */
+.hud-hint{
+  inset-inline:0;margin-inline:auto;bottom:64px;width:min(560px,92vw);
+  padding:9px 18px;font-size:13.5px;line-height:1.5;text-align:center;
+  color:var(--cream,#efe2c8);opacity:.94;animation:ch1-hint-in .5s ease both;
+}
+@keyframes ch1-hint-in{from{opacity:0;transform:translateY(6px)}to{opacity:.94;transform:none}}
+@media (prefers-reduced-motion:reduce){.hud-hint{animation:none}}
 /* Below ~1150px the controls panel (inset-inline-start:18px, up to 272px) and
    the centred goal bar (up to 560px) both sit at bottom:18px and collide. Fine
    on a maximised 1366, broken on a smaller window or any browser zoom. */
@@ -648,6 +657,27 @@ body{
 .nb-rawi b{font-family:var(--font-heading);font-weight:400;color:#8a6a2a}
 .nb-src{margin:0;font-size:11.5px;color:rgba(122,90,28,.75)}
 .nb-empty{margin:0;padding:30px 6px;font-size:15px;line-height:1.9;color:var(--muted);text-align:center}
+
+/* ארבע השאלות של הפרק — כתובות על העמוד, לא רכיב ממשק.
+   בלי מסגרת, בלי רקע, בלי תגית: קו דק בשוליים הוא כל מה שמפריד אותן
+   מהרשומות, כמו הערה שנכתבה בראש דף לפני היציאה לדרך. הספרות בצבע
+   הזהב העמום של כותרות המחברת ולא בעיגול צבעוני — עיגול היה הופך
+   את זה לרשימת UI, וזה בדיוק מה שאסור כאן. */
+.nb-questions{margin:0 0 4px;padding:0 0 12px;border-bottom:1px solid rgba(122,90,28,.22)}
+.nb-questions-title{
+  font-family:var(--font-heading);font-weight:400;font-size:17px;color:#8a6a2a;
+  margin:0 0 6px;letter-spacing:.01em;
+}
+.nb-questions-list{
+  margin:0;padding:0 1.35em 0 0;list-style:none;counter-reset:nbq;
+  display:grid;gap:3px;font-size:14.5px;line-height:1.75;color:var(--ink);
+}
+.nb-questions-list li{counter-increment:nbq;position:relative;opacity:.92}
+.nb-questions-list li::before{
+  content:counter(nbq) ".";position:absolute;inset-inline-start:-1.35em;
+  color:#8a6a2a;font-family:var(--font-heading);
+}
+@media (max-width:720px){.nb-questions-list{font-size:13.5px}}
 .nb-foot{
   display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:13px;color:#7a5a1c;
   border-top:1px solid rgba(122,90,28,.28);padding-top:10px;
