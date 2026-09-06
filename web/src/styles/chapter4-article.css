@@ -342,9 +342,9 @@
    without the ornament that would make it look like a pull-quote. Five uses,
    and the count is in STRUCTURE.md so a sixth has to be argued for. */
 .ch4-echo{
-  padding:16px 18px;
+  padding:clamp(14px,1.8vw,20px) clamp(16px,2vw,24px);
   border-inline-start:3px solid var(--maroon);
-  background:var(--panel);
+  background:var(--paper);
 }
 .ch4-echo > *{margin:0}
 .ch4-echo > * + *{margin-block-start:.7em}
@@ -1115,3 +1115,29 @@
 .ch4-who.is-still .ch4-who-dot{opacity:1;transition:none}
 .ch4-who.is-still .ch4-who-line{animation:none;stroke-dashoffset:0}
 .ch4-who.is-still .ch4-who-said{animation:none}
+
+/* ------------------------------- the year -----------------------------
+   §5 says the Muslim calendar begins at the hijra, and the chapter is named
+   after that event — but the number sat inside one clause of one paragraph and
+   nowhere else on the page. It stands beside the paragraph now.
+
+   IT IS NOT A CARD. No border and no panel: the numeral in the chapter's
+   display face on the reading edge, the paragraphs beside it, and a gold rule
+   between them. Under 700px the numeral steps above the text instead, because
+   a column of two words is not a column. */
+.ch4-year{
+  display:grid;grid-template-columns:auto 1fr;
+  gap:clamp(16px,2vw,28px);align-items:start;
+}
+.ch4-year-n{
+  font-family:var(--font-heading);font-weight:900;color:var(--maroon);
+  font-size:clamp(46px,6vw,84px);line-height:.92;letter-spacing:-.02em;
+  font-variant-numeric:lining-nums;direction:ltr;
+  padding-inline-end:clamp(16px,2vw,28px);
+  border-inline-end:2px solid var(--gold);
+}
+.ch4-year-text > * + *{margin-block-start:14px}
+@media (max-width:700px){
+  .ch4-year{grid-template-columns:1fr;gap:10px}
+  .ch4-year-n{padding-inline-end:0;border-inline-end:0;font-size:clamp(40px,11vw,58px)}
+}

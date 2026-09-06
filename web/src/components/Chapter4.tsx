@@ -253,6 +253,45 @@ const nameOf = (r: string): string => {
   return n
 }
 
+/** THE ONE DISTINCTION THE CHAPTER CANNOT DO WITHOUT.
+
+    Half this material is the seventh century and half is what has been done
+    with it in the last fifty years — a group that named itself after the hijra
+    and murdered a president in 1981, men who left Europe for Syria in the
+    twenty-first — and the source prints the two in adjacent sentences. A reader
+    must never have to work out which one they are reading.
+
+    A CHANGE OF GROUND, NOT A BOX. The rule on the reading edge and the panel's
+    own ground say „another voice"; a bordered card in the middle of a reading
+    column reads as an advertisement, which is what the first build did. */
+function Echo({ children }: { children: React.ReactNode }) {
+  return (
+    <aside className="ch4-echo" data-reveal>
+      {children}
+    </aside>
+  )
+}
+
+/** A NUMBER THE PAGE SHOULD NOT HAVE TO BE READ TO FIND.
+
+    §5 says the Muslim calendar begins at the hijra, and the chapter is named
+    after that event — yet the year sat inside one clause of one paragraph and
+    nowhere else. It is set beside the paragraph now, large.
+
+    IT IS LIFTED, NOT TYPED. `pick` proves the digits are in that very sentence
+    at a word boundary and throws otherwise, so the display can never drift from
+    the text it is supposed to be pulling out of. */
+function Year({ r, n, children }: { r: string; n: string; children: React.ReactNode }) {
+  return (
+    <div className="ch4-year" data-reveal>
+      <b className="ch4-year-n" aria-hidden="true">
+        {pick(r, n)}
+      </b>
+      <div className="ch4-year-text">{children}</div>
+    </div>
+  )
+}
+
 /* ---------------- structure ---------------- */
 
 /** The section heading — chapter 6's `.section-heading` with its diamond.
@@ -725,22 +764,40 @@ export default function Chapter4() {
                     },
                   ]}
                 />
+                {/* THE ARRIVAL, before the covenant it produced. §7 is the
+                    camel, the two orphans' yard and the mosque built on it —
+                    and it stood in the middle of „חוזה האומה" in the source
+                    order this file inherited from a device, three fragments out
+                    of their own order (c, a, b). Both are put right. */}
+                <SubHead section="hijra" id="mosque" />
+                <Block>
+                  <T r="§7.a" className="ch4-body" reveal />
+                  <T r="§7.b" className="ch4-body" reveal />
+                  <T r="§7.c" className="ch4-body" reveal />
+                </Block>
+
                 <SubHead section="hijra" id="covenant" />
                 <Block>
                   <T r="§4.a" className="ch4-body" reveal />
                   <T r="§4.b" className="ch4-body" reveal />
-                  <T r="§7.c" className="ch4-body" reveal />
-                  <T r="§7.a" className="ch4-body" reveal />
-                  <T r="§7.b" className="ch4-body" reveal />
                   <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                   <T r="§8.b" className="ch4-body" reveal />
                   <T r="§8.c" className="ch4-body" reveal />
                   <T r="§8.d" className="ch4-body" reveal />
+                </Block>
+
+                {/* THE HIJRA AS AN IDEA, and what has been done with it. §5 is
+                    why the Muslim calendar starts here; §6 is 1981 and the
+                    twenty-first century. */}
+                <SubHead section="hijra" id="hijra-idea" />
+                <Year r="§5.a" n="622">
                   <T r="§5.a" className="ch4-body" em={["אלהג'רה"]} reveal />
                   <T r="§5.b" className="ch4-body" reveal />
-                  <T r="§6.echo1" className="ch4-body" reveal />
-                  <T r="§6.echo2" className="ch4-body" reveal />
-                </Block>
+                </Year>
+                <Echo>
+                  <T r="§6.echo1" className="ch4-body" />
+                  <T r="§6.echo2" className="ch4-body" />
+                </Echo>
                 <SubHead section="hijra" id="jihad" />
                 <Block>
                   <T r="§9.dawa" className="ch4-body" reveal />

@@ -11,8 +11,16 @@
           "title": "מכה וית'רב"
         },
         {
+          "id": "mosque",
+          "title": "הגמל והמסגד"
+        },
+        {
           "id": "covenant",
           "title": "חוזה האומה"
+        },
+        {
+          "id": "hijra-idea",
+          "title": "אלהג'רה"
         },
         {
           "id": "jihad",

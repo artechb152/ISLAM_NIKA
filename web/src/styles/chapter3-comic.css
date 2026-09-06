@@ -142,10 +142,19 @@
 
 /* THE PANEL. The ink border and the gutter of bare paper between panels are
    what make this a comic page rather than a row of pictures: without them two
-   images touching at the spine read as one wide banner cut in half. */
+   images touching at the spine read as one wide banner cut in half.
+
+   ⚠ THE FRAME IS var(--ink), AND IT USED TO BE var(--line) — A TOKEN THAT DOES
+   NOT EXIST. It was carried over from the mockup, which defined its own :root;
+   the product has exactly one, in chapter6-article.css, and --line is not in
+   it. An undefined custom property makes the whole border shorthand invalid at
+   computed-value time, so it does not fall back, it VANISHES: measured, every
+   panel, every caption box and every balloon in this chapter had
+   border-width 0 and border-style none while appearing to be framed, because
+   the box-shadow underneath them looked like an edge. */
 .c3-pn{
   position:relative;overflow:hidden;margin:0;min-height:0;
-  border:calc(3.5px * var(--u)) solid var(--line);background:var(--paper);
+  border:calc(3.5px * var(--u)) solid var(--ink);background:var(--paper);
   box-shadow:0 calc(2px * var(--u)) calc(6px * var(--u)) rgba(60,35,18,.14);
 }
 .c3-pn img{display:block;width:100%;height:100%;object-fit:cover}
@@ -162,7 +171,7 @@
    and each one is sized to its own sentence rather than to the panel. ---- */
 .c3-cap{
   position:absolute;z-index:5;margin:0;max-width:56%;
-  background:var(--surface);border:calc(2px * var(--u)) solid var(--line);
+  background:var(--surface);border:calc(2px * var(--u)) solid var(--ink);
   padding:calc(7px * var(--u)) calc(13px * var(--u)) calc(8px * var(--u));
   font-size:calc(16px * var(--u));line-height:1.38;font-weight:600;color:var(--ink);
   box-shadow:calc(3px * var(--u)) calc(3px * var(--u)) 0 rgba(74,56,38,.22);
@@ -218,7 +227,7 @@
 .c3-say{
   position:absolute;z-index:6;top:calc(26px * var(--u));
   inset-inline-start:calc(56px * var(--u));max-width:44%;margin:0;
-  background:var(--surface);border:calc(2.5px * var(--u)) solid var(--line);
+  background:var(--surface);border:calc(2.5px * var(--u)) solid var(--ink);
   border-radius:calc(30px * var(--u)) / calc(22px * var(--u));
   padding:calc(11px * var(--u)) calc(22px * var(--u)) calc(13px * var(--u));
   font-family:var(--font-heading);font-weight:700;color:var(--ink);
@@ -229,7 +238,7 @@
 .c3-say::before{                       /* the ink outline of the tail */
   top:52%;inset-inline-start:calc(-2px * var(--u));
   border-block:calc(14px * var(--u)) solid transparent;
-  border-inline-end:calc(78px * var(--u)) solid var(--line);
+  border-inline-end:calc(78px * var(--u)) solid var(--ink);
 }
 .c3-say::after{                        /* the paper inside it */
   top:52%;inset-inline-start:calc(-2px * var(--u));
