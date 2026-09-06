@@ -101,6 +101,13 @@ interface Live {
   riseAt: number
   /** a task prop is in hand — the camera's mouse-look must not fight the drag */
   taskDrag: boolean
+  /* המרחקים אל שלושת הדברים שאפשר לפעול עליהם. E בוחר את הקרוב
+     ביותר, ולא לפי סדר קבוע: בתחנת הגבול העדות, השליח ומאזני המכס
+     עומדים בתוך שני מטרים זה מזה, ולכן סדר קבוע פירושו שהעדות אינה
+     ניתנת להרמה בכלל — וזה בדיוק מה שקרה. */
+  nearWhoD: number
+  nearFindD: number
+  atTaskD: number
 }
 
 /* Where the traveller is standing when this region opens. Normally the layout's
@@ -146,6 +153,9 @@ function makeLive(): Live {
     talk: null,
     riseAt: 0,
     taskDrag: false,
+    nearWhoD: Infinity,
+    nearFindD: Infinity,
+    atTaskD: Infinity,
   }
 }
 
@@ -1568,7 +1578,13 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
   )
   /* אזור הנחה על שולחן הוא בסדר גודל של כף יד, לא של מדורה */
   const BIN_R = SURFACE_Y != null ? 0.34 : 1.02
-  const DROP_NEAR = SURFACE_Y != null ? 0.45 : DROP_R
+  const DROP_NEAR = SURFACE_Y != null ? 0.5 : DROP_R
+  /* גובה המישור שהגרירה מוקרנת עליו. על החול חפץ מורם 30 ס"מ; על
+     שולחן אותם 30 ס"מ הם מישור שצף מעל הלוח, והנקודה שמתקבלת מוסטת
+     לעבר המצלמה בכל הפרש הגובה חלקי טנגנס זווית ההסתכלות — חצי מטר
+     ויותר, שזה יותר מרדיוס ההנחה כולו. כלומר ההנחה על השולחן נכשלה
+     תמיד, גם כשהסמן היה בדיוק על היעד. */
+  const LIFT_Y = SURFACE_Y != null ? 0.1 : 0.3
   /* שני מצבים לאותה יד: גרירת-תשובות (כל אופציה היא חפץ) — ותכנון-מסלול,
      שבו יש אסימון שיירה אחד ושלוש דרכים על מפת בד; הדרך שבוחרים היא
      המקום שאליו הנחת אותו. */
@@ -1772,7 +1788,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         return
       }
       const st = state.current[i]
-      const g = toPlane(e.clientX, e.clientY, yAt(st.home.x, st.home.z) + 0.3)
+      const g = toPlane(e.clientX, e.clientY, yAt(st.home.x, st.home.z) + LIFT_Y)
       /* לא נותנים לסחוב את התשובה מחוץ לזירה */
       const dx = g.x - (REGION_TASK?.x ?? 0)
       const dz = g.z - (REGION_TASK?.z ?? 0)
@@ -1894,10 +1910,15 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       window.removeEventListener('pointermove', move, true)
       window.removeEventListener('pointerup', up, true)
       window.removeEventListener('pointercancel', cancel, true)
-      gl.domElement.style.cursor = ''
-      live.taskDrag = false
+      /* אם היד עדיין מחזיקה חפץ כשהאפקט נטען מחדש (וזה קורה — כל
+         שינוי state ב-TaskProps יכול להריץ אותו שוב), אסור לשחרר את
+         המצלמה באמצע הגרירה. הניקוי שייך לסיום גרירה, לא לרינדור. */
+      if (dragging.current < 0) {
+        gl.domElement.style.cursor = ''
+        live.taskDrag = false
+      }
     }
-  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, yAt, SURFACE_Y, DROP_NEAR, onChoose, onSortDrop])
+  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, yAt, SURFACE_Y, DROP_NEAR, LIFT_Y, onChoose, onSortDrop])
 
   useFrame((_, dt) => {
     if (!state.current.length) return
@@ -2018,7 +2039,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       const tgtScreen = { x: (vv.x * 0.5 + 0.5) * r.width + r.left, y: (-vv.y * 0.5 + 0.5) * r.height + r.top }
       ;(window as unknown as Record<string, unknown>).__ch1Task = {
         props: state.current.map((st) => {
-          vv.set(st.cur.x, yAt(st.cur.x, st.cur.z) + 0.3, st.cur.z).project(camera)
+          vv.set(st.cur.x, yAt(st.cur.x, st.cur.z) + LIFT_Y, st.cur.z).project(camera)
           return {
             id: st.id,
             x: (vv.x * 0.5 + 0.5) * r.width + r.left,
@@ -2027,6 +2048,9 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
           }
         }),
         target: tgtScreen,
+        armed, sortLocked, solvedTask, planMode, sortMode,
+        needs: REGION_TASK?.needsFinds ?? null, foundIn: foundRef.current,
+        opts: opts.map((o) => ({ id: o.id, locked: locked(o) })),
         bins: binSpots.map((b) => {
           vv.set(b.x, yAt(b.x, b.z), b.z).project(camera)
           return { id: b.id, x: (vv.x * 0.5 + 0.5) * r.width + r.left, y: (-vv.y * 0.5 + 0.5) * r.height + r.top }
@@ -2986,6 +3010,7 @@ function MarkerProjector({ live, onNearChange, onNearFind, onAtTask, met, found,
         el.classList.toggle('is-done', done)
       }
     }
+    live.nearFindD = bestFind ? bestFindDist : Infinity
     if (bestFind !== live.nearFind) {
       live.nearFind = bestFind
       onNearFind(bestFind)
@@ -3004,6 +3029,7 @@ function MarkerProjector({ live, onNearChange, onNearFind, onAtTask, met, found,
          עומד עכשיו בפני עצמו, וההכרעה בין השניים עברה למקום שבו היא
          שייכת: סדר הטיפול במקש. */
       const at = d < TASK_RANGE && !solvedRef.current.includes(REGION_TASK.id)
+      live.atTaskD = at ? d : Infinity
       if (at !== live.atTask) { live.atTask = at; onAtTask(at) }
       const el = live.markerEls.get('task')
       if (el) {
@@ -3043,6 +3069,7 @@ function MarkerProjector({ live, onNearChange, onNearFind, onAtTask, met, found,
         nearest = c.who
       }
     }
+    live.nearWhoD = nearest ? nearestDist : Infinity
     if (nearest !== live.nearWho) {
       live.nearWho = nearest
       onNearChange(nearest)
@@ -4254,10 +4281,12 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, stoneLit, onStoneLit, tableSet, onTableSet }: {
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet }: {
   live: Live
   /** שלב התחנה — קובע מה זוהר ומה עומם */
   stage: Stage
+  /** התצפית הבאה בתור, אם התחנה דורשת לראות לפני שהיא שואלת */
+  nextSight: string | null
   onNearChange: (who: string | null) => void
   onNearFind: (id: string | null) => void
   onAtTask: (at: boolean) => void
@@ -4339,10 +4368,14 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       ))}
       {/* מה שהחליף את התגים המרחפים: אור על החול מתחת לכל עדות ומתחת
           לתחנת המשימה. הוא בעולם, לא מעליו. */}
+      {/* תצפית אחת בכל פעם. במנזר צריך לראות שלושה דברים לפני שאפשר
+          לשפוט, ושלושתם נדלקו יחד — מה שנקרא כשלוש מטלות מקבילות ולא
+          כרצף. עכשיו רק הבא בתור זוהר במלוא העוצמה; מה שכבר נראה
+          עומם, ומה שעוד לא תורו נשאר נוכח בלבד. */}
       {REGION_FINDS.map((fd) => (
         <GroundGlow key={`glow-${fd.id}`} x={fd.x} z={fd.z} r={0.95} live={live}
           dim={found.includes(fd.id)}
-          primary={stage === 'act' && !!REGION_TASK?.needsFinds?.includes(fd.id) && !found.includes(fd.id)} />
+          primary={stage === 'act' && fd.id === nextSight} />
       ))}
       {REGION_TASK && REGION_TASK.model !== 'none' && (
         <Prop
@@ -5154,6 +5187,30 @@ export default function Game() {
         : 'done'
   const stageRef = useRef<Stage>(stage)
   stageRef.current = stage
+  /* וו בדיקה, בפיתוח בלבד: מה יש כאן ואיפה הוא עומד. בלעדיו כל פרוב
+     חייב לשכפל את הנתונים של האזור, ואז הוא בודק את עצמו. */
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    ;(window as unknown as Record<string, unknown>).__ch1Where = {
+      region: REGION.id, stage, host: HOST_NAME, objective,
+      finds: REGION_FINDS.map((f) => ({ id: f.id, x: f.x, z: f.z, done: found.includes(f.id) })),
+      task: REGION_TASK ? { id: REGION_TASK.id, x: REGION_TASK.x, z: REGION_TASK.z, solved: solved.includes(REGION_TASK.id) } : null,
+      cast: CAST.map((c) => ({ who: c.who, x: c.x, z: c.z })),
+    }
+  })
+  /* התצפית הבאה בתור: הראשונה מבין הנדרשות שעוד לא נראתה. */
+  const nextSight = REGION_TASK?.needsFinds?.find((f) => !found.includes(f)) ?? null
+  const sightsLeft = (REGION_TASK?.needsFinds ?? []).filter((f) => !found.includes(f)).length
+  /* הוראת הפעולה. בתחנה שדורשת לראות לפני שהיא שואלת, השלב הראשון
+     אינו הגרירה אלא ההסתכלות — ולומר \"גררו\" למי שעוד לא ראה דבר
+     הוא לתת הוראה שאי אפשר לבצע. */
+  const actLine = sightsLeft > 0
+    ? `הביטו במה שמאיר — נותרו ${sightsLeft} דברים לראות כאן`
+    : ACT_LINE
+  const actLineRef = useRef(actLine)
+  actLineRef.current = actLine
+  const sightsLeftRef = useRef(sightsLeft)
+  sightsLeftRef.current = sightsLeft
   /* מה עכשיו — משפט אחד, שמשתנה עם השלב ולא עם המיקום. */
   const objective =
     stage === 'brief'
@@ -5544,10 +5601,20 @@ export default function Game() {
       if (interact && !encounterRef.current && !openRef.current) {
         /* F שומר על משמעותו הישנה: עדות קודם */
         if (e.code === 'KeyF' && live.nearFind && examineFind()) return
-        /* האדם קודם כל עוד נשאר לו מה לומר, ורק כשנגמרו דבריו המקש
-           נופל דרכו הלאה. זה גם הסדר הנכון מבחינת התוכן: קודם שומעים
-           למה גובים מכס, אחר כך שוקלים. */
-        if (live.nearWho) {
+        /* E פועל על מה שהכי קרוב, לא לפי סדר קבוע.
+           בתחנת הגבול העדות, השליח ומאזני המכס עומדים בתוך שני מטרים
+           זה מזה. סדר קבוע (אדם → משימה → עדות) פירושו שם שהעדות אינה
+           ניתנת להרמה בכלל, וממנה בדיוק צריך להביא את המטבע אל
+           המאזניים — כלומר התחנה הייתה חסומה במסלול הרגיל.
+           לאדם יש הטבה קטנה: מי שעומד מולך ומחכה לדבר קודם למה
+           שמונח על החול, אבל לא בפער של מטר וחצי. */
+        const dWho = live.nearWhoD - 0.6
+        const dFind = live.nearFindD
+        const dTask = live.atTaskD
+        if (live.nearFind && dFind <= dWho && dFind <= dTask && examineFind()) return
+        if (live.atTask && dTask <= dWho && dTask < dFind) {
+          /* נופל אל הטיפול במשימה שלמטה */
+        } else if (live.nearWho) {
           const heard = readNotebook().seen
           const next = REGION.encounters.find((x) => x.speaker === live.nearWho && !heard.includes(x.id))
           if (next) {
@@ -5579,10 +5646,10 @@ export default function Game() {
           }
           if (st === 'act') {
             const already = !!taskNoteRef.current
-            if (!already || HAS_SEPARATE_ACT) {
+            if (!already || HAS_SEPARATE_ACT || sightsLeftRef.current > 0) {
               setTaskNote({
                 who: REGION_TASK?.asker ?? HOST_NAME,
-                text: ACT_LINE,
+                text: actLineRef.current,
                 ok: false,
               })
               cue('ui')
@@ -5756,6 +5823,7 @@ export default function Game() {
               found={found}
               solved={solved}
               stage={stage}
+              nextSight={nextSight}
               talking={!!encounter}
               gesture={encounter?.gesture ?? 'talk'}
               speakingWho={encounter && stepSpeaker && stepSpeaker !== 'rawi' && stepSpeaker !== 'narrator' ? stepSpeaker : null}
@@ -5939,9 +6007,9 @@ export default function Game() {
           {atTask && !encounter && !openTask && !openFind && REGION_TASK && (
             <>
               {/* מה עושים כאן, במילים — ורק בשלב שבו זה מה שעושים */}
-              {stage === 'act' && ACT_LINE && (
+              {stage === 'act' && actLine && (
                 <div className="hud-panel ch1-task-hint" role="status">
-                  <span>{ACT_LINE}</span>
+                  <span>{actLine}</span>
                 </div>
               )}
               <div className="hud-panel poi-hint is-task-hint">

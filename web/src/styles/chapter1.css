@@ -419,6 +419,8 @@ body{
 .hud-goal{
   inset-inline:0;margin-inline:auto;bottom:18px;width:min(560px,92vw);
   display:flex;align-items:center;gap:14px;padding:10px 18px;font-size:14px;
+  /* שורת מצב, לא פקד — אסור לה לבלוע לחיצה שמיועדת לעולם */
+  pointer-events:none;
 }
 .hud-goal .hud-progress{max-width:130px}
 
@@ -442,6 +444,7 @@ body{
   inset-inline:0;margin-inline:auto;bottom:64px;width:min(560px,92vw);
   padding:9px 18px;font-size:13.5px;line-height:1.5;text-align:center;
   color:var(--cream,#efe2c8);opacity:.94;animation:ch1-hint-in .5s ease both;
+  pointer-events:none;
 }
 @keyframes ch1-hint-in{from{opacity:0;transform:translateY(6px)}to{opacity:.94;transform:none}}
 @media (prefers-reduced-motion:reduce){.hud-hint{animation:none}}
@@ -1113,11 +1116,17 @@ body{
 }
 
 /* התשובה של העולם לגרירה — שורת דיבור צפה, לא מודל. לחיצה מסלקת. */
+/* התשובה של הדמות לפעולה.
+   היא ישבה 104 פיקסלים מלמטה, בדיוק במקום שבו עומדים החפצים שגוררים,
+   ובלי pointer-events:none — כלומר אחרי כל הנחה מוצלחת היא חסמה את
+   ההרמה הבאה למשך אחת-עשרה שניות. זה מה שהפך את הגרירה ל"באגית
+   וכמעט בלתי אפשרית": לא הגרירה נשברה, אלא המשוב עליה ישב עליה.
+   עכשיו היא למעלה, מחוץ לאזור העבודה, ואינה מקבלת מצביע כלל. */
 .ch1-task-note{
-  position:absolute;inset-inline:0;bottom:104px;margin-inline:auto;z-index:13;
+  position:absolute;inset-inline:0;top:82px;margin-inline:auto;z-index:13;
   width:fit-content;max-width:min(640px,88vw);padding:12px 22px;
   background:rgba(30,22,14,.92);border:1px solid rgba(232,191,118,.5);border-radius:14px;
-  color:#f2e7cd;font-size:15px;line-height:1.55;cursor:pointer;
+  color:#f2e7cd;font-size:15px;line-height:1.55;pointer-events:none;
   display:flex;flex-direction:column;gap:4px;text-align:right;
   animation:poi-hint-in .25s ease both;
 }
