@@ -2501,6 +2501,46 @@ function Player({ live }: { live: Live }) {
       }
     }
 
+    /* והמצלמה לא נכנסת לקיר.
+       הכלל למעלה מרחיק את העדשה מהגופים של השיחה, אבל לא ממה שעומד
+       ביניהם. כשהשחקן נצמד לקיר, הכתף שהמצלמה יושבת מאחוריה נמצאת
+       בתוך האבן, והפריים הופך לחתך של מרקם.
+       זה raycast ולא Navmesh, כפי שהוא צריך להיות כאן: הקוליידרים הם
+       עיגולים ב-XZ והקירות אנכיים, ולכן בדיקת קטע-מול-מעגל מספיקה.
+       המצלמה נמשכת פנימה עד לפני המכשול ומשתחררת לבד כשהוא מתפנה —
+       ה-lerp שמתחת מחליק את שתי התנועות. */
+    {
+      const ex = live.player.x
+      const ez = live.player.z
+      const dx = target.x - ex
+      const dz = target.z - ez
+      const dist = Math.hypot(dx, dz)
+      if (dist > 0.05) {
+        const ux = dx / dist
+        const uz = dz / dist
+        let allowed = dist
+        for (const c of WORLD.colliders) {
+          const px = c.x - ex
+          const pz = c.z - ez
+          const t = px * ux + pz * uz
+          if (t <= 0 || t > dist) continue
+          const perp = Math.hypot(px - ux * t, pz - uz * t)
+          const rr = c.r + 0.3
+          if (perp >= rr) continue
+          /* הנקודה שבה הקרן נכנסת לעיגול, ומעט לפניה */
+          allowed = Math.min(allowed, Math.max(0.85, t - Math.sqrt(rr * rr - perp * perp) - 0.15))
+        }
+        if (allowed < dist) {
+          target.x = ex + ux * allowed
+          target.z = ez + uz * allowed
+        }
+      }
+      /* ולא מתחת לרצפה: הקרקע כאן מתגלגלת, ומצלמה שיורדת אל מתחת
+         לטרסה מראה את העולם מלמטה. */
+      const floor = groundYAt(target.x, target.z) + 0.55
+      if (target.y < floor) target.y = floor
+    }
+
     camera.position.lerp(target, Math.min(1, dt * (5 + riseK * 4)))
     camera.lookAt(lookV.current)
   })
@@ -3233,6 +3273,153 @@ function LampReveal({ live, target, home, onRevealed, revealed }: {
   )
 }
 
+/* מכה: שולחן הראיות בן שלוש השכבות.
+   הסיפור על אברהה מגיע משלושה מקומות שונים, ולומד שאינו מבחין ביניהם
+   קורא את כולם כ„מה שהיה“. לכן זו פעולה של היד ולא פסקה: על השולחן
+   שלושה מקומות מסומנים, ולידו שלושה חפצים — גוש כתובת, מגילת פסוק,
+   ודף מסורת מאוחרת. מניחים כל אחד במקומו, וההבחנה נעשית בגוף ולא
+   בהסבר.
+   רק אחרי שהשולחן מלא נפתחת השאלה הקיימת, ואז היא נקראת כסיכום של
+   מה שכבר עשית — לא כמבחן על טקסט שקראת. */
+const EVIDENCE_SLOTS = [
+  { id: 'stone', model: 'find-inscription', h: 0.42, label: 'כתובת שנחצבה', dx: -1.15 },
+  { id: 'verse', model: 'find-scroll', h: 0.3, label: 'פסוק מן הקוראן', dx: 0 },
+  { id: 'later', model: 'prop-codex', h: 0.26, label: 'דף מסורת מאוחרת', dx: 1.15 },
+]
+
+function EvidenceTable({ live, at, done, onComplete }: {
+  live: Live
+  at: { x: number; z: number }
+  done: boolean
+  onComplete: () => void
+}) {
+  const { camera, gl } = useThree()
+  /* מיקומי הבית של שלושת החפצים — מונחים על החול לפני השולחן */
+  const home = useMemo(
+    () => EVIDENCE_SLOTS.map((s, i) => ({ x: at.x + (i - 1) * 0.95, z: at.z + 2.15 })),
+    [at],
+  )
+  const slot = useMemo(
+    () => EVIDENCE_SLOTS.map((s) => ({ x: at.x + s.dx, z: at.z - 0.15 })),
+    [at],
+  )
+  const pos = useRef(home.map((h) => ({ ...h })))
+  const placed = useRef<boolean[]>([false, false, false])
+  const [placedN, setPlacedN] = useState(0)
+  const drag = useRef(-1)
+  const doneRef = useRef(done)
+  doneRef.current = done
+
+  useEffect(() => {
+    const v = new THREE.Vector3()
+    const toPlane = (cx: number, cy: number, y: number) => {
+      const r = gl.domElement.getBoundingClientRect()
+      v.set(((cx - r.left) / r.width) * 2 - 1, -(((cy - r.top) / r.height) * 2 - 1), 0.5).unproject(camera)
+      const dir = v.sub(camera.position).normalize()
+      const t = (y - camera.position.y) / dir.y
+      return { x: camera.position.x + dir.x * t, z: camera.position.z + dir.z * t }
+    }
+    const screenOf = (i: number) => {
+      const r = gl.domElement.getBoundingClientRect()
+      const p = pos.current[i]
+      const q = new THREE.Vector3(p.x, groundYAt(p.x, p.z) + 0.4, p.z).project(camera)
+      return { x: (q.x * 0.5 + 0.5) * r.width + r.left, y: (-q.y * 0.5 + 0.5) * r.height + r.top, ok: q.z <= 1 }
+    }
+    const down = (e: PointerEvent) => {
+      if (doneRef.current || e.target !== gl.domElement) return
+      for (let i = 0; i < 3; i++) {
+        if (placed.current[i]) continue
+        const s = screenOf(i)
+        if (s.ok && Math.hypot(e.clientX - s.x, e.clientY - s.y) < 62) {
+          drag.current = i
+          live.taskDrag = true
+          e.preventDefault()
+          return
+        }
+      }
+    }
+    const move = (e: PointerEvent) => {
+      const i = drag.current
+      if (i < 0) return
+      const p = toPlane(e.clientX, e.clientY, groundYAt(at.x, at.z) + 0.5)
+      const d = Math.hypot(p.x - at.x, p.z - at.z)
+      pos.current[i] = d > 5 ? { x: at.x + ((p.x - at.x) / d) * 5, z: at.z + ((p.z - at.z) / d) * 5 } : p
+    }
+    const up = () => {
+      const i = drag.current
+      if (i < 0) return
+      drag.current = -1
+      live.taskDrag = false
+      const p = pos.current[i]
+      /* נחת על המקום שלו? נצמד. נחת במקום אחר — חוזר הביתה, בלי עונש. */
+      if (Math.hypot(p.x - slot[i].x, p.z - slot[i].z) < 0.85) {
+        pos.current[i] = { ...slot[i] }
+        placed.current[i] = true
+        cue('task')
+        const n = placed.current.filter(Boolean).length
+        setPlacedN(n)
+        if (n === 3 && !doneRef.current) onComplete()
+      } else {
+        pos.current[i] = { ...home[i] }
+      }
+    }
+    window.addEventListener('pointerdown', down)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    if (process.env.NODE_ENV === 'development') {
+      ;(window as unknown as { __ch1TablePut?: (i: number) => void }).__ch1TablePut = (i: number) => {
+        pos.current[i] = { ...slot[i] }
+        placed.current[i] = true
+        const n = placed.current.filter(Boolean).length
+        setPlacedN(n)
+        if (n === 3) onComplete()
+      }
+    }
+    return () => {
+      window.removeEventListener('pointerdown', down)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+  }, [camera, gl, live, at, home, slot, onComplete])
+
+  return (
+    <group name="task:evidence-table">
+      {/* השולחן עצמו — ספסל אבן, הנכס שכבר קיים בפרק */}
+      <Prop url="/assets/chapter1/models/stone-bench.glb" x={at.x} z={at.z} height={0.62} ry={0} />
+      {/* שלושת המקומות המסומנים: אור על אבן השולחן, לא תווית מרחפת */}
+      {slot.map((s, i) => (
+        <GroundGlow key={`slot${i}`} x={s.x} z={s.z} r={0.5} live={live} tone={placedN > i ? '#cfe0b8' : '#f0c877'} />
+      ))}
+      {EVIDENCE_SLOTS.map((s, i) => (
+        <MovingEvidence key={s.id} model={s.model} h={s.h} at={pos.current} index={i} />
+      ))}
+    </group>
+  )
+}
+
+/* חפץ שהמיקום שלו נקרא מ-ref בכל פריים — הגרירה משנה את ה-ref, לא state,
+   כדי שלא יהיה רינדור של React על כל תזוזת עכבר. */
+function MovingEvidence({ model, h, at, index }: {
+  model: string; h: number; at: { x: number; z: number }[]; index: number
+}) {
+  const g = useRef<THREE.Group>(null)
+  /* ה-Prop שבפנים מציב את עצמו על groundYAt(0,0) — הקרקע בראשית הצירים.
+     מקזזים אותו כאן, אחרת החפץ מקבל את גובה הקרקע פעמיים והוא צף או
+     נקבר לפי השיפוע. */
+  const base = useMemo(() => groundYAt(0, 0), [])
+  useFrame(() => {
+    const p = at[index]
+    if (g.current) g.current.position.set(p.x, groundYAt(p.x, p.z) - base + 0.62, p.z)
+  })
+  return (
+    <group ref={g}>
+      <Suspense fallback={null}>
+        <Prop url={`/assets/chapter1/models/${model}.glb`} x={0} z={0} height={h} />
+      </Suspense>
+    </group>
+  )
+}
+
 /* בוחר לגמל אליפסה שכבר פנויה ממכשולים סטטיים.
    פונקציה טהורה ברמת המודול ולא סגור בתוך useMemo: היא נקראת פעם אחת
    לכל גמל, והתוצאה תלויה רק בארבעת המספרים ובקוליידרים של האזור —
@@ -3564,7 +3751,7 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stoneLit, onStoneLit }: {
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stoneLit, onStoneLit, tableSet, onTableSet }: {
   live: Live
   onNearChange: (who: string | null) => void
   onNearFind: (id: string | null) => void
@@ -3582,6 +3769,9 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
   /** תימן: האם האור כבר נגרר על האבן והחקיקה נחשפה */
   stoneLit: boolean
   onStoneLit: () => void
+  /** מכה: האם שלושת הפריטים כבר על השולחן */
+  tableSet: boolean
+  onTableSet: () => void
 }) {
   /* Scatter rocks and shrubs only where they don't intersect a placed prop or
      a person standing there — this is what stops models growing through each other.
@@ -3660,6 +3850,18 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       {/* תימן היא התחנה הראשונה, והפעולה הראשונה בפרק צריכה להיות של
           היד ולא של העכבר על כפתור: גוררים לפיד אל המצבה עד שהחקיקה
           יוצאת מן הצל. השאלה נפתחת רק אחריה. */}
+      {/* מכה: שולחן הראיות עומד לצד האבנים. שלוש שכבות המקור מסודרות
+          ביד לפני שנשאלת שאלה אחת עליהן. */}
+      {REGION.id === 'mecca' && REGION_TASK && (
+        <Suspense fallback={null}>
+          <EvidenceTable
+            live={live}
+            at={{ x: REGION_TASK.x + 2.1, z: REGION_TASK.z + 1.3 }}
+            done={tableSet}
+            onComplete={onTableSet}
+          />
+        </Suspense>
+      )}
       {REGION.id === 'yemen-heights' && REGION_TASK && (
         <Suspense fallback={null}>
           <LampReveal
@@ -4070,6 +4272,13 @@ function DevAudit() {
       scene.updateMatrixWorld(true)
       scene.traverse((o) => {
         if (!o.name || !/^(prop|cast|find|task):/.test(o.name)) return
+        /* חפצים שהשחקן מרים ומניח — הלפיד בתימן, שלוש הראיות על שולחן
+           מכה — יושבים על רהיט ונעים ביד. „חפיפה“ שלהם עם השולחן היא
+           מה שהנחה על שולחן אומרת, ו„ריחוף“ שלהם הוא גובה השולחן.
+           הם נמדדים על ידי האינטראקציה עצמה, לא כאן. */
+        for (let a: THREE.Object3D | null = o; a; a = a.parent) {
+          if (a.name === 'task:evidence-table' || a.name === 'task:lamp') return
+        }
         const box = new THREE.Box3().setFromObject(o)
         if (!isFinite(box.min.x) || box.isEmpty()) return
         const size = new THREE.Vector3()
@@ -4236,6 +4445,11 @@ export default function Game() {
      המצבה אינו פותח את השאלה — הוא אומר מה חסר. נשמר לאורך הביקור
      כדי שחזרה אל האבן לא תדרוש לחשוף אותה שוב. */
   const [stoneLit, setStoneLit] = useState(false)
+  /* מכה: האם שולחן הראיות סודר */
+  const [tableSet, setTableSet] = useState(false)
+  const tableSetRef = useRef(false)
+  tableSetRef.current = tableSet
+  const markTableSet = useCallback(() => { setTableSet(true); cue('find') }, [setTableSet])
   const stoneLitRef = useRef(false)
   stoneLitRef.current = stoneLit
   const markStoneLit = useCallback(() => {
@@ -4742,6 +4956,17 @@ export default function Game() {
         if (live.atTask) {
           /* בתימן קודם מביאים אור. פאנל שנפתח על אבן שאיש לא הֵאיר
              הופך את הפעולה הפיזית לקישוט. */
+          /* מכה: אותו עיקרון כמו תימן. השאלה על אברהה נפתחת רק אחרי
+             שהראיות סודרו — ואז היא סיכום של פעולה, לא מבחן על טקסט. */
+          if (REGION.id === 'mecca' && !tableSetRef.current) {
+            setTaskNote({
+              who: REGION_TASK?.asker ?? 'רָאוִי',
+              text: 'לפני שנשפוט — סדר את השולחן. הנח כל דבר במקומו: מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.',
+              ok: false,
+            })
+            cue('ui')
+            return
+          }
           if (REGION.id === 'yemen-heights' && !stoneLitRef.current) {
             setTaskNote({
               who: REGION_TASK?.asker ?? 'רָאוִי',
@@ -4925,6 +5150,8 @@ export default function Game() {
               met={met}
               stoneLit={stoneLit}
               onStoneLit={markStoneLit}
+              tableSet={tableSet}
+              onTableSet={markTableSet}
             />
             <SceneReady onReady={onSceneReady} />
             <DevAudit />
