@@ -1093,12 +1093,7 @@
 }
 
 /* ---- what the open face says ---- */
-.ch4-who-said{
-  padding-inline-start:clamp(14px,1.6vw,22px);
-  border-inline-start:3px solid var(--maroon);
-  animation:ch4-who-in .3s ease;
-}
-.ch4-who-said.is-away{border-inline-start-color:var(--gold-soft)}
+.ch4-who-said{animation:ch4-who-in .3s ease}
 .ch4-who-said h4{
   margin:0 0 5px;font-family:var(--font-heading);font-weight:700;
   font-size:clamp(18px,1.9vw,22px);line-height:1.3;color:var(--maroon);
