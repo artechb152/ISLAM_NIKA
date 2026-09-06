@@ -48,17 +48,11 @@ export const PAIR_ALLOW: { a: RegExp; b: RegExp; why: string }[] = [
   { a: /waymark/, b: WALL, why: 'אבן דרך בפתח המעבר, צמודה למבנה השער' },
   /* כתובת נחקקת על סלע. אם היא לא נוגעת בו — היא לא כתובה עליו. */
   { a: /find-inscription|inscription/, b: SCENERY, why: 'כתובת חקוקה בסלע' },
-  /* קיר יבש הוא קופסה ארוכה. מי שעומד אל פניו חופף לתיבה ולא לאבן —
-     נבדק בעין ברמות תימן (scratchpad/shots/yemen-heights-wall-merchant.png):
-     הניצב עומד מול הקיר, לא בתוכו. הסף שומר שדמות שבאמת בלועה בקיר
-     עדיין תדווח. */
-  { a: /^cast:/, b: WALL, why: 'עומד אל פני קיר — תיבת הקיר ארוכה, האבן לא' },
   { a: /firepit|torch/, b: WALL, why: 'אח אל קיר החצר' },
   { a: /^cast:/, b: /camel|cart/, why: 'עומד אל גמלו' },
   { a: /camel|cart/, b: NESTED, why: 'גמל עומד אל מטענו — כך נראית שיירה שנטענת' },
   { a: /camel|cart/, b: SCENERY, why: 'גמל רובץ בין הסלעים — תיבת הגוש רחבה, הסלע לא' },
   { a: /camel|cart/, b: WALL, why: 'גמל קשור אל קיר החצר' },
-  { a: /^cast:/, b: SCENERY, why: 'עומד ליד סלע — אותו ארטיפקט תיבה כמו הקיר' },
   { a: /well/, b: /trough/, why: 'שוקת ניצבת אל הבאר; זה תפקידה' },
   { a: /trough/, b: WALL, why: 'שוקת צמודה לקיר החצר' },
   { a: /torch/, b: WALL, why: 'לפיד מוצמד לקיר, כפי שלפיד מוצמד' },
@@ -90,6 +84,24 @@ export function allowedBecause(a: string, b: string, depth: number, frac: number
   const shallow = frac < 0.15
   if (/camel|cart/.test(a) !== /camel|cart/.test(b) && /firepit|torch/.test(a + b)) {
     return shallow ? 'עומד סביב האש, לא בתוכה' : null
+  }
+  /* אדם מול קיר, מול מבנה או מול סלע.
+     שני הכללים שהיו כאן היו גורפים, וזה מה שהסתיר את מה שהמשתמשת
+     ראתה בעין: ניצבים תקועים בתוך הקיר ברמות תימן, מאושרים בדוח.
+     תיבת קיר יבש היא באמת קופסה ארוכה ומגע קל בה הוא ארטיפקט מדידה —
+     אבל חצי דמות בתוך אבן אינו ארטיפקט, וההבדל בין השניים הוא סף.
+     המרווח החזותי עצמו נאכף בנתונים: scratchpad/space-people.mjs
+     מרחיק כל דמות 0.45 מ' מכל מכשול, ולכן מה שנשאר כאן הוא באמת
+     נגיעה בתיבה בלבד. */
+  {
+    const aCast = /^cast:/.test(a)
+    const bCast = /^cast:/.test(b)
+    if (aCast !== bCast) {
+      const other = aCast ? b : a
+      if (WALL.test(other) || SCENERY.test(other)) {
+        return frac < 0.14 ? 'עומד אל פני קיר או סלע — נגיעה בתיבה, לא באבן' : null
+      }
+    }
   }
   /* אדם ליד הכלים שלו. נופל הלאה אל PAIR_ALLOW ולא פוסל, כדי שכלל
      מפורש יותר למטה עדיין יוכל לאשר. */

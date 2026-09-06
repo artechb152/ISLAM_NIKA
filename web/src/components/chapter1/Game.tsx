@@ -4752,7 +4752,15 @@ function DevAudit() {
       const report = {
         region: REGION.id, counted: items.length,
         overlaps: classified.filter((h) => h.frac > 0.02), unapproved, floating,
-        sizes: items.map((i) => ({ name: i.name, w: +i.size.x.toFixed(2), h: +i.size.y.toFixed(2), d: +i.size.z.toFixed(2) })),
+        /* התיבות עצמן, ולא רק מידותיהן: מתקן שמזיז דמות צריך לבדוק
+           מועמדים מול מה שבאמת עומד בעולם, ולא מול עיגול ההתנגשות
+           שה-JSON מצהיר עליו — הפער בין השניים הוא בדיוק מה שהשאיר
+           ניצבים בתוך הקיר. */
+        sizes: items.map((i) => ({
+          name: i.name, w: +i.size.x.toFixed(2), h: +i.size.y.toFixed(2), d: +i.size.z.toFixed(2),
+          box: [+i.box.min.x.toFixed(2), +i.box.min.y.toFixed(2), +i.box.min.z.toFixed(2),
+                +i.box.max.x.toFixed(2), +i.box.max.y.toFixed(2), +i.box.max.z.toFixed(2)],
+        })),
       }
       ;(window as unknown as { __ch1Audit: unknown }).__ch1Audit = report
       ;(window as unknown as { __ch1Scene: THREE.Scene }).__ch1Scene = scene
@@ -5850,7 +5858,10 @@ export default function Game() {
         </div>
         {/* המטרה האחת של התחנה, בשורה אחת, ומשתנה עם השלב. זה מה שהיה
             חסר: לא רשימת מטלות ולא לוח בקרה — משפט אחד שאומר מה עכשיו. */}
-        {objective && !overlay && !openTask && !openFind && (
+        {/* כשההנחיה כבר עומדת ליד המקש — לא חוזרים עליה מתחת. אותה
+            שורה פעמיים נקראת כתקלה, לא כדגש. */}
+        {objective && !overlay && !openTask && !openFind && !encounter &&
+          !(stage === 'brief' && nearPending) && !(atTask && REGION_TASK) && (
           <p className="hud-objective" role="status">{objective}</p>
         )}
         {idleHint && hintText && !overlay && !openFind && !openTask && !encounter && (
