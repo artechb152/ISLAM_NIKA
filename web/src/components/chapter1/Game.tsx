@@ -675,7 +675,11 @@ function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1 }: {
      נמוכים ממנו וכדים ריחפו באוויר. הצבה על פני הקרקע עצמם פותרת
      את שני הכיוונים באותו שינוי. */
   return (
-    <group position={[x, groundYAt(x, z) - sink, z]} rotation={[0, ry, 0]}>
+    /* השם אינו קישוט: ביקורת החפיפות (DevAudit) הולכת על גרף הסצנה
+       ומודדת Box3 בקואורדינטות עולם — אחרי scale, סיבוב, sink ו-origin
+       של המודל. בדיקת ה-JSON רואה רק x/z/r מהקובץ, ולכן פספסה חפיפות
+       שנראות בעין. בלי שם, זוג חופף מדווח כ„Group ↔ Group“. */
+    <group name={`prop:${url.split('/').pop()}@${x.toFixed(1)},${z.toFixed(1)}`} position={[x, groundYAt(x, z) - sink, z]} rotation={[0, ry, 0]}>
       {url.includes('palm') ? (
         <Sway x={x} z={z}>
           <primitive object={object} />
@@ -3049,6 +3053,223 @@ function useWalkingCamel(height: number) {
   return { obj, legs, phase }
 }
 
+/* אור על הקרקע במקום אייקון מרחף.
+   דיסקה אחת, שקופה, בצבע הזהב של הפרק, שוכבת על החול מתחת לחפץ. היא
+   נושמת לאט כשרחוקים ומתחזקת כשמתקרבים — תנועה עדינה שהעין תופסת
+   בפריפריה בלי שדבר ירחף מעל העולם. חומר בסיסי עם additive blending
+   ובלי depthWrite: זה אור, לא אובייקט, ולכן הוא לא חוסם ולא מתנגש
+   עם שום דבר, ואין לו עלות תאורה אמיתית. */
+/* מפת נפילה רדיאלית, נבנית פעם אחת לכל החיים. בלעדיה הדיסקה היא עיגול
+   עם קצה חד — וקצה חד על חול קורא כמדבקה, בדיוק מה שרצינו להיפטר ממנו.
+   העקומה בריבוע כדי שהמרכז יהיה חם והשוליים ייעלמו לגמרי. */
+let GLOW_TEX: THREE.CanvasTexture | null = null
+function glowTexture() {
+  if (GLOW_TEX) return GLOW_TEX
+  const c = document.createElement('canvas')
+  c.width = c.height = 128
+  const g = c.getContext('2d')!
+  const grad = g.createRadialGradient(64, 64, 0, 64, 64, 64)
+  for (let i = 0; i <= 10; i++) {
+    const t = i / 10
+    grad.addColorStop(t, `rgba(255,255,255,${Math.pow(1 - t, 2.2).toFixed(3)})`)
+  }
+  g.fillStyle = grad
+  g.fillRect(0, 0, 128, 128)
+  GLOW_TEX = new THREE.CanvasTexture(c)
+  return GLOW_TEX
+}
+
+function GroundGlow({ x, z, r = 1.1, live, tone = '#f0c877' }: {
+  x: number; z: number; r?: number; live: Live; tone?: string
+}) {
+  const m = useRef<THREE.Mesh>(null)
+  const mat = useRef<THREE.MeshBasicMaterial>(null)
+  useFrame(({ clock }) => {
+    if (!mat.current || !m.current) return
+    const d = Math.hypot(live.player.x - x, live.player.z - z)
+    /* קרוב = 1, רחוק מ-14 מטר = 0. עקומה רכה כדי שלא ידלק בבת אחת. */
+    const near = Math.max(0, Math.min(1, (14 - d) / 11))
+    const breathe = 0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.3)
+    mat.current.opacity = 0.06 + near * near * 0.3 + breathe * (0.03 + near * 0.07)
+    const s = 1 + near * 0.16 + breathe * 0.05
+    m.current.scale.set(s, s, s)
+  })
+  return (
+    <mesh ref={m} rotation={[-Math.PI / 2, 0, 0]} position={[x, groundYAt(x, z) + 0.035, z]} renderOrder={2}>
+      <planeGeometry args={[r * 2.6, r * 2.6]} />
+      <meshBasicMaterial
+        ref={mat}
+        map={glowTexture()}
+        color={tone}
+        transparent
+        opacity={0.1}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  )
+}
+
+/* תימן: האור נגרר על האבן.
+   הכתובת אינה נקראת מפאנל — היא נקראת מן האבן, ורק כשמביאים אליה אור.
+   הלפיד מונח על החול ליד המצבה; גוררים אותו ביד (raycast למישור בגובה
+   הלפיד, אותה טכניקה שמשמשת את גרירת המשימות), ואיתו נע אור נקודתי חם.
+   ככל שהלהבה קרובה יותר, החקיקה יוצאת מן הצל. שנייה וחצי של קרבה
+   מסיימת את החשיפה — לא לחיצה, אלא החזקה של אור במקום הנכון.
+   רק אחרי זה נפתחת השאלה „מה האבן מוכיחה“: קודם רואים, אחר כך מסיקים.
+   בלי נכס חדש — torch.glb הוא הלפיד שכבר קיים בפרק. */
+function LampReveal({ live, target, home, onRevealed, revealed }: {
+  live: Live
+  target: { x: number; z: number }
+  home: { x: number; z: number }
+  onRevealed: () => void
+  revealed: boolean
+}) {
+  const { camera, gl } = useThree()
+  const grp = useRef<THREE.Group>(null)
+  const lightRef = useRef<THREE.PointLight>(null)
+  const pos = useRef({ x: home.x, z: home.z })
+  const dragging = useRef(false)
+  const progress = useRef(0)
+  const doneRef = useRef(revealed)
+  doneRef.current = revealed
+  const { scene } = useGLTF(MODEL_TORCH)
+  const model = useMemo(() => {
+    const c = scene.clone(true)
+    const box = new THREE.Box3().setFromObject(c)
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    const s = size.y > 0 ? 1.15 / size.y : 1
+    c.scale.setScalar(s)
+    const b2 = new THREE.Box3().setFromObject(c)
+    c.position.y = -b2.min.y
+    return c
+  }, [scene])
+
+  useEffect(() => {
+    const v = new THREE.Vector3()
+    const toPlane = (cx: number, cy: number, y: number) => {
+      const r = gl.domElement.getBoundingClientRect()
+      v.set(((cx - r.left) / r.width) * 2 - 1, -(((cy - r.top) / r.height) * 2 - 1), 0.5).unproject(camera)
+      const dir = v.sub(camera.position).normalize()
+      const t = (y - camera.position.y) / dir.y
+      return { x: camera.position.x + dir.x * t, z: camera.position.z + dir.z * t }
+    }
+    const near = (cx: number, cy: number) => {
+      const r = gl.domElement.getBoundingClientRect()
+      const p = new THREE.Vector3(pos.current.x, groundYAt(pos.current.x, pos.current.z) + 0.6, pos.current.z).project(camera)
+      const sx = (p.x * 0.5 + 0.5) * r.width + r.left
+      const sy = (-p.y * 0.5 + 0.5) * r.height + r.top
+      return Math.hypot(cx - sx, cy - sy) < 70 && p.z <= 1
+    }
+    const down = (e: PointerEvent) => {
+      if (doneRef.current) return
+      /* פאנל פתוח מעל הקנבס: לחיצה עליו אינה תופסת את הלפיד שמאחוריו */
+      if (e.target !== gl.domElement) return
+      if (!near(e.clientX, e.clientY)) return
+      dragging.current = true
+      live.taskDrag = true
+      e.preventDefault()
+    }
+    const move = (e: PointerEvent) => {
+      if (!dragging.current) return
+      const p = toPlane(e.clientX, e.clientY, groundYAt(pos.current.x, pos.current.z) + 0.3)
+      /* הלפיד לא עוזב את סביבת המצבה — גרירה אל מעבר לאופק אינה משחק */
+      const d = Math.hypot(p.x - target.x, p.z - target.z)
+      const lim = 6
+      pos.current = d > lim
+        ? { x: target.x + ((p.x - target.x) / d) * lim, z: target.z + ((p.z - target.z) / d) * lim }
+        : { x: p.x, z: p.z }
+    }
+    const up = () => {
+      if (!dragging.current) return
+      dragging.current = false
+      live.taskDrag = false
+    }
+    window.addEventListener('pointerdown', down)
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up)
+    /* וו בדיקה, בפיתוח בלבד: מאפשר לפרוב להניח את הלפיד בנקודה ידועה
+       ולבדוק את לוגיקת החשיפה בלי להיות תלוי בדיוק של סימולציית עכבר
+       על מדרון. אינו קיים ב-build של ייצור. */
+    if (process.env.NODE_ENV === 'development') {
+      ;(window as unknown as { __ch1LampSet?: (x: number, z: number) => void }).__ch1LampSet =
+        (x: number, z: number) => { pos.current = { x, z } }
+    }
+    return () => {
+      window.removeEventListener('pointerdown', down)
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+    }
+  }, [camera, gl, live, target])
+
+  useFrame((_, dt) => {
+    const g = grp.current
+    if (!g) return
+    g.position.set(pos.current.x, groundYAt(pos.current.x, pos.current.z), pos.current.z)
+    const d = Math.hypot(pos.current.x - target.x, pos.current.z - target.z)
+    /* קרוב מ-1.7 מטר = חושפים. רחוק מזה — הצל חוזר לאט, כך שהיד
+       מרגישה שהיא מחזיקה משהו ולא שהיא לחצה על כפתור. */
+    const gain = d < 1.7 ? dt / 1.5 : -dt / 3
+    progress.current = Math.max(0, Math.min(1, progress.current + gain))
+    if (progress.current >= 1 && !doneRef.current) onRevealed()
+    if (lightRef.current) {
+      const lit = doneRef.current ? 1 : progress.current
+      lightRef.current.intensity = 2.2 + lit * 5.5 + Math.sin(performance.now() / 140) * 0.25
+      lightRef.current.distance = 5.5 + lit * 3
+    }
+  })
+
+  return (
+    <group ref={grp} name="task:lamp">
+      <primitive object={model} />
+      <pointLight ref={lightRef} position={[0, 1.05, 0]} color="#ffcf8a" intensity={2.4} distance={6} decay={2} />
+    </group>
+  )
+}
+
+/* בוחר לגמל אליפסה שכבר פנויה ממכשולים סטטיים.
+   פונקציה טהורה ברמת המודול ולא סגור בתוך useMemo: היא נקראת פעם אחת
+   לכל גמל, והתוצאה תלויה רק בארבעת המספרים ובקוליידרים של האזור —
+   שנבנים פעם אחת בטעינת המודול ואינם משתנים. */
+function clearWalk(cx: number, cz: number, rx: number, rz: number) {
+  const CAMEL_R = 1.4
+  const hits = (x: number, z: number) =>
+    WORLD.colliders.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + CAMEL_R)
+  const clear = (ex: number, ez: number, ox: number, oz: number) => {
+    for (let i = 0; i < 48; i++) {
+      const t = (i / 48) * Math.PI * 2
+      if (hits(cx + ox + Math.cos(t) * ex, cz + oz + Math.sin(t) * ez)) return false
+    }
+    return true
+  }
+  if (clear(rx, rz, 0, 0)) return { cx, cz, rx, rz }
+  for (let k = 0.85; k >= 0.35; k -= 0.1) {
+    if (clear(rx * k, rz * k, 0, 0)) return { cx, cz, rx: rx * k, rz: rz * k }
+  }
+  for (let a = 0; a < 8; a++) {
+    const dx = Math.cos((a / 8) * Math.PI * 2)
+    const dz = Math.sin((a / 8) * Math.PI * 2)
+    for (const step of [2, 4, 6]) {
+      for (const k of [1, 0.7, 0.5]) {
+        if (clear(rx * k, rz * k, dx * step, dz * step)) {
+          return { cx: cx + dx * step, cz: cz + dz * step, rx: rx * k, rz: rz * k }
+        }
+      }
+    }
+  }
+  /* אין מסלול פנוי — הגמל נח. גמל עומד קורא כגמל נח; גמל שחוצה מדורה
+     קורא כמשחק שבור. */
+  for (let a = 0; a < 16; a++) {
+    const dx = Math.cos((a / 16) * Math.PI * 2)
+    const dz = Math.sin((a / 16) * Math.PI * 2)
+    for (const step of [0, 2, 4, 6, 8]) {
+      if (!hits(cx + dx * step, cz + dz * step)) return { cx: cx + dx * step, cz: cz + dz * step, rx: 0, rz: 0 }
+    }
+  }
+  return { cx, cz, rx: 0, rz: 0 }
+}
+
 function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
   live: Live
   cx: number
@@ -3061,7 +3282,18 @@ function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
 }) {
   const g = useRef<THREE.Group>(null)
   const { obj: model, legs, phase: gaitPhase } = useWalkingCamel(h)
-  const col = useMemo<Collider>(() => ({ x: cx + rx, z: cz, r: 1.5 }), [cx, cz, rx])
+
+  /* מסלול נקי, נבחר פעם אחת.
+     הגמל הלך על אליפסה קבועה בלי לדעת דבר על מה שעומד עליה, ולכן חצה
+     מדורות, אוהלים וארגזים — בדרך ההעמסה הוא עמד ממש בתוך האש. הפתרון
+     אינו התחמקות לכל פריים (שמשברת את ההליכה ומייצרת ריצוד), אלא בחירת
+     מסלול שכבר פנוי: דוגמים 48 נקודות על האליפסה מול WORLD.colliders,
+     ואם משהו חוסם — מכווצים, ואז מסיטים את המרכז. גמל שאין לו מסלול
+     פנוי כלל עומד במקום; גמל עומד קורא כגמל נח, גמל שחוצה מדורה קורא
+     כמשחק שבור. */
+  const path = useMemo(() => clearWalk(cx, cz, rx, rz), [cx, cz, rx, rz])
+
+  const col = useMemo<Collider>(() => ({ x: path.cx + path.rx, z: path.cz, r: 1.5 }), [path])
 
   useEffect(() => {
     live.dynamic.push(col)
@@ -3074,18 +3306,18 @@ function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
   /* Cadence derived from ground speed so the feet do not skate: the shader
      swings each foot ±~0.3 m, i.e. a ~0.62 m step, and one step is half a
      gait cycle. */
-  const groundSpeed = Math.abs(speed) * ((rx + rz) / 2)
+  const groundSpeed = Math.abs(speed) * ((path.rx + path.rz) / 2)
   const gaitRate = (groundSpeed / 0.62) * Math.PI
 
   useFrame(({ clock }, dt) => {
     const el = g.current
     if (!el) return
     const t = clock.elapsedTime * speed + phase
-    const x = cx + Math.cos(t) * rx
-    const z = cz + Math.sin(t) * rz
+    const x = path.cx + Math.cos(t) * path.rx
+    const z = path.cz + Math.sin(t) * path.rz
     // heading follows the path tangent; the camel model's long axis is +Z
-    const dx = -Math.sin(t) * rx * Math.sign(speed)
-    const dz = Math.cos(t) * rz * Math.sign(speed)
+    const dx = -Math.sin(t) * path.rx * Math.sign(speed)
+    const dz = Math.cos(t) * path.rz * Math.sign(speed)
     gaitPhase.current.value += dt * gaitRate
     const ph = gaitPhase.current.value
     for (const leg of legs) {
@@ -3327,7 +3559,7 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved }: {
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stoneLit, onStoneLit }: {
   live: Live
   onNearChange: (who: string | null) => void
   onNearFind: (id: string | null) => void
@@ -3342,6 +3574,9 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
   /** מי מהדמויות מפנה מבט אל ראאווי — כשההערה שלו היא שנאמרת */
   attendWho: string | null
   onExit: (to: string, label: string) => void
+  /** תימן: האם האור כבר נגרר על האבן והחקיקה נחשפה */
+  stoneLit: boolean
+  onStoneLit: () => void
 }) {
   /* Scatter rocks and shrubs only where they don't intersect a placed prop or
      a person standing there — this is what stops models growing through each other.
@@ -3402,6 +3637,11 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       {REGION_FINDS.map((fd) => (
         <Prop key={fd.id} url={`/assets/chapter1/models/${fd.model}.glb`} x={fd.x} z={fd.z} ry={fd.ry ?? 0} height={fd.h} />
       ))}
+      {/* מה שהחליף את התגים המרחפים: אור על החול מתחת לכל עדות ומתחת
+          לתחנת המשימה. הוא בעולם, לא מעליו. */}
+      {REGION_FINDS.map((fd) => (
+        <GroundGlow key={`glow-${fd.id}`} x={fd.x} z={fd.z} r={0.95} live={live} />
+      ))}
       {REGION_TASK && (
         <Prop
           url={`/assets/chapter1/models/${REGION_TASK.model}.glb`}
@@ -3410,6 +3650,21 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
           ry={REGION_TASK.ry ?? 0}
           height={REGION_TASK.h}
         />
+      )}
+      {REGION_TASK && <GroundGlow x={REGION_TASK.x} z={REGION_TASK.z} r={1.5} live={live} />}
+      {/* תימן היא התחנה הראשונה, והפעולה הראשונה בפרק צריכה להיות של
+          היד ולא של העכבר על כפתור: גוררים לפיד אל המצבה עד שהחקיקה
+          יוצאת מן הצל. השאלה נפתחת רק אחריה. */}
+      {REGION.id === 'yemen-heights' && REGION_TASK && (
+        <Suspense fallback={null}>
+          <LampReveal
+            live={live}
+            target={{ x: REGION_TASK.x, z: REGION_TASK.z }}
+            home={{ x: REGION_TASK.x + 2.3, z: REGION_TASK.z + 1.5 }}
+            revealed={stoneLit}
+            onRevealed={onStoneLit}
+          />
+        </Suspense>
       )}
 
       {/* every placed prop comes from one spacing-checked layout table */}
@@ -3793,6 +4048,77 @@ function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose }: {
   )
 }
 
+/* ביקורת חפיפות על גרף הסצנה, בפיתוח בלבד.
+   check-camp/check-layouts קוראים x/z/r מקובצי ה-JSON, ולכן הם עיוורים לכל
+   מה שקורה בין הקובץ לפיקסל: scale שנגזר מגובה היעד, סיבוב, sink, ו-origin
+   של המודל שלא במרכזו. חפיפות שנראות בעין ולא נתפסו שם — משם הן הגיעו.
+   כאן נמדד מה שבאמת עומד בעולם: Box3 בקואורדינטות עולם, אחרי כל
+   הטרנספורמציות. התוצאה יושבת על window.__ch1Audit כדי שפרוב יוכל
+   לקרוא אותה, ונכתבת לקונסול עם שני השמות, האזור ועומק החפיפה. */
+function DevAudit() {
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'development') return
+    const t = window.setTimeout(() => {
+      const items: { name: string; box: THREE.Box3; size: THREE.Vector3 }[] = []
+      scene.updateMatrixWorld(true)
+      scene.traverse((o) => {
+        if (!o.name || !/^(prop|cast|find|task):/.test(o.name)) return
+        const box = new THREE.Box3().setFromObject(o)
+        if (!isFinite(box.min.x) || box.isEmpty()) return
+        const size = new THREE.Vector3()
+        box.getSize(size)
+        items.push({ name: o.name, box, size })
+      })
+      /* חפיפה מדווחת לפי הנפח המשותף בשלושת הצירים. שני קירות שנוגעים
+         בפינה אינם באג; דמות שחצי ממנה בתוך קיר היא באג. הסף באחוז מן
+         הקטן שבשני העצמים, כדי שמגע קל בין ארגזים לא יטביע את הדוח. */
+      const hits: { a: string; b: string; depth: number; frac: number }[] = []
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          const A = items[i], B = items[j]
+          const ox = Math.min(A.box.max.x, B.box.max.x) - Math.max(A.box.min.x, B.box.min.x)
+          const oy = Math.min(A.box.max.y, B.box.max.y) - Math.max(A.box.min.y, B.box.min.y)
+          const oz = Math.min(A.box.max.z, B.box.max.z) - Math.max(A.box.min.z, B.box.min.z)
+          if (ox <= 0 || oy <= 0 || oz <= 0) continue
+          const vol = ox * oy * oz
+          const small = Math.min(A.size.x * A.size.y * A.size.z, B.size.x * B.size.y * B.size.z)
+          const frac = small > 0 ? vol / small : 0
+          hits.push({ a: A.name, b: B.name, depth: +Math.min(ox, oy, oz).toFixed(2), frac: +frac.toFixed(3) })
+        }
+      }
+      hits.sort((p, q) => q.frac - p.frac)
+      /* חפצים ששוכבים על הקרקע ומעט שקועים בה אינם חפיפה בין שני
+         מודלים — הקרקע אינה ברשימה. מה שנשאר הוא באמת מודל בתוך מודל. */
+      const floating: { name: string; gap: number }[] = []
+      for (const it of items) {
+        const gy = groundYAt((it.box.min.x + it.box.max.x) / 2, (it.box.min.z + it.box.max.z) / 2)
+        const gap = it.box.min.y - gy
+        if (gap > 0.25) floating.push({ name: it.name, gap: +gap.toFixed(2) })
+        if (gap < -Math.max(0.6, it.size.y * 0.5)) floating.push({ name: it.name, gap: +gap.toFixed(2) })
+      }
+      const report = {
+        region: REGION.id, counted: items.length,
+        overlaps: hits.filter((h) => h.frac > 0.02), floating,
+        sizes: items.map((i) => ({ name: i.name, w: +i.size.x.toFixed(2), h: +i.size.y.toFixed(2), d: +i.size.z.toFixed(2) })),
+      }
+      ;(window as unknown as { __ch1Audit: unknown }).__ch1Audit = report
+      ;(window as unknown as { __ch1Scene: THREE.Scene }).__ch1Scene = scene
+      ;(window as unknown as { __ch1Cam: THREE.Camera }).__ch1Cam = camera
+      if (report.overlaps.length || floating.length) {
+        console.warn(`[ch1 audit] ${REGION.id}: ${report.overlaps.length} overlaps, ${floating.length} off-ground`)
+        for (const h of report.overlaps.slice(0, 20)) console.warn(`  ${h.a} ↔ ${h.b} — ${h.depth}m deep (${Math.round(h.frac * 100)}% of the smaller)`)
+        for (const f of floating.slice(0, 20)) console.warn(`  ${f.name} — ${f.gap > 0 ? 'floating' : 'sunk'} ${Math.abs(f.gap)}m`)
+      } else {
+        console.info(`[ch1 audit] ${REGION.id}: clean (${items.length} objects)`)
+      }
+    }, 2500)
+    return () => window.clearTimeout(t)
+  }, [scene, camera])
+  return null
+}
+
 function SceneReady({ onReady }: { onReady: () => void }) {
   useEffect(() => {
     /* שני פריימים אחרי שה-Suspense נפתר: הראשון הוא זה שבו הסצנה
@@ -3898,6 +4224,16 @@ export default function Game() {
      דיבור למטה — התנועה נשארת חופשית, והפאנל של E נשאר למי שרוצה
      את השאלה במלואה. הפאנל-אחרי-גרירה נפסל על-ידי המשתמשת: "פתאום
      נפתח הפאנל — מוזר". */
+  /* תימן: החקיקה יוצאת מן הצל רק אחרי שגררו אליה אור. עד אז E על
+     המצבה אינו פותח את השאלה — הוא אומר מה חסר. נשמר לאורך הביקור
+     כדי שחזרה אל האבן לא תדרוש לחשוף אותה שוב. */
+  const [stoneLit, setStoneLit] = useState(false)
+  const stoneLitRef = useRef(false)
+  stoneLitRef.current = stoneLit
+  const markStoneLit = useCallback(() => {
+    setStoneLit(true)
+    cue('find')
+  }, [setStoneLit])
   const [taskNote, setTaskNote] = useState<{ who: string; text: string; ok: boolean } | null>(null)
   useEffect(() => {
     if (!taskNote) return
@@ -4396,6 +4732,17 @@ export default function Game() {
           }
         }
         if (live.atTask) {
+          /* בתימן קודם מביאים אור. פאנל שנפתח על אבן שאיש לא הֵאיר
+             הופך את הפעולה הפיזית לקישוט. */
+          if (REGION.id === 'yemen-heights' && !stoneLitRef.current) {
+            setTaskNote({
+              who: REGION_TASK?.asker ?? 'רָאוִי',
+              text: 'האבן בצל. קח את הלפיד שלצידה, גרור אותו אליה והחזק — החקיקה תצא מן האפלה.',
+              ok: false,
+            })
+            cue('ui')
+            return
+          }
           cue('task')
           setOpenTask(true)
           return
@@ -4568,8 +4915,11 @@ export default function Game() {
               attendWho={encounter && stepSpeaker === 'rawi' && encounter.speaker !== 'rawi' && encounter.speaker !== 'narrator' ? encounter.speaker : null}
               onExit={guardedTravel}
               met={met}
+              stoneLit={stoneLit}
+              onStoneLit={markStoneLit}
             />
             <SceneReady onReady={onSceneReady} />
+            <DevAudit />
           </Suspense>
           {/* גבול Suspense משלו, בכוונה: החפצים טוענים דגמים שלפעמים אינם
               באזור (חותם, מצבה), ובתוך הגבול של העולם הטעינה שלהם החביאה
@@ -4687,9 +5037,12 @@ export default function Game() {
               else live.markerEls.delete('find:' + fd.id)
             }}
           >
-            <span className="poi-find-pin" aria-hidden="true">✦</span>
+            {/* התג המרחף (✦) הוסר. מה שמסמן עדות עכשיו הוא אור על
+                הקרקע — GroundGlow בתוך העולם — והתווית מופיעה רק
+                כשקרובים. אייקון שמרחף מעל חפץ קורא כשכבת משחק, לא
+                כעולם, וזה בדיוק מה שהפך את הפרק ל„חיפוש חפצים“. */}
             <span className="poi-act" aria-hidden="true">
-              הביטו מקרוב · <b>F</b>
+              הביטו מקרוב · <b>E</b>
             </span>
             <span className="poi-marker-stem" aria-hidden="true" />
             <span className="poi-marker-foot" aria-hidden="true" />
@@ -4704,7 +5057,7 @@ export default function Game() {
               else live.markerEls.delete('task')
             }}
           >
-            <span className="poi-task-badge" aria-hidden="true">?</span>
+            {/* גם כאן: „?“ המרחף ירד. המשימה מסומנת באור על הקרקע. */}
             <span className="poi-act" aria-hidden="true">
               {REGION_TASK.prompt} · <b>E</b>
             </span>

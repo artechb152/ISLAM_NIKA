@@ -482,13 +482,27 @@ body{
 }
 /* a thin stem down to a dot on the ground, so the marker reads as belonging to
    a spot in the world rather than floating over it */
+/* אחרי שהתגים המרחפים ירדו, מה שנשאר צריך לקרוא כנצנוץ על החול ולא
+   כסיכה של ממשק: גבעול קצר ודהוי שכמעט נגמר לפני שהתחיל, ונקודה
+   קטנה. הסימון האמיתי הוא GroundGlow שבתוך העולם; אלה רק מחזיקים
+   את התווית במקום ונותנים לעין נקודת אחיזה מרחוק.
+   מתחזקים בקרבה, כדי שההתקרבות תרגיש כמו משהו שנענה. */
 .poi-marker-stem{
-  width:2px;height:34px;
-  background:linear-gradient(var(--gold),rgba(199,154,60,.12));
+  width:1px;height:14px;opacity:.5;
+  background:linear-gradient(rgba(199,154,60,.75),rgba(199,154,60,0));
+  transition:height .3s ease,opacity .3s ease;
 }
 .poi-marker-foot{
-  width:9px;height:9px;border-radius:50%;background:var(--gold);
-  box-shadow:0 0 10px rgba(199,154,60,.9);margin-top:-2px;
+  width:5px;height:5px;border-radius:50%;background:rgba(224,186,110,.85);
+  box-shadow:0 0 7px rgba(199,154,60,.6);margin-top:-1px;opacity:.6;
+  transition:opacity .3s ease,box-shadow .3s ease,transform .3s ease;
+}
+.poi-marker.is-near .poi-marker-stem{height:22px;opacity:.95}
+.poi-marker.is-near .poi-marker-foot{
+  opacity:1;transform:scale(1.25);box-shadow:0 0 14px rgba(255,214,130,.85);
+}
+@media (prefers-reduced-motion:reduce){
+  .poi-marker-stem,.poi-marker-foot{transition:none}
 }
 .poi-marker.is-done .poi-marker-stem{background:linear-gradient(var(--olive),rgba(124,138,79,.1))}
 .poi-marker.is-done .poi-marker-foot{background:var(--olive);box-shadow:0 0 8px rgba(124,138,79,.8)}

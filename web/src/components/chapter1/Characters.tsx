@@ -323,7 +323,9 @@ export function Npc({
   })
 
   return (
-    <group ref={group} position={position} rotation={[0, rotationY, 0]}>
+    /* השם נקרא על ידי ביקורת החפיפות (DevAudit ב-Game.tsx): דמות שחציה
+       בתוך קיר צריכה להידווח בשמה, לא כ„Group“. */
+    <group name={`cast:${who}`} ref={group} position={position} rotation={[0, rotationY, 0]}>
       <primitive object={model} />
       <ContactShadow radius={0.5} />
     </group>
