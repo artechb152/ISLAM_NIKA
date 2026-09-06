@@ -1,0 +1,1386 @@
+{
+  "$note": "מניפסט הפאנלים של פרק 3. כל פאנל מצהיר מה הכתוב שלו טוען שהתמונה חייבת להראות, ומה אסור שיופיע בה. verify-panels.mjs אוכף את מה שמכונה יכולה לאכוף; שדה `checked` נקבע בעין מול הנכס שהופק, ופאנל בלי אישור לא נכנס לפרק.",
+  "$why": "המקור לצורה הזו: 'אני צריכה שתוודא שהתמונה מתאימה למה שכתוב'. ההצהרה קודמת להפקה — קודם כותבים מה התמונה חייבת לשאת, ורק אז מפיקים אותה. אחרת בודקים תמונה מול זיכרון.",
+  "$lettering": "א — קופסת Ploni מלבנית על מסגרת דיו. נבחר מתוך ארבעה טיפולים שהוצגו ב-moodboard/lettering.html.",
+  "$fields": {
+    "id": "מזהה הפאנל",
+    "part": "החלק בפריסה",
+    "captions": "מערך של §N.fragment — הטקסט שהקופסאות נושאות, לפי סדר הקריאה",
+    "balloon": "בועת דיבור, אם יש: { ref, speaker, tail }",
+    "must": "טענות בדיקות שהתמונה חייבת לקיים. כל אחת נגזרת ממשפט הכתוב",
+    "mustNot": "מה שאסור שיופיע — איסור דתי או סתירה לטקסט",
+    "grid": "nine | six | splash",
+    "checked": "null עד שנבדק בעין. אחרת { asset, by, findings }"
+  },
+  "panels": [
+    {
+      "id": "p01",
+      "part": "1 · שנת הפיל",
+      "grid": "six",
+      "captions": [
+        "§0.a",
+        "§0.name"
+      ],
+      "must": [
+        "מכה כעיירה קטנה בעמק צחיח, לא עיר גדולה",
+        "אור שחר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "כתב"
+      ],
+      "checked": null,
+      "art": "A small 6th-century Arabian town of low flat-roofed mud-brick and dry-stone houses along a narrow dry valley floor, bare dark hills close on both sides, a few date palms, first light and long shadows. A modest settlement, not a city. Completely empty of people and animals. No mosque, no dome, no minaret.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any mosque, any dome, any minaret or tower, cloth covering on the stone cube, text or lettering."
+    },
+    {
+      "id": "p02",
+      "part": "1 · שנת הפיל",
+      "grid": "six",
+      "captions": [
+        "§1.a"
+      ],
+      "must": [
+        "אברהה וחייליו — מותר, אינם נביאים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "תנועה מתימן לעבר מכה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "A 6th-century Aksumite army on the march across arid highlands moving right to left toward distant hills: ranks of robed spearmen and one mounted commander, dust rising behind them.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p03",
+      "part": "1 · שנת הפיל",
+      "grid": "six",
+      "captions": [
+        "§2.a"
+      ],
+      "must": [
+        "להקת ציפורים רבות, לא בודדות",
+        "פיל אפריקאי — אוזניים גדולות ופרושות, גב משופע, חטים ארוכים קדימה. אברהה אקסומי, ולא הודי",
+        "הפיל נושא רוכבים",
+        "אבנים נופלות מן הציפורים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "מהומה ובריחה — לא זירת טבח"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "פיל הודי",
+        "גופות",
+        "דם"
+      ],
+      "checked": null,
+      "$fix": "האוזניים הקטנות והראש המכופף בסבב הראשון היו פיל הודי. הכשל היה בהצהרה — היא לא נקבה באנטומיה — ולא בהפקה. אותה טעות בדיוק נתפסה קודם באיור האקוורל ותוקנה שם, ולא הועברה לכאן.",
+      "art": "A dense flock of many small dark birds wheeling low over a 6th-century army halted in a rocky desert valley, dropping small burning stones; the soldiers break and run in confusion and dust. In the middle stands one large AFRICAN war elephant carrying riders — unmistakably African, very large fanned ears, sloping back, long forward-curving tusks. Nobody is dead; no corpses, no blood.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, Indian elephants with small ears, corpses or dead bodies, blood."
+    },
+    {
+      "id": "p04",
+      "part": "1 · שנת הפיל",
+      "grid": "six",
+      "captions": [
+        "§2.sura"
+      ],
+      "must": [
+        "אחרי: הדרך ריקה, מכה עומדת",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "גופות",
+        "דם"
+      ],
+      "checked": null,
+      "art": "The morning after: an empty caravan road through a rocky desert valley, abandoned shields and scattered small stones on bare ground, dust settling. Beyond, a small mud-brick town and, on open sand at its edge, a plain cube of dark dry-laid granite standing alone and undamaged. Empty of people, animals and bodies. No mosque, no dome, no minaret, no cloth on the cube.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any mosque, any dome, any minaret or tower, cloth covering on the stone cube, corpses or dead bodies, blood."
+    },
+    {
+      "id": "p05",
+      "part": "1 · שנת הפיל",
+      "grid": "six",
+      "captions": [
+        "§3.a",
+        "§3.aside"
+      ],
+      "must": [
+        "מכה בלילה מלמעלה, שקטה ושלמה — העיר שניצלה, לפני שנולד בה מישהו",
+        "בית אחד מואר בין הבתים החשוכים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "משה",
+        "תיבה",
+        "נילוס"
+      ],
+      "checked": null,
+      "art": "A small 6th-century desert town seen from above at night, quiet and whole, dark hills around it. One single house among the dark houses is lit from within. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Moses, an ark, a river."
+    },
+    {
+      "id": "p06",
+      "part": "2 · איפה זה פוגש אותנו",
+      "grid": "nine",
+      "captions": [
+        "§4.ask",
+        "§4.a"
+      ],
+      "must": [
+        "גוויל קוראן פתוח על אבן, בסגנון הפרק — הטקסט שממנו שואבים",
+        "חצי הפריים בצל, כאילו משהו עומד מעליו"
+      ],
+      "mustNot": [
+        "רחפן",
+        "טיל",
+        "סמל ארגון",
+        "מפה",
+        "גרפיקת מבצעים"
+      ],
+      "checked": null,
+      "art": "An open scroll of manuscript resting on a flat stone in daylight, its script rendered only as abstract unreadable ink strokes. Half the frame falls into a hard cold shadow as though something stands over it. No people.",
+      "avoid": "Absolutely do not include: drones, missiles, organisation emblems, maps, military graphics."
+    },
+    {
+      "id": "p07",
+      "part": "2 · איפה זה פוגש אותנו",
+      "grid": "nine",
+      "captions": [
+        "§4.b",
+        "§4.ababil"
+      ],
+      "must": [
+        "אותן ציפורי אבאביל של p03, דהויות ורחוקות — הד של הדימוי הקודם",
+        "שמיים ריקים ברובם"
+      ],
+      "mustNot": [
+        "רחפן",
+        "טיל",
+        "סמל ארגון",
+        "ציפורים"
+      ],
+      "checked": null,
+      "art": "A very wide pale empty sky with a small distant flock of dark birds far off near the horizon, faded and receding, mostly bare paper. Below, only a thin strip of empty desert. No people.",
+      "avoid": "Absolutely do not include: drones, missiles, organisation emblems, birds."
+    },
+    {
+      "id": "p08",
+      "part": "2 · איפה זה פוגש אותנו",
+      "grid": "nine",
+      "captions": [
+        "§5.a",
+        "§6.a"
+      ],
+      "must": [
+        "שדה מוץ שרוף — הדימוי שממנו „מוץ נאכל\" לקוח",
+        "קש מפוחם ואפר, רוח, בלי נפש"
+      ],
+      "mustNot": [
+        "סמל ארגון",
+        "דגל",
+        "מפה"
+      ],
+      "checked": null,
+      "art": "A burnt field of chaff and straw after fire: charred stalks, drifting ash and smoke, wind moving across it, flat empty land to the horizon. No people, no buildings.",
+      "avoid": "Absolutely do not include: organisation emblems, flags, maps."
+    },
+    {
+      "id": "p09",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§7.name",
+        "§7.a"
+      ],
+      "must": [
+        "בית האשם במכה — מבנה אבן צנוע",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "checked": null,
+      "art": "A modest 6th-century Arabian courtyard house of dry-laid stone and mud brick on a narrow street of a small desert town, doorway open onto the lane, a couple of robed inhabitants in the courtyard, clay jars, a low wall, one date palm. No mosque, no dome, no minaret.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any mosque, any dome, any minaret or tower, cloth covering on the stone cube."
+    },
+    {
+      "id": "p10",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§7.b"
+      ],
+      "must": [
+        "קריש כשבט אצולה — מעמד נראה בלבוש ובמיקום",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "checked": null,
+      "art": "A group of well-dressed 6th-century Arabian tribal notables in fine layered robes and embroidered mantles at the edge of an open sandy precinct, clearly of higher rank than the plainly dressed crowd behind them. On the sand beyond stands a plain cube of dark dry-laid granite. No mosque, no dome, no minaret, no cloth on the cube.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, any mosque, any dome, any minaret or tower, cloth covering on the stone cube."
+    },
+    {
+      "id": "p11",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§8.father",
+        "§8.mother"
+      ],
+      "must": [
+        "עבד אללה ואאמנה — שניהם מותרים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "A young 6th-century Arabian man and woman standing together quietly in the shaded courtyard of a comfortable stone house, in good plain robes, seen at three-quarter length. Only the two of them, nobody else.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features.",
+      "$redo": "הופק מחדש אחרי כישלון ביקורת"
+    },
+    {
+      "id": "p12",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§9.a",
+        "§9.b"
+      ],
+      "must": [
+        "אנצאב — אבני פולחן ניצבות סביב מתחם פתוח, בשעת בין־ערביים",
+        "אחת מהן גבוהה מן השאר ומעט מרוחקת"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "צלם",
+        "פסל בפוקוס"
+      ],
+      "checked": null,
+      "art": "Ansab — rough upright pagan standing-stones set in a ring around an open precinct at dusk, one of them taller than the rest and set slightly apart. Bare sand, long shadows. No people, no carved idols with faces.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, carved idols with faces, statues in the foreground."
+    },
+    {
+      "id": "p13",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§10.a"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "עדר במדבר",
+        "שני אנשים ניגשים — מלאכים, ולכן אור ולא גוף"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "יד",
+        "צללית",
+        "כנפיים"
+      ],
+      "checked": null,
+      "art": "Point of view of a boy herding: seen over a scatter of sheep and goats grazing on stony desert ground, low hills beyond. No person is visible anywhere — no figure, no hands, no silhouette, no human shadow. Toward the horizon an intense pale white light approaches across the ground, cold and bright and out of place. Only animals, ground and light.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, hands or arms, human silhouettes, wings."
+    },
+    {
+      "id": "p14",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§11.a"
+      ],
+      "must": [
+        "הר וסלע ריקים באור קר — הנוף שבו קרה הדבר, בלי הדבר עצמו",
+        "שכבת פרשנות — מה אומרים הפרשנים. שקט"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "לב אנטומי",
+        "דם"
+      ],
+      "checked": null,
+      "art": "An empty rocky hillside and bare boulders under cold flat light, the place where something happened, with nothing happening in it. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, anatomical hearts, blood."
+    },
+    {
+      "id": "p15",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§11.verse"
+      ],
+      "must": [
+        "שמיים פתוחים ורחבים מעל מדבר ריק — מרחב, לא סצנה",
+        "קופסת פסוק בזהב, על רקע שקט"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי"
+      ],
+      "checked": null,
+      "art": "A vast open sky over an empty desert, high and wide, mostly bare paper, a thin low horizon. Space, not a scene. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Arabic script."
+    },
+    {
+      "id": "p16",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§12.a"
+      ],
+      "must": [
+        "יתמות — בית ריק או שני סימני קבר, בלי גופה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "גופה",
+        "טקס קבורה"
+      ],
+      "checked": null,
+      "art": "An empty 6th-century Arabian courtyard house at dusk, doorway dark and open, a cold hearth, two clay jars set aside, nobody present. Two plain unmarked stones lie together on bare ground outside the wall. No people, no bodies, no funeral.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, funerals."
+    },
+    {
+      "id": "p17",
+      "part": "3 · הלידה והילדות",
+      "grid": "six",
+      "captions": [
+        "§12.b",
+        "§12.c"
+      ],
+      "must": [
+        "שני בתים, שתי חסויות — הסב ואז הדוד",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "Two 6th-century Arabian stone houses side by side on a narrow desert street seen in one view: the nearer shuttered and empty, the further lit and open with a robed man in its doorway. A worn path runs from the first to the second.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p18",
+      "part": "4 · ח׳דיג׳ה",
+      "grid": "six",
+      "captions": [
+        "§13.a"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "שיירת מסחר יוצאת ללבנט — גמלים ומטען"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "Point of view from within a departing trade caravan: loaded camels and bundled cargo ahead on a desert track heading north, dust and low hills. No faces visible, seen from behind.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p19",
+      "part": "4 · ח׳דיג׳ה",
+      "grid": "six",
+      "captions": [
+        "§14.a"
+      ],
+      "must": [
+        "ח׳דיג׳ה מצוירת — סוחרת אמידה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "הפרש הגילים נראה: היא המבוגרת"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "טקס חתונה מודרני"
+      ],
+      "checked": null,
+      "art": "A prosperous 6th-century Arabian merchant woman in fine robes standing in a stone courtyard beside stacked trade goods and sealed jars, clearly the one in charge, older and composed. One or two plainly dressed workers behind her.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, modern weddings."
+    },
+    {
+      "id": "p20",
+      "part": "4 · ח׳דיג׳ה",
+      "grid": "six",
+      "captions": [
+        "§14.daughters",
+        "§15.a"
+      ],
+      "must": [
+        "ארבע בנות — ארבע דמויות בדיוק",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "Four girls of different heights standing together in a stone courtyard of a 6th-century Arabian house, in simple robes. Exactly four figures, nobody else.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p21",
+      "part": "4 · ח׳דיג׳ה",
+      "grid": "six",
+      "captions": [
+        "§16.a"
+      ],
+      "must": [
+        "בית אבן צנוע שהפך אמיד — חצר מסודרת, כדים מלאים, אור חם",
+        "קופסת פסוק בזהב"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי"
+      ],
+      "checked": null,
+      "art": "A modest stone courtyard house that has become comfortable: swept yard, full clay jars, folded textiles, warm afternoon light. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Arabic script."
+    },
+    {
+      "id": "p22",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§17.a"
+      ],
+      "must": [
+        "הדרך במעלה ההר אל המערה",
+        "המערה נראית מבחוץ כפתח בסלע"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מנזר",
+        "צלב"
+      ],
+      "checked": null,
+      "art": "A steep rocky path climbing a bare desert mountain toward a dark opening in the cliff face high above, seen from below. Empty. No people, no monastery, no cross.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, crosses."
+    },
+    {
+      "id": "p23",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§17.b"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "פנים המערה — ריקה, בלי חפצים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "נזיר",
+        "נר",
+        "ספר"
+      ],
+      "checked": null,
+      "art": "Point of view from inside a small bare rock cave looking out through its opening at hazy mountain ranges in daylight. The interior is completely empty — no objects, no lamp, no book, no person, no hands.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, monks, candles, books."
+    },
+    {
+      "id": "p24",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§18.a"
+      ],
+      "must": [
+        "שקט לפני — המערה בלילה, לפני האור"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "אור על־טבעי"
+      ],
+      "checked": null,
+      "art": "Point of view from inside a small bare rock cave at night, looking out at a dark starry sky through the opening. Cold, quiet, ordinary night. No light source, no figure, no hands.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, supernatural light."
+    },
+    {
+      "id": "p25",
+      "part": "5 · ההתגלות",
+      "grid": "splash",
+      "captions": [
+        "§18.b"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "פנים המערה — פתח מעוגל וסלע ממסגר מכל צד. חייב להיקרא כמערה",
+        "בדיוק חמישה גווילים",
+        "הגווילים פרוסים ופונים אל הצופה",
+        "אור חזק שנקרא כנוכחות ולא כתאורה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש",
+        "יד",
+        "צללית",
+        "כנפיים",
+        "כתב על הגווילים"
+      ],
+      "checked": null,
+      "balloon": {
+        "ref": "§18.b",
+        "text": "קרא",
+        "speaker": "גבריאל",
+        "tail": "none"
+      },
+      "art": "Interior of a bare rock cave seen from the point of view of the person sitting inside. NO PERSON IS VISIBLE ANYWHERE — no figure, no angel, no hands, no face, no silhouette. Rough cave walls frame left and right in deep shadow. In the centre a powerful warm golden light floods in, and within it exactly FIVE open parchment scrolls hover unrolled, spread wide and facing the viewer, their surfaces blank and catching the glow.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, ANY human figure or person of any kind, hands or arms, human silhouettes, wings."
+    },
+    {
+      "id": "p26",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§19.a"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "אותה מערה, אותו אור — המשך ישיר של p25"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כל דמות אנוש",
+        "יד"
+      ],
+      "checked": null,
+      "balloon": {
+        "ref": "§19.a",
+        "text": "אינני קורא",
+        "speaker": "מוחמד",
+        "tail": "to-reader"
+      },
+      "art": "Interior of the same bare rock cave, from the same seated point of view: rough walls framing left and right in deep shadow, the same powerful warm golden light flooding the centre, and exactly FIVE open blank parchment scrolls hovering unrolled in the light facing the viewer, slightly nearer than before. NO person, no hands, no figure, no silhouette anywhere in the frame.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, ANY human figure or person of any kind, hands or arms.",
+      "$redo": "הופק מחדש אחרי כישלון ביקורת"
+    },
+    {
+      "id": "p27",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§19.verse"
+      ],
+      "must": [
+        "פנים המערה בבוקר שאחרי, ריקה, האור רגיל שוב",
+        "קופסת פסוק בזהב — סורה 96, המילים הראשונות שנתגלו"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי"
+      ],
+      "checked": null,
+      "art": "The same rock cave interior the next morning, empty and quiet, ordinary daylight through the opening, nothing hovering, nothing glowing. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Arabic script."
+    },
+    {
+      "id": "p28",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§20.a",
+        "§20.b"
+      ],
+      "must": [
+        "גוויל וקולמוס מונחים על אבן, לא בשימוש — השאלה אם ידע לקרוא",
+        "שני צללים נופלים עליהם משני כיוונים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "ספר",
+        "קולמוס בפוקוס"
+      ],
+      "checked": null,
+      "art": "A blank scroll and a reed pen lying unused on a flat stone in even light, with two distinct shadows falling across them from two different directions. No people, no writing on the scroll.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, books, pens in the foreground."
+    },
+    {
+      "id": "p29",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§21.a"
+      ],
+      "must": [
+        "ליל הגורל — שמי לילה, בלי דמות"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "סהר כסמל",
+        "מסגד"
+      ],
+      "checked": null,
+      "art": "A wide deep night sky over dark desert hills, unusually clear and still, no moon. No people, no crescent symbol, no building.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, crescent symbols, any mosque."
+    },
+    {
+      "id": "p30",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§22.a"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "הבית מבפנים; שמיכה נפרסת אלינו"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "Point of view of someone lying wrapped in a heavy blanket in a dim stone room, the cloth pulled up across the lower frame toward the viewer, a doorway of warm light beyond. No person visible, no hands.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p31",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§22.b",
+        "§22.c"
+      ],
+      "must": [
+        "ח׳דיג׳ה ונופל — שניהם מותרים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "נופל נוצרי — סימן מרומז בלבוש בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "צלב גדול",
+        "כנסייה"
+      ],
+      "checked": null,
+      "art": "A 6th-century Arabian woman and an elderly robed man seated across from each other in a stone room in earnest conversation, a small lamp between them. The old man's dress hints faintly at a Christian hermit without any cross or church.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, large crosses, churches."
+    },
+    {
+      "id": "p32",
+      "part": "5 · ההתגלות",
+      "grid": "six",
+      "captions": [
+        "§23.a"
+      ],
+      "must": [
+        "ח׳דיג׳ה מאמינה — תנוחה של קבלה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "A 6th-century Arabian woman standing alone in a stone doorway in morning light, her posture open and settled, hands loose at her sides.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p33",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§24.a",
+        "§24.b"
+      ],
+      "must": [
+        "מתחם הכעבה מרחוק בשעת בוקר, אנצאב סביב — העולם שאליו מופנית הבשורה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "אללה כדמות"
+      ],
+      "checked": null,
+      "art": "An open sandy precinct in a small desert town in early morning, ringed by rough upright standing-stones, with a plain cube of dark dry-laid granite at its centre. A few robed people at the far edges. No mosque, no dome, no minaret, no cloth on the cube.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any mosque, any dome, any minaret or tower, cloth covering on the stone cube."
+    },
+    {
+      "id": "p34",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§25.a",
+        "§25.b"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "קהל מקשיב במתחם",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "קבורת תינוקת",
+        "גופת ילדה"
+      ],
+      "checked": null,
+      "art": "Point of view of a speaker facing a seated and standing crowd of robed 6th-century townspeople in an open stone precinct, some listening, some turning away. No person in the foreground, no hands.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p35",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§26.a"
+      ],
+      "must": [
+        "מרבית תושבי מכה — קהל ולא קבוצה קטנה",
+        "שפת גוף של סירוב ועוינות",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "checked": {
+        "asset": "moodboard/p26.jpg",
+        "by": "סריקה חזותית",
+        "findings": [
+          "✅ שפת גוף — ידיים משוכלות, כתפיים מסובבות, מבטים מוסטים",
+          "✅ פנים נמסות, בלי עיניים ובלי פה",
+          "✅ הכעבה כקובייה כהה, בלי כיפה, מינרט או כיסוי",
+          "❌ „מרבית תושבי מכה\" — שלוש דמויות בלבד. שלושה אינם נושאים „מרבית\". דורש קהל ברקע או ניסוח פאנל אחר."
+        ]
+      },
+      "balloon": {
+        "ref": "§27.b",
+        "text": "אגדות של הקדמונים",
+        "speaker": "אנשי מכה",
+        "tail": "down"
+      },
+      "art": "A large crowd of robed 6th-century townspeople filling a sunlit stone precinct, arms folded, shoulders turned away, bodies closed and hostile, many of them, receding into the background. Behind them low dry-stone buildings and a plain dark stone cube on open sand. No mosque, no dome, no minaret.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, any mosque, any dome, any minaret or tower, cloth covering on the stone cube."
+    },
+    {
+      "id": "p36",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§26.b",
+        "§26.c"
+      ],
+      "must": [
+        "היריד השנתי — שבטים, סחורה, תנועה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה"
+      ],
+      "checked": null,
+      "art": "A busy annual desert fair: crowded market stalls, bales and sacks of goods, tethered camels, tribes camped around an open precinct with a plain dark stone cube at its centre. Trade and movement everywhere. No mosque, no dome, no minaret.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, any mosque, any dome, any minaret or tower, cloth covering on the stone cube."
+    },
+    {
+      "id": "p37",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§27.a",
+        "§27.b"
+      ],
+      "must": [
+        "שיירה נוצרית ויהודית עוברת במדבר — הדתות שאנשי מכה כבר הכירו",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "ספר תורה",
+        "ברית חדשה",
+        "צלב"
+      ],
+      "checked": null,
+      "art": "A mixed caravan of Christian and Jewish travellers crossing the desert past a rocky outcrop, plainly dressed, with pack animals. Distant and small in the frame. No large cross, no church, no synagogue.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, crosses."
+    },
+    {
+      "id": "p38",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§28.a"
+      ],
+      "must": [
+        "מיעוט קטן מול עיר — הניגוד הכמותי נראה בפריים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "A very small cluster of about a dozen robed figures standing together in the corner of a wide sunlit stone precinct, dwarfed by the empty space and the large town around them. The contrast of the few against the many is the subject.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p39",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§29.a"
+      ],
+      "must": [
+        "המתאסלמים הראשונים — קבוצה מצומצמת ומזוהה",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "A tight group of six or seven robed 6th-century figures standing close together in a shaded stone courtyard, deliberately gathered, of clearly different ages and dress.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p40",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§30.a"
+      ],
+      "must": [
+        "קבוצה יוצאת להגירה — רדיפה מאחור, דרך לפנים",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "A small group of robed travellers with bundles setting out along a desert road at dawn, looking ahead, while behind them a walled town recedes. Dust behind, open road in front.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p41",
+      "part": "6 · הטפה",
+      "grid": "six",
+      "captions": [
+        "§30.b",
+        "§30.c"
+      ],
+      "must": [
+        "מלך חבש מקבל אותם — מותר, אינו נביא",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "חבש: נוף ולבוש שונים ממכה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "צלב גדול",
+        "כנסייה מונומנטלית"
+      ],
+      "checked": null,
+      "art": "A robed African king seated on a low carved wooden throne in a stone hall of the Aksumite highlands, receiving a small group of travel-worn robed visitors who stand before him. Highland landscape visible through an opening. No large cross, no monumental church.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, large crosses, monumental churches."
+    },
+    {
+      "id": "p42",
+      "part": "7 · שנת העצב",
+      "grid": "six",
+      "captions": [
+        "§31.a",
+        "§31.b",
+        "§31.aside"
+      ],
+      "must": [
+        "אבו טאלב — מותר",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "רגיסטר שקט, אור אחרון"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "גופה",
+        "טקס קבורה"
+      ],
+      "checked": null,
+      "art": "An elderly robed 6th-century Arabian man seated against a stone wall in the last light of day, still and diminished, a few figures standing quietly apart. No body, no funeral, no procession.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, funerals."
+    },
+    {
+      "id": "p43",
+      "part": "7 · שנת העצב",
+      "grid": "splash",
+      "captions": [
+        "§32.a",
+        "§32.b"
+      ],
+      "must": [
+        "השקט הגדול של הפרק — בית ריק, ארבע בנות",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות",
+        "גופה",
+        "אבל מוחצן"
+      ],
+      "checked": null,
+      "art": "An empty stone room at dusk with a folded blanket and a cold hearth, and four girls of different heights standing together near the doorway, very still. Nothing else in the room.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features, overt mourning."
+    },
+    {
+      "id": "p44",
+      "part": "7 · שנת העצב",
+      "grid": "six",
+      "captions": [
+        "§33.a"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "המסר לבנות — שקט. גבריאל אינו בפריים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "גן עדן",
+        "ענן"
+      ],
+      "checked": null,
+      "art": "Point of view of someone facing four girls of different heights in a dim stone room, who are looking up toward the viewer. No person in the foreground, no hands, no figure, no angel, no cloud, no paradise.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, paradise, clouds of glory."
+    },
+    {
+      "id": "p45",
+      "part": "7 · שנת העצב",
+      "grid": "six",
+      "captions": [
+        "§34.a",
+        "§34.b"
+      ],
+      "must": [
+        "לילות למרגלות הכעבה; הדרך לטאא׳ף",
+        "אם הכעבה בפריים: קובייה של אבן כהה בבנייה יבשה בלבד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מסגד",
+        "כיפה",
+        "מינרט",
+        "כיסוי בד על הכעבה",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "A plain dark stone cube on open sand at night under stars, with a bare desert road leading away from it toward distant hills. Utterly empty. No mosque, no dome, no minaret, no people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any mosque, any dome, any minaret or tower, cloth covering on the stone cube, detailed faces or facial features."
+    },
+    {
+      "id": "p46",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§35.a",
+        "§35.b"
+      ],
+      "must": [
+        "הדרך היוצאת ממכה בלילה, תחת כוכבים",
+        "אלבראק מתואר בכתוב ואינו מצויר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אלבראק",
+        "בהמה פלאית",
+        "כנפיים"
+      ],
+      "checked": null,
+      "art": "A bare caravan track leaving a small dark desert town at night under a dense field of stars, dark volcanic hills either side, the track a pale line of sand running into the valley. No animal on the track, no beast, no wings, no people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any mount or fantastic beast, any fantastic animal, wings."
+    },
+    {
+      "id": "p47",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§36.a",
+        "§36.b"
+      ],
+      "must": [
+        "מבנה תפילה רחוק ומופשט לחלוטין — צללית אבן פשוטה על אופק, בלי פרט מזהה",
+        "בהמה קשורה ליד אבן — נראית רק כחבל ויתד, הבהמה מחוץ לפריים",
+        "„המסגד הקיצון\" — מופשט לחלוטין, בלי מבנה"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אלאקצא",
+        "כיפת הסלע",
+        "ירושלים",
+        "עיר מודרנית",
+        "מסגד",
+        "כיפה",
+        "מינרט"
+      ],
+      "checked": null,
+      "art": "A far distant simple stone prayer building reduced to a plain silhouette on the horizon at night, with no identifying detail of any kind, no dome and no tower. In the near foreground a rope and a wooden tethering peg driven into the ground, the animal itself out of frame. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Al-Aqsa mosque, the Dome of the Rock, Jerusalem, any modern city, any mosque, any dome, any minaret or tower."
+    },
+    {
+      "id": "p48",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§37.a",
+        "§37.b"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "שני כדים מוגשים אלינו — יין וחלב"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "יד"
+      ],
+      "checked": null,
+      "art": "Point of view of someone being offered two vessels: two clay jars held out toward the viewer on a stone ledge, one holding dark wine and one holding white milk. No hands, no arms, no figure anywhere.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, hands or arms."
+    },
+    {
+      "id": "p49",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§37.c"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "כד החלב נבחר — הכד השני נותר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "יד"
+      ],
+      "checked": null,
+      "art": "The same two clay jars on the same stone ledge, seen from the same point of view, the milk jar now moved forward and the wine jar left behind. No hands, no figure.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, hands or arms."
+    },
+    {
+      "id": "p50",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§38.a",
+        "§38.b"
+      ],
+      "must": [
+        "נקודת מבט של מוחמד — רואים את מה שהוא רואה, הוא עצמו לא בפריים",
+        "שורות תפילה ריקות לחלוטין — אף אדם בפריים",
+        "מבנה פשוט וחשוף, לא מסגד"
+      ],
+      "mustNot": [
+        "כל דמות אנוש",
+        "מוחמד",
+        "גבריאל",
+        "אברהם",
+        "משה",
+        "ישוע",
+        "מסגד",
+        "כיפה",
+        "מינרט"
+      ],
+      "checked": null,
+      "art": "Point of view looking down long straight empty rows of plain reed prayer mats laid on bare packed earth inside a very simple open 7th-century desert prayer enclosure: low rough mud-brick walls, bare palm-trunk posts, open sky above, no roof. The place is completely deserted — not one person anywhere, no figures standing, kneeling, sitting or walking, no silhouettes in the distance.",
+      "avoid": "Absolutely do not include: ANY human figure or person of any kind, Muhammad or any prophet figure, Gabriel, Abraham, Moses, Jesus, any mosque, any dome, any minaret or tower.",
+      "$redo": "הופק מחדש אחרי כישלון ביקורת"
+    },
+    {
+      "id": "p51",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§39.a"
+      ],
+      "must": [
+        "שמיים מרובדים בלילה, שכבה מעל שכבה, נמתחות כלפי מעלה",
+        "פתיחת העלייה — שמיים מרובדים, בלי דמות"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "מלאך",
+        "סולם",
+        "מדרגות"
+      ],
+      "checked": null,
+      "art": "A vast night sky in visible layers, one stratum above another, stretching upward, deep and empty. No people, no ladder, no stairs.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any angel, ladders, stairs or steps."
+    },
+    {
+      "id": "p52",
+      "part": "8 · המסע",
+      "grid": "splash",
+      "captions": [
+        "§39.r1",
+        "§39.r2",
+        "§39.r3",
+        "§39.r4",
+        "§39.r5",
+        "§39.r6",
+        "§39.r7"
+      ],
+      "must": [
+        "שבעה רבדי שמיים, כל אחד כהה מקודמו — טיפוגרפיה תרכב עליהם",
+        "סדר 1→7 מלמעלה למטה",
+        "סדר 1→7 מלמעלה למטה, בלי היפוך"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אדם",
+        "ישוע",
+        "יוחנן",
+        "יוסף",
+        "אהרון",
+        "חנוך",
+        "משה",
+        "אברהם",
+        "כל דמות אנוש",
+        "גן עדן",
+        "גהינום"
+      ],
+      "checked": null,
+      "art": "A completely abstract vertical field of seven horizontal bands of night sky stacked one above another, each band darker than the one below it, from a faint warm glow at the very bottom edge to near-black at the top, fine stars growing sparser with height. Pure sky and nothing else whatsoever: no ground, no horizon line, no stairs, no steps, no ladder, no architecture, no figures, no symbols.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, the prophet Adam, Jesus, John the Baptist, Joseph, Aaron, Enoch, Moses, Abraham, ANY human figure or person of any kind, paradise, hell.",
+      "$redo": "הופק מחדש אחרי כישלון ביקורת"
+    },
+    {
+      "id": "p53",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§40.a",
+        "§40.b"
+      ],
+      "must": [
+        "שמי לילה עמוקים וריקים לגמרי — המרחב שבו ניתן הציווי"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "אללה",
+        "כס",
+        "משה",
+        "מלאך"
+      ],
+      "checked": null,
+      "art": "A vast completely empty deep night sky, dark and still, nothing in it at all. No people, no throne, no light source.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, any depiction of God, a throne, Moses, any angel."
+    },
+    {
+      "id": "p54",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§40.c",
+        "§40.d"
+      ],
+      "must": [
+        "אותם שמיים, מעט בהירים יותר — שינוי מצב, לא סצנה חדשה",
+        "חמישים יורד לחמש — שני המספרים באותו פריים"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "משה",
+        "אללה",
+        "התמקחות כסצנה"
+      ],
+      "checked": null,
+      "art": "The same deep night sky, slightly lighter and clearer than before, still completely empty. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Moses, any depiction of God, a bargaining scene."
+    },
+    {
+      "id": "p55",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§41.a",
+        "§41.b"
+      ],
+      "must": [
+        "אבו בכר — מותר",
+        "פנים מטושטשות לכל דמות — שטיפה, בלי עיניים ובלי פה",
+        "מכה עם שחר"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "פנים מפורטות"
+      ],
+      "checked": null,
+      "art": "Two robed 6th-century Arabian men meeting on a street of a small desert town at first light, one arriving and one turning toward him.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, detailed faces or facial features."
+    },
+    {
+      "id": "p56",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§42.a",
+        "§42.lead"
+      ],
+      "must": [
+        "ליל ה-27 — סהר דק מעל מדבר, בלי שום סמל"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "לוח שנה מודרני",
+        "סהר כסמל"
+      ],
+      "checked": null,
+      "art": "A thin crescent moon low over a dark empty desert horizon at night, a few stars, nothing else. No symbol, no calendar, no building, no people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, modern calendars, crescent symbols."
+    },
+    {
+      "id": "p57",
+      "part": "8 · המסע",
+      "grid": "six",
+      "captions": [
+        "§42.isra",
+        "§42.najm"
+      ],
+      "must": [
+        "אופק לילי רחב, נקודת אור אחת רחוקה מאוד",
+        "שתי קופסאות פסוק בזהב"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "כתב ערבי",
+        "אלאקצא",
+        "ירושלים"
+      ],
+      "checked": null,
+      "art": "A wide dark night horizon with one single very distant point of light near the edge of the sky. Almost entirely empty. No people.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Arabic script, Al-Aqsa mosque, Jerusalem."
+    },
+    {
+      "id": "p58",
+      "part": "9 · המחלוקת",
+      "grid": "splash",
+      "captions": [
+        "§43.a",
+        "§43.b",
+        "§44.a"
+      ],
+      "must": [
+        "שני קווי אופק מופשטים זה מעל זה — קרוב ורחוק, בלי עיר ובלי מבנה",
+        "תרשים שתי הקריאות — מופשט, קו ושתי נקודות קצה",
+        "שני הסעיפים מודפסים תמיד"
+      ],
+      "mustNot": [
+        "מוחמד",
+        "גבריאל",
+        "ירושלים",
+        "אלאקצא",
+        "כיפת הסלע",
+        "עיר מודרנית",
+        "מפה מדינית",
+        "נשק",
+        "דגל"
+      ],
+      "checked": null,
+      "art": "A completely abstract diagram on an empty cream field: two long horizontal rules drawn one above the other across the frame, the upper one a solid dark line and the lower one faint and broken, with a small mark at each end of each line. Nothing else at all — no landscape, no cliff, no buildings, no city, no people, no scenery of any kind.",
+      "avoid": "Absolutely do not include: Muhammad or any prophet figure, Gabriel, Jerusalem, Al-Aqsa mosque, the Dome of the Rock, any modern city, political maps, weapons, flags.",
+      "$redo": "הופק מחדש אחרי כישלון ביקורת"
+    }
+  ],
+  "$art": "כל 58 הפאנלים מצוירים. §§4–6 שומרים על איסור הדימוי על הנושא שלהם — בלי רחפנים, נשק, סמלי ארגונים או גרפיקת מבצעים — ומציירים במקומו את המקור העתיק שהשם המודרני שאול ממנו.",
+  "$art_field": "art = הנוסח האנגלי שנשלח למודל. הסמכות נשארת ב-must/mustNot בעברית, והבדיקה אחרי ההפקה היא תמיד מולם ולעולם לא מול art.",
+  "$pipeline_fix": "mustNot היה תיעוד בלבד: הפרומפט נבנה מ-art לבד, ולכן „בלי מסגד\" ישב במניפסט בזמן שהמודל צייר מסגד עות'מאני. עכשיו כל פאנל נושא avoid באנגלית שנבנה מה-mustNot שלו, ו-produce.mjs מצרף אותו לפרומפט. ההצהרה מגיעה למודל ולא רק למבקר."
+}
