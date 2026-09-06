@@ -1,0 +1,588 @@
+[
+ {
+  "region": "yemen-heights",
+  "cast": [
+   {
+    "a": "prop:pergola.glb@-5.0,6.6",
+    "b": "cast:merchant",
+    "depth": 1.4,
+    "frac": 1
+   },
+   {
+    "a": "prop:drywall3.glb@-2.2,17.0",
+    "b": "cast:merchant",
+    "depth": 1.25,
+    "frac": 0.878
+   },
+   {
+    "a": "prop:waymark.glb@5.4,9.6",
+    "b": "cast:chief",
+    "depth": 0.14,
+    "frac": 0.171
+   },
+   {
+    "a": "prop:drywall.glb@-8.3,6.0",
+    "b": "cast:merchant",
+    "depth": 0.06,
+    "frac": 0.032
+   }
+  ],
+  "buried": [
+   {
+    "a": "prop:house-d.glb@-19.9,16.8",
+    "b": "prop:bigjar.glb@-18.9,13.4",
+    "depth": 0.75,
+    "frac": 1
+   },
+   {
+    "a": "prop:bigjar.glb@-11.8,18.0",
+    "b": "prop:terraces-hero.glb@-15.0,16.0",
+    "depth": 0.7,
+    "frac": 0.796
+   },
+   {
+    "a": "prop:rocks.glb@-14.5,7.4",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.4,
+    "frac": 0.725
+   },
+   {
+    "a": "prop:boulder3.glb@8.1,23.3",
+    "b": "prop:house-e.glb@9.3,20.6",
+    "depth": 0.96,
+    "frac": 0.641
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "night-camp",
+  "cast": [
+   {
+    "a": "prop:find-scroll.glb@1.6,-5.2",
+    "b": "cast:chief",
+    "depth": 0.5,
+    "frac": 0.421
+   },
+   {
+    "a": "prop:firewood.glb@6.3,-4.0",
+    "b": "cast:merchant",
+    "depth": 0.5,
+    "frac": 0.265
+   },
+   {
+    "a": "prop:firepit.glb@0.0,0.0",
+    "b": "cast:merchant",
+    "depth": 0.33,
+    "frac": 0.07
+   }
+  ],
+  "buried": [
+   {
+    "a": "prop:basket.glb@-7.7,-7.8",
+    "b": "prop:bayt.glb@-6.8,-10.5",
+    "depth": 0.54,
+    "frac": 1
+   },
+   {
+    "a": "prop:palm.glb@16.0,2.0",
+    "b": "prop:shrub.glb@13.5,4.3",
+    "depth": 0.44,
+    "frac": 1
+   },
+   {
+    "a": "prop:bigjar.glb@7.7,-11.0",
+    "b": "prop:bayt.glb@9.4,-13.2",
+    "depth": 0.94,
+    "frac": 1
+   },
+   {
+    "a": "prop:waterskin.glb@12.1,-11.1",
+    "b": "prop:bayt.glb@9.4,-13.2",
+    "depth": 0.9,
+    "frac": 1
+   },
+   {
+    "a": "prop:waterskin.glb@12.1,-11.1",
+    "b": "prop:palm.glb@13.0,-12.2",
+    "depth": 0.9,
+    "frac": 1
+   },
+   {
+    "a": "prop:crate.glb@13.5,-10.6",
+    "b": "prop:palm.glb@13.0,-12.2",
+    "depth": 0.65,
+    "frac": 1
+   },
+   {
+    "a": "prop:bayt.glb@-8.6,-3.4",
+    "b": "prop:amphora.glb@-10.2,-6.0",
+    "depth": 0.45,
+    "frac": 0.999
+   },
+   {
+    "a": "prop:jars.glb@7.3,-16.9",
+    "b": "prop:palm.glb@9.0,-19.0",
+    "depth": 0.85,
+    "frac": 0.969
+   },
+   {
+    "a": "prop:jars.glb@-4.3,-9.4",
+    "b": "prop:bayt.glb@-6.8,-10.5",
+    "depth": 0.95,
+    "frac": 0.953
+   },
+   {
+    "a": "prop:crate.glb@13.5,-10.6",
+    "b": "prop:awning.glb@15.7,-12.3",
+    "depth": 0.65,
+    "frac": 0.931
+   },
+   {
+    "a": "prop:blacktent-hero.glb@-11.7,8.0",
+    "b": "prop:shrub.glb@-8.7,4.0",
+    "depth": 0.53,
+    "frac": 0.92
+   },
+   {
+    "a": "prop:palm.glb@16.0,2.0",
+    "b": "prop:shrub.glb@16.9,-0.7",
+    "depth": 0.46,
+    "frac": 0.732
+   },
+   {
+    "a": "prop:bayt.glb@-6.8,-10.5",
+    "b": "prop:torch.glb@0.0,0.0",
+    "depth": 0.66,
+    "frac": 0.725
+   },
+   {
+    "a": "prop:sackpile.glb@-5.9,-4.0",
+    "b": "prop:bayt.glb@-8.6,-3.4",
+    "depth": 0.59,
+    "frac": 0.631
+   },
+   {
+    "a": "prop:basket.glb@-12.0,-4.2",
+    "b": "prop:well.glb@-13.0,-3.0",
+    "depth": 0.54,
+    "frac": 0.558
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "border-post",
+  "cast": [
+   {
+    "a": "prop:torch.glb@0.0,0.0",
+    "b": "cast:chief",
+    "depth": 0.67,
+    "frac": 0.919
+   },
+   {
+    "a": "prop:awning.glb@4.7,-1.9",
+    "b": "cast:merchant",
+    "depth": 0.96,
+    "frac": 0.698
+   },
+   {
+    "a": "prop:camel.glb@-5.4,-4.9",
+    "b": "cast:chief",
+    "depth": 0.83,
+    "frac": 0.407
+   },
+   {
+    "a": "prop:sackpile.glb@-4.7,-2.3",
+    "b": "cast:merchant",
+    "depth": 0.22,
+    "frac": 0.367
+   },
+   {
+    "a": "prop:crate.glb@4.6,-0.8",
+    "b": "cast:merchant",
+    "depth": 0.07,
+    "frac": 0.04
+   },
+   {
+    "a": "prop:house-b.glb@-7.5,-2.2",
+    "b": "cast:merchant",
+    "depth": 0.06,
+    "frac": 0.04
+   },
+   {
+    "a": "prop:find-coin.glb@-3.0,-3.4",
+    "b": "cast:merchant",
+    "depth": 0.07,
+    "frac": 0.032
+   }
+  ],
+  "buried": [
+   {
+    "a": "prop:crate.glb@-5.9,13.5",
+    "b": "prop:bayt2.glb@-9.4,11.3",
+    "depth": 0.9,
+    "frac": 1
+   },
+   {
+    "a": "prop:amphora.glb@-5.3,-0.4",
+    "b": "prop:house-b.glb@-7.5,-2.2",
+    "depth": 0.55,
+    "frac": 1
+   },
+   {
+    "a": "prop:crate.glb@4.6,-0.8",
+    "b": "prop:awning.glb@4.7,-1.9",
+    "depth": 0.94,
+    "frac": 1
+   },
+   {
+    "a": "prop:awning.glb@4.7,-1.9",
+    "b": "prop:waterskin.glb@4.6,-2.7",
+    "depth": 0.42,
+    "frac": 1
+   },
+   {
+    "a": "prop:awning.glb@4.7,-1.9",
+    "b": "prop:basket.glb@3.5,-3.3",
+    "depth": 0.4,
+    "frac": 1
+   },
+   {
+    "a": "prop:palm.glb@12.6,6.3",
+    "b": "prop:desert-bush.glb@14.1,4.5",
+    "depth": 0.3,
+    "frac": 1
+   },
+   {
+    "a": "prop:palm.glb@13.3,2.8",
+    "b": "prop:desert-bush.glb@14.1,4.5",
+    "depth": 0.3,
+    "frac": 1
+   },
+   {
+    "a": "prop:gate-post.glb@4.6,-8.5",
+    "b": "prop:drywall.glb@4.8,-8.5",
+    "depth": 0.73,
+    "frac": 1
+   },
+   {
+    "a": "prop:rocks.glb@25.8,-5.3",
+    "b": "prop:house-d.glb@26.9,-7.8",
+    "depth": 0.6,
+    "frac": 1
+   },
+   {
+    "a": "prop:desert-bush.glb@3.0,-3.5",
+    "b": "prop:toll-scale.glb@3.4,-4.1",
+    "depth": 0.29,
+    "frac": 0.99
+   },
+   {
+    "a": "prop:awning.glb@4.7,-1.9",
+    "b": "prop:jars.glb@5.1,-3.4",
+    "depth": 0.9,
+    "frac": 0.971
+   },
+   {
+    "a": "prop:waterskin.glb@4.6,-2.7",
+    "b": "prop:jars.glb@5.1,-3.4",
+    "depth": 0.35,
+    "frac": 0.8
+   },
+   {
+    "a": "prop:basket.glb@-5.2,0.2",
+    "b": "prop:house-b.glb@-7.5,-2.2",
+    "depth": 0.4,
+    "frac": 0.783
+   },
+   {
+    "a": "prop:basket.glb@3.5,-3.3",
+    "b": "prop:toll-scale.glb@3.4,-4.1",
+    "depth": 0.4,
+    "frac": 0.753
+   },
+   {
+    "a": "prop:palm.glb@26.4,-3.2",
+    "b": "prop:rocks.glb@25.8,-5.3",
+    "depth": 0.6,
+    "frac": 0.746
+   },
+   {
+    "a": "prop:sackpile.glb@-4.7,-2.3",
+    "b": "prop:house-b.glb@-7.5,-2.2",
+    "depth": 0.44,
+    "frac": 0.727
+   },
+   {
+    "a": "prop:awning.glb@4.7,-1.9",
+    "b": "prop:fodder.glb@6.3,-2.5",
+    "depth": 0.35,
+    "frac": 0.692
+   },
+   {
+    "a": "prop:toll-scale.glb@3.4,-4.1",
+    "b": "prop:sackpile.glb@4.1,-4.1",
+    "depth": 0.43,
+    "frac": 0.654
+   },
+   {
+    "a": "prop:claypot.glb@-5.8,0.2",
+    "b": "prop:house-b.glb@-7.5,-2.2",
+    "depth": 0.35,
+    "frac": 0.651
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "narrow-pass",
+  "cast": [],
+  "buried": [
+   {
+    "a": "prop:waymark.glb@-6.2,26.6",
+    "b": "prop:basalt2.glb@-14.2,39.6",
+    "depth": 1.15,
+    "frac": 1
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:jars.glb@9.8,13.7",
+    "depth": 0.95,
+    "frac": 1
+   },
+   {
+    "a": "prop:bayt.glb@7.2,13.6",
+    "b": "prop:jars.glb@9.8,13.7",
+    "depth": 0.95,
+    "frac": 1
+   },
+   {
+    "a": "prop:boulder1.glb@-7.8,11.5",
+    "b": "prop:jars.glb@-6.6,6.9",
+    "depth": 0.94,
+    "frac": 1
+   },
+   {
+    "a": "prop:waymark.glb@13.7,6.8",
+    "b": "prop:basalt2.glb@11.6,0.1",
+    "depth": 1.07,
+    "frac": 1
+   },
+   {
+    "a": "prop:bayt2.glb@13.8,10.6",
+    "b": "prop:waymark.glb@13.7,6.8",
+    "depth": 0.99,
+    "frac": 0.812
+   },
+   {
+    "a": "prop:drywall.glb@4.4,14.3",
+    "b": "prop:bayt.glb@7.2,13.6",
+    "depth": 0.91,
+    "frac": 0.673
+   },
+   {
+    "a": "prop:rocks.glb@4.2,15.9",
+    "b": "prop:bayt.glb@7.2,13.6",
+    "depth": 0.77,
+    "frac": 0.63
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "loading-road",
+  "cast": [
+   {
+    "a": "prop:camel.glb@5.9,3.4",
+    "b": "cast:chief",
+    "depth": 0.81,
+    "frac": 0.72
+   },
+   {
+    "a": "prop:camel.glb@5.9,3.4",
+    "b": "cast:merchant",
+    "depth": 0.12,
+    "frac": 0.086
+   },
+   {
+    "a": "prop:crate.glb@3.4,2.8",
+    "b": "cast:chief",
+    "depth": 0.11,
+    "frac": 0.043
+   }
+  ],
+  "buried": [
+   {
+    "a": "prop:boulder3.glb@10.5,25.9",
+    "b": "prop:basket.glb@14.1,23.9",
+    "depth": 0.64,
+    "frac": 0.833
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "yathrib",
+  "cast": [
+   {
+    "a": "prop:awning.glb@5.8,12.0",
+    "b": "cast:chief",
+    "depth": 1.28,
+    "frac": 1
+   },
+   {
+    "a": "prop:awning.glb@5.8,12.0",
+    "b": "cast:merchant",
+    "depth": 0.61,
+    "frac": 0.443
+   },
+   {
+    "a": "prop:amphora.glb@4.7,13.0",
+    "b": "cast:chief",
+    "depth": 0.12,
+    "frac": 0.229
+   },
+   {
+    "a": "prop:stone-bench.glb@5.6,12.0",
+    "b": "cast:chief",
+    "depth": 0.02,
+    "frac": 0.025
+   }
+  ],
+  "buried": [
+   {
+    "a": "prop:amphora.glb@4.7,13.0",
+    "b": "prop:awning.glb@5.8,12.0",
+    "depth": 0.52,
+    "frac": 1
+   },
+   {
+    "a": "prop:stone-bench.glb@5.6,12.0",
+    "b": "prop:awning.glb@5.8,12.0",
+    "depth": 0.58,
+    "frac": 1
+   },
+   {
+    "a": "prop:awning.glb@5.8,12.0",
+    "b": "prop:sackpile.glb@4.7,10.9",
+    "depth": 0.69,
+    "frac": 1
+   },
+   {
+    "a": "prop:drywall.glb@-5.8,17.8",
+    "b": "prop:palm.glb@-7.2,18.5",
+    "depth": 1,
+    "frac": 0.738
+   },
+   {
+    "a": "prop:jars.glb@5.6,26.3",
+    "b": "prop:awning.glb@7.4,27.3",
+    "depth": 0.93,
+    "frac": 0.73
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "monastery",
+  "cast": [
+   {
+    "a": "prop:well.glb@2.8,1.6",
+    "b": "cast:monk",
+    "depth": 0.68,
+    "frac": 0.334
+   },
+   {
+    "a": "prop:trough.glb@5.0,1.6",
+    "b": "cast:monk",
+    "depth": 0.42,
+    "frac": 0.118
+   }
+  ],
+  "buried": [
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:bigjar.glb@-9.4,5.3",
+    "depth": 0.8,
+    "frac": 1
+   },
+   {
+    "a": "prop:bigjar.glb@-9.4,5.3",
+    "b": "prop:house-d.glb@-8.5,2.5",
+    "depth": 0.8,
+    "frac": 1
+   },
+   {
+    "a": "prop:stone-bench.glb@-6.0,4.6",
+    "b": "prop:house-d.glb@-8.5,2.5",
+    "depth": 0.61,
+    "frac": 0.998
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "mecca",
+  "cast": [],
+  "buried": [
+   {
+    "a": "prop:torch.glb@5.4,27.7",
+    "b": "prop:awning.glb@7.1,25.8",
+    "depth": 0.77,
+    "frac": 1
+   },
+   {
+    "a": "prop:basket.glb@6.5,26.9",
+    "b": "prop:awning.glb@7.1,25.8",
+    "depth": 0.54,
+    "frac": 1
+   },
+   {
+    "a": "prop:basket.glb@-4.7,21.8",
+    "b": "prop:house-f.glb@-6.4,18.9",
+    "depth": 0.54,
+    "frac": 1
+   },
+   {
+    "a": "prop:crate.glb@16.5,36.0",
+    "b": "prop:awning.glb@18.4,37.2",
+    "depth": 0.68,
+    "frac": 0.979
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "exit",
+  "cast": [
+   {
+    "a": "prop:rocks.glb@3.8,-6.9",
+    "b": "cast:merchant",
+    "depth": 0.61,
+    "frac": 0.289
+   },
+   {
+    "a": "prop:rocks.glb@5.1,-7.2",
+    "b": "cast:merchant",
+    "depth": 0.52,
+    "frac": 0.19
+   }
+  ],
+  "buried": [
+   {
+    "a": "prop:bayt2.glb@-4.5,8.4",
+    "b": "prop:boulder2.glb@-7.0,6.7",
+    "depth": 0.78,
+    "frac": 0.901
+   },
+   {
+    "a": "prop:waymark.glb@4.5,19.9",
+    "b": "prop:boulder2.glb@6.9,18.8",
+    "depth": 1.21,
+    "frac": 0.741
+   }
+  ],
+  "floating": []
+ }
+]

@@ -4590,7 +4590,55 @@ function MiniMap({ pos, yaw, met, found, solved }: {
  *
  * It appears only where the road actually stops, and only once everything that
  * region has to say has been said. */
-function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose }: {
+/* סרטון הסיכום — מסך מלא, בסוף הדרך.
+   הסיכום התלת-ממדי שהיה כאן ניסה להסביר את הפרק בתוך עוד אינטראקציה,
+   ולא הצליח: אחרי תשע תחנות של עשייה, מה שנדרש הוא רגע של צפייה.
+   הכתוביות בעברית מגיעות מקובץ VTT ולא נשרפות בתמונה, כדי שאפשר יהיה
+   לתקן טקסט בלי לקודד מחדש. הפוסטר מונע את המסך השחור בזמן הטעינה,
+   וה-faststart בקובץ עצמו מונע את ההמתנה שקדמה לו. */
+function ChapterFilm({ onDone }: { onDone: () => void }) {
+  const ref = useRef<HTMLVideoElement>(null)
+  const [playing, setPlaying] = useState(true)
+  const [muted, setMutedState] = useState(() => isMuted())
+  useEffect(() => {
+    const v = ref.current
+    if (!v) return
+    v.play().catch(() => setPlaying(false))
+  }, [])
+  return (
+    <div className="ch1-film" role="dialog" aria-label="סרטון סיכום הפרק">
+      <video
+        ref={ref}
+        className="ch1-film-video"
+        src="/assets/anim-video/ch1-summary.mp4"
+        poster="/assets/anim-video/ch1-summary-poster.jpg"
+        playsInline
+        muted={muted}
+        onEnded={onDone}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+      >
+        <track kind="subtitles" srcLang="he" label="עברית" default src="/assets/anim-video/ch1-summary.he.vtt" />
+      </video>
+      <div className="ch1-film-bar">
+        <button type="button" className="hud-card-btn" onClick={() => {
+          const v = ref.current
+          if (!v) return
+          if (v.paused) v.play().catch(() => {})
+          else v.pause()
+        }}>{playing ? 'השהו' : 'המשיכו'}</button>
+        <button type="button" className="hud-card-btn" onClick={() => setMutedState((m) => !m)}>
+          {muted ? 'הפעילו קול' : 'השתיקו'}
+        </button>
+        <button type="button" className="hud-card-btn is-primary" onClick={onDone}>
+          דלגו ←
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose, onPractice }: {
   done: number
   /** how much of the evidence was actually picked up along the way */
   evidence: number
@@ -4599,6 +4647,8 @@ function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose }: {
   onLeave: () => void
   /** back to the overlook — the card must not be a dead end */
   onClose: () => void
+  /** התרגול המסכם — הצעד הבא בזרימה, ולכן הכפתור הראשי */
+  onPractice: () => void
 }) {
   /* הרגע היחיד בפרק שאומר „סיימת“. עד עכשיו הוא הופיע בשקט מוחלט. */
   useEffect(() => { cue('find') }, [])
@@ -4618,7 +4668,10 @@ function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose }: {
           נאספו {evidence} מתוך {FINDS_TOTAL} עדויות
         </p>
         <div className="ch1-end-actions">
-          <button type="button" className="hud-card-btn is-primary" onClick={onNotebook}>
+          <button type="button" className="hud-card-btn is-primary" onClick={onPractice}>
+            לתרגול המסכם
+          </button>
+          <button type="button" className="hud-card-btn" onClick={onNotebook}>
             פתחו את המחברת
           </button>
           <button type="button" className="hud-card-btn" onClick={onMap}>
@@ -4920,7 +4973,7 @@ export default function Game() {
      המצלמה עולה אל הדגם (riseAt), העולם נהיה דיורמה, ורק אז הכרטיס מופיע
      מעליו. הסגירה מחזירה את המצלמה ואת השיטוט — ולא קופצת שוב: מי שסגר
      סגר. דגל ההשלמה של מסך הפרקים נכתב ברגע שהמסע הושלם. */
-  const [finale, setFinale] = useState<'none' | 'rising' | 'card' | 'closed'>('none')
+  const [finale, setFinale] = useState<'none' | 'rising' | 'film' | 'card' | 'closed'>('none')
   const finaleEligible =
     !ONWARD && !encounter && REGION.encounters.length > 0 && REGION.encounters.every((e) => seen.includes(e.id)) &&
     /* הכרטיס עלה לפני שנאספה הכתובת שבמשקיף — 20/21 לנצח (דוח R3).
@@ -4934,7 +4987,8 @@ export default function Game() {
       localStorage.setItem('islam:chapter:1', 'done')
     } catch {}
     setFinale('rising')
-    window.setTimeout(() => setFinale('card'), 2400)
+    /* מסע → מכה → סרטון סיכום → תרגול מסכם → סיום הפרק */
+    window.setTimeout(() => setFinale('film'), 2400)
   }, [finaleEligible, finale, live])
 
   /* Crossing into the next region. The world is built at module scope, so the
@@ -5024,7 +5078,7 @@ export default function Game() {
   /* one gate for "something is already on screen", so a keypress cannot open a
      second panel behind the first */
   const openRef = useRef(false)
-  openRef.current = !!openFind || openTask || finale === 'card'
+  openRef.current = !!openFind || openTask || finale === 'card' || finale === 'film'
 
   /* Escape סגר דיאלוג, מחברת ומפה — אבל לא כרטיס ראיה, לוח משימה או את
      כרטיס הסיום. מקש אחד לסגירה חייב לעבוד על כל מה שנפתח. הפעולה נקראת
@@ -5214,7 +5268,7 @@ export default function Game() {
     return next
   }, [seen, solved])
   useEffect(() => {
-    if (!sceneReady || !rawiAutoNext || encounter || openFind || openTask || finale === 'card') return
+    if (!sceneReady || !rawiAutoNext || encounter || openFind || openTask || finale === 'card' || finale === 'film') return
     const iv = window.setInterval(() => {
       /* ליד תחנת משימה E שייך לתחנה — שיחה אוטומטית כאן חסמה את
          "שלוש האבנים" (דוח R3). ראווי ימתין צעד אחד הצידה. */
@@ -5805,6 +5859,7 @@ export default function Game() {
         <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />
 
         {/* the road stops here, and everything this place had to say is said */}
+        {finale === 'film' && <ChapterFilm onDone={() => setFinale('card')} />}
         {finale === 'card' && !overlay && (
           <ChapterEnd
             done={notebook.done}
@@ -5812,6 +5867,7 @@ export default function Game() {
             onNotebook={() => setOverlay('notebook')}
             onMap={() => setOverlay('map')}
             onLeave={() => router.push('/chapters')}
+            onPractice={() => router.push('/chapter1/practice')}
             onClose={() => {
               live.riseAt = 0
               setFinale('closed')

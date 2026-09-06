@@ -1,0 +1,182 @@
+[
+ {
+  "region": "yemen-heights",
+  "spawn": {
+   "x": 4,
+   "z": 26
+  },
+  "goal": "רמות תימן מחברת: 1 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 3,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E קראו את האבן ",
+   "hud-panel hud-goal: רמות תימן מחברת: 1 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [],
+  "fps": 3,
+  "errors": []
+ },
+ {
+  "region": "night-camp",
+  "spawn": {
+   "x": 0,
+   "z": 4
+  },
+  "goal": "מחנה הלילה מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 4,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E תכננו את המסל",
+   "hud-panel hud-dialogue is-open is-anchored: רָאוִי המידע על החיים בחצי האי ערב לפני האסלאם",
+   "hud-panel hud-goal: מחנה הלילה מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [
+   "לחצו להשלמת השורה"
+  ],
+  "fps": 3,
+  "errors": []
+ },
+ {
+  "region": "border-post",
+  "spawn": {
+   "x": 0,
+   "z": 10
+  },
+  "goal": "תחנת הגבול מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 4,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E שיחה עם דמות ",
+   "hud-panel hud-dialogue is-open is-anchored: רָאוִי האליטה הפרסית זורואסטרית. שים לב מה זה ",
+   "hud-panel hud-goal: תחנת הגבול מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [
+   "לחצו להשלמת השורה"
+  ],
+  "fps": 1,
+  "errors": []
+ },
+ {
+  "region": "narrow-pass",
+  "spawn": {
+   "x": 0,
+   "z": 24
+  },
+  "goal": "המעבר הצר מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 3,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E שיחה עם דמות ",
+   "hud-panel hud-goal: המעבר הצר מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [],
+  "fps": 3,
+  "errors": []
+ },
+ {
+  "region": "loading-road",
+  "spawn": {
+   "x": 0,
+   "z": 22
+  },
+  "goal": "הדרך והעמסה מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 4,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E העמיסו את האר",
+   "hud-panel hud-dialogue is-open is-anchored: רָאוִי אזור החג׳אז היה יחסית חבוי, והאימפריות ",
+   "hud-panel hud-goal: הדרך והעמסה מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [
+   "לחצו להשלמת השורה"
+  ],
+  "fps": 2,
+  "errors": []
+ },
+ {
+  "region": "yathrib",
+  "spawn": {
+   "x": 0,
+   "z": 26
+  },
+  "goal": "ית׳רב מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 3,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E שיחה עם דמות ",
+   "hud-panel hud-goal: ית׳רב מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [],
+  "fps": 3,
+  "errors": []
+ },
+ {
+  "region": "monastery",
+  "spawn": {
+   "x": 0,
+   "z": 22
+  },
+  "goal": "המנזר מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 3,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E שיחה עם דמות ",
+   "hud-panel hud-goal: המנזר מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [],
+  "fps": 3,
+  "errors": []
+ },
+ {
+  "region": "mecca",
+  "spawn": {
+   "x": 2,
+   "z": 34
+  },
+  "goal": "מכה מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 3,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה E שיחה עם דמות ",
+   "hud-panel hud-goal: מכה מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [],
+  "fps": 3,
+  "errors": []
+ },
+ {
+  "region": "exit",
+  "spawn": {
+   "x": 0,
+   "z": 18
+  },
+  "goal": "יציאה — ערב עליית האסלאם מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+  "progress": "",
+  "hudPanels": 3,
+  "hud": [
+   "hud-panel hud-controls: מקשים × W קדימה S אחורה A שמאלה D ימינה Shift ריצה F להביט מקרוב J",
+   "hud-panel hud-goal: יציאה — ערב עליית האסלאם מחברת: 0 מתוך 26 עדויות: 0 מתוך 21",
+   "hud-panel hud-map: N"
+  ],
+  "canvas": true,
+  "prompts": [],
+  "fps": 3,
+  "errors": []
+ }
+]

@@ -1,0 +1,1721 @@
+[
+ {
+  "region": "yemen-heights",
+  "counted": 49,
+  "overlaps": [
+   {
+    "a": "prop:pergola.glb@-5.0,6.6",
+    "b": "cast:merchant",
+    "depth": 1.4,
+    "frac": 1
+   },
+   {
+    "a": "prop:house-d.glb@-19.9,16.8",
+    "b": "prop:bigjar.glb@-18.9,13.4",
+    "depth": 0.75,
+    "frac": 1
+   },
+   {
+    "a": "prop:mudtower.glb@17.7,18.7",
+    "b": "prop:drywall2.glb@15.1,14.0",
+    "depth": 1.52,
+    "frac": 0.927
+   },
+   {
+    "a": "prop:mudtower.glb@17.7,18.7",
+    "b": "prop:drywall3.glb@19.9,13.9",
+    "depth": 1.26,
+    "frac": 0.923
+   },
+   {
+    "a": "prop:drywall3.glb@18.9,24.8",
+    "b": "prop:mudtower.glb@17.7,18.7",
+    "depth": 1.34,
+    "frac": 0.922
+   },
+   {
+    "a": "prop:terraces-hero.glb@-15.0,16.0",
+    "b": "prop:drywall3.glb@-14.7,13.7",
+    "depth": 1.06,
+    "frac": 0.92
+   },
+   {
+    "a": "prop:drywall3.glb@-2.2,17.0",
+    "b": "cast:merchant",
+    "depth": 1.25,
+    "frac": 0.878
+   },
+   {
+    "a": "prop:bigjar.glb@-11.8,18.0",
+    "b": "prop:terraces-hero.glb@-15.0,16.0",
+    "depth": 0.7,
+    "frac": 0.796
+   },
+   {
+    "a": "prop:drywall3.glb@14.2,25.2",
+    "b": "prop:mudtower.glb@17.7,18.7",
+    "depth": 0.98,
+    "frac": 0.774
+   },
+   {
+    "a": "prop:desert-bush.glb@11.8,19.0",
+    "b": "prop:mudtower.glb@17.7,18.7",
+    "depth": 1.1,
+    "frac": 0.77
+   },
+   {
+    "a": "prop:rocks.glb@-14.5,7.4",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.4,
+    "frac": 0.725
+   },
+   {
+    "a": "prop:boulder3.glb@8.1,23.3",
+    "b": "prop:house-e.glb@9.3,20.6",
+    "depth": 0.96,
+    "frac": 0.641
+   },
+   {
+    "a": "prop:palm.glb@-12.2,26.3",
+    "b": "prop:drywall3.glb@-14.1,24.9",
+    "depth": 1.17,
+    "frac": 0.599
+   },
+   {
+    "a": "prop:mudtower.glb@17.7,18.7",
+    "b": "prop:drywall.glb@23.4,24.2",
+    "depth": 1.31,
+    "frac": 0.592
+   },
+   {
+    "a": "prop:drywall2.glb@-9.5,25.1",
+    "b": "prop:palm.glb@-12.2,26.3",
+    "depth": 1.32,
+    "frac": 0.443
+   },
+   {
+    "a": "prop:terraces-hero.glb@-15.0,16.0",
+    "b": "prop:drywall.glb@-13.9,12.3",
+    "depth": 0.91,
+    "frac": 0.416
+   },
+   {
+    "a": "prop:mudtower.glb@17.7,18.7",
+    "b": "prop:palm.glb@24.4,21.1",
+    "depth": 2.13,
+    "frac": 0.404
+   },
+   {
+    "a": "prop:terraces-hero.glb@-15.0,16.0",
+    "b": "prop:house-d.glb@-19.9,16.8",
+    "depth": 2.71,
+    "frac": 0.387
+   },
+   {
+    "a": "prop:house-e.glb@9.3,20.6",
+    "b": "prop:desert-bush.glb@11.8,19.0",
+    "depth": 1.04,
+    "frac": 0.292
+   },
+   {
+    "a": "prop:drywall.glb@-10.6,15.3",
+    "b": "prop:terraces-hero.glb@-15.0,16.0",
+    "depth": 1.03,
+    "frac": 0.27
+   },
+   {
+    "a": "prop:mudtower.glb@17.7,18.7",
+    "b": "prop:drywall2.glb@24.3,13.2",
+    "depth": 1.2,
+    "frac": 0.268
+   },
+   {
+    "a": "prop:drywall3.glb@10.0,13.8",
+    "b": "prop:mudtower.glb@17.7,18.7",
+    "depth": 1.07,
+    "frac": 0.266
+   },
+   {
+    "a": "prop:palm.glb@24.4,21.1",
+    "b": "prop:drywall3.glb@27.6,23.5",
+    "depth": 1.09,
+    "frac": 0.256
+   },
+   {
+    "a": "prop:drywall3.glb@-14.7,13.7",
+    "b": "prop:drywall.glb@-13.9,12.3",
+    "depth": 0.37,
+    "frac": 0.247
+   },
+   {
+    "a": "prop:drywall3.glb@-14.7,13.7",
+    "b": "prop:house-d.glb@-19.9,16.8",
+    "depth": 1.06,
+    "frac": 0.235
+   },
+   {
+    "a": "prop:drywall3.glb@-18.5,24.3",
+    "b": "prop:drywall.glb@-18.6,22.8",
+    "depth": 0.28,
+    "frac": 0.228
+   },
+   {
+    "a": "prop:drywall.glb@23.4,24.2",
+    "b": "prop:palm.glb@24.4,21.1",
+    "depth": 0.36,
+    "frac": 0.227
+   },
+   {
+    "a": "prop:drywall.glb@-8.3,6.0",
+    "b": "prop:shrub.glb@-9.4,4.1",
+    "depth": 0.92,
+    "frac": 0.204
+   },
+   {
+    "a": "prop:waymark.glb@5.4,9.6",
+    "b": "cast:chief",
+    "depth": 0.14,
+    "frac": 0.171
+   },
+   {
+    "a": "prop:drywall2.glb@9.6,25.0",
+    "b": "prop:mudtower.glb@17.7,18.7",
+    "depth": 0.78,
+    "frac": 0.153
+   },
+   {
+    "a": "prop:house-e.glb@9.3,20.6",
+    "b": "prop:mudtower.glb@17.7,18.7",
+    "depth": 0.59,
+    "frac": 0.129
+   },
+   {
+    "a": "prop:pergola.glb@-5.0,6.6",
+    "b": "prop:drywall.glb@-8.3,6.0",
+    "depth": 0.23,
+    "frac": 0.08
+   },
+   {
+    "a": "prop:drywall2.glb@15.1,14.0",
+    "b": "prop:drywall3.glb@19.9,13.9",
+    "depth": 0.25,
+    "frac": 0.053
+   },
+   {
+    "a": "prop:drywall3.glb@10.0,13.8",
+    "b": "prop:drywall2.glb@15.1,14.0",
+    "depth": 0.21,
+    "frac": 0.037
+   },
+   {
+    "a": "prop:drywall.glb@-8.3,6.0",
+    "b": "cast:merchant",
+    "depth": 0.06,
+    "frac": 0.032
+   },
+   {
+    "a": "prop:drywall2.glb@-9.5,25.1",
+    "b": "prop:drywall3.glb@-14.1,24.9",
+    "depth": 0.15,
+    "frac": 0.029
+   },
+   {
+    "a": "prop:drywall2.glb@9.6,25.0",
+    "b": "prop:drywall3.glb@14.2,25.2",
+    "depth": 0.18,
+    "frac": 0.028
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "night-camp",
+  "counted": 55,
+  "overlaps": [
+   {
+    "a": "prop:basket.glb@-7.7,-7.8",
+    "b": "prop:bayt.glb@-6.8,-10.5",
+    "depth": 0.54,
+    "frac": 1
+   },
+   {
+    "a": "prop:palm.glb@16.0,2.0",
+    "b": "prop:shrub.glb@13.5,4.3",
+    "depth": 0.44,
+    "frac": 1
+   },
+   {
+    "a": "prop:bayt.glb@-8.6,-3.4",
+    "b": "prop:amphora.glb@-10.2,-6.0",
+    "depth": 0.45,
+    "frac": 0.999
+   },
+   {
+    "a": "prop:jars.glb@-4.3,-9.4",
+    "b": "prop:bayt.glb@-6.8,-10.5",
+    "depth": 0.95,
+    "frac": 0.953
+   },
+   {
+    "a": "prop:blacktent-hero.glb@-11.7,8.0",
+    "b": "prop:shrub.glb@-8.7,4.0",
+    "depth": 0.53,
+    "frac": 0.92
+   },
+   {
+    "a": "prop:bayt.glb@-6.8,-10.5",
+    "b": "prop:torch.glb@0.0,0.0",
+    "depth": 0.66,
+    "frac": 0.725
+   },
+   {
+    "a": "prop:palm.glb@16.0,2.0",
+    "b": "prop:shrub.glb@16.9,-0.7",
+    "depth": 0.46,
+    "frac": 0.715
+   },
+   {
+    "a": "prop:sackpile.glb@-5.9,-4.0",
+    "b": "prop:bayt.glb@-8.6,-3.4",
+    "depth": 0.59,
+    "frac": 0.631
+   },
+   {
+    "a": "prop:basket.glb@-12.0,-4.2",
+    "b": "prop:well.glb@-13.0,-3.0",
+    "depth": 0.54,
+    "frac": 0.558
+   },
+   {
+    "a": "prop:blacktent-hero.glb@12.6,-5.8",
+    "b": "prop:shrub.glb@16.0,-2.7",
+    "depth": 1.37,
+    "frac": 0.549
+   },
+   {
+    "a": "prop:find-scroll.glb@1.6,-5.2",
+    "b": "cast:chief",
+    "depth": 0.5,
+    "frac": 0.421
+   },
+   {
+    "a": "prop:firewood.glb@6.3,-4.0",
+    "b": "cast:merchant",
+    "depth": 0.5,
+    "frac": 0.265
+   },
+   {
+    "a": "prop:firepit.glb@0.0,0.0",
+    "b": "prop:torch.glb@0.0,0.0",
+    "depth": 0.33,
+    "frac": 0.17
+   },
+   {
+    "a": "prop:camel.glb@-6.2,3.1",
+    "b": "prop:blacktent-hero.glb@-11.7,8.0",
+    "depth": 0.96,
+    "frac": 0.133
+   },
+   {
+    "a": "prop:blacktent-hero.glb@-11.7,8.0",
+    "b": "prop:palm.glb@-17.0,3.0",
+    "depth": 1.96,
+    "frac": 0.08
+   },
+   {
+    "a": "prop:firepit.glb@0.0,0.0",
+    "b": "cast:merchant",
+    "depth": 0.33,
+    "frac": 0.07
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "border-post",
+  "counted": 40,
+  "overlaps": [
+   {
+    "a": "prop:crate.glb@-5.9,13.5",
+    "b": "prop:bayt2.glb@-9.4,11.3",
+    "depth": 0.9,
+    "frac": 1
+   },
+   {
+    "a": "prop:torch.glb@0.0,0.0",
+    "b": "cast:chief",
+    "depth": 0.67,
+    "frac": 0.919
+   },
+   {
+    "a": "prop:crate.glb@5.9,17.7",
+    "b": "prop:camel.glb@5.1,18.6",
+    "depth": 0.58,
+    "frac": 0.546
+   },
+   {
+    "a": "prop:sackpile.glb@-4.5,-0.5",
+    "b": "prop:fodder.glb@-4.3,-0.9",
+    "depth": 0.35,
+    "frac": 0.528
+   },
+   {
+    "a": "prop:basket.glb@-4.2,1.2",
+    "b": "prop:camel.glb@-5.0,1.5",
+    "depth": 0.35,
+    "frac": 0.504
+   },
+   {
+    "a": "prop:camel.glb@-5.0,1.5",
+    "b": "prop:basket.glb@-5.2,0.2",
+    "depth": 0.4,
+    "frac": 0.477
+   },
+   {
+    "a": "prop:well.glb@6.7,2.7",
+    "b": "prop:palm.glb@8.8,5.2",
+    "depth": 1.78,
+    "frac": 0.475
+   },
+   {
+    "a": "prop:camel.glb@-5.0,1.5",
+    "b": "prop:bigjar.glb@-4.2,0.4",
+    "depth": 0.27,
+    "frac": 0.416
+   },
+   {
+    "a": "prop:camel.glb@-5.0,1.5",
+    "b": "prop:claypot.glb@-5.8,0.2",
+    "depth": 0.32,
+    "frac": 0.405
+   },
+   {
+    "a": "prop:sackpile.glb@-6.0,15.6",
+    "b": "prop:bayt2.glb@-9.4,11.3",
+    "depth": 0.28,
+    "frac": 0.329
+   },
+   {
+    "a": "prop:camel.glb@4.5,10.2",
+    "b": "prop:crate.glb@5.9,9.3",
+    "depth": 0.63,
+    "frac": 0.326
+   },
+   {
+    "a": "prop:bayt2.glb@-9.4,11.3",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.75,
+    "frac": 0.303
+   },
+   {
+    "a": "prop:palm.glb@5.1,5.8",
+    "b": "prop:palm.glb@8.8,5.2",
+    "depth": 1.54,
+    "frac": 0.302
+   },
+   {
+    "a": "prop:bigjar.glb@-6.3,0.8",
+    "b": "prop:jars.glb@-7.2,1.3",
+    "depth": 0.22,
+    "frac": 0.289
+   },
+   {
+    "a": "prop:basket.glb@-5.2,0.2",
+    "b": "prop:amphora.glb@-5.3,-0.4",
+    "depth": 0.27,
+    "frac": 0.277
+   },
+   {
+    "a": "prop:palm.glb@5.1,5.8",
+    "b": "prop:well.glb@6.7,2.7",
+    "depth": 0.82,
+    "frac": 0.24
+   },
+   {
+    "a": "prop:well.glb@6.7,2.7",
+    "b": "prop:camel.glb@6.2,0.7",
+    "depth": 0.78,
+    "frac": 0.228
+   },
+   {
+    "a": "prop:camel.glb@-4.3,14.4",
+    "b": "prop:crate.glb@-5.9,13.5",
+    "depth": 0.52,
+    "frac": 0.222
+   },
+   {
+    "a": "prop:trough.glb@4.7,2.5",
+    "b": "prop:well.glb@6.7,2.7",
+    "depth": 0.33,
+    "frac": 0.166
+   },
+   {
+    "a": "prop:camel.glb@5.1,18.6",
+    "b": "prop:fodder.glb@6.1,19.8",
+    "depth": 0.16,
+    "frac": 0.163
+   },
+   {
+    "a": "prop:camel.glb@-4.3,14.4",
+    "b": "prop:bayt2.glb@-9.4,11.3",
+    "depth": 0.57,
+    "frac": 0.154
+   },
+   {
+    "a": "prop:camel.glb@4.5,10.2",
+    "b": "prop:fodder.glb@6.1,11.4",
+    "depth": 0.23,
+    "frac": 0.115
+   },
+   {
+    "a": "prop:basket.glb@-4.2,1.2",
+    "b": "prop:bigjar.glb@-4.2,0.4",
+    "depth": 0.09,
+    "frac": 0.102
+   },
+   {
+    "a": "prop:palm.glb@-9.5,3.9",
+    "b": "prop:jars.glb@-7.2,1.3",
+    "depth": 0.3,
+    "frac": 0.101
+   },
+   {
+    "a": "prop:trough.glb@4.7,2.5",
+    "b": "prop:camel.glb@6.2,0.7",
+    "depth": 0.33,
+    "frac": 0.099
+   },
+   {
+    "a": "prop:camel.glb@6.2,0.7",
+    "b": "prop:crate.glb@4.6,-0.8",
+    "depth": 0.48,
+    "frac": 0.093
+   },
+   {
+    "a": "prop:waterskin.glb@-4.2,3.3",
+    "b": "prop:camel.glb@-5.0,1.5",
+    "depth": 0.3,
+    "frac": 0.089
+   },
+   {
+    "a": "prop:camel.glb@-4.3,14.4",
+    "b": "prop:sackpile.glb@-6.0,15.6",
+    "depth": 0.13,
+    "frac": 0.061
+   },
+   {
+    "a": "prop:bayt2.glb@-9.4,11.3",
+    "b": "prop:boulder2.glb@-8.5,17.4",
+    "depth": 0.18,
+    "frac": 0.043
+   },
+   {
+    "a": "prop:find-coin.glb@-3.0,-3.4",
+    "b": "cast:merchant",
+    "depth": 0.07,
+    "frac": 0.032
+   }
+  ],
+  "floating": [
+   {
+    "name": "prop:crate.glb@4.6,-0.8",
+    "gap": 1.39
+   }
+  ]
+ },
+ {
+  "region": "narrow-pass",
+  "counted": 48,
+  "overlaps": [
+   {
+    "a": "prop:waymark.glb@-6.2,26.6",
+    "b": "prop:basalt2.glb@-14.2,39.6",
+    "depth": 1.15,
+    "frac": 1
+   },
+   {
+    "a": "prop:waymark.glb@-2.9,30.9",
+    "b": "prop:basalt2.glb@4.7,41.5",
+    "depth": 1.35,
+    "frac": 1
+   },
+   {
+    "a": "prop:waymark.glb@3.0,31.2",
+    "b": "prop:basalt2.glb@4.7,41.5",
+    "depth": 1.4,
+    "frac": 1
+   },
+   {
+    "a": "prop:drywall.glb@-9.0,25.3",
+    "b": "prop:boulder2.glb@-19.0,20.7",
+    "depth": 0.91,
+    "frac": 1
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:jars.glb@9.8,13.7",
+    "depth": 0.95,
+    "frac": 1
+   },
+   {
+    "a": "prop:bayt.glb@7.2,13.6",
+    "b": "prop:jars.glb@9.8,13.7",
+    "depth": 0.95,
+    "frac": 1
+   },
+   {
+    "a": "prop:boulder1.glb@-7.8,11.5",
+    "b": "prop:drywall.glb@-8.8,8.4",
+    "depth": 0.91,
+    "frac": 1
+   },
+   {
+    "a": "prop:boulder1.glb@-7.8,11.5",
+    "b": "prop:jars.glb@-6.6,6.9",
+    "depth": 0.94,
+    "frac": 1
+   },
+   {
+    "a": "prop:boulder1.glb@-7.8,11.5",
+    "b": "prop:drywall.glb@-9.1,7.3",
+    "depth": 0.91,
+    "frac": 1
+   },
+   {
+    "a": "prop:drywall2.glb@8.3,7.9",
+    "b": "prop:boulder1.glb@8.4,7.8",
+    "depth": 0.85,
+    "frac": 1
+   },
+   {
+    "a": "prop:rocks.glb@-12.4,9.7",
+    "b": "prop:boulder2.glb@-19.0,20.7",
+    "depth": 0.77,
+    "frac": 1
+   },
+   {
+    "a": "prop:boulder2.glb@-19.0,20.7",
+    "b": "prop:rocks.glb@-22.0,9.6",
+    "depth": 0.76,
+    "frac": 1
+   },
+   {
+    "a": "prop:boulder2.glb@-19.0,20.7",
+    "b": "prop:drywall2.glb@-25.4,11.1",
+    "depth": 0.99,
+    "frac": 1
+   },
+   {
+    "a": "prop:waymark.glb@13.7,6.8",
+    "b": "prop:basalt2.glb@11.6,0.1",
+    "depth": 1.07,
+    "frac": 1
+   },
+   {
+    "a": "prop:drywall.glb@16.3,3.3",
+    "b": "prop:basalt2.glb@11.6,0.1",
+    "depth": 0.91,
+    "frac": 1
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:drywall2.glb@16.7,14.4",
+    "depth": 1.13,
+    "frac": 0.883
+   },
+   {
+    "a": "prop:bayt2.glb@13.8,10.6",
+    "b": "prop:waymark.glb@13.7,6.8",
+    "depth": 0.99,
+    "frac": 0.812
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:boulder3.glb@21.3,21.1",
+    "depth": 2.15,
+    "frac": 0.737
+   },
+   {
+    "a": "prop:drywall2.glb@8.3,7.9",
+    "b": "prop:basalt2.glb@11.6,0.1",
+    "depth": 0.85,
+    "frac": 0.685
+   },
+   {
+    "a": "prop:boulder1.glb@-7.8,11.5",
+    "b": "prop:rocks.glb@-12.4,9.7",
+    "depth": 0.77,
+    "frac": 0.677
+   },
+   {
+    "a": "prop:drywall.glb@4.4,14.3",
+    "b": "prop:bayt.glb@7.2,13.6",
+    "depth": 0.91,
+    "frac": 0.673
+   },
+   {
+    "a": "prop:rocks.glb@4.2,15.9",
+    "b": "prop:bayt.glb@7.2,13.6",
+    "depth": 0.77,
+    "frac": 0.63
+   },
+   {
+    "a": "prop:boulder2.glb@-19.0,20.7",
+    "b": "prop:basalt1.glb@-27.9,30.5",
+    "depth": 3.67,
+    "frac": 0.596
+   },
+   {
+    "a": "prop:drywall.glb@-8.8,8.4",
+    "b": "prop:boulder2.glb@-19.0,20.7",
+    "depth": 0.91,
+    "frac": 0.594
+   },
+   {
+    "a": "prop:bayt2.glb@13.8,10.6",
+    "b": "prop:drywall2.glb@16.7,14.4",
+    "depth": 1.13,
+    "frac": 0.576
+   },
+   {
+    "a": "prop:drywall.glb@4.8,25.3",
+    "b": "prop:basalt2.glb@12.3,21.4",
+    "depth": 1.25,
+    "frac": 0.568
+   },
+   {
+    "a": "prop:waymark.glb@-3.8,11.5",
+    "b": "prop:boulder1.glb@-7.8,11.5",
+    "depth": 0.78,
+    "frac": 0.556
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:bayt.glb@7.2,13.6",
+    "depth": 2.05,
+    "frac": 0.545
+   },
+   {
+    "a": "prop:boulder1.glb@8.4,7.8",
+    "b": "prop:basalt2.glb@11.6,0.1",
+    "depth": 3.85,
+    "frac": 0.537
+   },
+   {
+    "a": "prop:jars.glb@9.8,13.7",
+    "b": "prop:bayt2.glb@13.8,10.6",
+    "depth": 0.53,
+    "frac": 0.489
+   },
+   {
+    "a": "prop:rocks.glb@-10.6,3.3",
+    "b": "prop:basalt2.glb@-13.5,-0.5",
+    "depth": 0.77,
+    "frac": 0.47
+   },
+   {
+    "a": "prop:boulder1.glb@-7.8,11.5",
+    "b": "prop:boulder2.glb@-19.0,20.7",
+    "depth": 5.3,
+    "frac": 0.443
+   },
+   {
+    "a": "prop:waymark.glb@4.5,21.9",
+    "b": "prop:basalt2.glb@12.3,21.4",
+    "depth": 0.49,
+    "frac": 0.397
+   },
+   {
+    "a": "prop:drywall.glb@4.4,14.3",
+    "b": "prop:basalt2.glb@12.3,21.4",
+    "depth": 0.91,
+    "frac": 0.379
+   },
+   {
+    "a": "prop:drywall2.glb@-3.8,0.3",
+    "b": "prop:drywall3.glb@-3.9,-0.7",
+    "depth": 0.73,
+    "frac": 0.311
+   },
+   {
+    "a": "prop:basalt2.glb@-14.2,39.6",
+    "b": "prop:basalt1.glb@-27.9,30.5",
+    "depth": 2.16,
+    "frac": 0.282
+   },
+   {
+    "a": "prop:boulder4.glb@-2.3,28.5",
+    "b": "prop:basalt2.glb@4.7,41.5",
+    "depth": 1.11,
+    "frac": 0.258
+   },
+   {
+    "a": "prop:drywall.glb@-8.8,8.4",
+    "b": "prop:drywall.glb@-9.1,7.3",
+    "depth": 0.42,
+    "frac": 0.256
+   },
+   {
+    "a": "prop:boulder4.glb@2.5,28.4",
+    "b": "prop:basalt2.glb@4.7,41.5",
+    "depth": 1.09,
+    "frac": 0.253
+   },
+   {
+    "a": "prop:boulder1.glb@8.4,7.8",
+    "b": "prop:bayt2.glb@13.8,10.6",
+    "depth": 2.05,
+    "frac": 0.247
+   },
+   {
+    "a": "prop:find-inscription.glb@3.9,9.2",
+    "b": "prop:boulder1.glb@8.4,7.8",
+    "depth": 0.22,
+    "frac": 0.241
+   },
+   {
+    "a": "prop:boulder4.glb@-2.3,28.5",
+    "b": "prop:basalt2.glb@-14.2,39.6",
+    "depth": 1.03,
+    "frac": 0.229
+   },
+   {
+    "a": "prop:basalt2.glb@4.7,41.5",
+    "b": "prop:boulder1.glb@21.9,34.0",
+    "depth": 5.12,
+    "frac": 0.221
+   },
+   {
+    "a": "prop:boulder4.glb@-2.3,28.5",
+    "b": "prop:waymark.glb@-2.9,30.9",
+    "depth": 0.61,
+    "frac": 0.217
+   },
+   {
+    "a": "prop:bayt2.glb@13.8,10.6",
+    "b": "prop:basalt2.glb@11.6,0.1",
+    "depth": 1.77,
+    "frac": 0.214
+   },
+   {
+    "a": "prop:drywall3.glb@-3.9,-0.7",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.73,
+    "frac": 0.211
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:bayt2.glb@13.8,10.6",
+    "depth": 1.7,
+    "frac": 0.205
+   },
+   {
+    "a": "prop:rocks.glb@-12.4,9.7",
+    "b": "prop:bayt.glb@-15.2,5.8",
+    "depth": 0.24,
+    "frac": 0.19
+   },
+   {
+    "a": "prop:boulder2.glb@-19.0,20.7",
+    "b": "prop:basalt2.glb@-14.2,39.6",
+    "depth": 5.64,
+    "frac": 0.188
+   },
+   {
+    "a": "prop:bayt.glb@7.2,13.6",
+    "b": "prop:boulder1.glb@8.4,7.8",
+    "depth": 1.06,
+    "frac": 0.173
+   },
+   {
+    "a": "prop:drywall.glb@-9.0,25.3",
+    "b": "prop:basalt2.glb@-14.2,39.6",
+    "depth": 0.3,
+    "frac": 0.165
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:boulder1.glb@21.9,34.0",
+    "depth": 5.88,
+    "frac": 0.158
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:boulder3.glb@20.7,10.1",
+    "depth": 1.34,
+    "frac": 0.156
+   },
+   {
+    "a": "prop:drywall2.glb@16.7,14.4",
+    "b": "prop:boulder3.glb@20.7,10.1",
+    "depth": 0.46,
+    "frac": 0.156
+   },
+   {
+    "a": "prop:bayt.glb@-15.2,5.8",
+    "b": "prop:basalt2.glb@-13.5,-0.5",
+    "depth": 1.22,
+    "frac": 0.152
+   },
+   {
+    "a": "prop:rocks.glb@4.2,15.9",
+    "b": "prop:basalt2.glb@12.3,21.4",
+    "depth": 0.22,
+    "frac": 0.151
+   },
+   {
+    "a": "prop:boulder2.glb@-19.0,20.7",
+    "b": "prop:bayt.glb@-15.2,5.8",
+    "depth": 1.03,
+    "frac": 0.144
+   },
+   {
+    "a": "prop:bayt2.glb@13.8,10.6",
+    "b": "prop:boulder3.glb@20.7,10.1",
+    "depth": 1.22,
+    "frac": 0.133
+   },
+   {
+    "a": "prop:waymark.glb@-6.8,21.0",
+    "b": "prop:boulder2.glb@-19.0,20.7",
+    "depth": 0.17,
+    "frac": 0.122
+   },
+   {
+    "a": "prop:basalt2.glb@4.7,41.5",
+    "b": "prop:basalt2.glb@-14.2,39.6",
+    "depth": 2.23,
+    "frac": 0.079
+   },
+   {
+    "a": "prop:boulder1.glb@-7.8,11.5",
+    "b": "prop:bayt.glb@-15.2,5.8",
+    "depth": 1.09,
+    "frac": 0.077
+   },
+   {
+    "a": "prop:boulder4.glb@2.5,28.4",
+    "b": "prop:basalt2.glb@12.3,21.4",
+    "depth": 0.31,
+    "frac": 0.069
+   },
+   {
+    "a": "prop:bayt.glb@7.2,13.6",
+    "b": "prop:bayt2.glb@13.8,10.6",
+    "depth": 0.56,
+    "frac": 0.059
+   },
+   {
+    "a": "prop:basalt2.glb@12.3,21.4",
+    "b": "prop:basalt2.glb@4.7,41.5",
+    "depth": 1.32,
+    "frac": 0.056
+   },
+   {
+    "a": "prop:boulder4.glb@2.5,28.4",
+    "b": "prop:waymark.glb@3.0,31.2",
+    "depth": 0.16,
+    "frac": 0.055
+   },
+   {
+    "a": "prop:drywall.glb@4.8,25.3",
+    "b": "prop:boulder4.glb@2.5,28.4",
+    "depth": 0.25,
+    "frac": 0.05
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "loading-road",
+  "counted": 49,
+  "overlaps": [
+   {
+    "a": "prop:boulder3.glb@-6.3,18.9",
+    "b": "prop:drywall.glb@-7.3,20.2",
+    "depth": 0.98,
+    "frac": 1
+   },
+   {
+    "a": "prop:boulder3.glb@10.5,25.9",
+    "b": "prop:basket.glb@14.1,23.9",
+    "depth": 0.64,
+    "frac": 0.833
+   },
+   {
+    "a": "prop:camel.glb@5.9,3.4",
+    "b": "cast:chief",
+    "depth": 0.81,
+    "frac": 0.72
+   },
+   {
+    "a": "prop:bayt.glb@-7.5,13.7",
+    "b": "prop:drywall3.glb@-5.5,10.1",
+    "depth": 0.91,
+    "frac": 0.398
+   },
+   {
+    "a": "prop:basket.glb@2.5,7.6",
+    "b": "prop:crate.glb@3.4,7.4",
+    "depth": 0.4,
+    "frac": 0.372
+   },
+   {
+    "a": "prop:boulder3.glb@-6.3,18.9",
+    "b": "prop:bayt.glb@-7.5,13.7",
+    "depth": 2.05,
+    "frac": 0.335
+   },
+   {
+    "a": "prop:sackpile.glb@3.2,4.7",
+    "b": "prop:drywall2.glb@2.5,4.2",
+    "depth": 0.31,
+    "frac": 0.335
+   },
+   {
+    "a": "prop:bayt.glb@-7.5,13.7",
+    "b": "prop:jars.glb@-10.6,10.5",
+    "depth": 0.54,
+    "frac": 0.284
+   },
+   {
+    "a": "prop:camel.glb@5.9,3.4",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.75,
+    "frac": 0.2
+   },
+   {
+    "a": "prop:jars.glb@8.2,6.1",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.21,
+    "frac": 0.111
+   },
+   {
+    "a": "prop:drywall2.glb@2.5,4.2",
+    "b": "prop:crate.glb@3.4,2.8",
+    "depth": 0.37,
+    "frac": 0.094
+   },
+   {
+    "a": "prop:camel.glb@5.9,3.4",
+    "b": "cast:merchant",
+    "depth": 0.12,
+    "frac": 0.086
+   },
+   {
+    "a": "prop:jars.glb@-10.6,10.5",
+    "b": "prop:jars.glb@-9.6,9.3",
+    "depth": 0.22,
+    "frac": 0.053
+   },
+   {
+    "a": "prop:crate.glb@6.9,12.5",
+    "b": "prop:camel.glb@8.8,12.6",
+    "depth": 0.06,
+    "frac": 0.048
+   },
+   {
+    "a": "prop:crate.glb@3.4,2.8",
+    "b": "cast:chief",
+    "depth": 0.11,
+    "frac": 0.043
+   },
+   {
+    "a": "prop:desert-bush.glb@-4.3,23.3",
+    "b": "prop:boulder3.glb@-6.3,18.9",
+    "depth": 0.08,
+    "frac": 0.021
+   }
+  ],
+  "floating": [
+   {
+    "name": "prop:crate.glb@5.5,24.3",
+    "gap": 1.38
+   },
+   {
+    "name": "prop:crate.glb@-6.6,24.7",
+    "gap": 1.38
+   },
+   {
+    "name": "prop:crate.glb@7.2,19.1",
+    "gap": 1.38
+   },
+   {
+    "name": "prop:crate.glb@3.2,14.9",
+    "gap": 1.38
+   },
+   {
+    "name": "prop:crate.glb@6.9,12.5",
+    "gap": 1.38
+   },
+   {
+    "name": "prop:crate.glb@2.9,9.1",
+    "gap": 1.38
+   }
+  ]
+ },
+ {
+  "region": "yathrib",
+  "counted": 51,
+  "overlaps": [
+   {
+    "a": "prop:amphora.glb@4.7,13.0",
+    "b": "prop:awning.glb@5.8,12.0",
+    "depth": 0.52,
+    "frac": 1
+   },
+   {
+    "a": "prop:stone-bench.glb@5.6,12.0",
+    "b": "prop:awning.glb@5.8,12.0",
+    "depth": 0.58,
+    "frac": 1
+   },
+   {
+    "a": "prop:awning.glb@5.8,12.0",
+    "b": "prop:sackpile.glb@4.7,10.9",
+    "depth": 0.69,
+    "frac": 1
+   },
+   {
+    "a": "prop:awning.glb@5.8,12.0",
+    "b": "cast:chief",
+    "depth": 1.28,
+    "frac": 1
+   },
+   {
+    "a": "prop:bigjar.glb@-16.4,22.6",
+    "b": "prop:palm.glb@-17.6,21.8",
+    "depth": 0.96,
+    "frac": 1
+   },
+   {
+    "a": "prop:bigjar.glb@-16.4,22.6",
+    "b": "prop:awning.glb@-18.0,22.2",
+    "depth": 0.96,
+    "frac": 1
+   },
+   {
+    "a": "prop:bigjar.glb@4.7,7.6",
+    "b": "prop:awning.glb@5.7,6.7",
+    "depth": 0.91,
+    "frac": 1
+   },
+   {
+    "a": "prop:awning.glb@5.7,6.7",
+    "b": "prop:stone-bench.glb@5.6,6.6",
+    "depth": 0.57,
+    "frac": 1
+   },
+   {
+    "a": "prop:house-d.glb@10.2,11.7",
+    "b": "cast:merchant",
+    "depth": 1.17,
+    "frac": 0.844
+   },
+   {
+    "a": "prop:drywall.glb@-5.8,17.8",
+    "b": "prop:palm.glb@-7.2,18.5",
+    "depth": 1,
+    "frac": 0.738
+   },
+   {
+    "a": "prop:jars.glb@5.6,26.3",
+    "b": "prop:awning.glb@7.4,27.3",
+    "depth": 0.93,
+    "frac": 0.73
+   },
+   {
+    "a": "prop:palm.glb@-17.6,21.8",
+    "b": "prop:awning.glb@-18.0,22.2",
+    "depth": 2.51,
+    "frac": 0.644
+   },
+   {
+    "a": "prop:awning.glb@5.7,6.7",
+    "b": "cast:jewish",
+    "depth": 0.67,
+    "frac": 0.482
+   },
+   {
+    "a": "prop:awning.glb@5.8,12.0",
+    "b": "cast:merchant",
+    "depth": 0.61,
+    "frac": 0.443
+   },
+   {
+    "a": "prop:awning.glb@5.8,12.0",
+    "b": "prop:house-d.glb@10.2,11.7",
+    "depth": 1.71,
+    "frac": 0.397
+   },
+   {
+    "a": "prop:awning.glb@-18.0,22.2",
+    "b": "prop:awning.glb@-18.1,18.5",
+    "depth": 1.15,
+    "frac": 0.259
+   },
+   {
+    "a": "prop:bayt.glb@-14.9,15.2",
+    "b": "prop:awning.glb@-18.1,18.5",
+    "depth": 2.05,
+    "frac": 0.25
+   },
+   {
+    "a": "prop:amphora.glb@4.7,13.0",
+    "b": "cast:chief",
+    "depth": 0.12,
+    "frac": 0.229
+   },
+   {
+    "a": "prop:palm.glb@-17.6,21.8",
+    "b": "prop:awning.glb@-18.1,18.5",
+    "depth": 1.18,
+    "frac": 0.211
+   },
+   {
+    "a": "prop:palm.glb@-7.2,18.5",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.75,
+    "frac": 0.199
+   },
+   {
+    "a": "prop:palm.glb@-7.2,18.5",
+    "b": "prop:mudtower.glb@-10.9,21.1",
+    "depth": 1.23,
+    "frac": 0.167
+   },
+   {
+    "a": "prop:bigjar.glb@4.7,7.6",
+    "b": "cast:jewish",
+    "depth": 0.14,
+    "frac": 0.111
+   },
+   {
+    "a": "prop:drywall2.glb@5.3,18.5",
+    "b": "prop:basket.glb@7.5,19.1",
+    "depth": 0.19,
+    "frac": 0.09
+   },
+   {
+    "a": "prop:drywall2.glb@-6.8,23.1",
+    "b": "prop:mudtower.glb@-10.9,21.1",
+    "depth": 0.29,
+    "frac": 0.089
+   },
+   {
+    "a": "prop:house-f.glb@-9.3,10.6",
+    "b": "prop:bayt.glb@-14.9,15.2",
+    "depth": 0.92,
+    "frac": 0.035
+   },
+   {
+    "a": "prop:mudtower.glb@-10.9,21.1",
+    "b": "prop:bayt.glb@-14.9,15.2",
+    "depth": 0.69,
+    "frac": 0.034
+   },
+   {
+    "a": "prop:stone-bench.glb@5.6,12.0",
+    "b": "cast:chief",
+    "depth": 0.02,
+    "frac": 0.025
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "monastery",
+  "counted": 50,
+  "overlaps": [
+   {
+    "a": "prop:drywall2.glb@7.5,12.4",
+    "b": "prop:house-f.glb@8.5,7.4",
+    "depth": 1.44,
+    "frac": 1
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:bigjar.glb@-9.4,5.3",
+    "depth": 0.8,
+    "frac": 1
+   },
+   {
+    "a": "prop:bigjar.glb@-9.4,5.3",
+    "b": "prop:house-d.glb@-8.5,2.5",
+    "depth": 0.8,
+    "frac": 1
+   },
+   {
+    "a": "prop:stone-bench.glb@-6.0,4.6",
+    "b": "prop:house-d.glb@-8.5,2.5",
+    "depth": 0.61,
+    "frac": 0.998
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:drywall.glb@-11.6,4.8",
+    "depth": 1,
+    "frac": 0.944
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:drywall2.glb@-14.9,6.7",
+    "depth": 1.87,
+    "frac": 0.869
+   },
+   {
+    "a": "prop:drywall2.glb@3.9,13.0",
+    "b": "prop:house-f.glb@8.5,7.4",
+    "depth": 1.48,
+    "frac": 0.85
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:monastery-hero.glb@-7.2,7.5",
+    "depth": 3.27,
+    "frac": 0.667
+   },
+   {
+    "a": "prop:gate-post.glb@3.7,9.7",
+    "b": "prop:house-f.glb@8.5,7.4",
+    "depth": 1.5,
+    "frac": 0.63
+   },
+   {
+    "a": "prop:ruinwall.glb@14.7,12.9",
+    "b": "prop:mudtower.glb@19.3,7.9",
+    "depth": 2.42,
+    "frac": 0.595
+   },
+   {
+    "a": "prop:drywall.glb@14.2,7.2",
+    "b": "prop:mudtower.glb@19.3,7.9",
+    "depth": 1.74,
+    "frac": 0.553
+   },
+   {
+    "a": "prop:monastery-hero.glb@-7.2,7.5",
+    "b": "prop:bigjar.glb@-9.4,5.3",
+    "depth": 0.52,
+    "frac": 0.484
+   },
+   {
+    "a": "prop:drywall2.glb@-6.1,12.7",
+    "b": "prop:house-c.glb@-10.0,9.4",
+    "depth": 1.42,
+    "frac": 0.436
+   },
+   {
+    "a": "prop:drywall.glb@-11.2,0.1",
+    "b": "prop:drywall.glb@-11.1,-2.5",
+    "depth": 0.96,
+    "frac": 0.36
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:house-d.glb@-8.5,2.5",
+    "depth": 2.77,
+    "frac": 0.337
+   },
+   {
+    "a": "prop:well.glb@2.8,1.6",
+    "b": "cast:monk",
+    "depth": 0.68,
+    "frac": 0.334
+   },
+   {
+    "a": "prop:house-f.glb@8.5,7.4",
+    "b": "prop:bigjar.glb@4.6,3.4",
+    "depth": 0.21,
+    "frac": 0.309
+   },
+   {
+    "a": "prop:find-scroll.glb@5.2,-3.4",
+    "b": "prop:basket.glb@5.8,-3.2",
+    "depth": 0.26,
+    "frac": 0.291
+   },
+   {
+    "a": "prop:ruinwall.glb@-8.0,17.5",
+    "b": "prop:drywall3.glb@-8.0,15.2",
+    "depth": 0.91,
+    "frac": 0.265
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:wayhouse.glb@-17.0,13.0",
+    "depth": 2.43,
+    "frac": 0.221
+   },
+   {
+    "a": "prop:ruinwall.glb@-8.0,17.5",
+    "b": "prop:boulder4.glb@-12.0,19.7",
+    "depth": 1.49,
+    "frac": 0.205
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:stone-bench.glb@-6.0,4.6",
+    "depth": 0.28,
+    "frac": 0.205
+   },
+   {
+    "a": "prop:drywall2.glb@3.9,13.0",
+    "b": "prop:drywall2.glb@7.5,12.4",
+    "depth": 0.94,
+    "frac": 0.158
+   },
+   {
+    "a": "prop:jars.glb@-4.2,6.6",
+    "b": "prop:monastery-hero.glb@-7.2,7.5",
+    "depth": 0.18,
+    "frac": 0.129
+   },
+   {
+    "a": "prop:claypot.glb@-7.2,-4.6",
+    "b": "prop:crate.glb@-7.5,-3.9",
+    "depth": 0.1,
+    "frac": 0.121
+   },
+   {
+    "a": "prop:monastery-hero.glb@-7.2,7.5",
+    "b": "prop:house-d.glb@-8.5,2.5",
+    "depth": 0.57,
+    "frac": 0.12
+   },
+   {
+    "a": "prop:trough.glb@5.0,1.6",
+    "b": "cast:monk",
+    "depth": 0.42,
+    "frac": 0.118
+   },
+   {
+    "a": "prop:house-c.glb@-10.0,9.4",
+    "b": "prop:wayhouse.glb@-17.0,2.6",
+    "depth": 1.28,
+    "frac": 0.101
+   },
+   {
+    "a": "prop:ruinwall.glb@-12.5,14.9",
+    "b": "prop:wayhouse.glb@-17.0,13.0",
+    "depth": 0.43,
+    "frac": 0.095
+   },
+   {
+    "a": "prop:house-f.glb@8.5,7.4",
+    "b": "prop:stone-bench.glb@8.5,3.0",
+    "depth": 0.12,
+    "frac": 0.091
+   },
+   {
+    "a": "prop:drywall2.glb@-14.9,6.7",
+    "b": "prop:wayhouse.glb@-17.0,2.6",
+    "depth": 1.06,
+    "frac": 0.073
+   },
+   {
+    "a": "prop:well.glb@2.8,1.6",
+    "b": "prop:trough.glb@5.0,1.6",
+    "depth": 0.13,
+    "frac": 0.072
+   },
+   {
+    "a": "prop:trough.glb@5.0,1.6",
+    "b": "prop:house-a.glb@7.8,-0.8",
+    "depth": 0.39,
+    "frac": 0.068
+   },
+   {
+    "a": "prop:drywall2.glb@-14.9,6.7",
+    "b": "prop:ruinwall.glb@-17.8,7.9",
+    "depth": 0.2,
+    "frac": 0.064
+   },
+   {
+    "a": "prop:drywall3.glb@-8.0,15.2",
+    "b": "prop:boulder4.glb@-12.0,19.7",
+    "depth": 0.57,
+    "frac": 0.056
+   },
+   {
+    "a": "prop:house-a.glb@7.8,-0.8",
+    "b": "prop:basket.glb@5.8,-3.2",
+    "depth": 0.06,
+    "frac": 0.047
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "mecca",
+  "counted": 54,
+  "overlaps": [
+   {
+    "a": "prop:torch.glb@5.4,27.7",
+    "b": "prop:awning.glb@7.1,25.8",
+    "depth": 0.77,
+    "frac": 1
+   },
+   {
+    "a": "prop:basket.glb@6.5,26.9",
+    "b": "prop:awning.glb@7.1,25.8",
+    "depth": 0.54,
+    "frac": 1
+   },
+   {
+    "a": "prop:basket.glb@-4.7,21.8",
+    "b": "prop:house-f.glb@-6.4,18.9",
+    "depth": 0.54,
+    "frac": 1
+   },
+   {
+    "a": "prop:crate.glb@16.5,36.0",
+    "b": "prop:awning.glb@18.4,37.2",
+    "depth": 0.68,
+    "frac": 0.979
+   },
+   {
+    "a": "prop:drywall3.glb@5.8,15.1",
+    "b": "prop:house-d.glb@8.0,15.0",
+    "depth": 1.17,
+    "frac": 0.909
+   },
+   {
+    "a": "prop:awning.glb@-11.4,25.2",
+    "b": "prop:drywall.glb@-13.3,24.8",
+    "depth": 1.21,
+    "frac": 0.719
+   },
+   {
+    "a": "prop:house-f.glb@-6.4,18.9",
+    "b": "prop:pergola.glb@-12.3,19.9",
+    "depth": 2.71,
+    "frac": 0.713
+   },
+   {
+    "a": "prop:trough.glb@-6.8,22.4",
+    "b": "prop:house-f.glb@-6.4,18.9",
+    "depth": 0.59,
+    "frac": 0.49
+   },
+   {
+    "a": "prop:bigjar.glb@6.2,17.1",
+    "b": "prop:house-d.glb@8.0,15.0",
+    "depth": 0.46,
+    "frac": 0.448
+   },
+   {
+    "a": "prop:awning.glb@-11.4,25.2",
+    "b": "prop:awning.glb@-14.2,27.7",
+    "depth": 2.32,
+    "frac": 0.244
+   },
+   {
+    "a": "prop:boulder1.glb@-11.1,30.7",
+    "b": "prop:awning.glb@-14.2,27.7",
+    "depth": 2.16,
+    "frac": 0.218
+   },
+   {
+    "a": "prop:awning.glb@7.1,25.8",
+    "b": "prop:pergola.glb@7.0,21.6",
+    "depth": 0.39,
+    "frac": 0.082
+   },
+   {
+    "a": "prop:awning.glb@-14.2,27.7",
+    "b": "prop:drywall.glb@-13.3,24.8",
+    "depth": 0.08,
+    "frac": 0.061
+   },
+   {
+    "a": "prop:trough.glb@14.5,35.9",
+    "b": "prop:awning.glb@18.4,37.2",
+    "depth": 0.15,
+    "frac": 0.053
+   }
+  ],
+  "floating": []
+ },
+ {
+  "region": "exit",
+  "counted": 45,
+  "overlaps": [
+   {
+    "a": "prop:bayt2.glb@-4.5,8.4",
+    "b": "prop:boulder2.glb@-7.0,6.7",
+    "depth": 0.78,
+    "frac": 0.901
+   },
+   {
+    "a": "prop:boulder4.glb@-5.8,26.8",
+    "b": "prop:waymark.glb@-9.3,23.4",
+    "depth": 1.38,
+    "frac": 0.861
+   },
+   {
+    "a": "prop:boulder3.glb@15.9,-0.1",
+    "b": "prop:boulder3.glb@21.4,4.4",
+    "depth": 2.04,
+    "frac": 0.777
+   },
+   {
+    "a": "prop:waymark.glb@4.5,19.9",
+    "b": "prop:boulder2.glb@6.9,18.8",
+    "depth": 1.21,
+    "frac": 0.741
+   },
+   {
+    "a": "prop:boulder1.glb@4.1,21.0",
+    "b": "prop:boulder2.glb@6.9,18.8",
+    "depth": 0.51,
+    "frac": 0.704
+   },
+   {
+    "a": "prop:rocks.glb@-3.1,-4.1",
+    "b": "prop:mudtower.glb@-8.0,-6.3",
+    "depth": 1.19,
+    "frac": 0.417
+   },
+   {
+    "a": "prop:bayt2.glb@-4.5,8.4",
+    "b": "prop:drywall3.glb@-8.3,10.1",
+    "depth": 1.2,
+    "frac": 0.389
+   },
+   {
+    "a": "prop:boulder2.glb@-0.3,26.6",
+    "b": "prop:boulder4.glb@-5.8,26.8",
+    "depth": 1.73,
+    "frac": 0.304
+   },
+   {
+    "a": "prop:boulder2.glb@-5.2,16.5",
+    "b": "prop:desert-bush.glb@-8.1,18.5",
+    "depth": 0.74,
+    "frac": 0.295
+   },
+   {
+    "a": "prop:rocks.glb@3.8,-6.9",
+    "b": "cast:merchant",
+    "depth": 0.61,
+    "frac": 0.289
+   },
+   {
+    "a": "prop:boulder2.glb@6.9,18.8",
+    "b": "prop:basalt2.glb@11.3,18.4",
+    "depth": 1.4,
+    "frac": 0.215
+   },
+   {
+    "a": "prop:boulder2.glb@-7.0,6.7",
+    "b": "prop:camel.glb@-9.1,6.2",
+    "depth": 0.6,
+    "frac": 0.21
+   },
+   {
+    "a": "prop:rocks.glb@5.1,-7.2",
+    "b": "cast:merchant",
+    "depth": 0.52,
+    "frac": 0.19
+   },
+   {
+    "a": "prop:bayt2.glb@-4.5,8.4",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.75,
+    "frac": 0.186
+   },
+   {
+    "a": "prop:camel.glb@-2.0,13.9",
+    "b": "prop:boulder2.glb@-5.2,16.5",
+    "depth": 1.12,
+    "frac": 0.176
+   },
+   {
+    "a": "prop:boulder3.glb@15.9,-0.1",
+    "b": "prop:wayhouse.glb@10.6,-6.0",
+    "depth": 1.17,
+    "frac": 0.161
+   },
+   {
+    "a": "prop:boulder2.glb@-7.0,6.7",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.32,
+    "frac": 0.148
+   },
+   {
+    "a": "prop:boulder2.glb@9.7,5.4",
+    "b": "prop:boulder3.glb@15.9,-0.1",
+    "depth": 2.06,
+    "frac": 0.13
+   },
+   {
+    "a": "prop:camel.glb@-9.1,6.2",
+    "b": "prop:firepit.glb@0.0,0.0",
+    "depth": 0.75,
+    "frac": 0.118
+   },
+   {
+    "a": "prop:boulder2.glb@9.7,5.4",
+    "b": "prop:ruinwall.glb@4.3,1.8",
+    "depth": 0.41,
+    "frac": 0.113
+   },
+   {
+    "a": "prop:bayt2.glb@-4.5,8.4",
+    "b": "prop:camel.glb@-9.1,6.2",
+    "depth": 0.4,
+    "frac": 0.102
+   },
+   {
+    "a": "prop:boulder2.glb@9.7,5.4",
+    "b": "prop:mudtower.glb@15.5,8.5",
+    "depth": 1.61,
+    "frac": 0.099
+   },
+   {
+    "a": "prop:mudtower.glb@15.5,8.5",
+    "b": "prop:boulder3.glb@15.9,-0.1",
+    "depth": 0.84,
+    "frac": 0.08
+   },
+   {
+    "a": "prop:boulder4.glb@-5.8,26.8",
+    "b": "prop:rocks.glb@-12.7,22.5",
+    "depth": 0.49,
+    "frac": 0.054
+   },
+   {
+    "a": "prop:mudtower.glb@15.5,8.5",
+    "b": "prop:boulder3.glb@21.4,4.4",
+    "depth": 0.5,
+    "frac": 0.046
+   },
+   {
+    "a": "prop:mudtower.glb@15.5,8.5",
+    "b": "prop:boulder2.glb@20.4,14.4",
+    "depth": 0.8,
+    "frac": 0.036
+   },
+   {
+    "a": "prop:waymark.glb@4.5,19.9",
+    "b": "prop:boulder1.glb@4.1,21.0",
+    "depth": 0.05,
+    "frac": 0.034
+   },
+   {
+    "a": "prop:boulder2.glb@6.9,18.8",
+    "b": "prop:wayhouse.glb@9.6,24.8",
+    "depth": 0.34,
+    "frac": 0.028
+   },
+   {
+    "a": "prop:camel.glb@-10.4,3.6",
+    "b": "prop:boulder2.glb@-16.5,5.2",
+    "depth": 0.07,
+    "frac": 0.021
+   }
+  ],
+  "floating": []
+ }
+]

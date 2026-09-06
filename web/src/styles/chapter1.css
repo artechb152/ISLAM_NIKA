@@ -1153,3 +1153,27 @@ body{
   padding-inline-start:18px;border-inline-start:2px solid var(--gold-soft);
   font-size:var(--read,18.5px);line-height:1.6;color:var(--ink);
 }
+
+/* ===== סרטון הסיכום ===== */
+/* מסך מלא, שחור, בלי שום דבר אחר. הפוסטר מצויר עד שהפריים הראשון
+   מוכן, ולכן אין מסך שחור בזמן הטעינה. שלושת הכפתורים — השהיה,
+   השתקה ודילוג — יושבים בשוליים ולא על התמונה. */
+.ch1-film{
+  position:fixed;inset:0;z-index:80;background:#0a0705;
+  display:grid;grid-template-rows:1fr auto;align-items:center;
+}
+.ch1-film-video{
+  width:100%;height:100%;object-fit:contain;background:#0a0705;
+}
+.ch1-film-video::cue{
+  font-family:inherit;font-size:.9em;line-height:1.5;
+  background:rgba(10,7,5,.72);color:#f4e3c1;
+}
+.ch1-film-bar{
+  display:flex;gap:10px;justify-content:center;align-items:center;
+  padding:14px 18px calc(14px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,rgba(10,7,5,.95),rgba(10,7,5,0));
+}
+@media (max-width:560px){
+  .ch1-film-bar{flex-wrap:wrap}
+}
