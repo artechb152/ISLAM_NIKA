@@ -1498,6 +1498,9 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
   useEffect(() => () => { live.taskFocus = null }, [live])
   const dragging = useRef<number>(-1)
   const hovering = useRef<number>(-1)
+  /* פינג תשובה: טבעת מתרחבת בנקודת ההשלכה — זהב לקבלה, חמרה לסירוב */
+  const ping = useRef<{ x: number; z: number; at: number; ok: boolean } | null>(null)
+  const pingRing = useRef<THREE.Mesh>(null)
   const nearTarget = useRef(false)
   const solvedAt = useRef(0)
   const [, force] = useState(0)
@@ -1603,6 +1606,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         const k = nearestSpot(st.cur.x, st.cur.z)
         if (k >= 0) {
           const sp = spots[k]
+          ping.current = { x: st.cur.x, z: st.cur.z, at: performance.now(), ok: sp.right }
           if (sp.right) {
             st.placed = true
             st.tgt = { x: sp.x, z: sp.z }
@@ -1624,6 +1628,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         if (best >= 0) {
           const bin = binSpots[best]
           const opt = opts[i]
+          ping.current = { x: st.cur.x, z: st.cur.z, at: performance.now(), ok: opt.bin === bin.id }
           if (opt.bin === bin.id) {
             st.placed = true
             /* פיזור קטן סביב העמדה — חמישה חפצים לא נערמים לנקודה */
@@ -1641,6 +1646,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         const d = Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z)
         if (d < 1.6) {
           const opt = opts[i]
+          ping.current = { x: st.cur.x, z: st.cur.z, at: performance.now(), ok: !!opt.right }
           if (opt.right) st.placed = true
           else {
             st.returning = true
@@ -1747,6 +1753,20 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
     }
     live.taskFocus =
       atTask && !solvedTask && (planMode || sortMode || opts.length > 0) ? focusSpec : null
+    const pr = pingRing.current
+    if (pr) {
+      const pg = ping.current
+      const t = pg ? (performance.now() - pg.at) / 700 : 2
+      pr.visible = !!pg && t < 1
+      if (pr.visible && pg) {
+        pr.position.set(pg.x, groundYAt(pg.x, pg.z) + 0.05, pg.z)
+        const k = 0.8 + t * 1.9
+        pr.scale.set(k, k, k)
+        const m = pr.material as THREE.MeshBasicMaterial
+        m.opacity = (1 - t) * 0.9
+        m.color.set(pg.ok ? '#e8bf76' : '#c4674e')
+      }
+    }
     const hr = hoverRing.current
     if (hr) {
       const h = dragging.current < 0 ? hovering.current : -1
@@ -1798,6 +1818,11 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       <mesh ref={hoverRing} rotation-x={-Math.PI / 2} visible={false} renderOrder={2}>
         <ringGeometry args={[0.3, 0.4, 32]} />
         <meshBasicMaterial color="#f5ecd6" transparent opacity={0.8} depthWrite={false} />
+      </mesh>
+      {/* פינג התשובה — העולם עונה בנקודה שבה שוחרר החפץ */}
+      <mesh ref={pingRing} rotation-x={-Math.PI / 2} visible={false} renderOrder={3}>
+        <ringGeometry args={[0.42, 0.54, 40]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       {planMode && (
         <>
@@ -3521,9 +3546,6 @@ function ControlsPanel({ pressed }: { pressed: Set<string> }) {
         {CAST.length > 0 && <span><i className="hud-key">E</i> שיחה עם דמות</span>}
         {REGION_TASK && <span><i className="hud-key">E</i> {REGION_TASK.prompt}</span>}
         <span><i className="hud-key">F</i> להביט מקרוב</span>
-        {REGION.encounters.some((e) => e.speaker === 'rawi') && (
-          <span><i className="hud-key">R</i> שיחה עם רָאוִי</span>
-        )}
         <span><i className="hud-key">J</i> מחברת</span>
         <span><i className="hud-key">M</i> מפה</span>
         <span>גרירת עכבר — סיבוב מבט</span>
@@ -3825,6 +3847,7 @@ export default function Game() {
     const needed = (sortLike ? REGION_TASK.options : REGION_TASK.options.filter((o) => o.right)).map((o) => o.id)
     if (needed.length && needed.every((n) => taskChosen.includes(n))) {
       setSolved(recordTask(REGION_TASK.id).solved)
+      setTaskNote({ who: 'רָאוִי', text: REGION_TASK.done, ok: true })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskChosen, taskSolved])
@@ -3858,21 +3881,36 @@ export default function Game() {
     },
     [],
   )
-  /* גרירה שנחתה על התחנה עונה — ופותחת את הפאנל כדי שההערה תיקרא */
+  /* גרירה שנחתה עונה בעולם, לא במודל: ההערה המלמדת מופיעה כשורת
+     דיבור למטה — התנועה נשארת חופשית, והפאנל של E נשאר למי שרוצה
+     את השאלה במלואה. הפאנל-אחרי-גרירה נפסל על-ידי המשתמשת: "פתאום
+     נפתח הפאנל — מוזר". */
+  const [taskNote, setTaskNote] = useState<{ who: string; text: string; ok: boolean } | null>(null)
+  useEffect(() => {
+    if (!taskNote) return
+    const t = window.setTimeout(() => setTaskNote(null), 11000)
+    return () => window.clearTimeout(t)
+  }, [taskNote])
   const chooseByDrop = useCallback(
     (id: string) => {
       chooseTask(id)
       cue('task')
-      setOpenTask(true)
+      const opt = REGION_TASK?.options.find((o) => o.id === id)
+      if (opt && REGION_TASK)
+        setTaskNote({ who: REGION_TASK.asker, text: opt.right ? opt.note : (opt.wrong ?? opt.note), ok: !!opt.right })
     },
     [chooseTask],
   )
-  /* הנחה פיזית על צד של מיון — אותו מסלול, אותה הערה מלמדת */
+  /* הנחה פיזית על צד של מיון — אותה הערה מלמדת, באותה שורת עולם */
   const sortByDrop = useCallback(
     (itemId: string, binId: string) => {
       sortTask(itemId, binId)
       cue('task')
-      setOpenTask(true)
+      const opt = REGION_TASK?.options.find((o) => o.id === itemId)
+      if (opt && REGION_TASK) {
+        const ok = opt.bin === binId
+        setTaskNote({ who: REGION_TASK.asker, text: ok ? opt.note : (opt.wrong ?? opt.note), ok })
+      }
     },
     [sortTask],
   )
@@ -4534,6 +4572,17 @@ export default function Game() {
         </Canvas>
         {/* המסגרת שסוגרת את הפריים — מתחת לכל שכבות ה-HUD, מעל הקנבס */}
         <div className="ch1-vignette" aria-hidden="true" />
+        {/* התשובה של העולם לגרירה: מי אמר, מה אמר — בלי לעצור את המשחק */}
+        {taskNote && !openTask && !encounter && !openFind && (
+          <div
+            className={`ch1-task-note${taskNote.ok ? '' : ' is-wrong'}`}
+            role="status"
+            onClick={() => setTaskNote(null)}
+          >
+            <b>{taskNote.who}</b>
+            <span>{taskNote.text}</span>
+          </div>
+        )}
         {/* Leaving a region took 900 ms behind a banner; arriving took none.
             The new document rendered a bare plate, then a loading line, then a
             canvas drawing nothing while up to 193 props decoded, and then the
@@ -4660,12 +4709,7 @@ export default function Game() {
               <span>דברו עם {SPEAKERS[nearPending.speaker]}</span>
             </div>
           )}
-          {pendingEncounter && !encounter && !nearPending && (
-            <div className="hud-panel poi-hint is-rawi-hint">
-              <i className="hud-key">R</i>
-              <span>דברו עם רָאוִי</span>
-            </div>
-          )}
+          {/* ראווי מדבר מעצמו — אין צורך בכפתור. R נשאר קיצור סמוי. */}
         </div>
         {encounter && (
           <DialogueHud

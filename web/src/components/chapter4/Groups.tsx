@@ -45,9 +45,12 @@ export interface Group {
   text: string
   /** the painted vignette, without extension */
   img: string
-  /** position over the picture, in per cent from its left and top edges */
-  x: number
-  y: number
+  /** Where on the ring it stands, in degrees clockwise from twelve o'clock.
+      A ONE-NUMBER POSITION ON PURPOSE: the four sit on one circle at one
+      radius, so no face can end up nearer the town than another. Percentages
+      could not do that — the picture is wider than it is tall, so equal
+      percentages are unequal distances. */
+  angle: number
   /** true for the one group the source places outside the town */
   away?: boolean
 }
@@ -59,6 +62,13 @@ interface Line {
   x2: number
   y2: number
   len: number
+}
+
+/** where a face stands, in pixels from the top-left of the stage */
+interface Spot {
+  id: string
+  left: number
+  top: number
 }
 
 export default function Groups({
@@ -80,6 +90,7 @@ export default function Groups({
   const town = useRef<HTMLImageElement | null>(null)
   const dots = useRef<Array<HTMLButtonElement | null>>([])
   const [lines, setLines] = useState<Line[]>([])
+  const [spots, setSpots] = useState<Spot[]>([])
   const [box, setBox] = useState({ w: 0, h: 0 })
   const [at, setAt] = useState(0)
   const [shown, setShown] = useState(false)
@@ -105,35 +116,45 @@ export default function Groups({
        query the stylesheet uses, or the lines and the arrangement disagree. */
     if (!window.matchMedia('(min-width: 900px)').matches) {
       setLines([])
+      setSpots([])
       return
     }
     const t = pic.getBoundingClientRect()
     const cx = t.left - r.left + t.width / 2
     const cy = t.top - r.top + t.height / 2
-    const next: Line[] = []
-    groups.forEach((g, i) => {
-      const el = dots.current[i]
-      if (!el) return
-      const d = el.getBoundingClientRect()
-      const x1 = d.left - r.left + d.width / 2
-      const y1 = d.top - r.top + d.height / 2
-      const dx = cx - x1
-      const dy = cy - y1
-      const dist = Math.hypot(dx, dy) || 1
-      const from = d.width / 2 + 8
-      /* stop well short of the middle: a line that reaches the centre of the
-         oasis crosses the town instead of pointing at it */
-      const to = Math.max(from + 4, dist - t.width * 0.16)
-      next.push({
+
+    /* ONE CIRCLE, ONE RADIUS. The ring is laid out in pixels rather than in per
+       cent so that it is a real circle on a picture that is wider than it is
+       tall: every face is the same distance from the middle of the oasis, and
+       therefore every connector is the same length. The radius clears the
+       painting's dense middle and still keeps the faces over it. */
+    const size = Math.min(t.width, t.height)
+    const R = size * 0.46
+    const half = (dots.current[0]?.getBoundingClientRect().width ?? 110) / 2
+
+    const nextSpots: Spot[] = []
+    const nextLines: Line[] = []
+    groups.forEach((g) => {
+      const a = ((g.angle - 90) * Math.PI) / 180
+      const px = cx + Math.cos(a) * R
+      const py = cy + Math.sin(a) * R
+      nextSpots.push({ id: g.id, left: px, top: py })
+      /* the connector runs from the edge of the face in toward the middle and
+         stops short of it — a line that reaches the centre crosses the town
+         instead of pointing at it */
+      const from = half + 8
+      const to = Math.max(from + 4, R - size * 0.17)
+      nextLines.push({
         id: g.id,
-        x1: x1 + (dx / dist) * from,
-        y1: y1 + (dy / dist) * from,
-        x2: x1 + (dx / dist) * to,
-        y2: y1 + (dy / dist) * to,
+        x1: px - Math.cos(a) * from,
+        y1: py - Math.sin(a) * from,
+        x2: px - Math.cos(a) * to,
+        y2: py - Math.sin(a) * to,
         len: Math.max(0, to - from),
       })
     })
-    setLines(next)
+    setSpots(nextSpots)
+    setLines(nextLines)
   }, [groups])
 
   useEffect(() => {
@@ -221,7 +242,11 @@ export default function Groups({
                 dots.current[i] = el
               }}
               className={`ch4-who-dot${at === i ? ' is-on' : ''}${g.away ? ' is-away' : ''}`}
-              style={{ ['--x' as string]: `${g.x}%`, ['--y' as string]: `${g.y}%`, ['--step' as string]: `${0.6 + i * 0.3}s` }}
+              style={{
+                ['--x' as string]: spots[i] ? `${spots[i].left}px` : '50%',
+                ['--y' as string]: spots[i] ? `${spots[i].top}px` : '50%',
+                ['--step' as string]: `${0.6 + i * 0.3}s`,
+              }}
               onClick={() => setAt(i)}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -232,10 +257,10 @@ export default function Groups({
         </div>
       </div>
 
-      {/* one panel, full measure, on the page's own ground — this is where all
-          the reading happens */}
+      {/* what the open face says: not a card, just text on the reading edge in
+          the same column as the paragraphs around the figure */}
       <div
-        className={`ch4-who-panel${open?.away ? ' is-away' : ''}`}
+        className={`ch4-who-said${open?.away ? ' is-away' : ''}`}
         id={`${uid}-panel`}
         role="tabpanel"
         aria-labelledby={`${uid}-tab-${open?.id}`}

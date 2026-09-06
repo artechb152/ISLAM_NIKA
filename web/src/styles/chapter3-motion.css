@@ -36,7 +36,7 @@
 /* ---- depth 1 · the picture ---- */
 .c3-lens{
   position:absolute;inset:calc(-9px * var(--u));display:block;overflow:hidden;
-  transform:translate3d(calc(var(--px) * 6px),calc(var(--py) * 5px),0);
+  transform:translate3d(calc(var(--px) * 4px),calc(var(--py) * 3px),0);
   transition:transform .55s cubic-bezier(.2,.7,.2,1);
 }
 .c3-lens img{display:block;width:100%;height:100%;object-fit:cover}
@@ -50,7 +50,7 @@
 /* ---- depth 2 · the atmosphere ---- */
 .c3-haze{
   position:absolute;inset:-8%;z-index:1;pointer-events:none;
-  transform:translate3d(calc(var(--px) * -10px),calc(var(--py) * -8px),0);
+  transform:translate3d(calc(var(--px) * -6px),calc(var(--py) * -5px),0);
   transition:transform .65s cubic-bezier(.2,.7,.2,1);
   animation:c3-in 1.5s ease .15s both;
 }
@@ -67,7 +67,7 @@
 /* ---- depth 3 · what hangs in the air ---- */
 .c3-fx{
   position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
-  transform:translate3d(calc(var(--px) * -18px),calc(var(--py) * -14px),0);
+  transform:translate3d(calc(var(--px) * -11px),calc(var(--py) * -9px),0);
   transition:transform .75s cubic-bezier(.2,.7,.2,1);
   animation:c3-in 2s ease .3s both;
 }
@@ -134,9 +134,11 @@
 
 /* the drifting layers now sit under the lettering, so the lettering comes up
    past them rather than through them */
-.c3-art.has-verse::after{z-index:3}
-.c3-top{z-index:4}
-.c3-say,.c3-verse{z-index:5}
+/* the drifting layers are in the DOM on every panel but only the two open
+   pages animate: hiding them everywhere else is what keeps a book of two
+   hundred panels from running two hundred particle fields. */
+.c3-haze,.c3-fx{display:none}
+.c3-page.is-live .c3-haze,.c3-page.is-live .c3-fx{display:block}
 
 /* ---- the lettering arrives after the page does ---- */
 @keyframes c3-rise{from{opacity:0;transform:translateY(calc(11px * var(--u)))}to{opacity:1;transform:none}}
@@ -144,16 +146,20 @@
 @keyframes c3-stamp-in{from{opacity:0;transform:translateX(calc(20px * var(--u)))}to{opacity:1;transform:none}}
 @keyframes c3-pop{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
 @keyframes c3-card{from{opacity:0;transform:translateY(calc(16px * var(--u))) scale(.985)}to{opacity:1;transform:none}}
+@keyframes c3-tier{from{opacity:0;transform:translateY(calc(14px * var(--u)))}to{opacity:1;transform:none}}
 
-.c3-page.is-fresh .c3-cap{animation:c3-rise .55s cubic-bezier(.2,.75,.25,1) both}
-.c3-page.is-fresh .c3-cap:nth-child(2){animation-delay:.15s}
-.c3-page.is-fresh .c3-cap:nth-child(3){animation-delay:.3s}
+/* the tiers land one after another, and the boxes inside a tier after it —
+   --i is the panel's index on the page */
+.c3-page.is-fresh .c3-pn{animation:c3-tier .5s cubic-bezier(.2,.75,.25,1) both;animation-delay:calc(var(--i) * .09s)}
+.c3-page.is-fresh .c3-cap{animation:c3-rise .5s cubic-bezier(.2,.75,.25,1) both;animation-delay:calc(var(--i) * .09s + .13s)}
+.c3-page.is-fresh .c3-cap.is-br{animation-delay:calc(var(--i) * .09s + .24s)}
+.c3-page.is-fresh .c3-cap.is-bl{animation-delay:calc(var(--i) * .09s + .34s)}
 .c3-page.is-fresh .c3-plate{animation:c3-plate-in .7s cubic-bezier(.2,.75,.25,1) both}
 .c3-page.is-fresh .c3-stamp{animation:c3-stamp-in .45s cubic-bezier(.2,.85,.3,1) .22s both}
 /* the balloon lands last and lands hardest: it is the only voice in the book
    that is spoken rather than narrated */
-.c3-page.is-fresh .c3-say{animation:c3-pop .4s cubic-bezier(.2,1.5,.4,1) .3s both}
-.c3-page.is-fresh .c3-verse{animation:c3-card .7s cubic-bezier(.2,.7,.2,1) .32s both}
+.c3-page.is-fresh .c3-say{animation:c3-pop .4s cubic-bezier(.2,1.5,.4,1) calc(var(--i) * .09s + .28s) both}
+.c3-page.is-fresh .c3-verse,.c3-page.is-fresh .c3-hero-verse{animation:c3-card .7s cubic-bezier(.2,.7,.2,1) .34s both}
 
 /* ---- the four spreads the chapter turns on ----
    §2 the birds · §19 the first words of the Quran · §42 the two verses of the
@@ -185,9 +191,10 @@
   .c3-page.is-live[data-c="out"] .c3-lens img,
   .c3-page.is-peak.is-live .c3-lens img{animation:none;transform:none}
   [data-m] .c3-haze,[data-m] .c3-fx::before,[data-m] .c3-fx::after,.c3-fx{animation:none}
-  .c3-page.is-fresh .c3-cap,.c3-page.is-fresh .c3-cap:nth-child(2),
-  .c3-page.is-fresh .c3-cap:nth-child(3),.c3-page.is-fresh .c3-plate,
-  .c3-page.is-fresh .c3-stamp,.c3-page.is-fresh .c3-say,
-  .c3-page.is-fresh .c3-verse{animation:none}
+  .c3-page.is-fresh .c3-pn,.c3-page.is-fresh .c3-cap,
+  .c3-page.is-fresh .c3-cap.is-br,.c3-page.is-fresh .c3-cap.is-bl,
+  .c3-page.is-fresh .c3-plate,.c3-page.is-fresh .c3-stamp,
+  .c3-page.is-fresh .c3-say,.c3-page.is-fresh .c3-verse,
+  .c3-page.is-fresh .c3-hero-verse{animation:none}
   .c3-scene{transition:opacity .3s ease;transform:scale(1.14)}
 }

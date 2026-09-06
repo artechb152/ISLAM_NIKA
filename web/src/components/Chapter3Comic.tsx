@@ -1,30 +1,32 @@
 'use client'
 
-/* Chapter 3 — ראשית חיי מוחמד, as a book you turn.
+/* Chapter 3 — ראשית חיי מוחמד, as a comic you turn.
 
-   ONE PAGE HOLDS ONE PICTURE, and that is a measurement, not a taste. Every
-   picture in this chapter was painted 4:3. The previous build cut each
-   landscape page into two or three columns, so a 4:3 painting was poured into a
-   frame of ratio 0.46–0.70 and `object-fit:cover` threw away up to 58% of its
-   width — the elephant lost its head, the army lost its ranks. An audit of all
-   75 panels put the median caption over 13% of its picture and the worst over
-   45%, with boxes crossing the panel border and captions running to eight
-   lines in a 114px column.
+   THE PAGE IS A COMIC PAGE: framed panels in tiers, gutters of bare paper
+   between them, and the narration in lettering boxes inside the frames. The
+   build before this one gave each page a single full-bleed picture with a cream
+   caption strip under it, on the reasoning that a 4:3 painting cannot be poured
+   into a panel without losing something. It was right about the arithmetic and
+   wrong about the object: without frames and gutters, two pictures touching at
+   the spine read as one wide banner cut in half — a slideshow, not a comic.
 
-   Both faults have one cause: the page did not have the shape of its art. So
-   the page is now 690×620 and its picture is 690×517, which is 4:3 exactly —
-   nothing is cropped — and the narration lives UNDER the picture on paper,
-   where it can never cover anything.
+   THE PAGE SHAPE IS WHAT MAKES BOTH THINGS POSSIBLE, and it is measured, not
+   chosen. Every picture in this chapter was painted 4:3. On a page of 690×900 —
+   the proportion of a real comic book — a tier is 650×423, which keeps 87% of
+   the painting. On the landscape page it replaced, the same tier kept 53%, and
+   a 2×2 grid there came out at ratio 1.12 with panels a third of the size. The
+   spread is then 1.53, which fills the height of a laptop screen exactly, so
+   the book is bigger as well as better cut.
 
      · NO SENTENCE OF THE CHAPTER IS WRITTEN IN THIS FILE. Every word comes from
        comic.json, which concept/chapter3/sync-comic.mjs builds from the
        manifest. UI strings — an aria-label, the page counter — are this file's.
      · FOUR VOICES, and the data says which is which (see sync-comic.mjs):
-       the narrator's band, the dated stamp, the gold verse card, and a speech
+       the narrator's box, the dated stamp, the gold verse card, and a speech
        balloon WHOSE TAIL LEAVES THE PANEL — because the two who speak in this
        book, Muhammad and Gabriel, are never drawn.
-     · Reading is RTL: the right-hand page is the earlier one, and the LEFT
-       arrow moves forward.
+     · Reading is RTL: the right-hand page is the earlier one, the tiers read
+       top to bottom, and the LEFT arrow moves forward.
 
    ⚠ TWO TRAPS THAT COST THIS BUILD REAL TIME, RECORDED SO THEY ARE NOT REPEATED:
      1. `perspective` and `transform: scale()` must never sit on the same
@@ -40,65 +42,121 @@ import comicData from '@/lib/chapter3/comic.json'
 import { markContentComplete } from '@/lib/chapter3/progress'
 
 interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
-interface Page { a: string; p: number; e?: number; b: Beat[]; m: string; c: string; peak?: number }
+interface Panel { a: string; p: number; e?: number; b: Beat[]; m: string; c: string; peak?: number }
 interface Part { title: string; first: number }
-const PAGES = (comicData as unknown as { pages: Page[] }).pages
+const PANELS = (comicData as unknown as { pages: Panel[] }).pages
 const PARTS = (comicData as unknown as { parts: Part[] }).parts
-/* folio → the part that opens on it */
-const OPENS = new Map(PARTS.map((p, i) => [p.first, i]))
+
+/* ---------------- the page templates ----------------
+   Tiers, because a tier is the one shape that takes a 4:3 painting without
+   throwing much of it away: two tiers keep 87% of the picture, three keep 50%.
+   A three-tier page is for a run of quick beats, and that is the page's pacing
+   — the same device a printed comic uses. `hero` gives one panel most of the
+   page and a band of bare paper under it for a verse. */
+const T: Record<string, number> = { two: 2, three: 3, hero: 1 }
+const ROTATION = ['two', 'three', 'two', 'two', 'three']
+
+/* A HERO PAGE IS FOR A LONG VERSE, AND ONLY FOR ONE. The three long recitations
+   — sura 96 and the two verses of the night journey — are the moments the
+   chapter is built towards, and giving each of them a page is how a comic says
+   so. The two SHORT verses are five words each; on a page of their own they
+   left a picture stranded above an acre of blank paper, so they ride in an
+   ordinary tier with the gold card on the picture, which is what a short
+   quotation wants. */
+const isHero = (p: Panel) =>
+  (p.b.find((b) => b.k === 'v')?.t.split(/\s+/).length ?? 0) > 8
+
+interface Page { t: string; ps: Panel[] }
+function paginate(): Page[] {
+  const out: Page[] = []
+  let i = 0
+  let r = 0
+  while (i < PANELS.length) {
+    if (isHero(PANELS[i])) { out.push({ t: 'hero', ps: [PANELS[i++]] }); continue }
+    const name = ROTATION[r++ % ROTATION.length]
+    const run: Panel[] = []
+    const epi = !!PANELS[i].e
+    while (run.length < T[name] && i < PANELS.length &&
+           !!PANELS[i].e === epi && !isHero(PANELS[i])) run.push(PANELS[i++])
+    out.push({ t: run.length === T[name] ? name : run.length >= 2 ? 'two' : 'hero', ps: run })
+  }
+  return out
+}
+
+/* WHERE EACH LETTERING BOX SITS, and it depends on how many there are.
+   With two boxes the RTL Z is right: top right, then bottom left, and the eye
+   crosses the picture. With THREE it is wrong — a reader takes the two bottom
+   boxes right to left, so a third box at the bottom right is read BEFORE the
+   one at the bottom left and the sentences arrive out of order. Three boxes
+   therefore run top-right, bottom-right, bottom-left, which is both a reading
+   order and a shape. */
+const SLOTS: Record<number, string[]> = {
+  1: ['is-tr'],
+  2: ['is-tr', 'is-bl'],
+  3: ['is-tr', 'is-br', 'is-bl'],
+}
 
 /* THE MOTION LAYER.
    `live`  — this page is one of the two the reader is looking at. Only these
-             two carry the drifting layers, so the book animates two pages at a
-             time and never seventy-eight.
+             carry the drifting layers, so the book animates a handful of panels
+             and never all of them at once.
    `fresh` — the turn has finished and this page has just arrived. It runs the
              entrance once. It is deliberately NOT the same flag as `live`: a
              page being turned AWAY from must keep its text on screen for the
              whole rotation, and tying the entrance to visibility made the
              outgoing page go blank in mid-air. */
-function PageView({ page, folio, side, live, fresh }: {
-  page: Page | null; folio: number; side: 'r' | 'l'; live: boolean; fresh: boolean
+function PanelView({ panel, order, hideVerse }: { panel: Panel; order: number; hideVerse?: boolean }) {
+  const time = panel.b.find((b) => b.k === 'time')
+  const says = panel.b.filter((b) => b.k === 'say')
+  const verses = hideVerse ? [] : panel.b.filter((b) => b.k === 'v')
+  const caps = panel.b.filter((b) => !b.k)
+  return (
+    <figure className={'c3-pn' + (verses.length ? ' has-verse' : '') + (panel.e ? ' is-today' : '')}
+            data-m={panel.m} data-c={panel.c} style={{ '--i': order } as React.CSSProperties}>
+      <span className="c3-lens">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/assets/chapter3/comic/${panel.a}.jpg`} alt="" aria-hidden="true"
+             loading="lazy" decoding="async" />
+      </span>
+      <span className="c3-haze" aria-hidden="true" />
+      <span className="c3-fx" aria-hidden="true" />
+      {time && <span className="c3-stamp">{time.t}</span>}
+      {/* the RTL Z: the first box enters at the top right and the last leaves at
+          the bottom left, so the eye crosses the picture instead of sitting on
+          one edge of it */}
+      {caps.map((b, k) => (
+        <p className={'c3-cap ' + SLOTS[caps.length][k]} key={k}>{b.t}</p>
+      ))}
+      {says.map((b, k) => <p className="c3-say" key={k}>{b.t}</p>)}
+      {verses.map((b, k) => <p className="c3-verse" key={k}>{b.t}</p>)}
+    </figure>
+  )
+}
+
+function PageView({ page, folio, side, live, fresh, parts }: {
+  page: Page | null; folio: number; side: 'r' | 'l'; live: boolean; fresh: boolean; parts: Part[]
 }) {
   if (!page) return <div className="c3-page is-blank" />
-  const opens = OPENS.get(folio)
-  const time = page.b.find((b) => b.k === 'time')
-  const says = page.b.filter((b) => b.k === 'say')
-  const verses = page.b.filter((b) => b.k === 'v')
-  const caps = page.b.filter((b) => !b.k)
+  const opens = parts.findIndex((p) => p.first === folio)
+  const peak = page.ps.some((p) => p.peak)
+  /* on a hero page the verse comes out of the panel and stands on bare paper
+     under it, at twice the size — a printed comic gives its one big moment the
+     whole page, not a card floating in a corner of it */
+  const hero = page.t === 'hero' ? page.ps[0].b.find((b) => b.k === 'v') : undefined
   return (
-    <div className={'c3-page' + (page.e ? ' is-today' : '') + (caps.length ? '' : ' is-full') +
-                    (side === 'r' ? ' is-recto' : '') + (live ? ' is-live' : '') +
-                    (fresh ? ' is-fresh' : '') + (page.peak ? ' is-peak' : '')}
-         data-m={page.m} data-c={page.c}>
-      <figure className={'c3-art' + (verses.length ? ' has-verse' : '')}>
-        <span className="c3-lens">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/assets/chapter3/comic/${page.a}.jpg`} alt="" aria-hidden="true"
-               loading="lazy" decoding="async" />
-        </span>
-        {live && <><span className="c3-haze" aria-hidden="true" />
-                   <span className="c3-fx" aria-hidden="true" /></>}
-        {(opens !== undefined || time) && (
-          <div className="c3-top">
-            {opens !== undefined && (
-              <div className="c3-plate">
-                <span className="c3-plate-n">{String(opens + 1).padStart(2, '0')}</span>
-                <span className="c3-plate-t">{PARTS[opens].title}</span>
-              </div>
-            )}
-            {time && <span className="c3-stamp">{time.t}</span>}
-          </div>
-        )}
-        {says.map((b, k) => (
-          <p className="c3-say" key={k}>{b.t}</p>
+    <div className={'c3-page is-' + page.t + (side === 'r' ? ' is-recto' : '') +
+                    (live ? ' is-live' : '') + (fresh ? ' is-fresh' : '') +
+                    (peak ? ' is-peak' : '') + (page.ps[0]?.e ? ' is-today' : '')}>
+      <div className="c3-grid">
+        {page.ps.map((p, k) => (
+          <PanelView panel={p} key={p.a + k} order={k} hideVerse={!!hero} />
         ))}
-        {verses.map((b, k) => (
-          <p className="c3-verse" key={k}>{b.t}</p>
-        ))}
-      </figure>
-      {caps.length > 0 && (
-        <div className="c3-band">
-          {caps.map((b, k) => <p className="c3-cap" key={k}>{b.t}</p>)}
+      </div>
+      {hero && <p className="c3-hero-verse">{hero.t}</p>}
+      {opens >= 0 && (
+        <div className="c3-plate">
+          <span className="c3-plate-n">{String(opens + 1).padStart(2, '0')}</span>
+          <span className="c3-plate-t">{parts[opens].title}</span>
         </div>
       )}
       <span className="c3-folio">{folio}</span>
@@ -109,6 +167,7 @@ function PageView({ page, folio, side, live, fresh }: {
 export default function Chapter3Comic() {
   const router = useRouter()
   const bookRef = useRef<HTMLDivElement | null>(null)
+  const stageRef = useRef<HTMLDivElement | null>(null)
   const [at, setAt] = useState(0)
   const [drawer, setDrawer] = useState(false)
   /* the sheet currently in motion. It must sit ABOVE the stack for the whole
@@ -117,27 +176,33 @@ export default function Chapter3Comic() {
      then reappears on the left — which reads as a glitch, not a page. */
   const [moving, setMoving] = useState(-1)
 
+  const pages = useMemo(() => paginate(), [])
+  /* the folio a part opens on, recomputed from the pagination — a part opens on
+     the PAGE that carries its first panel */
+  const parts = useMemo(() => PARTS.map((part, i) => ({
+    ...part,
+    first: pages.findIndex((pg) => pg.ps.some((p) => p.p === i)) + 1,
+  })), [pages])
+
   /* SHEETS. After n turns the reader sees sheet[n-1]'s BACK on the left and
      sheet[n]'s FRONT on the right, and in an RTL book the right page is the
      earlier one. So folio 1 is the front of the sheet under the cover, and
      folio 2 rides on the COVER'S BACK — which is what an inside front cover is
      for, and is why no blank page opens the book. */
   const sheets = useMemo(() => {
-    const page = (n: number) => (PAGES[n] ? { page: PAGES[n], folio: n + 1 } : null)
-    const out: { front: 'cover' | ReturnType<typeof page>; back: ReturnType<typeof page> }[] =
-      [{ front: 'cover', back: page(1) }]
-    for (let k = 1; k * 2 - 2 < PAGES.length; k++) {
-      out.push({ front: page(2 * k - 2), back: page(2 * k + 1) })
+    const leaf = (n: number) => (pages[n] ? { page: pages[n], folio: n + 1 } : null)
+    const out: { front: 'cover' | ReturnType<typeof leaf>; back: ReturnType<typeof leaf> }[] =
+      [{ front: 'cover', back: leaf(1) }]
+    for (let k = 1; k * 2 - 2 < pages.length; k++) {
+      out.push({ front: leaf(2 * k - 2), back: leaf(2 * k + 1) })
     }
     return out
-  }, [])
+  }, [pages])
 
   /* WHERE THE CLOSING LEAF GOES. The last sheet is never turned — its front is
      the last page — so its back is never seen. The leaf the reader actually
      ends on is the back of the sheet BEFORE it, which is the first back with no
-     page on it. Putting the ending on the last sheet left the reader staring at
-     a blank left page with the ending hidden behind the one leaf the book will
-     not turn. */
+     page on it. */
   const endAt = useMemo(() => sheets.findIndex((s) => !s.back), [sheets])
 
   const TURN_MS = 800
@@ -168,25 +233,29 @@ export default function Chapter3Comic() {
       const narrow = window.innerWidth < 860
       const availW = window.innerWidth - (narrow ? 12 : 132)
       const availH = window.innerHeight - 56 - 46
-      const ASPECT = 1380 / 620          /* two landscape pages side by side */
-      /* ON A PHONE THE SPREAD IS SIZED BY HEIGHT AND PANNED ACROSS.
-         Fitting a spread of ratio 2.23 into 390px of width leaves a book 137px
-         tall with 3.6px captions — measured, not guessed. So the narrow layout
-         gives the spread the full height it wants, lets it be wider than the
-         screen, and the reader pans across it the way you would tilt a real
-         book. The page turn itself is untouched. */
+      const ASPECT = 1380 / 900          /* two comic-book pages side by side */
+      /* ON A PHONE THE SPREAD IS SIZED BY HEIGHT AND PANNED ACROSS. Fitting a
+         whole spread into 390px of width leaves captions a few pixels tall —
+         measured. The narrow layout gives the spread the height it wants, lets
+         it be wider than the screen, and the reader pans across it the way you
+         would tilt a real book. The page turn itself is untouched. */
       let w = narrow ? Math.round(availH * ASPECT) : Math.min(availW, Math.round(availH * ASPECT))
       let h = Math.round(w / ASPECT)
-      /* the closed book is one leaf, so it is fitted as one leaf */
-      if (at === 0) {
+      if (at === 0) {                    /* the closed book is one leaf */
         w = Math.min(w / 2, availW)
-        h = Math.min(Math.round(w / (690 / 620)), availH)
-        w = Math.round(h * (690 / 620))
+        h = Math.min(Math.round(w / (690 / 900)), availH)
+        w = Math.round(h * (690 / 900))
       }
       book.style.width = `${Math.round(w)}px`
       book.style.height = `${h}px`
       /* one unit for every measurement inside the page */
-      book.style.setProperty('--u', String(h / 620))
+      book.style.setProperty('--u', String(h / 900))
+      /* THE ARROWS BELONG TO THE BOOK, NOT TO THE WINDOW. Pinned to the window
+         edge they sat 88px out in the empty parchment at 1440 and read as two
+         loose buttons; put beside the leaf they read as the thing you press to
+         turn it. The book is centred, so its edge is arithmetic. */
+      const out = Math.max(6, Math.round((window.innerWidth - w) / 2) - 66)
+      document.documentElement.style.setProperty('--c3-out', `${out}px`)
     }
     fit()
     window.addEventListener('resize', fit)
@@ -215,33 +284,34 @@ export default function Chapter3Comic() {
     if (at >= sheets.length - 1) markContentComplete()
   }, [at, sheets.length])
 
-  const atEnd = at >= sheets.length - 1
+  /* a turn puts the reader back at the start of the new spread, which on a
+     panned narrow screen is the RIGHT edge — the earlier page */
+  useEffect(() => { if (stageRef.current) stageRef.current.scrollLeft = 0 }, [at])
 
+  const atEnd = at >= sheets.length - 1
+  const shown = at === 0 ? 0 : Math.min(at * 2, pages.length)
+  const partNow = parts.reduce((acc, p, i) => (p.first <= Math.max(shown, 1) ? i : acc), 0)
+  const openNow = at === 0 ? [] : [at * 2 - 1, at * 2]
+  const settled = moving < 0
+
+  /* CLICKING THE PAPER TURNS IT, AND THE PAGE SAYS SO BEFORE YOU CLICK. A click
+     anywhere that silently flipped the page was the surprise: you move in to
+     read a panel, press, and the page is gone. `side` tracks which half the
+     pointer is over, the leaf on that side lifts its outer corner, and its
+     arrow lights — so the click is announced rather than sprung. */
+  const [side, setSide] = useState<'' | 'l' | 'r'>('')
   const onStage = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('a,button')) return
     const r = bookRef.current?.getBoundingClientRect()
     if (!r) return
     turn(at === 0 || e.clientX < (r.left + r.right) / 2 ? 1 : -1)
   }, [at, turn])
-  const shown = at === 0 ? 0 : Math.min(at * 2, PAGES.length)
-  /* the part the reader is standing in, by the later of the two open folios */
-  const partNow = PARTS.reduce((acc, p, i) => (p.first <= Math.max(shown, 1) ? i : acc), 0)
-
-  /* the two folios the reader is looking at: the right leaf is 2·at−1 and the
-     left leaf 2·at, which is the whole of what the motion layer runs on */
-  const openNow = at === 0 ? [] : [at * 2 - 1, at * 2]
-  const settled = moving < 0
 
   /* THE POINTER MOVES THE LAYERS AGAINST EACH OTHER. Two numbers, written on
      the book once per frame; every layer reads them and multiplies them by its
      own depth, so the picture, the atmosphere and the motes travel at three
      different speeds. Written straight to the element rather than through
-     state — a re-render per mouse move would re-render 39 sheets. */
-  /* a turn puts the reader back at the start of the new spread, which on a
-     panned narrow screen is the RIGHT edge — folio 2·at−1, the earlier page */
-  const stageRef = useRef<HTMLDivElement | null>(null)
-  useEffect(() => { if (stageRef.current) stageRef.current.scrollLeft = 0 }, [at])
-
+     state — a re-render per mouse move would re-render every sheet. */
   const raf = useRef(0)
   const onMove = useCallback((e: React.PointerEvent) => {
     if (raf.current) return
@@ -250,30 +320,29 @@ export default function Chapter3Comic() {
       raf.current = 0
       const book = bookRef.current
       if (!book) return
-      book.style.setProperty('--px', String(((x / window.innerWidth) * 2 - 1).toFixed(3)))
-      book.style.setProperty('--py', String(((y / window.innerHeight) * 2 - 1).toFixed(3)))
+      book.style.setProperty('--px', ((x / window.innerWidth) * 2 - 1).toFixed(3))
+      book.style.setProperty('--py', ((y / window.innerHeight) * 2 - 1).toFixed(3))
+      const r = book.getBoundingClientRect()
+      setSide(at === 0 ? 'l' : x < (r.left + r.right) / 2 ? 'l' : 'r')
     })
-  }, [])
+  }, [at])
   useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current) }, [])
 
-  /* THE FOUR PAGES THE CHAPTER TURNS ON. Nothing about the page itself changes
-     — the room around the book does: the stage takes the colour of the picture
+  /* THE SPREADS THE CHAPTER TURNS ON. Nothing about the page itself changes —
+     the room around the book does: the stage takes the colour of the picture
      the reader has just arrived at. */
-  const peak = settled ? openNow.map((f) => PAGES[f - 1]).find((p) => p?.peak) : undefined
+  const peak = settled
+    ? openNow.map((f) => pages[f - 1]).flatMap((pg) => pg?.ps ?? []).find((p) => p?.peak)
+    : undefined
 
   return (
     <div className="c3-shell">
       <header className="chapter-site-header">
         <div className="chapter-site-header-inner">
           <div className="chapter-hdr-start">
-            <button
-              type="button"
-              className="chapter-burger"
-              aria-label="פתיחת תפריט הפרק"
-              aria-controls="chapter-menu"
-              aria-expanded={drawer}
-              onClick={() => setDrawer(true)}
-            >
+            <button type="button" className="chapter-burger" aria-label="פתיחת תפריט הפרק"
+                    aria-controls="chapter-menu" aria-expanded={drawer}
+                    onClick={() => setDrawer(true)}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16" /></svg>
             </button>
             <button type="button" className="chapter-logo" onClick={() => router.push('/chapters')}
@@ -285,12 +354,11 @@ export default function Chapter3Comic() {
           {/* the article's search field has no meaning in a book whose pages are
               turned rather than scrolled; the reader's place stands in for it */}
           <div className="c3-place">
-            <span className="c3-place-part">{PARTS[partNow].title}</span>
+            <span className="c3-place-bar" aria-hidden="true"
+                  style={{ transform: `scaleX(${shown / pages.length})` }} />
+            <span className="c3-place-part">{parts[partNow].title}</span>
             <span className="c3-place-n">
-              {at === 0 ? 'הכריכה' : `${shown} מתוך ${PAGES.length}`}
-            </span>
-            <span className="c3-place-bar" aria-hidden="true">
-              <i style={{ transform: `scaleX(${shown / PAGES.length})` }} />
+              {at === 0 ? 'הכריכה' : `${shown}/${pages.length}`}
             </span>
           </div>
         </div>
@@ -309,15 +377,13 @@ export default function Chapter3Comic() {
         </div>
         <nav className="chapter-menu-nav" aria-label="ניווט בפרק">
           <ol>
-            {PARTS.map((part, i) => (
+            {parts.map((part, i) => (
               <li key={part.title}>
                 <a href={`#p${part.first}`}
                    className={i === partNow && at > 0 ? 'is-current' : undefined}
                    aria-current={i === partNow && at > 0 ? 'true' : undefined}
                    onClick={(e) => {
                      e.preventDefault()
-                     /* folio f sits on sheet ceil(f/2) — turning to it opens the
-                        spread that carries it */
                      goTo(Math.ceil(part.first / 2))
                      setDrawer(false)
                    }}>
@@ -349,27 +415,33 @@ export default function Chapter3Comic() {
           leaf back. It lives on the stage rather than on two overlay buttons
           because an overlay would have to sit above the sheets, and then it
           would swallow the one link the book contains. */}
-      <div className={'c3-stage' + (peak ? ' is-peak' : '')} ref={stageRef} onClick={onStage} onPointerMove={onMove}>
+      <div className={'c3-stage' + (peak ? ' is-peak' : '') + (side ? ' hover-' + side : '')}
+           ref={stageRef} onClick={onStage} onPointerMove={onMove}
+           onPointerLeave={() => setSide('')}>
         <div className={'c3-scene' + (peak ? ' is-on' : '')} aria-hidden="true"
              style={peak ? { backgroundImage: `url(/assets/chapter3/comic/${peak.a}.jpg)` } : undefined} />
         <div className={'c3-book' + (at === 0 ? ' is-closed' : '')} ref={bookRef}>
           <div className="c3-under" aria-hidden="true">
             <span className="c3-half is-l" /><span className="c3-half is-r" />
           </div>
+          <span className="c3-lift is-l" aria-hidden="true" />
+          <span className="c3-lift is-r" aria-hidden="true" />
           {sheets.map((s, i) => (
             <div className={'c3-sheet' + (i < at ? ' is-turned' : '')} key={i}
                  style={{ zIndex: i === moving ? sheets.length + 5 : i < at ? i + 1 : sheets.length - i }}>
               <div className="c3-face is-front">
                 {s.front === 'cover'
-                  ? <Cover />
+                  ? <Cover pages={pages.length} />
                   : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} side="r"
+                              parts={parts}
                               live={openNow.includes(s.front?.folio ?? -1)}
                               fresh={settled && openNow.includes(s.front?.folio ?? -1)} />}
               </div>
               <div className="c3-face is-back">
                 {i === endAt
-                  ? <EndPage />
+                  ? <EndPage pages={pages.length} />
                   : <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l"
+                              parts={parts}
                               live={openNow.includes(s.back?.folio ?? -1)}
                               fresh={settled && openNow.includes(s.back?.folio ?? -1)} />}
               </div>
@@ -388,28 +460,27 @@ export default function Chapter3Comic() {
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
              strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 5l7 7-7 7" /></svg>
       </button>
-
     </div>
   )
 }
 
-/* the leaf that follows the last page. A book ends on a blank verso; a
-   screen that does so looks unfinished, and this is also the one place the
-   reader is meant to be handed on to the practice. */
-function EndPage() {
+/* the leaf that follows the last page. A book ends on a blank verso; a screen
+   that does so looks unfinished, and this is also the one place the reader is
+   meant to be handed on to the practice. */
+function EndPage({ pages }: { pages: number }) {
   return (
     <div className="c3-page is-end">
       <div className="c3-end">
         <span className="c3-end-mark" aria-hidden="true" />
         <p className="c3-end-t">סוף הפרק</p>
-        <p className="c3-end-s">ראשית חיי מוחמד · {PAGES.length} עמודים</p>
+        <p className="c3-end-s">ראשית חיי מוחמד · {pages} עמודים</p>
         <Link className="c3-end-go" href="/chapter3/practice">לתרגול המסכם</Link>
       </div>
     </div>
   )
 }
 
-function Cover() {
+function Cover({ pages }: { pages: number }) {
   return (
     <div className="c3-cover">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -420,7 +491,7 @@ function Cover() {
         <div className="c3-cover-rule" />
       </div>
       <div className="c3-cover-foot">
-        {PARTS.length} חלקים · {PAGES.length} עמודים · לחצו לפתיחה
+        {PARTS.length} חלקים · {PANELS.length} פאנלים · {pages} עמודים
       </div>
     </div>
   )
