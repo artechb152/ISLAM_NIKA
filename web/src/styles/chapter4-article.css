@@ -1111,7 +1111,7 @@
    coloured — a colour here would read as one more key term */
 .ch4-points{
   font-weight:inherit;color:inherit;
-  border-block-end:2px solid var(--gold);
+  border-block-end:2px solid var(--maroon);
   padding-block-end:1px;
 }
 

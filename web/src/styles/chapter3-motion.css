@@ -12,10 +12,9 @@
        for the other seventy-three. Thirty-nine sheets of animated particles
        would cost more than the whole rest of the chapter.
 
-   2 · THE ENTRANCE IS TIED TO ARRIVAL, NOT TO VISIBILITY. `is-fresh` lands when
-       the turn finishes. The page being turned AWAY from keeps its text on
-       screen for the whole rotation — tying the entrance to `is-live` made the
-       outgoing page go blank in mid-air, which is worse than no animation.
+   2 · THE LETTERING NEVER MOVES. It is ink printed on the same sheet as the
+       drawing, so it cannot arrive after it. There was a staged entrance here
+       once and it read as a slideshow build; the page turn is the animation.
 
    3 · THREE DEPTHS, ONE POINTER. --px/--py are written on the book once a
        frame; the picture reads them at ×6, the atmosphere at ×−10 and the motes
@@ -138,26 +137,16 @@
 .c3-haze,.c3-fx{display:none}
 .c3-page.is-live .c3-haze,.c3-page.is-live .c3-fx{display:block}
 
-/* ---- the lettering arrives after the page does ---- */
-@keyframes c3-rise{from{opacity:0;transform:translateY(calc(11px * var(--u)))}to{opacity:1;transform:none}}
-@keyframes c3-plate-in{from{opacity:0;transform:translateY(calc(-16px * var(--u)))}to{opacity:1;transform:none}}
-@keyframes c3-stamp-in{from{opacity:0;transform:translateX(calc(20px * var(--u)))}to{opacity:1;transform:none}}
-@keyframes c3-pop{from{opacity:0;transform:scale(.86)}to{opacity:1;transform:none}}
-@keyframes c3-card{from{opacity:0;transform:translateY(calc(16px * var(--u))) scale(.985)}to{opacity:1;transform:none}}
-@keyframes c3-tier{from{opacity:0;transform:translateY(calc(14px * var(--u)))}to{opacity:1;transform:none}}
+/* ---- THE LETTERING DOES NOT ARRIVE. IT IS PRINTED. ----
+   There was a staged entrance here: the tiers dropped in, then the boxes rose
+   one after another, then the balloon popped. It was the wrong idiom. In a
+   comic the lettering is ink on the same sheet as the drawing — it cannot
+   arrive after the picture it is printed on, and watching it assemble itself
+   every time a page landed read as a slideshow build, not as a page.
 
-/* the tiers land one after another, and the boxes inside a tier after it —
-   --i is the panel's index on the page */
-.c3-page.is-fresh .c3-pn{animation:c3-tier .5s cubic-bezier(.2,.75,.25,1) both;animation-delay:calc(var(--i) * .09s)}
-.c3-page.is-fresh .c3-cap{animation:c3-rise .5s cubic-bezier(.2,.75,.25,1) both;animation-delay:calc(var(--i) * .09s + .13s)}
-.c3-page.is-fresh .c3-cap.is-br{animation-delay:calc(var(--i) * .09s + .24s)}
-.c3-page.is-fresh .c3-cap.is-bl{animation-delay:calc(var(--i) * .09s + .34s)}
-.c3-page.is-fresh .c3-plate{animation:c3-plate-in .7s cubic-bezier(.2,.75,.25,1) both}
-.c3-page.is-fresh .c3-stamp{animation:c3-stamp-in .45s cubic-bezier(.2,.85,.3,1) .22s both}
-/* the balloon lands last and lands hardest: it is the only voice in the book
-   that is spoken rather than narrated */
-.c3-page.is-fresh .c3-say{animation:c3-pop .4s cubic-bezier(.2,1.5,.4,1) calc(var(--i) * .09s + .28s) both}
-.c3-page.is-fresh .c3-verse,.c3-page.is-fresh .c3-hero-verse{animation:c3-card .7s cubic-bezier(.2,.7,.2,1) .34s both}
+   The page turn IS the animation. What is left moving is only what would move
+   if the drawing were a window: the slow camera, the air, and the motes.
+   Deleted deliberately — do not put it back. */
 
 /* ---- the four spreads the chapter turns on ----
    §2 the birds · §19 the first words of the Quran · §42 the two verses of the
@@ -189,10 +178,5 @@
   .c3-page.is-live[data-c="out"] .c3-lens img,
   .c3-page.is-peak.is-live .c3-lens img{animation:none;transform:none}
   [data-m] .c3-haze,[data-m] .c3-fx::before,[data-m] .c3-fx::after,.c3-fx{animation:none}
-  .c3-page.is-fresh .c3-pn,.c3-page.is-fresh .c3-cap,
-  .c3-page.is-fresh .c3-cap.is-br,.c3-page.is-fresh .c3-cap.is-bl,
-  .c3-page.is-fresh .c3-plate,.c3-page.is-fresh .c3-stamp,
-  .c3-page.is-fresh .c3-say,.c3-page.is-fresh .c3-verse,
-  .c3-page.is-fresh .c3-hero-verse{animation:none}
   .c3-scene{transition:opacity .3s ease;transform:scale(1.14)}
 }

@@ -104,11 +104,10 @@ const SLOTS: Record<number, string[]> = {
    `live`  — this page is one of the two the reader is looking at. Only these
              carry the drifting layers, so the book animates a handful of panels
              and never all of them at once.
-   `fresh` — the turn has finished and this page has just arrived. It runs the
-             entrance once. It is deliberately NOT the same flag as `live`: a
-             page being turned AWAY from must keep its text on screen for the
-             whole rotation, and tying the entrance to visibility made the
-             outgoing page go blank in mid-air. */
+   THE LETTERING NEVER ANIMATES. It is ink on the same sheet as the drawing, so
+   it cannot arrive after it; a staged entrance read as a slideshow build. The
+   page turn is the animation, and what still moves is only what would move if
+   the panel were a window. */
 function PanelView({ panel, order, hideVerse }: { panel: Panel; order: number; hideVerse?: boolean }) {
   const time = panel.b.find((b) => b.k === 'time')
   const says = panel.b.filter((b) => b.k === 'say')
@@ -137,8 +136,8 @@ function PanelView({ panel, order, hideVerse }: { panel: Panel; order: number; h
   )
 }
 
-function PageView({ page, folio, side, live, fresh, parts }: {
-  page: Page | null; folio: number; side: 'r' | 'l'; live: boolean; fresh: boolean; parts: Part[]
+function PageView({ page, folio, side, live, parts }: {
+  page: Page | null; folio: number; side: 'r' | 'l'; live: boolean; parts: Part[]
 }) {
   if (!page) return <div className="c3-page is-blank" />
   const opens = parts.findIndex((p) => p.first === folio)
@@ -149,7 +148,7 @@ function PageView({ page, folio, side, live, fresh, parts }: {
   const hero = page.t === 'hero' ? page.ps[0].b.find((b) => b.k === 'v') : undefined
   return (
     <div className={'c3-page is-' + page.t + (side === 'r' ? ' is-recto' : '') +
-                    (live ? ' is-live' : '') + (fresh ? ' is-fresh' : '') +
+                    (live ? ' is-live' : '') +
                     (peak ? ' is-peak' : '') + (page.ps[0]?.e ? ' is-today' : '')}>
       <div className="c3-grid">
         {page.ps.map((p, k) => (
@@ -467,16 +466,14 @@ export default function Chapter3Comic() {
                   ? <Cover pages={pages.length} />
                   : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} side="r"
                               parts={parts}
-                              live={openNow.includes(s.front?.folio ?? -1)}
-                              fresh={settled && openNow.includes(s.front?.folio ?? -1)} />}
+                              live={openNow.includes(s.front?.folio ?? -1)} />}
               </div>
               <div className="c3-face is-back">
                 {i === endAt
                   ? <EndPage pages={pages.length} />
                   : <PageView page={s.back?.page ?? null} folio={s.back?.folio ?? 0} side="l"
                               parts={parts}
-                              live={openNow.includes(s.back?.folio ?? -1)}
-                              fresh={settled && openNow.includes(s.back?.folio ?? -1)} />}
+                              live={openNow.includes(s.back?.folio ?? -1)} />}
               </div>
             </div>
           ))}
