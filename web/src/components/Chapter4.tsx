@@ -53,6 +53,7 @@ import {
   saveCurrentSection,
   SECTION_ORDER,
 } from '@/lib/chapter4/progress'
+import MarkToNotebook from '@/components/MarkToNotebook'
 
 interface Sub {
   id: string
@@ -527,6 +528,8 @@ export default function Chapter4() {
 
   return (
     <div className="chapter-page">
+      {/* סימון משפט → "הוספה למחברת" */}
+      <MarkToNotebook ch={4} />
       <header className="chapter-site-header">
         <div className="chapter-site-header-inner">
           <div className="chapter-hdr-start">
@@ -783,20 +786,20 @@ export default function Chapter4() {
                 </Block>
                 {/* THE TURN, FULL BLEED. §4.b is a before and an after inside
                     one sentence, and as one paragraph it reads as neither. The
-                    band opens on the first drawing, turns on a press, and stops
-                    on the second. Both captions are that sentence's own words,
+                    two drawings are one view: the same camera, the same wall,
+                    the same gate and the same tree, so the only thing that can
+                    be seen is what changed. A press anywhere turns it. Both captions are that sentence's own words,
                     proved by `pick`; the sentence itself is printed under the
                     band in full, so nothing is replaced by its own summary. */}
                 <Pact
-                  film="pact-turn"
                   stillBefore="pact-before"
                   stillAfter="pact-after"
                   labelBefore="לפני קבלת החוזה"
                   labelAfter="אחרי קבלת החוזה"
                   textBefore={pick('§4.b', 'אי הצלחה, דשדוש וחוסר יכולת')}
                   textAfter={pick('§4.b', 'דת, מוסר, ערכים וצבא')}
-                  alt="ית'רב לפני החוזה ואחריו · שחזור מצויר"
-                  replay="מהתחלה"
+                  altBefore="ית'רב לפני החוזה · שחזור מצויר"
+                  altAfter="אותו מבט אחרי החוזה · שחזור מצויר"
                 />
                 <Block>
                   <T r="§4.b" className="ch4-body" reveal />

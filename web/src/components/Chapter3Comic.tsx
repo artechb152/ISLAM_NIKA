@@ -491,7 +491,7 @@ export default function Chapter3Comic() {
                  style={{ zIndex: i === moving ? sheets.length + 5 : i < at ? i + 1 : sheets.length - i }}>
               <div className="c3-face is-front">
                 {s.front === 'cover'
-                  ? <Cover pages={pages.length} />
+                  ? <Cover />
                   : <PageView page={s.front?.page ?? null} folio={s.front?.folio ?? 0} side="r"
                               parts={parts}
                               live={openNow.includes(s.front?.folio ?? -1)} />}
@@ -538,7 +538,7 @@ function EndPage({ pages }: { pages: number }) {
   )
 }
 
-function Cover({ pages }: { pages: number }) {
+function Cover() {
   return (
     <div className="c3-cover">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -547,9 +547,6 @@ function Cover({ pages }: { pages: number }) {
         <div className="c3-eyebrow">פרק שלישי</div>
         <h1 className="c3-cover-title">ראשית חיי מוחמד</h1>
         <div className="c3-cover-rule" />
-      </div>
-      <div className="c3-cover-foot">
-        {PARTS.length} חלקים · {PANELS.length} פאנלים · {pages} עמודים
       </div>
     </div>
   )

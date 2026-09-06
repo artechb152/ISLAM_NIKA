@@ -21,6 +21,7 @@ import '@/styles/chapter3-motion.css'
 /* and the closing practice, dressed in the same book: ink frames, lettering
    boxes and the maroon plate, over chapter3-article.css's structure */
 import '@/styles/chapter3-practice-comic.css'
+import '@/styles/site-notebook.css'
 
 export const metadata: Metadata = {
   title: 'פרק שלישי · ראשית חיי מוחמד',

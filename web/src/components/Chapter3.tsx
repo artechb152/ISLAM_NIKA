@@ -38,6 +38,7 @@ import {
   saveCurrentSection,
   SECTION_ORDER,
 } from '@/lib/chapter3/progress'
+import MarkToNotebook from '@/components/MarkToNotebook'
 
 interface Sub {
   id: string
@@ -907,6 +908,8 @@ export default function Chapter3() {
 
   return (
     <div className="chapter-page">
+      {/* סימון משפט → "הוספה למחברת" */}
+      <MarkToNotebook ch={3} />
       <header className="chapter-site-header">
         <div className="chapter-site-header-inner">
           <div className="chapter-hdr-start">

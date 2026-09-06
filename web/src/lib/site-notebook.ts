@@ -1,39 +1,49 @@
-/* המחברת האישית של האתר — הערות חופשיות שהלומדים כותבים לעצמם,
-   מסודרות לפי פרקים. הכול נשמר מקומית בדפדפן (localStorage): אין
-   חשבון ואין שרת — המחברת היא של הקוראת בלבד. */
+/* המחברת שלי — הסימונים של הלומד/ת.
 
-export interface SiteNote {
+   אין כאן "כתיבת הערות מאפס": המחברת מתמלאת רק ממה שסומן בפרקים עצמם
+   — מסמנים משפט, לוחצים "הוספה למחברת", והוא נשמר עם הפרק שממנו הגיע.
+   רק אחר כך, בתוך המחברת, אפשר לתלות הערה אישית על כל סימון בנפרד.
+
+   הכול מקומי לדפדפן (localStorage): אין חשבון ואין שרת. */
+
+export interface Mark {
   id: string
-  /** מספר פרק 1..16, או 0 להערה כללית */
+  /** מספר הפרק שממנו סומן */
   ch: number
+  /** המשפט שסומן, כלשונו */
   text: string
-  /** נכתבה (epoch ms) */
+  /** כותרת הסעיף שבו עמד הסימון, אם נמצאה — כדי למצוא אותו שוב */
+  where?: string
+  /** נסמן (epoch ms) */
   at: number
-  /** נערכה לאחרונה, אם נערכה */
-  up?: number
+  /** ההערה האישית שנתלתה עליו במחברת */
+  note?: string
+  noteAt?: number
 }
 
-export interface SiteNotebookStore {
-  v: 1
-  notes: SiteNote[]
+export interface MarksStore {
+  v: 2
+  marks: Mark[]
 }
 
-export const SITE_NOTEBOOK_KEY = 'site:notebook:v1'
+export const SITE_NOTEBOOK_KEY = 'site:notebook:v2'
+/** נשלח על window בכל שינוי, כדי שלשוניות/עמודים פתוחים יתרעננו */
+export const MARKS_EVENT = 'site-notebook-change'
 
-const EMPTY: SiteNotebookStore = { v: 1, notes: [] }
+const EMPTY: MarksStore = { v: 2, marks: [] }
 
-export function readSiteNotebook(): SiteNotebookStore {
+export function readMarks(): MarksStore {
   if (typeof window === 'undefined') return EMPTY
   try {
     const raw = window.localStorage.getItem(SITE_NOTEBOOK_KEY)
     if (!raw) return EMPTY
-    const p = JSON.parse(raw) as Partial<SiteNotebookStore>
-    if (!Array.isArray(p.notes)) return EMPTY
+    const p = JSON.parse(raw) as Partial<MarksStore>
+    if (!Array.isArray(p.marks)) return EMPTY
     return {
-      v: 1,
-      notes: p.notes.filter(
-        (n): n is SiteNote =>
-          !!n && typeof n.id === 'string' && typeof n.ch === 'number' && typeof n.text === 'string' && typeof n.at === 'number',
+      v: 2,
+      marks: p.marks.filter(
+        (m): m is Mark =>
+          !!m && typeof m.id === 'string' && typeof m.ch === 'number' && typeof m.text === 'string' && typeof m.at === 'number',
       ),
     }
   } catch {
@@ -41,27 +51,45 @@ export function readSiteNotebook(): SiteNotebookStore {
   }
 }
 
-function write(store: SiteNotebookStore): SiteNotebookStore {
+function write(store: MarksStore): MarksStore {
   try {
     window.localStorage.setItem(SITE_NOTEBOOK_KEY, JSON.stringify(store))
+    window.dispatchEvent(new CustomEvent(MARKS_EVENT))
   } catch {
-    /* דפדפן שחוסם אחסון — המחברת עדיין עובדת בזיכרון עד רענון */
+    /* דפדפן שחוסם אחסון — הסימון עדיין מוצג עד רענון */
   }
   return store
 }
 
-export function addSiteNote(ch: number, text: string): SiteNotebookStore {
-  const s = readSiteNotebook()
-  const note: SiteNote = { id: Math.random().toString(36).slice(2, 10) + Date.now().toString(36), ch, text, at: Date.now() }
-  return write({ ...s, notes: [...s.notes, note] })
+/** אורך מקסימלי לסימון בודד — בחירה ענקית בטעות לא תשתלט על המחברת */
+const MAX_LEN = 1200
+
+export function addMark(ch: number, text: string, where?: string): Mark | null {
+  const clean = text.replace(/\s+/g, ' ').trim().slice(0, MAX_LEN)
+  if (!clean) return null
+  const s = readMarks()
+  /* אותו משפט מאותו פרק לא נשמר פעמיים */
+  const dup = s.marks.find((m) => m.ch === ch && m.text === clean)
+  if (dup) return dup
+  const mark: Mark = { id: Math.random().toString(36).slice(2, 9) + Date.now().toString(36), ch, text: clean, where, at: Date.now() }
+  write({ ...s, marks: [...s.marks, mark] })
+  return mark
 }
 
-export function editSiteNote(id: string, text: string): SiteNotebookStore {
-  const s = readSiteNotebook()
-  return write({ ...s, notes: s.notes.map((n) => (n.id === id ? { ...n, text, up: Date.now() } : n)) })
+export function setMarkNote(id: string, note: string): MarksStore {
+  const s = readMarks()
+  const text = note.trim()
+  return write({
+    ...s,
+    marks: s.marks.map((m) => (m.id === id ? { ...m, note: text || undefined, noteAt: text ? Date.now() : undefined } : m)),
+  })
 }
 
-export function deleteSiteNote(id: string): SiteNotebookStore {
-  const s = readSiteNotebook()
-  return write({ ...s, notes: s.notes.filter((n) => n.id !== id) })
+export function deleteMark(id: string): MarksStore {
+  const s = readMarks()
+  return write({ ...s, marks: s.marks.filter((m) => m.id !== id) })
+}
+
+export function marksInChapter(ch: number): Mark[] {
+  return readMarks().marks.filter((m) => m.ch === ch)
 }

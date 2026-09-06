@@ -11,6 +11,7 @@ import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter2-article.css'
+import '@/styles/site-notebook.css'
 
 export const metadata: Metadata = {
   title: 'פרק שני · תרבות שבטית טרום עליית האסלאם',

@@ -187,7 +187,7 @@
   box-shadow:calc(3px * var(--u)) calc(3px * var(--u)) 0 rgba(74,56,38,.22);
   text-wrap:pretty;
 }
-.c3-cap.is-tr{top:calc(13px * var(--u));inset-inline-start:calc(13px * var(--u))}
+.c3-cap.is-tr{top:calc(13px * var(--u));inset-inline-start:calc(44px * var(--u))}
 .c3-cap.is-br{bottom:calc(13px * var(--u));inset-inline-start:calc(13px * var(--u))}
 .c3-cap.is-bl{bottom:calc(13px * var(--u));inset-inline-end:calc(13px * var(--u))}
 /* THREE BOXES ON ONE PANEL SHARE THE BOTTOM EDGE. At 56% each the two of them
@@ -196,13 +196,19 @@
 .c3-pn:has(.c3-cap.is-br) .c3-cap.is-br,
 .c3-pn:has(.c3-cap.is-br) .c3-cap.is-bl{max-width:44%}
 /* a dated panel already has something in its top corner */
-.c3-pn:has(.c3-stamp) .c3-cap.is-tr{top:calc(56px * var(--u))}
+/* a dated panel already has the number AND the date along its top edge, so
+   the first caption drops below both and takes the corner back */
+.c3-pn:has(.c3-stamp) .c3-cap.is-tr{top:calc(50px * var(--u));inset-inline-start:calc(13px * var(--u))}
 
 /* ---- the panel's number ----
-   Top LEFT: the tiers enter at the top right and the three lettering slots take
-   the other corners, so this is the one corner that is always free. */
+   ⚠ IT GOES IN THE CORNER THE EYE ENTERS BY, WHICH IN AN RTL COMIC IS THE TOP
+   RIGHT. It sat top LEFT — the exit corner — on the reasoning that no lettering
+   box uses it. Measured, every number was 0–1% from the left edge, and in a
+   paired tier that put the RIGHT panel's number in the middle of the tier and
+   the LEFT panel's at the far edge: scanning right to left, the numbers did not
+   arrive in the order they name. The first caption steps aside for it. */
 .c3-num{
-  position:absolute;z-index:7;top:0;inset-inline-end:0;
+  position:absolute;z-index:7;top:0;inset-inline-start:0;
   min-width:calc(27px * var(--u));height:calc(26px * var(--u));
   display:grid;place-items:center;padding:0 calc(7px * var(--u));
   background:var(--maroon-deep);color:var(--cream);
@@ -212,7 +218,7 @@
 
 /* ---- voice 2 · the date the story leaps to ---- */
 .c3-stamp{
-  position:absolute;z-index:6;top:0;inset-inline-start:calc(24px * var(--u));
+  position:absolute;z-index:6;top:0;inset-inline-start:calc(40px * var(--u));
   background:var(--maroon-deep);color:var(--cream);
   font-family:var(--font-heading);font-weight:700;letter-spacing:.05em;
   font-size:calc(14.5px * var(--u));
@@ -339,10 +345,6 @@
 .c3-cover-rule{
   width:calc(88px * var(--u));height:2px;background:var(--gold);
   margin:calc(20px * var(--u)) auto 0;opacity:.9;
-}
-.c3-cover-foot{
-  position:absolute;inset-inline:0;bottom:5%;z-index:2;text-align:center;
-  font-size:calc(13px * var(--u));letter-spacing:.18em;color:rgba(245,236,214,.76);
 }
 
 /* ---------------- the closing leaf ---------------- */

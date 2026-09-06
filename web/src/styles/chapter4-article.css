@@ -1163,90 +1163,76 @@
 }
 @media (max-width:820px){.ch4-plate{width:100%}}
 
-
 /* ------------------------- before the covenant, and after ----------------
-   §4.b is a before and an after inside one sentence. The band opens on the
-   first drawing and stops on the second; the sentence itself is printed under
-   it in full, so the shape is added and nothing is taken away.
+   Two drawings of ONE view — the same camera, the same wall, the same gate and
+   the same tree — so the only thing a reader can see is what changed. §4.b is a
+   before and an after inside one sentence; the sentence is printed under the
+   figure in full, and this gives it its shape.
 
-   FULL BLEED, like chapter 2's `.ch2-plate.is-bleed`: out to the gutters, and
-   the only thing in the chapter that leaves the reading column. It is the one
-   turn in section 01 and it is allowed to be the one wide object.
+   THE WHOLE PICTURE IS THE BUTTON. A control in a corner asks to be found; a
+   press anywhere turns the view, and the chip is a label for what the press
+   will show rather than the only place it works.
 
-   THE LAST FRAME OF THE FILM IS THE SECOND STILL — the still was cut from it,
-   measured at 1.5/255 — so the swap at the end has nothing to show. */
-.ch4-pact{
-  margin:0;
-  margin-inline:calc(-1 * var(--content-gutter));
-  width:auto;
-}
+   IN THE COLUMN, not out to the gutters: it is a figure in an article and it
+   sits where the paragraphs sit. */
+.ch4-pact{margin:0;width:100%}
 .ch4-pact-stage{
-  position:relative;isolation:isolate;overflow:hidden;
-  aspect-ratio:16/9;max-height:min(74vh,720px);
-  background:var(--maroon-deep);
+  position:relative;isolation:isolate;overflow:hidden;display:block;
+  width:100%;padding:0;cursor:pointer;
+  aspect-ratio:1600/861;
+  border:1px solid var(--edge);border-radius:14px;background:var(--maroon-deep);
 }
-.ch4-pact-still,.ch4-pact-film{
+.ch4-pact-stage:focus-visible{outline:2px solid var(--gold-text);outline-offset:3px}
+
+.ch4-pact-still{
   position:absolute;inset:0;width:100%;height:100%;
   object-fit:cover;display:block;
-  transition:opacity .45s ease;
+  transition:opacity .5s ease;
 }
-/* one of the three is shown at a time; the others are held at zero rather than
-   unmounted, so nothing has to be decoded again mid-turn */
-.ch4-pact-still.is-after,.ch4-pact-film{opacity:0}
-.ch4-pact.is-running .ch4-pact-film{opacity:1;transition:none}
-.ch4-pact.is-running .ch4-pact-still.is-before{opacity:0;transition:none}
-.ch4-pact.is-after .ch4-pact-still.is-after{opacity:1}
-.ch4-pact.is-after .ch4-pact-still.is-before{opacity:0}
+.ch4-pact-still.is-after{opacity:0}
+.ch4-pact-stage.is-after .ch4-pact-still.is-after{opacity:1}
+.ch4-pact-stage.is-after .ch4-pact-still.is-before{opacity:0}
 
 .ch4-pact-scrim{
   position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(to bottom,rgba(28,14,6,.06),rgba(28,14,6,.28) 52%,rgba(28,14,6,.74));
+  background:linear-gradient(to bottom,rgba(28,14,6,0),rgba(28,14,6,.18) 54%,rgba(28,14,6,.72));
 }
 
 /* the two captions: our own label above, the sentence's own words below */
 .ch4-pact-cap{
   position:absolute;z-index:2;
-  inset-inline:clamp(24px,5vw,84px);bottom:clamp(22px,4vw,56px);
-  display:grid;gap:6px;color:var(--cream);
-  opacity:0;translate:0 8px;transition:opacity .45s ease,translate .45s ease;
+  inset-inline:clamp(18px,3vw,40px);bottom:clamp(16px,2.6vw,32px);
+  display:grid;gap:4px;color:var(--cream);text-align:start;
+  opacity:0;translate:0 6px;transition:opacity .4s ease,translate .4s ease;
   pointer-events:none;
 }
 .ch4-pact-cap b{
-  font-size:13px;font-weight:600;letter-spacing:.14em;
-  color:var(--gold);text-transform:none;
+  font-size:12px;font-weight:600;letter-spacing:.13em;color:var(--gold);
 }
-.ch4-pact-cap span{
-  font-family:var(--font-heading);font-weight:700;line-height:1.22;
-  font-size:clamp(22px,3.2vw,44px);text-wrap:balance;
-  text-shadow:0 3px 18px rgba(20,10,4,.6);
+.ch4-pact-cap i{
+  font-style:normal;font-family:var(--font-heading);font-weight:700;line-height:1.22;
+  font-size:clamp(19px,2.4vw,32px);text-wrap:balance;
+  text-shadow:0 3px 16px rgba(20,10,4,.65);
 }
-.ch4-pact.is-before .ch4-pact-cap.is-before,
-.ch4-pact.is-after .ch4-pact-cap.is-after{opacity:1;translate:0 0}
+.ch4-pact-stage:not(.is-after) .ch4-pact-cap.is-before,
+.ch4-pact-stage.is-after .ch4-pact-cap.is-after{opacity:1;translate:0 0}
 
-.ch4-pact-go{
-  position:absolute;z-index:3;inset-block-start:50%;inset-inline-start:50%;
-  translate:-50% -50%;
-  display:inline-flex;align-items:center;gap:10px;cursor:pointer;
-  padding:12px 22px 12px 18px;border-radius:999px;
-  border:1px solid rgba(245,236,214,.5);background:rgba(28,16,10,.5);
+/* what a press will show — a label, not the only place the press works */
+.ch4-pact-chip{
+  position:absolute;z-index:3;
+  inset-block-start:clamp(12px,2vw,20px);inset-inline-end:clamp(12px,2vw,20px);
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 14px;border-radius:999px;
+  border:1px solid rgba(245,236,214,.45);background:rgba(28,16,10,.44);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
-  color:var(--cream);font-weight:600;font-size:15px;
+  color:var(--cream);font-size:13px;font-weight:600;white-space:nowrap;
   transition:background .2s ease,border-color .2s ease;
 }
-.ch4-pact-go:hover{background:rgba(28,16,10,.72);border-color:var(--cream)}
-.ch4-pact-go:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.ch4-pact-go svg{width:17px;height:17px;flex:none}
-
-.ch4-pact-back{
-  position:absolute;z-index:3;
-  inset-block-start:clamp(16px,2.4vw,26px);inset-inline-end:clamp(16px,2.4vw,26px);
-  cursor:pointer;padding:8px 16px;border-radius:999px;
-  border:1px solid rgba(245,236,214,.42);background:rgba(28,16,10,.42);
-  color:var(--cream);font-size:13.5px;font-weight:600;
+.ch4-pact-chip::before{
+  content:"";width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none;
 }
-.ch4-pact-back:hover{background:rgba(28,16,10,.68)}
-.ch4-pact-back:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.ch4-pact-stage:hover .ch4-pact-chip{background:rgba(28,16,10,.68);border-color:var(--cream)}
 
-@media (max-width:700px){
-  .ch4-pact-stage{aspect-ratio:4/5;max-height:none}
+@media (prefers-reduced-motion:reduce){
+  .ch4-pact-still,.ch4-pact-cap{transition:none}
 }

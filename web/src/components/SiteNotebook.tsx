@@ -1,185 +1,261 @@
 'use client'
 
-/* המחברת שלי — עמוד המחברת האישית של האתר. נפתחת מהתפריט (ליד חדר
-   המבחנים): מסמנים ושומרים דברים לעצמכם, מסודר לפי פרקים. מקומי
-   לדפדפן; אין שרת. העיצוב יושב על שפת הקלף של מסך הפרקים. */
+/* המחברת שלי — עמוד שנראה כמו פרק רגיל (אותו masthead, אותו סרגל
+   סעיפים, אותה שפת קלף), אלא שהתוכן שלו הוא מה שהקורא/ת סימנו:
+   כל סעיף הוא פרק, וכל סימון הוא ציטוט שאפשר לתלות עליו הערה אישית.
+   המחברת אינה כותבת דבר משל עצמה. */
 
-import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { allChapters } from '@/lib/chapters-data'
-import {
-  addSiteNote,
-  deleteSiteNote,
-  editSiteNote,
-  readSiteNotebook,
-  type SiteNotebookStore,
-} from '@/lib/site-notebook'
-
-const GENERAL = 0
+import { deleteMark, MARKS_EVENT, readMarks, setMarkNote, type Mark } from '@/lib/site-notebook'
 
 function fmt(ms: number): string {
-  return new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 export default function SiteNotebook() {
-  const [store, setStore] = useState<SiteNotebookStore>({ v: 1, notes: [] })
+  const router = useRouter()
+  const [marks, setMarks] = useState<Mark[]>([])
   const [ready, setReady] = useState(false)
-  const [open, setOpen] = useState<Set<number>>(new Set())
-  const [draft, setDraft] = useState<Record<number, string>>({})
+  const [drawer, setDrawer] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null)
   const [confirmDel, setConfirmDel] = useState<string | null>(null)
+  const [current, setCurrent] = useState<string | null>(null)
+  const articleRef = useRef<HTMLElement | null>(null)
 
-  /* localStorage נקרא רק אחרי ההרכבה — העמוד עובר prerender בשרת */
+  const load = useCallback(() => setMarks(readMarks().marks), [])
   useEffect(() => {
-    const s = readSiteNotebook()
-    setStore(s)
-    /* פרקים שכבר יש בהם הערות נפתחים מעצמם — קודם מה ששלך */
-    setOpen(new Set(s.notes.map((n) => n.ch)))
+    load()
     setReady(true)
+    window.addEventListener(MARKS_EVENT, load)
+    window.addEventListener('storage', load)
+    return () => {
+      window.removeEventListener(MARKS_EVENT, load)
+      window.removeEventListener('storage', load)
+    }
+  }, [load])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width:1024px)')
+    const sync = () => setIsDesktop(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
   }, [])
 
-  const byChapter = useMemo(() => {
-    const m = new Map<number, SiteNotebookStore['notes']>()
-    for (const n of store.notes) {
-      const list = m.get(n.ch) ?? []
-      list.push(n)
-      m.set(n.ch, list)
+  /* סעיף לכל פרק שיש בו סימונים — סדר הפרקים, לא סדר הסימון */
+  const sections = useMemo(() => {
+    const by = new Map<number, Mark[]>()
+    for (const m of marks) {
+      const list = by.get(m.ch) ?? []
+      list.push(m)
+      by.set(m.ch, list)
     }
-    for (const list of m.values()) list.sort((a, b) => a.at - b.at)
-    return m
-  }, [store])
+    for (const list of by.values()) list.sort((a, b) => a.at - b.at)
+    return allChapters
+      .filter((c) => by.has(c.number))
+      .map((c) => ({ id: `ch-${c.number}`, num: c.number, title: c.title, href: c.href, marks: by.get(c.number)! }))
+  }, [marks])
 
-  const sections = useMemo(
-    () => [
-      { ch: GENERAL, title: 'הערות כלליות', sub: 'מה שלא שייך לפרק אחד' },
-      ...allChapters.map((c) => ({ ch: c.number, title: c.title, sub: `פרק ${c.number}` })),
-    ],
-    [],
-  )
+  /* איזה סעיף נקרא עכשיו — מסמן אותו בסרגל, בדיוק כמו בפרק */
+  useEffect(() => {
+    const root = articleRef.current
+    if (!root) return
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting) setCurrent(e.target.id)
+      },
+      { rootMargin: '-30% 0px -60% 0px' },
+    )
+    root.querySelectorAll('.article-section[id]').forEach((s) => obs.observe(s))
+    return () => obs.disconnect()
+  }, [sections])
 
-  const toggle = (ch: number) =>
-    setOpen((prev) => {
-      const next = new Set(prev)
-      if (next.has(ch)) next.delete(ch)
-      else next.add(ch)
-      return next
-    })
-
-  const save = (ch: number) => {
-    const text = (draft[ch] ?? '').trim()
-    if (!text) return
-    setStore(addSiteNote(ch, text))
-    setDraft((d) => ({ ...d, [ch]: '' }))
-  }
-
-  const saveEdit = () => {
+  const saveNote = () => {
     if (!editing) return
-    const text = editing.text.trim()
-    if (text) setStore(editSiteNote(editing.id, text))
+    setMarkNote(editing.id, editing.text)
     setEditing(null)
   }
 
-  const total = store.notes.length
-
   return (
-    <div className="nb-page" dir="rtl">
-      <header className="nb-hdr">
-        <Link className="nb-back" href="/chapters" aria-label="חזרה לפרקי הלמידה">
-          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 6l6 6-6 6" />
-          </svg>
-          <span>פרקי הלמידה</span>
-        </Link>
-        <div className="nb-title">
-          <h1>המחברת שלי</h1>
-          <p>{ready && total > 0 ? `${total} הערות, שמורות כאן בדפדפן שלכם` : 'סמנו ושמרו לעצמכם — לפי פרקים. נשמר בדפדפן הזה בלבד.'}</p>
+    <div className="chapter-page">
+      <header className="chapter-site-header">
+        <div className="chapter-site-header-inner">
+          <div className="chapter-hdr-start">
+            <button
+              type="button"
+              className="chapter-burger"
+              aria-label={isDesktop ? 'כיווץ/הרחבה של התפריט' : 'פתיחת תפריט המחברת'}
+              aria-controls="chapter-menu"
+              aria-expanded={isDesktop ? !collapsed : drawer}
+              onClick={() => (isDesktop ? setCollapsed((c) => !c) : setDrawer(true))}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5h16M4 12h16M4 17.5h16" /></svg>
+            </button>
+            <button type="button" className="chapter-logo" onClick={() => router.push('/chapters')} aria-label="חזרה לעמוד הפרקים">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/assets/logo-cream.png" alt="אסלאם" />
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="nb-body">
-        {sections.map((sec) => {
-          const notes = byChapter.get(sec.ch) ?? []
-          const isOpen = open.has(sec.ch)
-          return (
-            <section key={sec.ch} className={`nb-sec${isOpen ? ' is-open' : ''}${notes.length ? ' has-notes' : ''}`}>
-              <button type="button" className="nb-sec-head" aria-expanded={isOpen} onClick={() => toggle(sec.ch)}>
-                <span className="nb-sec-sub">{sec.sub}</span>
-                <span className="nb-sec-name">{sec.title}</span>
-                {notes.length > 0 && <span className="nb-count">{notes.length}</span>}
-                <svg className="nb-chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-              {isOpen && (
-                <div className="nb-sec-body">
-                  {notes.map((n) =>
-                    editing?.id === n.id ? (
-                      <div className="nb-note is-editing" key={n.id}>
-                        <textarea
-                          value={editing.text}
-                          rows={3}
-                          autoFocus
-                          onChange={(e) => setEditing({ id: n.id, text: e.target.value })}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveEdit()
-                            if (e.key === 'Escape') setEditing(null)
-                          }}
-                        />
-                        <div className="nb-note-actions">
-                          <button type="button" className="nb-btn" onClick={saveEdit}>שמירה</button>
-                          <button type="button" className="nb-btn is-quiet" onClick={() => setEditing(null)}>ביטול</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="nb-note" key={n.id}>
-                        <p>{n.text}</p>
-                        <div className="nb-note-meta">
-                          <span>{fmt(n.up ?? n.at)}{n.up ? ' · נערכה' : ''}</span>
-                          <span className="nb-note-tools">
-                            <button type="button" className="nb-tool" onClick={() => { setConfirmDel(null); setEditing({ id: n.id, text: n.text }) }}>
-                              עריכה
-                            </button>
-                            {confirmDel === n.id ? (
+      <div className="chapter-shell">
+        <aside
+          id="chapter-menu"
+          className={'chapter-drawer' + (drawer ? ' is-open' : '') + (collapsed ? ' is-collapsed' : '')}
+          aria-label="תפריט המחברת"
+          aria-hidden={!isDesktop && !drawer ? true : undefined}
+          inert={!isDesktop && !drawer}
+        >
+          <div className="menu-head">
+            <button type="button" className="menu-close" aria-label="סגירת התפריט" onClick={() => setDrawer(false)}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+            <p className="menu-title">מה סימנתם</p>
+            <span className="menu-sub">לפי פרקים</span>
+          </div>
+          <nav className="chapter-menu-nav" aria-label="ניווט במחברת">
+            <ol>
+              {sections.map((s) => (
+                <li key={s.id}>
+                  <a
+                    href={`#${s.id}`}
+                    className={current === s.id ? 'is-current' : undefined}
+                    aria-current={current === s.id ? 'true' : undefined}
+                    onClick={() => setDrawer(false)}
+                  >
+                    <span className="menu-num">{String(s.num).padStart(2, '0')}</span>
+                    <span className="menu-label">{s.title}</span>
+                    <span className="nb-rail-count">{s.marks.length}</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+            {ready && sections.length === 0 && <p className="nb-rail-empty">אין עדיין סימונים</p>}
+          </nav>
+        </aside>
+        {drawer && !isDesktop && <div className="chapter-scrim" onClick={() => setDrawer(false)} />}
+
+        <div className="chapter-content">
+          <div className="chapter-layout">
+            <main className="chapter-article" ref={articleRef}>
+              <section className="article-section opening-section">
+                <span className="chapter-number">המחברת שלי</span>
+                <div className="title-ornament" aria-hidden="true"><span /></div>
+                <h1 className="nb-h1">מה שסימנתם לעצמכם</h1>
+                <p className="opening-subtitle">
+                  {ready && marks.length > 0
+                    ? `${marks.length} סימונים מתוך ${sections.length} פרקים`
+                    : 'כאן נאסף מה שסימנתם בפרקים'}
+                </p>
+                <div className="nb-lede">
+                  <p>
+                    במהלך הקריאה בפרק אפשר לסמן משפט בעכבר — ומעליו יופיע כפתור קטן,
+                    <b> „הוספה למחברת“</b>. מה שנוסף מופיע כאן, מסודר לפי הפרק שממנו בא,
+                    ואפשר לתלות על כל סימון הערה אישית משלכם.
+                  </p>
+                  <p className="nb-lede-quiet">
+                    המחברת נשמרת בדפדפן הזה בלבד — היא לא עולה לשום שרת.
+                  </p>
+                </div>
+              </section>
+
+              {ready && sections.length === 0 && (
+                <section className="article-section nb-empty">
+                  <p>עוד לא סימנתם דבר.</p>
+                  <button type="button" className="nb-btn" onClick={() => router.push('/chapters')}>
+                    אל הפרקים
+                  </button>
+                </section>
+              )}
+
+              {sections.map((s) => (
+                <section className="article-section" id={s.id} key={s.id}>
+                  <header className="section-heading">
+                    <span className="section-eyebrow">פרק {s.num}</span>
+                    <div>
+                      <h2>{s.title}</h2>
+                    </div>
+                    {s.href && (
+                      <p className="nb-sec-link">
+                        <a href={s.href}>חזרה אל הפרק ←</a>
+                      </p>
+                    )}
+                  </header>
+
+                  <div className="nb-marks">
+                    {s.marks.map((m) => (
+                      <article className="nb-mark" key={m.id}>
+                        <blockquote>
+                          <p>{m.text}</p>
+                          {m.where && <cite>{m.where}</cite>}
+                        </blockquote>
+
+                        {m.note && editing?.id !== m.id && (
+                          <div className="nb-mark-note">
+                            <span className="nb-mark-note-label">ההערה שלי</span>
+                            <p>{m.note}</p>
+                          </div>
+                        )}
+
+                        {editing?.id === m.id ? (
+                          <div className="nb-mark-edit">
+                            <textarea
+                              rows={3}
+                              autoFocus
+                              placeholder="מה חשוב לזכור כאן?"
+                              value={editing.text}
+                              onChange={(e) => setEditing({ id: m.id, text: e.target.value })}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveNote()
+                                if (e.key === 'Escape') setEditing(null)
+                              }}
+                            />
+                            <div className="nb-mark-actions">
+                              <button type="button" className="nb-btn" onClick={saveNote}>שמירה</button>
+                              <button type="button" className="nb-link" onClick={() => setEditing(null)}>ביטול</button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="nb-mark-foot">
+                            <span className="nb-mark-date">סומן {fmt(m.at)}</span>
+                            <span className="nb-mark-tools">
                               <button
                                 type="button"
-                                className="nb-tool is-danger"
-                                onClick={() => { setStore(deleteSiteNote(n.id)); setConfirmDel(null) }}
+                                className="nb-link"
+                                onClick={() => { setConfirmDel(null); setEditing({ id: m.id, text: m.note ?? '' }) }}
                               >
-                                למחוק באמת?
+                                {m.note ? 'עריכת ההערה' : 'הוספת הערה'}
                               </button>
-                            ) : (
-                              <button type="button" className="nb-tool" onClick={() => setConfirmDel(n.id)}>
-                                מחיקה
-                              </button>
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    ),
-                  )}
-                  <div className="nb-compose">
-                    <textarea
-                      placeholder={sec.ch === GENERAL ? 'הערה חדשה…' : `הערה על ${sec.sub}…`}
-                      rows={2}
-                      value={draft[sec.ch] ?? ''}
-                      onChange={(e) => setDraft((d) => ({ ...d, [sec.ch]: e.target.value }))}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) save(sec.ch)
-                      }}
-                    />
-                    <button type="button" className="nb-btn" disabled={!(draft[sec.ch] ?? '').trim()} onClick={() => save(sec.ch)}>
-                      הוספה
-                    </button>
+                              {confirmDel === m.id ? (
+                                <button
+                                  type="button"
+                                  className="nb-link is-danger"
+                                  onClick={() => { deleteMark(m.id); setConfirmDel(null) }}
+                                >
+                                  למחוק את הסימון?
+                                </button>
+                              ) : (
+                                <button type="button" className="nb-link" onClick={() => setConfirmDel(m.id)}>
+                                  מחיקה
+                                </button>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                      </article>
+                    ))}
                   </div>
-                </div>
-              )}
-            </section>
-          )
-        })}
-        <p className="nb-foot">
-          המחברת נשמרת בדפדפן הזה בלבד — היא לא עולה לשום שרת. ניקוי נתוני האתר בדפדפן ימחק אותה.
-        </p>
-      </main>
+                </section>
+              ))}
+            </main>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

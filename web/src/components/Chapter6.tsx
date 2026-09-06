@@ -20,6 +20,7 @@ import {
   SECTION_ORDER,
 } from '@/lib/chapter6/progress'
 import type { Screen } from '@/lib/chapter6/types'
+import MarkToNotebook from '@/components/MarkToNotebook'
 
 const SECTION_LINKS = [
   { id: 'opening', label: 'פתיחת הפרק' },
@@ -458,6 +459,8 @@ export default function Chapter6() {
 
   return (
     <div className="chapter-page">
+      {/* סימון משפט → "הוספה למחברת" */}
+      <MarkToNotebook ch={6} />
       <header className="chapter-site-header">
         <div className="chapter-site-header-inner">
           <div className="chapter-hdr-start">

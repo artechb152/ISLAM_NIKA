@@ -5,6 +5,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
+import '@/styles/site-notebook.css'
 
 export const metadata: Metadata = {
   title: "פרק שישי · חמש מצוות היסוד",

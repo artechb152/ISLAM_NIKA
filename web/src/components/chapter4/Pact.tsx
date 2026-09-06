@@ -6,42 +6,38 @@
    word „נהיה" and „דת, מוסר, ערכים וצבא" on the other. It is a before and an
    after inside one sentence, and as one paragraph it reads as neither.
 
-   So the band opens on the before, holds it, and turns — a film that runs once,
-   from the first drawing to the second, and stops on it. The reader starts it;
-   nothing moves on its own.
+   TWO DRAWINGS OF ONE VIEW. Not two pictures of two places: the same camera,
+   the same wall, the same gate, the same ridge and the same tree. The second
+   was made by editing the first, so nothing in the frame moves and the only
+   thing the reader can see is what changed — dusk to morning, a shut gate to an
+   open one, bare ground to a working courtyard, a dead tree in leaf.
 
-   THE TWO CAPTIONS ARE THE SENTENCE'S OWN WORDS. The label above each is ours —
-   a caption on our own drawing, which this file may write — but the line under
-   it is a phrase lifted out of §4.b, and the caller proves it with `pick`, which
-   throws if the phrase is not in that fragment. The whole sentence is printed
-   under the band as a paragraph, so the shape is added and nothing is replaced
-   by its own summary.
+   THE WHOLE PICTURE IS THE BUTTON. A control in one corner asks to be found;
+   here a press anywhere turns the view, and the chip in the corner is a label
+   for what the press will show, not the only place it works.
 
-   REDUCED MOTION SKIPS THE FILM, it does not skip the point: the band goes
-   straight from the first drawing to the second and says so. A reader who has
-   asked not to be moved still gets the before, the after and both captions.
+   THE CAPTIONS ARE THE SENTENCE'S OWN WORDS. The small line above each is ours
+   — a caption on our own drawing, which this file may write — but the line
+   under it is a phrase lifted out of §4.b, and the caller proves it with
+   `pick`, which throws if the phrase is not in that fragment. The sentence
+   itself is printed under the figure in full, so the shape is added and nothing
+   is replaced by its own summary.
 
-   THE LAST FRAME OF THE FILM IS THE SECOND DRAWING — it was generated with that
-   still as its end image — so the swap from video to picture at the end has
-   nothing to show. */
+   BOTH DRAWINGS ARE ALWAYS LOADED and cross-faded in place, so the turn has
+   nothing to fetch and the frame cannot jump. */
 
-import { useEffect, useRef, useState } from 'react'
-
-type Phase = 'before' | 'running' | 'after'
+import { useState } from 'react'
 
 export default function Pact({
-  film,
   stillBefore,
   stillAfter,
   labelBefore,
   labelAfter,
   textBefore,
   textAfter,
-  alt,
-  replay,
+  altBefore,
+  altAfter,
 }: {
-  /** the transition, without extension */
-  film: string
   stillBefore: string
   stillAfter: string
   /** our own captions on our own drawings */
@@ -50,87 +46,45 @@ export default function Pact({
   /** the source's words, lifted from §4.b by the caller */
   textBefore: string
   textAfter: string
-  alt: string
-  replay: string
+  altBefore: string
+  altAfter: string
 }) {
-  const video = useRef<HTMLVideoElement | null>(null)
-  const [phase, setPhase] = useState<Phase>('before')
-  const [still, setStill] = useState(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const sync = () => setStill(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
-
-  const run = () => {
-    if (phase !== 'before') return
-    if (still) {
-      setPhase('after')
-      return
-    }
-    setPhase('running')
-    const v = video.current
-    if (!v) {
-      setPhase('after')
-      return
-    }
-    v.currentTime = 0
-    v.play().catch(() => setPhase('after'))
-  }
-
-  const back = () => {
-    setPhase('before')
-    video.current?.pause()
-  }
+  const [after, setAfter] = useState(false)
 
   return (
-    <figure className={`ch4-pact is-${phase}`}>
-      <div className="ch4-pact-stage">
+    /* THE STATE CLASS IS NOT ON THE REVEALED ELEMENT. `.is-inview` is added to
+       [data-reveal] imperatively by the article's observer; re-rendering this
+       figure with a className of our own wiped it, and the whole picture went
+       to opacity 0 the moment it was pressed. The figure's class is now
+       constant and the state lives on the button inside it. */
+    <figure className="ch4-pact" data-reveal>
+      <button
+        type="button"
+        className={`ch4-pact-stage${after ? ' is-after' : ''}`}
+        aria-pressed={after}
+        aria-label={after ? labelBefore : labelAfter}
+        onClick={() => setAfter((v) => !v)}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="ch4-pact-still is-before" src={`/assets/chapter4/${stillBefore}.jpg`} alt={alt} />
+        <img className="ch4-pact-still is-before" src={`/assets/chapter4/${stillBefore}.jpg`} alt={altBefore} />
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="ch4-pact-still is-after" src={`/assets/chapter4/${stillAfter}.jpg`} alt="" aria-hidden="true" />
-        <video
-          className="ch4-pact-film"
-          ref={video}
-          src={`/assets/chapter4/${film}.mp4`}
-          poster={`/assets/chapter4/${stillBefore}.jpg`}
-          muted
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-          tabIndex={-1}
-          onEnded={() => setPhase('after')}
-        />
+        <img className="ch4-pact-still is-after" src={`/assets/chapter4/${stillAfter}.jpg`} alt={altAfter} />
 
         <span className="ch4-pact-scrim" aria-hidden="true" />
 
-        <figcaption className="ch4-pact-cap is-before">
+        <span className="ch4-pact-cap is-before" aria-hidden={after}>
           <b>{labelBefore}</b>
-          <span>{textBefore}</span>
-        </figcaption>
-        <figcaption className="ch4-pact-cap is-after">
+          <i>{textBefore}</i>
+        </span>
+        <span className="ch4-pact-cap is-after" aria-hidden={!after}>
           <b>{labelAfter}</b>
-          <span>{textAfter}</span>
-        </figcaption>
+          <i>{textAfter}</i>
+        </span>
 
-        {phase === 'before' && (
-          <button type="button" className="ch4-pact-go" onClick={run}>
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <span>{labelAfter}</span>
-          </button>
-        )}
-        {phase === 'after' && (
-          <button type="button" className="ch4-pact-back" onClick={back}>
-            {replay}
-          </button>
-        )}
-      </div>
+        <span className="ch4-pact-chip" aria-hidden="true">
+          {after ? labelBefore : labelAfter}
+        </span>
+      </button>
     </figure>
   )
 }
