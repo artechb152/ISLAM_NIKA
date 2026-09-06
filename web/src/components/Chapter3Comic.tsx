@@ -44,6 +44,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import comicData from '@/lib/chapter3/comic.json'
 import { markContentComplete } from '@/lib/chapter3/progress'
+import MarkToNotebook from '@/components/MarkToNotebook'
 
 interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
 interface Panel {
@@ -397,6 +398,8 @@ export default function Chapter3Comic() {
 
   return (
     <div className="c3-shell">
+      {/* סימון משפט בקומיקס → "הוספה למחברת" */}
+      <MarkToNotebook ch={3} />
       <header className="chapter-site-header">
         <div className="chapter-site-header-inner">
           <div className="chapter-hdr-start">

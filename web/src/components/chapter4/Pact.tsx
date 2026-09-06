@@ -12,9 +12,9 @@
    thing the reader can see is what changed — dusk to morning, a shut gate to an
    open one, bare ground to a working courtyard, a dead tree in leaf.
 
-   THE WHOLE PICTURE IS THE BUTTON. A control in one corner asks to be found;
-   here a press anywhere turns the view, and the chip in the corner is a label
-   for what the press will show, not the only place it works.
+   THE WHOLE PICTURE IS THE BUTTON, and nothing is drawn on it to say so — a
+   press anywhere turns the view. The button's own aria-label names what the
+   press will show, so a screen reader is still told.
 
    THE CAPTIONS ARE THE SENTENCE'S OWN WORDS. The small line above each is ours
    — a caption on our own drawing, which this file may write — but the line
@@ -79,10 +79,6 @@ export default function Pact({
         <span className="ch4-pact-cap is-after" aria-hidden={!after}>
           <b>{labelAfter}</b>
           <i>{textAfter}</i>
-        </span>
-
-        <span className="ch4-pact-chip" aria-hidden="true">
-          {after ? labelBefore : labelAfter}
         </span>
       </button>
     </figure>

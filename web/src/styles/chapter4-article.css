@@ -1217,22 +1217,6 @@
 .ch4-pact-stage:not(.is-after) .ch4-pact-cap.is-before,
 .ch4-pact-stage.is-after .ch4-pact-cap.is-after{opacity:1;translate:0 0}
 
-/* what a press will show — a label, not the only place the press works */
-.ch4-pact-chip{
-  position:absolute;z-index:3;
-  inset-block-start:clamp(12px,2vw,20px);inset-inline-end:clamp(12px,2vw,20px);
-  display:inline-flex;align-items:center;gap:7px;
-  padding:7px 14px;border-radius:999px;
-  border:1px solid rgba(245,236,214,.45);background:rgba(28,16,10,.44);
-  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
-  color:var(--cream);font-size:13px;font-weight:600;white-space:nowrap;
-  transition:background .2s ease,border-color .2s ease;
-}
-.ch4-pact-chip::before{
-  content:"";width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none;
-}
-.ch4-pact-stage:hover .ch4-pact-chip{background:rgba(28,16,10,.68);border-color:var(--cream)}
-
 @media (prefers-reduced-motion:reduce){
   .ch4-pact-still,.ch4-pact-cap{transition:none}
 }

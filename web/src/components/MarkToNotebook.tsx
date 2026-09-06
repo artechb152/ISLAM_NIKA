@@ -13,7 +13,9 @@ import { addMark } from '@/lib/site-notebook'
 /* אזורים שבהם סימון אינו "ציטוט מהפרק": ניווט, כותרות מסך, פקדים */
 const IGNORE = 'nav, header, aside, button, input, textarea, select, .chapter-drawer, .chapter-site-header, .nb-mark-fab'
 
-export default function MarkToNotebook({ ch, root = '.chapter-article' }: { ch: number; root?: string }) {
+/* ברירת המחדל מכסה את שני מבני הפרקים: המאמר (.chapter-article) והקומיקס
+   של פרק 3 (.c3-shell). אפשר לדרוס עם prop לפרק בעל מבנה משלו. */
+export default function MarkToNotebook({ ch, root = '.chapter-article, .c3-page' }: { ch: number; root?: string }) {
   const [at, setAt] = useState<{ x: number; y: number } | null>(null)
   const [saved, setSaved] = useState(false)
   const pending = useRef<{ text: string; where?: string } | null>(null)
