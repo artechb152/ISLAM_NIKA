@@ -292,6 +292,36 @@ function Year({ r, n, children }: { r: string; n: string; children: React.ReactN
   )
 }
 
+/** A SENTENCE THAT TURNS, SET AS A TURN.
+
+    §4.b holds twelve years of „אי הצלחה, דשדוש וחוסר יכולת" on one side of the
+    word „נהיה" and „דת, מוסר, ערכים וצבא" on the other. It is a before and an
+    after, and as one paragraph it reads as neither.
+
+    THE TWO SIDES ARE THE SENTENCE'S OWN WORDS, lifted by `pick`, which proves
+    each phrase is in that fragment at a word boundary and throws otherwise. The
+    whole sentence is printed underneath them, so the shape is added and nothing
+    is taken away — a reader who ignores the device still reads every word.
+
+    RTL: the before stands on the reading edge and the after to its left, and
+    the arrow points the way the line is read. */
+function Turn({ r, from, to }: { r: string; from: string; to: string }) {
+  return (
+    <div className="ch4-turn" data-reveal>
+      <div className="ch4-turn-row">
+        <p className="ch4-turn-side is-from">{pick(r, from)}</p>
+        <span className="ch4-turn-arrow" aria-hidden="true">
+          <svg viewBox="0 0 40 12">
+            <path d="M39 6H3M9 1 3 6l6 5" />
+          </svg>
+        </span>
+        <p className="ch4-turn-side is-to">{pick(r, to)}</p>
+      </div>
+      <T r={r} className="ch4-body ch4-turn-full" />
+    </div>
+  )
+}
+
 /* ---------------- structure ---------------- */
 
 /** The section heading — chapter 6's `.section-heading` with its diamond.
@@ -779,11 +809,31 @@ export default function Chapter4() {
                 <SubHead section="hijra" id="covenant" />
                 <Block>
                   <T r="§4.a" className="ch4-body" reveal />
-                  <T r="§4.b" className="ch4-body" reveal />
+                </Block>
+                {/* THE TURN, and the sentence already contains it: twelve years
+                    of one thing on one side of „נהיה" and four nouns of another
+                    on the other. Both labels are lifted out of this very
+                    sentence by `pick`, which throws if they are not in it — and
+                    the sentence itself is printed under them in full, so
+                    nothing is replaced by its own summary. */}
+                <Turn
+                  r="§4.b"
+                  from="אי הצלחה, דשדוש וחוסר יכולת"
+                  to="דת, מוסר, ערכים וצבא"
+                />
+                <Block>
                   <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                   <T r="§8.b" className="ch4-body" reveal />
-                  <T r="§8.c" className="ch4-body" reveal />
-                  <T r="§8.d" className="ch4-body" reveal />
+                </Block>
+
+                {/* NOT THE COVENANT: what became of the tribes years after it.
+                    A heading of its own, and nothing else — this is the
+                    material the chapter gives no picture and no mechanism, the
+                    same call §26 and chapter 2's ואד אלבנת got. */}
+                <SubHead section="hijra" id="tribes" />
+                <Block>
+                  <T r="§8.c" className="ch4-body ch4-quiet-body" reveal />
+                  <T r="§8.d" className="ch4-body ch4-quiet-body" reveal />
                 </Block>
 
                 {/* THE HIJRA AS AN IDEA, and what has been done with it. §5 is
