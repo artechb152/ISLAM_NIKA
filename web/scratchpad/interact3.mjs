@@ -1,0 +1,10 @@
+import { open } from './lib-probe.mjs'
+const { browser, page, errors } = await open('exit', { w: 1400, h: 850 })
+console.log('keys:', JSON.stringify(await page.evaluate(() => [...document.querySelectorAll('.hud-keys span')].map(s=>s.innerText.replace(/\s+/g,' ').trim()))))
+await page.evaluate(() => window.__ch1Live.player.set(6.4, 0, -7.2)); await page.waitForTimeout(1000)
+const before = await page.evaluate(() => ({ nearFind: window.__ch1Live.nearFind, atTask: !!window.__ch1Live.atTask, find: !!document.querySelector('.ch1-find') }))
+console.log('standing on find:', JSON.stringify(before))
+await page.keyboard.press('KeyE'); await page.waitForTimeout(1300)
+console.log('after E:', JSON.stringify(await page.evaluate(() => ({ find: !!document.querySelector('.ch1-find') }))))
+console.log('errors:', errors.length ? errors : 'none')
+await browser.close()

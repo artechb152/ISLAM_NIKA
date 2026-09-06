@@ -421,6 +421,21 @@ body{
   display:flex;align-items:center;gap:14px;padding:10px 18px;font-size:14px;
 }
 .hud-goal .hud-progress{max-width:130px}
+
+/* המטרה של התחנה — משפט אחד מעל שורת ההתקדמות.
+   בלי מסגרת, בלי רקע, בלי תג: זו שורת טקסט בעולם ולא רכיב ממשק.
+   רוחב זהה לשורת ההתקדמות כדי שהשתיים ייקראו כדבר אחד. */
+.hud-objective{
+  position:absolute;inset-inline:0;margin-inline:auto;bottom:64px;
+  width:min(620px,94vw);text-align:center;
+  font-size:15.5px;font-weight:500;line-height:1.55;letter-spacing:.01em;
+  color:#f4e3c1;padding:6px 16px;border-radius:10px;
+  background:radial-gradient(60% 120% at 50% 50%,rgba(18,12,7,.62),rgba(18,12,7,0));
+  text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.65);
+  pointer-events:none;animation:ch1-objective-in .5s ease both;
+}
+@keyframes ch1-objective-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.hud-objective{animation:none}}
 /* שורת הרמז יושבת מעל שורת המטרה ובאותו רוחב, כדי שתיקרא כהמשך שלה
    ולא כהתראה חדשה. נכנסת ברכות — רמז שקופץ קורא כשגיאה. */
 .hud-hint{

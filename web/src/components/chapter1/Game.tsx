@@ -1448,9 +1448,11 @@ function InkRoute({ x0, z0, x1, z1, bend = 0.35 }: { x0: number; z0: number; x1:
 const GRAB_PX = 115
 const DROP_R = 2.1
 
-function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDrop }: {
+function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, onSortDrop }: {
   live: Live
   atTask: boolean
+  /** האינטראקציה נפתחת רק אחרי שיחת ההקדמה של התחנה */
+  armed: boolean
   chosen: string[]
   solvedTask: boolean
   found: string[]
@@ -1635,7 +1637,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
     const down = (e: PointerEvent) => {
       /* פאנל פתוח מעל הקנבס: לחיצה עליו לא תופסת פרופ שמאחוריו */
       if (e.target !== gl.domElement) return
-      if (solvedTask || dragging.current >= 0) return
+      if (solvedTask || !armed || dragging.current >= 0) return
       const i = hitAt(e.clientX, e.clientY)
       if (i >= 0) {
         dragging.current = i
@@ -1651,7 +1653,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       const i = dragging.current
       if (i < 0) {
         /* hover: היד יודעת שאפשר להרים עוד לפני הלחיצה */
-        const h = solvedTask ? -1 : hitAt(e.clientX, e.clientY)
+        const h = solvedTask || !armed ? -1 : hitAt(e.clientX, e.clientY)
         if (h !== hovering.current) {
           hovering.current = h
           setHoverIdx(h)
@@ -1784,7 +1786,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       gl.domElement.style.cursor = ''
       live.taskDrag = false
     }
-  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, onChoose, onSortDrop])
+  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, onChoose, onSortDrop])
 
   useFrame((_, dt) => {
     if (!state.current.length) return
@@ -3193,6 +3195,47 @@ const STATION_INDEX = Math.max(1, MAP_PINS.findIndex((p) => p.id === REGION.id) 
 const REGION_FINDS = findsIn(REGION.id)
 const REGION_TASK = taskIn(REGION.id)
 
+/* ── סדר קבוע לכל תחנה ────────────────────────────────────────────────────
+   הדיווח היה: „לא ברור שיש אינטראקציות, מתי לבצע אותן, למה הן קיימות ומה
+   הקשר בינן לבין השיחות." הסיבה היא שלא היה סדר — הכול היה זמין בבת אחת,
+   ולכן שום דבר לא נקרא כשלב.
+
+   עכשיו לכל תחנה אותם ארבעה שלבים, והם נגזרים ממה שכבר קיים — אין כאן
+   מצב חדש שצריך לתחזק במקביל:
+
+     brief  שיחת הפתיחה של התחנה טרם נשמעה.  E → „דברו עם X"
+     act    השיחה נשמעה, הפעולה הפיזית טרם נעשתה.  E → הפועל
+     wrap   הפעולה נעשתה, הסיכום טרם נפתח.  E → הסיכום
+     done   התחנה סגורה.  E → הדרך הלאה
+
+   „הפעולה הפיזית" אינה אותו דבר בכל תחנה, ולכן היא נשאלת ולא מונחת:
+   בתימן זה הלפיד, במכה השולחן, ובשאר — ההנחה עצמה היא התשובה. */
+type Stage = 'brief' | 'act' | 'wrap' | 'done'
+/** שיחת הפתיחה: הראשונה מבין שיחות הליבה של האזור. */
+const INTRO_ID: string | null =
+  (REGION.core ?? []).find((id) => REGION.encounters.some((e) => e.id === id)) ??
+  REGION.encounters[0]?.id ??
+  null
+/** מי מארח את התחנה — הדמות שאיתה מדברים כאן, לצורך „דברו עם X". */
+const HOST_NAME: string = (() => {
+  const intro = REGION.encounters.find((e) => e.id === INTRO_ID)
+  const who = intro && intro.speaker !== 'narrator' ? intro.speaker : 'rawi'
+  return SPEAKERS[who] ?? 'רָאוִי'
+})()
+/** האם התחנה מפרידה בין הפעולה הפיזית לבין הסיכום. */
+const HAS_SEPARATE_ACT = REGION.id === 'yemen-heights' || REGION.id === 'mecca'
+/* ההוראה של שלב הפעולה — משפט אחד שמתחיל בפועל. „גררו", „הניחו",
+   „חברו", „האירו", „מסרו". הטקסטים של התחנות כבר כתובים כך ב-tasks.ts;
+   שתי התחנות שיש להן שער נפרד מקבלות ניסוח משלהן, כי שם הפעולה
+   הפיזית אינה המשימה עצמה אלא מה שפותח אותה. */
+const ACT_LINE: string =
+  REGION.id === 'yemen-heights'
+    ? 'האירו את האבן: קחו את הלפיד שלצידה, גררו אותו אליה והחזיקו.'
+    : REGION.id === 'mecca'
+      ? 'סדרו את השולחן: הניחו כל דבר במקומו — מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.'
+      : (REGION_TASK?.hint ?? REGION_TASK?.prompt ?? '')
+
+
 /** Drop scattered spots that would clash with a prop or a person standing there. */
 function filterFree(spots: { x: number; z: number; k: number }[], pad: number) {
   return spots.filter((p) => {
@@ -3263,34 +3306,78 @@ function glowTexture() {
   return GLOW_TEX
 }
 
-function GroundGlow({ x, z, r = 1.1, live, tone = '#f0c877' }: {
+function GroundGlow({ x, z, r = 1.1, live, tone = '#f0c877', primary = false, dim = false }: {
   x: number; z: number; r?: number; live: Live; tone?: string
+  /** האינטראקציה הפעילה עכשיו — נדלקת במלוא העוצמה ומקבלת עמוד אור */
+  primary?: boolean
+  /** נעשה כבר, או עוד לא הגיע תורו — נשאר נוכח, לא קורא */
+  dim?: boolean
 }) {
   const m = useRef<THREE.Mesh>(null)
   const mat = useRef<THREE.MeshBasicMaterial>(null)
+  /* טבעת מגע כהה מתחת לזוהר. זוהר בבלנד חיבורי הוא הדבר היחיד שנראה
+     בסצנה חשוכה — ובמדבר בצהריים הוא נשטף לגמרי. טבעת כהה עושה בדיוק
+     את ההפך: היא נעלמת בלילה ובולטת ביום. השתיים יחד נראות בשתי
+     הסצנות, וזאת הייתה הדרישה. */
+  const ring = useRef<THREE.MeshBasicMaterial>(null)
+  /** עמוד האור — רק על האינטראקציה הפעילה, ומרחוק */
+  const beam = useRef<THREE.Mesh>(null)
+  const beamMat = useRef<THREE.MeshBasicMaterial>(null)
   useFrame(({ clock }) => {
     if (!mat.current || !m.current) return
     const d = Math.hypot(live.player.x - x, live.player.z - z)
-    /* קרוב = 1, רחוק מ-14 מטר = 0. עקומה רכה כדי שלא ידלק בבת אחת. */
-    const near = Math.max(0, Math.min(1, (14 - d) / 11))
-    const breathe = 0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.3)
-    mat.current.opacity = 0.06 + near * near * 0.3 + breathe * (0.03 + near * 0.07)
-    const s = 1 + near * 0.16 + breathe * 0.05
-    m.current.scale.set(s, s, s)
+    /* 14 מטר היה קצר מדי: התחנה נדלקה רק אחרי שכבר מצאו אותה. 26 מטר
+       הוא כמעט רוחב אזור — כלומר האובייקט הפעיל ניתן לזיהוי מרחוק,
+       כפי שנדרש. */
+    const near = Math.max(0, Math.min(1, (26 - d) / 18))
+    const breathe = 0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.25)
+    const gain = dim ? 0.22 : primary ? 1 : 0.55
+    mat.current.opacity = (0.1 + near * near * 0.52 + breathe * (0.05 + near * 0.13)) * gain
+    if (ring.current) ring.current.opacity = (0.1 + near * 0.28) * gain
+    const sc = 1 + near * 0.2 + breathe * 0.06
+    m.current.scale.set(sc, sc, sc)
+    if (beam.current && beamMat.current) {
+      /* העמוד חי רק כשהאובייקט הוא הפעיל, והוא דוהה כשמתקרבים —
+         תפקידו למשוך מרחוק, לא לעמוד בין העין לחפץ. */
+      const far = Math.max(0, Math.min(1, (d - 5) / 9))
+      beam.current.visible = primary && !dim && far > 0.02
+      beamMat.current.opacity = far * (0.15 + breathe * 0.07)
+    }
   })
+  const y = groundYAt(x, z)
   return (
-    <mesh ref={m} rotation={[-Math.PI / 2, 0, 0]} position={[x, groundYAt(x, z) + 0.035, z]} renderOrder={2}>
-      <planeGeometry args={[r * 2.6, r * 2.6]} />
-      <meshBasicMaterial
-        ref={mat}
-        map={glowTexture()}
-        color={tone}
-        transparent
-        opacity={0.1}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </mesh>
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[x, y + 0.02, z]} renderOrder={1}>
+        <circleGeometry args={[r * 1.15, 40]} />
+        <meshBasicMaterial ref={ring} color="#3a2c1c" transparent opacity={0.16} depthWrite={false} />
+      </mesh>
+      <mesh ref={m} rotation={[-Math.PI / 2, 0, 0]} position={[x, y + 0.035, z]} renderOrder={2}>
+        <planeGeometry args={[r * 3.1, r * 3.1]} />
+        <meshBasicMaterial
+          ref={mat}
+          map={glowTexture()}
+          color={tone}
+          transparent
+          opacity={0.1}
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+      {/* עמוד אור רך — שינוי תאורה, לא אייקון: הוא יושב בעולם, אין לו
+          קצה חד, והוא לא מרחף מעל ראשו של דבר. */}
+      <mesh ref={beam} position={[x, y + 2.1, z]} renderOrder={1} visible={false}>
+        <cylinderGeometry args={[r * 0.72, r * 1.0, 4.2, 20, 1, true]} />
+        <meshBasicMaterial
+          ref={beamMat}
+          color={tone}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+    </group>
   )
 }
 
@@ -4035,8 +4122,10 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stoneLit, onStoneLit, tableSet, onTableSet }: {
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, stoneLit, onStoneLit, tableSet, onTableSet }: {
   live: Live
+  /** שלב התחנה — קובע מה זוהר ומה עומם */
+  stage: Stage
   onNearChange: (who: string | null) => void
   onNearFind: (id: string | null) => void
   onAtTask: (at: boolean) => void
@@ -4119,7 +4208,9 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       {/* מה שהחליף את התגים המרחפים: אור על החול מתחת לכל עדות ומתחת
           לתחנת המשימה. הוא בעולם, לא מעליו. */}
       {REGION_FINDS.map((fd) => (
-        <GroundGlow key={`glow-${fd.id}`} x={fd.x} z={fd.z} r={0.95} live={live} />
+        <GroundGlow key={`glow-${fd.id}`} x={fd.x} z={fd.z} r={0.95} live={live}
+          dim={found.includes(fd.id)}
+          primary={stage === 'act' && !!REGION_TASK?.needsFinds?.includes(fd.id) && !found.includes(fd.id)} />
       ))}
       {REGION_TASK && (
         <Prop
@@ -4130,7 +4221,13 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
           height={REGION_TASK.h}
         />
       )}
-      {REGION_TASK && <GroundGlow x={REGION_TASK.x} z={REGION_TASK.z} r={1.5} live={live} />}
+      {/* רק האינטראקציה הפעילה זוהרת במלוא העוצמה. בשלב השיחה התחנה
+          עוד לא נקראת, ואחרי שנפתרה היא כבר לא — ובשניהם הזוהר עומם. */}
+      {REGION_TASK && (
+        <GroundGlow x={REGION_TASK.x} z={REGION_TASK.z} r={1.6} live={live}
+          primary={stage === 'act' || stage === 'wrap'}
+          dim={stage === 'brief' || stage === 'done'} />
+      )}
       {/* תימן היא התחנה הראשונה, והפעולה הראשונה בפרק צריכה להיות של
           היד ולא של העכבר על כפתור: גוררים לפיד אל המצבה עד שהחקיקה
           יוצאת מן הצל. השאלה נפתחת רק אחריה. */}
@@ -4741,6 +4838,8 @@ export default function Game() {
     cue('find')
   }, [setStoneLit])
   const [taskNote, setTaskNote] = useState<{ who: string; text: string; ok: boolean } | null>(null)
+  const taskNoteRef = useRef(taskNote)
+  taskNoteRef.current = taskNote
   useEffect(() => {
     if (!taskNote) return
     const t = window.setTimeout(() => setTaskNote(null), 11000)
@@ -4847,6 +4946,31 @@ export default function Game() {
   /* שער הליבה: היציאה קדימה נפתחת רק כשמה שהאזור קיים בשבילו נעשה.
      עדויות אופציונליות לא נספרות כאן, ואחורה תמיד פתוח — אי אפשר
      להיתקע, רק אי אפשר לדלג. */
+  /* השלב שהתחנה נמצאת בו — נגזר, לא נשמר. ראה את ההערה ליד Stage. */
+  const taskSolvedNow = !!REGION_TASK && solved.includes(REGION_TASK.id)
+  const physDone = HAS_SEPARATE_ACT
+    ? (REGION.id === 'yemen-heights' ? stoneLit : tableSet)
+    : taskSolvedNow
+  const stage: Stage = !INTRO_ID || !seen.includes(INTRO_ID)
+    ? 'brief'
+    : !physDone
+      ? 'act'
+      : !taskSolvedNow
+        ? 'wrap'
+        : 'done'
+  const stageRef = useRef<Stage>(stage)
+  stageRef.current = stage
+  /* מה עכשיו — משפט אחד, שמשתנה עם השלב ולא עם המיקום. */
+  const objective =
+    stage === 'brief'
+      ? `דברו עם ${HOST_NAME}`
+      : stage === 'act'
+        ? ACT_LINE
+        : stage === 'wrap'
+          ? `חזרו אל ${REGION_TASK?.asker ?? HOST_NAME} וסכמו — E`
+          : ONWARD
+            ? 'התחנה הושלמה — המשיכו בדרך'
+            : 'הדרך הסתיימה'
   const coreMissing = (REGION.core ?? []).filter((id) => !seen.includes(id) && !solved.includes(id))
   const coreMissingRef = useRef<string[]>([])
   coreMissingRef.current = coreMissing
@@ -5238,27 +5362,38 @@ export default function Game() {
           }
         }
         if (live.atTask) {
-          /* בתימן קודם מביאים אור. פאנל שנפתח על אבן שאיש לא הֵאיר
-             הופך את הפעולה הפיזית לקישוט. */
-          /* מכה: אותו עיקרון כמו תימן. השאלה על אברהה נפתחת רק אחרי
-             שהראיות סודרו — ואז היא סיכום של פעולה, לא מבחן על טקסט. */
-          if (REGION.id === 'mecca' && !tableSetRef.current) {
+          /* E פועל לפי השלב שהתחנה נמצאת בו, ולעולם אינו מדלג עליו.
+
+             brief — התחנה עוד לא הוצגה. E מפנה אל מי שמציג אותה.
+             act   — הפעולה הפיזית טרם נעשתה. E אומר מה לעשות, בפועל.
+             wrap  — הפעולה נעשתה. עכשיו, ורק עכשיו, נפתח הסיכום.
+
+             החריג היחיד הוא מקלדת: בתחנות שבהן ההנחה עצמה היא התשובה
+             (הגבול, ההעמסה, המנזר, ית'רב, המחנה) פאנל שלא ייפתח לעולם
+             הוא תחנה שאי אפשר לסיים בלי עכבר. לכן לחיצה שנייה על E,
+             בזמן שההנחיה עוד על המסך, פותחת אותו בכל זאת. ההנחיה
+             נקראת קודם; הדילוג הוא בחירה, לא תאונה. */
+          const st = stageRef.current
+          if (st === 'brief') {
             setTaskNote({
-              who: REGION_TASK?.asker ?? 'רָאוִי',
-              text: 'לפני שנשפוט — סדר את השולחן. הנח כל דבר במקומו: מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.',
+              who: HOST_NAME,
+              text: `לפני שנתחיל — ${HOST_NAME} מחכה לך. דבר איתו, ואז נעבור לעבודה.`,
               ok: false,
             })
             cue('ui')
             return
           }
-          if (REGION.id === 'yemen-heights' && !stoneLitRef.current) {
-            setTaskNote({
-              who: REGION_TASK?.asker ?? 'רָאוִי',
-              text: 'האבן בצל. קח את הלפיד שלצידה, גרור אותו אליה והחזק — החקיקה תצא מן האפלה.',
-              ok: false,
-            })
-            cue('ui')
-            return
+          if (st === 'act') {
+            const already = !!taskNoteRef.current
+            if (!already || HAS_SEPARATE_ACT) {
+              setTaskNote({
+                who: REGION_TASK?.asker ?? HOST_NAME,
+                text: ACT_LINE,
+                ok: false,
+              })
+              cue('ui')
+              return
+            }
           }
           cue('task')
           setOpenTask(true)
@@ -5426,6 +5561,7 @@ export default function Game() {
               onAtTask={setAtTask}
               found={found}
               solved={solved}
+              stage={stage}
               talking={!!encounter}
               gesture={encounter?.gesture ?? 'talk'}
               speakingWho={encounter && stepSpeaker && stepSpeaker !== 'rawi' && stepSpeaker !== 'narrator' ? stepSpeaker : null}
@@ -5467,6 +5603,7 @@ export default function Game() {
               <TaskProps
                 live={live}
                 atTask={atTask}
+                armed={stage !== 'brief'}
                 chosen={taskChosen}
                 solvedTask={taskSolved}
                 found={found}
@@ -5596,23 +5733,32 @@ export default function Game() {
             a player standing between a stone and a stranger really can do both.
             column-reverse keeps the first one lowest, nearest the eye. */}
         <div className="poi-hints">
-          {nearFind && !encounter && !openFind && !openTask && (
+          {/* מקש אחד שמוצג. F נשאר קיצור סמוי לתאימות, אבל הוא לא
+              מופיע יותר על המסך: E קטן לצד E גדול לימד שני מקשים
+              במקום אחד, ומי שלמד „E מדבר" לא ידע מה עושים מול אבן. */}
+          {nearFind && !atTask && !encounter && !openFind && !openTask && (
             <div className="hud-panel poi-hint is-find-hint">
-              <i className="hud-key">F</i>
+              <i className="hud-key">E</i>
               <span>הביטו מקרוב</span>
             </div>
           )}
           {atTask && !encounter && !openTask && !openFind && REGION_TASK && (
             <>
-              {/* מה עושים כאן, במילים — מעל הפרומפט של E */}
-              {REGION_TASK.hint && !taskSolved && (
+              {/* מה עושים כאן, במילים — ורק בשלב שבו זה מה שעושים */}
+              {stage === 'act' && ACT_LINE && (
                 <div className="hud-panel ch1-task-hint" role="status">
-                  <span>{REGION_TASK.hint}</span>
+                  <span>{ACT_LINE}</span>
                 </div>
               )}
               <div className="hud-panel poi-hint is-task-hint">
                 <i className="hud-key">E</i>
-                <span>{REGION_TASK.prompt}</span>
+                <span>
+                  {stage === 'brief'
+                    ? `דברו קודם עם ${HOST_NAME}`
+                    : stage === 'wrap'
+                      ? 'סכמו את מה שעשיתם'
+                      : REGION_TASK.prompt}
+                </span>
               </div>
             </>
           )}
@@ -5648,6 +5794,11 @@ export default function Game() {
             תחנה {STATION_INDEX} מתוך {STATION_COUNT}
           </span>
         </div>
+        {/* המטרה האחת של התחנה, בשורה אחת, ומשתנה עם השלב. זה מה שהיה
+            חסר: לא רשימת מטלות ולא לוח בקרה — משפט אחד שאומר מה עכשיו. */}
+        {objective && !overlay && !openTask && !openFind && (
+          <p className="hud-objective" role="status">{objective}</p>
+        )}
         {idleHint && hintText && !overlay && !openFind && !openTask && !encounter && (
           <p className="hud-panel hud-hint" role="status">{hintText}</p>
         )}
