@@ -51,7 +51,7 @@
    "intensity": 3.5
   },
   "viewerFill": 0.42,
-  "grade": "saturate(1.12) contrast(1.02) brightness(1.06) sepia(.06)",
+  "grade": "saturate(1.14) contrast(1.02) brightness(1.05) sepia(.05)",
   "vignette": 0.29
  },
  "roads": [

@@ -658,6 +658,17 @@ function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1, atX
       const prepareMaterial = (mat: THREE.Material) => {
         const owned = tint || foliage ? mat.clone() : mat
         if (thin) owned.side = THREE.DoubleSide
+        /* חומר שסומן שקוף ואין לו במה להיות שקוף.
+           `claypot.glb` יוצא מ-Blender עם `alphaMode: BLEND` ואטימות
+           מלאה — כלומר הוא מצויר במעבר האלפא, בלי כתיבה לעומק, ורואים
+           דרכו את מה שמאחוריו. זה הכד ה"שקוף". התנאי בודק בדיוק את
+           המצב הזה — שקיפות מוצהרת בלי אטימות חלקית ובלי חיתוך אלפא —
+           ומחזיר אותו למסלול האטום; חומר שבאמת שקוף אינו נוגע בו. */
+        const so = owned as THREE.MeshStandardMaterial
+        if (so.transparent && so.opacity >= 1 && !so.alphaTest && !so.alphaMap) {
+          so.transparent = false
+          so.depthWrite = true
+        }
         const colourMaterial = owned as THREE.Material & { color?: THREE.Color }
         if (tint && colourMaterial.color) colourMaterial.color.set(tint)
         if (foliage) {
@@ -710,6 +721,7 @@ const MODEL_TENT = '/assets/chapter1/models/blacktent-hero.glb'
 const MODEL_FIREPIT = '/assets/chapter1/models/firepit.glb'
 const MODEL_TORCH = '/assets/chapter1/models/torch.glb'
 const MODEL_CAMEL = '/assets/chapter1/models/camel.glb'
+const MODEL_CAMEL_LOAD = '/assets/chapter1/models/camel-load.glb'
 /* make-player.py also writes traveler-stride, traveler-passing and
    traveler-walk. The game stopped loading all three when the player took
    Rawi's skeleton and the walk came from traveler-anim instead; the constants
@@ -1254,6 +1266,36 @@ function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
     </group>
   )
 }
+/* אסימון השיירה — מיניאטורה, לא גמל.
+   על מפת הבד עמד גמל טעון אחד בגובה 60 ס"מ, וזה נקרא כגמל שנשכח על
+   המפה ולא כחתיכת משחק שמזיזים ביד. אסימון הוא שלושה גמלים בשורה על
+   בסיס עגול: השורה היא מה שהופך גמל לשיירה, והבסיס הוא מה שאומר
+   „מרימים אותי". הכול מנכס שכבר קיים בפרק, בשלושה עותקים קטנים. */
+function CaravanToken({ x, z, h }: { x: number; z: number; h: number }) {
+  const a = useNormalizedGLB(MODEL_CAMEL_LOAD, h * 0.72)
+  const b = useNormalizedGLB(MODEL_CAMEL_LOAD, h * 0.62)
+  const c = useNormalizedGLB(MODEL_CAMEL_LOAD, h * 0.54)
+  return (
+    <group position={[x, groundYAt(x, z), z]}>
+      {/* בסיס: דיסקת עץ נמוכה עם שפה — הדבר שאומר „חתיכת משחק" */}
+      <mesh position={[0, 0.035, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[h * 0.62, h * 0.68, 0.07, 28]} />
+        <meshStandardMaterial color="#6f4b2e" roughness={0.85} metalness={0} />
+      </mesh>
+      <mesh position={[0, 0.075, 0]}>
+        <torusGeometry args={[h * 0.6, 0.018, 8, 30]} />
+        <meshStandardMaterial color="#a9793f" roughness={0.7} metalness={0.15} />
+      </mesh>
+      {/* שלושה גמלים בשורה, הולכים לאותו כיוון — זו שיירה */}
+      <group position={[0, 0.07, 0]} rotation={[0, 0.35, 0]}>
+        <primitive object={a} position={[0, 0, -h * 0.34]} />
+        <primitive object={b} position={[0, 0, 0.02]} />
+        <primitive object={c} position={[0, 0, h * 0.34]} />
+      </group>
+    </group>
+  )
+}
+
 /* מה שהנחת נשאר מונח: אחרי שמשימה פיזית נפתרת, החפצים לא נעלמים —
    הם עומדים היכן שהושמו. המשי בתוך הארגז, המחתה בצד שחצה למכה, המטבע
    על המאזניים. העולם זוכר את הפעולה. */
@@ -1399,6 +1441,13 @@ function InkRoute({ x0, z0, x1, z1, bend = 0.35 }: { x0: number; z0: number; x1:
   )
 }
 
+/* גרירה שמצליחה בניסיון הראשון או השני.
+   שני מספרים, ושניהם נבחרו כלפי מעלה בכוונה: `GRAB_PX` הוא רדיוס
+   האחיזה על המסך, ו-`DROP_R` הוא רדיוס ההנחה במטרים. הקודמים (70
+   פיקסלים ו-1.6 מטר) הפכו את מטבע הכסף בתחנת הגבול למשחק דיוק. */
+const GRAB_PX = 115
+const DROP_R = 2.1
+
 function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDrop }: {
   live: Live
   atTask: boolean
@@ -1508,6 +1557,17 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
   useEffect(() => () => { live.taskFocus = null }, [live])
   const dragging = useRef<number>(-1)
   const hovering = useRef<number>(-1)
+  /* תוויות: רק מה שרלוונטי עכשיו.
+     חמישה חפצים ושני אזורים בית'רב הדליקו שבע תוויות בבת אחת, וכל
+     אחת מהן צעקה באותה עוצמה — מה שמכבה את כולן. תווית מופיעה כשהיד
+     מרחפת מעל החפץ, כשהוא מוחזק, או כשעומדים לידו. אזורי ההנחה
+     נדלקים כשמשהו ביד או כשמתקרבים אליהם. */
+  const [hoverIdx, setHoverIdx] = useState(-1)
+  const [dragIdx, setDragIdx] = useState(-1)
+  const [nearIdx, setNearIdx] = useState(-1)
+  const [nearBin, setNearBin] = useState(-1)
+  const nearRef = useRef(-1)
+  const nearBinRef = useRef(-1)
   /* פינג תשובה: טבעת מתרחבת בנקודת ההשלכה — זהב לקבלה, חמרה לסירוב */
   const ping = useRef<{ x: number; z: number; at: number; ok: boolean } | null>(null)
   const pingRing = useRef<THREE.Mesh>(null)
@@ -1524,9 +1584,13 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
   useEffect(() => {
     if (!REGION_TASK || !state.current.length) return
     const v = new THREE.Vector3()
+    /* נקודת האחיזה מוקרנת מאמצע הגובה של החפץ ולא מבסיסו: מטבע בגובה
+       12 ס"מ ואסימון שיירה בגובה 60 אינם נתפסים באותו מקום על המסך,
+       ועד עכשיו שניהם נמדדו מהחול שמתחתם. */
     const project = (i: number) => {
       const st = state.current[i]
-      v.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + 0.3, st.cur.z).project(camera)
+      const hh = planMode ? 0.32 : ((opts[i]?.prop?.h ?? 0.4) * 0.55)
+      v.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + st.lift + hh, st.cur.z).project(camera)
       const r = gl.domElement.getBoundingClientRect()
       return {
         x: (v.x * 0.5 + 0.5) * r.width + r.left,
@@ -1551,13 +1615,17 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         if (sortLocked) continue
         if (!planMode && locked(opts[i])) continue
         const p = project(i)
-        if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < 70) return i
+        /* אזור אחיזה גדול בהרבה מהמודל. מטבע כסף הוא כמה עשרות פיקסלים
+           על המסך, ו-70 פיקסלים של סובלנות הפכו את ההרמה למשחק דיוק.
+           הגרירה הזאת אינה מבחן במוטוריקה — היא אמורה להצליח בניסיון
+           הראשון או השני. */
+        if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < GRAB_PX) return i
       }
       return -1
     }
     const nearestSpot = (x: number, z: number) => {
       let best = -1
-      let bd = 1.6
+      let bd = DROP_R
       for (let k = 0; k < spots.length; k++) {
         const d = Math.hypot(x - spots[k].x, z - spots[k].z)
         if (d < bd) { bd = d; best = k }
@@ -1571,6 +1639,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       const i = hitAt(e.clientX, e.clientY)
       if (i >= 0) {
         dragging.current = i
+        setDragIdx(i)
         state.current[i].returning = false
         live.taskDrag = true
         gl.domElement.style.cursor = 'grabbing'
@@ -1585,6 +1654,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         const h = solvedTask ? -1 : hitAt(e.clientX, e.clientY)
         if (h !== hovering.current) {
           hovering.current = h
+          setHoverIdx(h)
           gl.domElement.style.cursor = h >= 0 ? 'grab' : ''
         }
         return
@@ -1596,8 +1666,26 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       const dz = g.z - (REGION_TASK?.z ?? 0)
       const d = Math.hypot(dx, dz)
       const cap = Math.min(1, 4.5 / Math.max(d, 1e-3))
-      st.cur.x = (REGION_TASK?.x ?? 0) + dx * cap
-      st.cur.z = (REGION_TASK?.z ?? 0) + dz * cap
+      let nx = (REGION_TASK?.x ?? 0) + dx * cap
+      let nz = (REGION_TASK?.z ?? 0) + dz * cap
+      /* Snap: בטווח ההנחה החפץ נמשך אל היעד כבר בזמן שהוא ביד. היד
+         מרגישה את המקום לפני שהיא משחררת, ומי ששחרר בקצה הטווח לא
+         מגלה בדיעבד שהוא פספס. */
+      const snapTo = planMode
+        ? spots[nearestSpot(nx, nz)]
+        : sortMode
+          ? binSpots.find((b) => Math.hypot(nx - b.x, nz - b.z) < DROP_R)
+          : Math.hypot(nx - st.tgt.x, nz - st.tgt.z) < DROP_R
+            ? st.tgt
+            : undefined
+      if (snapTo) {
+        const sd = Math.hypot(nx - snapTo.x, nz - snapTo.z)
+        const pull = Math.max(0, 1 - sd / DROP_R) * 0.45
+        nx += (snapTo.x - nx) * pull
+        nz += (snapTo.z - nz) * pull
+      }
+      st.cur.x = nx
+      st.cur.z = nz
       st.lift = 0.55
       nearTarget.current = planMode
         ? nearestSpot(st.cur.x, st.cur.z) >= 0
@@ -1607,6 +1695,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
     }
     const drop = (i: number) => {
       dragging.current = -1
+      setDragIdx(-1)
       live.taskDrag = false
       gl.domElement.style.cursor = ''
       const st = state.current[i]
@@ -1630,7 +1719,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         }
       } else if (sortMode) {
         let best = -1
-        let bd = 1.6
+        let bd = DROP_R
         for (let k = 0; k < binSpots.length; k++) {
           const d = Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z)
           if (d < bd) { bd = d; best = k }
@@ -1654,7 +1743,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       } else {
         /* נדיב: שחרור בקרבת היעד נספר — אף פעם לא דיוק-פיקסל */
         const d = Math.hypot(st.cur.x - st.tgt.x, st.cur.z - st.tgt.z)
-        if (d < 1.6) {
+        if (d < DROP_R) {
           const opt = opts[i]
           ping.current = { x: st.cur.x, z: st.cur.z, at: performance.now(), ok: !!opt.right }
           if (opt.right) st.placed = true
@@ -1677,6 +1766,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
       const i = dragging.current
       if (i < 0) return
       dragging.current = -1
+      setDragIdx(-1)
       live.taskDrag = false
       gl.domElement.style.cursor = ''
       state.current[i].lift = 0
@@ -1739,7 +1829,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         const ring = spotRings.current[k]
         if (!ring) continue
         ring.visible = !solvedTask || st0.placed
-        const near = drag && Math.hypot(st0.cur.x - spots[k].x, st0.cur.z - spots[k].z) < 1.6
+        const near = drag && Math.hypot(st0.cur.x - spots[k].x, st0.cur.z - spots[k].z) < DROP_R
         const target = near ? 1.4 : 1.0
         ring.scale.x += (target - ring.scale.x) * Math.min(1, dt * 10)
         ring.scale.y = ring.scale.z = ring.scale.x
@@ -1754,12 +1844,30 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
         if (!ring) continue
         ring.visible = !sortLocked && !solvedTask
         const st = drag >= 0 ? state.current[drag] : null
-        const near = !!st && Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z) < 1.6
+        const near = !!st && Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z) < DROP_R
         const target = near ? 1.4 : 1.0
         ring.scale.x += (target - ring.scale.x) * Math.min(1, dt * 10)
         ring.scale.y = ring.scale.z = ring.scale.x
         ;(ring.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.4
       }
+    }
+    /* מי קרוב מספיק כדי שתווית תהיה שימושית ולא רעש */
+    {
+      let best = -1
+      let bd = 2.8
+      for (let i = 0; i < state.current.length; i++) {
+        const st = state.current[i]
+        const d = Math.hypot(live.player.x - st.cur.x, live.player.z - st.cur.z)
+        if (d < bd) { bd = d; best = i }
+      }
+      if (best !== nearRef.current) { nearRef.current = best; setNearIdx(best) }
+      let bb = -1
+      let bbd = 3.2
+      for (let k = 0; k < binSpots.length; k++) {
+        const d = Math.hypot(live.player.x - binSpots[k].x, live.player.z - binSpots[k].z)
+        if (d < bbd) { bbd = d; bb = k }
+      }
+      if (bb !== nearBinRef.current) { nearBinRef.current = bb; setNearBin(bb) }
     }
     live.taskFocus =
       atTask && !solvedTask && (planMode || sortMode || opts.length > 0) ? focusSpec : null
@@ -1863,7 +1971,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
                 <ringGeometry args={[0.5, 0.66, 40]} />
                 <meshBasicMaterial color="#e8bf76" transparent opacity={0.45} depthWrite={false} />
               </mesh>
-              {atTask && !solvedTask && (
+              {!solvedTask && (dragIdx >= 0 || nearIdx >= 0) && (
                 <Html center position={[sp.x, groundYAt(sp.x, sp.z) + 0.8, sp.z]} zIndexRange={[4, 4]}>
                   <span className="ch1-prop-label">{sp.label}</span>
                 </Html>
@@ -1875,15 +1983,12 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
             const st = state.current[0]
             return (
               <group position={[st.cur.x - st.home.x, st.lift + Math.sin(st.hop * Math.PI) * 0.3, st.cur.z - st.home.z]}>
-                <TaskProp
-                  url="/assets/chapter1/models/camel-load.glb"
-                  h={0.6}
-                  x={st.home.x}
-                  z={st.home.z}
-                  label="השיירה — גררו אל הדרך"
-                  showLabel={atTask && !solvedTask && !st.placed}
-                  taken={false}
-                />
+                <CaravanToken x={st.home.x} z={st.home.z} h={0.62} />
+                {!solvedTask && !st.placed && (hoverIdx === 0 || dragIdx === 0 || nearIdx === 0) && (
+                  <Html center position={[st.home.x, groundYAt(st.home.x, st.home.z) + 1.05, st.home.z]} zIndexRange={[4, 4]}>
+                    <span className="ch1-prop-label">אסימון השיירה</span>
+                  </Html>
+                )}
               </group>
             )
           })()}
@@ -1901,7 +2006,7 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
               <ringGeometry args={[0.85, 1.02, 44]} />
               <meshBasicMaterial color={k === 0 ? '#e8bf76' : '#cbd6de'} transparent opacity={0.4} depthWrite={false} />
             </mesh>
-            {atTask && !solvedTask && !sortLocked && (
+            {!solvedTask && !sortLocked && (dragIdx >= 0 || nearBin === k) && (
               <Html center position={[b.x, groundYAt(b.x, b.z) + 0.9, b.z]} zIndexRange={[4, 4]}>
                 <span className="ch1-prop-label">{b.label}</span>
               </Html>
@@ -1921,7 +2026,10 @@ function TaskProps({ live, atTask, chosen, solvedTask, found, onChoose, onSortDr
                 x={st.home.x}
                 z={st.home.z}
                 label={o.label}
-                showLabel={atTask && !solvedTask && !sortLocked}
+                showLabel={
+                  !solvedTask && !sortLocked && !st.placed &&
+                  (hoverIdx === i || dragIdx === i || nearIdx === i)
+                }
                 taken={st.placed || chosen.includes(o.id)}
               />
             </group>
@@ -2075,6 +2183,13 @@ function useNormalizedGLB(url: string, height: number, tint?: string) {
       m.frustumCulled = false
       const prepareMaterial = (mat: THREE.Material) => {
         const owned = tint ? mat.clone() : mat
+        /* אותו תיקון של שקיפות-בטעות כמו ב-Prop, כי חפצי משימה
+           נטענים בדרך הזאת ולא דרכו */
+        const so = owned as THREE.MeshStandardMaterial
+        if (so.transparent && so.opacity >= 1 && !so.alphaTest && !so.alphaMap) {
+          so.transparent = false
+          so.depthWrite = true
+        }
         owned.side = THREE.DoubleSide
         const colourMaterial = owned as THREE.Material & { color?: THREE.Color }
         if (tint && colourMaterial.color) colourMaterial.color.set(tint)
@@ -2112,6 +2227,8 @@ function Player({ live }: { live: Live }) {
      scratchpad/lab2.mjs `twoshot`. */
   const talkBlend = useRef(0)
   const talkAnchor = useRef({ x: 0, z: 0 })
+  /** המרחק שהמצלמה יושבת בו בפועל, מרוכך — ראה את הבדיקה למטה */
+  const camDist = useRef(3.7)
   /* תקריב המשימה: בלנד משלו + צד קבוע-למחצה שממנו המצלמה משקיפה */
   const taskBlend = useRef(0)
   const taskDir = useRef({ x: 0, z: 1 })
@@ -2299,6 +2416,15 @@ function Player({ live }: { live: Live }) {
     g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, sway, Math.min(1, dt * 8))
     g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, 0.06 * ease, Math.min(1, dt * 6))
 
+    /* חפץ ביד — המצלמה עומדת.
+       הגרירה עובדת בהיטל: הסמן מוקרן אל מישור אופקי, והנקודה שמתקבלת
+       היא מקום החפץ. אם המצלמה זזה תוך כדי — והיא זזה, כי תקריב
+       המשימה עדיין נכנס פנימה — המישור נע מתחת לסמן והחפץ מחליק
+       הצידה בלי שהיד עשתה דבר. זה מה שהפך את הגרירה בתחנת הגבול
+       לכמעט בלתי אפשרית. עדשה קפואה בזמן שהיד עובדת היא גם הדבר
+       הנכון בפני עצמו. */
+    if (live.taskDrag) return
+
     /* Third-person camera, framed high and close so the player is read from the
        waist up. The player mesh has no real gait (it swaps between two static
        poses — its source robe fuses the arms into the cloth, which every
@@ -2368,12 +2494,25 @@ function Player({ live }: { live: Live }) {
       ;(camera as THREE.PerspectiveCamera).updateProjectionMatrix()
     }
 
-    /* Pull in when a trunk or tent would sit between us and the player. The
-       colliders are circles on the ground plane, so this is a 2-D ray/circle
-       test rather than a scene raycast — cheap enough to run every frame. */
+    /* מכשול בין השחקן למצלמה — מעבר אחד, סף אחד, וריכוך.
+
+       היו כאן שתי בדיקות נפרדות שעשו בדיוק את אותה עבודה עם שני ספים
+       שונים (2.2 מול 0.85) ושתי רשימות קוליידרים שהן ממילא אותה רשימה
+       (`STATIC_COLLIDERS === WORLD.colliders`). כשהולכים בין אוהלים
+       וארגזים הן נדלקו וכבו לסירוגין: העדשה זינקה 3.7 → 0.85 → 3.7
+       כמה פעמים בשנייה, והתמונה נקראה בדיוק כפי שדווח — הדמות
+       מתקדמת, נסוגה, וממשיכה. הגוף עצמו מעולם לא זז אחורה; הפרלקסה
+       של המצלמה עשתה זאת.
+
+       עכשיו: מעבר אחד על שתי הרשימות, ואז ריכוך אסימטרי — נכנסים מהר
+       (המכשול כבר מסתיר), יוצאים לאט (אין למה למהר). הריכוך הוא מה
+       שמונע את הרעד: כל אלטרנציה בין מצב חסום לפנוי נבלעת בו.
+
+       הקוליידרים הם עיגולים במישור, ולכן זו בדיקת קרן־מול־עיגול ולא
+       raycast של סצנה — זול מספיק לכל פריים. */
     const ox = camOffset.x / CAM_DIST
     const oz = camOffset.z / CAM_DIST
-    let dist = CAM_DIST
+    let want = CAM_DIST
     for (const c of [...STATIC_COLLIDERS, ...live.dynamic]) {
       const fx = live.player.x - c.x
       const fz = live.player.z - c.z
@@ -2386,9 +2525,12 @@ function Player({ live }: { live: Live }) {
       const enter = -b - s
       const exit = -b + s
       // the camera only clips if the prop lies between the player and it.
-      // 2.2 m is the floor: any closer and the player's back fills the screen.
-      if (exit > 0 && enter < dist) dist = Math.max(2.2, Math.min(dist, enter - 0.1))
+      // 1.9 m is the floor: any closer and the player's back fills the screen.
+      if (exit > 0 && enter < want) want = Math.max(1.9, Math.min(want, enter - 0.1))
     }
+    const camK = want < camDist.current ? 12 : 2.6
+    camDist.current += (want - camDist.current) * Math.min(1, dt * camK)
+    const dist = camDist.current
     camOffset.multiplyScalar(dist / CAM_DIST)
     camOffset.y = 2.45 - rb * 0.15 - (CAM_DIST - dist) * 0.15 // dip when tucked in, and when running
 
@@ -2501,42 +2643,39 @@ function Player({ live }: { live: Live }) {
       }
     }
 
-    /* והמצלמה לא נכנסת לקיר.
-       הכלל למעלה מרחיק את העדשה מהגופים של השיחה, אבל לא ממה שעומד
-       ביניהם. כשהשחקן נצמד לקיר, הכתף שהמצלמה יושבת מאחוריה נמצאת
-       בתוך האבן, והפריים הופך לחתך של מרקם.
-       זה raycast ולא Navmesh, כפי שהוא צריך להיות כאן: הקוליידרים הם
-       עיגולים ב-XZ והקירות אנכיים, ולכן בדיקת קטע-מול-מעגל מספיקה.
-       המצלמה נמשכת פנימה עד לפני המכשול ומשתחררת לבד כשהוא מתפנה —
-       ה-lerp שמתחת מחליק את שתי התנועות. */
-    {
+    /* בשיחה ובתקריב המשימה העוגן זז הצידה, ולכן הקטע שנבדק למעלה —
+       מהשחקן אל היעד — כבר אינו הקטע שהמצלמה באמת יושבת עליו. שם, ושם
+       בלבד, נחזור ונבדוק את הקטע המעודכן. בהליכה חופשית זה אותו קטע
+       בדיוק, ולכן התנאי מדלג עליו ואין שתי בדיקות שנלחמות זו בזו. */
+    if (tb > 0.02 || kf > 0.02) {
       const ex = live.player.x
       const ez = live.player.z
       const dx = target.x - ex
       const dz = target.z - ez
-      const dist = Math.hypot(dx, dz)
-      if (dist > 0.05) {
-        const ux = dx / dist
-        const uz = dz / dist
-        let allowed = dist
-        for (const c of WORLD.colliders) {
+      const seg = Math.hypot(dx, dz)
+      if (seg > 0.05) {
+        const ux = dx / seg
+        const uz = dz / seg
+        let allowed = seg
+        for (const c of STATIC_COLLIDERS) {
           const px = c.x - ex
           const pz = c.z - ez
           const t = px * ux + pz * uz
-          if (t <= 0 || t > dist) continue
+          if (t <= 0 || t > seg) continue
           const perp = Math.hypot(px - ux * t, pz - uz * t)
-          const rr = c.r + 0.3
+          const rr = c.r + 0.2
           if (perp >= rr) continue
-          /* הנקודה שבה הקרן נכנסת לעיגול, ומעט לפניה */
-          allowed = Math.min(allowed, Math.max(0.85, t - Math.sqrt(rr * rr - perp * perp) - 0.15))
+          allowed = Math.min(allowed, Math.max(1.2, t - Math.sqrt(rr * rr - perp * perp) - 0.15))
         }
-        if (allowed < dist) {
+        if (allowed < seg) {
           target.x = ex + ux * allowed
           target.z = ez + uz * allowed
         }
       }
-      /* ולא מתחת לרצפה: הקרקע כאן מתגלגלת, ומצלמה שיורדת אל מתחת
-         לטרסה מראה את העולם מלמטה. */
+    }
+    /* ולא מתחת לרצפה: הקרקע כאן מתגלגלת, ומצלמה שיורדת אל מתחת
+       לטרסה מראה את העולם מלמטה. */
+    {
       const floor = groundYAt(target.x, target.z) + 0.55
       if (target.y < floor) target.y = floor
     }
@@ -3282,10 +3421,74 @@ function LampReveal({ live, target, home, onRevealed, revealed }: {
    רק אחרי שהשולחן מלא נפתחת השאלה הקיימת, ואז היא נקראת כסיכום של
    מה שכבר עשית — לא כמבחן על טקסט שקראת. */
 const EVIDENCE_SLOTS = [
-  { id: 'stone', model: 'find-inscription', h: 0.42, label: 'כתובת שנחצבה', dx: -1.15 },
-  { id: 'verse', model: 'find-scroll', h: 0.3, label: 'פסוק מן הקוראן', dx: 0 },
-  { id: 'later', model: 'prop-codex', h: 0.26, label: 'דף מסורת מאוחרת', dx: 1.15 },
+  { id: 'stone', model: 'find-inscription', h: 0.34, label: 'כתובת שנחצבה', dx: -0.95 },
+  { id: 'verse', model: 'find-scroll', h: 0.26, label: 'פסוק מן הקוראן', dx: 0 },
+  { id: 'later', model: 'prop-codex', h: 0.22, label: 'דף מסורת מאוחרת', dx: 0.95 },
 ]
+
+/* שולחן עבודה — משטח, עובי, רגליים.
+   קודם עמד כאן `stone-bench.glb` בגובה 62 ס"מ, שנקרא כאבן שנשכחה על
+   החול ולא כמקום שעובדים עליו. שולחן הוא ארבעה דברים בבת אחת: משטח
+   אופקי בגובה מותניים, עובי שרואים מהצד, רגליים שנוגעות בקרקע, וחומר
+   שאומר „עשה יד אדם“. הוא נבנה מפרימיטיבים כי כך הוא נשלט בדיוק —
+   גובה המשטח הוא המספר שכל ההנחות מסתמכות עליו. */
+const TABLE_TOP = 0.82
+function WorkTable({ x, z, w = 2.7, d = 1.15, ry = 0 }: {
+  x: number; z: number; w?: number; d?: number; ry?: number
+}) {
+  const y0 = groundYAt(x, z)
+  const legX = w / 2 - 0.17
+  const legZ = d / 2 - 0.15
+  return (
+    <group position={[x, y0, z]} rotation={[0, ry, 0]} name="prop:worktable">
+      {/* המשטח, עם עובי שנראה מהצד */}
+      <mesh position={[0, TABLE_TOP - 0.045, 0]} castShadow receiveShadow>
+        <boxGeometry args={[w, 0.09, d]} />
+        <meshStandardMaterial color="#8a6437" roughness={0.82} metalness={0} />
+      </mesh>
+      {/* שפה עליונה כהה — מה שהופך לוח לשולחן */}
+      <mesh position={[0, TABLE_TOP + 0.006, 0]}>
+        <boxGeometry args={[w + 0.06, 0.02, d + 0.06]} />
+        <meshStandardMaterial color="#5d3f24" roughness={0.9} metalness={0} />
+      </mesh>
+      {/* מסגרת מתחת למשטח */}
+      <mesh position={[0, TABLE_TOP - 0.15, 0]} castShadow>
+        <boxGeometry args={[w - 0.28, 0.08, d - 0.26]} />
+        <meshStandardMaterial color="#6f4b2e" roughness={0.9} metalness={0} />
+      </mesh>
+      {[[-legX, -legZ], [legX, -legZ], [-legX, legZ], [legX, legZ]].map(([lx, lz], i) => (
+        <mesh key={i} position={[lx, (TABLE_TOP - 0.09) / 2, lz]} castShadow receiveShadow>
+          <boxGeometry args={[0.13, TABLE_TOP - 0.09, 0.13]} />
+          <meshStandardMaterial color="#6f4b2e" roughness={0.9} metalness={0} />
+        </mesh>
+      ))}
+      {/* מוט חיזוק בין הרגליים — הפרט שאומר „נגר בנה את זה“ */}
+      <mesh position={[0, 0.22, 0]} castShadow>
+        <boxGeometry args={[w - 0.4, 0.06, 0.06]} />
+        <meshStandardMaterial color="#63421f" roughness={0.92} metalness={0} />
+      </mesh>
+    </group>
+  )
+}
+
+/* כתם אור על המשטח — אותו זוהר של הקרקע, בגובה חופשי */
+function SurfaceGlow({ x, y, z, r = 0.42, tone = '#f0c877', on = true }: {
+  x: number; y: number; z: number; r?: number; tone?: string; on?: boolean
+}) {
+  const mat = useRef<THREE.MeshBasicMaterial>(null)
+  useFrame(({ clock }) => {
+    if (!mat.current) return
+    const breathe = 0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.6)
+    mat.current.opacity = on ? 0.34 + breathe * 0.16 : 0.16
+  })
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[x, y, z]} renderOrder={2}>
+      <planeGeometry args={[r * 2.6, r * 2.6]} />
+      <meshBasicMaterial ref={mat} map={glowTexture()} color={tone} transparent opacity={0.3}
+        depthWrite={false} blending={THREE.AdditiveBlending} />
+    </mesh>
+  )
+}
 
 function EvidenceTable({ live, at, done, onComplete }: {
   live: Live
@@ -3294,21 +3497,27 @@ function EvidenceTable({ live, at, done, onComplete }: {
   onComplete: () => void
 }) {
   const { camera, gl } = useThree()
-  /* מיקומי הבית של שלושת החפצים — מונחים על החול לפני השולחן */
+  /* הכול קורה על גובה אחד: פני השולחן. עד עכשיו החפצים חושבו על
+     `groundYAt + 0.62` תמיד — גם כשהם עוד היו „על החול“ לפני השולחן —
+     ולכן שלושתם ריחפו באוויר. זה מה שנראה במכה. */
+  const topY = useMemo(() => groundYAt(at.x, at.z) + TABLE_TOP, [at])
+  /* מגש ההתחלה: שלושת החפצים מונחים מסודרים על קצה השולחן הקרוב */
   const home = useMemo(
-    () => EVIDENCE_SLOTS.map((s, i) => ({ x: at.x + (i - 1) * 0.95, z: at.z + 2.15 })),
+    () => EVIDENCE_SLOTS.map((s, i) => ({ x: at.x + (i - 1) * 0.8, z: at.z + 0.36 })),
     [at],
   )
   const slot = useMemo(
-    () => EVIDENCE_SLOTS.map((s) => ({ x: at.x + s.dx, z: at.z - 0.15 })),
+    () => EVIDENCE_SLOTS.map((s) => ({ x: at.x + s.dx, z: at.z - 0.3 })),
     [at],
   )
   const pos = useRef(home.map((h) => ({ ...h })))
   const placed = useRef<boolean[]>([false, false, false])
   const [placedN, setPlacedN] = useState(0)
+  const [held, setHeld] = useState(-1)
   const drag = useRef(-1)
   const doneRef = useRef(done)
   doneRef.current = done
+  const SNAP = 0.72
 
   useEffect(() => {
     const v = new THREE.Vector3()
@@ -3322,7 +3531,7 @@ function EvidenceTable({ live, at, done, onComplete }: {
     const screenOf = (i: number) => {
       const r = gl.domElement.getBoundingClientRect()
       const p = pos.current[i]
-      const q = new THREE.Vector3(p.x, groundYAt(p.x, p.z) + 0.4, p.z).project(camera)
+      const q = new THREE.Vector3(p.x, topY + EVIDENCE_SLOTS[i].h * 0.5, p.z).project(camera)
       return { x: (q.x * 0.5 + 0.5) * r.width + r.left, y: (-q.y * 0.5 + 0.5) * r.height + r.top, ok: q.z <= 1 }
     }
     const down = (e: PointerEvent) => {
@@ -3330,9 +3539,13 @@ function EvidenceTable({ live, at, done, onComplete }: {
       for (let i = 0; i < 3; i++) {
         if (placed.current[i]) continue
         const s = screenOf(i)
-        if (s.ok && Math.hypot(e.clientX - s.x, e.clientY - s.y) < 62) {
+        if (s.ok && Math.hypot(e.clientX - s.x, e.clientY - s.y) < GRAB_PX) {
           drag.current = i
+          setHeld(i)
           live.taskDrag = true
+          /* pointer capture: היד לא מאבדת את החפץ כשהסמן יוצא מגבולות
+             המודל, ולא כשהוא עובר מעל אלמנט אחר */
+          ;(gl.domElement as Element).setPointerCapture?.(e.pointerId)
           e.preventDefault()
           return
         }
@@ -3341,18 +3554,21 @@ function EvidenceTable({ live, at, done, onComplete }: {
     const move = (e: PointerEvent) => {
       const i = drag.current
       if (i < 0) return
-      const p = toPlane(e.clientX, e.clientY, groundYAt(at.x, at.z) + 0.5)
+      const p = toPlane(e.clientX, e.clientY, topY + 0.1)
       const d = Math.hypot(p.x - at.x, p.z - at.z)
-      pos.current[i] = d > 5 ? { x: at.x + ((p.x - at.x) / d) * 5, z: at.z + ((p.z - at.z) / d) * 5 } : p
+      let np = d > 2.6 ? { x: at.x + ((p.x - at.x) / d) * 2.6, z: at.z + ((p.z - at.z) / d) * 2.6 } : p
+      /* Snap אל המקום הנכון בזמן שהחפץ עוד ביד */
+      const sd = Math.hypot(np.x - slot[i].x, np.z - slot[i].z)
+      if (sd < SNAP) {
+        const pull = (1 - sd / SNAP) * 0.55
+        np = { x: np.x + (slot[i].x - np.x) * pull, z: np.z + (slot[i].z - np.z) * pull }
+      }
+      pos.current[i] = np
     }
-    const up = () => {
-      const i = drag.current
-      if (i < 0) return
-      drag.current = -1
-      live.taskDrag = false
-      const p = pos.current[i]
+    const settle = (i: number) => {
       /* נחת על המקום שלו? נצמד. נחת במקום אחר — חוזר הביתה, בלי עונש. */
-      if (Math.hypot(p.x - slot[i].x, p.z - slot[i].z) < 0.85) {
+      const p = pos.current[i]
+      if (Math.hypot(p.x - slot[i].x, p.z - slot[i].z) < SNAP) {
         pos.current[i] = { ...slot[i] }
         placed.current[i] = true
         cue('task')
@@ -3363,9 +3579,18 @@ function EvidenceTable({ live, at, done, onComplete }: {
         pos.current[i] = { ...home[i] }
       }
     }
+    const up = () => {
+      const i = drag.current
+      if (i < 0) return
+      drag.current = -1
+      setHeld(-1)
+      live.taskDrag = false
+      settle(i)
+    }
     window.addEventListener('pointerdown', down)
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
     if (process.env.NODE_ENV === 'development') {
       ;(window as unknown as { __ch1TablePut?: (i: number) => void }).__ch1TablePut = (i: number) => {
         pos.current[i] = { ...slot[i] }
@@ -3379,37 +3604,54 @@ function EvidenceTable({ live, at, done, onComplete }: {
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
+      live.taskDrag = false
     }
-  }, [camera, gl, live, at, home, slot, onComplete])
+  }, [camera, gl, live, at, home, slot, topY, onComplete])
 
   return (
     <group name="task:evidence-table">
-      {/* השולחן עצמו — ספסל אבן, הנכס שכבר קיים בפרק */}
-      <Prop url="/assets/chapter1/models/stone-bench.glb" x={at.x} z={at.z} height={0.62} ry={0} />
-      {/* שלושת המקומות המסומנים: אור על אבן השולחן, לא תווית מרחפת */}
+      <WorkTable x={at.x} z={at.z} w={2.9} d={1.25} />
+      {/* שלושת המקומות: שקע רדוד בלוח, ואור רך מעליו. לא תווית, ולא UI. */}
       {slot.map((s, i) => (
-        <GroundGlow key={`slot${i}`} x={s.x} z={s.z} r={0.5} live={live} tone={placedN > i ? '#cfe0b8' : '#f0c877'} />
+        <group key={`slot${i}`}>
+          <mesh position={[s.x, topY + 0.002, s.z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
+            <planeGeometry args={[0.68, 0.5]} />
+            <meshStandardMaterial color={placedN > i ? '#7a6034' : '#5d3f24'} roughness={0.95} metalness={0} />
+          </mesh>
+          <SurfaceGlow x={s.x} y={topY + 0.012} z={s.z} r={0.34}
+            tone={placed.current[i] ? '#cfe0b8' : '#f0c877'} on={!done} />
+        </group>
       ))}
       {EVIDENCE_SLOTS.map((s, i) => (
-        <MovingEvidence key={s.id} model={s.model} h={s.h} at={pos.current} index={i} />
+        <MovingEvidence key={s.id} model={s.model} h={s.h} at={pos.current} index={i}
+          y={topY} lifted={held === i} />
       ))}
+      {/* תווית רק על מה שמוחזק ביד */}
+      {held >= 0 && (
+        <Html center position={[pos.current[held].x, topY + 0.55, pos.current[held].z]} zIndexRange={[4, 4]}>
+          <span className="ch1-prop-label">{EVIDENCE_SLOTS[held].label}</span>
+        </Html>
+      )}
     </group>
   )
 }
 
 /* חפץ שהמיקום שלו נקרא מ-ref בכל פריים — הגרירה משנה את ה-ref, לא state,
    כדי שלא יהיה רינדור של React על כל תזוזת עכבר. */
-function MovingEvidence({ model, h, at, index }: {
-  model: string; h: number; at: { x: number; z: number }[]; index: number
+function MovingEvidence({ model, h, at, index, y, lifted }: {
+  model: string; h: number; at: { x: number; z: number }[]; index: number; y: number; lifted: boolean
 }) {
   const g = useRef<THREE.Group>(null)
   /* ה-Prop שבפנים מציב את עצמו על groundYAt(0,0) — הקרקע בראשית הצירים.
      מקזזים אותו כאן, אחרת החפץ מקבל את גובה הקרקע פעמיים והוא צף או
      נקבר לפי השיפוע. */
   const base = useMemo(() => groundYAt(0, 0), [])
-  useFrame(() => {
+  const lift = useRef(0)
+  useFrame((_, dt) => {
     const p = at[index]
-    if (g.current) g.current.position.set(p.x, groundYAt(p.x, p.z) - base + 0.62, p.z)
+    lift.current += ((lifted ? 0.11 : 0) - lift.current) * Math.min(1, dt * 12)
+    if (g.current) g.current.position.set(p.x, y - base + lift.current, p.z)
   })
   return (
     <group ref={g}>
@@ -3424,10 +3666,11 @@ function MovingEvidence({ model, h, at, index }: {
    פונקציה טהורה ברמת המודול ולא סגור בתוך useMemo: היא נקראת פעם אחת
    לכל גמל, והתוצאה תלויה רק בארבעת המספרים ובקוליידרים של האזור —
    שנבנים פעם אחת בטעינת המודול ואינם משתנים. */
-function clearWalk(cx: number, cz: number, rx: number, rz: number) {
+function clearWalk(cx: number, cz: number, rx: number, rz: number, taken: Collider[] = []) {
   const CAMEL_R = 1.4
   const hits = (x: number, z: number) =>
-    WORLD.colliders.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + CAMEL_R)
+    WORLD.colliders.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + CAMEL_R) ||
+    taken.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + CAMEL_R)
   const clear = (ex: number, ez: number, ox: number, oz: number) => {
     for (let i = 0; i < 48; i++) {
       const t = (i / 48) * Math.PI * 2
@@ -3462,12 +3705,39 @@ function clearWalk(cx: number, cz: number, rx: number, rz: number) {
   return { cx, cz, rx: 0, rz: 0 }
 }
 
-function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
+/* מסלולי העדר — מתוכננים יחד, ופעם אחת.
+
+   `clearWalk` היא פונקציה טהורה, ולכן שני גמלים שקיבלו את אותה אליפסה
+   קיבלו ממנה גם את אותה תשובה בדיוק. בדרך ההעמסה שני הגמלים הנודדים
+   מוגדרים באמת על אותה אליפסה (‎cx -12.12, cz 8.21) ונבדלים רק בפאזה —
+   וכשהמסלול נחסם ושניהם „חנו", הם חנו באותה נקודה: גמל בתוך גמל, בדיוק
+   מה שנראה במשחק.
+
+   התכנון עובר עכשיו על העדר כולו לפי הסדר, וכל גמל רואה את מי שכבר תפס
+   מקום: גמל חונה תופס עיגול, וגמל הולך תופס את האליפסה שלו רק אם גמל
+   אחר מבקש בדיוק אותה אליפסה — שאז השני נדחף החוצה לטבעת רחבה יותר,
+   ואם גם זה לא מתאפשר הוא חונה במקום פנוי משלו. */
+type HerdPath = { cx: number; cz: number; rx: number; rz: number }
+const HERD_PATHS: HerdPath[] = (() => {
+  const taken: Collider[] = []
+  const out: HerdPath[] = []
+  for (const h of HERD) {
+    const sameRing = out.find((p) => Math.hypot(p.cx - h.cx, p.cz - h.cz) < 0.6 && p.rx > 0)
+    let p = clearWalk(h.cx, h.cz, h.rx, h.rz, taken)
+    if (sameRing && p.rx > 0 && Math.abs(p.rx - sameRing.rx) < 0.4) {
+      /* אותה טבעת בדיוק — הרחב, כדי ששני הגופים לא ידרכו זה על זה */
+      const wide = clearWalk(h.cx, h.cz, h.rx + 2.2, h.rz + 1.6, taken)
+      if (wide.rx > 0) p = wide
+    }
+    if (p.rx === 0 && p.rz === 0) taken.push({ x: p.cx, z: p.cz, r: 2.4 })
+    out.push(p)
+  }
+  return out
+})()
+
+function WanderingCamel({ live, index, speed, phase, h }: {
   live: Live
-  cx: number
-  cz: number
-  rx: number
-  rz: number
+  index: number
   speed: number
   phase: number
   h: number
@@ -3475,15 +3745,8 @@ function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
   const g = useRef<THREE.Group>(null)
   const { obj: model, legs, phase: gaitPhase } = useWalkingCamel(h)
 
-  /* מסלול נקי, נבחר פעם אחת.
-     הגמל הלך על אליפסה קבועה בלי לדעת דבר על מה שעומד עליה, ולכן חצה
-     מדורות, אוהלים וארגזים — בדרך ההעמסה הוא עמד ממש בתוך האש. הפתרון
-     אינו התחמקות לכל פריים (שמשברת את ההליכה ומייצרת ריצוד), אלא בחירת
-     מסלול שכבר פנוי: דוגמים 48 נקודות על האליפסה מול WORLD.colliders,
-     ואם משהו חוסם — מכווצים, ואז מסיטים את המרכז. גמל שאין לו מסלול
-     פנוי כלל עומד במקום; גמל עומד קורא כגמל נח, גמל שחוצה מדורה קורא
-     כמשחק שבור. */
-  const path = useMemo(() => clearWalk(cx, cz, rx, rz), [cx, cz, rx, rz])
+  /* מסלול נקי, נבחר פעם אחת — ראה HERD_PATHS למעלה */
+  const path = HERD_PATHS[index] ?? { cx: 0, cz: 0, rx: 0, rz: 0 }
 
   const col = useMemo<Collider>(() => ({ x: path.cx + path.rx, z: path.cz, r: 1.5 }), [path])
 
@@ -3501,9 +3764,27 @@ function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
   const groundSpeed = Math.abs(speed) * ((path.rx + path.rz) / 2)
   const gaitRate = (groundSpeed / 0.62) * Math.PI
 
+  /* גמל שאין לו מסלול פנוי עומד — ואז הרגליים היו קופאות באמצע פסיעה,
+     כי `gaitRate` יוצא אפס והזווית נשארת על מה שהיה. גמל קפוא באמצע צעד
+     נקרא כאנימציה שנשברה. עומד = עומד: הרגליים חוזרות לאפס ברוך, והגוף
+     מקבל נשימה איטית משלו. */
+  const parked = path.rx === 0 && path.rz === 0
+  const idleT = useRef(Math.abs(phase))
+
   useFrame(({ clock }, dt) => {
     const el = g.current
     if (!el) return
+    if (parked) {
+      idleT.current += dt
+      const br = Math.sin(idleT.current * 0.55)
+      for (const leg of legs) leg.rotation.x += (0 - leg.rotation.x) * Math.min(1, dt * 3)
+      el.position.set(path.cx, groundYAt(path.cx, path.cz) + br * 0.012, path.cz)
+      el.rotation.y = phase
+      el.rotation.z = br * 0.008
+      col.x = path.cx
+      col.z = path.cz
+      return
+    }
     const t = clock.elapsedTime * speed + phase
     const x = path.cx + Math.cos(t) * path.rx
     const z = path.cz + Math.sin(t) * path.rz
@@ -3516,8 +3797,11 @@ function WanderingCamel({ live, cx, cz, rx, rz, speed, phase, h }: {
       const sideShift = leg.name.endsWith('L') ? 0 : Math.PI
       leg.rotation.x = Math.sin(ph + sideShift) * 0.34
     }
+    /* הגובה נלקח מהקרקע. הגמלים ישבו על y=0 קבוע בזמן שהטרסה האפויה
+       מתגלגלת — בדרך ההעמסה זה קבר אותם עד הברכיים, ובמעבר הצר הם
+       הלכו באוויר. אותו `groundYAt` שכל שאר העולם כבר יושב עליו. */
     // no vertical hop — a walking camel keeps its body level and sways sideways
-    el.position.set(x, 0, z)
+    el.position.set(x, groundYAt(x, z), z)
     el.rotation.y = Math.atan2(dx, dz)
     el.rotation.z = Math.sin(gaitPhase.current.value) * 0.028
     col.x = x
@@ -3881,7 +4165,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       ))}
       {/* camels that actually walk the valley */}
       {HERD.map((h, i) => (
-        <WanderingCamel key={i} live={live} {...h} />
+        <WanderingCamel key={i} live={live} index={i} speed={h.speed} phase={h.phase} h={h.h} />
       ))}
       {rockSpots.map((p, i) => (
         <Prop key={`r${i}`} url={MODEL_ROCKS} x={p.x} z={p.z} ry={p.k * 6.28} height={0.5 + p.k * 0.7} />
@@ -5343,8 +5627,6 @@ export default function Game() {
         {encounter && (
           <DialogueHud
             encounter={encounter}
-            notebookDone={notebook.done}
-            notebookTotal={NOTEBOOK_TOTAL}
             onSpeakerChange={setStepSpeaker}
             onFinished={finishEncounter}
             onClose={() => setEncounter(null)}

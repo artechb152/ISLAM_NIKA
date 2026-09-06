@@ -109,7 +109,7 @@ export function Rawi({
      changed, and his speed changes continuously as the gap to the player
      closes. */
   const walk = actions['walk']
-  useFrame(() => {
+  useFrame((_, dt) => {
     if (walk) {
       const v = speed?.current ?? 0
       walk.setEffectiveTimeScale(
@@ -127,7 +127,9 @@ export function Rawi({
          rather than a modulo, because JS `%` keeps the dividend's sign and so
          left the whole range [−3π, −π) unwrapped, which is precisely when the
          long way round happened */
-      g.rotation.y += wrapPi(want - g.rotation.y) * 0.12
+      /* תלוי בזמן ולא בפריים: ב-120Hz הסיבוב היה כפול מהירותו
+         ב-60Hz, וראאווי „קפץ" לכיוון כשקצב הפריימים השתנה */
+      g.rotation.y += wrapPi(want - g.rotation.y) * Math.min(1, dt * 7.2)
     }
   })
 
@@ -187,10 +189,15 @@ interface ProcUniforms {
   uTime: { value: number }
   uTalk: { value: number }
   uH: { value: number }
+  /** פנייה של הראש בלבד, ברדיאנים, ביחס לגוף */
+  uHeadYaw: { value: number }
+  /** הנהון קל מעלה/מטה, ברדיאנים */
+  uHeadPitch: { value: number }
 }
 
 const PROC_COMMON = /* glsl */ `
   uniform float uTime; uniform float uTalk; uniform float uH;
+  uniform float uHeadYaw; uniform float uHeadPitch;
 `
 
 /* האמפליטודות כאן היו בסדר גודל של סנטימטר אחד על דמות בגובה 1.70 —
@@ -221,6 +228,19 @@ const PROC_VERTEX = /* glsl */ `
   // מחווה — הכתפיים נפתחות מעט כשמדברים
   float shoulder = exp(-pow((h - 0.82) * 6.0, 2.0));
   transformed.x += sin(t * 1.9) * 0.030 * shoulder * uTalk;
+  /* פניית ראש. עד עכשיו כל הגוף הסתובב אל השחקן — וכשעוברים לצד
+     הזווית הקצרה החליפה סימן והדמות התהפכה בבת אחת. עכשיו מסתובב
+     רק מה שמעל הכתפיים, במעבר רך לאורך הצוואר, והזווית מוגבלת
+     ומוחלקת בצד ה-JS. */
+  float neck = smoothstep(0.60, 0.88, h);
+  float ha = uHeadYaw * neck;
+  float chy = cos(ha), shy = sin(ha);
+  transformed.xz = vec2(
+    transformed.x * chy + transformed.z * shy,
+   -transformed.x * shy + transformed.z * chy
+  );
+  // הנהון: הטיה קטנה סביב ציר X, באותה מסכת צוואר
+  transformed.y += uHeadPitch * neck * transformed.z;
 `
 
 export function Npc({
@@ -260,6 +280,8 @@ export function Npc({
     uTime: { value: life.phase },
     uTalk: { value: 0 },
     uH: { value: CHAR_HEIGHT },
+    uHeadYaw: { value: 0 },
+    uHeadPitch: { value: 0 },
   })
 
   const model = useMemo(() => {
@@ -275,6 +297,8 @@ export function Npc({
         shader.uniforms.uTime = uniforms.current.uTime
         shader.uniforms.uTalk = uniforms.current.uTalk
         shader.uniforms.uH = uniforms.current.uH
+        shader.uniforms.uHeadYaw = uniforms.current.uHeadYaw
+        shader.uniforms.uHeadPitch = uniforms.current.uHeadPitch
         shader.vertexShader = shader.vertexShader
           .replace('#include <common>', `#include <common>\n${PROC_COMMON}`)
           .replace('#include <begin_vertex>', `#include <begin_vertex>\n${PROC_VERTEX}`)
@@ -294,32 +318,47 @@ export function Npc({
     const want = speaking ? 1 : 0
     u.uTalk.value += (want - u.uTalk.value) * Math.min(dt * 3.5, 1)
 
-    /* פנייה אל השחקן. דמות שממשיכה להביט לכיוון קבוע בזמן שעומדים
-       מולה ומדברים איתה נקראת כפסל — וזה הסימן היחיד החזק באמת,
-       הרבה מעבר לנשימה. הפנייה מוגבלת בטווח, כדי שהאזור לא ייראה
-       כמו חדר שכולו מסתובב אחרי מי שנכנס אליו, ומוחלקת בזמן, כדי
-       שראש לא ינתר. */
+    /* מבט אל השחקן — בראש, לא בגוף.
+
+       קודם הסתובב הגוף כולו לפי `pull = 1 - dist/NOTICE`, ולכן דמות
+       שעמדת תשעה מטרים ממנה כבר זזה קצת, ובעיקר: כשעוברים לצידה
+       האחורי הזווית הקצרה מחליפה סימן והגוף התהפך בקפיצה אחת. זה מה
+       שנראה מוזר.
+
+       עכשיו שתי שכבות, שתיהן חסומות ומוחלקות, ואף אחת מהן אינה
+       `lookAt` חד לכל פריים:
+         הראש  — עד 55°, נכנס רק בטווח 7 מטר;
+         הגוף  — עד 28°, רק כשהשחקן כבר מלפנים ובטווח שיחה.
+       הראש מוגבל ל-55° מעבר לגוף, ולכן השניים לעולם אינם פונים
+       לכיוונים מנוגדים. מאחור או מרחוק — שניהם חוזרים ל-idle. */
     const g = group.current
     const p = playerRef?.current
-    if (!g || !p) return
-    const dx = p.x - position[0]
-    const dz = p.z - position[2]
-    const dist = Math.hypot(dx, dz)
-    const NOTICE = 9
-    let target = rotationY
-    if (dist < NOTICE && dist > 0.4) {
-      const facing = Math.atan2(dx, dz)
-      /* קרוב = פנייה מלאה, בקצה הטווח = הצצה בלבד */
-      const pull = 1 - Math.min(1, dist / NOTICE)
-      let d = facing - rotationY
-      while (d > Math.PI) d -= Math.PI * 2
-      while (d < -Math.PI) d += Math.PI * 2
-      target = rotationY + d * pull
+    if (!g) return
+    const u2 = uniforms.current
+    let wantHead = 0
+    let wantBody = 0
+    if (p) {
+      const dx = p.x - position[0]
+      const dz = p.z - position[2]
+      const dist = Math.hypot(dx, dz)
+      const NOTICE = 7
+      if (dist < NOTICE && dist > 0.35) {
+        const facing = Math.atan2(dx, dz)
+        let d = wrapPi(facing - rotationY)
+        /* מאחור אין מה לפנות אליו — צוואר אינו מסתובב 180° */
+        if (Math.abs(d) < 2.0) {
+          const pull = Math.min(1, (NOTICE - dist) / (NOTICE - 2.2))
+          d *= pull
+          wantBody = Math.max(-0.49, Math.min(0.49, d)) * (dist < 4 ? 1 : 0)
+          wantHead = Math.max(-0.96, Math.min(0.96, d - wantBody))
+        }
+      }
     }
-    let diff = target - g.rotation.y
-    while (diff > Math.PI) diff -= Math.PI * 2
-    while (diff < -Math.PI) diff += Math.PI * 2
-    g.rotation.y += diff * Math.min(dt * 2.4, 1)
+    /* דיבור מרים מעט את המבט — הנהון של מי שמדבר אליך */
+    const wantPitch = u2.uTalk.value * 0.045
+    u2.uHeadYaw.value += (wantHead - u2.uHeadYaw.value) * Math.min(dt * 3.2, 1)
+    u2.uHeadPitch.value += (wantPitch - u2.uHeadPitch.value) * Math.min(dt * 2.5, 1)
+    g.rotation.y += wrapPi(rotationY + wantBody - g.rotation.y) * Math.min(dt * 1.8, 1)
   })
 
   return (

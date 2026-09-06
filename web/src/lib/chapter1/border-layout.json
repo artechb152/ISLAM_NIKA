@@ -1685,8 +1685,8 @@
  "mood": {
   "sky": "sky-morning.png",
   "fill": {
-   "sky": "#dde7f0",
-   "ground": "#a5a89e",
+   "sky": "#dbe6f2",
+   "ground": "#bda487",
    "intensity": 1.18
   },
   "fog": {
@@ -1700,13 +1700,13 @@
     14,
     -12
    ],
-   "color": "#f0f5ff",
+   "color": "#fff0d8",
    "intensity": 3
   },
   "skyLight": 0.2,
   "exposure": 1.46,
   "viewerFill": 0.4,
-  "grade": "saturate(0.94) contrast(1.07) brightness(1.03) hue-rotate(7deg)",
+  "grade": "saturate(1.06) contrast(1.06) brightness(1.03) hue-rotate(4deg)",
   "vignette": 0.3
  },
  "extras": [

@@ -1109,3 +1109,32 @@ body{
 .ch1-task-note b{color:#e8bf76;font-size:13.5px;font-weight:700}
 .ch1-task-note.is-wrong{border-color:rgba(200,110,90,.55)}
 .ch1-task-note.is-wrong b{color:#d99a82}
+
+/* ===== תרגול מסכם ===== */
+/* /chapter1/practice is built entirely from the classes the other chapters'
+   closing practices already use — the article shell from chapter6-article.css
+   and the exercise surfaces (.p2-*) from chapter2-article.css, both loaded by
+   the practice page itself. Two things only are chapter 1's own, and they are
+   here rather than in either of those sheets so neither chapter 2 nor chapter 6
+   is touched:
+
+   1. WHICH PICTURE STANDS IN THE BAND. .ch2-hero-media hard-codes chapter 2's
+      desert in a background shorthand; this replaces the image (and only the
+      image — size:cover survives from the shorthand) with the still the
+      journey opens on. Two classes deep, so it wins on specificity whichever
+      sheet the bundler puts first.
+   2. THE CLOSING TAKEAWAYS. Four sentences the road leaves behind, set in the
+      article's own measure and rule — the same gold hairline the chapter uses
+      to mark a thing worth keeping, and no device of its own. */
+.p1-banner .ch2-hero-media{
+  background-image:url('/assets/chapter1/concept/station1-camp.png');
+  background-position:center 42%;
+}
+.p1-takeaways{
+  list-style:none;margin:0;padding:0;display:grid;gap:clamp(14px,1.6vw,20px);
+  width:100%;max-width:var(--measure,880px);
+}
+.p1-takeaways li{
+  padding-inline-start:18px;border-inline-start:2px solid var(--gold-soft);
+  font-size:var(--read,18.5px);line-height:1.6;color:var(--ink);
+}

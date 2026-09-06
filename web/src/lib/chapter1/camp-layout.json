@@ -1128,9 +1128,9 @@
   "mood": {
     "sky": "sky-dawn.png",
     "fill": {
-      "sky": "#6d7ba6",
-      "ground": "#4a4657",
-      "intensity": 0.95
+      "sky": "#5d6ea8",
+      "ground": "#8a4b2a",
+      "intensity": 1.05
     },
     "fog": {
       "color": "#5b6280",
@@ -1143,13 +1143,13 @@
         15,
         13
       ],
-      "color": "#a9bce4",
+      "color": "#9db4e6",
       "intensity": 1.5
     },
     "skyLight": 0.64,
     "exposure": 1.22,
     "viewerFill": 0.3,
-    "grade": "saturate(0.94) contrast(1.12) brightness(0.95) hue-rotate(10deg)",
+    "grade": "saturate(1.10) contrast(1.10) brightness(0.96) hue-rotate(6deg)",
     "vignette": 0.46
   },
   "roads": [

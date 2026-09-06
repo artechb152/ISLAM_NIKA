@@ -1828,7 +1828,7 @@
       "intensity": 3.1
     },
     "viewerFill": 0.4,
-    "grade": "saturate(1.10) contrast(1.04) brightness(1.02) hue-rotate(-9deg)",
+    "grade": "saturate(1.14) contrast(1.04) brightness(1.02) hue-rotate(-9deg)",
     "vignette": 0.3
   },
   "exits": [

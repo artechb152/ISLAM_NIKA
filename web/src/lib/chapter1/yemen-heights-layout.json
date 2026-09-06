@@ -30,8 +30,8 @@
       "far": 470
     },
     "fill": {
-      "sky": "#e6efdf",
-      "ground": "#b3a684",
+      "sky": "#e8f0dd",
+      "ground": "#b7a47c",
       "intensity": 1.22
     },
     "sun": {
@@ -44,7 +44,7 @@
       "intensity": 3.3
     },
     "viewerFill": 0.4,
-    "grade": "saturate(1.06) contrast(1.05) brightness(1.05) hue-rotate(-5deg)",
+    "grade": "saturate(1.12) contrast(1.05) brightness(1.04) hue-rotate(-5deg)",
     "vignette": 0.27
   },
   "roads": [

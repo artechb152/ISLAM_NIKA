@@ -34,15 +34,11 @@ function buildSteps(e: Encounter): Step[] {
 
 export function DialogueHud({
   encounter,
-  notebookDone,
-  notebookTotal,
   onSpeakerChange,
   onFinished,
   onClose,
 }: {
   encounter: Encounter
-  notebookDone: number
-  notebookTotal: number
   /** Lets the 3D layer play the right gesture / turn the right head. */
   onSpeakerChange?: (speaker: SpeakerId) => void
   onFinished: (e: Encounter) => void
@@ -256,9 +252,12 @@ export function DialogueHud({
           {/* „נרשם במחברת" רק כשבאמת נרשם. פעימות בלי רשומה — ברכת ההיכרות
               ומשפטי ההגעה — נושאות notebook: 0 ואינן נכנסות למחברת, והשורה
               הזאת הצהירה עליהן שכן, ליד מונה שנשאר על אותו מספר. */}
+          {/* המונה „0 מתוך 26“ ירד. מחסן של 26 פריטים אינו מדד להתקדמות
+              בפרק — הוא רק מודיע לשחקן, בכל שיחה, כמה עוד לא עשה. מה
+              שקרה בפועל — „זה נרשם“ — נשאר, וההתקדמות נמדדת בתחנות
+              בשורה שמתחת. */}
           <span className="hud-dialogue-count">
-            {showDone && encounter.notebook > 0 ? '✓ נרשם במחברת · ' : ''}
-            מחברת: {notebookDone} מתוך {notebookTotal}
+            {showDone && encounter.notebook > 0 ? '✓ נרשם במחברת' : ''}
           </span>
           {showDone && (
             <button
