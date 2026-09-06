@@ -180,3 +180,14 @@
   [data-m] .c3-haze,[data-m] .c3-fx::before,[data-m] .c3-fx::after,.c3-fx{animation:none}
   .c3-scene{transition:opacity .3s ease;transform:scale(1.14)}
 }
+
+/* ---- the panels that are films ----
+   Three peak panels were run through image-to-video and kept only because the
+   painting survived it — measured frame against source, 5.7 to 9.0 out of 255.
+   The cave of §19 came back at 52.9, rebuilt in blue-grey rock, and is not
+   here. The still sits underneath as the poster, so nothing is lost if the file
+   does not load, and a reader who has asked for less motion gets the drawing. */
+.c3-lens video{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+}
+@media (prefers-reduced-motion:reduce){ .c3-lens video{display:none} }

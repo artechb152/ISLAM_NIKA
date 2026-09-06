@@ -46,7 +46,7 @@ import comicData from '@/lib/chapter3/comic.json'
 import { markContentComplete } from '@/lib/chapter3/progress'
 
 interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
-interface Panel { a: string; p: number; e?: number; b: Beat[]; m: string; c: string; peak?: number }
+interface Panel { a: string; p: number; e?: number; b: Beat[]; m: string; c: string; peak?: number; film?: number }
 interface Part { title: string; first: number }
 const PANELS = (comicData as unknown as { pages: Panel[] }).pages
 const PARTS = (comicData as unknown as { parts: Part[] }).parts
@@ -108,7 +108,9 @@ const SLOTS: Record<number, string[]> = {
    it cannot arrive after it; a staged entrance read as a slideshow build. The
    page turn is the animation, and what still moves is only what would move if
    the panel were a window. */
-function PanelView({ panel, order, hideVerse }: { panel: Panel; order: number; hideVerse?: boolean }) {
+function PanelView({ panel, order, hideVerse, live }: {
+  panel: Panel; order: number; hideVerse?: boolean; live: boolean
+}) {
   const time = panel.b.find((b) => b.k === 'time')
   const says = panel.b.filter((b) => b.k === 'say')
   const verses = hideVerse ? [] : panel.b.filter((b) => b.k === 'v')
@@ -120,6 +122,16 @@ function PanelView({ panel, order, hideVerse }: { panel: Panel; order: number; h
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/assets/chapter3/comic/${panel.a}.jpg`} alt="" aria-hidden="true"
              loading="lazy" decoding="async" />
+        {/* A FEW PANELS ARE FILMS, AND ONLY WHILE THEY ARE OPEN. The painting
+            stays underneath as the poster, so a panel that has not loaded, or a
+            reader who has asked for less motion, sees exactly the drawing. Only
+            the live page mounts a <video>: three of these decoding behind
+            seventeen sheets would cost more than the whole book. */}
+        {panel.film === 1 && live && (
+          <video src={`/assets/chapter3/comic/motion/${panel.a}.mp4`}
+                 poster={`/assets/chapter3/comic/${panel.a}.jpg`}
+                 autoPlay muted loop playsInline aria-hidden="true" />
+        )}
       </span>
       <span className="c3-haze" aria-hidden="true" />
       <span className="c3-fx" aria-hidden="true" />
@@ -152,7 +164,7 @@ function PageView({ page, folio, side, live, parts }: {
                     (peak ? ' is-peak' : '') + (page.ps[0]?.e ? ' is-today' : '')}>
       <div className="c3-grid">
         {page.ps.map((p, k) => (
-          <PanelView panel={p} key={p.a + k} order={k} hideVerse={!!hero} />
+          <PanelView panel={p} key={p.a + k} order={k} hideVerse={!!hero} live={live} />
         ))}
       </div>
       {hero && <p className="c3-hero-verse">{hero.t}</p>}

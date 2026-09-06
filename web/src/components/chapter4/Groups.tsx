@@ -206,6 +206,16 @@ export default function Groups({
   const on = shown || still
   const open = groups[at]
 
+  /* THE LIST'S OWN SEPARATOR, DROPPED WHEN THE ITEM STANDS ALONE. §3 prints its
+     four groups as one sentence — „…שהגיעו ממכה; …בעירם; …במדינה, ו…קריש." —
+     so each fragment carries the mark that joined it to the next one. Here each
+     one is read by itself and that mark is a comma hanging in mid-air.
+
+     THIS CHANGES NO WORD, and it is the one thing the chapter's rule allows to
+     change: the fidelity gate compares with punctuation stripped, precisely so
+     a sentence can be set in a caption or a panel without being rewritten. */
+  const said = (open?.text ?? '').replace(/\s*[;,]\s*$/, '')
+
   return (
     <figure className={`ch4-who${on ? ' is-on' : ''}${still ? ' is-still' : ''}`} aria-label={question}>
       <div className="ch4-who-body">
@@ -267,7 +277,7 @@ export default function Groups({
           key={open?.id}
         >
           <h4>{open?.name}</h4>
-          <p>{open?.text}</p>
+          <p>{said}</p>
         </div>
       </div>
     </figure>
