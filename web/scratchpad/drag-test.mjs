@@ -45,6 +45,7 @@ for (const f of w.finds) {
   for (let k = 0; k < 3; k++) {
     const st = await page.evaluate((id) => window.__ch1Where.finds.find((q) => q.id === id)?.done, f.id)
     if (st) break
+    await clearDialogue()
     await page.keyboard.press('KeyE'); await page.waitForTimeout(700)
     await page.keyboard.press('Escape'); await page.waitForTimeout(300)
     await clearDialogue()

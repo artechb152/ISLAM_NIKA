@@ -36,8 +36,16 @@ for (const region of ORDER) {
   await hold(['KeyW'], 2200); await hold(['ShiftLeft','KeyW'], 2200); await hold(['KeyS'], 1200)
   // שיחת הפתיחה
   let w = await page.evaluate(()=>window.__ch1Where)
-  for (const c of w.cast) { await go(c.x, c.z+1.7); await page.waitForTimeout(1400)
-    await page.keyboard.press('KeyE'); await page.waitForTimeout(600); await clear() }
+  for (const c of w.cast) {
+    await go(c.x, c.z+1.7); await page.waitForTimeout(1400)
+    /* לדמות אחת יכולות להיות כמה שיחות ליבה — לוחצים עד שנגמרו */
+    for (let k=0;k<6;k++){
+      await page.keyboard.press('KeyE'); await page.waitForTimeout(900)
+      const had = await page.evaluate(()=>!!document.querySelector('.hud-dialogue'))
+      await clear()
+      if (!had) break
+    }
+  }
   for (let i=0;i<6;i++){ w = await page.evaluate(()=>window.__ch1Where); if (w.stage!=='brief') break
     await page.keyboard.press('KeyR'); await page.waitForTimeout(600); await clear() }
   // עדויות
@@ -65,15 +73,16 @@ for (const region of ORDER) {
       let ok = false
       for (const b of zones) {
         await page.waitForTimeout(1300)
-        const fresh = (await page.evaluate(()=>window.__ch1Task)).props.find((p)=>p.id===item.id)
+        const snap = await page.evaluate(()=>window.__ch1Task)
+        const fresh = snap?.props?.find((p)=>p.id===item.id)
         if (fresh) { item.x = fresh.x; item.y = fresh.y }
         await page.mouse.move(item.x, item.y); await page.mouse.down()
         for (let s=1;s<=10;s++){ await page.mouse.move(item.x+(b.x-item.x)*s/10, item.y+(b.y-item.y)*s/10); await page.waitForTimeout(50) }
         await page.mouse.up(); await page.waitForTimeout(1400)
         const w2 = await page.evaluate(()=>window.__ch1Where)
         if (w2.task?.solved) { ok = true; break }
-        const now = (await page.evaluate(()=>window.__ch1Task)).props.find((p)=>p.id===item.id)
-        if (now?.placed) { ok = true; break }
+        const snap2 = await page.evaluate(()=>window.__ch1Task)
+        if (snap2?.props?.find((p)=>p.id===item.id)?.placed) { ok = true; break }
       }
       if (!ok) break
       if ((await page.evaluate(()=>window.__ch1Where)).task?.solved) break
