@@ -46,43 +46,65 @@ import comicData from '@/lib/chapter3/comic.json'
 import { markContentComplete } from '@/lib/chapter3/progress'
 
 interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
-interface Panel { a: string; p: number; e?: number; b: Beat[]; m: string; c: string; peak?: number; film?: number }
+interface Panel {
+  a: string; p: number; e?: number; b: Beat[]; m: string; c: string
+  n: number            /* its place in the book, 1–75, printed on the frame */
+  op: number           /* where to crop it, measured — see sync-comic.mjs   */
+  peak?: number; film?: number
+}
 interface Part { title: string; first: number }
 const PANELS = (comicData as unknown as { pages: Panel[] }).pages
 const PARTS = (comicData as unknown as { parts: Part[] }).parts
 
-/* ---------------- the page templates ----------------
-   Tiers, because a tier is the one shape that takes a 4:3 painting without
-   throwing much of it away: two tiers keep 87% of the picture, three keep 50%.
-   A three-tier page is for a run of quick beats, and that is the page's pacing
-   — the same device a printed comic uses. `hero` gives one panel most of the
-   page and a band of bare paper under it for a verse. */
-const T: Record<string, number> = { two: 2, three: 3, hero: 1 }
-const ROTATION = ['two', 'three', 'two', 'two', 'three']
+/* ---------------- the page ----------------
+   A HEBREW COMIC PAGE IS TIERS, AND A TIER IS READ RIGHT TO LEFT. The sources
+   on adapting comics into Hebrew are unanimous: the panel path follows the
+   language, so the panels on the right are read before the panels on the left
+   and the page then drops a tier. The build before this gave every tier one
+   full-width panel, so the page had no right-to-left step in it at all and
+   nothing on it taught the eye anything.
 
-/* A HERO PAGE IS FOR A LONG VERSE, AND ONLY FOR ONE. The three long recitations
-   — sura 96 and the two verses of the night journey — are the moments the
-   chapter is built towards, and giving each of them a page is how a comic says
-   so. The two SHORT verses are five words each; on a page of their own they
-   left a picture stranded above an acre of blank paper, so they ride in an
-   ordinary tier with the gold card on the picture, which is what a short
-   quotation wants. */
+   ⚠ BUT THIS CHAPTER'S PANELS CANNOT ALL BE PAIRED, and that is arithmetic:
+   55 of the 75 carry two full sentences. Measured with every tier paired, the
+   lettering stood on a median 23% of its panel and a worst of 79% — a six-word
+   line that sets on one line across a wide tier sets on four across half of
+   one. So a tier is PAIRED WHERE THE TEXT ALLOWS IT and whole where it does
+   not: two panels share a tier only when they carry three captions between
+   them. Twenty-one places in the book qualify, and those are where the page
+   turns right to left. Everywhere else the reading order is carried by the
+   number every panel now wears. */
+const TIERS_PER_PAGE = [3, 2, 3, 3, 2]     /* a two-tier page is a slow page */
+const PAIR_BUDGET = 3                      /* captions two panels may share  */
+
+const capsOf = (p: Panel) => p.b.filter((b) => !b.k).length
+
+/* A HERO PAGE IS FOR A LONG VERSE, AND ONLY FOR ONE — the three long
+   recitations the chapter is built towards. The two short verses are five words
+   each and ride in an ordinary tier with the gold card on the picture. */
 const isHero = (p: Panel) =>
-  (p.b.find((b) => b.k === 'v')?.t.split(/\s+/).length ?? 0) > 8
+  (p.b.find((b) => b.k === 'v')?.t.split(/s+/).length ?? 0) > 8
 
-interface Page { t: string; ps: Panel[] }
+interface Page { t: 'hero' | 'grid'; tiers: Panel[][] }
 function paginate(): Page[] {
   const out: Page[] = []
   let i = 0
   let r = 0
   while (i < PANELS.length) {
-    if (isHero(PANELS[i])) { out.push({ t: 'hero', ps: [PANELS[i++]] }); continue }
-    const name = ROTATION[r++ % ROTATION.length]
-    const run: Panel[] = []
+    if (isHero(PANELS[i])) { out.push({ t: 'hero', tiers: [[PANELS[i++]]] }); continue }
+    const want = TIERS_PER_PAGE[r++ % TIERS_PER_PAGE.length]
+    const tiers: Panel[][] = []
     const epi = !!PANELS[i].e
-    while (run.length < T[name] && i < PANELS.length &&
-           !!PANELS[i].e === epi && !isHero(PANELS[i])) run.push(PANELS[i++])
-    out.push({ t: run.length === T[name] ? name : run.length >= 2 ? 'two' : 'hero', ps: run })
+    while (tiers.length < want && i < PANELS.length &&
+           !!PANELS[i].e === epi && !isHero(PANELS[i])) {
+      const a = PANELS[i++]
+      const b = PANELS[i]
+      /* pairs only on the three-tier page: on a two-tier page a paired panel
+         would be 316×416, ratio 0.76, and lose nearly half the painting */
+      const canPair = want === 3 && b && !isHero(b) && !!b.e === epi &&
+                      capsOf(a) + capsOf(b) <= PAIR_BUDGET
+      tiers.push(canPair ? [a, PANELS[i++]] : [a])
+    }
+    out.push({ t: 'grid', tiers })
   }
   return out
 }
@@ -108,16 +130,18 @@ const SLOTS: Record<number, string[]> = {
    it cannot arrive after it; a staged entrance read as a slideshow build. The
    page turn is the animation, and what still moves is only what would move if
    the panel were a window. */
-function PanelView({ panel, order, hideVerse, live }: {
-  panel: Panel; order: number; hideVerse?: boolean; live: boolean
+function PanelView({ panel, order, hideVerse, live, half }: {
+  panel: Panel; order: number; hideVerse?: boolean; live: boolean; half?: boolean
 }) {
   const time = panel.b.find((b) => b.k === 'time')
   const says = panel.b.filter((b) => b.k === 'say')
   const verses = hideVerse ? [] : panel.b.filter((b) => b.k === 'v')
   const caps = panel.b.filter((b) => !b.k)
   return (
-    <figure className={'c3-pn' + (verses.length ? ' has-verse' : '') + (panel.e ? ' is-today' : '')}
-            data-m={panel.m} data-c={panel.c} style={{ '--i': order } as React.CSSProperties}>
+    <figure className={'c3-pn' + (verses.length ? ' has-verse' : '') + (panel.e ? ' is-today' : '') +
+                       (half ? ' is-half' : '')}
+            data-m={panel.m} data-c={panel.c}
+            style={{ '--i': order, '--op': panel.op + '%' } as React.CSSProperties}>
       <span className="c3-lens">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/assets/chapter3/comic/${panel.a}.jpg`} alt="" aria-hidden="true"
@@ -135,13 +159,26 @@ function PanelView({ panel, order, hideVerse, live }: {
       </span>
       <span className="c3-haze" aria-hidden="true" />
       <span className="c3-fx" aria-hidden="true" />
+      {/* THE NUMBER, ON EVERY PANEL. The tiers read right to left and then drop,
+          which the layout now says on its own — but the book runs over folds and
+          across a spread, and a running count answers all of it at a glance.
+          Top-LEFT is the one corner no lettering box uses. */}
+      <span className="c3-num">{panel.n}</span>
       {time && <span className="c3-stamp">{time.t}</span>}
       {/* the RTL Z: the first box enters at the top right and the last leaves at
           the bottom left, so the eye crosses the picture instead of sitting on
           one edge of it */}
-      {caps.map((b, k) => (
-        <p className={'c3-cap ' + SLOTS[caps.length][k]} key={k}>{b.t}</p>
-      ))}
+      {/* A NARROW PANEL CANNOT CARRY CORNER BOXES. Half the width and the same
+          sentences: measured, two boxes in the corners of a paired panel stood on
+          36% of it and the worst reached 79%. On a paired panel the lettering
+          drops into one block along the bottom instead — the bande dessinée
+          récitatif — which leaves the whole top of the drawing clear and reads
+          straight down. */}
+      {half
+        ? <div className="c3-caps">{caps.map((b, k) => <p className="c3-cap" key={k}>{b.t}</p>)}</div>
+        : caps.map((b, k) => (
+            <p className={'c3-cap ' + SLOTS[caps.length][k]} key={k}>{b.t}</p>
+          ))}
       {says.map((b, k) => <p className="c3-say" key={k}>{b.t}</p>)}
       {verses.map((b, k) => <p className="c3-verse" key={k}>{b.t}</p>)}
     </figure>
@@ -153,18 +190,24 @@ function PageView({ page, folio, side, live, parts }: {
 }) {
   if (!page) return <div className="c3-page is-blank" />
   const opens = parts.findIndex((p) => p.first === folio)
-  const peak = page.ps.some((p) => p.peak)
+  const peak = page.tiers.flat().some((p) => p.peak)
   /* on a hero page the verse comes out of the panel and stands on bare paper
      under it, at twice the size — a printed comic gives its one big moment the
      whole page, not a card floating in a corner of it */
-  const hero = page.t === 'hero' ? page.ps[0].b.find((b) => b.k === 'v') : undefined
+  const hero = page.t === 'hero' ? page.tiers[0][0].b.find((b) => b.k === 'v') : undefined
   return (
     <div className={'c3-page is-' + page.t + (side === 'r' ? ' is-recto' : '') +
                     (live ? ' is-live' : '') +
-                    (peak ? ' is-peak' : '') + (page.ps[0]?.e ? ' is-today' : '')}>
+                    (peak ? ' is-peak' : '') + (page.tiers[0][0]?.e ? ' is-today' : '') +
+                    ' is-t' + page.tiers.length}>
       <div className="c3-grid">
-        {page.ps.map((p, k) => (
-          <PanelView panel={p} key={p.a + k} order={k} hideVerse={!!hero} live={live} />
+        {page.tiers.map((tier, r) => (
+          <div className="c3-tier" key={r}>
+            {tier.map((p, k) => (
+              <PanelView panel={p} key={p.a + k} order={r} hideVerse={!!hero} live={live}
+                         half={tier.length > 1} />
+            ))}
+          </div>
         ))}
       </div>
       {hero && <p className="c3-hero-verse">{hero.t}</p>}
@@ -196,7 +239,7 @@ export default function Chapter3Comic() {
      the PAGE that carries its first panel */
   const parts = useMemo(() => PARTS.map((part, i) => ({
     ...part,
-    first: pages.findIndex((pg) => pg.ps.some((p) => p.p === i)) + 1,
+    first: pages.findIndex((pg) => pg.tiers.flat().some((p) => p.p === i)) + 1,
   })), [pages])
 
   /* SHEETS. After n turns the reader sees sheet[n-1]'s BACK on the left and
@@ -322,61 +365,34 @@ export default function Chapter3Comic() {
      own depth, so the picture, the atmosphere and the motes travel at three
      different speeds. Written straight to the element rather than through
      state — a re-render per mouse move would re-render every sheet. */
-  /* ⚠ AND IT IS WRITTEN ONTO THE SIX LIVE LAYERS, NOT INTO A CUSTOM PROPERTY ON
-     THE BOOK. --px on .c3-book inherits into every .c3-lens in the document —
-     seventy-five of them, seventeen sheets deep — and Chrome recomputes the lot
-     on every mouse move whether or not their page is on screen. Measured: a
-     single sweep across the book cost 1.5s of long tasks with the variable, and
-     the layers the reader can actually see number six. So the six are collected
-     whenever the spread changes and written to directly. */
-  const layers = useRef<{ el: HTMLElement; mx: number; my: number }[]>([])
-  useEffect(() => {
-    const stage = stageRef.current
-    if (!stage) { layers.current = []; return }
-    const pick = (sel: string, mx: number, my: number) =>
-      [...stage.querySelectorAll<HTMLElement>('.c3-page.is-live ' + sel)].map((el) => ({ el, mx, my }))
-    layers.current = [
-      ...pick('.c3-lens', 4, 3),      /* the picture, nearest to still     */
-      ...pick('.c3-haze', -6, -5),    /* the air in front of it            */
-      ...pick('.c3-fx', -11, -9),     /* what hangs in the air, travelling most */
-    ]
-  }, [at, moving])
+  /* THE MOUSE DOES NOT MOVE THE PAGE. There was a pointer parallax here —
+     three depths travelling against each other as the cursor crossed the book.
+     It is the right idea for a screen you look INTO and the wrong one for a
+     page you look AT: a printed panel does not lean when you shift in your
+     chair, and a reader who moves the mouse to reach a control should not see
+     the drawing answer. Removed, with the layer collection it needed.
 
-  const raf = useRef(0)
+     What is left moving is what the drawing itself would do: the slow camera,
+     the air, the motes, and the four panels that are films. */
   const onMove = useCallback((e: React.PointerEvent) => {
-    if (raf.current) return
-    const x = e.clientX, y = e.clientY
-    raf.current = requestAnimationFrame(() => {
-      raf.current = 0
-      const book = bookRef.current
-      if (!book) return
-      const px = (x / window.innerWidth) * 2 - 1
-      const py = (y / window.innerHeight) * 2 - 1
-      for (const l of layers.current) {
-        l.el.style.transform = `translate3d(${(px * l.mx).toFixed(2)}px,${(py * l.my).toFixed(2)}px,0)`
-      }
-      /* ⚠ THE HOVERED SIDE IS WRITTEN ONTO THE ELEMENT, NEVER INTO STATE. It was
-         a useState, set from this same callback, and every mouse movement then
-         re-rendered all seventeen sheets: a single sweep across the book cost
-         3.45s wall clock with 2.75s of long tasks — measured. The class goes
-         straight onto the stage for the same reason --px and --py do. */
-      const stage = stageRef.current
-      if (!stage) return
-      const r = book.getBoundingClientRect()
-      const s = x < (r.left + r.right) / 2 ? 'hover-l' : 'hover-r'
-      if (!stage.classList.contains(s)) {
-        stage.classList.remove('hover-l', 'hover-r')
-        stage.classList.add(s)
-      }
-    })
+    /* the only thing the pointer still does is say which half it is over, so
+       that the leaf lifts its corner before a click turns it */
+    const book = bookRef.current, stage = stageRef.current
+    if (!book || !stage) return
+    const r = book.getBoundingClientRect()
+    const side = e.clientX > (r.left + r.right) / 2 ? 'hover-r' : 'hover-l'
+    if (!stage.classList.contains(side)) {
+      stage.classList.remove('hover-l', 'hover-r')
+      stage.classList.add(side)
+    }
   }, [])
-  useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current) }, [])
+
 
   /* THE SPREADS THE CHAPTER TURNS ON. Nothing about the page itself changes —
      the room around the book does: the stage takes the colour of the picture
      the reader has just arrived at. */
   const peak = settled
-    ? openNow.map((f) => pages[f - 1]).flatMap((pg) => pg?.ps ?? []).find((p) => p?.peak)
+    ? openNow.map((f) => pages[f - 1]).flatMap((pg) => pg?.tiers.flat() ?? []).find((p) => p?.peak)
     : undefined
 
   return (

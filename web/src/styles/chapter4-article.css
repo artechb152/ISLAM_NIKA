@@ -446,9 +446,10 @@
    the diamond belongs to the ten, and a second one at this level would say
    the two ranks are the same rank. */
 .ch4-sub{
-  font-family:var(--font-heading);
-  font-size:clamp(17px,1.8vw,21px);
-  color:var(--maroon);
+  font-family:var(--font-heading);font-size:var(--sub);font-weight:700;color:var(--maroon);
+  line-height:1.2;width:fit-content;max-width:100%;
+  margin:0;
+  padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);
 }
 
 /* The quiet passages that sit INSIDE a louder section — the massacre of the
@@ -1141,3 +1142,23 @@
   .ch4-year{grid-template-columns:1fr;gap:10px}
   .ch4-year-n{padding-inline-end:0;border-inline-end:0;font-size:clamp(40px,11vw,58px)}
 }
+
+/* ------------------------------- a plate ------------------------------
+   Chapter 2's `.ch2-plate`, part for part: a 16/9 window, the same radius and
+   the same edge. Measured against the two chapters this one is held to,
+   chapter 2 renders seventeen figures and chapter 6 eighteen; chapter 4 had
+   six, and three of its five sub-sections were type and nothing else.
+
+   INSET, on the reading edge, with paper beside it. Two reasons: the section
+   already carries a vignette that dissolves into the page, and a second
+   full-width landscape under it would read as a pair; and every block in the
+   section was the same width, so the column had no rhythm of its own. */
+.ch4-plate{width:min(64%,640px)}
+.ch4-plate img{
+  display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
+  border-radius:14px;border:1px solid var(--edge);
+}
+.ch4-plate figcaption{
+  margin-top:8px;font-size:13px;color:var(--muted);line-height:1.5;
+}
+@media (max-width:820px){.ch4-plate{width:100%}}
