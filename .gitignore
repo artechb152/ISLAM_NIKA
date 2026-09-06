@@ -27,3 +27,13 @@ web/scratchpad/transition/
 # Playwright committee recordings are evidence, not source — too big for GitHub
 web/scratchpad/committee-*/video/
 *.webm
+
+# ---- חומר המקור המסומן „מוגבל" ----
+# חוברת המקור ונגזרותיה המילוליות. הן נשארות על הדיסק — השערים קוראים
+# מהן — אבל אינן נעקבות, כדי שדחיפה לא תגיש אותן מהענף הראשי.
+# העבר נשאר בהיסטוריה: זה לא מבטל חשיפה שכבר קרתה.
+**/chapter6-source*.pdf
+concept/chapter1/SOURCE-TEXT.md
+concept/chapter2/SOURCE-TEXT.md
+concept/chapter3/SOURCE-TEXT.md
+concept/chapter4/SOURCE-TEXT.md
