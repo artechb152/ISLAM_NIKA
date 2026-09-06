@@ -2444,12 +2444,14 @@ function Player({ live }: { live: Live }) {
          the corner case of standing between two touching colliders. */
       const PLAYER_R = 0.45
       for (let pass = 0; pass < 2; pass++) {
+        let touched = false
         for (const c of [...STATIC_COLLIDERS, ...live.dynamic]) {
           const dx = live.player.x - c.x
           const dz = live.player.z - c.z
           const d = Math.hypot(dx, dz)
           const min = c.r + PLAYER_R
           if (d < min) {
+            touched = true
             if (d < 1e-4) {
               live.player.x = c.x + min
             } else {
@@ -2458,6 +2460,10 @@ function Player({ live }: { live: Live }) {
             }
           }
         }
+        /* מעבר שני רץ רק אם הראשון באמת נגע במשהו. כשהוא רץ תמיד,
+           שחקן שתקוע בין שני קוליידרים נדחף מאחד אל השני ובחזרה בכל
+           פריים — וזו נדנדה שנקראת כהליכה קטועה. */
+        if (!touched) break
       }
 
       // keep the player inside the region's walkable circle — each layout
@@ -4094,7 +4100,7 @@ const RAWI_INTRO: Encounter = {
     {
       prompt: 'איך נדבר בדרך?',
       lines: [
-        { source: '', text: 'קרא לי עם R בכל עת. ליד אנשים — E פותח שיחה, ו-F מרים דבר־מה מהקרקע אל המחברת.' },
+        { source: '', text: 'קרא לי עם R בכל עת. וכל השאר הוא מקש אחד: E — לדבר עם מי שעומד מולך, לבחון מה שמונח על הקרקע, ולעשות את מה שהמקום מבקש.' },
       ],
     },
   ],
@@ -4908,8 +4914,19 @@ function DevAudit() {
       /* חפצים ששוכבים על הקרקע ומעט שקועים בה אינם חפיפה בין שני
          מודלים — הקרקע אינה ברשימה. מה שנשאר הוא באמת מודל בתוך מודל. */
       const floating: { name: string; gap: number }[] = []
+      /* נמדד רק בתוך האזור שאפשר להגיע אליו. מעבר לגבול ההליכה עומדת
+         תפאורת אופק — דקלים שהוצבו במכוון על רכסים באמצע `sink` שלילי
+         (‎-2.39 בתחנת הגבול), במרחק 70 מטר מכל מקום שאפשר לעמוד בו.
+         ‎`groundYAt` מודד שם את החול שמתחת לרכס ולא את הרכס, ולכן הוא
+         מדווח עליהם כמרחפים. „להוריד אותם לקרקע“ פירושו לקבור אותם
+         בתוך הרכס שהם יושבים עליו. מה שאי אפשר להתקרב אליו אינו נמדד
+         כאן — והמרווח נדיב בשישה מטרים מעבר לגבול. */
+      const REACH = (WORLD.layout.bound ?? 24) + 6
       for (const it of items) {
-        const gy = groundYAt((it.box.min.x + it.box.max.x) / 2, (it.box.min.z + it.box.max.z) / 2)
+        const mx = (it.box.min.x + it.box.max.x) / 2
+        const mz = (it.box.min.z + it.box.max.z) / 2
+        if (Math.hypot(mx, mz) > REACH) continue
+        const gy = groundYAt(mx, mz)
         const gap = it.box.min.y - gy
         if (gap > 0.25) floating.push({ name: it.name, gap: +gap.toFixed(2) })
         if (gap < -Math.max(0.6, it.size.y * 0.5)) floating.push({ name: it.name, gap: +gap.toFixed(2) })
@@ -5674,17 +5691,20 @@ export default function Game() {
       }
       const k = codeMap[e.code]
       if (k) {
+        /* החזקת מקש משדרת keydown שוב ושוב — כשלושים פעם בשנייה.
+           כל אחת מהן קראה ל-setPressed עם Set חדש, כלומר רינדור מלא
+           של כל רכיב המשחק וכל ה-HUD שלושים פעם בשנייה כל עוד המקש
+           למטה. זה מה שקרעו את ההליכה ואת הריצה. מעדכנים רק כשהמצב
+           באמת השתנה. */
+        const fresh = !live.keys.has(k)
         live.keys.add(k)
-        setPressed(new Set(live.keys))
+        if (fresh) setPressed(new Set(live.keys))
         e.preventDefault()
       }
     }
     const up = (e: KeyboardEvent) => {
       const k = codeMap[e.code]
-      if (k) {
-        live.keys.delete(k)
-        setPressed(new Set(live.keys))
-      }
+      if (k && live.keys.delete(k)) setPressed(new Set(live.keys))
     }
     const blur = () => {
       live.keys.clear()

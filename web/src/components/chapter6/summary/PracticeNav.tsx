@@ -38,10 +38,15 @@ export interface NavStop {
 export default function PracticeNav({
   stops,
   back = { href: '/chapter6#chapter-end', label: 'חזרה לפרק 6' },
+  /* כותרת המשנה של המגירה. ברירת המחדל היא פרק 6, שהוא הבית של
+     הרכיב; פרק אחר שמשתמש בו מוסר את שלו — עד עכשיו התרגול של כל
+     פרק הכריז על עצמו כפרק 6. */
+  subtitle = 'פרק 6 · תרגול מסכם',
   children,
 }: {
   stops: NavStop[]
   back?: { href: string; label: string }
+  subtitle?: string
   children: React.ReactNode
 }) {
   const router = useRouter()
@@ -162,7 +167,7 @@ export default function PracticeNav({
               </svg>
             </button>
             <h2 className="menu-title">התרגול</h2>
-            <span className="menu-sub">פרק 6 · תרגול מסכם</span>
+            <span className="menu-sub">{subtitle}</span>
           </div>
           <nav className="chapter-menu-nav" aria-label="ניווט בתרגול">
             <ol>
