@@ -43,6 +43,10 @@ export interface TaskOption {
 export interface TaskBin {
   id: string
   label: string
+  /** נקודת חיבור שנייה לאותו צד. „בבית פנימה" אינו מקום אחד אלא שניים —
+      חצר אחת וחצר שנייה — ובלי זה שתי הקהילות מתמזגות לדלי יחיד, שזה
+      בדיוק ההפך ממה שהתחנה מלמדת. */
+  spot2?: { dx: number; dz: number }
   /** עמדה פיזית בעולם (היסט מהתחנה): צד המיון הוא מקום שמניחים בו
       חפץ ביד, לא כפתור. בלעדיה — המיון חי בפאנל בלבד. */
   spot?: { dx: number; dz: number }
@@ -74,6 +78,9 @@ export interface Task {
   /** where the station stands, in scene metres */
   x: number
   z: number
+  /** גובה משטח העבודה מעל הקרקע, אם התחנה מתרחשת על שולחן ולא על החול.
+      כל מה שהמכניקה מציבה יושב על הגובה הזה. */
+  surface?: number
   model: string
   h: number
   ry?: number
@@ -90,6 +97,9 @@ export interface Task {
   done: string
   source: string
 }
+
+/** גובה משטח העבודה בתחנות שמתרחשות על שולחן — תואם ל-TABLE_TOP ב-Game.tsx */
+export const TABLE_SURFACE = 0.82
 
 export const TASKS: Task[] = [
   /* רמות תימן: עוגן שפת אי-הוודאות של הפרק כולו. לא שואלים "מה כתוב
@@ -274,21 +284,31 @@ export const TASKS: Task[] = [
        הבתים יושב במעגל המשותף שעוטף את הבית; מה שנשאר פנימה יושב
        בתוכו. דו-קיום והבדלה בתמונה אחת, לא ארבע תוויות בקופסאות. */
     kind: 'connect',
-    x: 1.4, z: 6.2, model: 'stone-bench', h: 0.62, ry: 1.2,
-    prompt: 'שבו אל השולחן',
+    /* הלוח עצמו נבנה ב-Game.tsx (YathribBoard): שולחן אמיתי, שתי חצרות
+       מיניאטוריות בקצותיו וחבל מתוח ביניהן. `model: none` כי אין כאן
+       GLB אחד שהוא התחנה — התחנה היא הלוח. */
+    x: 1.4, z: 6.2, model: 'none', h: 0.9, ry: 0,
+    surface: TABLE_SURFACE,
+    prompt: 'חברו בין החצרות',
     title: 'מפת השכנוּת',
     asker: 'הסוחר היהודי',
     question:
       'ראית אותנו היום — את השכן שקנה, את השירה מהחצר, את בית הדין. ' +
       'עכשיו סדר את מה שראית: מה חי במעגל המשותף שבין הבתים, ומה נשאר ' +
       'בבית פנימה.',
+    /* שתי החצרות והחבל שביניהן.
+       „המעגל המשותף" הוא נקודת חיבור אחת באמצע החבל — מה שמניחים שם
+       באמת נמתח בין שני הבתים. „בבית פנימה" הוא שתי נקודות, אחת בכל
+       חצר, כי זו הנקודה של התחנה: לכל קהילה היה בית משלה ודין משלו,
+       ובכל זאת עבר ביניהן מסחר, שירה — וגם ציפייה. */
     bins: [
-      { id: 'shared', label: 'המעגל המשותף — בין הבתים' },
-      { id: 'apart', label: 'בבית פנימה' },
+      { id: 'shared', label: 'על החבל — בין החצרות', spot: { dx: 0, dz: -0.02 } },
+      { id: 'apart', label: 'בחצר פנימה', spot: { dx: -1.3, dz: -0.5 }, spot2: { dx: 1.3, dz: -0.5 } },
     ],
     options: [
       {
         id: 'trade',
+        prop: { model: 'basket', h: 0.24 },
         label: 'התמרים שהשכן קונה כל בוקר',
         bin: 'shared',
         wrong: 'זה דווקא עבר. השכן קונה ממני, אני קונה ממנו — כל בוקר מחדש.',
@@ -296,6 +316,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'poetry',
+        prop: { model: 'prop-writing', h: 0.26 },
         label: 'השירה שנשמעת משתי החצרות',
         bin: 'shared',
         wrong: 'לא. שירה היא בדיוק מה שכן חצה — בערב יושבים ושומעים את אותה שירה.',
@@ -303,6 +324,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'law',
+        prop: { model: 'prop-codex', h: 0.26 },
         label: 'הריב שנשפט אצל כל אחד לפי מנהגו',
         bin: 'apart',
         wrong: 'לא. אם יש בינינו ריב — הוא נשפט אצלו לפי מנהגו, ואני אצלי לפי מנהגי.',
@@ -310,6 +332,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'faith',
+        prop: { model: 'prop-censer', h: 0.26 },
         label: 'הדת עצמה',
         bin: 'apart',
         wrong: 'לא. הם יודעים שיש לנו דת משלנו — לדעת עליה אינו לחלוק אותה.',
@@ -317,6 +340,7 @@ export const TASKS: Task[] = [
       },
       {
         id: 'messiah',
+        prop: { model: 'find-scroll', h: 0.28 },
         label: 'הציפייה למשיח',
         bin: 'shared',
         wrong:

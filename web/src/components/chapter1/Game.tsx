@@ -1244,19 +1244,23 @@ const TASK_PROP_SPOTS = [
   { dx: 1.4, dz: -0.6 },
   { dx: 0.2, dz: -1.6 },
 ]
-function TaskProp({ url, tint, h, x, z, label, showLabel, taken }: {
+function TaskProp({ url, tint, h, x, z, y, fitMax, label, showLabel, taken }: {
   url: string
   tint?: string
   h: number
   x: number
   z: number
+  /** גובה מפורש — תחנה שמתרחשת על שולחן ולא על החול */
+  y?: number
+  /** נרמול לפי הצלע הגדולה, לא לפי הגובה — מיניאטורות על שולחן */
+  fitMax?: boolean
   label: string
   showLabel: boolean
   taken: boolean
 }) {
-  const model = useNormalizedGLB(url, h, tint)
+  const model = useNormalizedGLB(url, h, tint, fitMax)
   return (
-    <group position={[x, groundYAt(x, z), z]}>
+    <group position={[x, y ?? groundYAt(x, z), z]}>
       <primitive object={model} />
       {showLabel && !taken && (
         <Html center position={[0, h + 0.42, 0]} zIndexRange={[4, 4]}>
@@ -1313,8 +1317,12 @@ function SolvedTaskProps() {
     } else if (o.bin && T.bins) {
       const bin = T.bins.find((bb) => bb.id === o.bin)
       if (!bin?.spot) return
-      x = T.x + bin.spot.dx + ((i % 3) - 1) * 0.55
-      z = T.z + bin.spot.dz + (i % 2 ? 0.3 : -0.25)
+      /* צד עם שתי נקודות חיבור: החפצים מתחלקים ביניהן, אחרת שתי
+         החצרות של ית'רב מתמזגות שוב לערימה אחת. */
+      const anchor = bin.spot2 && i % 2 ? bin.spot2 : bin.spot
+      const spread = T.surface != null ? 0.26 : 0.55
+      x = T.x + anchor.dx + ((i % 3) - 1) * spread
+      z = T.z + anchor.dz + (i % 2 ? spread * 0.5 : -spread * 0.45)
     } else return
     items.push({ id: o.id, model: o.prop.model, tint: o.prop.tint, h: o.prop.h, x, z })
   })
@@ -1328,6 +1336,8 @@ function SolvedTaskProps() {
           h={it.h}
           x={it.x}
           z={it.z}
+          y={T.surface != null ? groundYAt(T.x, T.z) + T.surface : undefined}
+          fitMax={T.surface != null}
           label=""
           showLabel={false}
           taken={false}
@@ -1441,6 +1451,90 @@ function InkRoute({ x0, z0, x1, z1, bend = 0.35 }: { x0: number; z0: number; x1:
   )
 }
 
+/* ית'רב: שתי חצרות וחבל ביניהן.
+   הגרסה הקודמת הייתה מיון של חמישה חפצים לשני דליים, והמשתמשת אמרה
+   בדיוק למה זה לא מספיק: זה לא מלמד קשר בין בתים וקהילות, זה מלמד
+   מיון. הלוח הזה הוא הטענה עצמה בצורתה — שני בתים נפרדים, לכל אחד
+   חצר משלו ואח משלו, וחבל ממשי מתוח ביניהם. מה שעבר בין הקהילות
+   נתלה על החבל; מה שכל אחת שמרה לעצמה נכנס אל תוך החצר.
+   ככל שנתלים על החבל דברים — הוא נמתח ומאיר. הקשר נבנה ביד. */
+function CourtYard({ x, y, z, tone, lit }: { x: number; y: number; z: number; tone: string; lit: number }) {
+  const fire = useRef<THREE.Mesh>(null)
+  useFrame(({ clock }) => {
+    if (fire.current) {
+      const f = 0.6 + 0.4 * Math.sin(clock.elapsedTime * 5.1 + x)
+      fire.current.scale.setScalar((0.55 + lit * 0.5) * (0.9 + f * 0.2))
+    }
+  })
+  return (
+    <group position={[x, y, z]}>
+      {/* חומת החצר — שלושה קטעים פתוחים אל החבל */}
+      <mesh position={[0, 0.09, -0.3]} castShadow receiveShadow>
+        <boxGeometry args={[0.86, 0.18, 0.05]} />
+        <meshStandardMaterial color={tone} roughness={0.95} metalness={0} />
+      </mesh>
+      <mesh position={[-0.4, 0.09, -0.05]} castShadow receiveShadow>
+        <boxGeometry args={[0.05, 0.18, 0.55]} />
+        <meshStandardMaterial color={tone} roughness={0.95} metalness={0} />
+      </mesh>
+      <mesh position={[0.4, 0.09, -0.05]} castShadow receiveShadow>
+        <boxGeometry args={[0.05, 0.18, 0.55]} />
+        <meshStandardMaterial color={tone} roughness={0.95} metalness={0} />
+      </mesh>
+      {/* הבית עצמו, עם גג שטוח */}
+      <mesh position={[0, 0.16, -0.42]} castShadow receiveShadow>
+        <boxGeometry args={[0.5, 0.32, 0.34]} />
+        <meshStandardMaterial color={tone} roughness={0.92} metalness={0} />
+      </mesh>
+      <mesh position={[0, 0.335, -0.42]} castShadow>
+        <boxGeometry args={[0.56, 0.03, 0.4]} />
+        <meshStandardMaterial color="#5d3f24" roughness={0.9} metalness={0} />
+      </mesh>
+      {/* האח של החצר — נדלק כשמשהו נשאר בבית */}
+      <mesh ref={fire} position={[0, 0.055, -0.02]}>
+        <sphereGeometry args={[0.06, 10, 8]} />
+        <meshBasicMaterial color="#ffb457" transparent opacity={0.25 + lit * 0.6} depthWrite={false} />
+      </mesh>
+    </group>
+  )
+}
+
+function ConnectionRope({ ax, bx, y, z, lit }: { ax: number; bx: number; y: number; z: number; lit: number }) {
+  const mat = useRef<THREE.MeshStandardMaterial>(null)
+  useFrame(({ clock }) => {
+    if (mat.current) {
+      const b = 0.5 + 0.5 * Math.sin(clock.elapsedTime * 1.5)
+      mat.current.emissiveIntensity = lit * (0.35 + b * 0.25)
+    }
+  })
+  const len = Math.abs(bx - ax)
+  const mid = (ax + bx) / 2
+  const knots = [ax + len * 0.25, mid, bx - len * 0.25]
+  return (
+    <group>
+      {/* שני עמודי הקשירה */}
+      {[ax, bx].map((px, i) => (
+        <mesh key={i} position={[px, y + 0.11, z]} castShadow>
+          <cylinderGeometry args={[0.022, 0.026, 0.22, 8]} />
+          <meshStandardMaterial color="#5d3f24" roughness={0.9} metalness={0} />
+        </mesh>
+      ))}
+      {/* החבל */}
+      <mesh position={[mid, y + 0.2, z]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.014, 0.014, len, 8]} />
+        <meshStandardMaterial ref={mat} color="#c9a878" emissive="#e8bf76" emissiveIntensity={0} roughness={0.85} metalness={0} />
+      </mesh>
+      {/* שלוש נקודות החיבור — קשרים על החבל */}
+      {knots.map((kx, i) => (
+        <mesh key={`k${i}`} position={[kx, y + 0.2, z]}>
+          <sphereGeometry args={[0.03, 10, 8]} />
+          <meshStandardMaterial color="#a9793f" emissive="#e8bf76" emissiveIntensity={lit * 0.5} roughness={0.8} metalness={0.1} />
+        </mesh>
+      ))}
+    </group>
+  )
+}
+
 /* גרירה שמצליחה בניסיון הראשון או השני.
    שני מספרים, ושניהם נבחרו כלפי מעלה בכוונה: `GRAB_PX` הוא רדיוס
    האחיזה על המסך, ו-`DROP_R` הוא רדיוס ההנחה במטרים. הקודמים (70
@@ -1460,6 +1554,21 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
   onSortDrop: (itemId: string, binId: string) => void
 }) {
   const { camera, gl } = useThree()
+  /* משטח העבודה של התחנה.
+     המיון של ית'רב מתרחש על שולחן, לא על החול, ולכן כל מה שהמכניקה
+     הזאת מציבה — בתים, חבל, חפצים, טבעות ומישור הגרירה — חייב לשבת
+     על גובה אחד: פני השולחן. תחנה שאינה מצהירה על `surface` ממשיכה
+     לעבוד על הקרקע בדיוק כפי שעבדה. */
+  const SURFACE_Y = REGION_TASK?.surface != null
+    ? groundYAt(REGION_TASK.x, REGION_TASK.z) + REGION_TASK.surface
+    : null
+  const yAt = useCallback(
+    (x: number, z: number) => (SURFACE_Y != null ? SURFACE_Y : groundYAt(x, z)),
+    [SURFACE_Y],
+  )
+  /* אזור הנחה על שולחן הוא בסדר גודל של כף יד, לא של מדורה */
+  const BIN_R = SURFACE_Y != null ? 0.34 : 1.02
+  const DROP_NEAR = SURFACE_Y != null ? 0.45 : DROP_R
   /* שני מצבים לאותה יד: גרירת-תשובות (כל אופציה היא חפץ) — ותכנון-מסלול,
      שבו יש אסימון שיירה אחד ושלוש דרכים על מפת בד; הדרך שבוחרים היא
      המקום שאליו הנחת אותו. */
@@ -1501,7 +1610,11 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
           },
         ]
       : opts.map((o, i) => {
-          const spot = TASK_PROP_SPOTS[i % TASK_PROP_SPOTS.length]
+          /* על שולחן החפצים מונחים בשורה מסודרת בקצה הקרוב — מגש
+             התחלה. על החול הם פזורים סביב התחנה כפי שהיו. */
+          const spot = REGION_TASK?.surface != null
+            ? { dx: -1.2 + i * (2.4 / Math.max(1, opts.length - 1)), dz: 0.6 }
+            : TASK_PROP_SPOTS[i % TASK_PROP_SPOTS.length]
           const home = { x: (REGION_TASK?.x ?? 0) + spot.dx, z: (REGION_TASK?.z ?? 0) + spot.dz }
           const tgt = {
             x: (REGION_TASK?.x ?? 0) + (o.spot?.dx ?? 0),
@@ -1526,20 +1639,18 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         : [],
     [planMode],
   )
-  const binSpots = useMemo(
-    () =>
-      sortMode && REGION_TASK
-        ? (REGION_TASK.bins ?? [])
-            .filter((b) => b.spot)
-            .map((b) => ({
-              id: b.id,
-              label: b.label,
-              x: REGION_TASK.x + b.spot!.dx,
-              z: REGION_TASK.z + b.spot!.dz,
-            }))
-        : [],
-    [sortMode],
-  )
+  /* צד יכול לשאת שתי נקודות חיבור. „בחצר פנימה" בית'רב הוא שתי חצרות,
+     ולא דלי אחד — שני הערכים נושאים את אותו `id`, ולכן ההתאמה למטה
+     נשארת בדיוק כפי שהייתה. */
+  const binSpots = useMemo(() => {
+    if (!sortMode || !REGION_TASK) return []
+    const out: { id: string; label: string; x: number; z: number }[] = []
+    for (const b of REGION_TASK.bins ?? []) {
+      if (b.spot) out.push({ id: b.id, label: b.label, x: REGION_TASK.x + b.spot.dx, z: REGION_TASK.z + b.spot.dz })
+      if (b.spot2) out.push({ id: b.id, label: b.label, x: REGION_TASK.x + b.spot2.dx, z: REGION_TASK.z + b.spot2.dz })
+    }
+    return out
+  }, [sortMode])
   /* תקריב המשימה: המסגור נגזר מהפריסה בפועל — הכול חייב להיכנס לפריים.
      בתכנון המבט תלול כמעט-אנכי אל הבד; בשאר — אלכסון נמוך מעל המשטח. */
   const focusSpec = useMemo(() => {
@@ -1567,7 +1678,6 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
   const [hoverIdx, setHoverIdx] = useState(-1)
   const [dragIdx, setDragIdx] = useState(-1)
   const [nearIdx, setNearIdx] = useState(-1)
-  const [nearBin, setNearBin] = useState(-1)
   const nearRef = useRef(-1)
   const nearBinRef = useRef(-1)
   /* פינג תשובה: טבעת מתרחבת בנקודת ההשלכה — זהב לקבלה, חמרה לסירוב */
@@ -1592,7 +1702,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
     const project = (i: number) => {
       const st = state.current[i]
       const hh = planMode ? 0.32 : ((opts[i]?.prop?.h ?? 0.4) * 0.55)
-      v.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + st.lift + hh, st.cur.z).project(camera)
+      v.set(st.cur.x, yAt(st.cur.x, st.cur.z) + st.lift + hh, st.cur.z).project(camera)
       const r = gl.domElement.getBoundingClientRect()
       return {
         x: (v.x * 0.5 + 0.5) * r.width + r.left,
@@ -1662,7 +1772,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         return
       }
       const st = state.current[i]
-      const g = toPlane(e.clientX, e.clientY, groundYAt(st.home.x, st.home.z) + 0.3)
+      const g = toPlane(e.clientX, e.clientY, yAt(st.home.x, st.home.z) + 0.3)
       /* לא נותנים לסחוב את התשובה מחוץ לזירה */
       const dx = g.x - (REGION_TASK?.x ?? 0)
       const dz = g.z - (REGION_TASK?.z ?? 0)
@@ -1721,7 +1831,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         }
       } else if (sortMode) {
         let best = -1
-        let bd = DROP_R
+        let bd = DROP_NEAR
         for (let k = 0; k < binSpots.length; k++) {
           const d = Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z)
           if (d < bd) { bd = d; best = k }
@@ -1733,7 +1843,8 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
           if (opt.bin === bin.id) {
             st.placed = true
             /* פיזור קטן סביב העמדה — חמישה חפצים לא נערמים לנקודה */
-            st.tgt = { x: bin.x + ((i % 3) - 1) * 0.55, z: bin.z + (i % 2 === 0 ? 0.35 : -0.3) }
+            const sp = SURFACE_Y != null ? 0.24 : 0.55
+            st.tgt = { x: bin.x + ((i % 3) - 1) * sp, z: bin.z + (i % 2 === 0 ? sp * 0.6 : -sp * 0.55) }
           } else {
             st.returning = true
             st.hop = 1 /* הצד הלא-נכון מחזיר — והנזיר מסביר למה */
@@ -1786,7 +1897,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       gl.domElement.style.cursor = ''
       live.taskDrag = false
     }
-  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, onChoose, onSortDrop])
+  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, yAt, SURFACE_Y, DROP_NEAR, onChoose, onSortDrop])
 
   useFrame((_, dt) => {
     if (!state.current.length) return
@@ -1815,7 +1926,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       tr.visible = !planMode && d >= 0 && !solvedTask
       if (tr.visible) {
         const st = state.current[d]
-        tr.position.set(st.tgt.x, groundYAt(st.tgt.x, st.tgt.z) + 0.03, st.tgt.z)
+        tr.position.set(st.tgt.x, yAt(st.tgt.x, st.tgt.z) + 0.03, st.tgt.z)
         const near = nearTarget.current
         const target = near ? 1.35 : 1.0
         tr.scale.x += (target - tr.scale.x) * Math.min(1, dt * 10)
@@ -1846,7 +1957,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         if (!ring) continue
         ring.visible = !sortLocked && !solvedTask
         const st = drag >= 0 ? state.current[drag] : null
-        const near = !!st && Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z) < DROP_R
+        const near = !!st && Math.hypot(st.cur.x - binSpots[k].x, st.cur.z - binSpots[k].z) < DROP_NEAR
         const target = near ? 1.4 : 1.0
         ring.scale.x += (target - ring.scale.x) * Math.min(1, dt * 10)
         ring.scale.y = ring.scale.z = ring.scale.x
@@ -1869,7 +1980,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         const d = Math.hypot(live.player.x - binSpots[k].x, live.player.z - binSpots[k].z)
         if (d < bbd) { bbd = d; bb = k }
       }
-      if (bb !== nearBinRef.current) { nearBinRef.current = bb; setNearBin(bb) }
+      nearBinRef.current = bb
     }
     live.taskFocus =
       atTask && !solvedTask && (planMode || sortMode || opts.length > 0) ? focusSpec : null
@@ -1879,7 +1990,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       const t = pg ? (performance.now() - pg.at) / 700 : 2
       pr.visible = !!pg && t < 1
       if (pr.visible && pg) {
-        pr.position.set(pg.x, groundYAt(pg.x, pg.z) + 0.05, pg.z)
+        pr.position.set(pg.x, yAt(pg.x, pg.z) + 0.05, pg.z)
         const k = 0.8 + t * 1.9
         pr.scale.set(k, k, k)
         const m = pr.material as THREE.MeshBasicMaterial
@@ -1893,7 +2004,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       hr.visible = h >= 0 && !solvedTask
       if (hr.visible) {
         const st = state.current[h]
-        hr.position.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + 0.03, st.cur.z)
+        hr.position.set(st.cur.x, yAt(st.cur.x, st.cur.z) + 0.03, st.cur.z)
       }
     }
     /* חלון לסוכני Playwright: מיקומי מסך חיים של החפצים והיעד */
@@ -1903,11 +2014,11 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       const d0 = dragging.current >= 0 ? dragging.current : 0
       const st0 = state.current[d0]
       const tgt0 = planMode && spots.length ? spots.find((s) => s.right)! : st0.tgt
-      vv.set(tgt0.x, groundYAt(tgt0.x, tgt0.z), tgt0.z).project(camera)
+      vv.set(tgt0.x, yAt(tgt0.x, tgt0.z), tgt0.z).project(camera)
       const tgtScreen = { x: (vv.x * 0.5 + 0.5) * r.width + r.left, y: (-vv.y * 0.5 + 0.5) * r.height + r.top }
       ;(window as unknown as Record<string, unknown>).__ch1Task = {
         props: state.current.map((st) => {
-          vv.set(st.cur.x, groundYAt(st.cur.x, st.cur.z) + 0.3, st.cur.z).project(camera)
+          vv.set(st.cur.x, yAt(st.cur.x, st.cur.z) + 0.3, st.cur.z).project(camera)
           return {
             id: st.id,
             x: (vv.x * 0.5 + 0.5) * r.width + r.left,
@@ -1917,7 +2028,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         }),
         target: tgtScreen,
         bins: binSpots.map((b) => {
-          vv.set(b.x, groundYAt(b.x, b.z), b.z).project(camera)
+          vv.set(b.x, yAt(b.x, b.z), b.z).project(camera)
           return { id: b.id, x: (vv.x * 0.5 + 0.5) * r.width + r.left, y: (-vv.y * 0.5 + 0.5) * r.height + r.top }
         }),
         dragging: dragging.current,
@@ -1955,7 +2066,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
           {/* נקודת המוצא — טבעת אדומה: מכאן הדרכים נמתחות */}
           <mesh
             rotation-x={-Math.PI / 2}
-            position={[T.x - 0.85, groundYAt(T.x - 0.85, T.z + 0.95) + 0.082, T.z + 0.95]}
+            position={[T.x - 0.85, yAt(T.x - 0.85, T.z + 0.95) + 0.082, T.z + 0.95]}
             renderOrder={2}
           >
             <ringGeometry args={[0.16, 0.24, 28]} />
@@ -1967,14 +2078,14 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
               <mesh
                 ref={(el) => { spotRings.current[k] = el }}
                 rotation-x={-Math.PI / 2}
-                position={[sp.x, groundYAt(sp.x, sp.z) + 0.08, sp.z]}
+                position={[sp.x, yAt(sp.x, sp.z) + 0.08, sp.z]}
                 renderOrder={2}
               >
                 <ringGeometry args={[0.5, 0.66, 40]} />
                 <meshBasicMaterial color="#e8bf76" transparent opacity={0.45} depthWrite={false} />
               </mesh>
               {!solvedTask && (dragIdx >= 0 || nearIdx >= 0) && (
-                <Html center position={[sp.x, groundYAt(sp.x, sp.z) + 0.8, sp.z]} zIndexRange={[4, 4]}>
+                <Html center position={[sp.x, yAt(sp.x, sp.z) + 0.8, sp.z]} zIndexRange={[4, 4]}>
                   <span className="ch1-prop-label">{sp.label}</span>
                 </Html>
               )}
@@ -1987,7 +2098,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
               <group position={[st.cur.x - st.home.x, st.lift + Math.sin(st.hop * Math.PI) * 0.3, st.cur.z - st.home.z]}>
                 <CaravanToken x={st.home.x} z={st.home.z} h={0.62} />
                 {!solvedTask && !st.placed && (hoverIdx === 0 || dragIdx === 0 || nearIdx === 0) && (
-                  <Html center position={[st.home.x, groundYAt(st.home.x, st.home.z) + 1.05, st.home.z]} zIndexRange={[4, 4]}>
+                  <Html center position={[st.home.x, yAt(st.home.x, st.home.z) + 1.05, st.home.z]} zIndexRange={[4, 4]}>
                     <span className="ch1-prop-label">אסימון השיירה</span>
                   </Html>
                 )}
@@ -1996,20 +2107,35 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
           })()}
         </>
       )}
+      {/* הלוח של ית'רב: שולחן, שתי חצרות וחבל. נבנה כאן ולא ב-World,
+          כי המכניקה שמעליו — נקודות החיבור וההנחות — יושבת כאן. */}
+      {REGION.id === 'yathrib' && (
+        <group name="task:yathrib-board">
+          <WorkTable x={T.x} z={T.z} w={3.6} d={1.5} />
+          <CourtYard x={T.x - 1.3} y={yAt(T.x, T.z)} z={T.z - 0.5} tone="#c2a883"
+            lit={chosen.filter((c) => T.options.find((o) => o.id === c)?.bin === 'apart').length / 2} />
+          <CourtYard x={T.x + 1.3} y={yAt(T.x, T.z)} z={T.z - 0.5} tone="#b09272"
+            lit={chosen.filter((c) => T.options.find((o) => o.id === c)?.bin === 'apart').length / 2} />
+          <ConnectionRope ax={T.x - 1.3} bx={T.x + 1.3} y={yAt(T.x, T.z)} z={T.z - 0.02}
+            lit={Math.min(1, chosen.filter((c) => T.options.find((o) => o.id === c)?.bin === 'shared').length / 3)} />
+        </group>
+      )}
       {sortMode &&
         binSpots.map((b, k) => (
-          <group key={b.id}>
+          <group key={`${b.id}-${k}`}>
             <mesh
               ref={(el) => { binRings.current[k] = el }}
               rotation-x={-Math.PI / 2}
-              position={[b.x, groundYAt(b.x, b.z) + 0.06, b.z]}
+              position={[b.x, yAt(b.x, b.z) + 0.012, b.z]}
               renderOrder={2}
             >
-              <ringGeometry args={[0.85, 1.02, 44]} />
+              <ringGeometry args={[BIN_R * 0.82, BIN_R, 44]} />
               <meshBasicMaterial color={k === 0 ? '#e8bf76' : '#cbd6de'} transparent opacity={0.4} depthWrite={false} />
             </mesh>
-            {!solvedTask && !sortLocked && (dragIdx >= 0 || nearBin === k) && (
-              <Html center position={[b.x, groundYAt(b.x, b.z) + 0.9, b.z]} zIndexRange={[4, 4]}>
+            {/* אזור הנחה מקבל תווית רק כשמשהו ביד. אחרת שתי תוויות
+                נדלקות יחד ומכסות זו את זו — וזה מה שנראה בית'רב. */}
+            {!solvedTask && !sortLocked && dragIdx >= 0 && (
+              <Html center position={[b.x, yAt(b.x, b.z) + (SURFACE_Y != null ? 0.5 : 0.9), b.z]} zIndexRange={[4, 4]}>
                 <span className="ch1-prop-label">{b.label}</span>
               </Html>
             )}
@@ -2027,6 +2153,8 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
                 h={o.prop!.h}
                 x={st.home.x}
                 z={st.home.z}
+                y={yAt(st.home.x, st.home.z)}
+                fitMax={SURFACE_Y != null}
                 label={o.label}
                 showLabel={
                   !solvedTask && !sortLocked && !st.placed &&
@@ -2162,7 +2290,7 @@ function Extra({ live, who, x, z, ry, tint }: {
    scene is NEVER mutated — all transforms go on a fresh wrapper group, so the
    math stays correct when React StrictMode re-runs the memo (mutating the
    cached scene twice is what shrank and sank the character). */
-function useNormalizedGLB(url: string, height: number, tint?: string) {
+function useNormalizedGLB(url: string, height: number, tint?: string, fitMax = false) {
   const { scene } = useGLTF(url)
   return useMemo(() => {
     /* clone (safe — these GLBs carry no skeleton), never touch the cached scene */
@@ -2170,7 +2298,11 @@ function useNormalizedGLB(url: string, height: number, tint?: string) {
     const box = new THREE.Box3().setFromObject(c)
     const size = new THREE.Vector3()
     box.getSize(size)
-    const s = size.y > 0 ? height / size.y : 1
+    /* מגילה שוכבת גבוהה 8 ס"מ ואורכה מטר. נרמול לפי הגובה בלבד ניפח
+       אותה על השולחן פי עשרה — היא כיסתה את הלוח כולו. על משטח עבודה
+       הצלע הגדולה היא מה שקובע. */
+    const ref = fitMax ? Math.max(size.x, size.y, size.z) : size.y
+    const s = ref > 0 ? height / ref : 1
     c.scale.setScalar(s)
     c.position.y = -box.min.y * s
     c.traverse((o) => {
@@ -2202,7 +2334,7 @@ function useNormalizedGLB(url: string, height: number, tint?: string) {
         : prepareMaterial(m.material)
     })
     return c
-  }, [scene, height, tint])
+  }, [scene, height, tint, fitMax])
 }
 
 function Player({ live }: { live: Live }) {
@@ -4212,7 +4344,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
           dim={found.includes(fd.id)}
           primary={stage === 'act' && !!REGION_TASK?.needsFinds?.includes(fd.id) && !found.includes(fd.id)} />
       ))}
-      {REGION_TASK && (
+      {REGION_TASK && REGION_TASK.model !== 'none' && (
         <Prop
           url={`/assets/chapter1/models/${REGION_TASK.model}.glb`}
           x={REGION_TASK.x}
@@ -4711,7 +4843,7 @@ function DevAudit() {
            מה שהנחה על שולחן אומרת, ו„ריחוף“ שלהם הוא גובה השולחן.
            הם נמדדים על ידי האינטראקציה עצמה, לא כאן. */
         for (let a: THREE.Object3D | null = o; a; a = a.parent) {
-          if (a.name === 'task:evidence-table' || a.name === 'task:lamp') return
+          if (a.name === 'task:evidence-table' || a.name === 'task:lamp' || a.name === 'task:yathrib-board') return
         }
         const box = new THREE.Box3().setFromObject(o)
         if (!isFinite(box.min.x) || box.isEmpty()) return
