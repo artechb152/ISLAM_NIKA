@@ -41,6 +41,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import BadrFilm from '@/components/chapter4/BadrFilm'
 import Groups from '@/components/chapter4/Groups'
+import Pact from '@/components/chapter4/Pact'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { CH4, frag, list, text } from '@/lib/chapter4/content'
 import layoutData from '@/lib/chapter4/layout.json'
@@ -288,36 +289,6 @@ function Year({ r, n, children }: { r: string; n: string; children: React.ReactN
         {pick(r, n)}
       </b>
       <div className="ch4-year-text">{children}</div>
-    </div>
-  )
-}
-
-/** A SENTENCE THAT TURNS, SET AS A TURN.
-
-    §4.b holds twelve years of „אי הצלחה, דשדוש וחוסר יכולת" on one side of the
-    word „נהיה" and „דת, מוסר, ערכים וצבא" on the other. It is a before and an
-    after, and as one paragraph it reads as neither.
-
-    THE TWO SIDES ARE THE SENTENCE'S OWN WORDS, lifted by `pick`, which proves
-    each phrase is in that fragment at a word boundary and throws otherwise. The
-    whole sentence is printed underneath them, so the shape is added and nothing
-    is taken away — a reader who ignores the device still reads every word.
-
-    RTL: the before stands on the reading edge and the after to its left, and
-    the arrow points the way the line is read. */
-function Turn({ r, from, to }: { r: string; from: string; to: string }) {
-  return (
-    <div className="ch4-turn" data-reveal>
-      <div className="ch4-turn-row">
-        <p className="ch4-turn-side is-from">{pick(r, from)}</p>
-        <span className="ch4-turn-arrow" aria-hidden="true">
-          <svg viewBox="0 0 40 12">
-            <path d="M39 6H3M9 1 3 6l6 5" />
-          </svg>
-        </span>
-        <p className="ch4-turn-side is-to">{pick(r, to)}</p>
-      </div>
-      <T r={r} className="ch4-body ch4-turn-full" />
     </div>
   )
 }
@@ -810,17 +781,26 @@ export default function Chapter4() {
                 <Block>
                   <T r="§4.a" className="ch4-body" reveal />
                 </Block>
-                {/* THE TURN, and the sentence already contains it: twelve years
-                    of one thing on one side of „נהיה" and four nouns of another
-                    on the other. Both labels are lifted out of this very
-                    sentence by `pick`, which throws if they are not in it — and
-                    the sentence itself is printed under them in full, so
-                    nothing is replaced by its own summary. */}
-                <Turn
-                  r="§4.b"
-                  from="אי הצלחה, דשדוש וחוסר יכולת"
-                  to="דת, מוסר, ערכים וצבא"
+                {/* THE TURN, FULL BLEED. §4.b is a before and an after inside
+                    one sentence, and as one paragraph it reads as neither. The
+                    band opens on the first drawing, turns on a press, and stops
+                    on the second. Both captions are that sentence's own words,
+                    proved by `pick`; the sentence itself is printed under the
+                    band in full, so nothing is replaced by its own summary. */}
+                <Pact
+                  film="pact-turn"
+                  stillBefore="pact-before"
+                  stillAfter="pact-after"
+                  labelBefore="לפני קבלת החוזה"
+                  labelAfter="אחרי קבלת החוזה"
+                  textBefore={pick('§4.b', 'אי הצלחה, דשדוש וחוסר יכולת')}
+                  textAfter={pick('§4.b', 'דת, מוסר, ערכים וצבא')}
+                  alt="ית'רב לפני החוזה ואחריו · שחזור מצויר"
+                  replay="מהתחלה"
                 />
+                <Block>
+                  <T r="§4.b" className="ch4-body" reveal />
+                </Block>
                 <Block>
                   <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
                   <T r="§8.b" className="ch4-body" reveal />

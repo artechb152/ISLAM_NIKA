@@ -1163,40 +1163,90 @@
 }
 @media (max-width:820px){.ch4-plate{width:100%}}
 
-/* -------------------------------- the turn -----------------------------
-   §4.b is a before and an after inside one sentence — twelve years of failure
-   on one side of „נהיה" and four nouns of a polity on the other. The two sides
-   are set facing each other above the sentence, which is still printed in full
-   underneath: the shape is added, nothing is taken away.
 
-   NOT A CARD, and not two cards. Two runs of the chapter's display face with an
-   arrow between them, on the page's own ground — the section already carries an
-   echo box and a vignette, and a third framed object would make the column a
-   sequence of boxes. */
-.ch4-turn{width:100%}
-.ch4-turn-row{
-  display:grid;grid-template-columns:1fr auto 1fr;
-  gap:clamp(12px,2vw,26px);align-items:center;
-  padding-bottom:clamp(12px,1.6vw,18px);
-  border-bottom:1px solid var(--rule);
-  margin-bottom:clamp(12px,1.6vw,18px);
+/* ------------------------- before the covenant, and after ----------------
+   §4.b is a before and an after inside one sentence. The band opens on the
+   first drawing and stops on the second; the sentence itself is printed under
+   it in full, so the shape is added and nothing is taken away.
+
+   FULL BLEED, like chapter 2's `.ch2-plate.is-bleed`: out to the gutters, and
+   the only thing in the chapter that leaves the reading column. It is the one
+   turn in section 01 and it is allowed to be the one wide object.
+
+   THE LAST FRAME OF THE FILM IS THE SECOND STILL — the still was cut from it,
+   measured at 1.5/255 — so the swap at the end has nothing to show. */
+.ch4-pact{
+  margin:0;
+  margin-inline:calc(-1 * var(--content-gutter));
+  width:auto;
 }
-.ch4-turn-side{
-  margin:0;font-family:var(--font-heading);font-weight:700;line-height:1.25;
-  font-size:clamp(16px,1.75vw,21px);
+.ch4-pact-stage{
+  position:relative;isolation:isolate;overflow:hidden;
+  aspect-ratio:16/9;max-height:min(74vh,720px);
+  background:var(--maroon-deep);
 }
-/* the before is spent, the after is the chapter's own colour */
-.ch4-turn-side.is-from{color:var(--muted);text-align:start}
-.ch4-turn-side.is-to{color:var(--maroon);text-align:end}
-.ch4-turn-arrow svg{
-  display:block;width:clamp(30px,3.4vw,44px);height:auto;
-  fill:none;stroke:var(--gold);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+.ch4-pact-still,.ch4-pact-film{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;display:block;
+  transition:opacity .45s ease;
 }
-/* the sentence itself, quieter than the two states it is being read through */
-.ch4-turn-full{color:var(--ink)}
+/* one of the three is shown at a time; the others are held at zero rather than
+   unmounted, so nothing has to be decoded again mid-turn */
+.ch4-pact-still.is-after,.ch4-pact-film{opacity:0}
+.ch4-pact.is-running .ch4-pact-film{opacity:1;transition:none}
+.ch4-pact.is-running .ch4-pact-still.is-before{opacity:0;transition:none}
+.ch4-pact.is-after .ch4-pact-still.is-after{opacity:1}
+.ch4-pact.is-after .ch4-pact-still.is-before{opacity:0}
+
+.ch4-pact-scrim{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(28,14,6,.06),rgba(28,14,6,.28) 52%,rgba(28,14,6,.74));
+}
+
+/* the two captions: our own label above, the sentence's own words below */
+.ch4-pact-cap{
+  position:absolute;z-index:2;
+  inset-inline:clamp(24px,5vw,84px);bottom:clamp(22px,4vw,56px);
+  display:grid;gap:6px;color:var(--cream);
+  opacity:0;translate:0 8px;transition:opacity .45s ease,translate .45s ease;
+  pointer-events:none;
+}
+.ch4-pact-cap b{
+  font-size:13px;font-weight:600;letter-spacing:.14em;
+  color:var(--gold);text-transform:none;
+}
+.ch4-pact-cap span{
+  font-family:var(--font-heading);font-weight:700;line-height:1.22;
+  font-size:clamp(22px,3.2vw,44px);text-wrap:balance;
+  text-shadow:0 3px 18px rgba(20,10,4,.6);
+}
+.ch4-pact.is-before .ch4-pact-cap.is-before,
+.ch4-pact.is-after .ch4-pact-cap.is-after{opacity:1;translate:0 0}
+
+.ch4-pact-go{
+  position:absolute;z-index:3;inset-block-start:50%;inset-inline-start:50%;
+  translate:-50% -50%;
+  display:inline-flex;align-items:center;gap:10px;cursor:pointer;
+  padding:12px 22px 12px 18px;border-radius:999px;
+  border:1px solid rgba(245,236,214,.5);background:rgba(28,16,10,.5);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  color:var(--cream);font-weight:600;font-size:15px;
+  transition:background .2s ease,border-color .2s ease;
+}
+.ch4-pact-go:hover{background:rgba(28,16,10,.72);border-color:var(--cream)}
+.ch4-pact-go:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.ch4-pact-go svg{width:17px;height:17px;flex:none}
+
+.ch4-pact-back{
+  position:absolute;z-index:3;
+  inset-block-start:clamp(16px,2.4vw,26px);inset-inline-end:clamp(16px,2.4vw,26px);
+  cursor:pointer;padding:8px 16px;border-radius:999px;
+  border:1px solid rgba(245,236,214,.42);background:rgba(28,16,10,.42);
+  color:var(--cream);font-size:13.5px;font-weight:600;
+}
+.ch4-pact-back:hover{background:rgba(28,16,10,.68)}
+.ch4-pact-back:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
 @media (max-width:700px){
-  .ch4-turn-row{grid-template-columns:1fr;gap:8px;justify-items:start}
-  .ch4-turn-side.is-to{text-align:start}
-  .ch4-turn-arrow svg{rotate:-90deg;width:26px}
+  .ch4-pact-stage{aspect-ratio:4/5;max-height:none}
 }
