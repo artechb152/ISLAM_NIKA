@@ -6064,7 +6064,24 @@ export default function Game() {
             encounter={encounter}
             onSpeakerChange={setStepSpeaker}
             onFinished={finishEncounter}
-            onClose={() => setEncounter(null)}
+            onClose={() => {
+              /* שיחה אינה נסגרת באמצע.
+                 לשליח בתחנת הגבול שתי שיחות ליבה, ולסוחר היהודי חמש.
+                 עד עכשיו כל אחת מהן נסגרה בנפרד והלומד היה צריך ללחוץ
+                 E שוב על אותו אדם שעומד מולו — מה שנקרא כשיחה שנקטעה,
+                 לא כשיחה שהמשיכה. אם לאותו דובר נשאר עוד משהו לומר
+                 והטריגר שלו כבר נפתח, זה ממשיך ישירות. */
+              const heard = readNotebook().seen
+              const spoke = encounter.speaker
+              const next = REGION.encounters.find((x) => {
+                if (x.speaker !== spoke || heard.includes(x.id)) return false
+                const t = x.trigger ?? 'arrive'
+                if (t.startsWith('after:') && !heard.includes(t.slice(6))) return false
+                if (t.startsWith('task:') && !readNotebook().solved.includes(t.slice(5))) return false
+                return true
+              })
+              setEncounter(next ?? null)
+            }}
           />
         )}
         {/* ההתקדמות היא המסע, לא המלאי.
