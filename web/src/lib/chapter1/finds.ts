@@ -84,7 +84,7 @@ export const FINDS: Find[] = [
   {
     id: 'find-drachm',
     region: 'border-post',
-    x: -2.97, z: -3.44, model: 'find-coin', h: 0.24, ry: 0.9,
+    x: -2.89, z: -3.93, model: 'find-coin', h: 0.24, ry: 0.9,
     title: 'מטבע כסף סאסאני',
     body:
       'מטבע שנטבע מצפון־מזרח לחצי האי, בממלכה הסאסאנית־פרסית ששלטה באזור איראן ועיראק. ' +
@@ -187,7 +187,7 @@ export const FINDS: Find[] = [
   {
     id: 'find-monk-hymn',
     region: 'monastery',
-    x: 5.2, z: -3.4, model: 'find-scroll', h: 0.3, ry: -0.8,
+    x: 4.95, z: -3.15, model: 'find-scroll', h: 0.3, ry: -0.8,
     title: 'שיר כתוב בתא',
     body:
       'דף ועליו שורות שיר, כתובות לאט, בשקט של תא אבן. להתבודד, לכתוב שיר — ' +
@@ -197,7 +197,7 @@ export const FINDS: Find[] = [
   {
     id: 'find-monk-routine',
     region: 'monastery',
-    x: -7.2, z: -4.6, model: 'claypot', h: 0.4, ry: 1.1,
+    x: -6.85, z: -4.6, model: 'claypot', h: 0.4, ry: 1.1,
     title: 'פינת המנהג הקבוע',
     body:
       'אותה פינה, אותה שעה, אותו מנהג פולחני — היום זה קרה כאן פעמיים, ' +

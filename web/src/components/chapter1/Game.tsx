@@ -19,6 +19,7 @@ import { TASK_RANGE, taskIn } from '@/lib/chapter1/tasks'
 import { FindCard } from './FindCard'
 import { wrapPi } from '@/lib/chapter1/angles'
 import { MAP_PINS } from '@/lib/chapter1/journey'
+import { allowedBecause } from '@/lib/chapter1/overlap-allow'
 import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
 import { TaskPanel } from './TaskPanel'
 import { ContactShadow, Npc, Rawi, type RawiClip } from './Characters'
@@ -565,7 +566,7 @@ function StagedProps({ placed, live }: { placed: CampProp[]; live: Live }) {
   )
 }
 
-function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1 }: {
+function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1, atX, atZ }: {
   url: string
   x: number
   z: number
@@ -584,6 +585,10 @@ function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1 }: {
   tint?: string
   /** bury the base this many metres — beds ridges/props into the sand */
   sink?: number
+  /** מיקום העולם לשם הביקורת, כשהפרופ יושב בתוך group שכבר מוקם
+      (מדורה, לפיד). בלי זה השם נושא 0,0 והדוח מטעה. */
+  atX?: number
+  atZ?: number
 }) {
   const { scene } = useGLTF(url)
   /* מרנדר מחדש כשהקרקע מגיעה, אחרת הגובה נשאר על אפס לנצח */
@@ -679,7 +684,7 @@ function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1 }: {
        ומודדת Box3 בקואורדינטות עולם — אחרי scale, סיבוב, sink ו-origin
        של המודל. בדיקת ה-JSON רואה רק x/z/r מהקובץ, ולכן פספסה חפיפות
        שנראות בעין. בלי שם, זוג חופף מדווח כ„Group ↔ Group“. */
-    <group name={`prop:${url.split('/').pop()}@${x.toFixed(1)},${z.toFixed(1)}`} position={[x, groundYAt(x, z) - sink, z]} rotation={[0, ry, 0]}>
+    <group name={`prop:${url.split('/').pop()}@${(atX ?? x).toFixed(1)},${(atZ ?? z).toFixed(1)}`} position={[x, groundYAt(x, z) - sink, z]} rotation={[0, ry, 0]}>
       {url.includes('palm') ? (
         <Sway x={x} z={z}>
           <primitive object={object} />
@@ -838,7 +843,7 @@ function Campfire({ x, z }: { x: number; z: number }) {
   return (
     <group position={[x, groundYAt(x, z), z]}>
       {/* authored fire pit: stone ring, logs and scorched ground */}
-      <Prop url={MODEL_FIREPIT} x={0} z={0} ry={0.4} height={0.75} />
+      <Prop url={MODEL_FIREPIT} x={0} z={0} atX={x} atZ={z} ry={0.4} height={0.75} />
       {/* warm glow on the ground under the fire */}
       <mesh position={[0, 0.03, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[1.1, 24]} />
@@ -1086,7 +1091,7 @@ function Torch({ x, z, ry = 0 }: { x: number; z: number; ry?: number }) {
   useGroundReady()
   return (
     <group position={[x, groundYAt(x, z), z]} rotation={[0, ry, 0]}>
-      <Prop url={MODEL_TORCH} x={0} z={0} height={1.85} />
+      <Prop url={MODEL_TORCH} x={0} z={0} atX={x} atZ={z} height={1.85} />
       <FireSprite y={1.95} size={0.85} fps={24} phase={x * 7} />
       <pointLight position={[0, 2, 0]} color="#ff9a3d" intensity={5} distance={8} decay={2} />
     </group>
@@ -4089,6 +4094,9 @@ function DevAudit() {
         }
       }
       hits.sort((p, q) => q.frac - p.frac)
+      /* סיווג: מכוונת / זניחה / תקלה. רק האחרונה נספרת. */
+      const classified = hits.map((h) => ({ ...h, why: allowedBecause(h.a, h.b, h.depth, h.frac) }))
+      const unapproved = classified.filter((h) => h.why === null)
       /* חפצים ששוכבים על הקרקע ומעט שקועים בה אינם חפיפה בין שני
          מודלים — הקרקע אינה ברשימה. מה שנשאר הוא באמת מודל בתוך מודל. */
       const floating: { name: string; gap: number }[] = []
@@ -4100,18 +4108,18 @@ function DevAudit() {
       }
       const report = {
         region: REGION.id, counted: items.length,
-        overlaps: hits.filter((h) => h.frac > 0.02), floating,
+        overlaps: classified.filter((h) => h.frac > 0.02), unapproved, floating,
         sizes: items.map((i) => ({ name: i.name, w: +i.size.x.toFixed(2), h: +i.size.y.toFixed(2), d: +i.size.z.toFixed(2) })),
       }
       ;(window as unknown as { __ch1Audit: unknown }).__ch1Audit = report
       ;(window as unknown as { __ch1Scene: THREE.Scene }).__ch1Scene = scene
       ;(window as unknown as { __ch1Cam: THREE.Camera }).__ch1Cam = camera
-      if (report.overlaps.length || floating.length) {
-        console.warn(`[ch1 audit] ${REGION.id}: ${report.overlaps.length} overlaps, ${floating.length} off-ground`)
-        for (const h of report.overlaps.slice(0, 20)) console.warn(`  ${h.a} ↔ ${h.b} — ${h.depth}m deep (${Math.round(h.frac * 100)}% of the smaller)`)
+      if (unapproved.length || floating.length) {
+        console.warn(`[ch1 audit] ${REGION.id}: ${unapproved.length} UNAPPROVED overlaps, ${floating.length} off-ground`)
+        for (const h of unapproved.slice(0, 20)) console.warn(`  ${h.a} ↔ ${h.b} — ${h.depth}m deep (${Math.round(h.frac * 100)}% of the smaller)`)
         for (const f of floating.slice(0, 20)) console.warn(`  ${f.name} — ${f.gap > 0 ? 'floating' : 'sunk'} ${Math.abs(f.gap)}m`)
       } else {
-        console.info(`[ch1 audit] ${REGION.id}: clean (${items.length} objects)`)
+        console.info(`[ch1 audit] ${REGION.id}: clean — 0 unapproved of ${hits.length} contacts (${items.length} objects)`)
       }
     }, 2500)
     return () => window.clearTimeout(t)
