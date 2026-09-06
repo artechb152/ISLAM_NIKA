@@ -25,8 +25,12 @@
        the narrator's box, the dated stamp, the gold verse card, and a speech
        balloon WHOSE TAIL LEAVES THE PANEL — because the two who speak in this
        book, Muhammad and Gabriel, are never drawn.
-     · Reading is RTL: the right-hand page is the earlier one, the tiers read
-       top to bottom, and the LEFT arrow moves forward.
+     · Reading is RTL: the right-hand page is the earlier one and the tiers read
+       top to bottom. THE RIGHT HAND TURNS THE PAGE — the right half of the
+       spread, the right arrow and the right cursor key all advance, because the
+       leaf you take hold of is the right-hand one and it swings leftward over
+       the spine. Every one of the three was pointing the other way once; they
+       are one decision and they move together.
 
    ⚠ TWO TRAPS THAT COST THIS BUILD REAL TIME, RECORDED SO THEY ARE NOT REPEATED:
      1. `perspective` and `transform: scale()` must never sit on the same
@@ -262,12 +266,13 @@ export default function Chapter3Comic() {
     return () => window.removeEventListener('resize', fit)
   }, [at])
 
-  /* RTL: the LEFT arrow moves forward, because forward is leftward */
+  /* the right-hand cursor key advances, with the right half and the right
+     arrow — see the note at the top of the file */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { setDrawer(false); return }
-      if (e.key === 'ArrowLeft') turn(1)
-      else if (e.key === 'ArrowRight') turn(-1)
+      if (e.key === 'ArrowRight') turn(1)
+      else if (e.key === 'ArrowLeft') turn(-1)
       else if (e.key === 'Home') goTo(0)
       else if (e.key === 'End') goTo(sheets.length - 1)
       else return
@@ -298,7 +303,7 @@ export default function Chapter3Comic() {
     if ((e.target as HTMLElement).closest('a,button')) return
     const r = bookRef.current?.getBoundingClientRect()
     if (!r) return
-    turn(at === 0 || e.clientX < (r.left + r.right) / 2 ? 1 : -1)
+    turn(at === 0 || e.clientX > (r.left + r.right) / 2 ? 1 : -1)
   }, [at, turn])
 
   /* THE POINTER MOVES THE LAYERS AGAINST EACH OTHER. Two numbers, written on
@@ -306,6 +311,26 @@ export default function Chapter3Comic() {
      own depth, so the picture, the atmosphere and the motes travel at three
      different speeds. Written straight to the element rather than through
      state — a re-render per mouse move would re-render every sheet. */
+  /* ⚠ AND IT IS WRITTEN ONTO THE SIX LIVE LAYERS, NOT INTO A CUSTOM PROPERTY ON
+     THE BOOK. --px on .c3-book inherits into every .c3-lens in the document —
+     seventy-five of them, seventeen sheets deep — and Chrome recomputes the lot
+     on every mouse move whether or not their page is on screen. Measured: a
+     single sweep across the book cost 1.5s of long tasks with the variable, and
+     the layers the reader can actually see number six. So the six are collected
+     whenever the spread changes and written to directly. */
+  const layers = useRef<{ el: HTMLElement; mx: number; my: number }[]>([])
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage) { layers.current = []; return }
+    const pick = (sel: string, mx: number, my: number) =>
+      [...stage.querySelectorAll<HTMLElement>('.c3-page.is-live ' + sel)].map((el) => ({ el, mx, my }))
+    layers.current = [
+      ...pick('.c3-lens', 4, 3),      /* the picture, nearest to still     */
+      ...pick('.c3-haze', -6, -5),    /* the air in front of it            */
+      ...pick('.c3-fx', -11, -9),     /* what hangs in the air, travelling most */
+    ]
+  }, [at, moving])
+
   const raf = useRef(0)
   const onMove = useCallback((e: React.PointerEvent) => {
     if (raf.current) return
@@ -314,8 +339,11 @@ export default function Chapter3Comic() {
       raf.current = 0
       const book = bookRef.current
       if (!book) return
-      book.style.setProperty('--px', ((x / window.innerWidth) * 2 - 1).toFixed(3))
-      book.style.setProperty('--py', ((y / window.innerHeight) * 2 - 1).toFixed(3))
+      const px = (x / window.innerWidth) * 2 - 1
+      const py = (y / window.innerHeight) * 2 - 1
+      for (const l of layers.current) {
+        l.el.style.transform = `translate3d(${(px * l.mx).toFixed(2)}px,${(py * l.my).toFixed(2)}px,0)`
+      }
       /* ⚠ THE HOVERED SIDE IS WRITTEN ONTO THE ELEMENT, NEVER INTO STATE. It was
          a useState, set from this same callback, and every mouse movement then
          re-rendered all seventeen sheets: a single sweep across the book cost
@@ -420,9 +448,9 @@ export default function Chapter3Comic() {
           leaf back. It lives on the stage rather than on two overlay buttons
           because an overlay would have to sit above the sheets, and then it
           would swallow the one link the book contains. */}
-      <div className={'c3-stage' + (peak ? ' is-peak' : '') + (side ? ' hover-' + side : '')}
+      <div className={'c3-stage' + (peak ? ' is-peak' : '')}
            ref={stageRef} onClick={onStage} onPointerMove={onMove}
-           onPointerLeave={() => setSide('')}>
+           onPointerLeave={(e) => e.currentTarget.classList.remove('hover-l', 'hover-r')}>
         <div className={'c3-scene' + (peak ? ' is-on' : '')} aria-hidden="true"
              style={peak ? { backgroundImage: `url(/assets/chapter3/comic/${peak.a}.jpg)` } : undefined} />
         <div className={'c3-book' + (at === 0 ? ' is-closed' : '')} ref={bookRef}>
@@ -458,12 +486,12 @@ export default function Chapter3Comic() {
       <button className="c3-arrow is-next" onClick={() => turn(1)}
               disabled={atEnd} aria-label="העמוד הבא">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
-             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 5l-7 7 7 7" /></svg>
+             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 5l7 7-7 7" /></svg>
       </button>
       <button className="c3-arrow is-prev" onClick={() => turn(-1)}
               disabled={at === 0} aria-label="העמוד הקודם">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
-             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 5l7 7-7 7" /></svg>
+             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 5l-7 7 7 7" /></svg>
       </button>
     </div>
   )

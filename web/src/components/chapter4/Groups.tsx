@@ -6,17 +6,20 @@
    people. As running text the list is four clauses the reader skims; here each
    group is a face standing on the town it is named in relation to.
 
+   THE PARAGRAPH ABOVE RUNS INTO IT. §3 ends on a colon and its last words are
+   ruled on the page; this figure is what that colon opens. There is no heading
+   of its own between the two, because the sentence already is one.
+
    NO TEXT AROUND THE PICTURE. It was tried and it does not read: four labels at
    four corners give the eye no order to follow, and a Hebrew group name is
    longer than the column a corner leaves for it. So the picture carries only
-   the four faces and their lines, and every word sits in ONE panel underneath —
-   full measure, page ground, the chapter's own reading size. Press a face and
-   the panel is about that group.
+   the four faces and their lines, and every word sits in ONE block on the far
+   side of it. Press a face and that block is about that group.
 
-   THE FOURTH GROUP IS NOT IN MEDINA, AND THE PICTURE SAYS SO. „ובמכה התגוררו
-   הכופרים משבט קריש" — the one group the source puts somewhere else, so its face
-   stands outside the frame, in gold rather than maroon, on the longest line of
-   the four. The distance is the point: it is what sections 02 and 03 are about.
+   THE FOUR STAND AT ONE DISTANCE. The one group the source puts somewhere else
+   — „ובמכה התגוררו הכופרים משבט קריש" — is marked in gold and a broken ring
+   rather than moved further out, so no face reads as more important than
+   another.
 
    EVERY WORD IS THE SOURCE'S. The heading is the source's own name for the group
    where it gives one, and otherwise a phrase lifted out of that group's own
@@ -28,12 +31,14 @@
 
    THE ANIMATION IS THE SENTENCE. On entering view the town settles first, then
    each line draws itself from its face in toward the oasis and the face arrives
-   with it — Mecca last and slowest, from outside. Once. Under
-   prefers-reduced-motion nothing moves.
+   with it — Mecca last and slowest. Once. Under prefers-reduced-motion nothing
+   moves.
 
-   THE LINES ARE MEASURED, NOT GUESSED — endpoints read off the laid-out DOM
-   through a ResizeObserver, so they stay attached at any width. Below 900px the
-   faces leave the picture and become a row beneath it, and no lines are drawn. */
+   THE RING IS MEASURED, NOT GUESSED — the four spots and their connectors are
+   computed in pixels from the laid-out picture through a ResizeObserver, so the
+   ring is a real circle on a picture that is wider than it is tall and every
+   connector comes out the same length. Below 900px the faces leave the picture,
+   become a row beneath it, and no lines are drawn. */
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 
@@ -76,14 +81,12 @@ export default function Groups({
   city,
   cityAlt,
   question,
-  hint,
 }: {
   groups: Group[]
   /** the painted view of the town, without extension */
   city: string
   cityAlt: string
   question: string
-  hint: string
 }) {
   const uid = useId().replace(/:/g, '')
   const stage = useRef<HTMLDivElement | null>(null)
@@ -204,70 +207,68 @@ export default function Groups({
   const open = groups[at]
 
   return (
-    <figure className={`ch4-who${on ? ' is-on' : ''}${still ? ' is-still' : ''}`}>
-      <figcaption className="ch4-who-head">
-        <h3>{question}</h3>
-        <p>{hint}</p>
-      </figcaption>
+    <figure className={`ch4-who${on ? ' is-on' : ''}${still ? ' is-still' : ''}`} aria-label={question}>
+      <div className="ch4-who-body">
+        <div className="ch4-who-stage" ref={stage}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="ch4-who-town" ref={town} src={`/assets/chapter4/${city}.jpg`} alt={cityAlt} />
 
-      <div className="ch4-who-stage" ref={stage}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="ch4-who-town" ref={town} src={`/assets/chapter4/${city}.jpg`} alt={cityAlt} />
+          <svg className="ch4-who-web" viewBox={`0 0 ${box.w || 1} ${box.h || 1}`} aria-hidden="true">
+            {lines.map((l, i) => (
+              <line
+                key={l.id}
+                className={`ch4-who-line${groups[at]?.id === l.id ? ' is-on' : ''}`}
+                x1={l.x1}
+                y1={l.y1}
+                x2={l.x2}
+                y2={l.y2}
+                style={{ ['--len' as string]: `${Math.round(l.len)}`, ['--step' as string]: `${0.8 + i * 0.3}s` }}
+              />
+            ))}
+          </svg>
 
-        <svg className="ch4-who-web" viewBox={`0 0 ${box.w || 1} ${box.h || 1}`} aria-hidden="true">
-          {lines.map((l, i) => (
-            <line
-              key={l.id}
-              className={`ch4-who-line${groups[at]?.id === l.id ? ' is-on' : ''}`}
-              x1={l.x1}
-              y1={l.y1}
-              x2={l.x2}
-              y2={l.y2}
-              style={{ ['--len' as string]: `${Math.round(l.len)}`, ['--step' as string]: `${0.8 + i * 0.3}s` }}
-            />
-          ))}
-        </svg>
+          <div className="ch4-who-ring" role="tablist" aria-label={question} onKeyDown={onKey}>
+            {groups.map((g, i) => (
+              <button
+                key={g.id}
+                type="button"
+                role="tab"
+                id={`${uid}-tab-${g.id}`}
+                aria-selected={at === i}
+                aria-controls={`${uid}-panel`}
+                tabIndex={at === i ? 0 : -1}
+                ref={(el) => {
+                  dots.current[i] = el
+                }}
+                className={`ch4-who-dot${at === i ? ' is-on' : ''}${g.away ? ' is-away' : ''}`}
+                style={{
+                  ['--x' as string]: spots[i] ? `${spots[i].left}px` : '50%',
+                  ['--y' as string]: spots[i] ? `${spots[i].top}px` : '50%',
+                  ['--step' as string]: `${0.6 + i * 0.3}s`,
+                }}
+                onClick={() => setAt(i)}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/assets/chapter4/${g.img}.jpg`} alt="" aria-hidden="true" loading="lazy" />
+                <span className="ch4-who-sr">{g.name}</span>
+              </button>
+            ))}
+          </div>
+  </div>
 
-        <div className="ch4-who-ring" role="tablist" aria-label={question} onKeyDown={onKey}>
-          {groups.map((g, i) => (
-            <button
-              key={g.id}
-              type="button"
-              role="tab"
-              id={`${uid}-tab-${g.id}`}
-              aria-selected={at === i}
-              aria-controls={`${uid}-panel`}
-              tabIndex={at === i ? 0 : -1}
-              ref={(el) => {
-                dots.current[i] = el
-              }}
-              className={`ch4-who-dot${at === i ? ' is-on' : ''}${g.away ? ' is-away' : ''}`}
-              style={{
-                ['--x' as string]: spots[i] ? `${spots[i].left}px` : '50%',
-                ['--y' as string]: spots[i] ? `${spots[i].top}px` : '50%',
-                ['--step' as string]: `${0.6 + i * 0.3}s`,
-              }}
-              onClick={() => setAt(i)}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/assets/chapter4/${g.img}.jpg`} alt="" aria-hidden="true" loading="lazy" />
-              <span className="ch4-who-sr">{g.name}</span>
-            </button>
-          ))}
+        {/* WHAT THE OPEN FACE SAYS, on the far side of the picture — one place,
+            not four, so there is somewhere for the eye to go back to. Not a
+            card: a rule on its reading edge and the chapter's own reading size. */}
+        <div
+          className={`ch4-who-said${open?.away ? ' is-away' : ''}`}
+          id={`${uid}-panel`}
+          role="tabpanel"
+          aria-labelledby={`${uid}-tab-${open?.id}`}
+          key={open?.id}
+        >
+          <h4>{open?.name}</h4>
+          <p>{open?.text}</p>
         </div>
-      </div>
-
-      {/* what the open face says: not a card, just text on the reading edge in
-          the same column as the paragraphs around the figure */}
-      <div
-        className={`ch4-who-said${open?.away ? ' is-away' : ''}`}
-        id={`${uid}-panel`}
-        role="tabpanel"
-        aria-labelledby={`${uid}-tab-${open?.id}`}
-        key={open?.id}
-      >
-        <h4>{open?.name}</h4>
-        <p>{open?.text}</p>
       </div>
     </figure>
   )

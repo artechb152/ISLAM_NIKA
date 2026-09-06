@@ -1010,34 +1010,31 @@
 }
 
 /* ------------------------- who met whom in Medina ----------------------
-   §3's four groups. The picture carries the four faces and nothing else; every
-   word is in the text under it — see Groups.tsx.
+   §3's four groups. The paragraph above runs straight into it: the sentence ends
+   on a colon, its last words are ruled, and the figure is what the colon opens.
 
-   IT IS PART OF THE COLUMN, NOT A PANEL DROPPED INTO IT. It runs to the same
-   measure as the paragraphs around it, its heading is set like the chapter's
-   other sub-headings on the reading edge, and the text under it is text — a
-   gold rule on the reading edge, the same one the quotations use, and no box.
-   A bordered card in the middle of a reading column reads as an advertisement.
+   THE PICTURE ON THE READING EDGE, THE WORDS ON THE FAR SIDE. One text block in
+   one fixed place, not four labels at four corners — the eye has somewhere to go
+   back to, and the block is wide enough for a Hebrew sentence.
 
    THE FADE HAS NO EDGE. Two things had to be true at once: the mask has to end
-   in nothing rather than in a ring, and the painting's own paper has to stop
-   being a different paper from the page's. Multiply blending does the
-   second — the engraving is dark linework on light ground, so its light ground
-   multiplies away into whatever the page ground is and only the drawing stays.
-   The mask then has nothing left to cut, and the picture ends in the page.
+   in nothing rather than in a ring — an ellipse whose radius is 64% of the width
+   finishes 64% out from the centre, past the edge at 50%, and the picture still
+   ends on a straight line — and the painting's own paper has to stop being a
+   different paper from the page's, which multiply blending does: the engraving
+   is dark linework on light ground, so its ground multiplies away into the
+   page's and only the drawing stays.
 
-   BELOW 900px the faces come off the picture and become a row beneath it, and
-   the connectors are not drawn at all. */
+   BELOW 900px the faces come off the picture, become a row beneath it, the text
+   follows underneath, and the connectors are not drawn at all. */
 .ch4-who{margin:0;width:100%}
 
-.ch4-who-head{margin-bottom:clamp(10px,1.4vw,18px)}
-.ch4-who-head h3{
-  margin:0;font-family:var(--font-heading);font-weight:700;color:var(--maroon);
-  font-size:clamp(20px,2.1vw,26px);line-height:1.3;
+.ch4-who-body{display:grid;gap:clamp(18px,2.4vw,34px);align-items:center}
+@media (min-width:900px){
+  .ch4-who-body{grid-template-columns:minmax(0,1.55fr) minmax(230px,1fr)}
 }
-.ch4-who-head p{margin:4px 0 0;font-size:14px;color:var(--muted)}
 
-.ch4-who-stage{position:relative;width:min(100%,820px);margin-inline:0 auto}
+.ch4-who-stage{position:relative}
 
 .ch4-who-town{
   display:block;width:100%;height:auto;
@@ -1066,7 +1063,7 @@
 
 .ch4-who-dot{
   display:block;padding:0;cursor:pointer;
-  width:clamp(78px,8.4vw,112px);aspect-ratio:1;border-radius:50%;
+  width:clamp(74px,7.6vw,102px);aspect-ratio:1;border-radius:50%;
   border:2px solid var(--gold);background:var(--mat);overflow:hidden;
   box-shadow:0 3px 12px rgba(60,35,18,.2);
   opacity:0;
@@ -1083,14 +1080,10 @@
 .ch4-who-dot.is-away{border-style:dashed;border-color:var(--gold-soft)}
 .ch4-who-dot.is-away.is-on{border-style:solid;border-color:var(--gold-text)}
 
-/* ---- wide: the faces stand on one circle over the picture ---- */
 @media (min-width:900px){
-  .ch4-who-stage{padding-block:clamp(8px,1.2vw,18px)}
   .ch4-who-ring{position:absolute;inset:0;z-index:2}
   .ch4-who-dot{position:absolute;left:var(--x);top:var(--y);translate:-50% -50%}
 }
-
-/* ---- narrow: the faces come off the picture and line up under it ---- */
 @media (max-width:899px){
   .ch4-who-ring{
     display:flex;flex-wrap:wrap;justify-content:center;gap:clamp(14px,4vw,26px);
@@ -1099,21 +1092,28 @@
   .ch4-who-dot{width:clamp(72px,17vw,96px)}
 }
 
-/* ---- what the open face says: text, on the reading edge, in the column ---- */
+/* ---- what the open face says ---- */
 .ch4-who-said{
-  margin-top:clamp(14px,1.8vw,22px);
-  padding-inline-start:clamp(16px,2vw,26px);
-  border-inline-start:3px solid var(--gold);
+  padding-inline-start:clamp(14px,1.6vw,22px);
+  border-inline-start:3px solid var(--maroon);
   animation:ch4-who-in .3s ease;
 }
 .ch4-who-said.is-away{border-inline-start-color:var(--gold-soft)}
 .ch4-who-said h4{
-  margin:0 0 4px;font-family:var(--font-heading);font-weight:700;
+  margin:0 0 5px;font-family:var(--font-heading);font-weight:700;
   font-size:clamp(18px,1.9vw,22px);line-height:1.3;color:var(--maroon);
 }
 .ch4-who-said.is-away h4{color:var(--gold-text)}
-.ch4-who-said p{margin:0;font-size:var(--read);line-height:var(--lh,1.7);color:var(--ink)}
+.ch4-who-said p{margin:0;font-size:calc(var(--read) - 1px);line-height:1.65;color:var(--ink)}
 @keyframes ch4-who-in{from{opacity:0;translate:0 4px}to{opacity:1;translate:0 0}}
+
+/* the words in the paragraph above that hand off to the figure: ruled, not
+   coloured — a colour here would read as one more key term */
+.ch4-points{
+  font-weight:inherit;color:inherit;
+  border-block-end:2px solid var(--gold);
+  padding-block-end:1px;
+}
 
 /* NOTHING MOVES for a reader who asked for that: no draw, no fade, no delay. */
 .ch4-who.is-still .ch4-who-town,

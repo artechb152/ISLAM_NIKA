@@ -104,7 +104,7 @@ const bindShort = (phrase: string): string =>
   phrase.split(' ').length <= 3 ? phrase.replace(/ /g, NBSP) : phrase
 
 /** Bold every `em` phrase inside one line, leaving the rest as it is. */
-function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] {
+function emphasise(s: string, em: string[], keyBase: string, cls = 'key'): React.ReactNode[] {
   if (!em.length) return [s]
   const parts: React.ReactNode[] = []
   let rest = s
@@ -125,7 +125,7 @@ function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] 
     }
     if (at > 0) parts.push(rest.slice(0, at))
     parts.push(
-      <b className="key" key={`${keyBase}-${k++}`}>
+      <b className={cls} key={`${keyBase}-${k++}`}>
         {bindShort(hit)}
       </b>,
     )
@@ -140,11 +140,16 @@ function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] 
 function T({
   r,
   em = [],
+  emClass,
   className,
   reveal = false,
 }: {
   r: string | string[]
   em?: string[]
+  /** How the emphasised phrase is set. Default: the chapter's key term, maroon.
+      The other one is a phrase that hands off to the figure directly under it —
+      ruled rather than coloured, so it reads as a pointer and not as a term. */
+  emClass?: string
   className?: string
   reveal?: boolean
 }) {
@@ -197,7 +202,7 @@ function T({
       if (i) out.push(' ')
       out.push(
         <span className="ch4-intro" key={`i${i}`}>
-          {emphasise(line.text, em, `l${i}`)}
+          {emphasise(line.text, em, `l${i}`, emClass)}
         </span>,
         ' ',
       )
@@ -207,12 +212,12 @@ function T({
     if (line.item) {
       out.push(
         <span className="ch4-item" key={`it${i}`}>
-          {emphasise(line.text, em, `l${i}`)}
+          {emphasise(line.text, em, `l${i}`, emClass)}
         </span>,
       )
       return
     }
-    out.push(...emphasise(line.text, em, `l${i}`))
+    out.push(...emphasise(line.text, em, `l${i}`, emClass))
   })
   return (
     <p className={className} {...rv}>
@@ -657,8 +662,18 @@ export default function Chapter4() {
                 </Block>
                 <SubHead section="hijra" id="groups" />
                 <Block>
-                  <T r="§3.a" className="ch4-body" reveal />
-                  <T r="§3.b" className="ch4-body" reveal />
+                  {/* ONE RUNNING PARAGRAPH, and its last words are the hand-off:
+                      the sentence ends on a colon and „התגוררו ארבע קבוצות
+                      אנשים" is ruled, so the eye is taken straight into the
+                      figure below it. Ruled and not coloured — a colour here
+                      would read as one more key term. */}
+                  <T
+                    r={['§3.a', '§3.b']}
+                    className="ch4-body"
+                    em={['התגוררו ארבע קבוצות אנשים']}
+                    emClass="ch4-points"
+                    reveal
+                  />
                 </Block>
                 {/* §3 ends on a colon and then lists four groups. The list is the
                     figure; §3.b's „ארבע קבוצות אנשים" is the sentence that hands
@@ -677,8 +692,7 @@ export default function Chapter4() {
                 <Groups
                   city="medina-622"
                   cityAlt="ית'רב — שחזור מצויר"
-                  question="מי פגש את מי במדינה?"
-                  hint="לחצו על קבוצה"
+                  question={sub('hijra', 'groups').title}
                   groups={[
                     {
                       id: 'muhajirun',

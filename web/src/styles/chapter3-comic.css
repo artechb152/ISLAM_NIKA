@@ -352,14 +352,15 @@
 .c3-arrow:hover{opacity:1;background:var(--maroon)}
 .c3-arrow:focus-visible{outline:2px solid var(--maroon-deep);outline-offset:3px}
 .c3-arrow:disabled{opacity:.16;cursor:default;background:var(--maroon-deep)}
-/* ⚠ THE FORWARD ARROW GOES ON THE LEFT. In an RTL book forward is leftward:
-   clicking the left leaf turns the page, the chevron points left, and the
-   button that does the same thing has to be on the same side as both. It was
-   on the RIGHT — a right-hand button, pointing left, doing what the left half
-   of the page does. That contradiction is a bug in the interaction, not a
-   detail of the styling. */
-.c3-arrow.is-next{inset-inline-end:var(--c3-out,20px)}
-.c3-arrow.is-prev{inset-inline-start:var(--c3-out,20px)}
+/* ⚠ THE FORWARD ARROW GOES ON THE RIGHT, WITH THE HAND THAT TURNS THE PAGE.
+   The leaf you take hold of in this book is the right-hand one, so the right
+   half of the spread, the right arrow and the right cursor key all advance, and
+   the chevron points the way your hand travels. These three were split across
+   two sides at one point — the click advanced on the left while the button
+   marked 'next' sat on the right — and that contradiction is what made the
+   controls read as broken. They are one decision. */
+.c3-arrow.is-next{inset-inline-start:var(--c3-out,20px)}
+.c3-arrow.is-prev{inset-inline-end:var(--c3-out,20px)}
 
 @media (max-width:860px){
   /* A WHOLE SPREAD CANNOT FIT A PHONE'S WIDTH. Measured at 390px, fitting it
@@ -373,8 +374,8 @@
   .c3-stage::-webkit-scrollbar{display:none}
   .c3-arrow{width:40px;height:40px}
   .c3-arrow svg{width:19px;height:19px}
-  .c3-arrow.is-next{inset-inline-end:6px}
-  .c3-arrow.is-prev{inset-inline-start:6px}
+  .c3-arrow.is-next{inset-inline-start:6px}
+  .c3-arrow.is-prev{inset-inline-end:6px}
   .c3-lift{display:none}
   .c3-place-part{display:none}
 }
@@ -392,5 +393,9 @@
 .c3-lift.is-l{inset-inline-end:0;background:linear-gradient(to left,transparent,rgba(74,56,38,.16))}
 .c3-lift.is-r{inset-inline-start:0;background:linear-gradient(to right,transparent,rgba(74,56,38,.16))}
 .c3-stage.hover-l .c3-lift.is-l,.c3-stage.hover-r .c3-lift.is-r{opacity:1}
-.c3-stage.hover-l .c3-arrow.is-next,.c3-stage.hover-r .c3-arrow.is-prev{opacity:1}
+/* ⚠ THE ARROWS ARE SIBLINGS OF THE STAGE, NOT INSIDE IT. A descendant
+   selector here matched nothing and the arrow never lit — measured at .9 while
+   the hovered leaf was lifting correctly beside it. */
+.c3-stage.hover-r ~ .c3-arrow.is-next,
+.c3-stage.hover-l ~ .c3-arrow.is-prev{opacity:1;background:var(--maroon)}
 @media (prefers-reduced-motion:reduce){.c3-lift{transition:none}}

@@ -31,12 +31,12 @@
    one element skew the 3-D page turn. The immersive moments are made by the
    room around the book, never by resizing the book. */
 
-.c3-book{--px:0;--py:0}
+/* the depths are written straight onto the six live layers from JS — see the
+   note in Chapter3Comic.tsx. Nothing here inherits a pointer variable. */
 
 /* ---- depth 1 · the picture ---- */
 .c3-lens{
   position:absolute;inset:calc(-9px * var(--u));display:block;overflow:hidden;
-  transform:translate3d(calc(var(--px) * 4px),calc(var(--py) * 3px),0);
   transition:transform .55s cubic-bezier(.2,.7,.2,1);
 }
 .c3-lens img{display:block;width:100%;height:100%;object-fit:cover}
@@ -50,7 +50,6 @@
 /* ---- depth 2 · the atmosphere ---- */
 .c3-haze{
   position:absolute;inset:-8%;z-index:1;pointer-events:none;
-  transform:translate3d(calc(var(--px) * -6px),calc(var(--py) * -5px),0);
   transition:transform .65s cubic-bezier(.2,.7,.2,1);
   animation:c3-in 1.5s ease .15s both;
 }
@@ -67,7 +66,6 @@
 /* ---- depth 3 · what hangs in the air ---- */
 .c3-fx{
   position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;
-  transform:translate3d(calc(var(--px) * -11px),calc(var(--py) * -9px),0);
   transition:transform .75s cubic-bezier(.2,.7,.2,1);
   animation:c3-in 2s ease .3s both;
 }
