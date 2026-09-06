@@ -292,22 +292,6 @@ function Year({ r, n, children }: { r: string; n: string; children: React.ReactN
   )
 }
 
-/** A painted plate, in chapter 2's shape.
-
-    THE CAPTION IS OURS AND SAYS SO. Every plate in this chapter is a painted
-    reconstruction and not a photograph of anything, and the caption ends by
-    saying it. That is a label on our own drawing, which this file may write;
-    the chapter's sentences are not, and they come from passages.json. */
-function Plate({ src, cap }: { src: string; cap: string }) {
-  return (
-    <figure className="ch4-plate" data-reveal>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/assets/chapter4/${src}.jpg`} alt="" aria-hidden="true" loading="lazy" />
-      <figcaption>{cap} · שחזור מצויר</figcaption>
-    </figure>
-  )
-}
-
 /* ---------------- structure ---------------- */
 
 /** The section heading — chapter 6's `.section-heading` with its diamond.
@@ -791,14 +775,6 @@ export default function Chapter4() {
                   <T r="§7.b" className="ch4-body" reveal />
                   <T r="§7.c" className="ch4-body" reveal />
                 </Block>
-                {/* THE ONE SCENE IN THIS SECTION. §7 is a camel kneeling in a
-                    yard belonging to two orphans, palms cut down, a mosque
-                    built on the ground he bought — and it was a hundred and
-                    sixty pixels of type. The plate holds what the sentences
-                    describe and nothing they do not: the yard, the camel, the
-                    two boys, the felled trunks. No mosque, because it is not
-                    built yet in this sentence, and no prophet, ever. */}
-                <Plate src="mosque-yard" cap="החצר של שני היתומים" />
 
                 <SubHead section="hijra" id="covenant" />
                 <Block>

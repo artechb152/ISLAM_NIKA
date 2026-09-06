@@ -203,11 +203,11 @@
    the other corners, so this is the one corner that is always free. */
 .c3-num{
   position:absolute;z-index:7;top:0;inset-inline-end:0;
-  min-width:calc(24px * var(--u));height:calc(23px * var(--u));
+  min-width:calc(27px * var(--u));height:calc(26px * var(--u));
   display:grid;place-items:center;padding:0 calc(7px * var(--u));
   background:var(--maroon-deep);color:var(--cream);
   font-family:var(--font-heading);font-weight:700;
-  font-size:calc(12.5px * var(--u));font-variant-numeric:tabular-nums;
+  font-size:calc(15px * var(--u));font-variant-numeric:tabular-nums;
 }
 
 /* ---- voice 2 · the date the story leaps to ---- */
