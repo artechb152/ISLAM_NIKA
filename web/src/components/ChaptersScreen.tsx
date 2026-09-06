@@ -52,6 +52,8 @@ const IF_HISTORY =
   'M7 2.5A2.5 2.5 0 0 0 4.5 5V17.4A3.4 3.4 0 0 1 7 16.4H18V2.5ZM11.7 6A3.2 3.2 0 1 0 11.7 12.4 2.4 2.4 0 1 1 11.7 6ZM15.9 6.1 16.6 7.65 18.3 7.8 17 8.95 17.4 10.6 15.9 9.7 14.4 10.6 14.8 8.95 13.5 7.8 15.2 7.65Z|M7 17.9A2 2 0 0 0 7 21.9H18V17.9Z'
 const IF_MOSQUE =
   'M12 2.2C13 3 13 4.2 12 5 11 4.2 11 3 12 2.2Z|M11.4 5.3H12.6V7.6H11.4Z|M4 21V12.4A8 8 0 0 1 20 12.4V21H14.5V17.5A2.5 2.5 0 0 0 9.5 17.5V21ZM11.5 21V17.5A0.5 0.5 0 0 1 12.5 17.5V21Z|M2.4 21H21.6V22.6H2.4Z'
+const IF_NOTEBOOK =
+  'M5 3.5A1.5 1.5 0 0 1 6.5 2H17.5A1.5 1.5 0 0 1 19 3.5V20.5A1.5 1.5 0 0 1 17.5 22H6.5A1.5 1.5 0 0 1 5 20.5ZM8 6.2H16V7.7H8ZM8 9.7H16V11.2H8ZM8 13.2H13.2V14.7H8Z'
 const IF_BOOK =
   'M11.3 6.2C9.6 4.9 7.2 4.4 4.4 4.7V17.5C7 17.3 9.3 17.8 11.3 19V6.2Z|M12.7 6.2C14.4 4.9 16.8 4.4 19.6 4.7V17.5C17 17.3 14.7 17.8 12.7 19V6.2Z'
 const IF_GLOBE =
@@ -345,6 +347,15 @@ export default function ChaptersScreen() {
             {toolRow(examItem)}
           </nav>
         )}
+        {/* המחברת שלי — היחידה בבלוק שכבר חיה: הערות אישיות לפי פרקים */}
+        <nav className="menu-extra menu-exam menu-notebook" aria-label="המחברת שלי">
+          <Link className="m-item x-item" href="/notebook" onClick={() => setDrawer(false)}>
+            <span className="x-ico" aria-hidden="true">
+              <FIcon d={IF_NOTEBOOK} />
+            </span>
+            <span className="m-name">המחברת שלי</span>
+          </Link>
+        </nav>
       </>
     )
   }

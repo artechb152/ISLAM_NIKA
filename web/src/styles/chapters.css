@@ -255,3 +255,7 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
   .card{animation:none;opacity:1;transform:none}
   .side{transition:none}
 }
+
+/* המחברת שלי — צמודה לחדר המבחנים בתחתית המגירה; הוא מצמיד את הבלוק
+   למטה (margin auto), והיא נשענת עליו בלי רווח כפול */
+.menu-extra.menu-notebook{margin-block-start:0;border-top:none;padding-top:0}
