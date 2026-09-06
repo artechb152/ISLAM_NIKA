@@ -294,12 +294,6 @@ export default function Chapter3Comic() {
   const openNow = at === 0 ? [] : [at * 2 - 1, at * 2]
   const settled = moving < 0
 
-  /* CLICKING THE PAPER TURNS IT, AND THE PAGE SAYS SO BEFORE YOU CLICK. A click
-     anywhere that silently flipped the page was the surprise: you move in to
-     read a panel, press, and the page is gone. `side` tracks which half the
-     pointer is over, the leaf on that side lifts its outer corner, and its
-     arrow lights — so the click is announced rather than sprung. */
-  const [side, setSide] = useState<'' | 'l' | 'r'>('')
   const onStage = useCallback((e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('a,button')) return
     const r = bookRef.current?.getBoundingClientRect()
@@ -322,10 +316,21 @@ export default function Chapter3Comic() {
       if (!book) return
       book.style.setProperty('--px', ((x / window.innerWidth) * 2 - 1).toFixed(3))
       book.style.setProperty('--py', ((y / window.innerHeight) * 2 - 1).toFixed(3))
+      /* ⚠ THE HOVERED SIDE IS WRITTEN ONTO THE ELEMENT, NEVER INTO STATE. It was
+         a useState, set from this same callback, and every mouse movement then
+         re-rendered all seventeen sheets: a single sweep across the book cost
+         3.45s wall clock with 2.75s of long tasks — measured. The class goes
+         straight onto the stage for the same reason --px and --py do. */
+      const stage = stageRef.current
+      if (!stage) return
       const r = book.getBoundingClientRect()
-      setSide(at === 0 ? 'l' : x < (r.left + r.right) / 2 ? 'l' : 'r')
+      const s = x < (r.left + r.right) / 2 ? 'hover-l' : 'hover-r'
+      if (!stage.classList.contains(s)) {
+        stage.classList.remove('hover-l', 'hover-r')
+        stage.classList.add(s)
+      }
     })
-  }, [at])
+  }, [])
   useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current) }, [])
 
   /* THE SPREADS THE CHAPTER TURNS ON. Nothing about the page itself changes —

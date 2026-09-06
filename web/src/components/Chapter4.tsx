@@ -622,6 +622,30 @@ export default function Chapter4() {
                   §2 נושא שתי גרסאות של אותו אירוע והמקור לא מכריע ביניהן —
                   זו הסיבה שהן עומדות זו מול זו ולא זו אחרי זו. */}
               <Section id="hijra" className="opening-section">
+                {/* THE CHAPTER'S BANNER, and its only <h1>. It was lost when the
+                    chapter was stripped to running text: that script rewrote
+                    each section as its heading plus its paragraphs, and the
+                    banner sits INSIDE this section rather than above it, so it
+                    went out with the devices. Restored. */}
+                <div className="ch4-hero">
+                  <div className="ch4-hero-media" aria-hidden="true">
+                    <video
+                      className="ch4-hero-video"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="auto"
+                      poster="/assets/chapter4/hero-road.jpg"
+                      tabIndex={-1}
+                    >
+                      <source src="/assets/chapter4/hero-road.mp4" type="video/mp4" />
+                    </video>
+                  </div>
+                  <div className="ch4-hero-copy">
+                    <h1 className="ch4-hero-title">{CH4.title}</h1>
+                  </div>
+                </div>
                 <Head id="hijra" />
                 <Block>
                   <T r="§0.a" className="ch4-body" reveal />
