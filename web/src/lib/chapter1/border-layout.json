@@ -1685,27 +1685,29 @@
  "mood": {
   "sky": "sky-morning.png",
   "fill": {
-   "sky": "#a9c2e0",
-   "ground": "#8a7a66",
-   "intensity": 0.95
+   "sky": "#dde7f0",
+   "ground": "#a5a89e",
+   "intensity": 1.18
   },
   "fog": {
-   "color": "#d8c3a4",
-   "near": 20,
-   "far": 170
+   "color": "#c2cacb",
+   "near": 60,
+   "far": 450
   },
   "sun": {
    "position": [
-    -20.9,
-    10,
-    -16.8
+    -16,
+    14,
+    -12
    ],
-   "color": "#ffdfae",
-   "intensity": 3.9
+   "color": "#f0f5ff",
+   "intensity": 3
   },
   "skyLight": 0.2,
   "exposure": 1.46,
-  "viewerFill": 0.42
+  "viewerFill": 0.4,
+  "grade": "saturate(0.94) contrast(1.07) brightness(1.03) hue-rotate(7deg)",
+  "vignette": 0.3
  },
  "extras": [
   {

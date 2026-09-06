@@ -25,25 +25,27 @@
     "skyLight": 0.3,
     "exposure": 1.86,
     "fog": {
-      "color": "#d9b790",
-      "near": 16,
-      "far": 135
+      "color": "#cdc39d",
+      "near": 62,
+      "far": 470
     },
     "fill": {
-      "sky": "#b9c8e8",
-      "ground": "#8f8073",
-      "intensity": 1.05
+      "sky": "#e6efdf",
+      "ground": "#b3a684",
+      "intensity": 1.22
     },
     "sun": {
       "position": [
-        -23.1,
-        9.5,
-        -13.5
+        -14,
+        17,
+        -11
       ],
-      "color": "#ffddb0",
-      "intensity": 3.8
+      "color": "#fff4d6",
+      "intensity": 3.3
     },
-    "viewerFill": 0.42
+    "viewerFill": 0.4,
+    "grade": "saturate(1.06) contrast(1.05) brightness(1.05) hue-rotate(-5deg)",
+    "vignette": 0.27
   },
   "roads": [
     {

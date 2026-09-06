@@ -5001,7 +5001,9 @@ export default function Game() {
               else live.markerEls.delete(c.who)
             }}
           >
-            <span className="poi-dialogue-bubble" aria-hidden="true">...</span>
+            {/* גם בועת הדיבור המרחפת ירדה. דמות שעומדת מולך היא כבר
+                הסימן שיש עם מי לדבר — לא צריך אייקון שירחף מעל ראשה.
+                מה שנשאר הוא התווית, וגם היא רק כשקרובים. */}
             <span className="poi-act" aria-hidden="true"><b>E</b> · שיחה עם {SPEAKERS[c.who]}</span>
             <span className="ch1-visually-hidden">שיחה עם {SPEAKERS[c.who]}</span>
           </div>

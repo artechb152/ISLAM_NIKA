@@ -1128,27 +1128,29 @@
   "mood": {
     "sky": "sky-dawn.png",
     "fill": {
-      "sky": "#faf1ef",
-      "ground": "#fa7a37",
-      "intensity": 1.13
+      "sky": "#6d7ba6",
+      "ground": "#4a4657",
+      "intensity": 0.95
     },
     "fog": {
-      "color": "#dda071",
-      "near": 18,
-      "far": 150
+      "color": "#5b6280",
+      "near": 44,
+      "far": 340
     },
     "sun": {
       "position": [
-        -20.9,
-        8,
-        -16.8
+        12,
+        15,
+        13
       ],
-      "color": "#fac07e",
-      "intensity": 2.6
+      "color": "#a9bce4",
+      "intensity": 1.5
     },
     "skyLight": 0.64,
     "exposure": 1.22,
-    "viewerFill": 0.5
+    "viewerFill": 0.3,
+    "grade": "saturate(0.94) contrast(1.12) brightness(0.95) hue-rotate(10deg)",
+    "vignette": 0.46
   },
   "roads": [
     {
