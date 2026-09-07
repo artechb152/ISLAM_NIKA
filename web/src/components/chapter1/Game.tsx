@@ -5526,7 +5526,19 @@ export default function Game() {
     if (!opt) return
     setTaskLast(id)
     setTaskLastOk(!!opt.right)
-    if (opt.right) setInterpreted(id)
+    if (opt.right) {
+      setInterpreted(id)
+      /* התשובה נכונה, אבל התחנה נסגרת רק אחרי שהדמות סיימה לדבר.
+         אומרים זאת כאן, ברגע התשובה — לא משאירים חלונית שנראית
+         פתורה ותחנה שאינה נסגרת. */
+      if (!talksDoneRef.current) {
+        setTaskNote({
+          who: 'רָאוִי',
+          text: `נכון. ורגע לפני שנסגור כאן — ל${HOST_NAME} יש עוד מה לומר לך. חזרו אליו (E), והתחנה תושלם.`,
+          ok: true,
+        })
+      }
+    }
   }, [setTaskLast, setTaskLastOk])
   const chooseTask = useCallback(
     (id: string) => {
@@ -6252,8 +6264,10 @@ export default function Game() {
         const st = stageRef.current
         const allowWho = st === 'brief' || st === 'interpret' || st === 'wrap' || st === 'done'
         const allowFind = st === 'look' || st === 'wrap' || st === 'done'
-        /* המשימה אינה נפתחת כל עוד לא נשמע מה שיש לדמות לומר */
-        const allowTask = st === 'interpret' && talksDoneRef.current
+        /* המשימה נפתחת כרגיל; מה שמחכה לשיחה הוא הסגירה. נעילת הפתיחה
+           שברה את הגבול, שבו השיחה השנייה עם השליח באה אחרי המטבע
+           והחותם — התחנה נתקעה ב-interpret כי אי אפשר היה לענות. */
+        const allowTask = st === 'interpret'
 
         const dWho = allowWho && live.nearWho ? live.nearWhoD : Infinity
         const dFind = allowFind && live.nearFind ? live.nearFindD : Infinity
@@ -6276,9 +6290,6 @@ export default function Game() {
               return 'את זה כבר בחנת. מה שנשאר הוא השאלה עצמה.'
             }
             if (near === 'task') {
-              if (!talksDoneRef.current) {
-                return `רגע — עוד לא שמעתם את כל מה שיש ל${HOST_NAME} לומר כאן. חזרו אליו, ואז נשוב לשאלה.`
-              }
               if (st === 'brief') return 'רגע — קודם נשמע את מי שעומד כאן.'
               if (st === 'look') return 'רגע — קודם בוחנים את מה שמונח כאן. אי אפשר להשיב על מה שלא ראית.'
               if (st === 'act') return 'רגע — הפעולה עצמה עוד לא הושלמה.'
