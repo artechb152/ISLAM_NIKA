@@ -3880,7 +3880,7 @@ function SurfaceGlow({ x, y, z, r = 0.42, tone = '#f0c877', on = true }: {
   )
 }
 
-function EvidenceTable({ live, at, done, active, onComplete }: {
+function EvidenceTable({ live, at, done, active, put, onPlaced, onComplete }: {
   live: Live
   at: { x: number; z: number }
   done: boolean
@@ -3888,6 +3888,9 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
       לפני ששמעת את הסוחר ולפני שראית את שלושת הממצאים — כלומר לפתור
       את הפעולה לפני שנשאלה. */
   active: boolean
+  /** בקשה מן הפאנל: הנח את הבא בתור. אותה פעולה בדיוק כמו גרירה. */
+  put: number
+  onPlaced: (n: number) => void
   onComplete: () => void
 }) {
   const { camera, gl } = useThree()
@@ -3914,6 +3917,24 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
   const activeRef = useRef(active)
   activeRef.current = active
   const SNAP = 0.72
+
+  /* ── אותה הנחה, במקלדת ─────────────────────────────────────────────
+     הגרירה היא הדרך הטבעית, אבל היא הדרך היחידה שמקדמת את `physDone` —
+     ולכן מי שאינו יכול לגרור נעצר כאן, והשער אינו נפתח. הכפתור בפאנל
+     מבקש את ההנחה הבאה, והשולחן מבצע אותה בדיוק כפי שהיד הייתה. */
+  useEffect(() => {
+    if (put <= 0) return
+    const i = placed.current.findIndex((v) => !v)
+    if (i < 0) return
+    pos.current[i] = { ...slot[i] }
+    placed.current[i] = true
+    const n = placed.current.filter(Boolean).length
+    setPlacedN(n)
+    onPlaced(n)
+    if (n === 3) onComplete()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [put])
+
 
   useEffect(() => {
     const v = new THREE.Vector3()
@@ -3993,6 +4014,7 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
         placed.current[i] = true
         const n = placed.current.filter(Boolean).length
         setPlacedN(n)
+        onPlaced(n)
         if (n === 3) onComplete()
       }
     }
@@ -4684,7 +4706,7 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet }: {
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet, tablePut, onTablePlaced }: {
   live: Live
   /** שלב התחנה — קובע מה זוהר ומה עומם */
   stage: Stage
@@ -4709,6 +4731,9 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
   /** מכה: האם שלושת הפריטים כבר על השולחן */
   tableSet: boolean
   onTableSet: () => void
+  /** מונה שעולה כשמבקשים מן הפאנל להניח את הפריט הבא */
+  tablePut: number
+  onTablePlaced: (n: number) => void
 }) {
   /* Scatter rocks and shrubs only where they don't intersect a placed prop or
      a person standing there — this is what stops models growing through each other.
@@ -4827,6 +4852,8 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
             at={{ x: REGION_TASK.x + 2.1, z: REGION_TASK.z + 1.3 }}
             done={tableSet}
             active={stage === 'act'}
+            put={tablePut}
+            onPlaced={onTablePlaced}
             onComplete={onTableSet}
           />
         </Suspense>
@@ -5520,6 +5547,8 @@ export default function Game() {
      שגרר את המטבע הנכון פתר את התחנה באותו רגע, ושלב הפירוש לא
      התקיים בפועל. */
   const [interpreted, setInterpreted] = useState<string | null>(null)
+  const interpretedRef = useRef<string | null>(null)
+  interpretedRef.current = interpreted
   const interpretTask = useCallback((id: string) => {
     if (!REGION_TASK?.interpret) return
     const opt = REGION_TASK.interpret.options.find((o) => o.id === id)
@@ -5585,6 +5614,9 @@ export default function Game() {
   const tableSetRef = useRef(false)
   tableSetRef.current = tableSet
   const markTableSet = useCallback(() => { setTableSet(true); cue('find') }, [setTableSet])
+  /** בקשת הנחה מן הפאנל: השולחן מניח את הבא בתור, בדיוק כמו גרירה */
+  const [tablePut, setTablePut] = useState(0)
+  const [tablePlaced, setTablePlaced] = useState(0)
   const stoneLitRef = useRef(false)
   stoneLitRef.current = stoneLit
   const markStoneLit = useCallback(() => {
@@ -6266,8 +6298,10 @@ export default function Game() {
         const allowFind = st === 'look' || st === 'wrap' || st === 'done'
         /* המשימה נפתחת כרגיל; מה שמחכה לשיחה הוא הסגירה. נעילת הפתיחה
            שברה את הגבול, שבו השיחה השנייה עם השליח באה אחרי המטבע
-           והחותם — התחנה נתקעה ב-interpret כי אי אפשר היה לענות. */
-        const allowTask = st === 'interpret'
+           והחותם — התחנה נתקעה ב-interpret כי אי אפשר היה לענות.
+           ומרגע שהתשובה ניתנה, המשימה מפסיקה לתפוס את E: אחרת היא
+           נפתחת שוב במקום השיחה שנשארה, והיא זו שסוגרת את התחנה. */
+        const allowTask = (st === 'act' || st === 'interpret') && !interpretedRef.current
 
         const dWho = allowWho && live.nearWho ? live.nearWhoD : Infinity
         const dFind = allowFind && live.nearFind ? live.nearFindD : Infinity
@@ -6290,6 +6324,9 @@ export default function Game() {
               return 'את זה כבר בחנת. מה שנשאר הוא השאלה עצמה.'
             }
             if (near === 'task') {
+              if (interpretedRef.current && !talksDoneRef.current) {
+                return `על השאלה כבר ענית. מה שנשאר הוא ל${HOST_NAME} — חזרו אליו (E), והתחנה תושלם.`
+              }
               if (st === 'brief') return 'רגע — קודם נשמע את מי שעומד כאן.'
               if (st === 'look') return 'רגע — קודם בוחנים את מה שמונח כאן. אי אפשר להשיב על מה שלא ראית.'
               if (st === 'act') return 'רגע — הפעולה עצמה עוד לא הושלמה.'
@@ -6498,6 +6535,8 @@ export default function Game() {
               met={met}
               stoneLit={stoneLit}
               onStoneLit={markStoneLit}
+              tablePut={tablePut}
+              onTablePlaced={setTablePlaced}
               tableSet={tableSet}
               onTableSet={markTableSet}
             />
@@ -6806,6 +6845,23 @@ export default function Game() {
           <TaskPanel
             task={REGION_TASK}
             phase={stage === 'interpret' ? 'interpret' : 'act'}
+            /* ── הפעולה שביד, גם ללא עכבר ────────────────────────────
+               בתימן ובמכה `physDone` נמדד מגרירה בלבד, ולכן מי שאינו
+               יכול לגרור נעצר בתחנה הראשונה — שער היציאה מחכה לפעולה
+               שאין לה דרך שנייה. אלה אותם צעדים, ככפתורים. */
+            hand={
+              stage !== 'act'
+                ? null
+                : REGION.id === 'yemen-heights'
+                  ? [{ label: 'קרבו את הלפיד אל האבן והחזיקו', done: stoneLit, onDo: markStoneLit }]
+                  : REGION.id === 'mecca'
+                    ? EVIDENCE_SLOTS.map((sl, i) => ({
+                        label: `הניחו: ${sl.label} — ${sl.place}`,
+                        done: tablePlaced > i,
+                        onDo: () => setTablePut((n) => n + 1),
+                      }))
+                    : null
+            }
             onInterpret={interpretTask}
             chosen={taskChosen}
             found={found}

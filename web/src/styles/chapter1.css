@@ -1314,3 +1314,7 @@ body{
   display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:30px;
 }
 .ch1-outro-foot .hud-card-btn{text-decoration:none}
+
+/* חלופת המקלדת לפעולה שביד — אותם צעדים, ככפתורים */
+.ch1-task-hand .ch1-task-options{gap:8px}
+.ch1-task-hand .hud-card-btn{text-align:start;width:100%}

@@ -23,10 +23,16 @@ const OBSERVE_LABELS: Record<string, string> = Object.fromEntries(
   FINDS.map((f) => [f.id, f.title]),
 )
 
-export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phase, onChoose, onSort, onInterpret, onClose }: {
+export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phase, hand, onChoose, onSort, onInterpret, onClose }: {
   task: Task
   /** באיזה שלב הפאנל נפתח: הפעולה עצמה, או הפירוש שאחריה */
   phase: 'act' | 'interpret'
+  /** ── חלופת המקלדת לפעולה שביד ─────────────────────────────────────
+      הפעולה הפיזית בתימן ובמכה נעשית בגרירת מצביע, ובלעדיה `physDone`
+      אינו נעשה — כלומר מי שאינו יכול לגרור נעצר בתחנה הראשונה, כי שער
+      היציאה מחכה לה. אלה אותם צעדים בדיוק, ככפתורים: לא עוקף את
+      הפעולה — מבצע אותה. */
+  hand?: { label: string; done: boolean; onDo: () => void }[] | null
   /** right answers already given, by either hand or button */
   chosen: string[]
   /** evidence already picked up — `present` options stay locked without theirs */
@@ -143,6 +149,23 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
             {!held && !solved && (
               <p className="ch1-task-hint">בחרו דבר, ואז את הצד שלו.</p>
             )}
+          </div>
+        ) : hand && hand.length > 0 ? (
+          <div className="ch1-task-hand">
+            <p className="ch1-task-hint">{task.hint ?? 'בצעו את הפעולה — בעכבר בעולם, או כאן במקלדת:'}</p>
+            <div className="ch1-task-options">
+              {hand.map((h) => (
+                <button
+                  key={h.label}
+                  type="button"
+                  className={`hud-card-btn${h.done ? ' is-taken' : ''}`}
+                  disabled={h.done}
+                  onClick={h.onDo}
+                >
+                  {h.done ? `✓ ${h.label}` : h.label}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <>
