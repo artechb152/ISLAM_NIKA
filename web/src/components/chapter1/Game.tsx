@@ -6149,7 +6149,11 @@ export default function Game() {
 
         {/* a pin over each piece of evidence — lit while it is still there to
             be looked at, dimmed to olive once it is in the notebook */}
-        {REGION_FINDS.map((fd) => (
+        {/* הסמנים על המסך הולכים לפי אותו שלב שהזוהר הולך לפיו.
+            בלי זה נשארו שתי מערכות סימון: אור בעולם שיודע מה תורו,
+            וסמן ב-HUD שמאיר גם דברים שאינם ניתנים לפעולה עכשיו. */}
+        {(stage === 'look' || stage === 'wrap' || stage === 'done') &&
+          REGION_FINDS.map((fd) => (
           <div
             key={fd.id}
             className="poi-marker is-find-marker"
@@ -6170,7 +6174,7 @@ export default function Game() {
             <span className="ch1-visually-hidden">{fd.title}</span>
           </div>
         ))}
-        {REGION_TASK && !solved.includes(REGION_TASK.id) && (
+        {REGION_TASK && (stage === 'act' || stage === 'interpret') && (
           <div
             className="poi-marker is-task-marker"
             ref={(el) => {
