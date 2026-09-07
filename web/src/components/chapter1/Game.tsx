@@ -4999,12 +4999,18 @@ function DevAudit() {
          מוצהר נמדד בחצי-רוחב התיבה שלו, כמו קודם. */
       const declared = new Map<string, number>()
       for (const c of WORLD.colliders) declared.set(`${c.x.toFixed(1)},${c.z.toFixed(1)}`, c.r)
+      /* התיקון חל רק על המקרה שבשבילו הוא נכתב: מודל שהתיבה שלו גדולה
+         בהרבה מן הטביעה שהוא באמת מכסה — גוש בזלת, רכס, צוק. אצלם
+         התיבה משקרת. אצל כד או ארגז התיבה צמודה לרשת והיא המדד הנכון,
+         ותיקון גורף עליהם הוריד את מכה מ-53 מגעים ל-7, כלומר הסתיר
+         חפיפות אמיתיות. פי 1.8 הוא הסף שמפריד בין השניים. */
       const radiusOf = (name: string, box: THREE.Box3) => {
-        const m = /@(-?[\d.]+),(-?[\d.]+)$/.exec(name)
         const boxR = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2
+        const m = /@(-?[\d.]+),(-?[\d.]+)$/.exec(name)
         if (!m) return boxR
         const r = declared.get(`${(+m[1]).toFixed(1)},${(+m[2]).toFixed(1)}`)
-        return r && r > 0 ? Math.min(boxR, r) : boxR
+        if (!r || r <= 0) return boxR
+        return boxR > r * 1.8 ? r : boxR
       }
       const hits: { a: string; b: string; depth: number; frac: number }[] = []
       for (let i = 0; i < items.length; i++) {
