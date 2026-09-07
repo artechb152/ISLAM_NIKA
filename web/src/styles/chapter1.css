@@ -259,9 +259,16 @@ body{
 .hud-card-lead{font-size:15px;line-height:1.55;margin:0 0 10px;color:rgba(245,236,214,.92)}
 .hud-card ul{margin:0;padding-inline-start:18px;display:grid;gap:6px;font-size:14px;line-height:1.5;color:rgba(245,236,214,.85)}
 .hud-card-actions{display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:10px}
+/* `all:unset` מחזיר את הכפתור ל-display:inline, ולכן "לעבודה ←" נשבר
+   בין המילה לחץ והחץ ירד שורה. inline-flex מחזיק את השניים על אותה
+   שורה, מיישר אותם אנכית, ונותן רווח קבוע במקום רווח טקסט שנשבר.
+   כפתורים שהתוכן שלהם הוא משפט — תשובות בשיחה ובפירוש — מבטלים את
+   ה-nowrap בעצמם, כי שם דווקא רוצים גלישה. */
 .hud-card-btn{
   all:unset;box-sizing:border-box;cursor:pointer;font-size:14px;color:var(--cream);
   border:1px solid var(--glass-edge);border-radius:999px;padding:7px 18px;transition:background .2s ease;
+  display:inline-flex;align-items:center;justify-content:center;gap:.4em;
+  white-space:nowrap;line-height:1.35;text-align:center;
 }
 .hud-card-btn:hover{background:rgba(199,154,60,.18)}
 .hud-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -300,7 +307,9 @@ body{
 .hud-dialogue-body{flex:1;min-width:0}
 .hud-dialogue-body .hud-title{font-size:17px;margin-bottom:3px}
 .hud-dialogue-topic{color:rgba(245,236,214,.6);font-family:var(--font-body);font-size:13px}
-.hud-dialogue-actions{display:flex;align-items:center;gap:10px;margin-top:12px}
+/* במסך צר שני הכפתורים לא נדחסים זה על זה — הם עוברים שורה יחד,
+   והטקסט שבתוך כל אחד נשאר על שורה אחת. */
+.hud-dialogue-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:12px}
 .hud-dialogue-count{font-size:12px;color:var(--gold-soft);margin-inline-end:auto}
 .hud-dialogue-body p{
   margin:0;font-size:14.5px;line-height:1.5;color:rgba(245,236,214,.9);
@@ -315,7 +324,7 @@ body{
    text on the panel — dimmer than the progress count beside it */
 .hud-dialogue-hint{font-size:13px;color:rgba(245,236,214,.74);letter-spacing:.02em}
 .hud-choices{display:grid;gap:7px;margin-top:12px}
-.hud-choices .hud-card-btn{text-align:start;width:100%}
+.hud-choices .hud-card-btn{display:flex;text-align:start;width:100%;white-space:normal;justify-content:flex-start}
 /* The region dialogue is a fixed teaching surface, not a bubble tethered to a
    marker: Rawi walks beside you, so anchoring it over his head would make the
    text chase him around the screen. Sits above the notebook bar. */
@@ -1241,7 +1250,7 @@ body{
 .ch1-task-question.is-interpret{margin-bottom:16px}
 .ch1-task-interpret .ch1-task-options{display:flex;flex-direction:column;gap:9px}
 .ch1-task-interpret .hud-card-btn{
-  position:static;width:100%;text-align:right;min-height:50px;
+  position:static;width:100%;text-align:right;min-height:50px;justify-content:flex-start;
   padding:12px 18px;font-size:15px;line-height:1.5;white-space:normal;
 }
 .ch1-task-interpret .hud-card-btn.is-last{border-color:rgba(232,191,118,.75)}

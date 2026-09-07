@@ -1693,6 +1693,20 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
      אחת מהן צעקה באותה עוצמה — מה שמכבה את כולן. תווית מופיעה כשהיד
      מרחפת מעל החפץ, כשהוא מוחזק, או כשעומדים לידו. אזורי ההנחה
      נדלקים כשמשהו ביד או כשמתקרבים אליהם. */
+  /* ── פריט אחד בכל פעם ────────────────────────────────────────────────
+     בתחנת הגבול צריך להרים את המטבע, לבחון אותו, להניח אותו — ורק
+     אז לגשת לחותם. עד עכשיו שני החפצים היו פעילים במקביל, ואפשר היה
+     להתחיל מהאמצע. הפעיל הוא הראשון בסדר ההצהרה שעוד לא הונח; כל
+     השאר שוכבים שם כתפאורה: בלי raycast, בלי hover, בלי תווית ובלי
+     טבעת יעד. */
+  const activeIdx = useMemo(() => {
+    if (planMode) return 0
+    if (sortMode) return -1 /* מיון: כל הפריטים פתוחים, זו הפעולה עצמה */
+    for (let i = 0; i < opts.length; i++) {
+      if (!chosen.includes(opts[i].id) && !locked(opts[i])) return i
+    }
+    return -1
+  }, [opts, chosen, planMode, sortMode, locked])
   const [hoverIdx, setHoverIdx] = useState(-1)
   const [dragIdx, setDragIdx] = useState(-1)
   const [nearIdx, setNearIdx] = useState(-1)
@@ -1744,6 +1758,8 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         if (st.placed || chosen.includes(st.id)) continue
         if (sortLocked) continue
         if (!planMode && locked(opts[i])) continue
+        /* רק מה שתורו עכשיו נתפס בכלל */
+        if (!planMode && !sortMode && activeIdx >= 0 && i !== activeIdx) continue
         const p = project(i)
         /* אזור אחיזה גדול בהרבה מהמודל. מטבע כסף הוא כמה עשרות פיקסלים
            על המסך, ו-70 פיקסלים של סובלנות הפכו את ההרמה למשחק דיוק.
@@ -1920,7 +1936,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         live.taskDrag = false
       }
     }
-  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, yAt, SURFACE_Y, DROP_NEAR, LIFT_Y, onChoose, onSortDrop])
+  }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, activeIdx, yAt, SURFACE_Y, DROP_NEAR, LIFT_Y, onChoose, onSortDrop])
 
   useFrame((_, dt) => {
     if (!state.current.length) return
@@ -2005,8 +2021,13 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       }
       nearBinRef.current = bb
     }
+    /* תקריב המשימה נכנס רק כשהאינטראקציה היא באמת התור הנוכחי.
+       קודם הוא נקבע לפי קרבה בלבד, ולכן במעבר ליד התחנה — בשלב
+       השיחה או בשלב בחינת העדויות — המצלמה כבר נכנסה לתקריב על
+       משהו שעוד אי אפשר לגעת בו. זה מה ששבר את המצלמה בתחנת הגבול
+       והפך את המשימה לכמעט בלתי אפשרית. */
     live.taskFocus =
-      atTask && !solvedTask && (planMode || sortMode || opts.length > 0) ? focusSpec : null
+      armed && atTask && !solvedTask && (planMode || sortMode || opts.length > 0) ? focusSpec : null
     const pr = pingRing.current
     if (pr) {
       const pg = ping.current
@@ -2183,7 +2204,8 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
                 fitMax={SURFACE_Y != null}
                 label={o.label}
                 showLabel={
-                  !solvedTask && !sortLocked && !st.placed &&
+                  armed && !solvedTask && !sortLocked && !st.placed &&
+                  (sortMode || activeIdx < 0 || i === activeIdx) &&
                   (hoverIdx === i || dragIdx === i || nearIdx === i)
                 }
                 taken={st.placed || chosen.includes(o.id)}
@@ -3513,6 +3535,47 @@ function glowTexture() {
    טבעת המגע הכהה שמתחת נשארת: זוהר חיבורי נעלם בשמש של צהריים,
    וכתם כהה נעלם בלילה. יחד הם נראים בשתי הסצנות. */
 type GlowRank = 'next' | 'ready' | 'done'
+/* סימן היעד הפעיל.
+   האור על הקרקע אומר „כאן יש משהו", אבל הוא שוכב על החול וקל לפספס
+   אותו בזווית שטוחה. מה שחסר הוא סימן קטן בגובה העין שאומר „זה
+   הדבר הבא" — ורק עליו.
+
+   לא תג טקסט, לא אייקון: יהלום זהוב קטן (12 ס"מ), שמרחף מעט מעל
+   החפץ, נושם לאט ומסתובב באיטיות כדי שהעין תתפוס אותו בפריפריה.
+   הוא נכנס ברוך כשמגיע התור ונעלם ברוך כשהוא נגמר, ואף פעם אין
+   יותר מאחד כזה באזור. */
+function TargetMark({ x, y, z, on }: { x: number; y: number; z: number; on: boolean }) {
+  const g = useRef<THREE.Group>(null)
+  const k = useRef(0)
+  useFrame(({ clock }, dt) => {
+    const el = g.current
+    if (!el) return
+    k.current += ((on ? 1 : 0) - k.current) * Math.min(1, dt * 3.5)
+    el.visible = k.current > 0.02
+    if (!el.visible) return
+    const t = clock.elapsedTime
+    el.scale.setScalar(k.current * (0.92 + Math.sin(t * 1.7) * 0.08))
+    el.position.y = y + 0.16 + Math.sin(t * 1.25) * 0.09 * k.current
+    el.rotation.y = t * 0.7
+  })
+  return (
+    <group ref={g} position={[x, y, z]} visible={false}>
+      {/* אוקטהדרון קטן — יהלום. חומר בסיסי, בלי תלות בתאורת האזור,
+          כדי שייראה גם בצהריים וגם בלילה. */}
+      <mesh>
+        <octahedronGeometry args={[0.12, 0]} />
+        <meshBasicMaterial color="#f3c96b" toneMapped={false} transparent opacity={0.92} />
+      </mesh>
+      {/* הילה רכה סביבו, שמרחיבה אותו בלי להגדיל את הצורה */}
+      <mesh scale={2.6}>
+        <octahedronGeometry args={[0.12, 0]} />
+        <meshBasicMaterial color="#f3c96b" toneMapped={false} transparent opacity={0.13}
+          depthWrite={false} blending={THREE.AdditiveBlending} />
+      </mesh>
+    </group>
+  )
+}
+
 function GroundGlow({ x, z, r = 1.1, live, tone = '#f0c877', rank = 'ready' }: {
   x: number; z: number; r?: number; live: Live; tone?: string; rank?: GlowRank
 }) {
@@ -3979,13 +4042,29 @@ function camelSpots(x: number, z: number, dx: number, dz: number) {
   ]
 }
 
-/* מכשולים שנולדים ברכיבים ולא ב-layout: הלפיד של תימן, שולחן הראיות
-   ולוח בית'רב. גמל שעובר דרכם נראה בדיוק כמו באג, והם לא היו ברשימה. */
+/* מה שגמל צריך להתחמק ממנו, ואינו ב-WORLD.colliders.
+
+   שני מקורות, ושניהם נמצאו אחרי שהמשתמשת ראתה גמל נכנס בלפיד:
+
+   1. פרופים עם ‎`r: 0`. ‎`buildWorld` מסנן אותם מרשימת הקוליידרים
+      בכוונה — עמוד בלתי נראה מתחת לכל שיח הוא מה שאטם פעם את שער
+      הגבול. אבל ארבעת הלפידים במחנה הלילה מוגדרים כך, ולכן מתכנן
+      המסלול לא ידע שהם קיימים בכלל. לגמל הם מכשול גם אם לשחקן לא.
+   2. מה שנולד ברכיבים: הלפיד של תימן, שולחן הראיות, לוח בית'רב. */
+const CAMEL_AVOID = /torch|firewood|firepit|waymark|trough|well|crate|jars|bigjar|basket|sackpile|amphora|claypot|fodder|cart|toll-scale|altar|ansab|idol|stone-bench/
 const HAND_OBSTACLES: Collider[] = (() => {
+  const out: Collider[] = []
+  for (const p of WORLD.layout.props) {
+    if (!CAMEL_AVOID.test(p.model)) continue
+    /* רדיוס אמיתי לגוף שאין לו קוליידר: חצי הגובה, בגבולות סבירים */
+    const r = p.r && p.r > 0 ? p.r : Math.max(0.5, Math.min(1.2, (p.h ?? 1) * 0.35))
+    out.push({ x: p.x, z: p.z, r })
+  }
   const t = REGION_TASK
-  if (!t) return []
-  const out: Collider[] = [{ x: t.x, z: t.z, r: Math.max(1.4, t.h * 0.8) }]
-  if (REGION.id === 'yemen-heights') out.push({ x: t.x + 2.3, z: t.z + 1.5, r: 1.0 })
+  if (t) {
+    out.push({ x: t.x, z: t.z, r: Math.max(1.4, t.h * 0.8) })
+    if (REGION.id === 'yemen-heights') out.push({ x: t.x + 2.3, z: t.z + 1.5, r: 1.0 })
+  }
   return out
 })()
 
@@ -4048,28 +4127,74 @@ function clearWalk(cx: number, cz: number, rx: number, rz: number, taken: Collid
 
 type HerdPath = { cx: number; cz: number; rx: number; rz: number; pts: { x: number; z: number }[] }
 
-/* מסלולי העדר — מתוכננים יחד, ופעם אחת.
-   כל גמל נבדק גם מול המסלולים שכבר נבחרו, נקודה מול נקודה: שתי
-   אליפסות יכולות להיחתך גם כשמרכזיהן רחוקים, וזה מה שהעמיד שני
-   גמלים באותו מקום בדרך ההעמסה. */
+/* מסלולי העדר — מתוכננים יחד, ונבדקים בזמן.
+
+   הבדיקה הקודמת השוותה נקודות של אליפסה מול נקודות של אליפסה, וזה
+   פספס את מה שבאמת קורה: שני גמלים יכולים לחלוק קטע מסלול ולהגיע
+   אליו באותו רגע. במחנה הלילה זה קרה בפועל — 0.79 מטר של חדירה
+   בכ-25% מן ההקפה, וזה מה שנראה בדפדפן.
+
+   עכשיו: אחרי התכנון רצה סימולציה של הקפה שלמה בצעדי זמן, ובכל צעד
+   נבדקים שלושת עיגולי הגוף של כל גמל מול העולם ומול כל גמל אחר. גמל
+   שנוגע ולו פעם אחת — עוצר.
+
+   „גמל עומד" אינו כישלון: מחנה שבו חלק מהגמלים רובצים הוא מחנה. גמל
+   שעובר דרך לפיד הוא באג. */
 const HERD_PATHS: HerdPath[] = (() => {
   const out: HerdPath[] = []
   const parked: Collider[] = []
-  const crosses = (pts: { x: number; z: number }[]) =>
-    out.some((p) => p.pts.some((a) => pts.some((b) => Math.hypot(a.x - b.x, a.z - b.z) < CAMEL_LEN * 2 + CAMEL_W)))
   for (const h of HERD) {
     let p = clearWalk(h.cx, h.cz, h.rx, h.rz, parked)
-    if (p.rx > 0 && crosses(p.pts)) {
-      /* המסלול נחתך במסלול קיים — נסה טבעת רחבה יותר, ואז צרה יותר */
-      const alts = [
-        clearWalk(h.cx, h.cz, h.rx + 2.6, h.rz + 1.9, parked),
-        clearWalk(h.cx, h.cz, h.rx * 0.55, h.rz * 0.55, parked),
-      ]
-      const good = alts.find((a) => a.rx > 0 && !crosses(a.pts))
-      p = good ?? clearWalk(h.cx, h.cz, 0, 0, parked)
-    }
     if (p.rx === 0 && p.rz === 0) parked.push({ x: p.cx, z: p.cz, r: CAMEL_LEN + CAMEL_W })
     out.push(p)
+  }
+
+  /* איפה יעמוד הגמל i בזמן t, ובאיזה כיוון */
+  const at = (i: number, t: number) => {
+    const p = out[i]
+    const h = HERD[i]
+    if (p.rx === 0 && p.rz === 0) return { x: p.cx, z: p.cz, dx: Math.sin(h.phase), dz: Math.cos(h.phase) }
+    const a = t * h.speed + h.phase
+    return {
+      x: p.cx + Math.cos(a) * p.rx,
+      z: p.cz + Math.sin(a) * p.rz,
+      dx: -Math.sin(a) * p.rx * Math.sign(h.speed),
+      dz: Math.cos(a) * p.rz * Math.sign(h.speed),
+    }
+  }
+  const blockers = [...WORLD.colliders, ...HAND_OBSTACLES]
+  /* הקפה שלמה של האיטי שבעדר, ב-240 צעדים */
+  const slowest = Math.min(...HERD.map((h) => Math.abs(h.speed)).filter((v) => v > 0), 0.05)
+  const span = (Math.PI * 2) / slowest
+  const STEPS = 240
+  const dirty = new Set<number>()
+  for (let k = 0; k < STEPS; k++) {
+    const t = (k / STEPS) * span
+    const bodies = out.map((_, i) => camelSpots(at(i, t).x, at(i, t).z, at(i, t).dx, at(i, t).dz))
+    for (let i = 0; i < bodies.length; i++) {
+      if (out[i].rx === 0 && out[i].rz === 0) continue
+      for (const s of bodies[i]) {
+        for (const c of blockers) {
+          if (Math.hypot(c.x - s.x, c.z - s.z) < c.r + s.r) { dirty.add(i); break }
+        }
+        for (let j = 0; j < bodies.length; j++) {
+          if (j === i) continue
+          for (const s2 of bodies[j]) {
+            if (Math.hypot(s2.x - s.x, s2.z - s.z) < s.r + s2.r) { dirty.add(i > j ? i : j); break }
+          }
+        }
+      }
+    }
+  }
+  /* מי שנמצא מלוכלך — עוצר במקום שבו הוא כרגע, ורק אם המקום פנוי */
+  for (const i of dirty) {
+    const home = at(i, 0)
+    const stop = clearWalk(home.x, home.z, 0, 0, parked)
+    out[i] = stop
+    parked.push({ x: stop.cx, z: stop.cz, r: CAMEL_LEN + CAMEL_W })
+  }
+  if (process.env.NODE_ENV !== 'production' && dirty.size) {
+    console.info(`[ch1 herd] ${REGION.id}: ${dirty.size} מתוך ${HERD.length} גמלים נעצרו — מסלולם לא היה נקי`)
   }
   return out
 })()
@@ -4157,8 +4282,12 @@ function WanderingCamel({ live, index, speed, phase, h }: {
     }
   })
 
+  /* השם אינו קישוט: ביקורת החפיפות הולכת על גרף הסצנה ומודדת רק
+     עצמים ששמם מתחיל ב-prop/cast/find/task. לגמלים הנודדים לא היה שם
+     כלל — כלומר הם מעולם לא נמדדו, ו"אפס חפיפות גמלים לאורך שתי
+     הקפות" מדד בדיוק כלום. זה מה שהחזיק את הדיווח השגוי. */
   return (
-    <group ref={g}>
+    <group ref={g} name={`camel:${index}`}>
       <primitive object={model} />
     </group>
   )
@@ -4500,6 +4629,20 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       {REGION_TASK && (
         <GroundGlow x={REGION_TASK.x} z={REGION_TASK.z} r={1.6} live={live}
           rank={stage === 'act' || stage === 'interpret' ? 'next' : 'done'} />
+      )}
+      {/* וסימן אחד, מעל היעד הפעיל בלבד. בשלב הבחינה הוא יושב על
+          העדות הבאה בתור; בשלב הפעולה והפירוש — על התחנה. */}
+      {stage === 'look' && nextSight && (() => {
+        const fd = REGION_FINDS.find((f) => f.id === nextSight)
+        return fd ? <TargetMark x={fd.x} y={groundYAt(fd.x, fd.z) + fd.h + 0.3} z={fd.z} on /> : null
+      })()}
+      {REGION_TASK && (
+        <TargetMark
+          x={REGION_TASK.x}
+          y={groundYAt(REGION_TASK.x, REGION_TASK.z) + REGION_TASK.h + 0.32}
+          z={REGION_TASK.z}
+          on={stage === 'act' || stage === 'interpret'}
+        />
       )}
       {/* תימן היא התחנה הראשונה, והפעולה הראשונה בפרק צריכה להיות של
           היד ולא של העכבר על כפתור: גוררים לפיד אל המצבה עד שהחקיקה
@@ -4984,7 +5127,7 @@ function DevAudit() {
       const items: { name: string; box: THREE.Box3; size: THREE.Vector3 }[] = []
       scene.updateMatrixWorld(true)
       scene.traverse((o) => {
-        if (!o.name || !/^(prop|cast|find|task):/.test(o.name)) return
+        if (!o.name || !/^(prop|cast|find|task|camel):/.test(o.name)) return
         /* חפצים שהשחקן מרים ומניח — הלפיד בתימן, שלוש הראיות על שולחן
            מכה — יושבים על רהיט ונעים ביד. „חפיפה“ שלהם עם השולחן היא
            מה שהנחה על שולחן אומרת, ו„ריחוף“ שלהם הוא גובה השולחן.

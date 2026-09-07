@@ -1521,7 +1521,7 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 @media (min-width:900px){
   .bleed-aside{
     display:grid;
-    grid-template-columns:minmax(0,1fr) clamp(300px,34%,480px);
+    grid-template-columns:minmax(0,1fr) clamp(320px,44%,540px);
     gap:0 clamp(18px,2.6vw,40px);
     /* the art column reaches into the page gutter instead of stopping at it */
     margin-inline-end:calc(-1 * var(--content-gutter));
@@ -1531,18 +1531,19 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
      art took row 1 / column 2 and the prose was pushed to row 2, opening a gap
      exactly as tall as the painting. Naming the row on both is the whole fix. */
   .bleed-aside-body{grid-column:1;grid-row:1}
-  /* THE BOX HUGS THE PAINTING rather than reserving a slab of column for it.
-     A cutout has no frame, so any height the box does not fill is not white
-     space in a figure — it is a hole in the page, and the sticky offset then
-     parks the painting against nothing. `height:auto` also means one class
-     serves a tall painting and a wide one without either being letterboxed. */
+  /* THE PAINTING RUNS THE LENGTH OF THE PROSE, which is what chapter 6 does:
+     its minaret is not a picture beside a paragraph, it is a column of paint
+     the whole section is read against. So the box stretches to the row — the
+     prose sets the height — and the painting is contained inside it, centred,
+     never cropped. An earlier build hugged the image instead and sat it
+     sticky; a short painting then floated in the middle of a long run and read
+     as an ornament that had lost its place. */
   .bleed-aside-art{
-    display:block;grid-column:2;grid-row:1;align-self:start;
-    position:sticky;top:calc(var(--header-height) + clamp(24px,4vh,54px));
+    display:block;grid-column:2;grid-row:1;align-self:stretch;
     z-index:0;pointer-events:none;user-select:none;
   }
   .bleed-aside-art img{
-    display:block;width:100%;height:auto;
+    display:block;width:100%;height:100%;object-fit:contain;object-position:center;
     /* a whisper of a fade at the foot, so the wash melts into the paper
        instead of ending on a cut line */
     -webkit-mask-image:linear-gradient(to top,transparent 0,#000 5%);
