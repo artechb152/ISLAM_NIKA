@@ -251,7 +251,7 @@ export function Notebook({ seen, found, solved, onClose }: {
                   </div>
                 ) : (
                   <p className="nb-empty">
-                    עוד לא נאספה עדות. חפצים שאפשר להביט בהם מקרוב מסומנים בנקודת זהב — F.
+                    עוד לא נאספה עדות. חפצים שאפשר להביט בהם מקרוב מסומנים באור על הקרקע — התקרבו ולחצו E.
                   </p>
                 )}
               </section>

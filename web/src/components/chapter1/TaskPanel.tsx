@@ -70,7 +70,11 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
       <div className="ch1-task-card">
         <p className="ch1-task-eyebrow">{task.asker}</p>
         <h3 id="ch1-task-title">{task.title}</h3>
-        <p className="ch1-task-question">{task.question}</p>
+        {/* שאלת הפעולה שייכת לשלב הפעולה. בשלב הפירוש היא עמדה מעל
+            שאלת הפירוש, ושתי שאלות זו מעל זו נקראות כשאלה אחת מבולבלת. */}
+        {!(phase === 'interpret' && task.interpret) && (
+          <p className="ch1-task-question">{task.question}</p>
+        )}
 
         {phase === 'interpret' && task.interpret ? (
           /* ── הפירוש ─────────────────────────────────────────────────

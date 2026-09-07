@@ -354,6 +354,9 @@
       ],
       "core": [
         "jewish-arrival",
+        "jewish-neighbors",
+        "jewish-difference",
+        "jewish-messiah",
         "task-market"
       ]
     },
@@ -453,6 +456,7 @@
       "core": [
         "monk-christianity",
         "monk-influence",
+        "monk-practices",
         "task-monk"
       ]
     },
@@ -640,7 +644,8 @@
       "core": [
         "merchant-idols",
         "abraha-story",
-        "birds-cinematic"
+        "birds-cinematic",
+        "task-stones"
       ]
     },
     {
