@@ -4586,6 +4586,21 @@ function coreHoldBeat(missing: string[]): Encounter {
    ראאווי עוצר פעם אחת בשער, אומר מה פספסנו, ומשאיר את ההכרעה לשחקן:
    לחזור ולחקור, או להתקדם. הוא אינו חוסם — הוא רק לא נותן לזה לקרות
    בשתיקה. */
+/* ── חזרה אחורה באמצע תחנה ────────────────────────────────────────────
+   שער אחורי פתוח תמיד, וזה נכון: אי אפשר להיתקע. אבל הוא גם היה שקט —
+   מי שהתרחק כדי לעקוף בניין ונגע בו עבר אזור, ומצב התחנה נפתח מחדש
+   מהתחלה. נמדד: במנזר, בדרך אל עדות שיושבת מאחורי בית, הבדיקה מצאה
+   את עצמה בית'רב. שואלים פעם אחת, ואז השער פתוח כרגיל. */
+function backBeat(label: string): Encounter {
+  return {
+    id: `rawi-back-${REGION.id}`,
+    speaker: 'rawi',
+    notebook: 0,
+    gesture: 'talk-nod',
+    lines: [{ source: '', text: `עוד לא סיימנו כאן. ${label}? נחזור מתי שתרצה — אבל נשלים קודם.` }],
+  }
+}
+
 function missedBeat(finds: string[], talks: string[]): Encounter {
   const names = [
     ...finds.map((id) => REGION_FINDS.find((f) => f.id === id)?.title ?? 'עדות על הדרך'),
@@ -5892,6 +5907,7 @@ export default function Game() {
   }
   /** נשאל פעם אחת לביקור, ולא בכל צעד בתוך השער */
   const askedMissed = useRef(false)
+  const askedBack = useRef(false)
   /** לאן היינו בדרך כשראאווי עצר לשאול */
   const pendingGate = useRef<{ to: string; label: string } | null>(null)
 
@@ -5931,6 +5947,15 @@ export default function Game() {
         coreHeldAt.current = now
         cue('ui')
         setEncounter(coreHoldBeat(coreMissingRef.current))
+        return
+      }
+      /* אחורה באמצע תחנה — שואלים פעם אחת. השער נשאר פתוח. */
+      if (to !== ONWARD && coreMissingRef.current.length > 0 && !askedBack.current) {
+        if (encounterRef.current) return
+        askedBack.current = true
+        pendingGate.current = { to, label }
+        cue('ui')
+        setEncounter(backBeat(label))
         return
       }
       /* הליבה נעשתה, אבל לא הכול. שואלים פעם אחת, ואז השער פתוח —
@@ -6779,7 +6804,17 @@ export default function Game() {
             }
             /* שיחת „פספסנו" נגמרת בהכרעה: להישאר ולחקור, או להתקדם */
             decide={
-              encounter.id === `rawi-missed-${REGION.id}`
+              encounter.id === `rawi-back-${REGION.id}`
+                ? {
+                    stay: 'נישאר ונשלים',
+                    go: 'בכל זאת אחורה ←',
+                    onGo: () => {
+                      const g = pendingGate.current
+                      setEncounter(null)
+                      if (g) travel(g.to, g.label)
+                    },
+                  }
+                : encounter.id === `rawi-missed-${REGION.id}`
                 ? {
                     stay: 'נמשיך לחקור',
                     go: 'להתקדם ←',
