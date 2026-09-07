@@ -24,7 +24,7 @@ export interface TaskOption {
   prop?: { model: string; h: number; tint?: string }
   /** true for the answer the source text supports (`choose` tasks) */
   right?: boolean
-  /** present tasks: locked until this evidence was picked up (F) */
+  /** present tasks: locked until this evidence was picked up with E */
   needsFind?: string
   /** הצבה בעולם: יעד ההנחה של הפרופ הזה, כהיסט מהתחנה (מטרים).
       בלעדיו — היעד הוא התחנה עצמה. במכה כל חפץ פולחן מתיישב בעמדה
@@ -73,7 +73,7 @@ export interface Task {
   /** `sort` only: the two sides. */
   bins?: TaskBin[]
   /** observe tasks: the judging stays locked until every one of these
-      sights was actually looked at (F). You judge what you saw. */
+      sights was actually looked at with E. You judge what you saw. */
   needsFinds?: string[]
   /** where the station stands, in scene metres */
   x: number
@@ -158,7 +158,7 @@ export const TASKS: Task[] = [
     asker: 'שליח האימפריה',
     /* לא עוד חידון אחרי הסבר: השחקן מציג לשליח את מה שאסף מהקרקע,
        והמסקנה — לאן הדרך פונה — נבנית מהראיה עצמה. אופציה נעולה עד
-       שהעדות המתאימה נאספה (F), כי אי אפשר להציג מה שאין ביד. */
+       שהעדות המתאימה נאספה ב-E, כי אי אפשר להציג מה שאין ביד. */
     hint: 'קחו ביד את הראיה שאספתם וגררו אותה אל כף המאזניים',
     question:
       'אספתם דברים מהדרך — ראיתי. הניחו אותם על המאזניים, אחד־אחד, ' +
@@ -434,7 +434,7 @@ export const TASKS: Task[] = [
     id: 'task-stones',
     region: 'mecca',
     /* גילוי לפני שיפוט: שלושת חפצי הפולחן — האבן הניצבת, המטבע בכיכר
-       ואשפת החיצים — נראים קודם (F), ורק אז שופטים. */
+       ואשפת החיצים — נראים קודם ב-E, ורק אז שופטים. */
     needsFinds: ['find-ansab', 'find-mecca-coin', 'find-divination'],
     x: -1.8, z: -12.6, model: 'ansab', h: 1.6, ry: 0.2,
     prompt: 'עמדו מול האבנים',

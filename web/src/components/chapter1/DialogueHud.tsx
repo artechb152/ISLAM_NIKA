@@ -44,6 +44,17 @@ export function DialogueHud({
   onFinished: (e: Encounter) => void
   onClose: () => void
 }) {
+  /* כל ה-state כאן שייך לשיחה אחת ולא לרכיב.
+     הרכיב נשאר מותקן כשעוברים ממפגש למפגש, ולכן `i`, `revealed`,
+     `asked`, `interlude` ו-`filed` עברו ביניהם. התוצאה, בסדר חומרתה:
+       · שיחה חדשה שקצרה מקודמתה נפתחה על שורתה האחרונה (`i` נחתך
+         כלפי מטה ב-Math.min), ולכן היא נראתה כמי שנסגרה מיד;
+       · `filed` שנשאר true פירושו ש-onFinished לא נקרא — כלומר
+         המפגש כלל לא נרשם במחברת;
+       · „המשך" נראה כאילו לא עשה דבר, כי כבר היינו בסוף.
+     הקורא ב-Game.tsx מעביר עכשיו key={encounter.id}, ולכן הרכיב
+     נטען מחדש בכל מפגש. האיפוס המפורש כאן הוא רשת שנייה, למקרה
+     שמישהו ישכח את ה-key. */
   const steps = useMemo(() => buildSteps(encounter), [encounter])
   const [i, setI] = useState(0)
   const [revealed, setRevealed] = useState(0)
@@ -52,6 +63,16 @@ export function DialogueHud({
   const [interlude, setInterlude] = useState<Step[] | null>(null)
   const [filed, setFiled] = useState(false)
   const timer = useRef<number | null>(null)
+
+  const lastId = useRef(encounter.id)
+  if (lastId.current !== encounter.id) {
+    lastId.current = encounter.id
+    setI(0)
+    setRevealed(0)
+    setAsked([])
+    setInterlude(null)
+    setFiled(false)
+  }
 
   const active = interlude ?? steps
   const step = active[Math.min(i, active.length - 1)]
@@ -117,7 +138,7 @@ export function DialogueHud({
       return
     }
     if (i < steps.length - 1) setI(i + 1)
-  }, [complete, full.length, i, interlude, steps.length])
+  }, [full.length, i, interlude, steps.length])
 
   const pickChoice = useCallback((c: Choice) => {
     setAsked((a) => [...a, c.prompt])
@@ -259,6 +280,21 @@ export function DialogueHud({
           <span className="hud-dialogue-count">
             {showDone && encounter.notebook > 0 ? '✓ נרשם במחברת' : ''}
           </span>
+          {/* „המשך" אמר את אותו דבר באמצע שיחה ובסופה, ולכן אי אפשר
+              היה לדעת אם עוד נשאר משהו לשמוע. שני כפתורים, שני
+              משפטים: בתוך הנושא מתקדמים לשורה, ובסופו סוגרים. */}
+          {!showChoices && !showDone && (
+            <button
+              type="button"
+              className="hud-card-btn"
+              onClick={(ev) => {
+                ev.stopPropagation()
+                advance()
+              }}
+            >
+              {complete ? 'לשורה הבאה ←' : 'להשלמת השורה'}
+            </button>
+          )}
           {showDone && (
             <button
               className="hud-card-btn is-primary"
@@ -267,16 +303,14 @@ export function DialogueHud({
                 onClose()
               }}
             >
-              המשך ←
+              סיום שיחה
             </button>
           )}
           {/* זו ההנחיה היחידה שאומרת לשחקן איך להמשיך, והיא הייתה
               הטקסט הכי חיוור בחלונית. „לחיצה משלימה“ גם נקרא כמו
               „הלחיצה היא משלימה“ ולא כמו הוראה. */}
           {!showChoices && !showDone && (
-            <span className="hud-dialogue-hint">
-              {complete ? 'רווח או לחיצה — להמשך' : 'לחצו להשלמת השורה'}
-            </span>
+            <span className="hud-dialogue-hint">רווח או לחיצה</span>
           )}
         </div>
       </div>

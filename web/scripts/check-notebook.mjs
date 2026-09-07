@@ -260,7 +260,7 @@ for (const region of ORDER) {
       log.push({ region, what: 'find ' + f.id, status: 'OUT OF RANGE' })
       continue
     }
-    await pg.keyboard.press('KeyF')
+    await pg.keyboard.press('KeyE')
     /* 9 s was the budget here, and under SwiftShader Yemen Heights renders at
        barely more than a frame a second — nine frames to mount a card, in the
        one region that also decodes the opening film. It failed there on run
@@ -272,7 +272,7 @@ for (const region of ORDER) {
        שחקן אמיתי פשוט לוחץ שוב, וגם הרתמה. */
     if (!opened) {
       await wait(900)
-      await pg.keyboard.press('KeyF')
+      await pg.keyboard.press('KeyE')
       opened = await until(() => !!document.querySelector('.ch1-find'), 14000)
     }
     await dismiss()
