@@ -2381,7 +2381,7 @@ function occlude(ex: number, ez: number, ux: number, uz: number, max: number, fl
   for (const c of [...STATIC_COLLIDERS, ...LIVE_DYNAMIC]) {
     const fx = ex - c.x
     const fz = ez - c.z
-    const r = c.r + 0.12
+    const r = c.r + 0.35
     const b = fx * ux + fz * uz
     const cc = fx * fx + fz * fz - r * r
     const disc = b * b - cc
@@ -2710,14 +2710,27 @@ function Player({ live }: { live: Live }) {
 
        הקוליידרים הם עיגולים במישור, ולכן זו בדיקת קרן־מול־עיגול ולא
        raycast של סצנה — זול מספיק לכל פריים. */
+    /* רצפת המרחק הייתה 1.9 מטר, והיא הייתה מוחלטת: כשמשהו עמד קרוב
+       מזה מאחורי השחקן, המצלמה פשוט נשארה בתוכו. נמדד בהליכה רגילה
+       ברמות תימן — 33 ס"מ בתוך קוליידר ברדיוס 1.14 (scratchpad/
+       walk-camera.mjs), כלומר זה מצב שמגיעים אליו ברגל ולא רק
+       בטלפורט.
+
+       שני שינויים. הרצפה יורדת ל-1.15, כי מצלמה קרובה עדיפה על
+       מצלמה בתוך אבן; והכתף עולה ככל שהיא נדחקת פנימה, כך שבמקום
+       להיכנס למכשול היא מביטה מעליו. זו התנהגות מוכרת של מצלמת
+       גוף-שלישי, והיא גם הסיבה שהריפוד גדל מ-12 ל-35 ס"מ: המצלמה
+       צריכה לעצור לפני פני האבן, לא עליהם. */
     const ox = camOffset.x / CAM_DIST
     const oz = camOffset.z / CAM_DIST
-    const want = occlude(live.player.x, live.player.z, ox, oz, CAM_DIST, 1.9)
+    const want = occlude(live.player.x, live.player.z, ox, oz, CAM_DIST, 1.15)
     const camK = want < camDist.current ? 12 : 2.6
     camDist.current += (want - camDist.current) * Math.min(1, dt * camK)
     const dist = camDist.current
     camOffset.multiplyScalar(dist / CAM_DIST)
-    camOffset.y = 2.45 - rb * 0.15 - (CAM_DIST - dist) * 0.15 // dip when tucked in, and when running
+    /** 0 כשהמצלמה חופשית, 1 כשהיא נדחקה עד הסוף */
+    const tucked = Math.max(0, Math.min(1, (CAM_DIST - dist) / (CAM_DIST - 1.15)))
+    camOffset.y = 2.45 - rb * 0.15 + tucked * 1.25
 
     const target = live.player.clone().add(camOffset)
     /* עומדים במקום, והפריים קפוא לגמרי: המצלמה נעולה, השחקן סטטי,
