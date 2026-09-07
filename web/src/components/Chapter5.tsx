@@ -43,6 +43,7 @@ import {
   completedSections,
   markContentComplete,
   markSectionDone,
+  practiceComplete,
   resumeSectionId,
   saveCurrentSection,
   SECTION_ORDER,
@@ -303,6 +304,13 @@ export default function Chapter5() {
     return () => io.disconnect()
   }, [])
 
+  /* the closing button carries a quiet „הושלם" once the practice has been finished; it still
+     links there either way, because re-entering a finished practice must never be blocked.
+     Read in an effect, not during render: on the server there is no localStorage, and a chip
+     that exists in the HTML but not in the browser (or the reverse) is a hydration mismatch. */
+  const [practiceDone, setPracticeDone] = useState(false)
+  useEffect(() => { setPracticeDone(practiceComplete()) }, [])
+
   useEffect(() => {
     const root = articleRef.current
     if (!root) return
@@ -553,9 +561,16 @@ export default function Chapter5() {
                 <T refs={['§9.a']} className="ch5-verdict" />
               </Section>
 
-              <div className="chapter-end" ref={endRef} id="chapter-end">
+              {/* the close, as chapter 6 closes: the chapter hands off to its practice and to
+                  nothing else. Reaching this block records the READING; the chapter itself is
+                  completed on the practice page, which is also where the route back to the
+                  chapters list lives. The second, quiet „לכל פרקי הלמידה" button that used to
+                  stand here is gone — offering a way out beside the way on invites the reader
+                  to leave one screen before the chapter ends, and the masthead logo already
+                  goes to /chapters from every scroll position. */}
+              <div className="chapter-end" ref={endRef} id="chapter-end" data-reveal>
                 <Link className="chapter-end-back" href="/chapter5/practice">לתרגול המסכם</Link>
-                <Link className="chapter-end-back is-quiet" href="/chapters">לכל פרקי הלמידה</Link>
+                {practiceDone && <span className="chapter-end-done">הושלם</span>}
               </div>
             </main>
           </div>

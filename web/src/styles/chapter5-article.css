@@ -314,10 +314,10 @@
 }
 .ch5-close{margin-top:var(--flow)!important}
 
-.chapter-end-back.is-quiet{
-  background:transparent;color:var(--maroon);border:1px solid var(--edge);box-shadow:none;
-}
-.chapter-end-back.is-quiet:hover{background:rgba(165,50,47,.08);transform:none}
+/* NO `.chapter-end` RULES HERE, AND NONE MAY BE ADDED. The closing block — its
+   layout, its button and the „הושלם" chip — is chapter 6's, and this chapter now
+   uses it unchanged. The ghost-button variant that stood here dressed a second
+   way out that no longer exists. */
 
 /* ---------- narrow ---------- */
 @media (max-width:900px){
