@@ -1557,7 +1557,11 @@ const DROP_R = 2.1
 function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, onSortDrop }: {
   live: Live
   atTask: boolean
-  /** האינטראקציה נפתחת רק אחרי שיחת ההקדמה של התחנה */
+  /** האינטראקציה היא התור הנוכחי — שלב הפעולה או שלב הפירוש בלבד.
+      קודם זה היה „אחרי שיחת ההקדמה", וזה כלל גם את שלב איסוף
+      העדויות: המצלמה נכנסה לתקריב המשימה בזמן שהלומד עוד מסתובב
+      ומרים דברים. במעבר הצר, שבו התחנה יושבת לרגליו של ראש השבט,
+      זה קרה בכל פעם שניגשים לדבר איתו. */
   armed: boolean
   chosen: string[]
   solvedTask: boolean
@@ -5311,6 +5315,23 @@ export default function Game() {
   /* ההשלמה נבדקת כאן ולא בתוך ה-updater: setState בתוך updater רץ בפאזת
      הרנדור (וב-StrictMode פעמיים), וזה בדיוק ה-"Issue" האדום שקפץ ברגע
      שפתרו משימה. אפקט אחד לשני מסלולי המענה. */
+  /* מה נחשב „הפעולה הושלמה".
+     ב-`present` הפעולה היא להציג את מה שאספת — את *כולו*. עד עכשיו
+     נספרו רק האופציות שסומנו `right`, ולכן בתחנת הגבול די היה
+     להניח את המטבע: החותם מעולם לא נדרש, והרצף שהמשתמשת ביקשה
+     (מטבע ← חותם ← פירוש) לא התקיים. כל פריט שיש לו גוף בעולם
+     צריך להימסר. */
+  const placedAll = useMemo(() => {
+    if (!REGION_TASK) return false
+    const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
+    const present = REGION_TASK.kind === 'present'
+    const needed = (sortLike || present
+      ? REGION_TASK.options.filter((o) => o.prop)
+      : REGION_TASK.options.filter((o) => o.right)
+    ).map((o) => o.id)
+    return needed.length > 0 && needed.every((n) => taskChosen.includes(n))
+  }, [taskChosen])
+
   /* ── מתי התחנה נסגרת ─────────────────────────────────────────────────
      בתחנה שיש לה שלב פירוש, ההנחה מסיימת את הפעולה בלבד. מה שסוגר
      היא התשובה על „מה זה אומר". בלי זה השניים היו אותו אירוע: מי
@@ -5327,15 +5348,12 @@ export default function Game() {
   }, [setTaskLast, setTaskLastOk])
   useEffect(() => {
     if (!REGION_TASK || taskSolved) return
-    const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
-    const needed = (sortLike ? REGION_TASK.options : REGION_TASK.options.filter((o) => o.right)).map((o) => o.id)
-    const placed = needed.length > 0 && needed.every((n) => taskChosen.includes(n))
-    if (!placed) return
+    if (!placedAll) return
     if (REGION_TASK.interpret && !interpreted) return
     setSolved(recordTask(REGION_TASK.id).solved)
     setTaskNote({ who: 'רָאוִי', text: REGION_TASK.done, ok: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskChosen, taskSolved, interpreted])
+  }, [taskChosen, taskSolved, interpreted, placedAll])
   const chooseTask = useCallback(
     (id: string) => {
       if (!REGION_TASK) return
@@ -5343,7 +5361,9 @@ export default function Game() {
       if (!opt) return
       setTaskLast(id)
       setTaskLastOk(!!opt.right)
-      if (!opt.right) return
+      /* ב-`present` שתי ההצגות נכונות כפעולה — כל אחת מראה דבר אחר,
+         וההערה שלה היא מה שמלמד. „לא נכון" שמור למשימות בחירה. */
+      if (!opt.right && REGION_TASK.kind !== 'present') return
       recordChoice(REGION_TASK.id, id)
       setTaskChosen((prev) => (prev.includes(id) ? prev : [...prev, id]))
     },
@@ -5504,12 +5524,6 @@ export default function Game() {
      כל החפצים שהתחנה מבקשת כבר מונחים במקומם (`taskChosen`), וזה קורה
      לפני ש-`solved` נרשם. */
   const taskSolvedNow = !!REGION_TASK && solved.includes(REGION_TASK.id)
-  const placedAll = useMemo(() => {
-    if (!REGION_TASK) return false
-    const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
-    const needed = (sortLike ? REGION_TASK.options : REGION_TASK.options.filter((o) => o.right)).map((o) => o.id)
-    return needed.length > 0 && needed.every((n) => taskChosen.includes(n))
-  }, [taskChosen])
   const introSeen = !INTRO_ID || seen.includes(INTRO_ID)
   /* `REGION_TASK!` כאן היה סימן קריאה על ערך שבאמת יכול להיות null:
      לאזור הסיום אין משימה כלל, ולכן הוא קרס בטעינה —
@@ -6241,7 +6255,7 @@ export default function Game() {
               <TaskProps
                 live={live}
                 atTask={atTask}
-                armed={stage !== 'brief'}
+                armed={stage === 'act' || stage === 'interpret'}
                 chosen={taskChosen}
                 solvedTask={taskSolved}
                 found={found}
