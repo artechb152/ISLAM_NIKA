@@ -129,10 +129,15 @@ export default function Groups({
     /* ONE CIRCLE, ONE RADIUS. The ring is laid out in pixels rather than in per
        cent so that it is a real circle on a picture that is wider than it is
        tall: every face is the same distance from the middle of the oasis, and
-       therefore every connector is the same length. The radius clears the
-       painting's dense middle and still keeps the faces over it. */
+       therefore every connector is the same length.
+
+       THE RADIUS PUTS THE FACES OFF THE PAINTING, NOT ON IT. At 0.46 they sat
+       over the town, and once the town was repainted pale and warm the two
+       read as one texture — a face lost its edge against the roofs behind it.
+       They sit past the dense middle now, out where the wash has already
+       fallen away, and the connector line is what says they belong to it. */
     const size = Math.min(t.width, t.height)
-    const R = size * 0.46
+    const R = size * 0.62
     const half = (dots.current[0]?.getBoundingClientRect().width ?? 110) / 2
 
     const nextSpots: Spot[] = []
@@ -221,7 +226,7 @@ export default function Groups({
       <div className="ch4-who-body">
         <div className="ch4-who-stage" ref={stage}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="ch4-who-town" ref={town} src={`/assets/chapter4/${city}.jpg`} alt={cityAlt} />
+          <img className="ch4-who-town" ref={town} src={`/assets/chapter4/${city}.webp`} alt={cityAlt} />
 
           <svg className="ch4-who-web" viewBox={`0 0 ${box.w || 1} ${box.h || 1}`} aria-hidden="true">
             {lines.map((l, i) => (

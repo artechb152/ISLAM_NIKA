@@ -220,11 +220,17 @@ const PROC_VERTEX = /* glsl */ `
   float chest = exp(-pow((h - 0.72) * 5.0, 2.0));
   transformed.z += sin(t * 1.6) * 0.024 * chest;
   transformed.y += sin(t * 1.6) * 0.015 * chest;
-  // שכבת הדיבור — נדנוד ראש ותנועת פלג גוף עליון
+  /* ── שכבת הדיבור ────────────────────────────────────────────────
+     כאן ישב abs(sin(t * 3.4)). גל מיושר אינו נדנוד: יש לו קצה חד
+     בכל מעבר אפס, ולכן הראש ניתר כפעמיים בשנייה במקום לנוע. ברוחב
+     4.2 ס״מ על דמות בגובה 1.70 זה מה שנראה — ראש מקפץ.
+     עכשיו: סינוס אחד, בלי ערך מוחלט, בקצב אחד לכל שלוש הצירים, כך
+     שהתנועה נקראת כתנועה אחת של מי שמדבר ולא כשלוש תנודות זרות. */
   float head = smoothstep(0.80, 0.97, h);
-  transformed.y -= abs(sin(t * 3.4)) * 0.042 * head * uTalk;
-  transformed.x += sin(t * 2.6 + 1.0) * 0.048 * h * h * uTalk;
-  transformed.z += sin(t * 3.0) * 0.034 * head * uTalk;
+  float talkT = t * 1.9;
+  transformed.y += sin(talkT) * 0.011 * head * uTalk;
+  transformed.x += sin(talkT * 0.85 + 1.0) * 0.024 * h * h * uTalk;
+  transformed.z += sin(talkT + 0.6) * 0.013 * head * uTalk;
   // מחווה — הכתפיים נפתחות מעט כשמדברים
   float shoulder = exp(-pow((h - 0.82) * 6.0, 2.0));
   transformed.x += sin(t * 1.9) * 0.030 * shoulder * uTalk;
@@ -350,13 +356,16 @@ export function Npc({
           const pull = Math.min(1, (NOTICE - dist) / (NOTICE - 2.2))
           d *= pull
           wantBody = Math.max(-0.49, Math.min(0.49, d)) * (dist < 4 ? 1 : 0)
-          wantHead = Math.max(-0.96, Math.min(0.96, d - wantBody))
+          /* 0.96 רדיאן הם 55°, וסיבוב של רשת סטטית בזווית כזאת סביב
+             ציר המודל מזיז את הראש הצידה במקום לסובב אותו. 0.62 הם
+             35° — כמה שצוואר באמת פונה, וכמה שהמסכה סובלת. */
+          wantHead = Math.max(-0.62, Math.min(0.62, d - wantBody))
         }
       }
     }
     /* דיבור מרים מעט את המבט — הנהון של מי שמדבר אליך */
     const wantPitch = u2.uTalk.value * 0.045
-    u2.uHeadYaw.value += (wantHead - u2.uHeadYaw.value) * Math.min(dt * 3.2, 1)
+    u2.uHeadYaw.value += (wantHead - u2.uHeadYaw.value) * Math.min(dt * 2.2, 1)
     u2.uHeadPitch.value += (wantPitch - u2.uHeadPitch.value) * Math.min(dt * 2.5, 1)
     g.rotation.y += wrapPi(rotationY + wantBody - g.rotation.y) * Math.min(dt * 1.8, 1)
   })

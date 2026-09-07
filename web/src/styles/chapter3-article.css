@@ -674,6 +674,13 @@
   color:var(--muted);max-width:var(--measure,880px);
 }
 
+/* ⚠ THE DRESS OF EVERYTHING BELOW IS chapter3-practice.css, which loads after
+   this sheet and puts the practice in CHAPTER 6'S language: no container, maroon
+   fill for selection, gold-ringed medallions, blanks that are rules rather than
+   boxes, pill buttons and one hairline axis. What is left here is the STRUCTURE
+   — the grids, the flow and the measures — and where a rule below still names a
+   border, a radius or a colour, that sheet is the one that decides it. */
+
 /* NOTHING ON THIS PAGE IS LIGHTER THAN THE PAGE. Every raised inset here —
    the answer chips, the option rows, the ordering cards, the picture frames,
    the plate, the map legend — was painted `--surface`, the palette's brightest
@@ -821,8 +828,10 @@
 .p3-check:hover:not(:disabled){background:var(--stamp)}
 .p3-check:disabled{opacity:.35;cursor:default}
 .p3-check:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.p3-feedback{margin:0;font-size:17px;line-height:1.6;color:var(--stamp);max-width:56ch}
-.p3-feedback.is-right{color:var(--gold-text)}
+/* `.p3-feedback` STOOD HERE and is gone with the element: the answer line is
+   chapter 6's `Feedback` now — a glyph, a colour and a sentence shape that cannot
+   be confused with one another — so this page no longer draws a second one of its
+   own at a size (17px) the chapter uses nowhere. See chapter3-practice.css. */
 
 .p3-done{margin-top:clamp(44px,5.4vw,76px);padding-top:clamp(36px,4.4vw,60px);border-top:1px solid var(--rule);display:grid;justify-items:center;gap:10px;text-align:center}
 .p3-done .title-ornament{margin:0 auto}

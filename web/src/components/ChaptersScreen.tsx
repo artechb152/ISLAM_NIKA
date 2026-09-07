@@ -22,6 +22,7 @@ import { NOTEBOOK_KEY as CH1_STORE_KEY } from '@/lib/chapter1/notebook'
 import { NOTEBOOK_TOTAL as CH1_NOTEBOOK_TOTAL } from '@/lib/chapter1/dialogue'
 import { SECTION_ORDER as CH2_SECTIONS, STORE_KEY as CH2_STORE_KEY } from '@/lib/chapter2/progress'
 import { SECTION_ORDER as CH3_SECTIONS, STORE_KEY as CH3_STORE_KEY } from '@/lib/chapter3/progress'
+import { SECTION_ORDER as CH5_SECTIONS, STORE_KEY as CH5_STORE_KEY } from '@/lib/chapter5/progress'
 /* the number of chapter-6 screens progress is measured against (derived, not hardcoded) */
 const CH6_SCREEN_COUNT = CH6.screens.length
 
@@ -156,6 +157,20 @@ export default function ChaptersScreen() {
             const p = JSON.parse(raw) as { sections?: string[] } | null
             const n = Array.isArray(p?.sections) ? p.sections.length : 0
             if (n > 0) progress = Math.min(99, Math.round((n / CH3_SECTIONS.length) * 100))
+          }
+        }
+        /* chapter 5 is a reading chapter like 2 and 3: progress is how many of its six
+           sections were scrolled past. It WROTE its progress from the day it shipped and
+           nothing read it — the chapter kept its own resume point correctly while the
+           chapters screen showed a flat 0%, which reads as „nothing was saved". Every
+           reading chapter needs its branch here; a new one is not finished until it has
+           one. */
+        if (chp.number === 5 && !done) {
+          const raw = localStorage.getItem(CH5_STORE_KEY)
+          if (raw) {
+            const p = JSON.parse(raw) as { sections?: string[] } | null
+            const n = Array.isArray(p?.sections) ? p.sections.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH5_SECTIONS.length) * 100))
           }
         }
         /* chapter 1 is the open world: progress is how full the notebook is */
@@ -314,8 +329,9 @@ export default function ChaptersScreen() {
      chip filter under the cards, not here.
 
      The exam room is pulled out of that list and pinned to the foot of the panel in an area of
-     its own: it is not something to read but something to sit down and do, and it stays out of
-     reach until every chapter has a question bank. */
+     its own: it is not something to read but something to sit down and do. It is LIVE now —
+     every built chapter has a question bank under lib/exams/banks — so unlike the four study
+     tools beside it, it renders as a link rather than as a locked row. */
   const tools = secondaryItems.filter((s) => s.id !== 'exams')
   const examItem = secondaryItems.find((s) => s.id === 'exams')
 
@@ -342,9 +358,16 @@ export default function ChaptersScreen() {
         <nav className="menu-extra menu-tools" aria-label="כלי עזר והעמקה">
           {tools.map((s) => toolRow(s))}
         </nav>
+        {/* חדר המבחנים — חי. שאר הכלים בבלוק שמעל עדיין נעולים, ולכן הוא נכתב
+            כאן כקישור מלא ולא דרך `toolRow`, שכל תפקידו הוא לצייר שורה נעולה. */}
         {examItem && (
           <nav className="menu-extra menu-exam" aria-label="מבחנים">
-            {toolRow(examItem)}
+            <Link className="m-item x-item" href="/exams" onClick={() => setDrawer(false)}>
+              <span className="x-ico" aria-hidden="true">
+                {CAT_ICON[examItem.icon]}
+              </span>
+              <span className="m-name">{examItem.title}</span>
+            </Link>
           </nav>
         )}
         {/* המחברת שלי — היחידה בבלוק שכבר חיה: הערות אישיות לפי פרקים */}

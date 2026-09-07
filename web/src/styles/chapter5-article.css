@@ -1,0 +1,338 @@
+/* Chapter 5 — שאלת הירושה והח׳ליפים ישרי הדרך.
+
+   This sheet loads ON TOP of chapter6-article.css and adds ONLY the four devices this
+   chapter's content asks for. It declares no colour, no font and no radius of its own:
+   every value below is a chapter-6 token or a size derived from one. If a rule here
+   names a hex code, it is a bug.
+
+   THE WIDTHS ARE CHAPTER 6'S, AND THEY ARE NOT ONE WIDTH. The first build put every
+   block on a single 790px measure and the page came out as one column of identical
+   grey — „לא מגוונים ביישורים". Measured on the same screen, chapter 6 runs its reading
+   prose at the FULL column (1025px at 1440) and then breaks that column repeatedly:
+   36 of its 155 blocks are centred, against 1 of 64 here. So prose is full width, and
+   everything that is not prose — the quote, the plate, the lineage, the axis, the
+   closing line — is narrower AND centred. The alternation is the rhythm; a single
+   measure is the absence of one. `--measure` survives only for blocks that sit beside
+   a picture, where the column is genuinely narrower. */
+
+:root{
+  /* only for a column that shares its row with a figure — everywhere else the width is
+     stated by the block itself, because there is no longer one width for the chapter */
+  --measure:640px;
+  /* THE RHYTHM WAS MEASURED AGAINST CHAPTER 6, NOT CHOSEN. Rendered at 1440, chapter 6
+     leaves a median of 12px between one paragraph and the next, 56px under a section
+     heading and 60px above a sub-heading. This chapter had 34px between paragraphs —
+     nearly three times the gap — which is why its prose floated apart instead of
+     reading as continuous text, and why the page felt loose at every scale.
+       --flow       between two paragraphs            (ch6: 12)
+       --flow-lead  under a section heading           (ch6: 56)
+       --flow-part  above a sub-heading, a new movement (ch6: 60) */
+  --flow-tight:14px;
+  --flow:14px;
+  --flow-lead:56px;
+  --flow-part:86px;
+}
+
+.chapter-article p{font-size:var(--read);line-height:1.85;color:var(--ink)}
+/* `.key` is chapter 6's own emphasis and is declared in chapter6-article.css; this is
+   its counterpart for a transliterated term, in the manuscript gold the chapter already
+   uses for its rules and its ornament. Weighted, not coloured-and-shouting: a term the
+   reader is being taught, not a fact being pressed. */
+.chapter-article .ch5-tr{font-weight:700;color:var(--gold-text)}
+.chapter-article > section > p{width:100%;margin-top:var(--flow)}
+.ch5-figrow-copy > p{width:100%;margin-top:var(--flow)}
+.ch5-lead{margin-top:var(--flow-lead)!important}
+.chapter-article .scrolly-env{margin-top:var(--flow-part)}
+.chapter-article .scrolly-env + p{margin-top:var(--flow-tight)!important}
+
+/* the years beside a section title. Chapter 6's `.section-term` is an Arabic span and
+   carries dir=rtl on the element; a year RANGE inside it renders „634–632". The years
+   get ltr and tabular figures so 632–634 and 644–656 are the same width. */
+.ch5-years{font-family:var(--font-body);font-variant-numeric:tabular-nums;letter-spacing:.01em}
+
+/* The banner: chapter 6's hero, with this chapter's own poster behind the video.
+   THE SUN WAS WHITE. Measured, chapter 6's hero still has zero neutral-bright pixels and
+   this one had 1.7% — a blown highlight where the sun sits, which is the one place in the
+   chapter the palette actually broke. The grade warms the whole media layer, video and
+   poster together, so the highlight lands on cream instead of white; it is a colour
+   correction on a photograph, not a filter effect, and nothing else in the banner moves. */
+.ch5-hero-media,.ch5-hero-media .ch6-hero-video{filter:sepia(.16) saturate(1.12)}
+.ch5-hero-media{background-image:url('/assets/chapter5/hero-poster.jpg')}
+
+/* ---------- 01 · the two claims ---------- */
+/* Chapter 2's card, part for part: ONE bounded surface in the PAGE'S OWN TONE — not
+   `--mat`, which is two points lighter than the parchment and reads as a white panel
+   laid on it — drawn by a hairline and by the picture inside it, with the picture flush
+   to the card's edges and the words in a padded foot below. No shadow: nothing in this
+   chapter is lifted off the page.
+
+   Equal tracks and stretched rows, so both cards are the same height whatever their
+   text runs to, and both pictures are the same 4:3. */
+/* TWO CARDS ARE NOT FOUR. Chapter 2 runs four across a full column, so each is about
+   230px wide; two stretched across the same column came out 498px each with a 372px
+   picture — the same card at more than twice the size, which is a poster, not a card.
+   The row is capped so a card here lands near chapter 2's, and it sits on the reading
+   edge rather than centred, because the prose above it starts there. */
+.ch5-claims{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);
+  width:min(880px,100%);margin:26px auto 0;align-items:stretch;
+}
+.ch5-claim{
+  position:relative;min-width:0;display:flex;flex-direction:column;
+  background:var(--paper);border:1px solid var(--edge);border-radius:16px;overflow:hidden;
+}
+.ch5-claim-art{display:block;background:var(--paper)}
+.ch5-claim-art img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.ch5-claim-text{
+  flex:1;padding:clamp(16px,1.8vw,24px);border-top:1px solid var(--edge);
+}
+.ch5-claim-name{
+  display:block;margin:0 0 8px;font-family:var(--font-heading);font-size:var(--sub);
+  font-weight:700;color:var(--maroon);line-height:1.25;
+}
+.ch5-claim p{font-size:var(--read);line-height:1.8;margin:0}
+
+/* ---------- prose beside a picture ---------- */
+/* The shape chapter 6 uses for the shahada and for charity: the reading column on one
+   side, one illustration on the other. The column keeps the measure; the figure takes
+   what is left and never grows past a third, so the prose never narrows into a gutter. */
+.ch5-figrow{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.58fr);
+  gap:clamp(24px,4vw,56px);align-items:start;
+}
+/* The genealogy plate is a plate and not a vignette. Its cartouches are small relative to
+   the whole, so in a .58fr column the names came out bigger than the plaques they belong
+   in — the plate has to be wide enough to carry its own lettering. */
+.ch5-figrow.is-wide{grid-template-columns:minmax(0,1fr) minmax(0,1.06fr)}
+/* ---------- a picture that runs the height of a section ---------- */
+/* The figure is the first grid child, so in RTL it takes the reading edge, and it
+   stretches to the row's full height — the heading and every paragraph sit beside it in
+   the second column. The picture is cropped to the column rather than letterboxed
+   inside it, because a section's height is not a fixed ratio and a contained image would
+   leave a different gap at every width. */
+.ch5-split{
+  display:grid;grid-template-columns:minmax(0,.46fr) minmax(0,1fr);
+  gap:clamp(24px,3.6vw,56px);align-items:stretch;
+}
+.ch5-tall{margin:0;min-height:100%;border-radius:16px;overflow:hidden;border:1px solid var(--edge)}
+.ch5-tall img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.ch5-split-copy{min-width:0}
+/* the first paragraph beside the picture starts level with the picture's own top */
+.ch5-split-copy > .ch5-lead{margin-top:0!important}
+@media (max-width:900px){
+  .ch5-split{grid-template-columns:1fr}
+  .ch5-tall{min-height:0;aspect-ratio:4/3;order:2;margin-top:var(--flow)}
+  .ch5-split-copy{order:1}
+}
+.ch5-figrow-copy{min-width:0}
+/* THE PICTURE SITS AT THE MIDDLE OF THE TEXT IT BELONGS TO. It was pinned to the top of
+   its row and sticky, so it started level with the first line and then crept down the
+   column on its own — beside a short column that reads as a picture parked at the top
+   with a hole under it. Centred in the row, it is level with the middle of the prose. */
+.ch5-figure{margin:0;align-self:center}
+/* The snake is centred on its text and then lifted two lines: it carries its weight in
+   the lower half of its own frame — the coiled body sits low on the cloth — so the
+   optical centre falls below the geometric one and centring alone read as sagging. The
+   codex opposite does not have that problem and is not lifted. `translate`, not a
+   margin, so the picture moves and the text around it does not, and the offset is two
+   lines of this chapter's own body text rather than a round pixel number. Two lines:
+   four overshot and it came back down by two.
+
+   ⚠ IT IS ON THE IMAGE, NOT ON THE FIGURE, and that is not a style choice. The figure
+   carries `data-reveal`, and chapter 6's reveal ends on
+   `.js-reveal [data-reveal].is-inview{translate:0 0}` — three selectors against this
+   rule's two, so a `translate` on the figure is simply erased the moment the figure
+   scrolls into view. The picture moved for exactly as long as it was off screen. The
+   image inside carries no reveal and nothing competes for its translate. */
+.ch5-figure.is-lifted img{translate:0 calc(var(--read) * -3.7)}
+.ch5-figure img{display:block;width:100%;height:auto}
+/* A cut-out sits ON the parchment — no frame, no card, exactly as chapter 6 mounts the
+   minaret and the giving hands. Its ground is genuinely transparent (knocked out by the
+   plate's own edge colour, so the soft edges stay soft); `multiply` was standing in for
+   that and left a visible pale rectangle wherever the generated white was not pure.
+
+   AND THE BOTTOM IS FADED, not cut. The bay'a poster was drawn with the two sleeves
+   running off the bottom of its frame — correct inside a frame, and a hard horizontal
+   slice across both arms once the frame is gone, which is exactly what read as wrong.
+   The mask dissolves the last sixth of the image so the arms rise out of the parchment
+   instead of ending on a straight line. Applied only where an edge actually runs off:
+   the snake is a floating object and keeps all four of its own soft edges. */
+.ch5-figure.is-cutout img{filter:drop-shadow(0 6px 14px rgba(60,35,18,.16))}
+.ch5-figure.is-bleed img{
+  -webkit-mask-image:linear-gradient(to top,transparent 0,#000 17%);
+  mask-image:linear-gradient(to top,transparent 0,#000 17%);
+}
+
+/* ---------- the hadith ---------- */
+/* The section closes on the hadith and on nothing else. A picture of the bay'a stood
+   here through three shapes — beside the prose, then at the foot of the section resting
+   on the rule — and it was competing with the quote for the end of the section rather
+   than supporting it. The quote is the close; it does not need a picture under it.
+
+   Centred and ruled above and below, which is the treatment chapter 6 gives its own
+   closing blessing: the one block in the section that is not read as prose. */
+.ch5-quote-lead{
+  margin-top:var(--flow-lead)!important;width:min(660px,100%)!important;
+  margin-inline:auto!important;text-align:center;
+}
+.ch5-quote{
+  width:min(660px,100%);margin:var(--flow) auto 0;text-align:center;
+  padding:clamp(18px,2.2vw,28px) clamp(20px,2.4vw,34px);
+  border-block:1px solid var(--gold-soft);
+  font-family:var(--font-heading);font-size:var(--emph);line-height:1.55;color:var(--maroon-deep);
+}
+
+/* ---------- 03 · the conquest map ---------- */
+/* Chapter 6's full-screen stage, filled with the map. The plate is a drawing and carries
+   no lettering; every name on it is DOM text. The veil is the same device chapter 6 uses
+   over its photographic stage — a parchment wash strong on the reading edge, fading off
+   toward the west of the map, so the cards stay legible without hiding the country the
+   sentence is about. */
+.ch5-map{position:absolute;inset:0;background:var(--panel)}
+.ch5-map > img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.ch5-map-veil{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to left,rgba(237,228,208,.97) 0%,rgba(237,228,208,.92) 18%,rgba(237,228,208,.62) 40%,rgba(237,228,208,.22) 68%,rgba(237,228,208,.1) 100%);
+}
+
+/* the reach out of Medina — one arm per conquest, drawn to the pin it belongs to and
+   growing from the origin outward as the pin arrives */
+.ch5-route{
+  position:absolute;height:2px;transform-origin:0 50%;translate:0 -50%;
+  background:repeating-linear-gradient(90deg,var(--maroon) 0 9px,transparent 9px 16px);
+  opacity:0;scale:0 1;
+  transition:opacity .4s ease,scale .75s cubic-bezier(.2,.8,.2,1);
+}
+.ch5-route.is-on{opacity:.9;scale:1 1}
+@media (prefers-reduced-motion:reduce){.ch5-route{transition:opacity .2s ease}.ch5-route.is-on{scale:1 1}}
+
+.ch5-pin{
+  position:absolute;translate:-50% -50%;display:flex;align-items:center;gap:8px;
+  opacity:0;transition:opacity .55s ease;pointer-events:none;
+}
+.ch5-pin.is-on{opacity:1}
+.ch5-pin-dot{
+  width:13px;height:13px;border-radius:50%;flex:none;background:var(--maroon);
+  box-shadow:0 0 0 4px rgba(199,154,60,.5),0 2px 6px rgba(60,35,18,.45);
+}
+/* the origin is on the plate from the first frame and is not a conquest — drawn hollow
+   so it never reads as one of the four */
+.ch5-pin.is-origin .ch5-pin-dot{background:var(--paper);box-shadow:0 0 0 3px var(--maroon),0 2px 6px rgba(60,35,18,.35)}
+.ch5-pin-label{
+  white-space:nowrap;font-family:var(--font-heading);font-size:15px;color:var(--cream);
+  background:var(--maroon-deep);padding:3px 10px;border-radius:6px;
+  box-shadow:0 2px 8px rgba(28,10,2,.3);
+}
+.ch5-pin-note{font-family:var(--font-body);font-weight:400;opacity:.75;margin-inline-start:7px;font-size:13px}
+/* a pin in the eastern half opens its label westward, away from the reading column */
+.ch5-pin.is-flipped{flex-direction:row-reverse}
+
+/* the cards over the map: chapter 6's own `.stage-card`, narrowed so the map keeps its
+   east, and given the parchment behind the words that the photographic stage gets from
+   its veil */
+.scrolly-fullstage .stage-card{width:min(440px,86%)}
+
+/* ---------- 05 · the genealogy plate ---------- */
+/* The plate is a painting with four EMPTY cartouches; the names are DOM text dropped into
+   them, the way every generated asset in this chapter carries its lettering. A CSS tree
+   stood here through two attempts and neither read — the first as a line of descent, the
+   second with no rule reaching Ali at all. A drawn genealogy needs no explaining. */
+/* the plate is centred against the whole passage it belongs to, not pinned to its top */
+.ch5-lin{margin:0;align-self:center}
+.ch5-lin-frame{position:relative;display:block;line-height:0}
+.ch5-lin img{display:block;width:100%;height:auto;border-radius:12px}
+.ch5-lin-plate{position:absolute;inset:0;line-height:1.2;pointer-events:none}
+.ch5-lin-name{
+  position:absolute;translate:-50% -50%;white-space:nowrap;
+  font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(10px,1.05vw,15px);
+}
+.ch5-lin-name.is-subject{color:var(--maroon);font-size:clamp(11px,1.2vw,17px)}
+/* The marriage that makes him a son-in-law, sitting just above the horizontal rule that
+   joins Fatima to Ali. On the first plate it was placed inside a medallion — gold
+   lettering on a dark painting, which is to say invisible — so it goes on parchment. */
+.ch5-lin-rel{
+  position:absolute;left:56.6%;top:73.5%;translate:-50% -50%;
+  font-style:normal;font-weight:700;color:var(--gold-text);white-space:nowrap;
+  font-size:clamp(9px,.92vw,12px);
+  /* a parchment chip behind it: the label has to be legible wherever the painting is
+     dark under it, and the two lower medallions crowd the rule it belongs to */
+  background:rgba(240,232,213,.88);padding:1px 6px;border-radius:5px;
+}
+/* a short tick UP from the label to the marriage rule it names */
+.ch5-lin-rel::after{
+  content:"";position:absolute;left:50%;bottom:100%;translate:-50% 0;
+  width:1px;height:clamp(6px,.9vw,11px);background:var(--gold);margin-bottom:2px;
+}
+/* the second route, down the plate's own margin: a rule from the first medallion to the
+   last, with the relation named beside it */
+/* the plate draws the second tie itself — the long rule down its right side — so nothing
+   is overlaid for it; only its name, under the plate on that side */
+/* the second route's name, under the plate and on its side */
+.ch5-lin-cap{
+  margin-top:10px;text-align:start;line-height:1.4;
+  font-weight:700;color:var(--gold-text);font-size:clamp(12px,1.15vw,15px);
+}
+.ch5-lin-cap::before{
+  content:"";display:inline-block;vertical-align:middle;
+  width:clamp(16px,2.4vw,34px);height:2px;background:var(--gold);
+  margin-inline-end:8px;
+}
+
+/* ---------- 06 · the four reigns ---------- */
+/* True proportion, and a scale that says so. The bars used to sit inside full-width
+   tracks, which turned four durations into four part-filled meters — the eye read fill
+   against emptiness rather than length against length, and nothing said the lengths were
+   years. No track now: the bar is the duration, its own number sits at its end, and the
+   sub-heading above says what is being measured. The bars are GOLD — the manuscript
+   accent, and the section they close is the golden age. */
+.ch5-axis{width:min(760px,100%);margin:26px auto 0;display:grid;gap:clamp(10px,1.4vw,16px)}
+.ch5-axis-row{display:grid;grid-template-columns:minmax(92px,auto) minmax(0,1fr) auto;align-items:center;gap:clamp(12px,1.6vw,20px)}
+.ch5-axis-name{font-family:var(--font-heading);font-size:var(--sub);color:var(--maroon)}
+.ch5-axis-bar{display:flex;align-items:center;gap:10px;min-width:0}
+.ch5-axis-bar i{
+  display:block;width:var(--w);height:14px;border-radius:0 999px 999px 0;background:var(--gold);
+  transform-origin:right center;transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.8,.2,1);
+}
+/* the number of years, at the end of its own bar */
+.ch5-axis-bar em{
+  font-style:normal;font-family:var(--font-heading);font-weight:700;
+  font-size:16.5px;color:var(--gold-text);font-variant-numeric:tabular-nums;flex:none;
+}
+.is-inview .ch5-axis-bar i,.ch5-axis[data-reveal].is-inview .ch5-axis-bar i{transform:none}
+.ch5-axis-years{font-family:var(--font-body);font-variant-numeric:tabular-nums;font-size:16px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.ch5-axis-bar i{transition:none;transform:none}}
+@media (max-width:900px){
+  .ch5-axis-row{grid-template-columns:1fr auto;gap:6px 12px}
+  .ch5-axis-bar{grid-column:1 / -1;order:3}
+}
+
+/* the source's own last sentence, landing under the axis */
+.ch5-verdict{
+  width:min(700px,100%)!important;margin:var(--flow-lead) auto 0!important;text-align:center;
+  font-family:var(--font-heading);font-size:var(--emph);line-height:1.5;color:var(--maroon-deep);
+}
+.ch5-close{margin-top:var(--flow)!important}
+
+.chapter-end-back.is-quiet{
+  background:transparent;color:var(--maroon);border:1px solid var(--edge);box-shadow:none;
+}
+.chapter-end-back.is-quiet:hover{background:rgba(165,50,47,.08);transform:none}
+
+/* ---------- narrow ---------- */
+@media (max-width:900px){
+  .ch5-claims{grid-template-columns:1fr;gap:16px}
+  .ch5-claim + .ch5-claim::before{display:none}
+  .ch5-figrow{grid-template-columns:1fr}
+  /* stacked under the prose there is nothing to be optically centred against */
+  .ch5-figure{position:static;translate:none;margin-top:var(--flow);width:min(360px,72%);margin-inline:auto}
+  .ch5-figure.is-lifted img{translate:none}
+  .ch5-pin-label{font-size:13px;padding:2px 7px}
+  .ch5-pin-note{display:none}
+  .ch5-axis-row{grid-template-columns:1fr;gap:6px}
+  .ch5-axis-years{justify-self:start}
+}
+
+/* the practice screen wears the chapter's own banner still, without the film — a
+   practice page has no business autoplaying the chapter's video a second time */
+.ch5-practice-banner .ch5-hero-media{background:var(--panel) url('/assets/chapter5/hero-poster.jpg') center 38%/cover no-repeat}

@@ -1597,6 +1597,10 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
   const planMode = REGION_TASK?.kind === 'plan'
   /* מיון פיזי: לכל פריט חפץ, ולכל צד עמדה על הקרקע — מניחים ביד.
      משימת מיון בלי חפצים (ית'רב) נשארת בפאנל כפי שהיא. */
+  /** תחנה שהפעולה שלה קורית על משטח משלה ולא בחפצי-אופציה — מכה */
+  const SURFACE_TASK = REGION.id === 'mecca'
+  /** בית'רב: המעגלים מקוננים, ולכן שתי תוויות קבועות היו נופלות זו על זו */
+  const NESTED_BINS = REGION_TASK?.kind === 'connect'
   const sortMode = ['sort', 'connect', 'observe'].includes(REGION_TASK?.kind ?? '') &&
     (REGION_TASK?.options.some((o) => o.prop) ?? false)
   /* observe: אי אפשר לשפוט לפני שראו הכול — עד אז החפצים מונחים ולא נגררים */
@@ -2030,8 +2034,13 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
        השיחה או בשלב בחינת העדויות — המצלמה כבר נכנסה לתקריב על
        משהו שעוד אי אפשר לגעת בו. זה מה ששבר את המצלמה בתחנת הגבול
        והפך את המשימה לכמעט בלתי אפשרית. */
+    /* במכה אין אף אופציה עם חפץ — הפעולה שם היא שולחן הראיות — ולכן
+       התנאי „יש חפצים" סינן אותה החוצה, והתקריב לא נכנס דווקא באחת
+       משתי התחנות שבהן הפעולה קורית על משטח קטן. */
     live.taskFocus =
-      armed && atTask && !solvedTask && (planMode || sortMode || opts.length > 0) ? focusSpec : null
+      armed && atTask && !solvedTask && (planMode || sortMode || opts.length > 0 || SURFACE_TASK)
+        ? focusSpec
+        : null
     const pr = pingRing.current
     if (pr) {
       const pg = ping.current
@@ -2183,11 +2192,16 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
               <ringGeometry args={[BIN_R * 0.82, BIN_R, 44]} />
               <meshBasicMaterial color={k === 0 ? '#e8bf76' : '#cbd6de'} transparent opacity={0.4} depthWrite={false} />
             </mesh>
-            {/* אזור הנחה מקבל תווית רק כשמשהו ביד. אחרת שתי תוויות
-                נדלקות יחד ומכסות זו את זו — וזה מה שנראה בית'רב. */}
-            {!solvedTask && !sortLocked && dragIdx >= 0 && (
+            {/* ── שם לכל עיגול ─────────────────────────────────────
+                התווית הופיעה רק כשמשהו כבר היה ביד, ולכן במנזר — שלושה
+                עיגולים על הרצפה — אי אפשר היה לדעת לאן ממיינים לפני
+                שהרימו. מי שאינו יודע לאן, אינו יודע גם מה להרים.
+                בית'רב הרינגים מקוננים זה בתוך זה, ושתי תוויות קבועות
+                שם היו מכסות זו את זו — ולכן שם בלבד נשארה ההתנהגות
+                הישנה, ובשאר הן קבועות כל עוד המיון פתוח. */}
+            {!solvedTask && !sortLocked && (dragIdx >= 0 || !NESTED_BINS) && (
               <Html center position={[b.x, yAt(b.x, b.z) + (SURFACE_Y != null ? 0.5 : 0.9), b.z]} zIndexRange={[4, 4]}>
-                <span className="ch1-prop-label">{b.label}</span>
+                <span className={`ch1-prop-label${dragIdx >= 0 ? ' is-live' : ''}`}>{b.label}</span>
               </Html>
             )}
           </group>
@@ -2450,6 +2464,8 @@ function Player({ live }: { live: Live }) {
   const talkDist = useRef(99)
   /* תקריב המשימה: בלנד משלו + צד קבוע-למחצה שממנו המצלמה משקיפה */
   const taskBlend = useRef(0)
+  /** המוקד האחרון, כדי שהמצלמה תיסוג ממנו במקום לקפוץ ממנו */
+  const taskLast = useRef<Live['taskFocus']>(null)
   const taskDir = useRef({ x: 0, z: 1 })
   const taskCamV = useRef(new THREE.Vector3())
   const twoShotV = useRef(new THREE.Vector3())
@@ -2699,12 +2715,21 @@ function Player({ live }: { live: Live }) {
     /* תקריב המשימה — נכנס רק כשאין שיחה ואין המראה; יוצא כשהמשימה
        נפתרת, כשמתרחקים או כשמתחילים לדבר. הצד שממנו משקיפים נמשך לאט
        אל הצד שבו השחקן עומד, כדי שהתמונה לא תסתובב עם כל צעד. */
-    const tf = live.taskFocus
-    taskBlend.current += ((tf && tb < 0.02 && !riseK ? 1 : 0) - taskBlend.current) * Math.min(1, dt * 2.0)
+    /* ── והחזרה ────────────────────────────────────────────────────
+       ברגע שהאינטראקציה נגמרה `live.taskFocus` מתאפס, ומכאן היו שתי
+       מהירויות שונות: המיקום נסוג בהחלקה (taskBlend יורד), אבל העדשה
+       חזרה בפריים אחד — כל השורות שמשתמשות במוקד מותנות ב-`tf`, שכבר
+       null. התוצאה היא קפיצה בסוף כל אינטראקציה, במקום נסיגה.
+       שומרים את המוקד האחרון עד שהמשקל באמת התאפס, וכך שני הצדדים
+       חוזרים יחד ובאותו קצב. */
+    if (live.taskFocus) taskLast.current = live.taskFocus
+    taskBlend.current += ((live.taskFocus && tb < 0.02 && !riseK ? 1 : 0) - taskBlend.current) * Math.min(1, dt * 2.0)
     const kf = taskBlend.current
-    if (tf) {
-      const ddx = live.player.x - tf.x
-      const ddz = live.player.z - tf.z
+    if (kf <= 0.002) taskLast.current = null
+    const tf = live.taskFocus ?? taskLast.current
+    if (live.taskFocus) {
+      const ddx = live.player.x - tf!.x
+      const ddz = live.player.z - tf!.z
       const dl = Math.hypot(ddx, ddz) || 1
       taskDir.current.x += (ddx / dl - taskDir.current.x) * Math.min(1, dt * 1.1)
       taskDir.current.z += (ddz / dl - taskDir.current.z) * Math.min(1, dt * 1.1)
@@ -3434,6 +3459,14 @@ const INTRO_ID: string | null =
   (REGION.core ?? []).find((id) => REGION.encounters.some((e) => e.id === id)) ??
   REGION.encounters[0]?.id ??
   null
+/* ── שיחות הליבה שקודמות למשימה ──────────────────────────────────────
+   „התחנה לא יכולה להיות מושלמת עד שהלומד עבר את כל השיחה עם הדמות
+   הרלוונטית." אלה השיחות שהאזור קיים בשבילן ושאינן נפתחות אחרי
+   המשימה: מפגש שה-trigger שלו הוא `task:` הוא הסיכום שבא אחריה, והוא
+   אינו נספר כאן — אחרת התחנה הייתה מחכה לעצמה. */
+const CORE_TALKS: string[] = (REGION.core ?? []).filter((id) =>
+  REGION.encounters.some((e) => e.id === id && !String(e.trigger ?? '').startsWith('task:')),
+)
 /** מי מארח את התחנה — הדמות שאיתה מדברים כאן, לצורך „דברו עם X". */
 const HOST_NAME: string = (() => {
   const intro = REGION.encounters.find((e) => e.id === INTRO_ID)
@@ -3638,12 +3671,14 @@ function GroundGlow({ x, z, r = 1.1, live, tone = '#f0c877', rank = 'ready' }: {
    מסיימת את החשיפה — לא לחיצה, אלא החזקה של אור במקום הנכון.
    רק אחרי זה נפתחת השאלה „מה האבן מוכיחה“: קודם רואים, אחר כך מסיקים.
    בלי נכס חדש — torch.glb הוא הלפיד שכבר קיים בפרק. */
-function LampReveal({ live, target, home, onRevealed, revealed }: {
+function LampReveal({ live, target, home, onRevealed, revealed, active }: {
   live: Live
   target: { x: number; z: number }
   home: { x: number; z: number }
   onRevealed: () => void
   revealed: boolean
+  /** רק כשזה התור של הלפיד */
+  active: boolean
 }) {
   const { camera, gl } = useThree()
   const grp = useRef<THREE.Group>(null)
@@ -3653,6 +3688,8 @@ function LampReveal({ live, target, home, onRevealed, revealed }: {
   const progress = useRef(0)
   const doneRef = useRef(revealed)
   doneRef.current = revealed
+  const activeRef = useRef(active)
+  activeRef.current = active
   const { scene } = useGLTF(MODEL_TORCH)
   const model = useMemo(() => {
     const c = scene.clone(true)
@@ -3698,7 +3735,7 @@ function LampReveal({ live, target, home, onRevealed, revealed }: {
       return Math.hypot(cx - sx, cy - sy) < 28 && p.z <= 1
     }
     const down = (e: PointerEvent) => {
-      if (doneRef.current) return
+      if (doneRef.current || !activeRef.current) return
       /* פאנל פתוח מעל הקנבס: לחיצה עליו אינה תופסת את הלפיד שמאחוריו */
       if (e.target !== gl.domElement) return
       if (!near(e.clientX, e.clientY)) return
@@ -3771,10 +3808,12 @@ function LampReveal({ live, target, home, onRevealed, revealed }: {
    בהסבר.
    רק אחרי שהשולחן מלא נפתחת השאלה הקיימת, ואז היא נקראת כסיכום של
    מה שכבר עשית — לא כמבחן על טקסט שקראת. */
+/* לכל חפץ שם, ולכל מקום על הלוח שם משלו. בלי השניים השולחן היה שלושה
+   דברים חומים ושלושה שקעים חומים, והשאלה „מה זה מה" נשארה פתוחה. */
 const EVIDENCE_SLOTS = [
-  { id: 'stone', model: 'find-inscription', h: 0.34, label: 'כתובת שנחצבה', dx: -0.95 },
-  { id: 'verse', model: 'find-scroll', h: 0.26, label: 'פסוק מן הקוראן', dx: 0 },
-  { id: 'later', model: 'prop-codex', h: 0.22, label: 'דף מסורת מאוחרת', dx: 0.95 },
+  { id: 'stone', model: 'find-inscription', h: 0.34, label: 'כתובת שנחצבה', place: 'מה שנחצב באבן', dx: -0.95 },
+  { id: 'verse', model: 'find-scroll', h: 0.26, label: 'פסוק מן הקוראן', place: 'מה שנאמר בפסוק', dx: 0 },
+  { id: 'later', model: 'prop-codex', h: 0.22, label: 'דף מסורת מאוחרת', place: 'מה שנכתב מאוחר יותר', dx: 0.95 },
 ]
 
 /* שולחן עבודה — משטח, עובי, רגליים.
@@ -3841,10 +3880,14 @@ function SurfaceGlow({ x, y, z, r = 0.42, tone = '#f0c877', on = true }: {
   )
 }
 
-function EvidenceTable({ live, at, done, onComplete }: {
+function EvidenceTable({ live, at, done, active, onComplete }: {
   live: Live
   at: { x: number; z: number }
   done: boolean
+  /** האם זה בכלל התור של השולחן. אחרת אפשר היה לסדר את שלושת המקורות
+      לפני ששמעת את הסוחר ולפני שראית את שלושת הממצאים — כלומר לפתור
+      את הפעולה לפני שנשאלה. */
+  active: boolean
   onComplete: () => void
 }) {
   const { camera, gl } = useThree()
@@ -3868,6 +3911,8 @@ function EvidenceTable({ live, at, done, onComplete }: {
   const drag = useRef(-1)
   const doneRef = useRef(done)
   doneRef.current = done
+  const activeRef = useRef(active)
+  activeRef.current = active
   const SNAP = 0.72
 
   useEffect(() => {
@@ -3886,7 +3931,7 @@ function EvidenceTable({ live, at, done, onComplete }: {
       return { x: (q.x * 0.5 + 0.5) * r.width + r.left, y: (-q.y * 0.5 + 0.5) * r.height + r.top, ok: q.z <= 1 }
     }
     const down = (e: PointerEvent) => {
-      if (doneRef.current || e.target !== gl.domElement) return
+      if (doneRef.current || !activeRef.current || e.target !== gl.domElement) return
       for (let i = 0; i < 3; i++) {
         if (placed.current[i]) continue
         const s = screenOf(i)
@@ -3978,11 +4023,22 @@ function EvidenceTable({ live, at, done, onComplete }: {
         <MovingEvidence key={s.id} model={s.model} h={s.h} at={pos.current} index={i}
           y={topY} lifted={held === i} />
       ))}
-      {/* תווית רק על מה שמוחזק ביד */}
-      {held >= 0 && (
-        <Html center position={[pos.current[held].x, topY + 0.55, pos.current[held].z]} zIndexRange={[4, 4]}>
-          <span className="ch1-prop-label">{EVIDENCE_SLOTS[held].label}</span>
+      {/* ── מה זה מה ──────────────────────────────────────────────────
+          עד עכשיו הופיעה תווית אחת בלבד, ורק על מה שכבר היה ביד. אבל
+          השאלה שנשאלת כאן היא בדיוק „מה זה מה", ומי שאינו יודע מה הוא
+          מחזיק אינו יודע גם לאן להניח. עכשיו לכל שקע כתוב מה מקומו,
+          ולכל חפץ שעוד לא הונח כתוב מה הוא. */}
+      {!done && active && slot.map((sp, i) => (
+        <Html key={`slab${i}`} center position={[sp.x, topY + 0.30, sp.z]} zIndexRange={[4, 4]}>
+          <span className={`ch1-slot-label${placedN > i ? ' is-filled' : ''}`}>{EVIDENCE_SLOTS[i].place}</span>
         </Html>
+      ))}
+      {EVIDENCE_SLOTS.map((s, i) =>
+        placed.current[i] || !active ? null : (
+          <Html key={`lab${i}`} center position={[pos.current[i].x, topY + (held === i ? 0.56 : 0.42), pos.current[i].z]} zIndexRange={[4, 4]}>
+            <span className={`ch1-prop-label${held === i ? ' is-live' : ''}`}>{s.label}</span>
+          </Html>
+        ),
       )}
     </group>
   )
@@ -4735,6 +4791,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
             live={live}
             at={{ x: REGION_TASK.x + 2.1, z: REGION_TASK.z + 1.3 }}
             done={tableSet}
+            active={stage === 'act'}
             onComplete={onTableSet}
           />
         </Suspense>
@@ -4746,6 +4803,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
             target={{ x: REGION_TASK.x, z: REGION_TASK.z }}
             home={{ x: REGION_TASK.x + 2.3, z: REGION_TASK.z + 1.5 }}
             revealed={stoneLit}
+            active={stage === 'act'}
             onRevealed={onStoneLit}
           />
         </Suspense>
@@ -5411,6 +5469,15 @@ export default function Game() {
     ).map((o) => o.id)
     return needed.length > 0 && needed.every((n) => taskChosen.includes(n))
   }, [taskChosen])
+  /* יש בכלל מה למסור כאן? במכה אין, ושם הפעולה היא השולחן. */
+  const hasPlaceables = useMemo(() => {
+    if (!REGION_TASK) return false
+    const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
+    const present = REGION_TASK.kind === 'present'
+    return (sortLike || present
+      ? REGION_TASK.options.filter((o) => o.prop)
+      : REGION_TASK.options.filter((o) => o.right)).length > 0
+  }, [])
 
   /* ── מתי התחנה נסגרת ─────────────────────────────────────────────────
      בתחנה שיש לה שלב פירוש, ההנחה מסיימת את הפעולה בלבד. מה שסוגר
@@ -5426,14 +5493,6 @@ export default function Game() {
     setTaskLastOk(!!opt.right)
     if (opt.right) setInterpreted(id)
   }, [setTaskLast, setTaskLastOk])
-  useEffect(() => {
-    if (!REGION_TASK || taskSolved) return
-    if (!placedAll) return
-    if (REGION_TASK.interpret && !interpreted) return
-    setSolved(recordTask(REGION_TASK.id).solved)
-    setTaskNote({ who: 'רָאוִי', text: REGION_TASK.done, ok: true })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskChosen, taskSolved, interpreted, placedAll])
   const chooseTask = useCallback(
     (id: string) => {
       if (!REGION_TASK) return
@@ -5614,6 +5673,30 @@ export default function Game() {
   const physDone = REGION.id === 'yemen-heights' ? stoneLit
     : REGION.id === 'mecca' ? tableSet
     : placedAll
+  /* ── מתי התחנה באמת נסגרת ───────────────────────────────────────
+     שלושה תנאים, וכל אחד מהם נשבר פעם אחת:
+
+     · ההנחה. במכה אין אפילו אופציה אחת עם חפץ — הפעולה שם היא שולחן
+       הראיות — ולכן „כל מה שצריך להימסר" היה רשימה ריקה, ותנאי
+       „ריק ⇐ לא הושלם" מנע סגירה לנצח. זו הייתה התחנה השבורה: אין
+       תשובה נכונה, כי אין תשובה שתיחשב. כשאין מה למסור, הפעולה
+       הפיזית עצמה היא ההנחה.
+     · הפירוש, כשיש שאלת פירוש.
+     · והשיחה. תחנה אינה מושלמת כל עוד הלומד לא שמע את מה שיש לדמות
+       הרלוונטית לומר. שיחות הליבה שאינן נפתחות אחרי המשימה נדרשות
+       כאן במפורש. */
+  const talksDone = CORE_TALKS.every((id) => seen.includes(id))
+  const talksDoneRef = useRef(true)
+  talksDoneRef.current = talksDone
+  useEffect(() => {
+    if (!REGION_TASK || taskSolved) return
+    if (!(placedAll || (!hasPlaceables && physDone))) return
+    if (REGION_TASK.interpret && !interpreted) return
+    if (!talksDone) return
+    setSolved(recordTask(REGION_TASK.id).solved)
+    setTaskNote({ who: 'רָאוִי', text: REGION_TASK.done, ok: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskChosen, taskSolved, interpreted, placedAll, physDone, talksDone])
   const interpretDone = taskSolvedNow
   /* הסיכום: המשפט הסוגר של התחנה נאמר. בתחנות שיש להן מפגש שנפתח
      ב-`task:` זה אותו מפגש; בשאר זו שורת ה-`done` של המשימה, שנרשמת
@@ -6101,7 +6184,8 @@ export default function Game() {
         const st = stageRef.current
         const allowWho = st === 'brief' || st === 'interpret' || st === 'wrap' || st === 'done'
         const allowFind = st === 'look' || st === 'wrap' || st === 'done'
-        const allowTask = st === 'interpret'
+        /* המשימה אינה נפתחת כל עוד לא נשמע מה שיש לדמות לומר */
+        const allowTask = st === 'interpret' && talksDoneRef.current
 
         const dWho = allowWho && live.nearWho ? live.nearWhoD : Infinity
         const dFind = allowFind && live.nearFind ? live.nearFindD : Infinity
@@ -6124,6 +6208,9 @@ export default function Game() {
               return 'את זה כבר בחנת. מה שנשאר הוא השאלה עצמה.'
             }
             if (near === 'task') {
+              if (!talksDoneRef.current) {
+                return `רגע — עוד לא שמעתם את כל מה שיש ל${HOST_NAME} לומר כאן. חזרו אליו, ואז נשוב לשאלה.`
+              }
               if (st === 'brief') return 'רגע — קודם נשמע את מי שעומד כאן.'
               if (st === 'look') return 'רגע — קודם בוחנים את מה שמונח כאן. אי אפשר להשיב על מה שלא ראית.'
               if (st === 'act') return 'רגע — הפעולה עצמה עוד לא הושלמה.'

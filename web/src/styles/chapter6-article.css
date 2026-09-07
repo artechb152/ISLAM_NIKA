@@ -1530,7 +1530,31 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
      grid auto-placement never walks backwards: with only a column named, the
      art took row 1 / column 2 and the prose was pushed to row 2, opening a gap
      exactly as tall as the painting. Naming the row on both is the whole fix. */
-  .bleed-aside-body{grid-column:1;grid-row:1}
+  /* THE WORDS SIT IN THE MIDDLE OF THEIR TRACK. Once the painting has a height
+     floor the row can be taller than the text, and a block that starts at the
+     top then leaves all of the slack in one lump underneath — which reads as a
+     hole, not as space. Centred, the same slack is split above and below and
+     becomes the margin of a composition. Chapter 6 centres both of its own
+     illustrated sections for this reason. */
+  .bleed-aside-body{grid-column:1;grid-row:1;display:flex;flex-direction:column;justify-content:center}
+  /* MIRRORED. Chapter 6 alternates its two cutouts — the minaret stands to the
+     left of the shahada, the hands to the right of the charity — and the page
+     is better for it: two long runs with the painting on the same side read as
+     one template applied twice. `.is-flipped` swaps the columns and the gutter
+     the art bleeds into, and nothing else changes. */
+  .bleed-aside.is-flipped{
+    margin-inline-end:0;
+    margin-inline-start:calc(-1 * var(--content-gutter));
+    grid-template-columns:clamp(320px,44%,540px) minmax(0,1fr);
+  }
+  .bleed-aside.is-flipped .bleed-aside-body{grid-column:2}
+  .bleed-aside.is-flipped .bleed-aside-art{grid-column:1}
+  /* RAISED BY ONE LINE. Centred exactly, the block sat a shade low against the
+     painting beside it: the figure's mass is in its upper two-thirds and the eye
+     pairs the first line of text with the head rather than with the middle of
+     the robe. One line-height up is where the two settle; two was too far. */
+  .bleed-aside.is-flipped .bleed-aside-body{translate:0 calc(var(--lh) * -1em)}
+
   /* THE PAINTING RUNS THE LENGTH OF THE PROSE, which is what chapter 6 does:
      its minaret is not a picture beside a paragraph, it is a column of paint
      the whole section is read against. So the box stretches to the row — the
@@ -1540,9 +1564,26 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
      as an ornament that had lost its place. */
   .bleed-aside-art{
     display:block;grid-column:2;grid-row:1;align-self:stretch;
+    /* THE PROSE SETS THE HEIGHT, NOT THE PAINTING. `height:100%` on an image
+       inside a stretched grid item is a circular dependency — the row sizes to
+       its tallest item, and the image is asking the row how tall it is — and a
+       browser resolves it by falling back to the image's own intrinsic height.
+       The painting then ran on past the end of the text that it was supposed to
+       be accompanying. Taking the image out of flow breaks the loop: it no
+       longer contributes a height, the row is measured from the words alone,
+       and the painting is fitted into whatever that turns out to be. */
+    position:relative;
+    /* A FLOOR, SO THE PICTURE DOES NOT SHRINK WITH THE SCREEN. The prose sets
+       the height — but on a wide display the same words fall into fewer lines,
+       the row gets shorter, and the painting shrinks with it. The wider the
+       screen, the smaller the picture: exactly backwards. Chapter 6 gives its
+       shahada a flat `min-height` for the same reason. Below this floor the
+       painting keeps its size and the row grows to hold it. */
+    min-height:clamp(520px,72vh,880px);
     z-index:0;pointer-events:none;user-select:none;
   }
   .bleed-aside-art img{
+    position:absolute;inset:0;
     display:block;width:100%;height:100%;object-fit:contain;object-position:center;
     /* a whisper of a fade at the foot, so the wash melts into the paper
        instead of ending on a cut line */

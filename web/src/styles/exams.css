@@ -1,0 +1,373 @@
+/* חדר המבחנים — בשפה הגרפית של פרק 6.
+
+   ⚠ מה שהיה כאן ולמה זה הוסר.
+
+   הגרסה הראשונה של הגיליון הזה ציירה מסטהד משלה (`.xr-header`, לוגו, כותרת
+   וכפתור חזרה) ועמודה ממורכזת: `.xr-main{width:min(880px,…);margin-inline:auto}`.
+   זו בדיוק התקלה ש-chapter6-practice.css מתעד שכבר תוקנה פעם אחת — „מסטהד משלו
+   עם אמצע ריק, בלי סרגל צד, ועמודה ממורכזת… שני העמודים לא חלקו ולו קצה אחד“.
+   נמדד ב-1920: עמודת הטקסט של המאמר מתחילה 64px מהקצה, וזו התחילה במאות.
+
+   העמוד יושב עכשיו ב-PracticeNav, המעטפת של האתר: המסטהד של המאמר, סרגל הצד
+   הנצמד, ו-`.chapter-layout` שמתחיל ב-`--content-gutter` מהקצה. כל מה שנשאר
+   בקובץ הזה הוא משטחי המבחן — לא רוחב עמוד, לא מסטהד ולא קצב אנכי.
+
+   chapter6-article.css כבר טעון, ואיתו הפלטה, סולם הטיפוגרפיה, ה-tokens
+   והחלקים המשותפים (`.title-ornament`, `.article-section`). אין כאן צבע חדש,
+   אין גופן חדש ואין רדיוס שהפרק אינו משתמש בו.
+
+   ארבעת הכללים של פרק 6, שכולם מחייבים גם כאן:
+
+     1. אין מיכל. שאלה אינה כרטיסייה — היא יושבת על הקלף ומופרדת מהבאה אחריה
+        בשיער אחד. בעמוד של שישים שאלות זה ההבדל בין מסמך לבין ערימת קופסאות.
+     2. בחירה היא מילוי מרון על קרם. זהב הוא שיער וטבעת סביב מספר, לעולם לא
+        צבע המצב.
+     3. החלקים הם החלקים של המאמר: מדליון ממוספר בטבעת זהב (`.gv-slot-n`),
+        משבצת שהיא קו ולא קופסה (`.gv-slot-line`), וכפתורי גלולה (`.gv-chip`,
+        `.gv-pick`).
+     4. אין מידה שהפרק אינו משתמש בה.
+
+   וכלל האלכסון של פרק 6, שהוא הסיבה שכמעט שום דבר כאן אינו ממורכז: פרוזה רצה
+   וכותרות מתחילות בקצה העמודה, ורק מה ששייך לשורה סימטרית או שהוא טקסי —
+   ממורכז. שאלה היא פרוזה. הציון בסוף הוא טקסי, והוא היחיד שממורכז, בתוך עמודה
+   שמתחילה בקצה.
+
+   היוצא מן הכלל היחיד לכלל 1 הוא סימון נכון/שגוי בסקירה, והוא צבוע בשיער בקצה
+   ההתחלה של השאלה ולא במסגרת סביבה — קו אחד שאפשר לסרוק במורד העמוד. */
+
+/* --------------------------------------------------------------- העמוד ----
+   `.chapter-article` נותן את העמודה; כאן רק המידות שהמבחן מוסיף. מידת הקריאה
+   היא של פרק 6, `min(760px,100%)`, והיא מתחילה בקצה — לא ממורכזת. */
+.xr-article { padding-bottom: clamp(40px, 6vw, 80px) }
+.xr-lead { margin-bottom: clamp(30px, 4.4vw, 52px) }
+.xr-lead h1 { margin: 0; font-size: clamp(34px, 4.4vw, 52px); font-weight: 900; color: var(--maroon) }
+.xr-lead p {
+  width: min(760px, 100%); margin: 16px 0 0;
+  font-size: var(--read); line-height: 1.75; color: var(--muted);
+}
+
+/* ------------------------------------------------------- מונה ושעון ----
+   יושבים בסלוט הסופי של המסטהד, במקום כפתור החזרה — ולכן הם על מרון, באותה
+   שפה של `.gv-back` שהמאמר שם באותו מקום. */
+.xr-hud { display: flex; align-items: center; gap: 14px }
+.xr-count { font-size: 15px; color: rgba(245, 236, 214, .78) }
+.xr-clock {
+  font-family: var(--font-heading); font-weight: 800; font-size: 20px;
+  min-width: 76px; text-align: center;
+  padding: 5px 14px; border-radius: 999px;
+  border: 1px solid rgba(245, 236, 214, .26); background: rgba(245, 236, 214, .1);
+  color: var(--cream); font-variant-numeric: tabular-nums;
+}
+.xr-clock.is-up { font-weight: 700; color: rgba(245, 236, 214, .8) }
+/* הדקה האחרונה. אין כאן אנימציה — שעון שמהבהב על מבחן הוא הפרעה ולא מידע. */
+.xr-clock.is-low { background: var(--stamp); border-color: var(--stamp); color: var(--cream) }
+
+/* עצירות הסרגל קופצות לבלוקים האלה, ולכן הם חייבים את אותו scroll-margin
+   ש-`.article-section` נושא — אחרת היעד נוחת מתחת למסטהד הנצמד. */
+.xr-step, .xq { scroll-margin-top: calc(var(--header-height) + 22px) }
+
+/* ----------------------------------------------------------- המדליון ----
+   `.gv-slot-n` של פרק 6 מילה במילה: 42px, נייר, טבעת זהב 2px וטבעת שיער
+   פנימית, והספרה בגודל ובמשקל שהפרק נותן לדיסק הממוספר היחיד שהוא מצייר. */
+.xr-n, .xq-n {
+  position: relative; flex: none; width: 42px; height: 42px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--paper); border: 2px solid var(--gold);
+  box-shadow: 0 5px 13px rgba(60, 35, 18, .12);
+  font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: var(--maroon);
+  transition: background .22s, border-color .22s, color .22s;
+}
+.xr-n::before, .xq-n::before {
+  content: ""; position: absolute; inset: 4px; border-radius: 50%;
+  border: 1px solid rgba(199, 154, 60, .5);
+}
+.xq-n.is-full { background: var(--maroon); border-color: var(--maroon-deep); color: var(--cream) }
+.xq-n.is-full::before { border-color: rgba(245, 236, 214, .5) }
+/* שורה בלי מספר — הדיסק נושא את המעוין של הפרק במקום ספרה */
+.xq-n.is-blank::after {
+  content: ""; width: 7px; height: 7px; border: 1px solid var(--gold-text); transform: rotate(45deg);
+}
+.xq-n.is-blank.is-full::after { border-color: var(--cream) }
+
+/* -------------------------------------------------------------- הבנייה ---- */
+.xr-step { margin-bottom: clamp(34px, 5vw, 58px) }
+.xr-step + .xr-step { padding-top: clamp(30px, 4.4vw, 48px); border-top: 1px solid var(--rule) }
+.xr-step-head { display: flex; gap: 16px; align-items: start; margin-bottom: clamp(18px, 2.6vw, 26px) }
+.xr-step-head h2 {
+  margin: 0; font-family: var(--font-heading); font-weight: 800;
+  font-size: clamp(23px, 2.3vw, 30px); line-height: 1.3; color: var(--maroon);
+}
+.xr-step-head p { margin: 6px 0 0; font-size: clamp(15px, 1.6vw, 18px); color: var(--muted) }
+
+.xr-chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px }
+/* כרטיס פרק הוא הדבר היחיד בעמוד שכן מצויר כשטח לחיץ, ומסיבה טובה: הוא בחירה
+   של אובייקט ולא של ערך, והוא נושא שלוש שורות מידע. גם הוא בלי מילוי — שיער
+   אחד, ומילוי מרון כשהוא נבחר, כמו כל בחירה אחרת בעמוד. */
+.xr-ch {
+  all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 16px; align-items: center;
+  padding: 14px 18px; border: 1px solid var(--edge); border-radius: 14px; background: var(--mat);
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.xr-ch:hover:not(.is-on) { background: rgba(165, 50, 47, .1); border-color: var(--maroon) }
+.xr-ch:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
+.xr-ch-n {
+  grid-row: 1 / span 2; width: 38px; height: 38px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--paper); border: 2px solid var(--gold);
+  font-family: var(--font-heading); font-weight: 800; font-size: 16px; color: var(--maroon);
+}
+.xr-ch-name { font-family: var(--font-heading); font-weight: 700; font-size: 20px; color: var(--maroon) }
+.xr-ch-count { grid-column: 2; font-size: 14px; color: var(--muted) }
+.xr-ch.is-on { background: var(--maroon); border-color: var(--maroon) }
+.xr-ch.is-on .xr-ch-name { color: var(--cream) }
+.xr-ch.is-on .xr-ch-count { color: rgba(245, 236, 214, .72) }
+.xr-ch.is-on .xr-ch-n { background: var(--cream); border-color: var(--cream); color: var(--maroon-deep) }
+.xr-chapters-all { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 16px }
+
+.xr-lengths { display: flex; flex-wrap: wrap; gap: 11px }
+
+/* ------------------------------------------------------------ הגלולות ----
+   `.gv-pick` של פרק 6: גלולה על `--mat` עם שיער `--edge`, ומילוי מרון כשנבחרה. */
+.xr-pick, .xq-pick, .xr-secondary {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 46px; padding: 11px 24px; border-radius: 999px;
+  border: 1px solid var(--edge); background: var(--mat);
+  font-family: var(--font-body); font-size: 16px; font-weight: 600; color: var(--maroon);
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.xr-pick:hover:not(.is-on):not(:disabled),
+.xq-pick:hover:not(.is-on),
+.xr-secondary:hover { background: rgba(165, 50, 47, .1); border-color: var(--maroon) }
+.xr-pick:focus-visible, .xq-pick:focus-visible, .xr-secondary:focus-visible {
+  outline: 2px solid var(--maroon); outline-offset: 2px;
+}
+.xr-pick.is-on, .xq-pick.is-on { background: var(--maroon); border-color: var(--maroon); color: var(--cream) }
+.xr-pick:disabled { opacity: .35; cursor: default }
+.xr-pick { font-family: var(--font-heading); font-weight: 700; font-size: 20px; min-width: 74px }
+
+/* הפעולה שמחייבת — מילוי מרון, שהוא מה שהעמוד מתכוון בו ב„נבחר“ */
+.xr-go {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 52px; padding: 13px 34px; border-radius: 999px;
+  background: var(--maroon); border: 1px solid var(--maroon); color: var(--cream);
+  font-family: var(--font-heading); font-weight: 700; font-size: 20px;
+  transition: background .2s ease, border-color .2s ease;
+}
+.xr-go:hover:not(:disabled) { background: var(--maroon-deep); border-color: var(--maroon-deep) }
+.xr-go:disabled { opacity: .35; cursor: default }
+.xr-go:focus-visible { outline: 2px solid var(--maroon); outline-offset: 3px }
+
+.xr-submit {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  margin-top: clamp(34px, 5vw, 56px); padding-top: clamp(28px, 4vw, 44px);
+  border-top: 1px solid var(--rule);
+}
+.xr-note { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--muted); flex-basis: 100% }
+.xr-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; font-size: 15px; color: var(--muted) }
+.xr-empty { font-size: var(--read); color: var(--muted) }
+
+/* ================================================================ השאלה ==== */
+/* אין מיכל. שיער אחד בין שאלה לשאלה, והרבה אוויר. */
+.xr-sheet { list-style: none; margin: 0; padding: 0 }
+.xr-sheet > li + li { margin-top: clamp(30px, 4.4vw, 48px); padding-top: clamp(30px, 4.4vw, 48px); border-top: 1px solid var(--rule) }
+
+.xq-head { display: flex; gap: 16px; align-items: start }
+.xq-head > div { min-width: 0; flex: 1 }
+.xq-head h2 {
+  margin: 0; font-family: var(--font-heading); font-weight: 700;
+  font-size: clamp(21px, 2vw, 27px); line-height: 1.35; color: var(--maroon-deep);
+}
+.xq-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin: 0 0 7px; font-size: 14px; color: var(--muted) }
+/* התווית הקטנה — 12.5px באותיות מרווחות, בדיוק `.gv-hint-label` של פרק 6 */
+.xq-tag {
+  font-size: 12.5px; letter-spacing: .16em; font-weight: 700; color: var(--gold-text);
+}
+.xq-tag.is-right { color: var(--maroon) }
+.xq-tag.is-wrong { color: var(--stamp) }
+.xq-work { margin-top: clamp(18px, 2.4vw, 26px) }
+
+/* סימון התוצאה בסקירה: קו בקצה ההתחלה, ולא מסגרת. אפשר לסרוק אותו במורד
+   העמוד בלי לקרוא מילה, וזה כל מה שהוא צריך לעשות. */
+.xq.is-review { padding-inline-start: clamp(14px, 2vw, 22px); border-inline-start: 3px solid transparent }
+.xq.is-review.is-right { border-inline-start-color: var(--maroon) }
+.xq.is-review.is-wrong { border-inline-start-color: var(--stamp) }
+
+/* ---- אמריקאית: גלולות בטור ----
+   טור ולא שורה עוטפת, כי אלה משפטים ולא שמות: ארבע גלולות באורכים שונים בשתי
+   שורות מרופטות מכריחות למצוא איפה תשובה נגמרת לפני שאפשר להשוות. */
+.xq-options { list-style: none; margin: 0; padding: 0; display: grid; justify-items: start; gap: 11px; width: min(760px, 100%) }
+.xq-options > li { display: flex; max-width: 100% }
+.xq-opt {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 46px; padding: 10px 20px; border-radius: 999px;
+  border: 1px solid var(--edge); background: var(--mat);
+  font-family: var(--font-body); font-size: 16px; font-weight: 600; line-height: 1.4; color: var(--maroon);
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.xq-opt:hover:not(.is-picked):not(:disabled) { background: rgba(165, 50, 47, .1); border-color: var(--maroon) }
+.xq-opt:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
+.xq-opt.is-picked { background: var(--maroon); border-color: var(--maroon); color: var(--cream) }
+.xq-opt:disabled { cursor: default }
+/* בסקירה: הנכונה תמיד מסומנת, וטעות שנבחרה נצבעת ב-stamp. אופציה שלא נבחרה
+   ואינה נכונה נשארת כפי שהיא — דף שכולו מסומן אינו קריא. */
+.xq-opt.is-right { background: var(--maroon); border-color: var(--maroon); color: var(--cream); opacity: 1 }
+.xq-opt.is-wrong { background: var(--mat); border-color: var(--stamp); color: var(--stamp) }
+.xq-opt-mark { flex: none; width: 19px; height: 19px }
+.xq-opt-mark svg { width: 100%; height: 100% }
+.xq-ask { margin: 14px 0 0; font-size: clamp(15px, 1.6vw, 18px); color: var(--muted) }
+
+/* ---- התאמה: בנק גלולות, ומשבצת שהיא קו ---- */
+.xq-bank { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 0 0 var(--flow, 26px); padding: 0; min-height: 46px }
+.xq-chip {
+  all: unset; box-sizing: border-box; cursor: grab;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 46px; padding: 10px 20px; border-radius: 999px;
+  border: 1px solid var(--edge); background: var(--mat); color: var(--maroon);
+  font-family: var(--font-body); font-size: 15px; font-weight: 600; line-height: 1.3;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, opacity .2s ease;
+}
+.xq-chip:hover:not(:disabled) { background: rgba(165, 50, 47, .1); border-color: var(--maroon) }
+.xq-chip:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
+.xq-chip.is-held { background: var(--maroon); border-color: var(--maroon); color: var(--cream); cursor: grabbing }
+.xq-chip.is-placed { opacity: .38; cursor: default }
+
+/* ציר שיער אחד דרך המדליונים, כמו `.gv-track::before` של פרק 6 במצבו האנכי —
+   הוא מה שהופך את השורות לתרגיל אחד עכשיו שאין קופסאות */
+.xq-match { position: relative; list-style: none; margin: 0; padding: 0 }
+.xq-match::before { content: ""; position: absolute; inset-inline-start: 21px; top: 16px; bottom: 16px; width: 1px; background: var(--edge) }
+.xq-match-row {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "n cue" ". line";
+  gap: 8px 16px; align-items: center; padding: 12px 0;
+}
+.xq-match-row > .xq-n { grid-area: n }
+.xq-match-left {
+  grid-area: cue; font-family: var(--font-heading); font-weight: 700;
+  font-size: clamp(15px, 1.4vw, 17.5px); line-height: 1.3; color: var(--maroon-deep);
+}
+/* המשבצת היא <button> בזמן מענה ו-<span> בסקירה, ולכן כלל אחד לשניהם ולא
+   שניים: `all:unset` על גרסת הכפתור היה מאפס גם את מה שהכלל המשותף כבר קבע,
+   ואז החזרתו תלויה בסדר הסלקטורים. כאן הצורה נכתבת פעם אחת, והכפתור מוסיף רק
+   את מה שהוא צריך בתור כפתור. */
+.xq-slot {
+  box-sizing: border-box;
+  grid-area: line; justify-self: start; width: min(360px, 100%);
+  display: flex; align-items: center; gap: 9px;
+  min-height: 2.1em; margin: 0; padding: 4px 6px;
+  border: 0; border-bottom: 2px dashed rgba(138, 39, 51, .42); border-radius: 0;
+  background: none; text-align: start;
+  font-family: var(--font-body); font-size: var(--read); line-height: 1.4; color: var(--ink);
+  transition: border-color .2s ease, color .2s ease;
+}
+button.xq-slot { cursor: pointer; appearance: none; -webkit-appearance: none }
+button.xq-slot:hover { border-bottom-color: var(--maroon) }
+button.xq-slot:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
+.xq-slot.is-full { border-bottom: 2px solid var(--maroon); color: var(--maroon-deep); font-weight: 700 }
+.xq-slot.is-wrong { border-bottom-color: var(--stamp); color: var(--stamp) }
+.xq-slot-mark { flex: none; width: 18px; height: 18px }
+.xq-slot-mark svg { width: 100%; height: 100% }
+.xq-slot i { font-style: italic; font-weight: 400; color: var(--muted) }
+/* התשובה הנכונה, כשהיא לא ניתנה — היא באה אחרי מה שנכתב ולא במקומו */
+.xq-fix { font-style: normal; font-weight: 700; color: var(--maroon-deep) }
+.xq-fix::before { content: "← "; color: var(--muted); font-weight: 400 }
+
+/* ---- פתוחה ---- */
+.xq-write {
+  box-sizing: border-box; width: min(760px, 100%); display: block;
+  padding: 14px 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--mat);
+  font-family: var(--font-body); font-size: var(--read); line-height: 1.75; color: var(--ink);
+  resize: vertical;
+}
+.xq-write:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px; border-color: var(--maroon) }
+/* התווית הקטנה בזהב מרווח — `.gv-hint-label` של פרק 6 */
+.xq-label {
+  display: block; font-size: 12.5px; letter-spacing: .16em; font-weight: 700;
+  color: var(--gold-text); margin-bottom: 6px;
+}
+.xq-mine, .xq-model, .xq-grade { width: min(760px, 100%) }
+.xq-mine p, .xq-model p { margin: 0 0 var(--flow-tight, 16px); font-size: var(--read); line-height: 1.75; color: var(--ink) }
+.xq-empty { color: var(--muted); font-style: italic }
+.xq-model { margin-top: clamp(20px, 2.8vw, 30px); padding-top: clamp(20px, 2.8vw, 30px); border-top: 1px solid var(--rule) }
+.xq-points { margin: 0; padding-inline-start: 1.15em; display: grid; gap: 7px }
+.xq-points li { font-size: 15.5px; line-height: 1.65; color: var(--ink) }
+.xq-grade { margin-top: clamp(20px, 2.8vw, 30px) }
+.xq-grade-row { display: flex; flex-wrap: wrap; gap: 11px }
+
+/* --------------------------------------------------------- שורת המקור ---- */
+.xq-foot { margin-top: clamp(18px, 2.4vw, 26px); width: min(760px, 100%) }
+.xq-ok { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--maroon-deep); font-weight: 600 }
+.xq-src { display: flex; flex-wrap: wrap; gap: 12px; margin: 9px 0 0; font-size: 14px; color: var(--muted) }
+.xq-src a { color: var(--maroon); font-weight: 700 }
+
+/* ================================================================ הציון ==== */
+/* ממורכז, כמו כל דבר טקסי בפרק — והמספר עצמו בגודל של כותרת ראשית. */
+/* הבלוק הטקסי היחיד בעמוד, ולכן היחיד שממורכז — בדיוק כמו `.gv-end-quote`
+   של פרק 6, שממורכז בתוך העמודה בעוד העמודה עצמה מתחילה בקצה. */
+.xr-score {
+  width: min(760px, 100%); margin-inline: auto; text-align: center;
+  margin-bottom: clamp(40px, 6vw, 72px);
+}
+.xr-score .title-ornament { margin: 15px auto 22px }
+.xr-score-n { display: flex; align-items: baseline; justify-content: center; gap: 12px; margin: 0 }
+.xr-score-n b { font-family: var(--font-heading); font-weight: 900; font-size: clamp(52px, 9vw, 96px); line-height: 1; color: var(--maroon) }
+.xr-score-n span { font-family: var(--font-heading); font-weight: 700; font-size: clamp(20px, 2.3vw, 28px); color: var(--muted) }
+.xr-score-line { margin: 0; font-size: var(--read); line-height: 1.75; color: var(--ink) }
+.xr-score-meta { margin: 10px 0 0; font-size: 14px; color: var(--muted) }
+/* לא אזהרה אדומה — הודעה. פתוחה שלא הוערכה אינה טעות של הלומדת. */
+.xr-score-warn {
+  width: min(620px, 100%); margin: 18px auto 0;
+  font-size: 14.5px; line-height: 1.6; color: var(--gold-text); font-weight: 600;
+}
+
+/* ============================================================ היסטוריה ==== */
+.xr-history { list-style: none; margin: 0; padding: 0 }
+.xr-history > li { display: flex; align-items: center; gap: 12px; padding: 14px 0 }
+.xr-history > li + li { border-top: 1px solid var(--rule) }
+.xr-hrow {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 16px; padding: 6px 8px; border-radius: 12px;
+  transition: background .2s ease;
+}
+.xr-hrow:hover { background: rgba(165, 50, 47, .07) }
+.xr-hrow:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
+.xr-hscore {
+  flex: none; width: 62px; height: 62px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--paper); border: 2px solid var(--gold);
+  font-family: var(--font-heading); font-weight: 800; font-size: 21px; color: var(--maroon);
+}
+.xr-hscore i { font-style: normal; font-size: 13px; font-weight: 700; color: var(--muted) }
+.xr-hbody { display: grid; gap: 4px; min-width: 0 }
+.xr-hbody b { font-family: var(--font-heading); font-weight: 700; font-size: 18px; color: var(--maroon-deep) }
+.xr-hbody span { font-size: 14px; line-height: 1.55; color: var(--muted) }
+.xr-del {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: none;
+  width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--edge); background: var(--mat); color: var(--muted);
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+.xr-del:hover { background: rgba(165, 50, 47, .1); border-color: var(--maroon); color: var(--maroon) }
+.xr-del:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
+.xr-del svg { width: 17px; height: 17px }
+
+/* תווית העצירה בסרגל היא „פרק N“ ולכן קצרה; החיתוך קיים כדי ששינוי עתידי
+   בתווית לא ימתח שישים שורות בסרגל. */
+.chapter-menu-nav .menu-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+
+/* ---------------------------------------------------------------- צר ---- */
+@media (max-width: 680px) {
+  .xr-count { display: none }
+  .xr-n, .xq-n { width: 34px; height: 34px; font-size: 14px }
+  .xq-match::before { inset-inline-start: 17px }
+  .xq-match-row { gap: 6px 12px }
+  .xr-ch { grid-template-columns: auto minmax(0, 1fr) }
+  .xr-ch-count { grid-column: 2 }
+  .xr-history > li { flex-wrap: wrap }
+}
+
+/* ------------------------------------------------------- תנועה מופחתת ---- */
+@media (prefers-reduced-motion: reduce) {
+  .xr-n, .xq-n, .xr-ch, .xr-pick, .xq-pick, .xr-secondary, .xr-go,
+  .xq-opt, .xq-chip, .xq-slot, .xr-hrow, .xr-del { transition: none }
+}

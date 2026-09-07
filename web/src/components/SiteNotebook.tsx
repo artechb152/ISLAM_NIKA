@@ -7,7 +7,8 @@
 
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { allChapters } from '@/lib/chapters-data'
+import TopicFilter from '@/components/TopicFilter'
+import { allChapters, categoryOfChapter } from '@/lib/chapters-data'
 import { deleteMark, MARKS_EVENT, readMarks, setMarkNote, type Mark } from '@/lib/site-notebook'
 
 function fmt(ms: number): string {
@@ -24,6 +25,7 @@ export default function SiteNotebook() {
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null)
   const [confirmDel, setConfirmDel] = useState<string | null>(null)
   const [current, setCurrent] = useState<string | null>(null)
+  const [topic, setTopic] = useState<string | null>(null)
   const articleRef = useRef<HTMLElement | null>(null)
 
   const load = useCallback(() => setMarks(readMarks().marks), [])
@@ -47,7 +49,7 @@ export default function SiteNotebook() {
   }, [])
 
   /* סעיף לכל פרק שיש בו סימונים — סדר הפרקים, לא סדר הסימון */
-  const sections = useMemo(() => {
+  const allSections = useMemo(() => {
     const by = new Map<number, Mark[]>()
     for (const m of marks) {
       const list = by.get(m.ch) ?? []
@@ -59,6 +61,27 @@ export default function SiteNotebook() {
       .filter((c) => by.has(c.number))
       .map((c) => ({ id: `ch-${c.number}`, num: c.number, title: c.title, href: c.href, marks: by.get(c.number)! }))
   }, [marks])
+
+  /* הנושאים שיש בהם סימונים, וכמה סימונים בכל אחד. המספר הוא של הסימונים ולא
+     של הפרקים — במחברת היחידה שסופרים היא הסימון. */
+  const topics = useMemo(() => {
+    const by = new Map<string, { id: string; title: string; count: number }>()
+    for (const s of allSections) {
+      const cat = categoryOfChapter.get(s.num)
+      if (!cat) continue
+      const cur = by.get(cat.id)
+      if (cur) cur.count += s.marks.length
+      else by.set(cat.id, { id: cat.id, title: cat.title, count: s.marks.length })
+    }
+    return [...by.values()]
+  }, [allSections])
+
+  /* הסינון חל על `sections` עצמו, ולכן גם הסרגל וגם המאמר עוקבים אחריו בלי
+     שאף אחד מהם יצטרך לדעת שיש סינון. */
+  const sections = useMemo(
+    () => (topic ? allSections.filter((s) => categoryOfChapter.get(s.num)?.id === topic) : allSections),
+    [allSections, topic]
+  )
 
   /* איזה סעיף נקרא עכשיו — מסמן אותו בסרגל, בדיוק כמו בפרק */
   useEffect(() => {
@@ -120,6 +143,15 @@ export default function SiteNotebook() {
           </div>
           <nav className="chapter-menu-nav" aria-label="ניווט במחברת">
             <ol>
+              {ready && allSections.length > 0 && sections.length === 0 && (
+                <section className="article-section nb-empty">
+                  <p>אין סימונים בנושא הזה.</p>
+                  <button type="button" className="nb-btn" onClick={() => setTopic(null)}>
+                    הצגת הכל
+                  </button>
+                </section>
+              )}
+
               {sections.map((s) => (
                 <li key={s.id}>
                   <a
@@ -147,9 +179,12 @@ export default function SiteNotebook() {
                 <span className="chapter-number">המחברת שלי</span>
                 <div className="title-ornament" aria-hidden="true"><span /></div>
                 <h1 className="nb-h1">מה שסימנתם לעצמכם</h1>
+                {/* הספירה היא של מה שגלוי כרגע. כותרת שסופרת את הכל מעל רשימה
+                    מסוננת סותרת את מה שרואים מתחתיה. */}
                 <p className="opening-subtitle">
                   {ready && marks.length > 0
-                    ? `${marks.length} סימונים מתוך ${sections.length} פרקים`
+                    ? `${sections.reduce((n, s) => n + s.marks.length, 0)} סימונים מתוך ${sections.length} פרקים` +
+                      (topic ? ' · מסונן לפי נושא' : '')
                     : 'כאן נאסף מה שסימנתם בפרקים'}
                 </p>
                 <div className="nb-lede">
@@ -164,7 +199,19 @@ export default function SiteNotebook() {
                 </div>
               </section>
 
-              {ready && sections.length === 0 && (
+              {/* הסינון יושב בין הפתיחה לסימונים — הוא שייך לרשימה שמתחתיו,
+                  ולא לכותרת. הרכיב מסתיר את עצמו כשיש פחות משני נושאים. */}
+              {ready && allSections.length > 0 && (
+                <TopicFilter
+                  active={topic}
+                  onPick={setTopic}
+                  options={topics}
+                  allCount={marks.length}
+                  label="סינון הסימונים לפי נושא"
+                />
+              )}
+
+              {ready && allSections.length === 0 && (
                 <section className="article-section nb-empty">
                   <p>עוד לא סימנתם דבר.</p>
                   <button type="button" className="nb-btn" onClick={() => router.push('/chapters')}>

@@ -1,0 +1,40 @@
+/* שורת הצ'יפים של הסינון לפי נושא.
+
+   הגיליון הזה קיים כי `.chip` יושב ב-chapters.css, ולא חדר המבחנים ולא המחברת
+   טוענים אותו — שניהם טוענים את chapter6-article.css. הכללים כאן הם אותה צורה
+   בדיוק, כתובה ב-tokens שהגיליון ההוא נושא: `--panel` לרקע, `--edge` לשיער,
+   ו-`--maroon` למילוי הפעיל. אין כאן צבע חדש ואין מידה חדשה.
+
+   מסך הפרקים לא נגעתי בו. הוא נושא ערכת tokens משלו (`--header`), ואיחוד שני
+   העותקים היה משנה עמוד שאיש לא ביקש לשנות. */
+
+.chip-row {
+  display: flex; gap: 10px; overflow-x: auto;
+  padding-bottom: 6px; margin-bottom: clamp(18px, 2.4vw, 28px);
+  scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+}
+.chip-row::-webkit-scrollbar { height: 6px }
+.chip-row::-webkit-scrollbar-thumb { background: rgba(87, 24, 32, .2); border-radius: 99px }
+
+.chip {
+  all: unset; box-sizing: border-box; cursor: pointer; flex: none; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 38px; padding: 8px 17px; border-radius: 999px;
+  background: var(--panel); border: 1px solid var(--edge); color: var(--ink);
+  font-family: var(--font-body); font-weight: 600; font-size: 14.5px;
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+.chip:hover:not(.is-active) { background: rgba(165, 50, 47, .1); border-color: var(--maroon) }
+.chip:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
+/* בחירה היא מילוי מרון על קרם — הכלל השני של פרק 6, כאן כמו בכל מקום אחר */
+.chip.is-active { background: var(--maroon); border-color: var(--maroon); color: var(--cream) }
+
+/* המספר לצד השם. הוא הדבר שהופך את השורה מניווט למידע: אפשר לראות כמה יש
+   בכל נושא בלי ללחוץ עליו. */
+.chip-n {
+  font-family: var(--font-heading); font-weight: 800; font-size: 13px;
+  color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.chip.is-active .chip-n { color: rgba(245, 236, 214, .75) }
+
+@media (prefers-reduced-motion: reduce) { .chip { transition: none } }

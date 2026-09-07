@@ -144,12 +144,42 @@
 /* §19 (sura 96) and §42 (17:1) — the two the event itself rests on.
    On the reading edge with a gold rule, not centred in a frame: a frame would
    make it an object, and these are text. */
+/* REVERSED ON THE USER'S INSTRUCTION, 7.9.2026. The note above argued for a
+   gold rule on the reading edge and against a frame — „a frame would make it
+   an object, and these are text." She asked for chapter 6's illuminated plate
+   instead, and that is the call. The reasoning above is left standing so the
+   record shows what was traded away: the verse now reads as an object.
+
+   It is the shahada's plate, part for part — the same cream-to-panel wash, the
+   same gold rule and inset, the same cusped corners and the same oversized
+   marks — because this chapter and that one are one product and a second
+   frame that merely resembled it would be the drift the sheet exists to
+   prevent. What does NOT carry over is the centring: chapter 6 centres its
+   testimony, and a running verse inside a reading column stays on its column. */
 .ch4-verse{
-  margin:0;width:min(760px,100%);
-  padding-inline-start:clamp(18px,2.2vw,28px);
-  border-inline-start:3px solid var(--gold);
+  position:relative;margin:0;width:min(620px,100%);
+  padding:24px clamp(24px,3.6vw,40px);
+  background:linear-gradient(180deg,var(--cream),var(--panel));
+  border:1.5px solid var(--gold);border-radius:16px;
+  box-shadow:inset 0 0 0 4px rgba(199,154,60,.16),0 10px 26px rgba(87,24,32,.1);
   font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
-  font-size:clamp(19px,1.9vw,25px);line-height:1.6;
+  font-size:clamp(19px,1.9vw,25px);line-height:1.5;
+}
+.ch4-verse::before,.ch4-verse::after{
+  content:"";position:absolute;width:18px;height:18px;border:2px solid var(--gold);opacity:.9;
+}
+.ch4-verse::before{top:7px;inset-inline-start:7px;border-inline-end:none;border-block-end:none;border-start-start-radius:8px}
+.ch4-verse::after{bottom:7px;inset-inline-end:7px;border-inline-start:none;border-block-start:none;border-end-end-radius:8px}
+.ch4-verse .cv-mark{
+  position:absolute;font-family:var(--font-heading);
+  font-size:64px;line-height:1;color:var(--gold);opacity:.85;pointer-events:none;
+}
+.ch4-verse .cv-open{top:-11px;inset-inline-start:18px}
+.ch4-verse .cv-close{bottom:-10px;inset-inline-end:18px;transform:rotate(180deg)}
+.ch4-verse p{margin:0}
+.ch4-verse cite{
+  display:block;font-family:var(--font-body);font-style:normal;font-weight:600;
+  font-size:14px;letter-spacing:.03em;color:var(--gold-text);margin-top:10px;
 }
 
 
@@ -338,25 +368,6 @@
 }
 .ch4-card-text{margin:0;color:var(--ink)}
 
-/* ---------------------- „איפה זה פוגש אותנו" --------------------------
-   THE ONE DISTINCTION THIS CHAPTER CANNOT DO WITHOUT. Half of chapter 4 is
-   seventh-century narrative and half is what has been done with it in the
-   last fifty years — a verse recited at a missile launch, an operation named
-   after a battle, a slogan chanted at a march. A reader must never have to
-   work out which of the two they are reading, and the source's own habit of
-   putting them in adjacent sentences is exactly what makes that easy to lose.
-
-   A rule on the reading edge and a quieter ground: present tense, set apart,
-   without the ornament that would make it look like a pull-quote. Five uses,
-   and the count is in STRUCTURE.md so a sixth has to be argued for. */
-.ch4-echo{
-  padding:clamp(14px,1.8vw,20px) clamp(16px,2vw,24px);
-  border-inline-start:3px solid var(--maroon);
-  background:var(--paper);
-}
-.ch4-echo > *{margin:0}
-.ch4-echo > * + *{margin-block-start:.7em}
-
 /* --------------------------- the force balance ------------------------
    Twice, and there is no third: Badr is 300 against 1000, Uhud is 1000
    against 3000, and the reversal is the argument. No bars — a bar sets a
@@ -444,7 +455,6 @@
    anyone adding a device here has to delete a rule that says not to. */
 .ch4-quiet .ch4-body{color:var(--read,var(--ink))}
 .ch4-quiet figure,
-.ch4-quiet .ch4-echo,
 .ch4-quiet .ch4-cards,
 .ch4-quiet .ch4-forces{display:none}
 
@@ -465,6 +475,15 @@
    around them carries a device; these paragraphs do not, and must not grow
    one later. */
 .ch4-quiet-body{color:var(--read,var(--ink))}
+
+/* -------------------- the second register of emphasis ------------------
+   `.key` (chapter 6's, maroon) carries the IDEA a sentence turns on. This one
+   carries a TRANSLITERATED TERM and nothing else — אלהג׳רה, דעוה, הודנה,
+   מצלחה. Gold instead of maroon because a term is not a claim: it names a
+   thing the chapter will use again, and it should read as a label rather than
+   as the point of the sentence. Weight 600 rather than 700 for the same
+   reason — present, not louder than the prose around it. */
+.ch4-tr{color:var(--gold-text);font-weight:600}
 
 /* -------------------------------- the plates --------------------------
    Three painted views, each under the sentences it belongs to. Full bleed
@@ -1036,7 +1055,21 @@
 
    BELOW 900px the faces come off the picture, become a row beneath it, the text
    follows underneath, and the connectors are not drawn at all. */
+/* THE BLOCK STARTS TWO LINES LOWER than the sentence that introduces it.
+   The sentence ends on a colon and hands off to the figure — but the ring
+   is laid out around the painting's centre, so the top two medallions rise
+   ABOVE the painting's own top edge and reach for the line they are
+   answering. The gap is measured against the medallions, not the picture. */
 .ch4-who{margin:0;width:100%}
+/* THE SELECTOR HAS TO OUT-WEIGH THE SECTION'S OWN RHYTHM. `.chapter-article
+   .article-section > * + *` sets the gap between blocks and scores 0,2,0; a
+   bare `.ch4-who` scores 0,1,0 and was simply ignored. Same weight, later in
+   the file, so this one lands. */
+/* THE SELECTOR HAS TO OUT-WEIGH THE SECTION'S OWN RHYTHM. `.chapter-article
+   .article-section > * + *` sets the gap between blocks and scores 0,2,0; a
+   bare `.ch4-who` scores 0,1,0 and was simply ignored. Same weight, later in
+   the file, so this one lands. */
+.chapter-article .ch4-who{margin-top:calc(var(--lh) * 2em)}
 
 .ch4-who-body{display:grid;gap:clamp(18px,2.4vw,34px);align-items:center}
 @media (min-width:900px){
@@ -1047,11 +1080,23 @@
 
 .ch4-who-town{
   display:block;width:100%;height:auto;
-  /* the painting's paper multiplies into the page's own ground, so the picture
-     ends in the page instead of in a disc of a slightly different cream */
-  mix-blend-mode:multiply;
-  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 54%,rgba(0,0,0,.8) 74%,rgba(0,0,0,.26) 90%,transparent 100%);
-  mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 54%,rgba(0,0,0,.8) 74%,rgba(0,0,0,.26) 90%,transparent 100%);
+  /* THE PAPER IS GONE, AND SO IS THE BLEND. This was a JPEG on a white ground,
+     and `multiply` was what made that white disappear into the page. But
+     multiply against a cream backdrop is not neutral: it scales blue by .839
+     and red by .961, so it WARMED the painting by 26 points of R-B against
+     every other illustration in the chapter, which are composited normally.
+     The painting is a transparent WebP now — the radial mask below already
+     does the fading the blend was credited with, and the colour is the file's
+     own. */
+  /* THE MASK IS ALMOST GONE, AND THE PAINTING REACHES THE EDGE. The old one
+     was an ellipse of 50% radius fading to nothing by the box's edge, so the
+     painting was already invisible some seventy pixels before it — which is
+     why it never lined up with the column the text starts at, however the box
+     was placed. The painting is painted to dissolve at its own edges now, so
+     all that is left here is a whisper at the very last few per cent, to stop
+     a crop line if the file ever changes. */
+  -webkit-mask-image:radial-gradient(ellipse 74% 74% at 50% 50%,#000 92%,transparent 100%);
+          mask-image:radial-gradient(ellipse 74% 74% at 50% 50%,#000 92%,transparent 100%);
   opacity:0;
   transition:opacity .8s ease;
 }
@@ -1074,7 +1119,11 @@
   display:block;padding:0;cursor:pointer;
   width:clamp(74px,7.6vw,102px);aspect-ratio:1;border-radius:50%;
   border:2px solid var(--gold);background:var(--mat);overflow:hidden;
-  box-shadow:0 3px 12px rgba(60,35,18,.2);
+  /* A RING OF THE PAGE'S OWN GROUND. The first shadow is not a shadow: it is a
+     band of the paper colour that separates the medallion from whatever the
+     painting is doing behind it. Without it a warm face on a warm oasis has no
+     edge, and the two read as one picture. */
+  box-shadow:0 0 0 7px var(--mat),0 3px 12px rgba(60,35,18,.2);
   opacity:0;
   transition:border-color .2s ease,scale .2s ease,box-shadow .2s ease,opacity .55s ease;
   transition-delay:0s,0s,0s,var(--step,.6s);
@@ -1180,16 +1229,45 @@
   background:linear-gradient(to bottom,rgba(28,14,6,0),rgba(28,14,6,.18) 54%,rgba(28,14,6,.72));
 }
 
-/* the two captions: our own label above, the sentence's own words below */
+/* THE SWITCH — top of the frame, at the reading edge.
+   It replaces the small gold tag that used to sit above each caption. The tag
+   named the state correctly and said nothing about the control: a reader saw a
+   picture with a label on it and had no reason to press. Two segments with the
+   current one filled say all three things at once — where you are, where else
+   you can be, and that the two swap.
+
+   `inset-inline-start` and not `right`: start is the right-hand side in RTL,
+   which is where a Hebrew reader's eye enters the frame.
+
+   `pointer-events:none` because the whole picture is the button and the switch
+   must not become a smaller target inside it. */
+.ch4-pact-switch{
+  position:absolute;z-index:2;
+  top:clamp(13px,1.8vw,20px);inset-inline-start:clamp(13px,1.8vw,20px);
+  display:inline-flex;align-items:center;gap:3px;
+  padding:4px;border-radius:999px;
+  background:rgba(255,247,229,.93);
+  box-shadow:0 6px 20px rgba(20,10,4,.38);
+  pointer-events:none;
+}
+.ch4-pact-switch > span{
+  padding:6px clamp(11px,1.2vw,16px);border-radius:999px;
+  font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(12px,1.05vw,14px);letter-spacing:.01em;
+  color:var(--muted);white-space:nowrap;
+  transition:background .38s ease,color .38s ease;
+}
+.ch4-pact-switch > span.is-on{background:var(--maroon);color:var(--cream)}
+.ch4-pact-stage:hover .ch4-pact-switch{box-shadow:0 8px 26px rgba(20,10,4,.5)}
+@media (prefers-reduced-motion:reduce){.ch4-pact-switch > span{transition:none}}
+
+/* the caption: the sentence's own words, at the foot of the frame */
 .ch4-pact-cap{
   position:absolute;z-index:2;
   inset-inline:clamp(18px,3vw,40px);bottom:clamp(16px,2.6vw,32px);
   display:grid;gap:4px;color:var(--cream);text-align:start;
   opacity:0;translate:0 6px;transition:opacity .4s ease,translate .4s ease;
   pointer-events:none;
-}
-.ch4-pact-cap b{
-  font-size:12px;font-weight:600;letter-spacing:.13em;color:var(--gold);
 }
 .ch4-pact-cap i{
   font-style:normal;font-family:var(--font-heading);font-weight:700;line-height:1.22;
@@ -1202,3 +1280,520 @@
 @media (prefers-reduced-motion:reduce){
   .ch4-pact-still,.ch4-pact-cap{transition:none}
 }
+
+/* ============================ the four traditions =======================
+   §18.a opens a list in the source — „מסורות רבות קיימות על קרב זה, ביניהם" —
+   and these are that list. Chapter 2's card, part for part: the painting flush
+   to the card's own edges, the card clipping it, and the name in a padded foot
+   below a hairline. One bounded surface, not a picture with a caption under it.
+
+   ALL FOUR ARE THE SAME SIZE, and that is the point rather than a nicety: they
+   are four of one kind, and a card that is shorter because its tradition is
+   shorter would rank them. The row stretches, the picture is a fixed ratio, and
+   the foot takes whatever height the longest of the four needs.
+
+   THE TEXT IS NOT BEHIND A CLICK. Every one of these is one to three sentences;
+   a disclosure that reveals forty words costs more than the words are worth,
+   and hides from a skim exactly what a skim should catch. */
+.ch4-cards{
+  display:grid;grid-template-columns:1fr;align-items:stretch;
+  gap:clamp(10px,1.4vw,16px);width:100%;
+}
+/* `grid-auto-rows:1fr` is what makes the SECOND row match the first when the
+   grid folds to two columns. Without it each row sizes to its own tallest card
+   and the four stop being one set. It starts at 640px on purpose: stacked in a
+   single column on a phone there is no row to match, and forcing it there would
+   only pad three cards with empty space. */
+@media (min-width:640px){
+  .ch4-cards{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr}
+}
+@media (min-width:1000px){ .ch4-cards{grid-template-columns:repeat(4,minmax(0,1fr))} }
+
+.ch4-card{
+  position:relative;margin:0;min-width:0;height:100%;
+  display:flex;flex-direction:column;
+  /* NO PADDING ON THE CARD. The painting is flush to the card's own edges and
+     the card clips it — that is what makes this one object and not a picture
+     with a caption under it. Padding here (a leftover from an earlier build)
+     left a cream mount around every picture and broke exactly that. */
+  padding:0;
+  background:var(--panel);border:1px solid var(--edge);border-radius:14px;
+  overflow:hidden;
+}
+.ch4-card-art{display:block;background:var(--mat)}
+.ch4-card-art img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+/* the foot grows; the pictures stay on one line across the row */
+.ch4-card-body{
+  flex:1;display:flex;flex-direction:column;
+  padding:clamp(13px,1.4vw,18px);border-top:1px solid var(--edge);
+}
+.ch4-card-title{
+  margin:0 0 9px;font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(17px,1.6vw,20px);color:var(--maroon);line-height:1.25;
+}
+.ch4-card .ch4-body{font-size:clamp(15px,1.35vw,16.5px);line-height:1.6}
+.ch4-card .ch4-body + .ch4-body{margin-top:9px}
+
+
+
+
+/* =============================== „להרחבה" ==============================
+   One door, in one place: §6, where the chapter steps out of the seventh
+   century. It is a button in the text's own column, not a card and not a box —
+   a second ground here would say „different kind of thing", and this is the
+   same passage continued.
+
+   The sheet is a real `<dialog>`. Centred by `inset:0` + `margin:auto`, because
+   a modal dialog centres itself only while all four margins are auto, and in a
+   right-to-left document a dialog that is merely padding-reset lands in the
+   corner. */
+.ch4-more-row{margin:0}
+.ch4-more{
+  all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-body);font-weight:600;font-size:15px;color:var(--maroon);
+  padding:7px 15px;border:1px solid var(--edge);border-radius:99px;
+  background:var(--panel);
+  transition:border-color .2s ease,background .2s ease;
+}
+.ch4-more span{font-size:17px;line-height:1;color:var(--gold-text)}
+.ch4-more:hover{border-color:var(--maroon);background:rgba(138,39,51,.06)}
+.ch4-more:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.ch4-sheet{
+  border:0;padding:0;background:transparent;
+  inset:0;margin:auto;width:min(620px,92vw);max-height:86vh;
+}
+.ch4-sheet::backdrop{background:rgba(40,22,16,.55)}
+.ch4-sheet-panel{
+  position:relative;background:var(--cream);border:1px solid var(--gold);
+  border-radius:14px;padding:clamp(24px,3.4vw,38px);
+  box-shadow:0 18px 50px rgba(60,35,18,.3);
+}
+.ch4-sheet-title{
+  margin:0 0 6px;font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(21px,2.2vw,27px);color:var(--maroon);line-height:1.2;
+}
+.ch4-sheet-title::after{content:"";display:block;width:44px;height:2px;
+  background:var(--gold);margin-top:9px;opacity:.85}
+.ch4-sheet-panel .ch4-body{margin-top:16px}
+.ch4-sheet-close{
+  position:absolute;top:10px;inset-inline-start:12px;
+  all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;font-size:23px;color:var(--muted);
+}
+.ch4-sheet-close:hover{background:rgba(138,39,51,.1);color:var(--maroon)}
+.ch4-sheet-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.ch4-more{transition:none}}
+
+
+
+
+
+
+/* ============================ the deed — מקטע 05 ============================
+
+   TWO COLUMNS. The sheet carries the contract; the prose runs beside it in one
+   column at one measure, from the section heading to the last line. The user's
+   two corrections are both here: the sheet came down from 594px because the
+   contract read as oversized, and it sits INSIDE the content column instead of
+   bleeding to the window edge — `.bleed-aside` pushes its art past the gutter,
+   which is right for a painting and wrong for a document the reader is meant
+   to read. Its right edge lines up with where every paragraph in the chapter
+   begins.
+
+42% IS THE FLOOR. The sheet came down twice on the user's word — 594, then
+   512, now 430 — and this is where it stops. The painted margin and the band
+   below the gold rule are fixed fractions of the picture, so shrinking the
+   sheet shrinks the writing field with it: at 430px the field is 324px and the
+   clauses set at 14px. That is the smallest hand this contract can be written
+   in and still be read; the room was bought by moving the text right up to the
+   gold rule rather than by making the letters smaller again. Below this the
+   clauses fall under 13px and the sheet becomes a picture of a contract rather
+   than a contract. The prose beside it stays at the chapter's 20px and carries
+   the reading.
+
+   THE GEOMETRY IS MEASURED, NOT GUESSED. `rule.mjs` read the painted sheet:
+   the gold margin rule sits 11% in from the left, 10.9% from the right, 7.9%
+   from the top and 15.3% from the bottom of the 1500×1536 image. Vertical
+   fractions are converted to fractions of the WIDTH (×1.024, the sheet's own
+   ratio), because every length here is a cqw and a cqw is a hundredth of the
+   width. Type included — sizing text in px over a picture that scales with the
+   column is the bug where the words fit at 1440 and spill over the torn edge
+   at 1100. */
+.ch4-deed-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 42%;
+  gap:0 clamp(20px,2.8vw,40px);
+  /* CENTRED ON THE USER'S INSTRUCTION. It was briefly top-aligned: the sheet
+     is some two hundred pixels shorter than the prose, and aligning the tops
+     put the slack at the bottom. The gap under the section heading that this
+     was meant to close turned out to be a different bug — `* + .ch4-deed-row`
+     was overriding the heading's own 48px with 66 — and once that was fixed
+     the sheet reads better centred against the column it belongs to. */
+  align-items:center;
+}
+/* BOTH ROWS ARE STATED. `grid-column` alone is not enough: the figure is
+   written first and placed in column 2, and grid's sparse auto-placement never
+   walks BACKWARDS — so the prose, asking for column 1, was pushed to row 2 and
+   sat under the sheet instead of beside it. */
+.ch4-deed-aside{grid-column:1;grid-row:1}
+.chapter-article .ch4-deed-aside > * + *{margin-top:var(--flow)}
+
+.ch4-deed{
+  grid-column:2;grid-row:1;
+  margin:0;
+  container-type:inline-size;
+  aspect-ratio:1500 / 1536;
+  background:url('/assets/chapter4/deed-sheet.webp') center/100% 100% no-repeat;
+  display:flex;
+}
+/* the paddings live HERE and not on the figure: see the note in Chapter4.tsx.
+   The bottom is the whole band under the gold rule — that is where the wax
+   seal and the reed pen are painted, and nothing is set over them. */
+.ch4-deed-inner{
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:9.4cqw 12.3cqw 15.6cqw;
+}
+
+/* the eyebrow that names the block. Gold, spaced, and small: on a document
+   this is a rubric and not a heading, and a heading here would compete with
+   the section title above it. */
+.ch4-deed-label{
+  margin:0 0 3.3cqw;
+  font-family:var(--font-heading);font-weight:700;
+  font-size:2.56cqw;letter-spacing:.24em;
+  color:var(--gold-text);text-align:center;
+}
+
+.ch4-deed-terms{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2.8cqw}
+.ch4-deed-terms > li{display:grid;grid-template-columns:4.8cqw minmax(0,1fr);gap:0 2cqw;align-items:start}
+/* the numeral is `aria-hidden`: the ordered list already says „three, in this
+   order" to a screen reader, and reading „א" aloud before each clause would
+   say it twice. */
+.ch4-deed-num{
+  font-family:var(--font-heading);font-weight:700;
+  font-size:3.2cqw;line-height:1.62;color:var(--maroon);
+  text-align:center;
+  border-bottom:1px solid var(--gold);
+}
+.chapter-article .ch4-deed-term{
+  margin:0;font-size:3.26cqw;line-height:1.62;color:var(--ink);
+}
+
+/* THE SIGNATURE. A rule with the title struck through above it — the one thing
+   in this section a reader keeps. `<s>` and not a CSS line-through on a span:
+   the mark means „this was withdrawn", which is what `<s>` is for. */
+.ch4-deed-sign{
+  margin:4.6cqw 0 0;
+  display:flex;align-items:baseline;justify-content:flex-end;gap:2.4cqw;
+  padding-bottom:1.2cqw;
+  border-bottom:1px solid var(--gold);
+}
+.ch4-deed-signlabel{
+  font-family:var(--font-heading);font-weight:700;
+  font-size:2.5cqw;letter-spacing:.18em;color:var(--gold-text);
+}
+/* MAROON ON MAROON IS AN INVISIBLE STRIKE. Painted first in the chapter's own
+   emphasis colour with a line of the same colour, the rule vanished into the
+   letters and the signature read as a title that was kept. The words are the
+   ones that were GIVEN UP, so they take the muted ink of something withdrawn,
+   and the line across them is the maroon. */
+.ch4-deed-struck{
+  font-family:var(--font-heading);font-weight:700;
+  font-size:4.5cqw;color:var(--muted);
+  text-decoration:line-through;
+  text-decoration-color:var(--maroon);
+  text-decoration-thickness:.4cqw;
+}
+
+/* NARROW: THE PAINTING GOES, THE CONTRACT STAYS.
+   Below this width the sheet would have to hold the same clauses in a third of
+   the room, and cqw type that fits at 1024 is 6px at 380. So the parchment is
+   dropped and the same markup becomes a plain ruled panel — the clauses and
+   the struck signature survive; only the picture does not. This is why the
+   sheet is not `.bleed-aside`: that mechanism would have hidden §29 outright. */
+@media (max-width:900px){
+  .ch4-deed-row{display:block}
+  .chapter-article .ch4-deed-aside{margin-top:var(--flow-part)}
+  .ch4-deed{
+    aspect-ratio:auto;container-type:normal;background:none;
+    background-color:var(--panel);
+    border:1px solid var(--gold);border-radius:14px;
+  }
+  .ch4-deed-inner{display:block;padding:clamp(22px,5vw,34px)}
+  .ch4-deed-label{font-size:12px;margin-bottom:18px}
+  .ch4-deed-terms{gap:14px}
+  .ch4-deed-terms > li{grid-template-columns:26px minmax(0,1fr);gap:0 11px}
+  .ch4-deed-num{font-size:16px}
+  .chapter-article .ch4-deed-term{font-size:16px;line-height:1.62}
+  .ch4-deed-sign{margin-top:24px;gap:12px;padding-bottom:8px}
+  .ch4-deed-signlabel{font-size:12px}
+  .ch4-deed-struck{font-size:21px;text-decoration-thickness:1.5px}
+}
+
+/* The deed is a movement of its own, like every other device in the chapter —
+   EXCEPT directly under its section heading. Written as `* + .ch4-deed-row` it
+   matched there too, at the same specificity as the heading's own rule and
+   later in the file, so section 05 opened on 66px where every other section
+   opens on 48 and the heading looked detached from its text. `:not` keeps the
+   part-break everywhere else and hands the heading back its own spacing. */
+.chapter-article *:not(.section-heading) + .ch4-deed-row{margin-top:var(--flow-part)}
+
+
+/* ==================== the stage — מקטע 06 ====================
+
+   Chapter 6's full-stage scrolly carries the layout: `.scrolly-fullstage`
+   makes the scene sticky and full-bleed and `.stage-card` floats each
+   paragraph over it, both from the shared sheet. Everything below is what
+   this scene needs of its own.
+
+   DUSK, AND THEREFORE CREAM TYPE. The first build put maroon paragraphs on a
+   cream wash over the daylight map, and the wash had to be near-opaque to
+   carry dark text — which left the map a ghost. The painting is graded to
+   dusk instead: light type on a dark ground needs only a scrim, so the map
+   keeps its ink AND the words could grow.
+
+   THE FRAME IS WHAT MOVES, NOT THE IMAGE. `transform-origin` + `scale` on a
+   wrapper: a scale of 1 or more about any origin cannot expose an empty edge,
+   so the camera can hold a point at the very corner of the map — which the
+   first shot does — with no clamping and no letterboxing. */
+.ch4-stage{position:absolute;inset:0;overflow:hidden;background:#2a1610}
+.ch4-stage-frame{
+  position:absolute;inset:0;
+  transition:transform .28s ease-out;
+  will-change:transform;
+}
+/* EVERY PAINTING CARRIES ITS OWN CAMERA. Through a handover the outgoing one
+   goes on pushing in while the incoming one settles onto its mark — both
+   growing at once, which is what makes the swap read as a zoom rather than a
+   dissolve — so scale and origin are per-image and not on a shared frame.
+   Opacity and transform are both set inline from the scroll position and must
+   NOT be transitioned here: a transition would lag a value that is already
+   recomputed on every measured frame. */
+.ch4-stage-layers{position:absolute;inset:0}
+.ch4-stage-map{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;display:block;
+  will-change:transform,opacity;
+}
+
+/* THE MARKER NAMES THE PLACE, NOT THE EPISODE — the heading in the reading
+   column does that. It counter-scales: it sits inside the frame so it stays
+   glued to its point on the painting, and the `scale(1/z)` the component
+   writes inline keeps it one size on screen at every zoom. */
+.ch4-stage-pin{
+  position:absolute;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:7px;line-height:1;
+  opacity:0;transition:opacity .45s ease;pointer-events:none;
+}
+.ch4-stage-pin.is-on{opacity:1}
+.ch4-stage-dot{
+  width:13px;height:13px;border-radius:50%;
+  background:var(--gold);box-shadow:0 0 0 5px rgba(199,154,60,.26),0 3px 10px rgba(0,0,0,.5);
+}
+.ch4-stage-label{
+  font-family:var(--font-heading);font-weight:700;font-size:14px;
+  color:var(--cream);letter-spacing:.06em;white-space:nowrap;
+  text-shadow:0 2px 10px rgba(0,0,0,.8);
+}
+
+/* THE SCRIM. Deep at the reading edge — the RIGHT, in RTL, which is why the
+   gradient runs `to left` — and gone by the far side, so the map is still a
+   map everywhere nothing is written over it. */
+.ch4-stage-veil{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to left,
+    rgba(26,12,7,.86) 0%,
+    rgba(26,12,7,.78) 28%,
+    rgba(26,12,7,.5) 52%,
+    rgba(26,12,7,.18) 78%,
+    rgba(26,12,7,0) 100%);
+}
+/* the marker layer rides ABOVE the scrim — see the note in TribesStage.tsx */
+.ch4-stage-marks{z-index:2;pointer-events:none}
+
+/* THE READING COLUMN ON THE DARK GROUND.
+   Chapter 6's `.stage-card` is written for dark type on a pale scene: it sets
+   `var(--read)` and a WHITE text-shadow. Both are overridden here, scoped to
+   this chapter's article so chapter 6's own stages keep what they were
+   reviewed with. The type is larger than the chapter's running size on
+   purpose — this is the one screen with nothing else on it. */
+.chapter-article .ch4-stage-head{
+  margin:0 0 14px;
+  font-family:var(--font-heading);font-weight:800;
+  font-size:clamp(26px,3vw,40px);line-height:1.15;letter-spacing:-.01em;
+  color:var(--gold);text-shadow:0 2px 18px rgba(0,0,0,.75);
+}
+.chapter-article .stage-card{width:min(640px,90%)}
+.chapter-article .stage-card p{
+  font-size:clamp(19px,1.55vw,24px);line-height:1.75;
+  color:#fbf3e2;text-shadow:0 2px 16px rgba(0,0,0,.72);
+}
+/* A STEP MAY HOLD MORE THAN ONE SENTENCE OF THE SOURCE. Chapter 6's stage
+   cards each carry a single paragraph, so the shared sheet never needed a
+   paragraph rhythm inside one; three of the seven steps here carry two or
+   three, and without this they ran together into a block with no breath. */
+.chapter-article .stage-card p + p{margin-top:.85em}
+/* the maroon emphasis is unreadable on a dark ground — on this screen the
+   chapter's key phrases take the gold, which is the one register that reads
+   on both grounds */
+.chapter-article .stage-card p .key{color:var(--gold);font-weight:700}
+
+@media (max-width:820px){
+  .ch4-stage-label{font-size:12px}
+  /* no thin side on a phone: the scrim covers evenly so the type stays legible */
+  .ch4-stage-veil{background:rgba(26,12,7,.74)}
+  .chapter-article .stage-card p{font-size:18px}
+  .chapter-article .ch4-stage-head{font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){
+  .ch4-stage-frame{transition:none}
+  .ch4-stage-pin{transition:none}
+}
+
+
+/* ==================== the slogan — §47 ====================
+   Three layers of one line: the Arabic as it is chanted, the transliteration
+   the booklet prints, and the Hebrew meaning. A PLAIN plate and not the
+   verse's illuminated frame — that costume belongs to the Quran, and this is
+   a chant in a procession. A maroon edge rule marks it as set apart without
+   claiming it is scripture. */
+/* NO EDGE RULE. It carried a maroon rule at the reading edge to mark it as
+   set apart; the user asked for it gone, and the plate holds on its own — the
+   panel ground, the air around it and the three sizes of type are enough. */
+.ch4-chant{
+  margin:0;
+  padding:clamp(20px,2.6vw,30px) clamp(22px,3vw,36px);
+  background:var(--panel);
+  border-radius:12px;
+  display:grid;gap:10px;text-align:center;
+}
+.ch4-chant-ar{
+  margin:0;font-size:clamp(22px,2.6vw,32px);line-height:1.5;
+  color:var(--maroon-deep);font-weight:600;
+}
+.ch4-chant-tr{
+  margin:0;font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(16px,1.7vw,20px);color:var(--gold-text);letter-spacing:.02em;
+}
+.ch4-chant-he{
+  margin:0;font-size:clamp(15px,1.5vw,17px);color:var(--muted);
+}
+.chapter-article * + .ch4-chant{margin-top:var(--flow)}
+.chapter-article .ch4-chant + *{margin-top:var(--flow-part)}
+
+
+
+
+/* ==================== who is speaking — §35–§40 ====================
+
+   Chapter 2's closing section, part for part: no picture, no interaction, no
+   diagram — prose, an order taken from the source's own connectives, and one
+   sentence at the end.
+
+   NO RULE AND NO CHIP, ON INSTRUCTION AND ALSO ON THE EVIDENCE. Three earlier
+   attempts at this section drew the argument instead of ordering it, and every
+   one of them reached for the same two pieces of furniture: a hairline edge
+   down the side of each voice and a small letter-spaced gold label above each
+   name. Neither carries information here — the name is the information, and
+   who the man is and when he ruled is in his own first sentence every time. A
+   name in the heading face with air above it is the whole device. */
+.ch4-mufti{display:block}
+.ch4-mufti-name{
+  margin:0;
+  font-family:var(--font-heading);font-weight:800;
+  font-size:clamp(21px,2.1vw,28px);line-height:1.2;letter-spacing:-.01em;
+  color:var(--maroon);
+}
+/* the space above a name is what separates one voice from the next — a full
+   part-break, the same one the chapter puts between its devices */
+.chapter-article .ch4-mufti{margin-top:var(--flow-part)}
+.chapter-article .ch4-mufti-name + *{margin-top:var(--flow-tight)}
+.chapter-article .ch4-mufti .ch4-body + .ch4-body{margin-top:14px}
+.chapter-article .ch4-mufti .ch4-verse{margin-top:var(--flow)}
+
+/* the recorded speech is the one quotation here that is neither scripture nor
+   a ruling. It is set apart by voice alone — the reading face in the muted
+   ink, no frame and no edge. */
+.chapter-article .ch4-mufti-quote{color:var(--muted);font-style:italic}
+
+/* the verse that closes the section stands clear of the last voice */
+.chapter-article .ch4-mufti + .ch4-verse{margin-top:var(--flow-part)}
+
+
+/* ==================== the plain — מקטע 08 ====================
+   The place all five rulings argue about, carrying the section's title and its
+   opening prose. The only section in the chapter that had nothing to look at.
+
+   NO FRAME, NO CARD, NO SHADOW (rule 44) — the painting IS the ground, bled to
+   the gutters. Its top and bottom are masked rather than cut: a straight edge
+   across a painted foreground of rock and scrub reads as a photograph pasted
+   onto the page, which is what rule 45 forbids.
+
+   THE VEIL IS CREAM AND NOT WHITE (rules 33–34). It is the paper's own colour
+   at partial alpha, so the block stays inside the palette; a white wash would
+   have been the fastest way to break the chapter's one absolute rule.
+
+   THE HEADING KEEPS THE COLUMN (rule 49): the copy holds the article's gutter,
+   so the title starts where every other title in the chapter starts, and the
+   painting runs past it on both sides. */
+.ch4-plainhero{
+  position:relative;isolation:isolate;
+  margin-inline:calc(-1 * var(--content-gutter));
+  padding:clamp(52px,7vw,96px) var(--content-gutter) clamp(56px,7.5vw,104px);
+}
+.ch4-plainhero-art{position:absolute;inset:0;z-index:0;overflow:hidden}
+/* THE BLUR IS THE LEGIBILITY FIX, NOT A LIGHTER WASH.
+   The measured contrast under the copy was already 7.3:1 — above AAA — and the
+   words were still hard to read, because what fights a letter is not luminance
+   but TEXTURE: the painting's rock and scrub run at the same frequency as the
+   strokes. Lifting the veil would have paled the picture, which the user
+   refused, and a panel behind the text would be the highlight she refused too.
+   Chapter 6 solves exactly this on its prayer stage the same way — `blur` on
+   the photograph, tone untouched. */
+.ch4-plainhero-art img{
+  width:100%;height:100%;object-fit:cover;object-position:center 62%;display:block;
+  filter:blur(3px);transform:scale(1.02);
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 12%,#000 80%,transparent 100%);
+          mask-image:linear-gradient(to bottom,transparent 0,#000 12%,#000 80%,transparent 100%);
+}
+/* deeper on the reading edge — the RIGHT, in RTL, which is why it runs
+   `to left` — and thinner across the rest, so the valley is still a valley
+   where nothing is written over it */
+.ch4-plainhero-veil{
+  position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to left,
+    rgba(243,234,214,.82) 0%,
+    rgba(243,234,214,.75) 34%,
+    rgba(243,234,214,.54) 62%,
+    rgba(243,234,214,.34) 100%);
+}
+.ch4-plainhero-copy{position:relative;z-index:1}
+/* a halo the colour of the paper, on the glyphs themselves. It has no shape of
+   its own — it is not a panel and not a highlight — and it is what separates a
+   letter from a painting when the two share a tone. */
+.ch4-plainhero-copy .ch4-body{
+  text-shadow:
+    0 1px 0 rgba(243,234,214,.9), 0 -1px 0 rgba(243,234,214,.72),
+    1px 0 0 rgba(243,234,214,.72), -1px 0 0 rgba(243,234,214,.72),
+    0 0 7px rgba(243,234,214,.85);
+}
+.ch4-plainhero-copy h2{text-shadow:0 0 16px rgba(243,234,214,.7)}
+/* the hero opens the section, so it carries no top rule of its own */
+.chapter-article .ch4-plainhero + *{margin-top:var(--flow-part)}
+
+@media (max-width:820px){
+  /* no thin side on a phone: the wash is even so the type stays legible */
+  .ch4-plainhero-veil{background:rgba(243,234,214,.8)}
+}
+
+/* THE VERSE THAT CLOSES THE SECTION IS CENTRED, and it is the only one of the
+   three that is. The other two sit inside a run of prose and take the reading
+   edge with it; this one has nothing after it, so it is the last thing on the
+   page and stands in the middle of the measure — the position chapter 2 gives
+   its own closing line. */
+.ch4-verse.is-mid{
+  width:min(700px,100%);margin-inline:auto;text-align:center;
+}
+.ch4-verse.is-mid cite{display:block;margin-inline:0}

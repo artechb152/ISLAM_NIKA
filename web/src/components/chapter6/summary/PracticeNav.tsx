@@ -42,11 +42,18 @@ export default function PracticeNav({
      הרכיב; פרק אחר שמשתמש בו מוסר את שלו — עד עכשיו התרגול של כל
      פרק הכריז על עצמו כפרק 6. */
   subtitle = 'פרק 6 · תרגול מסכם',
+  /* מה שיושב בסלוט הסופי של המסטהד, במקום כפתור החזרה.
+     קיים בשביל חדר המבחנים: במהלך מבחן השעון והמונה צריכים להיות גלויים תמיד,
+     ודווקא קישור החזרה צריך להיעלם — יציאה באמצע מבחן חייבת לעבור דרך אישור
+     ולא דרך לחיצה אחת בפינה. ברירת המחדל היא כפתור החזרה, כך ששני התרגולים
+     שכבר משתמשים ברכיב הזה אינם מרגישים בשינוי. */
+  end,
   children,
 }: {
   stops: NavStop[]
   back?: { href: string; label: string }
   subtitle?: string
+  end?: React.ReactNode
   children: React.ReactNode
 }) {
   const router = useRouter()
@@ -142,12 +149,14 @@ export default function PracticeNav({
           </div>
           {/* the end slot the article gives to its find-field. Same height, same hairline on
               maroon — one component family, not a second button style. */}
+          {end ?? (
           <Link className="gv-back" href={back.href}>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 6l6 6-6 6" />
             </svg>
             {back.label}
           </Link>
+          )}
         </div>
       </header>
 

@@ -12,9 +12,16 @@
    thing the reader can see is what changed — dusk to morning, a shut gate to an
    open one, bare ground to a working courtyard, a dead tree in leaf.
 
-   THE WHOLE PICTURE IS THE BUTTON, and nothing is drawn on it to say so — a
-   press anywhere turns the view. The button's own aria-label names what the
-   press will show, so a screen reader is still told.
+   THE WHOLE PICTURE IS THE BUTTON — but something IS drawn on it to say so.
+   It used to say nothing, on the argument that a control in a corner asks to
+   be found; in use nobody found it, because a picture that looks like a
+   picture is not read as a thing to press. The switch at the top of the frame
+   is that missing signal, and it is a switch and not a hint: it names BOTH
+   states and fills the one you are in, so the frame says what it holds, what
+   else it holds, and that the two can be swapped. A press anywhere still
+   turns the view — the switch is a label, not the only target, which is why
+   it is `aria-hidden` and takes no pointer events. The button's own
+   aria-label goes on naming what the press will show.
 
    THE CAPTIONS ARE THE SENTENCE'S OWN WORDS. The small line above each is ours
    — a caption on our own drawing, which this file may write — but the line
@@ -72,12 +79,18 @@ export default function Pact({
 
         <span className="ch4-pact-scrim" aria-hidden="true" />
 
+        {/* the switch. `aria-hidden` on purpose: it repeats what the button's
+            own aria-label already says, and a screen reader should hear the
+            control once. */}
+        <span className="ch4-pact-switch" aria-hidden="true">
+          <span className={after ? '' : 'is-on'}>{labelBefore}</span>
+          <span className={after ? 'is-on' : ''}>{labelAfter}</span>
+        </span>
+
         <span className="ch4-pact-cap is-before" aria-hidden={after}>
-          <b>{labelBefore}</b>
           <i>{textBefore}</i>
         </span>
         <span className="ch4-pact-cap is-after" aria-hidden={!after}>
-          <b>{labelAfter}</b>
           <i>{textAfter}</i>
         </span>
       </button>

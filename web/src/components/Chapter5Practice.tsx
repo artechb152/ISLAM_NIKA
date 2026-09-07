@@ -1,6 +1,6 @@
 'use client'
 
-/* Chapter 3's closing practice.
+/* Chapter 2's closing practice.
 
    Same contract as chapter 6's: the chapter is not finished by reading it, only
    by working through this. `islam:chapter:2 = 'done'` is written here and
@@ -13,14 +13,10 @@
 
 import Link from 'next/link'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import Feedback from '@/components/chapter6/summary/Feedback'
 import PracticeNav from '@/components/chapter6/summary/PracticeNav'
-import SlotSurface from '@/components/chapter6/summary/SlotSurface'
-import Tray from '@/components/chapter6/summary/Tray'
-import { usePickPlace } from '@/components/chapter6/summary/usePickPlace'
-import raw from '@/lib/chapter3/practice.json'
-import { CH3 } from '@/lib/chapter3/content'
-import { markChapterComplete } from '@/lib/chapter3/progress'
+import raw from '@/lib/chapter5/practice.json'
+import { CH5 } from '@/lib/chapter5/content'
+import { markChapterComplete } from '@/lib/chapter5/progress'
 
 /* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED, and that is the whole
    principle here. The practice does not get a picture set of its own: the four
@@ -34,11 +30,13 @@ type Q =
   | { id: string; label: string; photo?: string; type: 'match'; prompt: string; ok: string; retry: string; pairs: { left: string; right: string; photo?: string }[] }
   | { id: string; label: string; photo?: string; type: 'order'; prompt: string; ok: string; retry: string; steps: string[]; photos?: Record<string, string> }
   | { id: string; label: string; photo?: string; type: 'situations'; prompt: string; ok: string; retry: string; pairs: { key: string; text: string; to: string; photo?: string }[] }
-  | { id: string; label: string; photo?: string; type: 'place'; prompt: string; ok: string; retry: string; slots: { n: number; answer: string }[] }
 
-const ART = '/assets/chapter3/'
+const ART = '/assets/chapter5/'
 
 const QUESTIONS = (raw as unknown as { questions: Q[] }).questions
+
+const WORDS = ['אפס', 'שאלה אחת', 'שתי', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע', 'שמונה', 'תשע', 'עשר']
+const COUNT_WORD = WORDS[QUESTIONS.length] ?? String(QUESTIONS.length)
 
 /** deterministic shuffle — the same reader gets the same board on a reload */
 function shuffled<T>(items: T[], seed: number): T[] {
@@ -54,32 +52,12 @@ function shuffled<T>(items: T[], seed: number): T[] {
 
 type State = 'idle' | 'wrong' | 'right'
 
-/* CHAPTER 6'S FEEDBACK LINE, the component itself and not a copy of it.
-
-   „You got it wrong“ and „you are not finished yet“ can never be confused there:
-   a different glyph, a different colour and a different sentence shape. This page
-   said both in one paragraph — 17px, a size the chapter does not use anywhere —
-   inside a boxed panel with a gold bar down its margin, which is a shape the
-   article has nowhere in 1487 lines.
-
-   `idle` still renders NOTHING, which is this page's own rule and stays: chapter
-   6 reserves the line because its surfaces have a running count to report, and
-   these questions have nothing to say until they are checked.
-
-   THE `role="status"` MOVES OUT TO THE WRAPPER AND DOES NOT DISAPPEAR. Chapter
-   6's `Feedback` is deliberately not a live region, because that page has exactly
-   one — at the bottom, fed by usePickPlace, and a card that was also live
-   announced every placement twice. THIS page has no such region: only one of its
-   eight questions uses the hook, and it does not render `say`. So dropping the
-   role along with the old paragraph would have left „בדיקה“ with nothing spoken
-   at all. It sits on the wrapper instead, appearing and disappearing exactly when
-   the line does — which is what the paragraph it replaces did. */
-function Answer({ state, q }: { state: State; q: Q }) {
+function Feedback({ state, q }: { state: State; q: Q }) {
   if (state === 'idle') return null
   return (
-    <div className="p3-say" role="status">
-      <Feedback kind={state === 'right' ? 'ok' : 'miss'} text={state === 'right' ? q.ok : q.retry} />
-    </div>
+    <p className={'p2-feedback' + (state === 'right' ? ' is-right' : '')} role="status">
+      {state === 'right' ? q.ok : q.retry}
+    </p>
   )
 }
 
@@ -106,12 +84,12 @@ function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; 
 
   return (
     <>
-      <ul className="p3-options">
+      <ul className="p2-options">
         {opts.map((o) => (
           <li key={o.text}>
             <button
               type="button"
-              className={'p3-option' + (picked.includes(o.text) ? ' is-picked' : '') + (state === 'right' && o.right ? ' is-right' : '')}
+              className={'p2-option' + (picked.includes(o.text) ? ' is-picked' : '') + (state === 'right' && o.right ? ' is-right' : '')}
               aria-pressed={picked.includes(o.text)}
               onClick={() => toggle(o.text)}
             >
@@ -120,12 +98,12 @@ function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; 
           </li>
         ))}
       </ul>
-      {multi && <p className="p3-hint">אפשר לסמן יותר מאחת.</p>}
-      <div className="p3-actions">
-        <button type="button" className="p3-check" disabled={!picked.length || state === 'right'} onClick={check}>
+      {multi && <p className="p2-hint">אפשר לסמן יותר מאחת.</p>}
+      <div className="p2-actions">
+        <button type="button" className="p2-check" disabled={!picked.length || state === 'right'} onClick={check}>
           בדיקה
         </button>
-        <Answer state={state} q={q} />
+        <Feedback state={state} q={q} />
       </div>
     </>
   )
@@ -191,12 +169,12 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
 
   return (
     <>
-      <ul className="p3-bank" aria-label="התשובות">
+      <ul className="p2-bank" aria-label="התשובות">
         {answers.map((a) => (
           <li key={a}>
             <button
               type="button"
-              className={'p3-chip' + (held === a ? ' is-held' : '') + (placed.has(a) ? ' is-placed' : '')}
+              className={'p2-chip' + (held === a ? ' is-held' : '') + (placed.has(a) ? ' is-placed' : '')}
               aria-pressed={held === a}
               disabled={done || placed.has(a)}
               onClick={() => hold(a)}
@@ -210,38 +188,25 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
           something is held: that condition read `held` from state, so a slot
           could still be disabled at the instant a fast reader clicked it. A slot
           clicked with an empty hand simply does nothing. */}
-      {/* WITH PICTURES IT IS A ROW OF BOARDS, WITHOUT THEM IT IS A LIST OF ROWS —
-          and EITHER WAY the answer goes UNDER the thing it belongs to, which is
-          chapter 6's shape: a slot is a medallion, then what names it, then the
-          rule that fills. The list used to put the two side by side in a 200px
-          column, which is the shape of a form. */}
-      {/* `is-prose` IS READ OFF THE QUESTION'S TYPE, not guessed in the sheet. A
-          `match` row's cue is a NAME („אבו טאלב“) and takes chapter 6's caption —
-          Kedem at 700, maroon-deep — while a `situations` row's is a forty-word
-          sentence, and the chapter never sets a sentence in its display face. */}
-      <ul className={'p3-match' + (withArt ? ' is-boards' : '') + (q.type === 'situations' ? ' is-prose' : '')}>
+      {/* WITH PICTURES IT IS A ROW OF BOARDS, WITHOUT THEM IT IS A LIST OF ROWS.
+          Chapter 6's exercises put the answer UNDER the thing it belongs to —
+          each picture is a place, and the reader fills the place. Where this
+          chapter has painted the subject already (the four traits, the desert's
+          own beats) the exercise takes that shape; where it has not, the row
+          keeps its plain two-column form rather than reaching for stock art. */}
+      <ul className={'p2-match' + (withArt ? ' is-boards' : '')}>
         {rows.map((r) => (
-          <li className="p3-match-row" key={r.left}>
-            {/* CHAPTER 6'S MEDALLION, in its `is-blank` form: these four rows are a
-                SET and not a rank, and a digit on each disc is a promise of an
-                order the question does not have. It fills maroon when the row has
-                an answer, which is the one selection colour the page uses — and
-                the hairline the sheet runs through the column of discs is what
-                makes the rows read as one exercise now that the boxes are gone. */}
-            <span
-              className={'p3-slot-n is-blank' + (chosen[r.left] ? ' is-full' : '')}
-              aria-hidden="true"
-            />
+          <li className="p2-match-row" key={r.left}>
             {r.photo && (
-              <span className="p3-shot" aria-hidden="true">
+              <span className="p2-shot" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={ART + r.photo} alt="" loading="lazy" decoding="async" />
               </span>
             )}
-            <span className="p3-match-left">{r.left}</span>
+            <span className="p2-match-left">{r.left}</span>
             <button
               type="button"
-              className={'p3-slot' + (chosen[r.left] ? ' is-full' : '')}
+              className={'p2-slot' + (chosen[r.left] ? ' is-full' : '')}
               disabled={done}
               onClick={() => put(r.left)}
               aria-label={chosen[r.left] ? `${r.left}: ${chosen[r.left]} — לחצו כדי להחזיר` : `${r.left}: בחרו תשובה`}
@@ -251,16 +216,16 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
           </li>
         ))}
       </ul>
-      <div className="p3-actions">
+      <div className="p2-actions">
         <button
           type="button"
-          className="p3-check"
+          className="p2-check"
           disabled={Object.keys(chosen).length < rows.length || done}
           onClick={check}
         >
           בדיקה
         </button>
-        <Answer state={state} q={q} />
+        <Feedback state={state} q={q} />
       </div>
     </>
   )
@@ -297,117 +262,29 @@ function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: ()
           ordering the chain is ordering those four pictures, and the sentence
           under each is what the frame says. Keyed by the step's own text, so a
           step carries its frame wherever it is moved to. */}
-      <ol className={'p3-order' + (q.photos ? ' is-illustrated' : '')}>
+      <ol className={'p2-order' + (q.photos ? ' is-illustrated' : '')}>
         {items.map((s, i) => (
           <li key={s}>
-            <span className={'p3-order-n' + (state === 'right' ? ' is-full' : '')}>{i + 1}</span>
+            <span className="p2-order-n">{i + 1}</span>
             {q.photos?.[s] && (
-              <span className="p3-shot" aria-hidden="true">
+              <span className="p2-shot" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={ART + q.photos[s]} alt="" loading="lazy" decoding="async" />
               </span>
             )}
-            <span className="p3-order-text">{s}</span>
-            <span className="p3-order-moves">
+            <span className="p2-order-text">{s}</span>
+            <span className="p2-order-moves">
               <button type="button" onClick={() => move(i, -1)} disabled={i === 0 || state === 'right'} aria-label="הזזה למעלה">↑</button>
               <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1 || state === 'right'} aria-label="הזזה למטה">↓</button>
             </span>
           </li>
         ))}
       </ol>
-      <div className="p3-actions">
-        <button type="button" className="p3-check" disabled={state === 'right'} onClick={check}>
+      <div className="p2-actions">
+        <button type="button" className="p2-check" disabled={state === 'right'} onClick={check}>
           בדיקה
         </button>
-        <Answer state={state} q={q} />
-      </div>
-    </>
-  )
-}
-
-
-/** ---------------- the place engine: chapter 6's, not chapter 2's ----------------
-
-    THE ONE EXERCISE WHERE ORDER IS THE CONTENT. Seven numbered slots and a
-    label for each; the reader picks a name and seats it. This is chapter 6's
-    `usePickPlace` + `SlotSurface`, which serves tap, drag AND keyboard through
-    one code path — Enter picks up, Enter on a slot places, Escape cancels.
-
-    A WRONG NAME STILL SEATS. `onPlace` returns true unconditionally, so the
-    board never grades a move as it is made: the check button is the only place
-    correctness is spoken, exactly as in the other five questions. Nothing is
-    ever deleted — clicking a filled slot hands its label back to the tray. */
-function Place({ q, onSolved }: { q: Extract<Q, { type: 'place' }>; onSolved: () => void }) {
-  const [filled, setFilled] = useState<Record<number, string>>({})
-  const [state, setState] = useState<State>('idle')
-  const done = state === 'right'
-
-  const bank = useMemo(() => shuffled(q.slots.map((x) => x.answer), q.id.length * 61), [q])
-  const seated = new Set(Object.values(filled))
-
-  const slotIdFor = useCallback((n: number) => `${q.id}-s${n}`, [q.id])
-  const nOf = (slotId: string) => Number(slotId.slice(slotId.lastIndexOf('s') + 1))
-
-  const pp = usePickPlace({
-    labelOf: (id) => id,
-    slotLabelOf: (slotId) => String(nOf(slotId)),
-    onPlace: (itemId, slotId) => {
-      setState('idle')
-      setFilled((cur) => ({ ...cur, [nOf(slotId)]: itemId }))
-      return true
-    },
-  })
-
-  /* a filled slot stops being a target and becomes the way back to the tray */
-  const slotPropsFor = (n: number) =>
-    filled[n]
-      ? {
-          'data-slot': slotIdFor(n),
-          onClick: () => {
-            setState('idle')
-            setFilled((cur) => {
-              const next = { ...cur }
-              delete next[n]
-              return next
-            })
-          },
-        }
-      : pp.slotProps(slotIdFor(n))
-
-  function check() {
-    const ok = q.slots.every((x) => filled[x.n] === x.answer)
-    setState(ok ? 'right' : 'wrong')
-    if (ok) onSolved()
-  }
-
-  return (
-    <>
-      <Tray
-        items={bank.filter((a) => !seated.has(a)).map((a) => ({ id: a, text: a }))}
-        label='הנביאים'
-        heldId={pp.held}
-        itemPropsFor={(id: string) => pp.itemProps(id)}
-        emptyText='ריק'
-      />
-      <SlotSurface
-        layout='line'
-        slots={q.slots}
-        filled={filled}
-        slotIdFor={slotIdFor}
-        slotPropsFor={done ? undefined : slotPropsFor}
-        refused={pp.refused}
-        numbersAreOrder
-      />
-      <div className='p3-actions'>
-        <button
-          type='button'
-          className='p3-check'
-          disabled={Object.keys(filled).length < q.slots.length || done}
-          onClick={check}
-        >
-          בדיקה
-        </button>
-        <Answer state={state} q={q} />
+        <Feedback state={state} q={q} />
       </div>
     </>
   )
@@ -415,7 +292,7 @@ function Place({ q, onSolved }: { q: Extract<Q, { type: 'place' }>; onSolved: ()
 
 /* ---------------- the page ---------------- */
 
-export default function Chapter3Practice() {
+export default function Chapter5Practice() {
   const [solved, setSolved] = useState<Set<string>>(new Set())
   const [finished, setFinished] = useState(false)
 
@@ -435,15 +312,11 @@ export default function Chapter3Practice() {
      beside an exercise when it is solved, and the name of every exercise
      reachable from anywhere on the page. The bar that used to sit under the
      title did half of that and could not be clicked. */
-  const stops = QUESTIONS.map((q) => ({ id: `p3-${q.id}`, label: q.label, done: solved.has(q.id) }))
+  const stops = QUESTIONS.map((q) => ({ id: `p2-${q.id}`, label: q.label, done: solved.has(q.id) }))
 
   return (
-    <PracticeNav
-      stops={stops}
-      back={{ href: '/chapter3', label: 'חזרה לפרק 3' }}
-      subtitle="פרק 3 · תרגול מסכם"
-    >
-      <main className="chapter-article p3-main">
+    <PracticeNav stops={stops} back={{ href: '/chapter5', label: 'חזרה לפרק 5' }}>
+      <main className="chapter-article p2-main">
         {/* THE CHAPTER'S OWN BANNER, and this is the largest thing that was
             missing. The practice opened on a bare heading in a column as wide as
             the window — measured, 1457px against the article's 1172 — with no
@@ -451,15 +324,18 @@ export default function Chapter3Practice() {
             no edge. Same banner as the article, without the film: a practice
             screen has no business autoplaying the chapter's video a second
             time, so the still stands on its own. */}
-        <div className="ch3-hero p3-banner">
-          <div className="ch3-hero-media" aria-hidden="true" />
-          <div className="ch3-hero-copy">
-            <h1 id="p3-title" className="ch3-hero-title">התרגול המסכם</h1>
+        <div className="ch5-hero p2-banner ch5-practice-banner">
+          <div className="ch5-hero-media" aria-hidden="true" />
+          <div className="ch5-hero-copy">
+            <h1 id="p2-title" className="ch5-hero-title">התרגול המסכם</h1>
           </div>
         </div>
 
-        <p className="p3-lead" data-reveal>
-          {CH3.title} — שש שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
+        <p className="p2-lead" data-reveal>
+          {/* the count is DERIVED. Copied from chapter 2 it said „שמונה שאלות" over four
+              of them — a page that miscounts itself is the kind of thing a reader
+              notices immediately and never fully trusts again. */}
+          {CH5.title} — {COUNT_WORD} שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
         </p>
 
         {/* EACH EXERCISE IS A SECTION OF THE ARTICLE, not an item of a list.
@@ -469,26 +345,21 @@ export default function Chapter3Practice() {
             the section rhythm around it. */}
         {QUESTIONS.map((q, i) => (
           <section
-            className={'article-section p3-q' + (solved.has(q.id) ? ' is-solved' : '')}
-            id={`p3-${q.id}`}
+            className={'article-section p2-q' + (solved.has(q.id) ? ' is-solved' : '')}
+            id={`p2-${q.id}`}
             key={q.id}
-            aria-labelledby={`p3-${q.id}-t`}
+            aria-labelledby={`p2-${q.id}-t`}
           >
             <header className="section-heading" data-reveal>
               <div>
-                <h2 id={`p3-${q.id}-t`}>
-                  {/* the ordinal is chapter 6's medallion, and it FILLS when the
-                      question is solved — the one selection colour doing the
-                      chapter's own progress display, next to the ✓ in the rail */}
-                  <span className={'p3-q-n' + (solved.has(q.id) ? ' is-full' : '')}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
+                <h2 id={`p2-${q.id}-t`}>
+                  <span className="p2-q-n">{String(i + 1).padStart(2, '0')}</span>
                   {q.prompt}
                 </h2>
               </div>
               <div className="title-ornament section-ornament" aria-hidden="true"><span /></div>
             </header>
-            <div className={'p3-work' + (q.photo ? ' has-plate' : '')} data-reveal>
+            <div className={'p2-work' + (q.photo ? ' has-plate' : '')} data-reveal>
               {/* A QUESTION THAT NAMES A THING GETS THE THING BESIDE IT. „ממה
                   התעשר שבט קורייש" over the Kaaba, „כיצד נפתרו סכסוכים" over
                   the seated arbiter, the two ancestors over the map of the
@@ -496,7 +367,7 @@ export default function Chapter3Practice() {
                   the four options are about, and the reader has met all three
                   in the chapter. */}
               {q.photo && (
-                <figure className="p3-plate" aria-hidden="true">
+                <figure className="p2-plate" aria-hidden="true">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={ART + q.photo} alt="" loading="lazy" decoding="async" />
                 </figure>
@@ -504,16 +375,15 @@ export default function Chapter3Practice() {
               {(q.type === 'single' || q.type === 'multi') && <Choice q={q} onSolved={() => solve(q.id)} />}
               {(q.type === 'match' || q.type === 'situations') && <Match q={q} onSolved={() => solve(q.id)} />}
               {q.type === 'order' && <Order q={q} onSolved={() => solve(q.id)} />}
-              {q.type === 'place' && <Place q={q} onSolved={() => solve(q.id)} />}
             </div>
           </section>
         ))}
 
         {finished && (
-          <div className="p3-done" role="status">
+          <div className="p2-done" role="status">
             <div className="title-ornament" aria-hidden="true"><span /></div>
             <p>הפרק הושלם.</p>
-            <Link className="ch3-end-link" href="/chapters">לכל פרקי הלמידה</Link>
+            <Link className="ch2-end-link" href="/chapters">לכל פרקי הלמידה</Link>
           </div>
         )}
       </main>

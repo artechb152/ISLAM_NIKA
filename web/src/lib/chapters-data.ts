@@ -67,7 +67,10 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter4',
         available: true,
       }),
-      ch(5, 'שאלת הירושה והח׳ליפים ישרי הדרך'),
+      ch(5, 'שאלת הירושה והח׳ליפים ישרי הדרך', {
+        href: '/chapter5',
+        available: true,
+      }),
     ],
   },
   {
@@ -122,7 +125,8 @@ export const chapterCategories: CategoryDef[] = [
 
    "חדר המבחנים" is the one item that is not reference material: it is where a learner
    picks the chapters they want to be examined on and the site composes an exam from those
-   chapters' question banks. It stays locked until the chapters — and their banks — exist. */
+   chapters' question banks. It is BUILT — /exams, banks in lib/exams/banks — and it is the
+   only entry here that renders as a link; the four beside it are still locked. */
 export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' | 'sources' | 'map' | 'exam' }> = [
   { id: 'glossary', title: 'מילון מונחים', icon: 'book' },
   { id: 'recommended-reading', title: 'ספרות מומלצת', icon: 'books' },
@@ -132,6 +136,14 @@ export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | '
 ]
 
 export const allChapters: ChapterDef[] = chapterCategories.flatMap((c) => c.chapters)
+
+/* הקטגוריה שכל פרק שייך אליה.
+   נגזר מ-`chapterCategories` ולא נכתב שוב, כמו כל דבר אחר בקובץ הזה — ומכאן
+   שהוספת פרק לקטגוריה מספיקה כדי שהסינון לפי נושא יכיר אותו בכל מסך שיש בו
+   כזה: מסך הפרקים, חדר המבחנים והמחברת. */
+export const categoryOfChapter: ReadonlyMap<number, CategoryDef> = new Map(
+  chapterCategories.flatMap((cat) => cat.chapters.map((c) => [c.number, cat] as const))
+)
 
 /* "פרקים 1–2" — the range a category spans, derived rather than retyped */
 export function categoryRange(cat: CategoryDef): string {

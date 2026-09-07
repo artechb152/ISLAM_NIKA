@@ -10,6 +10,14 @@ import { useEffect, useState } from 'react'
 
 import { readNotebook, resetJourney } from '@/lib/chapter1/notebook'
 
+/* אזור הסיום אינו עולם. אין בו משימה, אין דמות ואין מה למסור — רק
+   הסרטון, דברי הסיכום והאבן האחרונה — ולכן הוא נטען כדף ולא כסצנה.
+   ‎`ssr:false` נשאר, כי הוא כותב אל המחברת ב-localStorage. */
+const Outro = dynamic(() => import('@/components/chapter1/ChapterOutro'), {
+  ssr: false,
+  loading: () => <div className="ch1-loading" aria-hidden="true" />,
+})
+
 const Game = dynamic(() => import('@/components/chapter1/Game'), {
   ssr: false,
   loading: () => (
@@ -34,11 +42,15 @@ export default function Chapter1Client() {
      כאילו המסע מתחיל מחדש בכל פעם. עד שיודעים, לא מציגים
      אף אחד מהשניים. */
   const [know, setKnow] = useState(false)
+  /** האם ביקשו את אזור הסיום — הוא נטען כדף, לא כעולם */
+  const [outro, setOutro] = useState(false)
   /* אזור אמצע-מסע שמור, אם יש התקדמות. המסך הזה תמיד שלח לרמות תימן —
      גם מטייל שנעצר במכה. */
   const [resumeAt, setResumeAt] = useState<string | null>(null)
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).has('from')) setStarted(true)
+    const q = new URLSearchParams(window.location.search)
+    if (q.get('region') === 'exit') setOutro(true)
+    if (q.has('from')) setStarted(true)
     const store = readNotebook()
     if (store.seen.length > 0 || store.entries.length > 0) {
       setResumeAt(store.region || 'yemen-heights')
@@ -51,6 +63,7 @@ export default function Chapter1Client() {
   }, [])
 
   if (!know) return <div className="ch1-loading" aria-hidden="true" />
+  if (outro) return <Outro />
   if (started) return <Game />
 
   return (
