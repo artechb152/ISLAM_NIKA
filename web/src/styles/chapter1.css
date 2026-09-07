@@ -1189,3 +1189,11 @@ body{
 @media (max-width:560px){
   .ch1-film-bar{flex-wrap:wrap}
 }
+
+/* ===== נפילה חיננית של סרט ===== */
+/* אם הסרט לא הפיק פריים בתוך 2.5 שניות, ה-<video> יורד ובמקומו נשאר
+   הפוסטר. הוא צריך למלא בדיוק את אותה תיבה, אחרת החלונית קופצת. */
+.hud-film-still{
+  display:block;overflow:hidden;border-radius:inherit;background:#120c07;
+}
+.hud-film-still img{display:block;width:100%;height:100%;object-fit:cover}

@@ -10,6 +10,7 @@ const shown = () => page.evaluate(() => {
   const btns = [...el.querySelectorAll('.hud-dialogue-actions button, .hud-choices button')].map(b=>b.innerText.trim())
   return { who: el.querySelector('.hud-title')?.innerText?.trim(), text: p?.innerText?.trim() ?? '', btns }
 })
+await page.waitForFunction(()=>window.__ch1Where, null, { timeout: 90000 }).catch(()=>{})
 const w0 = await page.evaluate(()=>window.__ch1Where)
 console.log(`== ${region}`)
 let opened = 0, problems = []

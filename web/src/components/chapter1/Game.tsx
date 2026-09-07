@@ -3387,6 +3387,10 @@ const HOST_NAME: string = (() => {
   const who = intro && intro.speaker !== 'narrator' ? intro.speaker : 'rawi'
   return SPEAKERS[who] ?? 'רָאוִי'
 })()
+/** תחנה שבה הפעולה הפיזית קודמת לבחינת העדות: אי אפשר לקרוא כתובת
+    שיושבת בצל, והלפיד הוא מה שמוציא אותה משם. */
+const REVEAL_FIRST = REGION.id === 'yemen-heights'
+
 /* ההוראה של שלב הפעולה — משפט אחד שמתחיל בפועל. „גררו", „הניחו",
    „חברו", „האירו", „מסרו". הטקסטים של התחנות כבר כתובים כך ב-tasks.ts;
    שתי התחנות שיש להן שער נפרד מקבלות ניסוח משלהן, כי שם הפעולה
@@ -5210,12 +5214,13 @@ export default function Game() {
   const [summaryShown, setSummaryShown] = useState(false)
   const summarySeen = summaryEncounter ? seen.includes(summaryEncounter.id) : summaryShown
   useEffect(() => { if (interpretDone) setSummaryShown(true) }, [interpretDone])
+  /* ברמות תימן הפעולה קודמת לקריאה: אי אפשר לקרוא כתובת שיושבת בצל,
+     והלפיד הוא מה שמוציא אותה משם. בכל שאר התחנות בוחנים קודם ואז
+     פועלים. זה ההבדל היחיד בסדר, והוא נובע מן התוכן. */
   const stage: Stage = !introSeen ? 'brief'
-    : !evidenceDone ? 'look'
-    : !physDone ? 'act'
-    : !interpretDone ? 'interpret'
-    : !summarySeen ? 'wrap'
-    : 'done'
+    : REVEAL_FIRST
+      ? (!physDone ? 'act' : !evidenceDone ? 'look' : !interpretDone ? 'interpret' : !summarySeen ? 'wrap' : 'done')
+      : (!evidenceDone ? 'look' : !physDone ? 'act' : !interpretDone ? 'interpret' : !summarySeen ? 'wrap' : 'done')
   const stageRef = useRef<Stage>(stage)
   stageRef.current = stage
   /* וו בדיקה, בפיתוח בלבד: מה יש כאן ואיפה הוא עומד. בלעדיו כל פרוב

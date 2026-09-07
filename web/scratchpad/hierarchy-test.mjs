@@ -3,7 +3,10 @@ import { open } from './lib-probe.mjs'
 const region = process.argv[2]
 const { browser, page, errors } = await open(region)
 const go = async (x,z)=>page.evaluate(({x,z})=>{const L=window.__ch1Live;L.player.x=x;L.player.z=z;L.lastDrag=performance.now()},{x,z})
-const W = () => page.evaluate(()=>window.__ch1Where)
+const W = async () => {
+  await page.waitForFunction(()=>window.__ch1Where, null, { timeout: 90000 }).catch(()=>{})
+  return page.evaluate(()=>window.__ch1Where)
+}
 const opened = () => page.evaluate(()=>({
   task: !!document.querySelector('.ch1-task'),
   find: !!document.querySelector('.ch1-find-card, .hud-find'),

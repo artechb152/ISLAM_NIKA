@@ -24,6 +24,49 @@ interface Step {
   source: string
 }
 
+/* סרט שלא מפענח פריים אינו מציג מלבן שחור.
+   `<video>` בלי poster הוא ריבוע שחור מרגע שהוא נמצא ב-DOM ועד שהפריים
+   הראשון מוכן — ובחיבור איטי זה כמה שניות של „המשחק נתקע". שני דברים
+   מונעים את זה: poster שנחתך מן הסרט עצמו ומצויר מיד, ושומר שבודק
+   אחרי 2.5 שניות אם באמת יש פריים (`videoWidth > 0`). אם אין — הסרט
+   יורד, הפוסטר נשאר, והשיחה ממשיכה בלעדיו. הטקסט הוא הערוץ העיקרי
+   כאן ממילא, ולכן אין שום דבר שאבד. */
+function FilmFrame({ file, once }: { file: string; once: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null)
+  const [dead, setDead] = useState(false)
+  const poster = `/assets/anim-video/${file.replace(/\.mp4$/, '')}-poster.jpg`
+  useEffect(() => {
+    setDead(false)
+    const t = window.setTimeout(() => {
+      const v = ref.current
+      if (!v || v.videoWidth === 0 || v.error) setDead(true)
+    }, 2500)
+    return () => window.clearTimeout(t)
+  }, [file])
+  if (dead) {
+    return (
+      <div className="hud-film hud-film-still" role="img" aria-label="תמונה מן הסרט">
+        <img src={poster} alt="" />
+      </div>
+    )
+  }
+  return (
+    <video
+      ref={ref}
+      key={file}
+      className="hud-film"
+      src={`/assets/anim-video/${file}`}
+      poster={poster}
+      autoPlay
+      muted={!once || isMuted()}
+      loop={!once}
+      playsInline
+      preload="auto"
+      aria-hidden="true"
+    />
+  )
+}
+
 function buildSteps(e: Encounter): Step[] {
   return encounterScript(e).map(({ speaker, line }) => ({
     speaker,
@@ -207,18 +250,7 @@ export function DialogueHud({
             גמורים יושבים בנכסים; אחד בלבד נאמן לתקופה של הפרק, והשאר
             מחכים לסרטים שייעשו לרגעים האלה. שקט ובלולאה: הקריינות
             המוקלדת היא הקול. */}
-        {encounter.film && (
-          <video
-            key={encounter.id}
-            className="hud-film"
-            src={`/assets/anim-video/${encounter.film}`}
-            autoPlay
-            muted={!encounter.filmOnce || isMuted()}
-            loop={!encounter.filmOnce}
-            playsInline
-            aria-hidden="true"
-          />
-        )}
+        {encounter.film && <FilmFrame file={encounter.film} once={!!encounter.filmOnce} />}
         {/* דילוג נראה — Escape עושה את אותו הדבר, אבל מקש סמוי אינו הזמנה
             (דוח הוועדה: "דילוג לא אומת — אין כפתור נראה") */}
         {encounter.film && !showDone && !showChoices && (
