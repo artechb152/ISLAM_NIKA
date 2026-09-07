@@ -44,8 +44,17 @@ async function turnTo(tx, tz) {
   await page.mouse.up()
   await page.waitForTimeout(220)
 }
+async function talkOut(max = 12) {
+  for (let i=0;i<max;i++){
+    if (!(await dlg())) return
+    await page.keyboard.press('Space'); await page.waitForTimeout(420)
+  }
+}
 async function walkTo(tx, tz, stopAt = 1.9, budget = 26) {
   for (let n=0; n<budget; n++) {
+    /* דיבור פתוח מבטל את מקשי התנועה — וזה נכון. הבדיקה הקודמת ניסתה
+       ללכת עם חלונית פתוחה ובזבזה 26 צעדים ריקים בכל סיבוב. */
+    if (await dlg()) await talkOut()
     const p = await live()
     const d = Math.hypot(tx-p.x, tz-p.z)
     if (d <= stopAt) return true
@@ -62,12 +71,6 @@ async function walkTo(tx, tz, stopAt = 1.9, budget = 26) {
   }
   const p = await live()
   return Math.hypot(tx-p.x, tz-p.z) <= stopAt + 1.2
-}
-async function talkOut(max = 12) {
-  for (let i=0;i<max;i++){
-    if (!(await dlg())) return
-    await page.keyboard.press('Space'); await page.waitForTimeout(420)
-  }
 }
 const log = []
 const say = (m) => { log.push(m); console.log(m) }
@@ -150,14 +153,32 @@ if (w.stage === 'interpret') {
 }
 w = await W(); say(`   אחרי הפירוש: ${w.stage}`)
 
+// 4.5) שיחת הסיום — היציאה מחכה לה, ולא רק למשימה
+for (let round=0; round<5; round++) {
+  const held = await page.evaluate(()=>!!document.querySelector('.poi-gate-hold'))
+  if (!held) break
+  w = await W()
+  if (!w.cast.length) break
+  const p0 = await live()
+  const c = [...w.cast].sort((a,b)=>Math.hypot(a.x-p0.x,a.z-p0.z)-Math.hypot(b.x-p0.x,b.z-p0.z))[0]
+  const got = await walkTo(c.x, c.z, 2.2)
+  await page.keyboard.press('KeyE'); await page.waitForTimeout(1000)
+  const spoke = await dlg()
+  await talkOut(20)
+  say(`   שיחת סיום עם ${c.who}: ${got ? (spoke ? 'דיברנו' : 'לא נפתחה') : 'לא הגעתי'}`)
+  if (!got || !spoke) break
+}
+
 // 5) השער
 const gateOpen = await page.evaluate(()=>!document.querySelector('.poi-gate-hold'))
 say(`   השער: ${gateOpen ? 'פתוח' : 'עדיין נעול'}`)
 if (w.gate && gateOpen) {
-  const got = await walkTo(w.gate.x, w.gate.z, 1.2, 30)
-  await page.waitForTimeout(4000)
+  const got = await walkTo(w.gate.x, w.gate.z, 1.2, 60)
+  await page.waitForTimeout(5000)
   const now = await page.evaluate(()=>window.__ch1Where?.region)
-  say(`   הליכה אל השער: ${got ? 'הגעתי' : 'לא הצלחתי'} · עברתי אל: ${now}`)
+  const p2 = await live()
+  const left = Math.hypot(w.gate.x-p2.x, w.gate.z-p2.z).toFixed(1)
+  say(`   הליכה אל השער: ${got ? 'הגעתי' : `לא הצלחתי (נשארו ${left} מ')`} · עברתי אל: ${now}`)
 }
 if (errs.length) say(`   JS: ${[...new Set(errs)].slice(0,2).join(' | ')}`)
 await ctx.close(); await browser.close()

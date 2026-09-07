@@ -4056,9 +4056,23 @@ function camelSpots(x: number, z: number, dx: number, dz: number) {
       המסלול לא ידע שהם קיימים בכלל. לגמל הם מכשול גם אם לשחקן לא.
    2. מה שנולד ברכיבים: הלפיד של תימן, שולחן הראיות, לוח בית'רב. */
 const CAMEL_AVOID = /torch|firewood|firepit|waymark|trough|well|crate|jars|bigjar|basket|sackpile|amphora|claypot|fodder|cart|toll-scale|altar|ansab|idol|stone-bench/
+/* ── שוליים ────────────────────────────────────────────────────────
+   הרדיוס המוצהר הוא טביעת הרגל, לא הגג. יריעת אוהל בולטת מעבר
+   ליתדות, ולכן גמל שעבר במרחק „חוקי" מן המרכז העביר את ראשו מתחת
+   לבד: בדרך העמסה נמדדו 3.1% מקודקודי הגמל בתוך רשת האוהל, בזמן
+   שמדידת הקוליידרים החזירה אפס. השוליים סוגרים את ההפרש הזה. */
+const CAMEL_MARGIN = 0.45
+/* ── אוהל ──────────────────────────────────────────────────────────
+   יש הפרש שאין שוליים שיסגרו: יריעת ה-bayt מגיעה 3.72 מטר מן המרכז,
+   והרדיוס המוצהר הוא 2.42. גמל שעמד ב-2.9 מטר היה „חוקי" והכניס את
+   ראשו מתחת לבד — 3.1% מקודקודיו בתוך הרשת, בדרך ההעמסה. לגמלים
+   האוהל רחב כפי שהוא נראה, ולא כפי שהוא מוצהר. */
+const CAMEL_WIDE: Record<string, number> = { bayt: 3.8, bayt2: 3.8 }
 const HAND_OBSTACLES: Collider[] = (() => {
   const out: Collider[] = []
   for (const p of WORLD.layout.props) {
+    const wide = CAMEL_WIDE[p.model]
+    if (wide) { out.push({ x: p.x, z: p.z, r: wide }); continue }
     if (!CAMEL_AVOID.test(p.model)) continue
     /* רדיוס אמיתי לגוף שאין לו קוליידר: חצי הגובה, בגבולות סבירים */
     const r = p.r && p.r > 0 ? p.r : Math.max(0.5, Math.min(1.2, (p.h ?? 1) * 0.35))
@@ -4083,9 +4097,11 @@ function clearWalk(
 ) {
   const blockers = [...WORLD.colliders, ...HAND_OBSTACLES, ...taken]
   /** האם גמל שעומד כאן, פונה לכיוון הזה, נוגע במשהו */
-  const hits = (x: number, z: number, dx: number, dz: number) => {
+  const hits = (x: number, z: number, dx: number, dz: number, margin = CAMEL_MARGIN) => {
     for (const s of camelSpots(x, z, dx, dz)) {
-      for (const c of blockers) if (Math.hypot(c.x - s.x, c.z - s.z) < c.r + s.r) return true
+      for (const c of blockers) {
+        if (Math.hypot(c.x - s.x, c.z - s.z) < c.r + s.r + margin) return true
+      }
     }
     return false
   }
@@ -4126,15 +4142,21 @@ function clearWalk(
   /* אין מסלול פנוי — הגמל רובץ. „מעט גמלים שזזים טוב" עדיף על
      „הרבה גמלים שמסתובבים בלולאות מלאכותיות", וגמל רובץ הוא תמונה
      נכונה של מחנה. */
-  for (let a = 0; a < 24; a++) {
-    const dx = Math.cos((a / 24) * Math.PI * 2)
-    const dz = Math.sin((a / 24) * Math.PI * 2)
-    for (const step of [0, 2, 4, 6, 8, 10]) {
-      const x = cx + dx * step, z = cz + dz * step
-      /* נבדק בכיוון שבו הוא באמת יעמוד, לא בכיוון שבו חיפשנו */
-      const fx = restDir ? restDir.dx : dx
-      const fz = restDir ? restDir.dz : dz
-      if (!hits(x, z, fx, fz)) return { cx: x, cz: z, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
+  /* מחפשים פעמיים: קודם עם השוליים, ואם המקום צר מכדי לתת אותם —
+     בלעדיהם. הוויתור על השוליים הוא ראש שמתקרב ליריעה; הוויתור על
+     החיפוש כולו היה גמל שנשתל בתוך סלע, וכך בדיוק נמדד המעבר הצר
+     כשהשוליים נוספו: 0.46 מטר חדירה ב-90 מתוך 90 דגימות. */
+  for (const margin of [CAMEL_MARGIN, 0]) {
+    for (let a = 0; a < 24; a++) {
+      const dx = Math.cos((a / 24) * Math.PI * 2)
+      const dz = Math.sin((a / 24) * Math.PI * 2)
+      for (const step of [0, 2, 4, 6, 8, 10]) {
+        const x = cx + dx * step, z = cz + dz * step
+        /* נבדק בכיוון שבו הוא באמת יעמוד, לא בכיוון שבו חיפשנו */
+        const fx = restDir ? restDir.dx : dx
+        const fz = restDir ? restDir.dz : dz
+        if (!hits(x, z, fx, fz, margin)) return { cx: x, cz: z, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
+      }
     }
   }
   return { cx, cz, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
@@ -4182,35 +4204,59 @@ const HERD_PATHS: HerdPath[] = (() => {
   const slowest = Math.min(...HERD.map((h) => Math.abs(h.speed)).filter((v) => v > 0), 0.05)
   const span = (Math.PI * 2) / slowest
   const STEPS = 240
-  const dirty = new Set<number>()
-  for (let k = 0; k < STEPS; k++) {
-    const t = (k / STEPS) * span
-    const bodies = out.map((_, i) => camelSpots(at(i, t).x, at(i, t).z, at(i, t).dx, at(i, t).dz))
-    for (let i = 0; i < bodies.length; i++) {
-      if (out[i].rx === 0 && out[i].rz === 0) continue
-      for (const s of bodies[i]) {
-        for (const c of blockers) {
-          if (Math.hypot(c.x - s.x, c.z - s.z) < c.r + s.r) { dirty.add(i); break }
-        }
-        for (let j = 0; j < bodies.length; j++) {
-          if (j === i) continue
-          for (const s2 of bodies[j]) {
-            if (Math.hypot(s2.x - s.x, s2.z - s.z) < s.r + s2.r) { dirty.add(i > j ? i : j); break }
+  const parkedNow = (i: number) => out[i].rx === 0 && out[i].rz === 0
+  const scan = () => {
+    const dirty = new Set<number>()
+    for (let k = 0; k < STEPS; k++) {
+      const t = (k / STEPS) * span
+      const bodies = out.map((_, i) => {
+        const p = at(i, t)
+        return camelSpots(p.x, p.z, p.dx, p.dz)
+      })
+      for (let i = 0; i < bodies.length; i++) {
+        if (parkedNow(i)) continue
+        for (const s of bodies[i]) {
+          for (const c of blockers) {
+            if (Math.hypot(c.x - s.x, c.z - s.z) < c.r + s.r + CAMEL_MARGIN) { dirty.add(i); break }
+          }
+          for (let j = 0; j < bodies.length; j++) {
+            if (j === i) continue
+            for (const s2 of bodies[j]) {
+              if (Math.hypot(s2.x - s.x, s2.z - s.z) < s.r + s2.r) {
+                /* מי מהשניים עוצר: אם השני כבר עומד, ההולך הוא שאשם.
+                   אם שניהם הולכים — הגבוה באינדקס, והסריקה הבאה תבדוק
+                   אם מי שנשאר עדיין חוצה את מי שנעצר. */
+                dirty.add(parkedNow(j) ? i : Math.max(i, j))
+                break
+              }
+            }
           }
         }
       }
     }
+    return dirty
   }
-  /* מי שנמצא מלוכלך — עוצר במקום שבו הוא כרגע, ורק אם המקום פנוי */
-  for (const i of dirty) {
-    const home = at(i, 0)
-    const rest = { dx: Math.sin(HERD[i].phase), dz: Math.cos(HERD[i].phase) }
-    const stop = clearWalk(home.x, home.z, 0, 0, parked, rest)
-    out[i] = stop
-    parked.push({ x: stop.cx, z: stop.cz, r: CAMEL_LEN + CAMEL_W })
+  /* ── למה בלולאה ──────────────────────────────────────────────────
+     סריקה אחת הספיקה כדי לסמן, אבל לא כדי לתקן: הגמל שנעצר נשתל
+     בנקודה שבה היה, וזו נקודה על מסלולו של מי שהמשיך ללכת. באזור
+     היציאה זה נמדד — camel:0 עבר דרך camel:1 בעומק 1.47 מטר,
+     ב-28 מתוך 90 דגימות. אחרי כל עצירה סורקים שוב, עד שהעדר נקי. */
+  let stopped = 0
+  for (let pass = 0; pass < 5; pass++) {
+    const dirty = scan()
+    if (!dirty.size) break
+    for (const i of dirty) {
+      if (parkedNow(i)) continue
+      const home = at(i, 0)
+      const rest = { dx: Math.sin(HERD[i].phase), dz: Math.cos(HERD[i].phase) }
+      const stop = clearWalk(home.x, home.z, 0, 0, parked, rest)
+      out[i] = stop
+      parked.push({ x: stop.cx, z: stop.cz, r: CAMEL_LEN + CAMEL_W })
+      stopped++
+    }
   }
-  if (process.env.NODE_ENV !== 'production' && dirty.size) {
-    console.info(`[ch1 herd] ${REGION.id}: ${dirty.size} מתוך ${HERD.length} גמלים נעצרו — מסלולם לא היה נקי`)
+  if (process.env.NODE_ENV !== 'production' && stopped) {
+    console.info(`[ch1 herd] ${REGION.id}: ${stopped} מתוך ${HERD.length} גמלים נעצרו — מסלולם לא היה נקי`)
   }
   return out
 })()
