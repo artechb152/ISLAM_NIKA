@@ -1521,24 +1521,28 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 @media (min-width:900px){
   .bleed-aside{
     display:grid;
-    grid-template-columns:minmax(0,1fr) clamp(280px,32%,440px);
+    grid-template-columns:minmax(0,1fr) clamp(300px,34%,480px);
     gap:0 clamp(18px,2.6vw,40px);
     /* the art column reaches into the page gutter instead of stopping at it */
     margin-inline-end:calc(-1 * var(--content-gutter));
   }
   .bleed-aside-body{grid-column:1}
+  /* THE BOX HUGS THE PAINTING rather than reserving a slab of column for it.
+     A cutout has no frame, so any height the box does not fill is not white
+     space in a figure — it is a hole in the page, and the sticky offset then
+     parks the painting against nothing. `height:auto` also means one class
+     serves a tall painting and a wide one without either being letterboxed. */
   .bleed-aside-art{
     display:block;grid-column:2;align-self:start;
     position:sticky;top:calc(var(--header-height) + clamp(24px,4vh,54px));
-    height:min(58vh,520px);
     z-index:0;pointer-events:none;user-select:none;
   }
   .bleed-aside-art img{
-    width:100%;height:100%;object-fit:contain;object-position:left center;
+    display:block;width:100%;height:auto;
     /* a whisper of a fade at the foot, so the wash melts into the paper
        instead of ending on a cut line */
-    -webkit-mask-image:linear-gradient(to top,transparent 0,#000 9%);
-            mask-image:linear-gradient(to top,transparent 0,#000 9%);
+    -webkit-mask-image:linear-gradient(to top,transparent 0,#000 5%);
+            mask-image:linear-gradient(to top,transparent 0,#000 5%);
   }
 }
 @media (prefers-reduced-motion:reduce){
