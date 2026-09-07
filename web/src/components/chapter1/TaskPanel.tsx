@@ -23,8 +23,10 @@ const OBSERVE_LABELS: Record<string, string> = Object.fromEntries(
   FINDS.map((f) => [f.id, f.title]),
 )
 
-export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onChoose, onSort, onClose }: {
+export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phase, onChoose, onSort, onInterpret, onClose }: {
   task: Task
+  /** באיזה שלב הפאנל נפתח: הפעולה עצמה, או הפירוש שאחריה */
+  phase: 'act' | 'interpret'
   /** right answers already given, by either hand or button */
   chosen: string[]
   /** evidence already picked up — `present` options stay locked without theirs */
@@ -37,6 +39,8 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onCh
   onChoose: (id: string) => void
   /** sort tasks: an item was put on one side */
   onSort: (itemId: string, binId: string) => void
+  /** שלב הפירוש: התשובה על „מה זה אומר" */
+  onInterpret: (id: string) => void
   onClose: () => void
 }) {
   /* connect חולק את מכניקת השני-קליקים של sort — רק התמונה שונה:
@@ -44,7 +48,11 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onCh
   const sorting = task.kind === 'sort' || task.kind === 'connect' || task.kind === 'observe'
   const nested = task.kind === 'connect'
   const needed = sorting ? task.options : task.options.filter((o) => o.right)
-  const lastOpt = last ? task.options.find((o) => o.id === last) : null
+  /* ההערה מוצגת גם לתשובת פירוש, ולא רק לאופציה של ההנחה */
+  const lastOpt: { note: string; wrong?: string } | null = last
+    ? (task.options.find((o) => o.id === last) ??
+       task.interpret?.options.find((o) => o.id === last) ?? null)
+    : null
   /* Two clicks, not a drag: pick the thing up, then say which side it goes on.
      A pointer drag would shut out the keyboard and the screen reader, and this
      panel is the accessible route by design — the hands-on route is the props
@@ -58,7 +66,28 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, onCh
         <h3 id="ch1-task-title">{task.title}</h3>
         <p className="ch1-task-question">{task.question}</p>
 
-        {(task.needsFinds ?? []).some((f) => !found.includes(f)) ? (
+        {phase === 'interpret' && task.interpret ? (
+          /* ── הפירוש ─────────────────────────────────────────────────
+             הפעולה כבר נעשתה, והפאנל אינו חוזר עליה: הוא שואל מה היא
+             אמרה. עד עכשיו ההנחה הייתה גם התשובה, ולכן השלב הזה לא
+             התקיים — התחנה נסגרה ברגע שהחפץ נחת. */
+          <div className="ch1-task-interpret">
+            <p className="ch1-task-did">✓ {task.hint ? 'הפעולה הושלמה' : 'הונח במקומו'}</p>
+            <p className="ch1-task-question is-interpret">{task.interpret.question}</p>
+            <div className="ch1-task-options">
+              {task.interpret.options.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  className={`hud-card-btn${last === o.id ? ' is-last' : ''}`}
+                  onClick={() => onInterpret(o.id)}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (task.needsFinds ?? []).some((f) => !found.includes(f)) ? (
           /* שופטים רק את מה שראו: עד ששלוש התצפיות נראו, המיון נשאר סגור
              והלוח אומר בדיוק מה עוד יש לראות. */
           <div className="ch1-task-observe" role="status">

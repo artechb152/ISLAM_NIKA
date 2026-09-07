@@ -1229,3 +1229,19 @@ body{
 .p2-main .p2-lead{color:#4a3a20}
 .p1-steps-count,.p1-order-how{color:#5b4726}
 .p2-main .p2-option,.p2-main .p2-chip{min-height:48px}
+
+/* ===== שלב הפירוש ===== */
+/* הפעולה נעשתה, והפאנל אינו חוזר עליה — הוא שואל מה היא אמרה.
+   שורת ה-✓ למעלה היא ההבדל: היא מאשרת את מה שהיד עשתה ואז עוברת
+   הלאה, כך שהשאלה נקראת כהמשך ולא כחזרה. */
+.ch1-task-did{
+  margin:0 0 10px;font-size:13.5px;letter-spacing:.02em;
+  color:var(--olive,#7c8a4f);
+}
+.ch1-task-question.is-interpret{margin-bottom:16px}
+.ch1-task-interpret .ch1-task-options{display:flex;flex-direction:column;gap:9px}
+.ch1-task-interpret .hud-card-btn{
+  position:static;width:100%;text-align:right;min-height:50px;
+  padding:12px 18px;font-size:15px;line-height:1.5;white-space:normal;
+}
+.ch1-task-interpret .hud-card-btn.is-last{border-color:rgba(232,191,118,.75)}

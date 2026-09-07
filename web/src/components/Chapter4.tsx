@@ -283,17 +283,6 @@ function Echo({ children }: { children: React.ReactNode }) {
     IT IS LIFTED, NOT TYPED. `pick` proves the digits are in that very sentence
     at a word boundary and throws otherwise, so the display can never drift from
     the text it is supposed to be pulling out of. */
-function Year({ r, n, children }: { r: string; n: string; children: React.ReactNode }) {
-  return (
-    <div className="ch4-year" data-reveal>
-      <b className="ch4-year-n" aria-hidden="true">
-        {pick(r, n)}
-      </b>
-      <div className="ch4-year-text">{children}</div>
-    </div>
-  )
-}
-
 /* ---------------- structure ---------------- */
 
 /** The section heading — chapter 6's `.section-heading` with its diamond.
@@ -809,35 +798,65 @@ export default function Chapter4() {
                   <T r="§8.b" className="ch4-body" reveal />
                 </Block>
 
-                {/* NOT THE COVENANT: what became of the tribes years after it.
-                    A heading of its own, and nothing else — this is the
-                    material the chapter gives no picture and no mechanism, the
-                    same call §26 and chapter 2's ואד אלבנת got. */}
-                <SubHead section="hijra" id="tribes" />
-                <Block>
-                  <T r="§8.c" className="ch4-body ch4-quiet-body" reveal />
-                  <T r="§8.d" className="ch4-body ch4-quiet-body" reveal />
-                </Block>
+                {/* THE CLOSING RUN OF THE SECTION — three movements, one painting.
 
-                {/* THE HIJRA AS AN IDEA, and what has been done with it. §5 is
-                    why the Muslim calendar starts here; §6 is 1981 and the
-                    twenty-first century. */}
-                <SubHead section="hijra" id="hijra-idea" />
-                <Year r="§5.a" n="622">
-                  <T r="§5.a" className="ch4-body" em={["אלהג'רה"]} reveal />
-                  <T r="§5.b" className="ch4-body" reveal />
-                </Year>
-                <Echo>
-                  <T r="§6.echo1" className="ch4-body" />
-                  <T r="§6.echo2" className="ch4-body" />
-                </Echo>
-                <SubHead section="hijra" id="jihad" />
-                <Block>
-                  <T r="§9.dawa" className="ch4-body" reveal />
-                  <T r="§9.jihad" className="ch4-body" reveal />
-                  <T r="§9.b" className="ch4-body" reveal />
-                  <T r="§9.c" className="ch4-body" reveal />
-                </Block>
+                    What the tribes became, what the hijra means, and the turn
+                    from preaching to raiding are three headings the reader
+                    passes in one breath, and the decision here was that they
+                    carry NO mechanism at all: running prose, headings, and a
+                    watercolour beside them. The `.bleed-aside` device is
+                    chapter 6's shahada treatment, generalised in the shared
+                    sheet so this is the same machine and not a copy of it.
+
+                    THE PAINTING IS A CARAVAN, and it is a caravan because the
+                    three headings are one thought: they left Mecca, the leaving
+                    is what the calendar counts from, and the road is where the
+                    raids on Quraysh begin. It carries no dome and no minaret —
+                    neither existed in 622, and the chapter's own rule forbids
+                    them.
+
+                    THE YEAR NO LONGER STANDS ALONE. „622" was set as a display
+                    numeral beside §5.a; the decision was to let the year stay
+                    inside the sentence that already carries it, so the run is
+                    prose and headings and nothing else. */}
+                <div className="bleed-aside">
+                  <div className="bleed-aside-art" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/chapter4/caravan-road.png" alt="" loading="lazy" decoding="async" />
+                  </div>
+                  <div className="bleed-aside-body">
+                    {/* NOT THE COVENANT: what became of the tribes years after
+                        it. The material the chapter gives no picture and no
+                        mechanism — the same call §26 and chapter 2's
+                        ואד אלבנת got. */}
+                    <SubHead section="hijra" id="tribes" />
+                    <Block>
+                      <T r="§8.c" className="ch4-body ch4-quiet-body" reveal />
+                      <T r="§8.d" className="ch4-body ch4-quiet-body" reveal />
+                    </Block>
+
+                    {/* THE HIJRA AS AN IDEA, and what has been done with it.
+                        §5 is why the Muslim calendar starts here; §6 is 1981
+                        and the twenty-first century. */}
+                    <SubHead section="hijra" id="hijra-idea" />
+                    <Block>
+                      <T r="§5.a" className="ch4-body" em={["אלהג'רה"]} reveal />
+                      <T r="§5.b" className="ch4-body" reveal />
+                    </Block>
+                    <Echo>
+                      <T r="§6.echo1" className="ch4-body" />
+                      <T r="§6.echo2" className="ch4-body" />
+                    </Echo>
+
+                    <SubHead section="hijra" id="jihad" />
+                    <Block>
+                      <T r="§9.dawa" className="ch4-body" reveal />
+                      <T r="§9.jihad" className="ch4-body" reveal />
+                      <T r="§9.b" className="ch4-body" reveal />
+                      <T r="§9.c" className="ch4-body" reveal />
+                    </Block>
+                  </div>
+                </div>
               </Section>
 
               <Section id="badr">

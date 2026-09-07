@@ -5155,16 +5155,31 @@ export default function Game() {
   /* ההשלמה נבדקת כאן ולא בתוך ה-updater: setState בתוך updater רץ בפאזת
      הרנדור (וב-StrictMode פעמיים), וזה בדיוק ה-"Issue" האדום שקפץ ברגע
      שפתרו משימה. אפקט אחד לשני מסלולי המענה. */
+  /* ── מתי התחנה נסגרת ─────────────────────────────────────────────────
+     בתחנה שיש לה שלב פירוש, ההנחה מסיימת את הפעולה בלבד. מה שסוגר
+     היא התשובה על „מה זה אומר". בלי זה השניים היו אותו אירוע: מי
+     שגרר את המטבע הנכון פתר את התחנה באותו רגע, ושלב הפירוש לא
+     התקיים בפועל. */
+  const [interpreted, setInterpreted] = useState<string | null>(null)
+  const interpretTask = useCallback((id: string) => {
+    if (!REGION_TASK?.interpret) return
+    const opt = REGION_TASK.interpret.options.find((o) => o.id === id)
+    if (!opt) return
+    setTaskLast(id)
+    setTaskLastOk(!!opt.right)
+    if (opt.right) setInterpreted(id)
+  }, [setTaskLast, setTaskLastOk])
   useEffect(() => {
     if (!REGION_TASK || taskSolved) return
     const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
     const needed = (sortLike ? REGION_TASK.options : REGION_TASK.options.filter((o) => o.right)).map((o) => o.id)
-    if (needed.length && needed.every((n) => taskChosen.includes(n))) {
-      setSolved(recordTask(REGION_TASK.id).solved)
-      setTaskNote({ who: 'רָאוִי', text: REGION_TASK.done, ok: true })
-    }
+    const placed = needed.length > 0 && needed.every((n) => taskChosen.includes(n))
+    if (!placed) return
+    if (REGION_TASK.interpret && !interpreted) return
+    setSolved(recordTask(REGION_TASK.id).solved)
+    setTaskNote({ who: 'רָאוִי', text: REGION_TASK.done, ok: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskChosen, taskSolved])
+  }, [taskChosen, taskSolved, interpreted])
   const chooseTask = useCallback(
     (id: string) => {
       if (!REGION_TASK) return
@@ -6319,6 +6334,8 @@ export default function Game() {
         {openTask && REGION_TASK && (
           <TaskPanel
             task={REGION_TASK}
+            phase={stage === 'interpret' ? 'interpret' : 'act'}
+            onInterpret={interpretTask}
             chosen={taskChosen}
             found={found}
             last={taskLast}

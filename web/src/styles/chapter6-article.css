@@ -1494,3 +1494,55 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   .chk-q{font-size:19px}
 }
 @media (prefers-reduced-motion:reduce){.chk-chip.is-bounce{animation:none}}
+/* ============ a watercolour cutout beside a run of prose =================
+   Chapter 6 built this once, for the shahada, hard-wired to that section's
+   own class names and to a minaret painting anchored at the bottom. Chapter 4
+   asked for the same device, so it is written here — the sheet all three
+   chapters load — rather than copied into a second stylesheet.
+
+   WHAT IT IS. A transparent cutout with no frame and no caption, set on the
+   paper beside the words. It is not a figure the reader studies; the paragraph
+   is still the whole content, and the painting is decoration the markup marks
+   `aria-hidden`. That is also why nothing here is a `<figure>`: a figure takes
+   a caption, and a caption here would be a sentence the source never wrote.
+
+   WHY STICKY AND NOT ANCHORED. The shahada's painting sits beside ONE screen
+   of text and is absolutely positioned across it. This runs beside a stretch
+   of several sub-headings, and a single cutout stretched over twelve hundred
+   pixels is a smear. Sticky instead: the painting comes to rest beside the
+   prose and stays there while the reader moves through the run.
+
+   IT BLEEDS OFF THE INLINE-END EDGE — the LEFT, in Hebrew — by pulling the
+   grid into the page gutter. Below 900px the painting is removed rather than
+   shrunk: a cutout at phone width is a smudge, and the prose reads without it. */
+.bleed-aside-art{display:none}
+.bleed-aside-body{position:relative;z-index:1}
+
+@media (min-width:900px){
+  .bleed-aside{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) clamp(280px,32%,440px);
+    gap:0 clamp(18px,2.6vw,40px);
+    /* the art column reaches into the page gutter instead of stopping at it */
+    margin-inline-end:calc(-1 * var(--content-gutter));
+  }
+  .bleed-aside-body{grid-column:1}
+  .bleed-aside-art{
+    display:block;grid-column:2;align-self:start;
+    position:sticky;top:calc(var(--header-height) + clamp(24px,4vh,54px));
+    height:min(58vh,520px);
+    z-index:0;pointer-events:none;user-select:none;
+  }
+  .bleed-aside-art img{
+    width:100%;height:100%;object-fit:contain;object-position:left center;
+    /* a whisper of a fade at the foot, so the wash melts into the paper
+       instead of ending on a cut line */
+    -webkit-mask-image:linear-gradient(to top,transparent 0,#000 9%);
+            mask-image:linear-gradient(to top,transparent 0,#000 9%);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  /* sticky is not motion, but a reader who asks for stillness gets a painting
+     that stays where the page put it */
+  .bleed-aside-art{position:static}
+}
