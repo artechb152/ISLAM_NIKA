@@ -4,12 +4,14 @@ let total = 0
 for (const r of R) {
   const { browser, page } = await open(r, { w: 800, h: 500 })
   await page.waitForFunction(() => window.__ch1Audit, null, { timeout: 90000 }).catch(() => {})
-  /* הביקורת רצה שוב עד שהעולם מפסיק לגדול — מחכים שהיא תתייצב */
-  await page.waitForTimeout(4000)
-  let prev = -1
-  for (let k = 0; k < 8; k++) {
+  /* הביקורת רצה שוב עד שהעולם מפסיק לגדול. „פעם אחת בלי שינוי" אינו
+     מספיק: מנה של פרופים יכולה להתעכב על פענוח, והמונה נראה יציב
+     לרגע. שלוש בדיקות רצופות באותו מספר, ולפחות 15 שניות. */
+  await page.waitForTimeout(6000)
+  let prev = -1, same = 0
+  for (let k = 0; k < 20 && same < 3; k++) {
     const n = await page.evaluate(() => window.__ch1Audit?.counted ?? 0)
-    if (n === prev) break
+    same = n === prev ? same + 1 : 0
     prev = n
     await page.waitForTimeout(2600)
   }
