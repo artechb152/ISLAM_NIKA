@@ -74,6 +74,7 @@ async function talkOut(max = 14) {
     await page.keyboard.press('Space'); await page.waitForTimeout(420)
   }
 }
+let stuck = 0
 async function walkTo(tx, tz, stopAt = 1.9, budget = 26) {
   for (let n=0; n<budget; n++) {
     /* דיבור פתוח מבטל את מקשי התנועה — וזה נכון. הבדיקה הקודמת ניסתה
@@ -89,9 +90,19 @@ async function walkTo(tx, tz, stopAt = 1.9, budget = 26) {
     await page.waitForTimeout(260)
     const q = await live()
     if (Math.hypot(q.x-p.x, q.z-p.z) < 0.12 && d > stopAt) {
-      /* לא זזנו — משהו חוסם. נסה לעקוף */
-      await page.keyboard.down('KeyA'); await page.waitForTimeout(700); await page.keyboard.up('KeyA')
-    }
+      /* לא זזנו — משהו חוסם. עוקפים לסירוגין, ואם גם זה לא עזר
+         פונים בזווית והולכים קדימה: בית באמצע הדרך אינו חסימה,
+         הוא מכשול שמקיפים. */
+      stuck++
+      const side = stuck % 2 ? 'KeyA' : 'KeyD'
+      await page.keyboard.down(side); await page.waitForTimeout(800); await page.keyboard.up(side)
+      if (stuck % 3 === 0) {
+        const off = (stuck % 6 === 0 ? 1 : -1) * 1.1
+        const pp = await live()
+        await turnTo(pp.x + Math.sin(pp.yaw + off) * 6, pp.z + Math.cos(pp.yaw + off) * 6)
+        await page.keyboard.down('KeyW'); await page.waitForTimeout(1200); await page.keyboard.up('KeyW')
+      }
+    } else stuck = 0
   }
   const p = await live()
   return Math.hypot(tx-p.x, tz-p.z) <= stopAt + 1.2
@@ -102,9 +113,10 @@ const say = (m) => { log.push(m); console.log(m) }
 let w = await W()
 say(`== ${region} · פתיחה בשלב ${w.stage}`)
 // 1) השיחה
-for (let round=0; round<8; round++) {
+for (let round=0; round<14; round++) {
   w = await W()
-  if (w.stage !== 'brief') break
+  const owed = await page.evaluate(()=>/יש עוד/.test(document.querySelector('.hud-objective')?.textContent ?? ''))
+  if (w.stage !== 'brief' && !owed) break
   if (w.cast.length) {
     const c = w.cast[0]
     const got = await walkTo(c.x, c.z, 2.2)
@@ -178,7 +190,7 @@ if (w.stage === 'interpret') {
 w = await W(); say(`   אחרי הפירוש: ${w.stage}`)
 
 // 4.5) שיחת הסיום — היציאה מחכה לה, ולא רק למשימה
-for (let round=0; round<5; round++) {
+for (let round=0; round<8; round++) {
   const held = await page.evaluate(()=>!!document.querySelector('.poi-gate-hold'))
   if (!held) break
   w = await W()

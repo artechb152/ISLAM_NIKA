@@ -5770,6 +5770,7 @@ export default function Game() {
   const talksDone = CORE_TALKS.every((id) => seen.includes(id))
   const talksDoneRef = useRef(true)
   talksDoneRef.current = talksDone
+  const talksLeftRef = useRef(0)
   useEffect(() => {
     if (!REGION_TASK || taskSolved) return
     if (!(placedAll || (!hasPlaceables && physDone))) return
@@ -5828,8 +5829,14 @@ export default function Game() {
   const sightsLeftRef = useRef(sightsLeft)
   sightsLeftRef.current = sightsLeft
   /* מה עכשיו — משפט אחד, שמשתנה עם השלב ולא עם המיקום. */
+  /* שיחות ליבה שנשארו — הן נדרשות לסגירת התחנה, ולכן ההנחיה מפנה
+     אליהן במקום לשלוח לעבודה. בלי זה הלומד נשלח למשימה, פותר אותה,
+     והתחנה אינה נסגרת בלי שהוא יודע למה. */
+  const talksLeft = CORE_TALKS.filter((id) => !seen.includes(id)).length
   const objective =
-    stage === 'brief'
+    talksLeft > 0 && stage !== 'brief'
+      ? `יש עוד ${talksLeft === 1 ? 'נושא אחד' : `${talksLeft} נושאים`} לשמוע מ${HOST_NAME} — לחצו E לידו`
+      : stage === 'brief'
       /* כשהמארח הוא ראאווי אין למי ללחוץ E: הוא צועד לצידך ומדבר
          מעצמו אחרי רגע של עמידה. הוראה ללחוץ מקש שאין לו יעד היא
          בדיוק מה שגורם למשחק להיקרא כשבור. */
@@ -5848,6 +5855,7 @@ export default function Game() {
                 ? 'התחנה הושלמה — המשיכו בדרך'
                 : 'הדרך הסתיימה'
   objectiveRef.current = objective
+  talksLeftRef.current = talksLeft
   /* רמז התקיעות אחרי 25 שניות. קודם הוא פתח תמיד במשימה — גם כשהיא
      עדיין נעולה מאחורי שיחה שלא נשמעה, כלומר הפנה את הלומד אל מה
      שלא ייפתח לו. הוא הולך עכשיו לפי אותו סדר של השלבים. */
@@ -6764,6 +6772,7 @@ export default function Game() {
             /* אם אחרי השיחה הזאת התחנה מחכה לפעולה — הכפתור אומר זאת */
             handoff={
               encounter.speaker !== 'narrator' &&
+              !talksLeftRef.current &&
               (stage === 'brief' || stage === 'look' || stage === 'act')
                 ? objective
                 : null

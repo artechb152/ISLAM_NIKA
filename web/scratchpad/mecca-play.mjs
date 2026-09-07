@@ -39,11 +39,20 @@ async function turnTo(tx,tz){ const p=await L()
   const st=Math.max(4,Math.min(30,Math.abs(px)/40))
   for(let i=1;i<=st;i++) await page.mouse.move(cx+(px*i)/st, cy)
   await page.mouse.up(); await page.waitForTimeout(220) }
+let stuck = 0
 async function walkTo(tx,tz,stop=2.0,budget=30){ for(let n=0;n<budget;n++){
   if (await dlg()) await talkOut()
   const p=await L(); const d=Math.hypot(tx-p.x,tz-p.z); if(d<=stop) return true
   await turnTo(tx,tz); await page.keyboard.down('KeyW'); await page.waitForTimeout(d>8?1400:620)
-  await page.keyboard.up('KeyW'); await page.waitForTimeout(250) }
+  await page.keyboard.up('KeyW'); await page.waitForTimeout(250)
+  const q=await L()
+  if (Math.hypot(q.x-p.x,q.z-p.z) < 0.12) { stuck++
+    const side = stuck % 2 ? 'KeyA' : 'KeyD'
+    await page.keyboard.down(side); await page.waitForTimeout(800); await page.keyboard.up(side)
+    if (stuck % 3 === 0) { const pp=await L()
+      await turnTo(pp.x + Math.sin(pp.yaw + 1.1) * 6, pp.z + Math.cos(pp.yaw + 1.1) * 6)
+      await page.keyboard.down('KeyW'); await page.waitForTimeout(1200); await page.keyboard.up('KeyW') } }
+  else stuck = 0 }
   const p=await L(); return Math.hypot(tx-p.x,tz-p.z)<=stop+1.2 }
 
 let w = await W()
@@ -59,8 +68,25 @@ w = await W(); console.log('אחרי השיחה:', w.stage)
 /* השולחן לפני שהוא רלוונטי */
 const T = { x: w.task.x + 2.1, z: w.task.z + 1.3 }
 await walkTo(T.x, T.z, 2.4)
-const topY = await page.evaluate(()=>{ const o=window.__ch1Scene.getObjectByName('task:evidence-table')
-  if(!o) return null; const v=o.getWorldPosition(new o.position.constructor()); return v.y })
+/* גובה פני השולחן נמדד מן הרשת עצמה. `getWorldPosition` של הקבוצה
+   מחזיר 0 — הילדים ממוקמים בקואורדינטות עולם — ולכן ההיטל היה שגוי
+   והגרירה החטיאה. */
+const topY = await page.evaluate(()=>{
+  const o = window.__ch1Scene.getObjectByName('task:evidence-table')
+  if (!o) return null
+  let top = -1e9
+  o.updateMatrixWorld(true)
+  o.traverse(n => {
+    if (!n.isMesh || !n.geometry?.attributes?.position) return
+    const pos = n.geometry.attributes.position, m = n.matrixWorld.elements
+    for (let i=0;i<pos.count;i+=Math.max(1,Math.ceil(pos.count/200))) {
+      const x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i)
+      const wy = m[1]*x + m[5]*y + m[9]*z + m[13]
+      if (wy > top) top = wy
+    }
+  })
+  return top
+})
 console.log('שלב לפני נגיעה בשולחן:', (await W()).stage)
 
 for (let guard=0; guard<8; guard++){ w = await W(); if (w.stage!=='look') break
@@ -86,6 +112,22 @@ for (let i=0;i<3;i++){
   console.log('   הנחה', i, '→ שלב', (await W()).stage)
 }
 await page.screenshot({ path: '/private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/mecca-placed.png' })
+/* אם הגרירה לא נרשמה — מנסים את חלופת המקלדת, ומדווחים על שתיהן */
+if ((await W()).stage === 'act') {
+  console.log('   הגרירה לא נרשמה — בודקים את חלופת המקלדת (T)')
+  await page.keyboard.press('KeyT'); await page.waitForTimeout(1400)
+  console.log('   T פתח פאנל:', await page.evaluate(()=>!!document.querySelector('.ch1-task')))
+  const labels = await page.$$eval('.ch1-task-hand button', els=>els.map(e=>e.textContent.trim()))
+  console.log('   כפתורי הפעולה:', JSON.stringify(labels))
+  for (let i=0;i<3;i++){
+    const b = await page.$$('.ch1-task-hand button')
+    const free = b.find ? null : null
+    for (const el of b) { const dis = await el.isDisabled().catch(()=>true); if (!dis) { await el.click({timeout:3000}).catch(()=>{}); break } }
+    await page.waitForTimeout(800)
+    console.log('   כפתור', i, '→ שלב', (await W()).stage)
+  }
+  for (let k=0;k<12;k++){ if(!(await page.evaluate(()=>!!document.querySelector('.ch1-task')))) break; await page.keyboard.press('Escape'); await page.waitForTimeout(300) }
+}
 w = await W(); console.log('אחרי השולחן:', w.stage)
 
 if (w.stage === 'interpret') {
