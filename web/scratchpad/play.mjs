@@ -44,9 +44,14 @@ async function turnTo(tx, tz) {
   await page.mouse.up()
   await page.waitForTimeout(220)
 }
-async function talkOut(max = 12) {
+async function talkOut(max = 14) {
   for (let i=0;i<max;i++){
     if (!(await dlg())) return
+    /* בשורה האחרונה החלונית אינה נסגרת ברווח — היא מחכה ללחיצה על
+       „סיום שיחה" / „לעבודה". שחקן לוחץ; הבדיקה הקודמת רק הקישה רווח,
+       והשיחה נשארה פתוחה. תחנת הגבול נתקעה שם 69 דקות. */
+    const btn = await page.$('.hud-dialogue .hud-card-btn.is-primary')
+    if (btn) { await btn.click({ timeout: 3000 }).catch(()=>{}); await page.waitForTimeout(500); continue }
     await page.keyboard.press('Space'); await page.waitForTimeout(420)
   }
 }
