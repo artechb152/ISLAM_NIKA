@@ -5368,8 +5368,12 @@ export default function Game() {
     return needed.length > 0 && needed.every((n) => taskChosen.includes(n))
   }, [taskChosen])
   const introSeen = !INTRO_ID || seen.includes(INTRO_ID)
+  /* `REGION_TASK!` כאן היה סימן קריאה על ערך שבאמת יכול להיות null:
+     לאזור הסיום אין משימה כלל, ולכן הוא קרס בטעינה —
+     "Cannot read properties of null (reading 'options')" — והתחנה
+     התשיעית של הפרק לא נטענה בכלל. */
   const evidenceDone = (REGION_TASK?.needsFinds ?? []).every((f) => found.includes(f)) &&
-    REGION_TASK!.options.every((o) => !o.needsFind || found.includes(o.needsFind))
+    (REGION_TASK?.options ?? []).every((o) => !o.needsFind || found.includes(o.needsFind))
   const physDone = REGION.id === 'yemen-heights' ? stoneLit
     : REGION.id === 'mecca' ? tableSet
     : placedAll

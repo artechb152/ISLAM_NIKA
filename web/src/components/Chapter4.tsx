@@ -822,7 +822,7 @@ export default function Chapter4() {
                 <div className="bleed-aside">
                   <div className="bleed-aside-art" aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/assets/chapter4/caravan-road.png" alt="" loading="lazy" decoding="async" />
+                    <img src="/assets/chapter4/caravan-road.webp" alt="" loading="lazy" decoding="async" />
                   </div>
                   <div className="bleed-aside-body">
                     {/* NOT THE COVENANT: what became of the tribes years after
