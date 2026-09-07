@@ -3591,9 +3591,12 @@ function GroundGlow({ x, z, r = 1.1, live, tone = '#f0c877', rank = 'ready' }: {
   useFrame(({ clock }, dt) => {
     if (!mat.current || !m.current) return
     const d = Math.hypot(live.player.x - x, live.player.z - z)
-    /* 'next' נקרא מכל האזור; 'ready' רק כשעומדים לידו. */
-    const reach = rank === 'next' ? 26 : 5.5
-    const near = Math.max(0, Math.min(1, (reach - d) / (rank === 'next' ? 18 : 3)))
+    /* 'next' נקרא מכל האזור; 'ready' — מרחוק מספיק כדי שיבחינו בו.
+       ב-5.5 מטר הראיה נדלקה רק כשכבר עמדת עליה, ולכן שברי החרס שעל
+       הדרך פשוט לא נראו. עכשיו יש להם נוכחות מרחוק, והסימן שמעל היעד
+       נשאר של האחד שתורו עכשיו בלבד. */
+    const reach = rank === 'next' ? 26 : 15
+    const near = Math.max(0, Math.min(1, (reach - d) / (rank === 'next' ? 18 : 11)))
     const want = rank === 'done' ? 0 : rank === 'next' ? 1 : 0.42
     level.current += (want - level.current) * Math.min(1, dt * 3)
     const k = level.current
@@ -3672,12 +3675,27 @@ function LampReveal({ live, target, home, onRevealed, revealed }: {
       const t = (y - camera.position.y) / dir.y
       return { x: camera.position.x + dir.x * t, z: camera.position.z + dir.z * t }
     }
+    /* ── לוחצים על הלפיד, לא לידו ──────────────────────────────────
+       כאן נבדק עד עכשיו מרחק על המסך: 70 פיקסלים מנקודת הלפיד. מי
+       שעומד מול המצבה רואה את הלפיד בערך במרכז המסך — ולכן כל גרירה
+       שהתחילה במרכז כדי לסובב את המצלמה תפסה את הלפיד במקום לסובב.
+       נמדד: האבן נדלקה מעצמה בזמן שהשחקן רק הסתכל סביב, והרצף „מאירים
+       ואז קוראים" קרס. עכשיו הלחיצה נבדקת מול הרשת עצמה, ורק אם היא
+       פספסה בקצת (28 פיקסלים) היא עדיין נחשבת אחיזה. */
+    const rayc = new THREE.Raycaster()
+    const ndc = new THREE.Vector2()
     const near = (cx: number, cy: number) => {
       const r = gl.domElement.getBoundingClientRect()
+      const g = grp.current
+      if (g) {
+        ndc.set(((cx - r.left) / r.width) * 2 - 1, -(((cy - r.top) / r.height) * 2 - 1))
+        rayc.setFromCamera(ndc, camera)
+        if (rayc.intersectObject(g, true).length > 0) return true
+      }
       const p = new THREE.Vector3(pos.current.x, groundYAt(pos.current.x, pos.current.z) + 0.6, pos.current.z).project(camera)
       const sx = (p.x * 0.5 + 0.5) * r.width + r.left
       const sy = (-p.y * 0.5 + 0.5) * r.height + r.top
-      return Math.hypot(cx - sx, cy - sy) < 70 && p.z <= 1
+      return Math.hypot(cx - sx, cy - sy) < 28 && p.z <= 1
     }
     const down = (e: PointerEvent) => {
       if (doneRef.current) return
@@ -5293,6 +5311,10 @@ function DevAudit() {
       }
       ;(window as unknown as { __ch1Audit: unknown }).__ch1Audit = report
       ;(window as unknown as { __ch1Scene: THREE.Scene }).__ch1Scene = scene
+      /* קריאה בלבד, לפיתוח: בלי המצלמה אי אפשר לתרגם מיקום בעולם
+         לנקודה על המסך, ובלי זה אי אפשר לגרור את הלפיד בעכבר אמיתי —
+         רק לקבוע את מקומו מבחוץ, וזה כבר לא משחק. */
+      ;(window as unknown as { __ch1Camera: THREE.Camera }).__ch1Camera = camera
       ;(window as unknown as { __ch1Cam: THREE.Camera }).__ch1Cam = camera
       if (unapproved.length || floating.length) {
         console.warn(`[ch1 audit] ${REGION.id}: ${unapproved.length} UNAPPROVED overlaps, ${floating.length} off-ground`)
@@ -6086,10 +6108,40 @@ export default function Game() {
         const dTask = allowTask && live.atTask ? live.atTaskD : Infinity
 
         if (dWho === Infinity && dFind === Infinity && dTask === Infinity) {
-          /* אין יעד חוקי כאן — אומרים מה כן צריך לעשות, במקום לא
-             להגיב בכלל. מקש שלא עונה נקרא כמשחק שבור. */
-          if (live.atTask || live.nearFind || live.nearWho) {
-            setTaskNote({ who: REGION_TASK?.asker ?? HOST_NAME, text: objectiveRef.current, ok: false })
+          /* ── „עדיין לא" שאומר למה ──────────────────────────────────
+             כאן הוצג עד עכשיו טקסט המטרה הכללי, ולכן מי שלחץ E על
+             האבן בתימן קיבל תשובה שאינה על האבן. התשובה צריכה להיות
+             על מה שנגעת בו: מה חוסם עכשיו, ומה הצעד שפותח אותו. */
+          const near = live.nearFind ? 'find' : live.atTask ? 'task' : live.nearWho ? 'who' : null
+          const say = (() => {
+            if (near === 'find') {
+              if (st === 'brief') return 'רגע — קודם נשמע מה יש לספר על המקום הזה.'
+              if (st === 'act') {
+                return REVEAL_FIRST
+                  ? 'רגע — עדיין אי אפשר לקרוא את החקוק. קרבו אליו את הלפיד והחזיקו, עד שהאותיות יוצאות מן הצל.'
+                  : 'רגע — קודם משלימים את הפעולה שכאן, ואז נחזור לראיות.'
+              }
+              return 'את זה כבר בחנת. מה שנשאר הוא השאלה עצמה.'
+            }
+            if (near === 'task') {
+              if (st === 'brief') return 'רגע — קודם נשמע את מי שעומד כאן.'
+              if (st === 'look') return 'רגע — קודם בוחנים את מה שמונח כאן. אי אפשר להשיב על מה שלא ראית.'
+              if (st === 'act') return 'רגע — הפעולה עצמה עוד לא הושלמה.'
+              return null
+            }
+            if (near === 'who') {
+              if (st === 'look') return 'רגע — קודם בוחנים את הראיות, ואז נדבר עליהן.'
+              if (st === 'act') return 'רגע — קודם משלימים את הפעולה שכאן.'
+              return null
+            }
+            return null
+          })()
+          if (near) {
+            setTaskNote({
+              who: REGION_TASK?.asker ?? HOST_NAME,
+              text: say ?? objectiveRef.current,
+              ok: false,
+            })
             cue('ui')
           }
           return

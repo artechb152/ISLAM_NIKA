@@ -52,6 +52,16 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       '@': path.resolve(process.cwd(), 'src'),
     }
+    /* scratchpad/ הוא תיקיית הבדיקות, והיא בתוך web/ — כלומר בתוך מה
+       ששרת הפיתוח צופה בו. Playwright כותב לתוכה קובץ וידאו ברציפות
+       בזמן שהוא מקליט ריצה, וכל כתיבה כזאת נראתה לשרת כשינוי קוד:
+       קומפילציה מחדש, ואז רענון מלא של הדף — באמצע המשחק. בריצה אחת
+       נמדדו ארבעה עשר רענונים, וכל אחד מהם איפס את מצב הפרק. זו הייתה
+       הסיבה האמיתית לריצות שנתקעו ולמדידות שנעלמו באמצע. */
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: ['**/node_modules/**', '**/scratchpad/**', '**/.next*/**'],
+    }
     return config
   },
 }

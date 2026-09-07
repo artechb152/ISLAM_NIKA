@@ -5,7 +5,10 @@
 import { chromium } from 'playwright-core'
 import fs from 'node:fs'
 const region = process.argv[2]
-const dir = `scratchpad/video/play-${region}`
+/* ההקלטה נכתבת מחוץ לפרויקט. Playwright כותב את קובץ הווידאו כל
+   הזמן, ושרת הפיתוח צופה ב-web/ — כך שכל ריצה מוקלטת גרמה
+   לקומפילציה מחדש ולרענון מלא של הדף, באמצע המשחק. */
+const dir = `/private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/video/play-${region}`
 fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true })
 const browser = await chromium.launch({ channel:'chrome', headless:true,
   args:['--enable-unsafe-swiftshader','--use-gl=angle','--use-angle=swiftshader','--enable-webgl','--ignore-gpu-blocklist','--autoplay-policy=no-user-gesture-required'] })
