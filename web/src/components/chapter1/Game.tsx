@@ -4072,7 +4072,15 @@ const HAND_OBSTACLES: Collider[] = (() => {
   return out
 })()
 
-function clearWalk(cx: number, cz: number, rx: number, rz: number, taken: Collider[] = []) {
+function clearWalk(
+  cx: number, cz: number, rx: number, rz: number,
+  taken: Collider[] = [],
+  /* הכיוון שאליו הגמל יפנה אם ייעצר. בלעדיו נבדק כיוון החיפוש —
+     ואז הגוף מאומת בזווית אחת ומצויר בזווית אחרת, כך שהראש והזנב
+     נוחתים במקום שאיש לא בדק. במעבר הצר זה שם גמל חונה בתוך גמל
+     סטטי, ב-90 מתוך 90 דגימות. */
+  restDir?: { dx: number; dz: number },
+) {
   const blockers = [...WORLD.colliders, ...HAND_OBSTACLES, ...taken]
   /** האם גמל שעומד כאן, פונה לכיוון הזה, נוגע במשהו */
   const hits = (x: number, z: number, dx: number, dz: number) => {
@@ -4123,7 +4131,10 @@ function clearWalk(cx: number, cz: number, rx: number, rz: number, taken: Collid
     const dz = Math.sin((a / 24) * Math.PI * 2)
     for (const step of [0, 2, 4, 6, 8, 10]) {
       const x = cx + dx * step, z = cz + dz * step
-      if (!hits(x, z, dx, dz)) return { cx: x, cz: z, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
+      /* נבדק בכיוון שבו הוא באמת יעמוד, לא בכיוון שבו חיפשנו */
+      const fx = restDir ? restDir.dx : dx
+      const fz = restDir ? restDir.dz : dz
+      if (!hits(x, z, fx, fz)) return { cx: x, cz: z, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
     }
   }
   return { cx, cz, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
@@ -4148,7 +4159,7 @@ const HERD_PATHS: HerdPath[] = (() => {
   const out: HerdPath[] = []
   const parked: Collider[] = []
   for (const h of HERD) {
-    let p = clearWalk(h.cx, h.cz, h.rx, h.rz, parked)
+    let p = clearWalk(h.cx, h.cz, h.rx, h.rz, parked, { dx: Math.sin(h.phase), dz: Math.cos(h.phase) })
     if (p.rx === 0 && p.rz === 0) parked.push({ x: p.cx, z: p.cz, r: CAMEL_LEN + CAMEL_W })
     out.push(p)
   }
@@ -4193,7 +4204,8 @@ const HERD_PATHS: HerdPath[] = (() => {
   /* מי שנמצא מלוכלך — עוצר במקום שבו הוא כרגע, ורק אם המקום פנוי */
   for (const i of dirty) {
     const home = at(i, 0)
-    const stop = clearWalk(home.x, home.z, 0, 0, parked)
+    const rest = { dx: Math.sin(HERD[i].phase), dz: Math.cos(HERD[i].phase) }
+    const stop = clearWalk(home.x, home.z, 0, 0, parked, rest)
     out[i] = stop
     parked.push({ x: stop.cx, z: stop.cz, r: CAMEL_LEN + CAMEL_W })
   }
