@@ -1188,6 +1188,8 @@ function DustMotes({ count = 55 }: { count?: number }) {
 /* the dust field needs the player's position without threading `live` through
    every layer; the World writes it once per frame */
 let livePlayerX = 0
+/** הקוליידרים הנעים של האזור, כדי ש-`occlude` תראה גם אותם */
+let LIVE_DYNAMIC: Collider[] = []
 let livePlayerZ = 0
 
 function Pebbles() {
@@ -2361,6 +2363,37 @@ function useNormalizedGLB(url: string, height: number, tint?: string, fitMax = f
   }, [scene, height, tint, fitMax])
 }
 
+/* מכשול בין שתי נקודות במישור — הפונקציה האחת שכל בדיקות חסימת
+   המצלמה עוברות דרכה.
+
+   היו כאן שתי בדיקות נפרדות שעשו את אותה עבודה עם שני ספים שונים
+   (2.2 מול 0.85), והן נדלקו וכבו לסירוגין: העדשה זינקה 3.7 → 0.85 →
+   3.7 כמה פעמים בשנייה, והתמונה נקראה כאילו הדמות מתקדמת, נסוגה
+   וממשיכה. הגוף מעולם לא זז אחורה; הפרלקסה עשתה זאת. מאז יש מעבר
+   אחד — וזה הקוד שלו, כדי ששום קטע אחר לא ימציא לעצמו גרסה משלו.
+
+   הקוליידרים הם עיגולים במישור והקירות אנכיים, ולכן בדיקת קרן־מול־
+   עיגול מספיקה, והיא זולה מספיק לכל פריים.
+
+   מחזיר את המרחק שמותר להתרחק בכיוון (ux,uz) לפני שמשהו נכנס בדרך. */
+function occlude(ex: number, ez: number, ux: number, uz: number, max: number, floor: number) {
+  let want = max
+  for (const c of [...STATIC_COLLIDERS, ...LIVE_DYNAMIC]) {
+    const fx = ex - c.x
+    const fz = ez - c.z
+    const r = c.r + 0.12
+    const b = fx * ux + fz * uz
+    const cc = fx * fx + fz * fz - r * r
+    const disc = b * b - cc
+    if (disc <= 0) continue
+    const s = Math.sqrt(disc)
+    const enter = -b - s
+    const exit = -b + s
+    if (exit > 0 && enter < want) want = Math.max(floor, Math.min(want, enter - 0.1))
+  }
+  return want
+}
+
 function Player({ live }: { live: Live }) {
   const group = useRef<THREE.Group>(null)
   /* ההליכה עצמה: קליפ שלד אמיתי, כמו של ראאווי. שלוש התנוחות הקפואות
@@ -2387,6 +2420,8 @@ function Player({ live }: { live: Live }) {
   const talkAnchor = useRef({ x: 0, z: 0 })
   /** המרחק שהמצלמה יושבת בו בפועל, מרוכך — ראה את הבדיקה למטה */
   const camDist = useRef(3.7)
+  /** אותו דבר לקטע של צילום־השניים, כשהעוגן זז הצידה */
+  const talkDist = useRef(99)
   /* תקריב המשימה: בלנד משלו + צד קבוע-למחצה שממנו המצלמה משקיפה */
   const taskBlend = useRef(0)
   const taskDir = useRef({ x: 0, z: 1 })
@@ -2404,6 +2439,7 @@ function Player({ live }: { live: Live }) {
     const dt = Math.min(rawDt, 0.1)
     livePlayerX = live.player.x
     livePlayerZ = live.player.z
+    LIVE_DYNAMIC = live.dynamic
     const k = live.keys
     const running = k.has('shift')
     /* 4 m/s is a jog: it crosses the whole 687 m chapter in three minutes and
@@ -2676,22 +2712,7 @@ function Player({ live }: { live: Live }) {
        raycast של סצנה — זול מספיק לכל פריים. */
     const ox = camOffset.x / CAM_DIST
     const oz = camOffset.z / CAM_DIST
-    let want = CAM_DIST
-    for (const c of [...STATIC_COLLIDERS, ...live.dynamic]) {
-      const fx = live.player.x - c.x
-      const fz = live.player.z - c.z
-      const r = c.r + 0.12
-      const b = fx * ox + fz * oz
-      const cc = fx * fx + fz * fz - r * r
-      const disc = b * b - cc
-      if (disc <= 0) continue
-      const s = Math.sqrt(disc)
-      const enter = -b - s
-      const exit = -b + s
-      // the camera only clips if the prop lies between the player and it.
-      // 1.9 m is the floor: any closer and the player's back fills the screen.
-      if (exit > 0 && enter < want) want = Math.max(1.9, Math.min(want, enter - 0.1))
-    }
+    const want = occlude(live.player.x, live.player.z, ox, oz, CAM_DIST, 1.9)
     const camK = want < camDist.current ? 12 : 2.6
     camDist.current += (want - camDist.current) * Math.min(1, dt * camK)
     const dist = camDist.current
@@ -2807,10 +2828,11 @@ function Player({ live }: { live: Live }) {
       }
     }
 
-    /* בשיחה ובתקריב המשימה העוגן זז הצידה, ולכן הקטע שנבדק למעלה —
-       מהשחקן אל היעד — כבר אינו הקטע שהמצלמה באמת יושבת עליו. שם, ושם
-       בלבד, נחזור ונבדוק את הקטע המעודכן. בהליכה חופשית זה אותו קטע
-       בדיוק, ולכן התנאי מדלג עליו ואין שתי בדיקות שנלחמות זו בזו. */
+    /* בשיחה ובתקריב המשימה העוגן זז הצידה, ולכן הקטע שהמצלמה יושבת
+       עליו אינו עוד הקטע שנבדק למעלה. אבל *בדיקה שנייה* היא בדיוק
+       הרגרסיה שקרעה את ההליכה, ולכן אין כאן אחת: הקטע האמיתי נמדד
+       פעם אחת, באותה פונקציה ובאותו ריכוך, והתוצאה נכתבת אל היעד.
+       ראה `occlude` ליד הבדיקה הראשונה. */
     if (tb > 0.02 || kf > 0.02) {
       const ex = live.player.x
       const ez = live.player.z
@@ -2818,24 +2840,16 @@ function Player({ live }: { live: Live }) {
       const dz = target.z - ez
       const seg = Math.hypot(dx, dz)
       if (seg > 0.05) {
-        const ux = dx / seg
-        const uz = dz / seg
-        let allowed = seg
-        for (const c of STATIC_COLLIDERS) {
-          const px = c.x - ex
-          const pz = c.z - ez
-          const t = px * ux + pz * uz
-          if (t <= 0 || t > seg) continue
-          const perp = Math.hypot(px - ux * t, pz - uz * t)
-          const rr = c.r + 0.2
-          if (perp >= rr) continue
-          allowed = Math.min(allowed, Math.max(1.2, t - Math.sqrt(rr * rr - perp * perp) - 0.15))
-        }
-        if (allowed < seg) {
-          target.x = ex + ux * allowed
-          target.z = ez + uz * allowed
-        }
+        const allowed = occlude(ex, ez, dx / seg, dz / seg, seg, 1.4)
+        /* אותו ריכוך אסימטרי, ב-ref נפרד לקטע הזה */
+        const k = allowed < talkDist.current ? 12 : 2.6
+        talkDist.current += (allowed - talkDist.current) * Math.min(1, dt * k)
+        const use = Math.min(seg, talkDist.current)
+        target.x = ex + (dx / seg) * use
+        target.z = ez + (dz / seg) * use
       }
+    } else {
+      talkDist.current = 99
     }
     /* ולא מתחת לרצפה: הקרקע כאן מתגלגלת, ומצלמה שיורדת אל מתחת
        לטרסה מראה את העולם מלמטה. */
@@ -4974,10 +4988,35 @@ function DevAudit() {
       /* חפיפה מדווחת לפי הנפח המשותף בשלושת הצירים. שני קירות שנוגעים
          בפינה אינם באג; דמות שחצי ממנה בתוך קיר היא באג. הסף באחוז מן
          הקטן שבשני העצמים, כדי שמגע קל בין ארגזים לא יטביע את הדוח. */
+      /* ── תיבה גדולה אינה נגיעה ────────────────────────────────────────
+         גוש בזלת הוא 20 מטר רוחב, ולכן תיבתו בולעת כד שעומד שבעה
+         מטרים ממנו — ודוח שמבוסס על תיבות בלבד קרא לזה „100% חפיפה".
+         זו בדיוק התוצאה המטעה שהתלוננו עליה, והתשובה לה אינה allowlist
+         רחב יותר אלא מדידה מדויקת יותר.
+         ה-layout כבר מצהיר על רדיוס התנגשות אמיתי לכל פרופ, והשם נושא
+         את מיקומו — אז לפני שסופרים חפיפה בודקים שהשניים באמת נוגעים
+         במישור: מרחק בין המרכזים מול סכום הרדיוסים. פרופ בלי רדיוס
+         מוצהר נמדד בחצי-רוחב התיבה שלו, כמו קודם. */
+      const declared = new Map<string, number>()
+      for (const c of WORLD.colliders) declared.set(`${c.x.toFixed(1)},${c.z.toFixed(1)}`, c.r)
+      const radiusOf = (name: string, box: THREE.Box3) => {
+        const m = /@(-?[\d.]+),(-?[\d.]+)$/.exec(name)
+        const boxR = Math.max(box.max.x - box.min.x, box.max.z - box.min.z) / 2
+        if (!m) return boxR
+        const r = declared.get(`${(+m[1]).toFixed(1)},${(+m[2]).toFixed(1)}`)
+        return r && r > 0 ? Math.min(boxR, r) : boxR
+      }
       const hits: { a: string; b: string; depth: number; frac: number }[] = []
       for (let i = 0; i < items.length; i++) {
         for (let j = i + 1; j < items.length; j++) {
           const A = items[i], B = items[j]
+          {
+            const ax = (A.box.min.x + A.box.max.x) / 2, az = (A.box.min.z + A.box.max.z) / 2
+            const bx = (B.box.min.x + B.box.max.x) / 2, bz = (B.box.min.z + B.box.max.z) / 2
+            /* 0.35 מ' של סובלנות: הרדיוס המוצהר הוא מעגל ההליכה ולא
+               עטיפת הגיאומטריה, והוא לרוב מעט קטן ממנה. */
+            if (Math.hypot(ax - bx, az - bz) > radiusOf(A.name, A.box) + radiusOf(B.name, B.box) + 0.35) continue
+          }
           const ox = Math.min(A.box.max.x, B.box.max.x) - Math.max(A.box.min.x, B.box.min.x)
           const oy = Math.min(A.box.max.y, B.box.max.y) - Math.max(A.box.min.y, B.box.min.y)
           const oz = Math.min(A.box.max.z, B.box.max.z) - Math.max(A.box.min.z, B.box.min.z)

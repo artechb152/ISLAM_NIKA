@@ -1220,3 +1220,12 @@ body{
 /* הבאנר היה גבוה מדי ובלע את השאלה הראשונה */
 .p1-banner{max-height:210px}
 .p1-banner .ch2-hero-title{font-size:clamp(28px,4.4vw,44px)}
+/* הסרגל היה 300 פיקסלים והדחק את השאלה לשליש הימני של המסך */
+@media (min-width:1100px){
+  .chapter-shell:has(.p1-steps) .chapter-side{width:236px}
+  .chapter-shell:has(.p1-steps) .chapter-article{max-width:none}
+}
+/* ניגודיות: הטקסט המשני היה בהיר מדי על הרקע הקרמי */
+.p2-main .p2-lead{color:#4a3a20}
+.p1-steps-count,.p1-order-how{color:#5b4726}
+.p2-main .p2-option,.p2-main .p2-chip{min-height:48px}
