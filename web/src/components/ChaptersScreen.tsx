@@ -22,6 +22,7 @@ import { NOTEBOOK_KEY as CH1_STORE_KEY } from '@/lib/chapter1/notebook'
 import { NOTEBOOK_TOTAL as CH1_NOTEBOOK_TOTAL } from '@/lib/chapter1/dialogue'
 import { SECTION_ORDER as CH2_SECTIONS, STORE_KEY as CH2_STORE_KEY } from '@/lib/chapter2/progress'
 import { SECTION_ORDER as CH3_SECTIONS, STORE_KEY as CH3_STORE_KEY } from '@/lib/chapter3/progress'
+import { SECTION_ORDER as CH4_SECTIONS, STORE_KEY as CH4_STORE_KEY } from '@/lib/chapter4/progress'
 import { SECTION_ORDER as CH5_SECTIONS, STORE_KEY as CH5_STORE_KEY } from '@/lib/chapter5/progress'
 /* the number of chapter-6 screens progress is measured against (derived, not hardcoded) */
 const CH6_SCREEN_COUNT = CH6.screens.length
@@ -171,6 +172,21 @@ export default function ChaptersScreen() {
             const p = JSON.parse(raw) as { sections?: string[] } | null
             const n = Array.isArray(p?.sections) ? p.sections.length : 0
             if (n > 0) progress = Math.min(99, Math.round((n / CH5_SECTIONS.length) * 100))
+          }
+        }
+        /* chapter 4 is a reading chapter like 2, 3 and 5 — and it repeated chapter
+           5's exact mistake: it wrote `ch4:v1` correctly from the day it shipped,
+           kept its own resume point, ticked its own rail, and this screen never
+           read a byte of it. Everything was saved; nothing was shown, which from
+           the reader's chair is the same thing as nothing being saved. The note
+           on chapter 5 above says a reading chapter is not finished until it has
+           this branch. It is now true of four of them. */
+        if (chp.number === 4 && !done) {
+          const raw = localStorage.getItem(CH4_STORE_KEY)
+          if (raw) {
+            const p = JSON.parse(raw) as { sections?: string[] } | null
+            const n = Array.isArray(p?.sections) ? p.sections.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH4_SECTIONS.length) * 100))
           }
         }
         /* chapter 1 is the open world: progress is how full the notebook is */

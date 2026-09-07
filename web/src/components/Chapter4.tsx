@@ -1518,11 +1518,12 @@ export default function Chapter4() {
               </Section>
 
               <div className="ch4-end" ref={endRef} data-reveal>
-                {/* אין עדיין /chapter4/practice. עד שיהיה, הסוגר מוביל
-                    למקום שקיים ולא ל-404, ו-markChapterComplete נשאר ללא קורא
-                    — בדיוק כפי שפרק 6 מגדיר: סיום הקריאה אינו סיום הפרק. */}
-                <Link className="ch4-end-link" href="/chapters">
-                  לכל פרקי הלמידה
+                {/* THE CHAPTER IS NOT FINISHED BY READING IT. `islam:chapter:4`
+                    is written by the practice screen and by nowhere else, which
+                    is chapter 6's own contract; the article's last act is to
+                    hand the reader over to it. */}
+                <Link className="ch4-end-link" href="/chapter4/practice">
+                  לתרגול המסכם
                 </Link>
               </div>
             </main>
