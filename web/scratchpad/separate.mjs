@@ -13,6 +13,15 @@ for (const region of process.argv.slice(2)) {
   await browser.close()
   if (!a?.unapproved?.length) { console.log(region, '— clean'); continue }
   const box = new Map(a.sizes.map((s) => [s.name, s.box]))
+  /* אותה אמת מידה של הביקורת: מרחק מרכזים מול סכום הרדיוסים. בלי זה
+     הכלי בודק מועמדים מול תיבות של גושי בזלת בני 20 מטר ומסיק ש"אין
+     מקום פנוי" בכל אזור סלעי. */
+  const rad = new Map(a.sizes.map((s) => [s.name, s.r]))
+  const touches = (cx, cz, r, name2) => {
+    const b2 = box.get(name2)
+    const x2 = (b2[0]+b2[3])/2, z2 = (b2[2]+b2[5])/2
+    return Math.hypot(cx-x2, cz-z2) < r + (rad.get(name2) ?? 0.5) + 0.35
+  }
   const vol = (b) => (b[3]-b[0])*(b[4]-b[1])*(b[5]-b[2])
   const inter = (b1, b2) => {
     const ox=Math.min(b1[3],b2[3])-Math.max(b1[0],b2[0])
@@ -45,8 +54,13 @@ for (const region of process.argv.slice(2)) {
         const t=(k/28)*Math.PI*2
         const nx=cx+Math.cos(t)*step, nz=cz+Math.sin(t)*step
         const cand=[nx-hw,b[1],nz-hd,nx+hw,b[4],nz+hd]
+        const myR = rad.get(pick) ?? Math.min(hw,hd)
         let worst=0
-        for (const [n2,b2] of box) if (n2!==pick) worst=Math.max(worst, inter(cand,b2))
+        for (const [n2,b2] of box) {
+          if (n2===pick) continue
+          if (!touches(nx,nz,myR,n2)) continue
+          worst=Math.max(worst, inter(cand,b2))
+        }
         if (worst<0.03){ best={dx:nx-cx, dz:nz-cz, step}; break }
       }
     }

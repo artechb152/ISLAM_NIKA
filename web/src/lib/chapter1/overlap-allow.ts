@@ -50,7 +50,12 @@ const NEVER: { a: RegExp; b: RegExp; what: string }[] = [
 
 export const PAIR_ALLOW: PairRule[] = [
   /* אש */
-  { a: /firepit|campfire/, b: CANOPY, maxFrac: 0.9, why: 'מדורה תחת סוכך המחנה — זו הצורה של מחנה לילה' },
+  /* מדורה תחת סוכך היא צורה נכונה של מחנה לילה — אבל להבה שעוברת
+     דרך הבד אינה. 0.9 אישר גם את זה: נראה בתחנת הגבול, האש בוקעת
+     מבעד לאריג (scratchpad/shots/inspect/bp-gate-0.png). */
+  { a: /firepit|campfire|torch/, b: CANOPY, maxFrac: 0.35,
+    why: 'מדורה תחת סוכך המחנה — זו הצורה של מחנה לילה',
+    shot: 'scratchpad/shots/inspect/bp-gate-0.png' },
   { a: /firepit/, b: /torch|firewood/, maxFrac: 0.3, why: 'אשכול האש: לפיד וערמת עצים ניצבים אל המדורה' },
   { a: /firepit|torch/, b: SCENERY, maxFrac: 0.35, why: 'מדורה מוקפת אבנים — כך מסיקים במדבר',
     shot: 'scratchpad/shots/final/night-camp.png' },
