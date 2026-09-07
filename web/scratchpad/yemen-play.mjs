@@ -28,7 +28,8 @@ const live = async () => {
     ? { x:window.__ch1Live.player.x, z:window.__ch1Live.player.z, yaw:window.__ch1Live.yaw }
     : { x:0, z:0, yaw:0 })
 }
-const W = () => page.evaluate(()=>window.__ch1Where)
+const W = async () => { await page.waitForFunction(()=>window.__ch1Where, null, {timeout:60000}).catch(()=>{})
+  return page.evaluate(()=>window.__ch1Where ?? { stage:'?', cast:[], finds:[], task:null }) }
 const dlg = () => page.evaluate(()=>!!document.querySelector('.hud-dialogue'))
 const note = () => page.evaluate(()=>document.querySelector('.ch1-task-note')?.textContent?.trim() ?? '')
 const project = (x,y,z) => page.evaluate(({x,y,z}) => {

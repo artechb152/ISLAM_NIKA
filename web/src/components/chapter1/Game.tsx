@@ -4557,6 +4557,41 @@ function coreHoldBeat(missing: string[]): Encounter {
   }
 }
 
+/* ── מה שנשאר מאחור ──────────────────────────────────────────────────
+   שער הליבה עוצר את מי שלא עשה את מה שהתחנה קיימת בשבילו. אבל יש
+   בתחנות גם דברים שאינם חובה — אבן על הדרך, שבר חרס, נושא נוסף שהדמות
+   מוכנה לדבר עליו — ומי שחלף על פניהם עבר הלאה בלי לדעת שהיו שם.
+   ראאווי עוצר פעם אחת בשער, אומר מה פספסנו, ומשאיר את ההכרעה לשחקן:
+   לחזור ולחקור, או להתקדם. הוא אינו חוסם — הוא רק לא נותן לזה לקרות
+   בשתיקה. */
+function missedBeat(finds: string[], talks: string[]): Encounter {
+  const names = [
+    ...finds.map((id) => REGION_FINDS.find((f) => f.id === id)?.title ?? 'עדות על הדרך'),
+    ...talks.map((id) => {
+      const e = REGION.encounters.find((x) => x.id === id)
+      if (!e) return 'עוד רגע אחד כאן'
+      if (e.speaker === 'rawi') return 'עוד משהו שרציתי לספר לך (R)'
+      if (e.speaker === 'narrator') return 'עוד רגע אחד שמחכה לקרות'
+      return `עוד נושא ש${SPEAKERS[e.speaker]} מוכן לדבר עליו (E)`
+    }),
+  ]
+  const uniq = [...new Set(names)]
+  const list = uniq.length > 3 ? `${uniq.slice(0, 3).join(' · ')} ועוד` : uniq.join(' · ')
+  return {
+    id: `rawi-missed-${REGION.id}`,
+    speaker: 'rawi',
+    notebook: 0,
+    gesture: 'talk-nod',
+    lines: [
+      {
+        source: '',
+        text: `רגע לפני שנמשיך — יש כאן דברים שפספסנו: ${list}. ` +
+          'תרצה להמשיך לחקור, או להתקדם?',
+      },
+    ],
+  }
+}
+
 const RAWI_WALK_GAP = 0.45
 const PLAYER_MOVE_EPS = 0.004
 
@@ -5785,6 +5820,25 @@ export default function Game() {
   const coreMissingRef = useRef<string[]>([])
   coreMissingRef.current = coreMissing
   const coreHeldAt = useRef(0)
+  /* מה שהתחנה כוללת ולא נעשה — בלי הליבה, שכבר נבדקה למעלה: עדויות
+     שנשארו על הרצפה, ונושאים שהדמות מוכנה לדבר עליהם ולא נשמעו. */
+  const missedRef = useRef<{ finds: string[]; talks: string[] }>({ finds: [], talks: [] })
+  missedRef.current = {
+    finds: REGION_FINDS.filter((f) => !found.includes(f.id)).map((f) => f.id),
+    talks: REGION.encounters
+      .filter(
+        (e) =>
+          !seen.includes(e.id) &&
+          !(REGION.core ?? []).includes(e.id) &&
+          !String(e.trigger ?? '').startsWith('task:') &&
+          !String(e.trigger ?? '').startsWith('after:'),
+      )
+      .map((e) => e.id),
+  }
+  /** נשאל פעם אחת לביקור, ולא בכל צעד בתוך השער */
+  const askedMissed = useRef(false)
+  /** לאן היינו בדרך כשראאווי עצר לשאול */
+  const pendingGate = useRef<{ to: string; label: string } | null>(null)
 
   const travel = useCallback(
     (to: string, label: string) => {
@@ -5823,6 +5877,20 @@ export default function Game() {
         cue('ui')
         setEncounter(coreHoldBeat(coreMissingRef.current))
         return
+      }
+      /* הליבה נעשתה, אבל לא הכול. שואלים פעם אחת, ואז השער פתוח —
+         מי שבחר להתקדם לא נשאל שוב, ומי שבחר לחקור אינו נעצר בכל צעד. */
+      if (to === ONWARD && !askedMissed.current) {
+        const missF = missedRef.current.finds
+        const missT = missedRef.current.talks
+        if (missF.length + missT.length > 0) {
+          if (encounterRef.current) return
+          askedMissed.current = true
+          pendingGate.current = { to, label }
+          cue('ui')
+          setEncounter(missedBeat(missF, missT))
+          return
+        }
       }
       travel(to, label)
     },
@@ -6632,6 +6700,20 @@ export default function Game() {
               encounter.speaker !== 'narrator' &&
               (stage === 'brief' || stage === 'look' || stage === 'act')
                 ? objective
+                : null
+            }
+            /* שיחת „פספסנו" נגמרת בהכרעה: להישאר ולחקור, או להתקדם */
+            decide={
+              encounter.id === `rawi-missed-${REGION.id}`
+                ? {
+                    stay: 'נמשיך לחקור',
+                    go: 'להתקדם ←',
+                    onGo: () => {
+                      const g = pendingGate.current
+                      setEncounter(null)
+                      if (g) travel(g.to, g.label)
+                    },
+                  }
                 : null
             }
             onSpeakerChange={setStepSpeaker}

@@ -78,6 +78,7 @@ function buildSteps(e: Encounter): Step[] {
 export function DialogueHud({
   encounter,
   handoff,
+  decide,
   onSpeakerChange,
   onFinished,
   onClose,
@@ -86,6 +87,10 @@ export function DialogueHud({
   /** מה התחנה מבקשת לעשות עכשיו. כשיש דבר כזה, השיחה אינה מציעה
       „המשך" — היא מוסרת את התור ליד, וממשיכה אחרי שהיא עשתה. */
   handoff?: string | null
+  /** שיחה שנגמרת בהכרעה ולא בסגירה: ראאווי עוצר בשער ושואל אם להמשיך
+      לחקור או להתקדם. „להישאר" הוא פשוט סגירת החלונית — השחקן חוזר אל
+      המקום שבו הוא עומד; „להתקדם" הוא המעבר עצמו. */
+  decide?: { stay: string; go: string; onGo: () => void } | null
   /** Lets the 3D layer play the right gesture / turn the right head. */
   onSpeakerChange?: (speaker: SpeakerId) => void
   onFinished: (e: Encounter) => void
@@ -337,15 +342,38 @@ export function DialogueHud({
               „המשך" שמופיע כאן היה מבטיח שיש עוד מה לשמוע, וזה בדיוק
               מה שלא נכון: יש עוד מה לעשות. */}
           {showDone && (
-            <button
-              className="hud-card-btn is-primary"
-              onClick={(ev) => {
-                ev.stopPropagation()
-                onClose()
-              }}
-            >
-              {handoff ? 'לעבודה ←' : 'סיום שיחה'}
-            </button>
+            decide ? (
+              <>
+                <button
+                  className="hud-card-btn is-primary"
+                  onClick={(ev) => {
+                    ev.stopPropagation()
+                    onClose()
+                  }}
+                >
+                  {decide.stay}
+                </button>
+                <button
+                  className="hud-card-btn"
+                  onClick={(ev) => {
+                    ev.stopPropagation()
+                    decide.onGo()
+                  }}
+                >
+                  {decide.go}
+                </button>
+              </>
+            ) : (
+              <button
+                className="hud-card-btn is-primary"
+                onClick={(ev) => {
+                  ev.stopPropagation()
+                  onClose()
+                }}
+              >
+                {handoff ? 'לעבודה ←' : 'סיום שיחה'}
+              </button>
+            )
           )}
           {showDone && handoff && (
             <span className="hud-dialogue-handoff">{handoff}</span>

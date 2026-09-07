@@ -47,9 +47,25 @@ async function turnTo(tx, tz) {
   await page.mouse.up()
   await page.waitForTimeout(220)
 }
+let sawMissed = null
 async function talkOut(max = 14) {
   for (let i=0;i<max;i++){
     if (!(await dlg())) return
+    if (!sawMissed) {
+      const t = await page.evaluate(()=>document.querySelector('.hud-dialogue')?.innerText ?? '')
+      if (t.includes('פספסנו')) {
+        sawMissed = t.replace(/\s+/g,' ').slice(0,220)
+        /* השורה עוד נכתבת; כפתורי ההכרעה מופיעים רק כשהיא שלמה */
+        for (let k=0;k<8;k++){
+          const done = await page.$$eval('.hud-dialogue-actions .hud-card-btn', els=>els.some(e=>/להתקדם|נמשיך לחקור/.test(e.textContent)))
+          if (done) break
+          await page.keyboard.press('Space'); await page.waitForTimeout(450)
+        }
+        const btns = await page.$$eval('.hud-dialogue-actions .hud-card-btn', els=>els.map(e=>e.textContent.trim()))
+        console.log('   [ראאווי בשער]', sawMissed)
+        console.log('   [כפתורים]', JSON.stringify(btns))
+      }
+    }
     /* בשורה האחרונה החלונית אינה נסגרת ברווח — היא מחכה ללחיצה על
        „סיום שיחה" / „לעבודה". שחקן לוחץ; הבדיקה הקודמת רק הקישה רווח,
        והשיחה נשארה פתוחה. תחנת הגבול נתקעה שם 69 דקות. */
