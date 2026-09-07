@@ -1392,11 +1392,11 @@ function DepartCamel({ offset, speed }: { offset: number; speed: number }) {
     const k = (t - DEPART_LENS[i - 1]) / seg
     const x = a.x + (b.x - a.x) * k
     const z = a.z + (b.z - a.z) * k
-    phase.current.value += dt * (speed / 0.62) * Math.PI
+    phase.current.value += dt * (speed / CAMEL_STEP) * Math.PI
     const ph = phase.current.value
     for (const leg of legs) {
       const sideShift = leg.name.endsWith('L') ? 0 : Math.PI
-      leg.rotation.x = Math.sin(ph + sideShift) * 0.34
+      leg.rotation.x = Math.sin(ph + sideShift) * LEG_SWING
     }
     el.position.set(x, 0, z)
     el.rotation.y = Math.atan2(b.x - a.x, b.z - a.z)
@@ -3905,70 +3905,143 @@ function MovingEvidence({ model, h, at, index, y, lifted }: {
    פונקציה טהורה ברמת המודול ולא סגור בתוך useMemo: היא נקראת פעם אחת
    לכל גמל, והתוצאה תלויה רק בארבעת המספרים ובקוליידרים של האזור —
    שנבנים פעם אחת בטעינת המודול ואינם משתנים. */
+/* ── הליכת הגמל ────────────────────────────────────────────────────────
+   אין קליפ הליכה אפוי לגמל בשום נכס בפרק (‎camel-parts.glb נושא ארבעה
+   אובייקטי רגל ואפס אנימציות ואפס skins), ולכן ההליכה היא סיבוב
+   פרוצדורלי מהירך. זה גג מה שאפשר, ולכן הכללים כאן הם כללי הריסון:
+   זווית קטנה, קצב שנגזר מן המהירות ולא להפך, וגוף שנשאר יציב.
+
+   ‎±0.34 רדיאן היו כמעט 20° לכל צד — טווח שמסגיר את היעדר הברך והופך
+   את ההליכה לבובה. ‎0.2 הוא צעד שקט. אורך הצעד נגזר מן הזווית ומאורך
+   הרגל במקום להיות מספר קבוע (0.62 שהיה כאן), כך שהרגליים נשארות
+   נטועות גם אחרי שהזווית משתנה. */
+const LEG_LEN = 1.55
+const LEG_SWING = 0.2
+/** מרחק שעובר כף רגל בחצי מחזור, כלומר אורך צעד */
+const CAMEL_STEP = 2 * Math.sin(LEG_SWING) * LEG_LEN
+
+/* ── מסלול לגמל ────────────────────────────────────────────────────────
+   גמל אינו עיגול. הוא כשלושה מטרים מהאף עד הזנב וכמטר וחצי ברוחב,
+   והייצוג הקודם — עיגול אחד ברדיוס 1.4 סביב המרכז — פספס בדיוק את
+   שני הקצוות. משם הגיעו האף שנכנס ללפיד והזנב שחצה את המדורה.
+
+   הוא מיוצג עכשיו בשלושה עיגולים לאורך הגוף — ראש, גוף, אחוריים —
+   שמסתובבים עם כיוון ההליכה. בדיקת המסלול היא לכן בדיקה של שלוש
+   הנקודות בכל דגימה, ולא של אחת.
+
+   שני דברים נוספים שהיו חסרים:
+     · המסלול נבדק מול הקוליידרים בפועל של האזור, ובנוסף מול כל מה
+       שהתחנה מציבה ביד — הלפיד, השולחן, החפצים הנגררים — שאינם
+       ב-WORLD.colliders כי הם נולדים ברכיבים.
+     · מסלול מול מסלול, ולא מרכז מול מרכז: שני גמלים על אליפסות
+       שנחתכות ייפגשו, גם אם המרכזים שלהם רחוקים.
+
+   64 דגימות במקום 48, כי בשלוש נקודות לגוף פספוס בין דגימות עולה
+   יותר. */
+const CAMEL_LEN = 1.35
+const CAMEL_W = 0.85
+
+/** שלושת העיגולים של גמל שעומד ב-(x,z) ופונה לכיוון dx,dz */
+function camelSpots(x: number, z: number, dx: number, dz: number) {
+  const m = Math.hypot(dx, dz) || 1
+  const ux = dx / m, uz = dz / m
+  return [
+    { x: x + ux * CAMEL_LEN, z: z + uz * CAMEL_LEN, r: CAMEL_W * 0.72 },
+    { x, z, r: CAMEL_W },
+    { x: x - ux * CAMEL_LEN, z: z - uz * CAMEL_LEN, r: CAMEL_W * 0.8 },
+  ]
+}
+
+/* מכשולים שנולדים ברכיבים ולא ב-layout: הלפיד של תימן, שולחן הראיות
+   ולוח בית'רב. גמל שעובר דרכם נראה בדיוק כמו באג, והם לא היו ברשימה. */
+const HAND_OBSTACLES: Collider[] = (() => {
+  const t = REGION_TASK
+  if (!t) return []
+  const out: Collider[] = [{ x: t.x, z: t.z, r: Math.max(1.4, t.h * 0.8) }]
+  if (REGION.id === 'yemen-heights') out.push({ x: t.x + 2.3, z: t.z + 1.5, r: 1.0 })
+  return out
+})()
+
 function clearWalk(cx: number, cz: number, rx: number, rz: number, taken: Collider[] = []) {
-  const CAMEL_R = 1.4
-  const hits = (x: number, z: number) =>
-    WORLD.colliders.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + CAMEL_R) ||
-    taken.some((c) => Math.hypot(c.x - x, c.z - z) < c.r + CAMEL_R)
-  const clear = (ex: number, ez: number, ox: number, oz: number) => {
-    for (let i = 0; i < 48; i++) {
-      const t = (i / 48) * Math.PI * 2
-      if (hits(cx + ox + Math.cos(t) * ex, cz + oz + Math.sin(t) * ez)) return false
+  const blockers = [...WORLD.colliders, ...HAND_OBSTACLES, ...taken]
+  /** האם גמל שעומד כאן, פונה לכיוון הזה, נוגע במשהו */
+  const hits = (x: number, z: number, dx: number, dz: number) => {
+    for (const s of camelSpots(x, z, dx, dz)) {
+      for (const c of blockers) if (Math.hypot(c.x - s.x, c.z - s.z) < c.r + s.r) return true
     }
-    return true
+    return false
   }
-  if (clear(rx, rz, 0, 0)) return { cx, cz, rx, rz }
+  const SAMPLES = 64
+  /** דוגם מסלול, ומחזיר את נקודותיו אם כולו פנוי */
+  const ring = (ex: number, ez: number, ox: number, oz: number) => {
+    const pts: { x: number; z: number }[] = []
+    for (let i = 0; i < SAMPLES; i++) {
+      const t = (i / SAMPLES) * Math.PI * 2
+      const x = cx + ox + Math.cos(t) * ex
+      const z = cz + oz + Math.sin(t) * ez
+      /* המשיק הוא כיוון ההליכה בנקודה הזאת */
+      if (hits(x, z, -Math.sin(t) * ex, Math.cos(t) * ez)) return null
+      pts.push({ x, z })
+    }
+    return pts
+  }
+  const ok = (ex: number, ez: number, ox: number, oz: number) => {
+    const pts = ring(ex, ez, ox, oz)
+    return pts ? { cx: cx + ox, cz: cz + oz, rx: ex, rz: ez, pts } : null
+  }
+  let r = ok(rx, rz, 0, 0)
+  if (r) return r
   for (let k = 0.85; k >= 0.35; k -= 0.1) {
-    if (clear(rx * k, rz * k, 0, 0)) return { cx, cz, rx: rx * k, rz: rz * k }
+    r = ok(rx * k, rz * k, 0, 0)
+    if (r) return r
   }
-  for (let a = 0; a < 8; a++) {
-    const dx = Math.cos((a / 8) * Math.PI * 2)
-    const dz = Math.sin((a / 8) * Math.PI * 2)
-    for (const step of [2, 4, 6]) {
+  for (let a = 0; a < 12; a++) {
+    const dx = Math.cos((a / 12) * Math.PI * 2)
+    const dz = Math.sin((a / 12) * Math.PI * 2)
+    for (const step of [2, 4, 6, 8]) {
       for (const k of [1, 0.7, 0.5]) {
-        if (clear(rx * k, rz * k, dx * step, dz * step)) {
-          return { cx: cx + dx * step, cz: cz + dz * step, rx: rx * k, rz: rz * k }
-        }
+        r = ok(rx * k, rz * k, dx * step, dz * step)
+        if (r) return r
       }
     }
   }
-  /* אין מסלול פנוי — הגמל נח. גמל עומד קורא כגמל נח; גמל שחוצה מדורה
-     קורא כמשחק שבור. */
-  for (let a = 0; a < 16; a++) {
-    const dx = Math.cos((a / 16) * Math.PI * 2)
-    const dz = Math.sin((a / 16) * Math.PI * 2)
-    for (const step of [0, 2, 4, 6, 8]) {
-      if (!hits(cx + dx * step, cz + dz * step)) return { cx: cx + dx * step, cz: cz + dz * step, rx: 0, rz: 0 }
+  /* אין מסלול פנוי — הגמל רובץ. „מעט גמלים שזזים טוב" עדיף על
+     „הרבה גמלים שמסתובבים בלולאות מלאכותיות", וגמל רובץ הוא תמונה
+     נכונה של מחנה. */
+  for (let a = 0; a < 24; a++) {
+    const dx = Math.cos((a / 24) * Math.PI * 2)
+    const dz = Math.sin((a / 24) * Math.PI * 2)
+    for (const step of [0, 2, 4, 6, 8, 10]) {
+      const x = cx + dx * step, z = cz + dz * step
+      if (!hits(x, z, dx, dz)) return { cx: x, cz: z, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
     }
   }
-  return { cx, cz, rx: 0, rz: 0 }
+  return { cx, cz, rx: 0, rz: 0, pts: [] as { x: number; z: number }[] }
 }
 
+type HerdPath = { cx: number; cz: number; rx: number; rz: number; pts: { x: number; z: number }[] }
+
 /* מסלולי העדר — מתוכננים יחד, ופעם אחת.
-
-   `clearWalk` היא פונקציה טהורה, ולכן שני גמלים שקיבלו את אותה אליפסה
-   קיבלו ממנה גם את אותה תשובה בדיוק. בדרך ההעמסה שני הגמלים הנודדים
-   מוגדרים באמת על אותה אליפסה (‎cx -12.12, cz 8.21) ונבדלים רק בפאזה —
-   וכשהמסלול נחסם ושניהם „חנו", הם חנו באותה נקודה: גמל בתוך גמל, בדיוק
-   מה שנראה במשחק.
-
-   התכנון עובר עכשיו על העדר כולו לפי הסדר, וכל גמל רואה את מי שכבר תפס
-   מקום: גמל חונה תופס עיגול, וגמל הולך תופס את האליפסה שלו רק אם גמל
-   אחר מבקש בדיוק אותה אליפסה — שאז השני נדחף החוצה לטבעת רחבה יותר,
-   ואם גם זה לא מתאפשר הוא חונה במקום פנוי משלו. */
-type HerdPath = { cx: number; cz: number; rx: number; rz: number }
+   כל גמל נבדק גם מול המסלולים שכבר נבחרו, נקודה מול נקודה: שתי
+   אליפסות יכולות להיחתך גם כשמרכזיהן רחוקים, וזה מה שהעמיד שני
+   גמלים באותו מקום בדרך ההעמסה. */
 const HERD_PATHS: HerdPath[] = (() => {
-  const taken: Collider[] = []
   const out: HerdPath[] = []
+  const parked: Collider[] = []
+  const crosses = (pts: { x: number; z: number }[]) =>
+    out.some((p) => p.pts.some((a) => pts.some((b) => Math.hypot(a.x - b.x, a.z - b.z) < CAMEL_LEN * 2 + CAMEL_W)))
   for (const h of HERD) {
-    const sameRing = out.find((p) => Math.hypot(p.cx - h.cx, p.cz - h.cz) < 0.6 && p.rx > 0)
-    let p = clearWalk(h.cx, h.cz, h.rx, h.rz, taken)
-    if (sameRing && p.rx > 0 && Math.abs(p.rx - sameRing.rx) < 0.4) {
-      /* אותה טבעת בדיוק — הרחב, כדי ששני הגופים לא ידרכו זה על זה */
-      const wide = clearWalk(h.cx, h.cz, h.rx + 2.2, h.rz + 1.6, taken)
-      if (wide.rx > 0) p = wide
+    let p = clearWalk(h.cx, h.cz, h.rx, h.rz, parked)
+    if (p.rx > 0 && crosses(p.pts)) {
+      /* המסלול נחתך במסלול קיים — נסה טבעת רחבה יותר, ואז צרה יותר */
+      const alts = [
+        clearWalk(h.cx, h.cz, h.rx + 2.6, h.rz + 1.9, parked),
+        clearWalk(h.cx, h.cz, h.rx * 0.55, h.rz * 0.55, parked),
+      ]
+      const good = alts.find((a) => a.rx > 0 && !crosses(a.pts))
+      p = good ?? clearWalk(h.cx, h.cz, 0, 0, parked)
     }
-    if (p.rx === 0 && p.rz === 0) taken.push({ x: p.cx, z: p.cz, r: 2.4 })
+    if (p.rx === 0 && p.rz === 0) parked.push({ x: p.cx, z: p.cz, r: CAMEL_LEN + CAMEL_W })
     out.push(p)
   }
   return out
@@ -3985,23 +4058,29 @@ function WanderingCamel({ live, index, speed, phase, h }: {
   const { obj: model, legs, phase: gaitPhase } = useWalkingCamel(h)
 
   /* מסלול נקי, נבחר פעם אחת — ראה HERD_PATHS למעלה */
-  const path = HERD_PATHS[index] ?? { cx: 0, cz: 0, rx: 0, rz: 0 }
+  const path = HERD_PATHS[index] ?? { cx: 0, cz: 0, rx: 0, rz: 0, pts: [] }
 
-  const col = useMemo<Collider>(() => ({ x: path.cx + path.rx, z: path.cz, r: 1.5 }), [path])
+  /* השחקן גם הוא נעצר בגמל שלם ולא בעיגול סביב מרכזו: שלושה
+     קוליידרים לאורך הגוף, שנעים איתו. */
+  const cols = useMemo<Collider[]>(
+    () => camelSpots(path.cx + path.rx, path.cz, 0, 1).map((c) => ({ ...c })),
+    [path],
+  )
 
   useEffect(() => {
-    live.dynamic.push(col)
+    for (const c of cols) live.dynamic.push(c)
     return () => {
-      const i = live.dynamic.indexOf(col)
-      if (i >= 0) live.dynamic.splice(i, 1)
+      for (const c of cols) {
+        const i = live.dynamic.indexOf(c)
+        if (i >= 0) live.dynamic.splice(i, 1)
+      }
     }
-  }, [live, col])
+  }, [live, cols])
 
-  /* Cadence derived from ground speed so the feet do not skate: the shader
-     swings each foot ±~0.3 m, i.e. a ~0.62 m step, and one step is half a
-     gait cycle. */
+  /* הקצב נגזר מן המהירות על הקרקע, כדי שכף הרגל לא תחליק: צעד אחד
+     הוא חצי מחזור, ואורכו נגזר מזווית הנדנוד ומאורך הרגל. */
   const groundSpeed = Math.abs(speed) * ((path.rx + path.rz) / 2)
-  const gaitRate = (groundSpeed / 0.62) * Math.PI
+  const gaitRate = (groundSpeed / CAMEL_STEP) * Math.PI
 
   /* גמל שאין לו מסלול פנוי עומד — ואז הרגליים היו קופאות באמצע פסיעה,
      כי `gaitRate` יוצא אפס והזווית נשארת על מה שהיה. גמל קפוא באמצע צעד
@@ -4020,8 +4099,10 @@ function WanderingCamel({ live, index, speed, phase, h }: {
       el.position.set(path.cx, groundYAt(path.cx, path.cz) + br * 0.012, path.cz)
       el.rotation.y = phase
       el.rotation.z = br * 0.008
-      col.x = path.cx
-      col.z = path.cz
+      {
+        const p = camelSpots(path.cx, path.cz, Math.sin(phase), Math.cos(phase))
+        for (let i = 0; i < cols.length; i++) { cols[i].x = p[i].x; cols[i].z = p[i].z }
+      }
       return
     }
     const t = clock.elapsedTime * speed + phase
@@ -4034,7 +4115,7 @@ function WanderingCamel({ live, index, speed, phase, h }: {
     const ph = gaitPhase.current.value
     for (const leg of legs) {
       const sideShift = leg.name.endsWith('L') ? 0 : Math.PI
-      leg.rotation.x = Math.sin(ph + sideShift) * 0.34
+      leg.rotation.x = Math.sin(ph + sideShift) * LEG_SWING
     }
     /* הגובה נלקח מהקרקע. הגמלים ישבו על y=0 קבוע בזמן שהטרסה האפויה
        מתגלגלת — בדרך ההעמסה זה קבר אותם עד הברכיים, ובמעבר הצר הם
@@ -4043,8 +4124,10 @@ function WanderingCamel({ live, index, speed, phase, h }: {
     el.position.set(x, groundYAt(x, z), z)
     el.rotation.y = Math.atan2(dx, dz)
     el.rotation.z = Math.sin(gaitPhase.current.value) * 0.028
-    col.x = x
-    col.z = z
+    {
+      const p = camelSpots(x, z, dx, dz)
+      for (let i = 0; i < cols.length; i++) { cols[i].x = p[i].x; cols[i].z = p[i].z }
+    }
   })
 
   return (
@@ -4864,7 +4947,13 @@ function DevAudit() {
   const camera = useThree((s) => s.camera)
   useEffect(() => {
     if (process.env.NODE_ENV !== 'development') return
-    const t = window.setTimeout(() => {
+    /* הפרופים נטענים במנות (StagedProps), ולכן צילום יחיד אחרי 2.5
+       שניות מדד אזור חלקי — בתחנת הגבול 12 מגעים במקום 97, כלומר
+       „0 חפיפות" שנמדד על עולם שעוד לא הגיע. הביקורת רצה שוב כל
+       2.5 שניות עד שמספר העצמים מפסיק לגדול. */
+    let last = -1
+    let stable = 0
+    const run = () => {
       const items: { name: string; box: THREE.Box3; size: THREE.Vector3 }[] = []
       scene.updateMatrixWorld(true)
       scene.traverse((o) => {
@@ -4946,8 +5035,13 @@ function DevAudit() {
       } else {
         console.info(`[ch1 audit] ${REGION.id}: clean — 0 unapproved of ${hits.length} contacts (${items.length} objects)`)
       }
+      if (items.length > last) { last = items.length; stable = 0 } else { stable++ }
+    }
+    const iv = window.setInterval(() => {
+      run()
+      if (stable >= 2) window.clearInterval(iv)
     }, 2500)
-    return () => window.clearTimeout(t)
+    return () => window.clearInterval(iv)
   }, [scene, camera])
   return null
 }
