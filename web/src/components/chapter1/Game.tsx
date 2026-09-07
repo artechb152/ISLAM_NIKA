@@ -5058,7 +5058,10 @@ function DevAudit() {
            מועמדים מול מה שבאמת עומד בעולם, ולא מול עיגול ההתנגשות
            שה-JSON מצהיר עליו — הפער בין השניים הוא בדיוק מה שהשאיר
            ניצבים בתוך הקיר. */
+        /* הרדיוס שהביקורת מדדה בו, כדי שכל כלי חיצוני יוכל לבדוק
+           מועמדים באותה אמת מידה ולא באמת מידה משלו. */
         sizes: items.map((i) => ({
+          r: +radiusOf(i.name, i.box).toFixed(2),
           name: i.name, w: +i.size.x.toFixed(2), h: +i.size.y.toFixed(2), d: +i.size.z.toFixed(2),
           box: [+i.box.min.x.toFixed(2), +i.box.min.y.toFixed(2), +i.box.min.z.toFixed(2),
                 +i.box.max.x.toFixed(2), +i.box.max.y.toFixed(2), +i.box.max.z.toFixed(2)],
