@@ -5018,6 +5018,9 @@ function ControlsPanel({ pressed, notebookDone }: { pressed: Set<string>; notebo
         )}
         {/* המחברת נלמדת ברגע שיש בה משהו לראות. לוח מקשים שמציע „J
             מחברת“ לפני שנרשמה שורה אחת מלמד מקש שנפתח על דף ריק. */}
+        {/* הפעולה שביד נעשית בעכבר. למי שאינו יכול לגרור יש את אותם
+            צעדים ברשימה, ולה מקש משלה — לא כדי לעקוף אלא כדי לבצע. */}
+        {REGION_TASK && <span><i className="hud-key">T</i> הפעולה ברשימה — ללא גרירה</span>}
         {notebookDone > 0 && <span><i className="hud-key">J</i> מחברת</span>}
         {/* המפה נלמדת אחרי התחנה הראשונה — לפניה אין מסע להראות. */}
         {STATION_INDEX > 1 && <span><i className="hud-key">M</i> מפה</span>}
@@ -6238,6 +6241,19 @@ export default function Game() {
       /* R talks to Rawi, who walks beside the player the whole way; E talks to
          whoever you are standing next to. Both read the store rather than the
          `seen` state so a keypress can never act on a stale render. */
+      /* ── חלופת המקלדת, במקש משלה ────────────────────────────────
+         העמסתי אותה קודם על E, וזה שבר את תימן: E ליד האבן פתח את
+         הפאנל במקום לומר „קרבו את הלפיד", והחלונית כיסתה את הלפיד
+         עצמו. הפעולה שביד נשארת של היד; T פותח את אותה רשימה למי
+         שאינו יכול לגרור. */
+      if (e.code === 'KeyT' && !encounterRef.current && !openRef.current) {
+        const st = stageRef.current
+        if (REGION_TASK && (st === 'act' || st === 'interpret')) {
+          cue('task')
+          setOpenTask(true)
+        }
+        return
+      }
       if (e.code === 'KeyR' && !encounterRef.current) {
         const heard = readNotebook().seen
         const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.includes(x.id))
@@ -6301,7 +6317,7 @@ export default function Game() {
            והחותם — התחנה נתקעה ב-interpret כי אי אפשר היה לענות.
            ומרגע שהתשובה ניתנה, המשימה מפסיקה לתפוס את E: אחרת היא
            נפתחת שוב במקום השיחה שנשארה, והיא זו שסוגרת את התחנה. */
-        const allowTask = (st === 'act' || st === 'interpret') && !interpretedRef.current
+        const allowTask = st === 'interpret' && !interpretedRef.current
 
         const dWho = allowWho && live.nearWho ? live.nearWhoD : Infinity
         const dFind = allowFind && live.nearFind ? live.nearFindD : Infinity
