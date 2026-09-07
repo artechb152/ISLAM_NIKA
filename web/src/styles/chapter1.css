@@ -1245,3 +1245,8 @@ body{
   padding:12px 18px;font-size:15px;line-height:1.5;white-space:normal;
 }
 .ch1-task-interpret .hud-card-btn.is-last{border-color:rgba(232,191,118,.75)}
+/* מה ללכת לעשות, לצד הכפתור שמוסר את התור */
+.hud-dialogue-handoff{
+  flex:1 1 100%;order:3;margin-top:8px;
+  font-size:13.5px;line-height:1.5;color:var(--gold-soft,#e8bf76);
+}

@@ -6256,6 +6256,13 @@ export default function Game() {
           <DialogueHud
             key={encounter.id}
             encounter={encounter}
+            /* אם אחרי השיחה הזאת התחנה מחכה לפעולה — הכפתור אומר זאת */
+            handoff={
+              encounter.speaker !== 'narrator' &&
+              (stage === 'brief' || stage === 'look' || stage === 'act')
+                ? objective
+                : null
+            }
             onSpeakerChange={setStepSpeaker}
             onFinished={finishEncounter}
             onClose={() => {

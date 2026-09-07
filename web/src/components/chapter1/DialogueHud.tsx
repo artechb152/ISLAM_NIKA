@@ -77,11 +77,15 @@ function buildSteps(e: Encounter): Step[] {
 
 export function DialogueHud({
   encounter,
+  handoff,
   onSpeakerChange,
   onFinished,
   onClose,
 }: {
   encounter: Encounter
+  /** מה התחנה מבקשת לעשות עכשיו. כשיש דבר כזה, השיחה אינה מציעה
+      „המשך" — היא מוסרת את התור ליד, וממשיכה אחרי שהיא עשתה. */
+  handoff?: string | null
   /** Lets the 3D layer play the right gesture / turn the right head. */
   onSpeakerChange?: (speaker: SpeakerId) => void
   onFinished: (e: Encounter) => void
@@ -327,6 +331,11 @@ export function DialogueHud({
               {complete ? 'לשורה הבאה ←' : 'להשלמת השורה'}
             </button>
           )}
+          {/* ── מסירת התור ליד ──────────────────────────────────────────
+              כשהתחנה מחכה לפעולה פיזית, הכפתור אינו „סיום שיחה" סתם —
+              הוא אומר מה ללכת לעשות, והשיחה הבאה תיפתח רק אחריה.
+              „המשך" שמופיע כאן היה מבטיח שיש עוד מה לשמוע, וזה בדיוק
+              מה שלא נכון: יש עוד מה לעשות. */}
           {showDone && (
             <button
               className="hud-card-btn is-primary"
@@ -335,8 +344,11 @@ export function DialogueHud({
                 onClose()
               }}
             >
-              סיום שיחה
+              {handoff ? 'לעבודה ←' : 'סיום שיחה'}
             </button>
+          )}
+          {showDone && handoff && (
+            <span className="hud-dialogue-handoff">{handoff}</span>
           )}
           {/* זו ההנחיה היחידה שאומרת לשחקן איך להמשיך, והיא הייתה
               הטקסט הכי חיוור בחלונית. „לחיצה משלימה“ גם נקרא כמו
