@@ -2,8 +2,8 @@
   pageerror: 0
   console error/warn: 41 (ייחודיים 14)
     warning: THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
-    warning: [.WebGL-0x124000f2e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
-    warning: [.WebGL-0x124000f2e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+    warning: [.WebGL-0x114000f8200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels
+    warning: [.WebGL-0x114000f8200]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
     warning: [ch1 audit] yemen-heights: 3 UNAPPROVED overlaps, 0 off-ground
     warning:   prop:mudtower.glb@17.7,18.7 ↔ prop:drywall2.glb@15.1,14.0 — 1.52m deep (93% of the smaller)
     warning:   prop:mudtower.glb@17.7,18.7 ↔ prop:drywall3.glb@19.9,13.9 — 1.26m deep (92% of the smaller)

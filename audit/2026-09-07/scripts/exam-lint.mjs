@@ -25,7 +25,10 @@ for (const q of qs) {
     if (new Set(rs).size !== rs.length) errs.push('צד ימין כפול')
   }
   if (q.type === 'open') {
-    if (!q.answer && !q.expected && !q.ok) errs.push('open בלי תשובה או משוב')
+    if (!q.model) errs.push('open בלי model')
+    if (!Array.isArray(q.points)) errs.push('open בלי points כרשימה')
+    else if (q.points.length < 2 || q.points.length > 4) errs.push(`open עם ${q.points.length} נקודות מפתח (החוזה: 2–4)`)
+    if (!q.ok) errs.push('open בלי משוב')
   }
   const texts = opts.map(o=>norm(o.text))
   if (new Set(texts).size !== texts.length) errs.push('אפשרות כפולה')
