@@ -160,16 +160,21 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
                 <text x="34" y="108" className="pm-sea-label" transform="rotate(-72 34 108)">הים האדום</text>
                 <text x="238" y="96" className="pm-empty-label">הרובע הריק</text>
                 <text x="236" y="112" className="pm-empty-sub">אין בארות</text>
-                {/* הדרך צפונה — תחנות המסע */}
-                <path d="M132 178 C 120 150, 122 120, 110 92 C 102 72, 96 52, 92 30" className="pm-route" />
+                {/* ── הדרך צפונה, ואז חזרה דרומה ──────────────────────
+                    מכה ישבה כאן בקצה הצפוני של הקו — כלומר צפונית
+                    לית'רב, וזה הפוך מן המציאות. היא כ-350 ק"מ מדרום
+                    לה. העלייה נעצרת בית'רב, ומשם קו נפרד חוזר דרומה
+                    אל מכה. */}
+                <path d="M132 178 C 120 150, 122 120, 110 92 C 104 78, 100 66, 98 56" className="pm-route" />
+                <path d="M98 56 C 88 66, 80 78, 76 92" className="pm-route pm-route-back" />
                 <circle cx="132" cy="178" r="6" className="pm-here" />
                 <text x="146" y="183" className="pm-stop">המחנה · רמות תימן</text>
                 <circle cx="116" cy="118" r="3.4" className="pm-dot" />
                 <text x="128" y="122" className="pm-stop">תחנת הגבול</text>
-                <circle cx="102" cy="74" r="3.4" className="pm-dot" />
-                <text x="114" y="78" className="pm-stop">ית׳רב</text>
-                <circle cx="92" cy="30" r="4.2" className="pm-dot pm-dot-mecca" />
-                <text x="104" y="34" className="pm-stop">מכה</text>
+                <circle cx="98" cy="56" r="3.4" className="pm-dot" />
+                <text x="110" y="60" className="pm-stop">ית׳רב</text>
+                <circle cx="76" cy="92" r="4.2" className="pm-dot pm-dot-mecca" />
+                <text x="88" y="96" className="pm-stop">מכה</text>
                 {/* שני הכיוונים האחרים — מקווקווים ודהויים */}
                 <path d="M144 172 C 190 160, 240 150, 284 148" className="pm-wrong" />
                 <path d="M132 186 C 136 192, 142 196, 150 200" className="pm-wrong" />

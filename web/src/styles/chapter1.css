@@ -1327,3 +1327,6 @@ body{
 }
 .hud-hand b{color:var(--gold-soft,#e8bf76);font-weight:700}
 .hud-hand .hud-key{margin:0 1px}
+
+/* קטע החזרה דרומה אל מכה — אותו קו, מקווקו, כדי שייקרא כפנייה חזרה */
+.pm-route-back{stroke-dasharray:5 4;opacity:.85}
