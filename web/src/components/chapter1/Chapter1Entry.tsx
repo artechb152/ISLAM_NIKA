@@ -2,8 +2,8 @@
 
 /* ── מסך הפתיחה של פרק 1 ─────────────────────────────────────────────
    מינימלי ככל האפשר, לבקשת הבעלים: המסטהד של האתר, התמונה, הכותרת,
-   ולחצן אחד. מי שכבר בדרך רואה גם „מסע חדש" קטן; מי שסיים — שני
-   קישורים קטנים. שום דבר אחר. המסטהד הוא של האתר (אותן מחלקות),
+   ולחצן אחד. מי שכבר בדרך רואה גם „מסע חדש" קטן. שום דבר אחר —
+   דף הסיום והתרגול נגישים מן המסע עצמו ומעמוד הפרקים, לא מכאן. המסטהד הוא של האתר (אותן מחלקות),
    הכותרת Kedem 900 בקרם, והלחצן הוא לחצן הסיום של פרק 2. */
 
 import Link from 'next/link'
@@ -23,7 +23,6 @@ function go(search: string): void {
 export default function Chapter1Entry() {
   const [know, setKnow] = useState(false)
   const [resumeAt, setResumeAt] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
@@ -34,9 +33,6 @@ export default function Chapter1Entry() {
     }
     const store = readNotebook()
     if (store.seen.length > 0 || store.entries.length > 0) setResumeAt(store.region || 'yemen-heights')
-    try {
-      setDone(localStorage.getItem('islam:chapter:1') === 'done')
-    } catch {}
     setKnow(true)
     /* מושכים את צ׳אנק המשחק בזמן שקוראים את המסך — כדי ש„טוען את
        המסע…" לא יהיה המסך הראשון אחרי הלחיצה */
@@ -89,16 +85,6 @@ export default function Chapter1Entry() {
               <button type="button" className="ch2-end-link" disabled={!know} onClick={() => go('')}>
                 התחילו במסע ←
               </button>
-            )}
-            {done && (
-              <>
-                <Link className="hud-card-btn" href="/chapter1/end">
-                  דף הסיום
-                </Link>
-                <Link className="hud-card-btn" href="/chapter1/practice">
-                  התרגול המסכם
-                </Link>
-              </>
             )}
           </div>
         </div>
