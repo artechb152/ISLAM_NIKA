@@ -1,0 +1,19 @@
+   [ניווט] http://localhost:3000/chapter1?region=yemen-heights
+   [ניווט] http://localhost:3000/chapter1?region=yemen-heights
+פתיחה בשלב brief
+אחרי השיחה: act
+1. E על האבן בעודה בצל:
+   קרוב אל: {"find":"find-terrace-inscription","d":1.5,"task":true,"who":null}
+   ההודעה: "רָאוִירגע — עדיין אי אפשר לקרוא את החקוק. קרבו אליו את הלפיד והחזיקו, עד שהאותיות יוצאות מן הצל."
+   פאנל נפתח: false
+2. גרירת הלפיד אל האבן, בעכבר:
+   הלפיד: {"x":-7.1000000000000005,"y":1.7200818547280505e-10,"z":14.1}
+   אחרי הגרירה: look
+3. אחרי קריאת האבן: interpret
+4. הפאנל נפתח: true
+   אפשרויות בפאנל: 3
+   אחרי תשובה שגויה — נרשמה? false | נפתרה? false
+   הנימוק: "זה בדיוק מה שהיא לא יכולה להוכיח. המסורת נכתבה מאוחר, ובמבט ביקורתי יש לקחת אותה בעירבון מ"
+   אחרי התשובה הנכונה — נפתרה? true
+5. שלב: done | השער: פתוח
+וידאו: /private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/video/play-yemen/play.webm

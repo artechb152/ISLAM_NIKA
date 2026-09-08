@@ -1,0 +1,13 @@
+   [ניווט] http://localhost:3000/chapter1?region=border-post
+   [ניווט] http://localhost:3000/chapter1?region=border-post
+== Red Team · border-post · פתיחה: brief
+RT-1 E בריק לפני ההקדמה → שיחה: true · פאנל: false · הודעה: ""
+RT-2 שער לפני הליבה → הגעתי: false · השער מוחזק: true · שיחה: true · "רָאוִי האליטה הפרסית זורואסטרית. שים לב מה זה אומר: לא אל אחד, ולא ריבוי אלילים כמו שנראה במכה. לשורה הבאה ← רווח או לחיצה" · אזור: border-post
+RT-3 E על התחנה בשלב brief → פאנל: false · הודעה: "שליח האימפריהרגע — קודם נשמע את מי שעומד כאן."
+RT-4 לחיצה כפולה על „לשורה הבאה" → מונה לפני "" אחרי ""
+   שלב אחרי ההקדמה: look
+RT-5 E על התחנה בשלב look → פאנל: false · הודעה: ""
+   [ניווט] http://localhost:3000/chapter1?region=border-post
+   [ניווט] http://localhost:3000/chapter1?region=border-post
+RT-6 רענון באמצע → שלב לפני: look · אחרי: look · אזור: border-post
+RT-7 E כפול על עדות → כרטיסים פתוחים: 1

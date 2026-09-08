@@ -1,0 +1,12 @@
+== yathrib · פתיחה בשלב brief
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+keyboard.up: Target page, context or browser has been closed
+    at walkTo (/Users/nikagreenbaum/ISLAM_NIKA/web/scratchpad/play.mjs:89:25)
+    at async file:///Users/nikagreenbaum/ISLAM_NIKA/web/scratchpad/play.mjs:122:17 {
+  log: []
+}
+
+Node.js v26.8.1
