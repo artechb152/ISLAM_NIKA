@@ -20,7 +20,7 @@
    where the chapter is signed off. */
 
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import PracticeNav from '@/components/chapter6/summary/PracticeNav'
 
 /* `why` IS THE WHOLE POINT OF GETTING IT WRONG. Chapter 2 answers a wrong check
@@ -480,8 +480,6 @@ function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: ()
 export default function Chapter1Practice() {
   const [solved, setSolved] = useState<Set<string>>(new Set())
   const [finished, setFinished] = useState(false)
-  /** איזו שאלה על המסך עכשיו */
-  const [at, setAt] = useState(0)
 
   const solve = useCallback((id: string) => {
     setSolved((s) => {
@@ -505,19 +503,6 @@ export default function Chapter1Practice() {
      beside an exercise when it is solved, and the name of every exercise
      reachable from anywhere on the page. No bar, no percentage, no score. */
   const stops = QUESTIONS.map((q) => ({ id: `p1-${q.id}`, label: q.label, done: solved.has(q.id) }))
-  /* הסרגל מצביע על שאלה שאולי מוסתרת עכשיו — לחיצה עליו צריכה להחליף
-     את השאלה המוצגת ולא לגלול אל כלום. */
-  useEffect(() => {
-    const onHash = () => {
-      const id = location.hash.replace('#p1-', '')
-      const i = QUESTIONS.findIndex((q) => q.id === id)
-      if (i >= 0) setAt(i)
-    }
-    onHash()
-    window.addEventListener('hashchange', onHash)
-    return () => window.removeEventListener('hashchange', onHash)
-  }, [])
-
   return (
     <PracticeNav stops={stops} subtitle="פרק 1 · תרגול מסכם" back={{ href: '/chapter1', label: 'חזרה לפרק 1' }}>
       <main className="chapter-article p2-main">
@@ -533,21 +518,17 @@ export default function Chapter1Practice() {
         </div>
 
         <p className="p2-lead" data-reveal>
-          מסע אל ערב טרום האסלאם — שש שאלות, אחת בכל פעם. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת, ותשובה שאינה נכונה
+          מסע אל ערב טרום האסלאם — שש שאלות בדף אחד. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת, ותשובה שאינה נכונה
           מקבלת הסבר ולא ציון.
         </p>
 
-        {/* שאלה אחת בכל פעם.
-            שמונה תרגילים על עמוד אחד ארוך הם דף שגוללים, לא תרגול
-            שעושים: אי אפשר לדעת כמה נשאר, והתשובה הבאה כבר על המסך.
-            מה שנפתר נשאר פתוח לצפייה מן הסרגל, אבל מה שמוצג הוא
-            השאלה הנוכחית בלבד. */}
+        {/* כל השאלות בדף אחד, כמו בתרגול של פרק 2 — גוללים, והסרגל
+            מסמן מה נפתר. הגרסה של „שאלה אחת בכל פעם" ירדה לבקשת הבעלים. */}
         {QUESTIONS.map((q, i) => (
           <section
             className={'article-section p2-q' + (solved.has(q.id) ? ' is-solved' : '')}
             id={`p1-${q.id}`}
             key={q.id}
-            hidden={i !== at}
             aria-labelledby={`p1-${q.id}-t`}
           >
             <header className="section-heading" data-reveal>
@@ -566,20 +547,6 @@ export default function Chapter1Practice() {
               {q.type === 'match' && <Match q={q} onSolved={() => solve(q.id)} />}
               {q.type === 'order' && <Order q={q} onSolved={() => solve(q.id)} />}
             </div>
-            <nav className="p1-steps" aria-label="מעבר בין השאלות">
-              <button type="button" className="hud-card-btn" disabled={at === 0} onClick={() => setAt(at - 1)}>
-                → הקודמת
-              </button>
-              <span className="p1-steps-count">שאלה {at + 1} מתוך {QUESTIONS.length}</span>
-              <button
-                type="button"
-                className="hud-card-btn is-primary"
-                disabled={at >= QUESTIONS.length - 1}
-                onClick={() => setAt(at + 1)}
-              >
-                {solved.has(q.id) ? 'הבאה ←' : 'לדלג ←'}
-              </button>
-            </nav>
           </section>
         ))}
 
