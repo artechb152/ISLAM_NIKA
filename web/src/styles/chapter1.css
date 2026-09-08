@@ -227,10 +227,16 @@ body{
 }
 .hud-controls-peek:hover,.hud-controls-peek:focus-visible{
   color:#fdf3dd;border-color:rgba(240,200,119,.7);background:rgba(28,18,9,.8);outline:none}
+/* ── כפתור הסגירה ────────────────────────────────────────────────────
+   נמדד בדפדפן: 15×19 פיקסלים. זה שטח לחיצה שדורש דיוק שאין סיבה
+   לדרוש, והוא גם היחיד בפרק שנשען על טבעת הפוקוס של הדפדפן. */
 .hud-controls-close{
   float:inline-start;margin-inline-start:auto;background:none;border:0;cursor:pointer;
-  color:rgba(240,228,205,.5);font-size:19px;line-height:1;padding:0 2px;
+  color:rgba(240,228,205,.62);font-size:19px;line-height:1;
+  min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:8px;
 }
+.hud-controls-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .hud-controls-close:hover{color:#fdf3dd}
 .hud-controls .hud-title{display:flex;align-items:center;justify-content:space-between}
 .hud-controls .hud-title{font-size:16px;margin-bottom:10px}
@@ -271,6 +277,15 @@ body{
   white-space:nowrap;line-height:1.35;text-align:center;
 }
 .hud-card-btn:hover{background:rgba(199,154,60,.18)}
+/* ── כפתור מושבת ─────────────────────────────────────────────────────
+   נמדד בתרגול: „→ הקודמת" בשאלה הראשונה יצא ביחס ניגודיות 1.02 —
+   כלומר הטקסט בצבע הרקע, בלתי נראה לחלוטין. כפתור מושבת צריך להיקרא
+   כמושבת, לא כתקלת רינדור. */
+.hud-card-btn:disabled,
+.hud-card-btn[aria-disabled="true"]{
+  color:rgba(245,236,214,.45);border-color:rgba(245,236,214,.2);
+  background:rgba(28,14,8,.35);cursor:default;
+}
 .hud-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .hud-card-btn.is-primary{background:var(--maroon);border-color:var(--maroon)}
 .hud-card-btn.is-primary:hover{background:var(--stamp)}
