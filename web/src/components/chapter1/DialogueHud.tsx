@@ -116,9 +116,18 @@ export function DialogueHud({
   const [filed, setFiled] = useState(false)
   const timer = useRef<number | null>(null)
 
+  /* ── חזרה מתשובה ─────────────────────────────────────────────────
+     אחרי כל נושא שנבחר הרכיב חוזר לשורה האחרונה של השיחה הראשית —
+     שורה שכבר נשמעה — והקליד אותה מחדש מאפס. לכן, גם כשנגמרו כל
+     הנושאים, הופיע שוב „להשלמת השורה · רווח או לחיצה" במקום „סיום
+     שיחה". שורה שכבר נשמעה מוצגת שלמה מיד, וההכרעה (עוד נושא / סיום)
+     מופיעה בלי לחיצה נוספת. */
+  const heard = useRef<Set<string>>(new Set())
+
   const lastId = useRef(encounter.id)
   if (lastId.current !== encounter.id) {
     lastId.current = encounter.id
+    heard.current = new Set()
     setI(0)
     setRevealed(0)
     setAsked([])
@@ -142,8 +151,12 @@ export function DialogueHud({
 
   // reveal the current line
   useEffect(() => {
-    setRevealed(0)
     if (timer.current) window.clearInterval(timer.current)
+    if (heard.current.has(full)) {
+      setRevealed(full.length)
+      return
+    }
+    setRevealed(0)
     timer.current = window.setInterval(() => {
       setRevealed((r) => {
         if (r >= full.length) {
@@ -163,6 +176,7 @@ export function DialogueHud({
     [encounter.choices, asked],
   )
 
+  if (complete && full) heard.current.add(full)
   const atScriptEnd = !interlude && i >= steps.length - 1 && complete
   const showChoices = atScriptEnd && remainingChoices.length > 0
   const showDone = atScriptEnd && remainingChoices.length === 0
