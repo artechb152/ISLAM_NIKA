@@ -283,8 +283,9 @@ body{
    כמושבת, לא כתקלת רינדור. */
 .hud-card-btn:disabled,
 .hud-card-btn[aria-disabled="true"]{
-  color:rgba(245,236,214,.45);border-color:rgba(245,236,214,.2);
-  background:rgba(28,14,8,.35);cursor:default;
+  /* עמעום בלבד, בלי לכפות צבע: אותו כפתור מופיע גם על ה-HUD הכהה
+     וגם על הקלף הבהיר של התרגול, וצבע קבוע שובר את אחד מהם. */
+  opacity:.6;cursor:default;
 }
 .hud-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .hud-card-btn.is-primary{background:var(--maroon);border-color:var(--maroon)}

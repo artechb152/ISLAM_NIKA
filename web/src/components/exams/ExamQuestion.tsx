@@ -69,7 +69,7 @@ function Choice({ q, ans, onAnswer, mode }: Pick<QProps, 'q' | 'ans' | 'onAnswer
   return (
     <>
       <ul className="xq-options">
-        {q.options.map((o) => {
+        {orderOptions(q.id, q.options).map((o) => {
           const on = picked.has(o.text)
           /* בסקירה: התשובה הנכונה מסומנת תמיד, וטעות שנבחרה מסומנת ככזו.
              אופציה שלא נבחרה ואינה נכונה נשארת כפי שהיא — דף שכולו מסומן
@@ -105,6 +105,19 @@ function Choice({ q, ans, onAnswer, mode }: Pick<QProps, 'q' | 'ans' | 'onAnswer
    לא useMemo, ובכוונה: `Match` מחזיר null כשהשאלה אינה מסוג התאמה, ו-hook אחרי
    return מותנה שובר את כללי ה-hooks. המערך הוא שניים עד שבעה פריטים, והחישוב
    מחדש בכל רנדר זול מכל תרגיל שיעקוף את זה. */
+/* ── סדר האפשרויות ───────────────────────────────────────────────────
+   במאגר, בכל 46 שאלות הבחירה של פרק 1 — וב-278 שאלות בששת המאגרים —
+   התשובה הנכונה היא האופציה הראשונה. הרכיב רינדר `q.options` כפי שהן,
+   ולכן סימון האופציה הראשונה תמיד נתן ציון מלא. זה לא מבחן.
+
+   הסדר נגזר מזהה השאלה ומטקסט האופציה, ולכן הוא יציב: אותה שאלה
+   נראית אותו דבר בסקירה ובניסיון חוזר, ואינה קופצת בכל רינדור. */
+function orderOptions<T extends { text: string }>(id: string, options: T[]): T[] {
+  const order = orderBank(id, options.map((o) => o.text))
+  const byText = new Map(options.map((o) => [o.text, o]))
+  return order.map((t) => byText.get(t)!).filter(Boolean)
+}
+
 function orderBank(id: string, answers: string[]): string[] {
   const key = (t: string): number => {
     let h = 0
