@@ -4143,8 +4143,16 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
         setHeld(i)
         live.taskDrag = true
         live.handHeld = EVIDENCE_SLOTS[i].label
-        kbSlot.current = 0
-        showAt(i, 0)
+        /* ── לא לתת את התשובה ──────────────────────────────────────
+           „השקע הפנוי הראשון" נשמע ניטרלי, אבל המקורות מסודרים באותו
+           סדר כמו השקעים — ולכן הוא תמיד היה השקע הנכון, ולחיצה על F
+           פעמיים פתרה את השולחן בלי לקרוא מילה. מתחילים בשקע פנוי
+           שאינו שלו; רק אם נשאר אחד בלבד, הוא זה. */
+        const free: number[] = []
+        for (let k = 0; k < 3; k++) if (!placed.current[k]) free.push(k)
+        const other = free.filter((k) => k !== i)
+        kbSlot.current = (other.length ? other : free)[0] ?? 0
+        showAt(i, kbSlot.current)
         return
       }
       if (held < 0) return
@@ -4157,7 +4165,10 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
       if (e.code === 'ArrowRight' || e.code === 'ArrowLeft' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
         e.preventDefault()
         const step = e.code === 'ArrowLeft' || e.code === 'ArrowDown' ? -1 : 1
-        kbSlot.current = (kbSlot.current + step + 3) % 3
+        for (let n = 0; n < 3; n++) {
+          kbSlot.current = (kbSlot.current + step + 3) % 3
+          if (!placed.current[kbSlot.current]) break
+        }
         showAt(held, kbSlot.current)
       }
     }
