@@ -1552,6 +1552,8 @@ function ConnectionRope({ ax, bx, y, z, lit }: { ax: number; bx: number; y: numb
    האחיזה על המסך, ו-`DROP_R` הוא רדיוס ההנחה במטרים. הקודמים (70
    פיקסלים ו-1.6 מטר) הפכו את מטבע הכסף בתחנת הגבול למשחק דיוק. */
 const GRAB_PX = 115
+/** ורצפה: חפץ קטן ורחוק עדיין ניתן לאחיזה, אבל לא מכל מקום במסך */
+const GRAB_MIN_PX = 34
 const DROP_R = 2.1
 
 function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, onSortDrop }: {
@@ -1741,14 +1743,21 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
        ועד עכשיו שניהם נמדדו מהחול שמתחתם. */
     const project = (i: number) => {
       const st = state.current[i]
-      const hh = planMode ? 0.32 : ((opts[i]?.prop?.h ?? 0.4) * 0.55)
-      v.set(st.cur.x, yAt(st.cur.x, st.cur.z) + st.lift + hh, st.cur.z).project(camera)
+      const h = planMode ? 0.32 : (opts[i]?.prop?.h ?? 0.4)
+      const hh = h * 0.55
       const r = gl.domElement.getBoundingClientRect()
-      return {
-        x: (v.x * 0.5 + 0.5) * r.width + r.left,
-        y: (-v.y * 0.5 + 0.5) * r.height + r.top,
-        behind: v.z > 1,
-      }
+      v.set(st.cur.x, yAt(st.cur.x, st.cur.z) + st.lift + hh, st.cur.z).project(camera)
+      const x = (v.x * 0.5 + 0.5) * r.width + r.left
+      const y = (-v.y * 0.5 + 0.5) * r.height + r.top
+      /* גובה החפץ בפיקסלים — ההפרש בין הבסיס לראש. משמש כדי שרדיוס
+         האחיזה לא יהיה מספר קבוע: 115 פיקסלים סביב מטבע שנראה
+         כעשרים פיקסלים הם שטח עצום, וכל גרירה שנועדה לסובב את
+         המצלמה ונפתחה בקרבתו תפסה אותו במקום לסובב. */
+      v.set(st.cur.x, yAt(st.cur.x, st.cur.z) + st.lift, st.cur.z).project(camera)
+      const by = (-v.y * 0.5 + 0.5) * r.height + r.top
+      v.set(st.cur.x, yAt(st.cur.x, st.cur.z) + st.lift + h, st.cur.z).project(camera)
+      const ty = (-v.y * 0.5 + 0.5) * r.height + r.top
+      return { x, y, behind: v.z > 1, px: Math.abs(by - ty) }
     }
     const toPlane = (cx: number, cy: number, y: number) => {
       const r = gl.domElement.getBoundingClientRect()
@@ -1769,11 +1778,11 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         /* רק מה שתורו עכשיו נתפס בכלל */
         if (!planMode && !sortMode && activeIdx >= 0 && i !== activeIdx) continue
         const p = project(i)
-        /* אזור אחיזה גדול בהרבה מהמודל. מטבע כסף הוא כמה עשרות פיקסלים
-           על המסך, ו-70 פיקסלים של סובלנות הפכו את ההרמה למשחק דיוק.
-           הגרירה הזאת אינה מבחן במוטוריקה — היא אמורה להצליח בניסיון
-           הראשון או השני. */
-        if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < GRAB_PX) return i
+        /* אזור אחיזה נדיב, אבל ביחס לחפץ ולא ביחס למסך: הגרירה אינה
+           מבחן במוטוריקה, ולכן הרדיוס הוא כגובה החפץ על המסך ועוד
+           מרווח — ולא מספר קבוע שבולע רבע מסך סביב מטבע רחוק. */
+        const tol = Math.max(GRAB_MIN_PX, Math.min(GRAB_PX, p.px * 0.9 + 24))
+        if (!p.behind && Math.hypot(p.x - cx, p.y - cy) < tol) return i
       }
       return -1
     }
