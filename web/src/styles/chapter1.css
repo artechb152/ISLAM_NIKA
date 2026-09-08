@@ -386,16 +386,15 @@ body{
 }
 @keyframes ch1-scrim-in{from{opacity:0}to{opacity:1}}
 
-/* ── סרט במסך מלא ────────────────────────────────────────────────────
-   הסרט מילא 74% מגובה המסך בתוך העולם המעומעם. עכשיו הוא האולם:
-   מסך שחור מקצה לקצה, התמונה בגודל המרבי שהיחס מאפשר, והכתוביות
-   מונחות עליה בתחתית — לא פאנל עם וידאו בתוכו. */
+/* ── סרט בתוך העולם ──────────────────────────────────────────────────
+   הכרעת המשתמשת: סרטי הפתיחה ומכה נשארים חלונית הקרנה בתוך העולם
+   המעומעם — רק סרט הסיום הוא אולם במסך מלא (ChapterFilm). */
 .hud-dialogue.has-film{
   z-index:15;
-  position:fixed;inset:0;top:0;left:0;bottom:0;transform:none;
-  width:100vw;max-width:none;height:100vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:0;background:#000;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;
+  bottom:auto;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:fit-content;max-width:96vw;
+  flex-direction:column;align-items:center;
+  padding:0;background:none;border:0;box-shadow:none;backdrop-filter:none;
 }
 .hud-dialogue.has-film .hud-portrait,
 .hud-dialogue.has-film .hud-speaker-avatar{display:none}
@@ -403,8 +402,8 @@ body{
 .hud-dialogue.has-film .hud-film{
   /* the box IS the film's shape, so nothing is letterboxed into it */
   aspect-ratio:16/9;
-  height:min(100vh, calc(100vw * 9 / 16));
-  width:auto;max-width:100vw;border-radius:0;box-shadow:none;
+  height:min(74vh, calc(96vw * 9 / 16));
+  width:auto;max-width:96vw;
   /* the generic .hud-film below caps every film at 200px for the small
      in-card use; a taller `height` cannot beat a `max-height`, and leaving
      this out is what pinned the screening at 356×200 */
@@ -421,14 +420,10 @@ body{
 .hud-dialogue.has-film .hud-choices{
   width:min(880px,92vw);
 }
-/* הסרט מתחת, הכתוביות והכפתורים מעליו. בלי סדר השכבות המפורש הווידאו —
-   שבא אחרון ב-DOM ופרוש על כל המסך — כיסה את כפתורי „דלגו" ו„סיום",
-   והלחיצה נחתה עליו: הסרט לא ניתן היה לסגירה, וכל המקשים נחסמו מאחוריו.
-   נמדד במכה: ההליכה נעצרה ב-34.7 מטר ולא זזה. */
-.hud-dialogue.has-film .hud-dialogue-body{position:absolute;inset:0;z-index:2;justify-content:flex-end;padding-bottom:28px;
-  background:linear-gradient(to top, rgba(0,0,0,.72) 0, rgba(0,0,0,.35) 22%, transparent 42%);pointer-events:none}
-.hud-dialogue.has-film .hud-dialogue-body>*{pointer-events:auto}
-.hud-dialogue.has-film .hud-film{position:absolute;inset:0;margin:auto;z-index:1;pointer-events:none}
+/* הכפתורים מעל הווידאו ולא מתחתיו — הלקח מהניסיון במסך מלא: וידאו שבא
+   אחרון ב-DOM בלע את הלחיצות על „דלגו" ו„סיום". */
+.hud-dialogue.has-film .hud-dialogue-body{position:relative;z-index:2}
+.hud-dialogue.has-film .hud-film{position:relative;z-index:1}
 .hud-dialogue.has-film .hud-title{margin:16px 0 4px;text-align:center;opacity:.82}
 .hud-dialogue.has-film p.is-full{
   text-align:center;font-size:17.5px;line-height:1.62;min-height:0;

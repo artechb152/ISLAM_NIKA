@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from 'react'
 import { FINDS } from '@/lib/chapter1/finds'
 import { REGIONS } from '@/lib/chapter1/dialogue'
 import { recordEncounter, recordFind } from '@/lib/chapter1/notebook'
+import { ChapterFilm } from './ChapterFilm'
 
 const REGION = REGIONS.find((r) => r.id === 'exit')
 const CLOSING = REGION?.encounters.find((e) => e.id === 'rawi-summary')
@@ -26,6 +27,10 @@ export default function ChapterOutro() {
   const [playing, setPlaying] = useState(true)
   const [muted, setMuted] = useState(true)
   const [filmOver, setFilmOver] = useState(false)
+  /* ── קודם הסרט, במסך מלא ────────────────────────────────────────
+     הסרט ישב כאן בתוך תיבה ברוחב 760 פיקסלים. סרט סיכום הוא אולם, לא
+     תיבה: הוא ממלא את המסך, ורק אחריו נפתח הדף עם המילים והאבן. */
+  const [cinema, setCinema] = useState(true)
 
   /* המחברת נסגרת כאן בדיוק כפי שנסגרה קודם: המפגש נשמע, האבן נמצאה,
      והפרק מסומן כהושלם. בלי זה הספירה הייתה נעצרת על 20 מתוך 21. */
@@ -41,6 +46,7 @@ export default function ChapterOutro() {
     video.current?.play().catch(() => setPlaying(false))
   }, [])
 
+  if (cinema) return <ChapterFilm onDone={() => setCinema(false)} />
   return (
     <main className="ch1-outro">
       <header className="ch1-outro-head">

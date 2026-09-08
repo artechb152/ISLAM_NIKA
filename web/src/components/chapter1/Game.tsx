@@ -23,6 +23,7 @@ import { allowedBecause } from '@/lib/chapter1/overlap-allow'
 import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
 import { TaskPanel } from './TaskPanel'
 import { ContactShadow, Npc, Rawi, type RawiClip } from './Characters'
+import { ChapterFilm } from './ChapterFilm'
 import { DialogueHud } from './DialogueHud'
 import { Notebook } from './Notebook'
 import { WorldMap } from './WorldMap'
@@ -5467,48 +5468,6 @@ function MiniMap({ pos, yaw, met, found, solved }: {
    הכתוביות בעברית מגיעות מקובץ VTT ולא נשרפות בתמונה, כדי שאפשר יהיה
    לתקן טקסט בלי לקודד מחדש. הפוסטר מונע את המסך השחור בזמן הטעינה,
    וה-faststart בקובץ עצמו מונע את ההמתנה שקדמה לו. */
-function ChapterFilm({ onDone }: { onDone: () => void }) {
-  const ref = useRef<HTMLVideoElement>(null)
-  const [playing, setPlaying] = useState(true)
-  const [muted, setMutedState] = useState(() => isMuted())
-  useEffect(() => {
-    const v = ref.current
-    if (!v) return
-    v.play().catch(() => setPlaying(false))
-  }, [])
-  return (
-    <div className="ch1-film" role="dialog" aria-label="סרטון סיכום הפרק">
-      <video
-        ref={ref}
-        className="ch1-film-video"
-        src="/assets/anim-video/ch1-summary.mp4"
-        poster="/assets/anim-video/ch1-summary-poster.jpg"
-        playsInline
-        muted={muted}
-        onEnded={onDone}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
-      >
-        <track kind="subtitles" srcLang="he" label="עברית" default src="/assets/anim-video/ch1-summary.he.vtt" />
-      </video>
-      <div className="ch1-film-bar">
-        <button type="button" className="hud-card-btn" onClick={() => {
-          const v = ref.current
-          if (!v) return
-          if (v.paused) v.play().catch(() => {})
-          else v.pause()
-        }}>{playing ? 'השהו' : 'המשיכו'}</button>
-        <button type="button" className="hud-card-btn" onClick={() => setMutedState((m) => !m)}>
-          {muted ? 'הפעילו קול' : 'השתיקו'}
-        </button>
-        <button type="button" className="hud-card-btn is-primary" onClick={onDone}>
-          דלגו ←
-        </button>
-      </div>
-    </div>
-  )
-}
-
 function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose, onPractice }: {
   done: number
   /** how much of the evidence was actually picked up along the way */
