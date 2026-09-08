@@ -23,7 +23,16 @@ say('מרחקים:', JSON.stringify(await page.evaluate(()=>{ const p=window.__c
   return window.__ch1Where.finds.map(f=>({ id:f.id, d:+Math.hypot(p.x-f.x,p.z-f.z).toFixed(2), done:!!f.done, fx:f.x, fz:f.z, px:+p.x.toFixed(2), pz:+p.z.toFixed(2) })) })))
 say('לפני E:', JSON.stringify(await page.evaluate(()=>({ nearFind: window.__ch1Live.nearFind ?? null, d: String(window.__ch1Live.nearFindD),
   nearWho: window.__ch1Live.nearWho ?? null, atTask: !!window.__ch1Live.atTask, stage: window.__ch1Where.stage, dlg: !!document.querySelector('.hud-dialogue') }))))
-await page.keyboard.press('KeyE'); await page.waitForTimeout(2800)
+await page.keyboard.press('KeyE'); await page.waitForTimeout(1200)
+{ /* ממתינים עד שהעדשה מתייצבת — ב-headless ה-dt קטן והבלנד איטי */
+  let prev = -1, t0 = Date.now()
+  for (let i = 0; i < 40; i++) {
+    const f = await page.evaluate(() => window.__ch1Camera?.fov ?? -2)
+    if (Math.abs(f - prev) < 0.05) break
+    prev = f; await page.waitForTimeout(700)
+  }
+  say('העדשה התייצבה אחרי', ((Date.now()-t0)/1000).toFixed(1), 'ש׳ · talk:', JSON.stringify(await page.evaluate(() => window.__ch1Live.talk)))
+}
 say('אחרי E:', JSON.stringify(await page.evaluate(()=>({ find: !!document.querySelector('.ch1-find'), dlg: !!document.querySelector('.hud-dialogue'),
   note: (document.querySelector('.ch1-task-note')?.textContent??'').trim().slice(0,90), focus: window.__ch1Live.findFocus }))))
 const open = await page.evaluate(()=>{ const el=document.querySelector('.ch1-find-card'); if(!el) return null

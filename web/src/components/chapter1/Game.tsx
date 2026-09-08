@@ -2551,6 +2551,9 @@ function Player({ live }: { live: Live }) {
   const taskBlend = useRef(0)
   /** המוקד האחרון, כדי שהמצלמה תיסוג ממנו במקום לקפוץ ממנו */
   const taskLast = useRef<Live['taskFocus']>(null)
+  /** הצד שממנו המצלמה משקיפה על התקריב — נבחר לפי מה שפנוי, ומוחזק */
+  const focusSide = useRef<{ cx: number; cz: number; seg: number; ok: number } | null>(null)
+  const focusSideAt = useRef(0)
   /** הזווית שממנה נכנסנו לתקריב, וזו שאליה חוזרים ביציאה */
   const focusHeld = useRef(false)
   const yawBefore = useRef(0)
@@ -2820,7 +2823,7 @@ function Player({ live }: { live: Live }) {
        היציאה המצלמה העוקבת יוצאת מן הזווית החדשה — ולכן „לא חזרה".
        שומרים את הזווית ברגע הכניסה, ומחזירים אותה ברכות ביציאה. */
     if (focusNow && !focusHeld.current) { yawBefore.current = live.yaw; focusHeld.current = true }
-    if (!focusNow && focusHeld.current) { focusHeld.current = false; yawReturn.current = yawBefore.current }
+    if (!focusNow && focusHeld.current) { focusHeld.current = false; yawReturn.current = yawBefore.current; focusSide.current = null }
     if (yawReturn.current !== null) {
       const d = wrapPi(yawReturn.current - live.yaw)
       live.yaw += d * Math.min(1, dt * 3)
@@ -2967,10 +2970,40 @@ function Player({ live }: { live: Live }) {
 
     if (tf && kf > 0.002) {
       const dl = Math.hypot(taskDir.current.x, taskDir.current.z) || 1
+      /* ── לא מאחורי הגב ────────────────────────────────────────────
+         המצלמה עמדה על הקו שבין החפץ לשחקן, מצד השחקן — כלומר בדיוק
+         מאחוריו, והתקריב היה תקריב על הגב שלו. הכיוון מסובב 55° הצידה
+         (65° לראיה, שהיא קרובה יותר): החפץ במרכז, השחקן בקצה המסגרת. */
+      const rot = live.findFocus ? 1.15 : 0.95
+      const ux = taskDir.current.x / dl
+      const uz = taskDir.current.z / dl
+      /* ── הצד הפנוי ──────────────────────────────────────────────
+         בדיקת ההסתרה שבהמשך מושכת את המצלמה חזרה אל השחקן אם משהו
+         עומד בינו לבינה — ובשוק של ית'רב תמיד עומד משהו. אם הצד
+         שנבחר חסום, המצלמה נחתה צמוד לגב השחקן, וזה מה שנראה. לכן
+         נבדקים שני הצדדים מראש, ונבחר זה שרואים ממנו רחוק יותר;
+         ואם שניהם חסומים — עולים גבוה, מעל למכשולים. */
+      const cand = (sgn: number) => {
+        const cx = tf.x + (ux * Math.cos(rot) - uz * Math.sin(rot) * sgn) * tf.dist
+        const cz = tf.z + (ux * Math.sin(rot) * sgn + uz * Math.cos(rot)) * tf.dist
+        const ddx = cx - live.player.x
+        const ddz = cz - live.player.z
+        const seg = Math.hypot(ddx, ddz) || 1e-3
+        const ok = occlude(live.player.x, live.player.z, ddx / seg, ddz / seg, seg, 1.4)
+        return { cx, cz, seg, ok }
+      }
+      if (!focusSide.current || performance.now() - focusSideAt.current > 900) {
+        const a = cand(1)
+        const b = cand(-1)
+        focusSide.current = a.ok >= b.ok ? a : b
+        focusSideAt.current = performance.now()
+      }
+      const side = focusSide.current
+      const blocked = side.ok < side.seg * 0.7
       taskCamV.current.set(
-        tf.x + (taskDir.current.x / dl) * tf.dist,
-        groundYAt(tf.x, tf.z) + tf.y,
-        tf.z + (taskDir.current.z / dl) * tf.dist,
+        side.cx,
+        groundYAt(tf.x, tf.z) + tf.y + (blocked ? 1.6 : 0),
+        side.cz,
       )
       target.lerp(taskCamV.current, kf)
       lookV.current.lerp(taskCamV.current.set(tf.x, groundYAt(tf.x, tf.z) + tf.look, tf.z), kf)
