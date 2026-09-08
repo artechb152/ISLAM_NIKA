@@ -1278,7 +1278,7 @@ function TaskProp({ url, tint, h, x, z, y, fitMax, label, showLabel, taken }: {
     <group position={[x, y ?? groundYAt(x, z), z]}>
       <primitive object={model} />
       {showLabel && !taken && (
-        <Html center position={[0, h + 0.42, 0]} zIndexRange={[4, 4]}>
+        <Html center position={[0, h + 0.42, 0]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
           <span className="ch1-prop-label">{label}</span>
         </Html>
       )}
@@ -2220,7 +2220,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
                 <meshBasicMaterial color="#e8bf76" transparent opacity={0.45} depthWrite={false} />
               </mesh>
               {!solvedTask && (dragIdx >= 0 || nearIdx >= 0) && (
-                <Html center position={[sp.x, yAt(sp.x, sp.z) + 0.8, sp.z]} zIndexRange={[4, 4]}>
+                <Html center position={[sp.x, yAt(sp.x, sp.z) + 0.8, sp.z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
                   <span className="ch1-prop-label">{sp.label}</span>
                 </Html>
               )}
@@ -2233,7 +2233,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
               <group position={[st.cur.x - st.home.x, st.lift + Math.sin(st.hop * Math.PI) * 0.3, st.cur.z - st.home.z]}>
                 <CaravanToken x={st.home.x} z={st.home.z} h={0.62} />
                 {!solvedTask && !st.placed && (hoverIdx === 0 || dragIdx === 0 || nearIdx === 0) && (
-                  <Html center position={[st.home.x, yAt(st.home.x, st.home.z) + 1.05, st.home.z]} zIndexRange={[4, 4]}>
+                  <Html center position={[st.home.x, yAt(st.home.x, st.home.z) + 1.05, st.home.z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
                     <span className="ch1-prop-label">אסימון השיירה</span>
                   </Html>
                 )}
@@ -2275,7 +2275,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
                 שם היו מכסות זו את זו — ולכן שם בלבד נשארה ההתנהגות
                 הישנה, ובשאר הן קבועות כל עוד המיון פתוח. */}
             {!solvedTask && !sortLocked && (dragIdx >= 0 || !NESTED_BINS) && (
-              <Html center position={[b.x, yAt(b.x, b.z) + (SURFACE_Y != null ? 0.5 : 0.9), b.z]} zIndexRange={[4, 4]}>
+              <Html center position={[b.x, yAt(b.x, b.z) + (SURFACE_Y != null ? 0.5 : 0.9), b.z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
                 <span className={`ch1-prop-label${dragIdx >= 0 ? ' is-live' : ''}`}>{b.label}</span>
               </Html>
             )}
@@ -4178,22 +4178,27 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
         </group>
       ))}
       {EVIDENCE_SLOTS.map((s, i) => (
-        <MovingEvidence key={s.id} model={s.model} h={s.h} at={pos.current} index={i}
+        <MovingEvidence key={s.id} id={s.id} model={s.model} h={s.h} at={pos.current} index={i}
           y={topY} lifted={held === i} />
       ))}
       {/* ── מה זה מה ──────────────────────────────────────────────────
           עד עכשיו הופיעה תווית אחת בלבד, ורק על מה שכבר היה ביד. אבל
           השאלה שנשאלת כאן היא בדיוק „מה זה מה", ומי שאינו יודע מה הוא
           מחזיק אינו יודע גם לאן להניח. עכשיו לכל שקע כתוב מה מקומו,
-          ולכל חפץ שעוד לא הונח כתוב מה הוא. */}
+          ולכל חפץ שעוד לא הונח כתוב מה הוא.
+
+          ושים לב ל-pointerEvents:'none': תווית בעולם היא אלמנט DOM
+          שיושב מעל הקנבס, ובלעדיו הלחיצה נופלת עליה במקום על החפץ.
+          בדיוק זה קרה כאן — הגרירה על שולחן הראיות לא התחילה מעולם,
+          מפני ש-e.target לא היה הקנבס. */}
       {!done && active && slot.map((sp, i) => (
-        <Html key={`slab${i}`} center position={[sp.x, topY + 0.30, sp.z]} zIndexRange={[4, 4]}>
+        <Html key={`slab${i}`} center position={[sp.x, topY + 0.30, sp.z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
           <span className={`ch1-slot-label${placedN > i ? ' is-filled' : ''}`}>{EVIDENCE_SLOTS[i].place}</span>
         </Html>
       ))}
       {EVIDENCE_SLOTS.map((s, i) =>
         placed.current[i] || !active ? null : (
-          <Html key={`lab${i}`} center position={[pos.current[i].x, topY + (held === i ? 0.56 : 0.42), pos.current[i].z]} zIndexRange={[4, 4]}>
+          <Html key={`lab${i}`} center position={[pos.current[i].x, topY + (held === i ? 0.56 : 0.42), pos.current[i].z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
             <span className={`ch1-prop-label${held === i ? ' is-live' : ''}`}>{s.label}</span>
           </Html>
         ),
@@ -4204,8 +4209,11 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
 
 /* חפץ שהמיקום שלו נקרא מ-ref בכל פריים — הגרירה משנה את ה-ref, לא state,
    כדי שלא יהיה רינדור של React על כל תזוזת עכבר. */
-function MovingEvidence({ model, h, at, index, y, lifted }: {
+function MovingEvidence({ model, h, at, index, y, lifted, id }: {
   model: string; h: number; at: { x: number; z: number }[]; index: number; y: number; lifted: boolean
+  /** שם לגוף עצמו, כדי שאפשר יהיה למדוד אותו ולכוון אליו בבדיקה.
+      התחילית אינה אחת מאלה שביקורת החפיפות סורקת. */
+  id: string
 }) {
   const g = useRef<THREE.Group>(null)
   /* ה-Prop שבפנים מציב את עצמו על groundYAt(0,0) — הקרקע בראשית הצירים.
@@ -4219,7 +4227,7 @@ function MovingEvidence({ model, h, at, index, y, lifted }: {
     if (g.current) g.current.position.set(p.x, y - base + lift.current, p.z)
   })
   return (
-    <group ref={g}>
+    <group ref={g} name={`evi:${id}`}>
       <Suspense fallback={null}>
         <Prop url={`/assets/chapter1/models/${model}.glb`} x={0} z={0} height={h} />
       </Suspense>
