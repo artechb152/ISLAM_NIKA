@@ -1318,3 +1318,12 @@ body{
 /* חלופת המקלדת לפעולה שביד — אותם צעדים, ככפתורים */
 .ch1-task-hand .ch1-task-options{gap:8px}
 .ch1-task-hand .hud-card-btn{text-align:start;width:100%}
+
+/* הוראת הפעולה במקלדת — שורה אחת מעל סרגל המטרה, רק כשיש מה לעשות */
+.hud-hand{
+  position:absolute;left:50%;bottom:112px;transform:translateX(-50%);
+  display:flex;align-items:center;gap:.35em;white-space:nowrap;
+  padding:7px 14px;font-size:13.5px;color:rgba(245,236,214,.94);
+}
+.hud-hand b{color:var(--gold-soft,#e8bf76);font-weight:700}
+.hud-hand .hud-key{margin:0 1px}

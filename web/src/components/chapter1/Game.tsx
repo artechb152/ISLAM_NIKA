@@ -82,6 +82,8 @@ interface Live {
   /** staged close-up over the task surface — TaskProps writes it while the
       player stands at an unsolved physical task, the camera reads it */
   taskFocus: { x: number; z: number; y: number; dist: number; fov: number; look: number } | null
+  /** מה שהיד מחזיקה כרגע דרך המקלדת — כדי שההוראה על המסך תדע מה לומר */
+  handHeld: string | null
   /** static props (tents, palms, well…) */
   colliders: Collider[]
   /** moving props (wandering camels) — mutated in place each frame */
@@ -146,6 +148,7 @@ function makeLive(): Live {
     nearFind: null,
     atTask: false,
     taskFocus: null,
+    handHeld: null,
     colliders: [],
     dynamic: [],
     lastDrag: 0,
@@ -1698,6 +1701,8 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
   useEffect(() => () => { live.taskFocus = null }, [live])
   const dragging = useRef<number>(-1)
   const hovering = useRef<number>(-1)
+  /** איזה יעד נבחר כרגע בחצים, כשהחפץ מוחזק במקלדת */
+  const kbTarget = useRef(0)
   /* תוויות: רק מה שרלוונטי עכשיו.
      חמישה חפצים ושני אזורים בית'רב הדליקו שבע תוויות בבת אחת, וכל
      אחת מהן צעקה באותה עוצמה — מה שמכבה את כולן. תווית מופיעה כשהיד
@@ -1936,15 +1941,76 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       state.current[i].lift = 0
       state.current[i].returning = true
     }
+    /* ── F: אותה פעולה, במקלדת ─────────────────────────────────────
+       לא קיצור דרך ולא פתרון אוטומטי. F מרים את החפץ שתורו עכשיו,
+       החצים עוברים בין היעדים החוקיים, F מניח — וההנחה עוברת דרך
+       `drop()`, בדיוק אותה פונקציה שהעכבר מגיע אליה. לכן המשוב, הפינג,
+       הקפיצה על יעד שגוי ותנאי ההשלמה זהים. Esc מבטל ומחזיר.
+       חפץ אחד בכל פעם: אין לחיצה שמסיימת לוח שלם. */
+    const targetsOf = (i: number) =>
+      planMode ? spots
+        : sortMode ? binSpots
+        : [state.current[i].tgt]
+    const holdTo = (i: number, k: number) => {
+      const t = targetsOf(i)[k]
+      if (!t) return
+      const st = state.current[i]
+      st.cur.x = t.x
+      st.cur.z = t.z
+      st.lift = 0.55
+      nearTarget.current = true
+      force((n) => n + 1)
+    }
+    const key = (e: KeyboardEvent) => {
+      if (solvedTask || !armed) return
+      if (document.querySelector('.hud-dialogue, .ch1-task, .ch1-find, .ch1-overlay')) return
+      const held = dragging.current
+      if (e.code === 'KeyF') {
+        e.preventDefault()
+        if (held >= 0) { drop(held); live.handHeld = null; kbTarget.current = 0; return }
+        /* מרימים את מי שתורו — אותו כלל שמגביל את העכבר */
+        let pick = -1
+        for (let i = 0; i < state.current.length; i++) {
+          const st = state.current[i]
+          if (st.placed || chosen.includes(st.id)) continue
+          if (sortLocked) continue
+          if (!planMode && locked(opts[i])) continue
+          if (!planMode && !sortMode && activeIdx >= 0 && i !== activeIdx) continue
+          pick = i
+          break
+        }
+        if (pick < 0) return
+        dragging.current = pick
+        setDragIdx(pick)
+        state.current[pick].returning = false
+        live.taskDrag = true
+        live.handHeld = opts[pick]?.label ?? 'החפץ'
+        kbTarget.current = 0
+        holdTo(pick, 0)
+        return
+      }
+      if (held < 0) return
+      if (e.code === 'Escape') { e.preventDefault(); live.handHeld = null; cancel(); return }
+      if (e.code === 'ArrowRight' || e.code === 'ArrowLeft' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+        const n = targetsOf(held).length
+        if (n <= 1) return
+        e.preventDefault()
+        const step = e.code === 'ArrowLeft' || e.code === 'ArrowDown' ? -1 : 1
+        kbTarget.current = (kbTarget.current + step + n) % n
+        holdTo(held, kbTarget.current)
+      }
+    }
     window.addEventListener('pointerdown', down, true)
     window.addEventListener('pointermove', move, true)
     window.addEventListener('pointerup', up, true)
     window.addEventListener('pointercancel', cancel, true)
+    window.addEventListener('keydown', key)
     return () => {
       window.removeEventListener('pointerdown', down, true)
       window.removeEventListener('pointermove', move, true)
       window.removeEventListener('pointerup', up, true)
       window.removeEventListener('pointercancel', cancel, true)
+      window.removeEventListener('keydown', key)
       /* אם היד עדיין מחזיקה חפץ כשהאפקט נטען מחדש (וזה קורה — כל
          שינוי state ב-TaskProps יכול להריץ אותו שוב), אסור לשחרר את
          המצלמה באמצע הגרירה. הניקוי שייך לסיום גרירה, לא לרינדור. */
@@ -3767,9 +3833,47 @@ function LampReveal({ live, target, home, onRevealed, revealed, active }: {
       dragging.current = false
       live.taskDrag = false
     }
+    /* ── F על הלפיד ────────────────────────────────────────────────
+       אותה פעולה: מרימים, מקרבים, מחזיקים. F מרים; החצים מזיזים אותו
+       חצי מטר בכל לחיצה לעבר האבן או ממנה; F מניח. החשיפה עצמה נשארת
+       מה שהייתה — קרבה לאורך זמן — ולכן אין כאן קיצור אלא יד אחרת. */
+    const key = (e: KeyboardEvent) => {
+      if (doneRef.current || !activeRef.current) return
+      if (document.querySelector('.hud-dialogue, .ch1-task, .ch1-find, .ch1-overlay')) return
+      if (e.code === 'KeyF') {
+        e.preventDefault()
+        if (dragging.current) { dragging.current = false; live.taskDrag = false; live.handHeld = null; return }
+        dragging.current = true
+        live.taskDrag = true
+        live.handHeld = 'הלפיד'
+        return
+      }
+      if (!dragging.current) return
+      if (e.code === 'Escape') {
+        e.preventDefault()
+        dragging.current = false
+        live.taskDrag = false
+        live.handHeld = null
+        pos.current = { x: home.x, z: home.z }
+        return
+      }
+      if (e.code === 'ArrowRight' || e.code === 'ArrowLeft' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+        e.preventDefault()
+        const toward = e.code === 'ArrowUp' || e.code === 'ArrowRight' ? 1 : -1
+        const dx = target.x - pos.current.x
+        const dz = target.z - pos.current.z
+        const d = Math.hypot(dx, dz) || 1
+        const step = 0.5 * toward
+        const nx = pos.current.x + (dx / d) * step
+        const nz = pos.current.z + (dz / d) * step
+        const nd = Math.hypot(nx - target.x, nz - target.z)
+        if (nd <= 6) pos.current = { x: nx, z: nz }
+      }
+    }
     window.addEventListener('pointerdown', down)
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
+    window.addEventListener('keydown', key)
     /* וו בדיקה, בפיתוח בלבד: מאפשר לפרוב להניח את הלפיד בנקודה ידועה
        ולבדוק את לוגיקת החשיפה בלי להיות תלוי בדיוק של סימולציית עכבר
        על מדרון. אינו קיים ב-build של ייצור. */
@@ -3781,8 +3885,9 @@ function LampReveal({ live, target, home, onRevealed, revealed, active }: {
       window.removeEventListener('pointerdown', down)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      window.removeEventListener('keydown', key)
     }
-  }, [camera, gl, live, target])
+  }, [camera, gl, live, target, home])
 
   useFrame((_, dt) => {
     const g = grp.current
@@ -3889,7 +3994,7 @@ function SurfaceGlow({ x, y, z, r = 0.42, tone = '#f0c877', on = true }: {
   )
 }
 
-function EvidenceTable({ live, at, done, active, put, onPlaced, onComplete }: {
+function EvidenceTable({ live, at, done, active, onComplete }: {
   live: Live
   at: { x: number; z: number }
   done: boolean
@@ -3897,9 +4002,6 @@ function EvidenceTable({ live, at, done, active, put, onPlaced, onComplete }: {
       לפני ששמעת את הסוחר ולפני שראית את שלושת הממצאים — כלומר לפתור
       את הפעולה לפני שנשאלה. */
   active: boolean
-  /** בקשה מן הפאנל: הנח את הבא בתור. אותה פעולה בדיוק כמו גרירה. */
-  put: number
-  onPlaced: (n: number) => void
   onComplete: () => void
 }) {
   const { camera, gl } = useThree()
@@ -3921,28 +4023,13 @@ function EvidenceTable({ live, at, done, active, put, onPlaced, onComplete }: {
   const [placedN, setPlacedN] = useState(0)
   const [held, setHeld] = useState(-1)
   const drag = useRef(-1)
+  /** איזה שקע נבחר בחצים כשהמקור מוחזק במקלדת */
+  const kbSlot = useRef(0)
   const doneRef = useRef(done)
   doneRef.current = done
   const activeRef = useRef(active)
   activeRef.current = active
   const SNAP = 0.72
-
-  /* ── אותה הנחה, במקלדת ─────────────────────────────────────────────
-     הגרירה היא הדרך הטבעית, אבל היא הדרך היחידה שמקדמת את `physDone` —
-     ולכן מי שאינו יכול לגרור נעצר כאן, והשער אינו נפתח. הכפתור בפאנל
-     מבקש את ההנחה הבאה, והשולחן מבצע אותה בדיוק כפי שהיד הייתה. */
-  useEffect(() => {
-    if (put <= 0) return
-    const i = placed.current.findIndex((v) => !v)
-    if (i < 0) return
-    pos.current[i] = { ...slot[i] }
-    placed.current[i] = true
-    const n = placed.current.filter(Boolean).length
-    setPlacedN(n)
-    onPlaced(n)
-    if (n === 3) onComplete()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [put])
 
 
   useEffect(() => {
@@ -4013,17 +4100,56 @@ function EvidenceTable({ live, at, done, active, put, onPlaced, onComplete }: {
       live.taskDrag = false
       settle(i)
     }
+    /* ── F על השולחן ───────────────────────────────────────────────
+       מרימים מקור אחד, בוחרים שקע בחצים, מניחים. ההנחה עוברת דרך
+       `settle()` — אותה פונקציה של העכבר — ולכן שקע שאינו שלו מחזיר
+       את החפץ הביתה בדיוק כמו בגרירה, ושלושת המקורות נדרשים אחד-אחד. */
+    const kbHold = () => drag.current
+    const showAt = (i: number, k: number) => {
+      pos.current[i] = { x: slot[k].x, z: slot[k].z }
+    }
+    const key = (e: KeyboardEvent) => {
+      if (doneRef.current || !activeRef.current) return
+      if (document.querySelector('.hud-dialogue, .ch1-task, .ch1-find, .ch1-overlay')) return
+      const held = kbHold()
+      if (e.code === 'KeyF') {
+        e.preventDefault()
+        if (held >= 0) { drag.current = -1; setHeld(-1); live.taskDrag = false; live.handHeld = null; settle(held); kbSlot.current = 0; return }
+        const i = placed.current.findIndex((v) => !v)
+        if (i < 0) return
+        drag.current = i
+        setHeld(i)
+        live.taskDrag = true
+        live.handHeld = EVIDENCE_SLOTS[i].label
+        kbSlot.current = 0
+        showAt(i, 0)
+        return
+      }
+      if (held < 0) return
+      if (e.code === 'Escape') {
+        e.preventDefault()
+        drag.current = -1; setHeld(-1); live.taskDrag = false; live.handHeld = null
+        pos.current[held] = { ...home[held] }
+        return
+      }
+      if (e.code === 'ArrowRight' || e.code === 'ArrowLeft' || e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+        e.preventDefault()
+        const step = e.code === 'ArrowLeft' || e.code === 'ArrowDown' ? -1 : 1
+        kbSlot.current = (kbSlot.current + step + 3) % 3
+        showAt(held, kbSlot.current)
+      }
+    }
     window.addEventListener('pointerdown', down)
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
     window.addEventListener('pointercancel', up)
+    window.addEventListener('keydown', key)
     if (process.env.NODE_ENV === 'development') {
       ;(window as unknown as { __ch1TablePut?: (i: number) => void }).__ch1TablePut = (i: number) => {
         pos.current[i] = { ...slot[i] }
         placed.current[i] = true
         const n = placed.current.filter(Boolean).length
         setPlacedN(n)
-        onPlaced(n)
         if (n === 3) onComplete()
       }
     }
@@ -4032,6 +4158,7 @@ function EvidenceTable({ live, at, done, active, put, onPlaced, onComplete }: {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
       window.removeEventListener('pointercancel', up)
+      window.removeEventListener('keydown', key)
       live.taskDrag = false
     }
   }, [camera, gl, live, at, home, slot, topY, onComplete])
@@ -4730,7 +4857,7 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet, tablePut, onTablePlaced }: {
+function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet }: {
   live: Live
   /** שלב התחנה — קובע מה זוהר ומה עומם */
   stage: Stage
@@ -4755,9 +4882,6 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
   /** מכה: האם שלושת הפריטים כבר על השולחן */
   tableSet: boolean
   onTableSet: () => void
-  /** מונה שעולה כשמבקשים מן הפאנל להניח את הפריט הבא */
-  tablePut: number
-  onTablePlaced: (n: number) => void
 }) {
   /* Scatter rocks and shrubs only where they don't intersect a placed prop or
      a person standing there — this is what stops models growing through each other.
@@ -4876,8 +5000,6 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
             at={{ x: REGION_TASK.x + 2.1, z: REGION_TASK.z + 1.3 }}
             done={tableSet}
             active={stage === 'act'}
-            put={tablePut}
-            onPlaced={onTablePlaced}
             onComplete={onTableSet}
           />
         </Suspense>
@@ -5042,9 +5164,9 @@ function ControlsPanel({ pressed, notebookDone }: { pressed: Set<string>; notebo
         )}
         {/* המחברת נלמדת ברגע שיש בה משהו לראות. לוח מקשים שמציע „J
             מחברת“ לפני שנרשמה שורה אחת מלמד מקש שנפתח על דף ריק. */}
-        {/* הפעולה שביד נעשית בעכבר. למי שאינו יכול לגרור יש את אותם
-            צעדים ברשימה, ולה מקש משלה — לא כדי לעקוף אלא כדי לבצע. */}
-        {REGION_TASK && <span><i className="hud-key">T</i> הפעולה ברשימה — ללא גרירה</span>}
+        {/* הפעולה שביד נעשית בעכבר. F הוא אותה פעולה במקלדת — לא
+            קיצור ולא פתרון: מרימים, בוחרים יעד בחצים, מניחים. */}
+        {REGION_TASK && <span><i className="hud-key">F</i> פעולה במקלדת — במקום גרירה</span>}
         {notebookDone > 0 && <span><i className="hud-key">J</i> מחברת</span>}
         {/* המפה נלמדת אחרי התחנה הראשונה — לפניה אין מסע להראות. */}
         {STATION_INDEX > 1 && <span><i className="hud-key">M</i> מפה</span>}
@@ -5641,9 +5763,6 @@ export default function Game() {
   const tableSetRef = useRef(false)
   tableSetRef.current = tableSet
   const markTableSet = useCallback(() => { setTableSet(true); cue('find') }, [setTableSet])
-  /** בקשת הנחה מן הפאנל: השולחן מניח את הבא בתור, בדיוק כמו גרירה */
-  const [tablePut, setTablePut] = useState(0)
-  const [tablePlaced, setTablePlaced] = useState(0)
   const stoneLitRef = useRef(false)
   stoneLitRef.current = stoneLit
   const markStoneLit = useCallback(() => {
@@ -5687,6 +5806,15 @@ export default function Game() {
   const [mapPos, setMapPos] = useState({ x: 0, z: 4 })
   const [mapYaw, setMapYaw] = useState(0)
   const [pressed, setPressed] = useState<Set<string>>(() => new Set())
+  /* מה שהיד מחזיקה יושב ב-live (נכתב מתוך הסצנה, לא מ-React), ולכן
+     ה-HUD קורא אותו בקצב נמוך — עשר פעמים בשנייה מספיקות לשורת טקסט. */
+  const [handHeld, setHandHeld] = useState<string | null>(null)
+  useEffect(() => {
+    const t = window.setInterval(() => {
+      setHandHeld((prev) => (prev === live.handHeld ? prev : live.handHeld))
+    }, 100)
+    return () => window.clearInterval(t)
+  }, [live])
 
   /* Region dialogue. `encounter` is whoever is speaking right now; `notebook`
      counts the 26 things Rawi has written down so far. */
@@ -6283,19 +6411,6 @@ export default function Game() {
       /* R talks to Rawi, who walks beside the player the whole way; E talks to
          whoever you are standing next to. Both read the store rather than the
          `seen` state so a keypress can never act on a stale render. */
-      /* ── חלופת המקלדת, במקש משלה ────────────────────────────────
-         העמסתי אותה קודם על E, וזה שבר את תימן: E ליד האבן פתח את
-         הפאנל במקום לומר „קרבו את הלפיד", והחלונית כיסתה את הלפיד
-         עצמו. הפעולה שביד נשארת של היד; T פותח את אותה רשימה למי
-         שאינו יכול לגרור. */
-      if (e.code === 'KeyT' && !encounterRef.current && !openRef.current) {
-        const st = stageRef.current
-        if (REGION_TASK && (st === 'act' || st === 'interpret')) {
-          cue('task')
-          setOpenTask(true)
-        }
-        return
-      }
       if (e.code === 'KeyR' && !encounterRef.current) {
         const heard = readNotebook().seen
         const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.includes(x.id))
@@ -6593,8 +6708,6 @@ export default function Game() {
               met={met}
               stoneLit={stoneLit}
               onStoneLit={markStoneLit}
-              tablePut={tablePut}
-              onTablePlaced={setTablePlaced}
               tableSet={tableSet}
               onTableSet={markTableSet}
             />
@@ -6876,6 +6989,16 @@ export default function Game() {
           !(stage === 'brief' && nearPending) && !(atTask && REGION_TASK) && (
           <p className="hud-objective" role="status">{objective}</p>
         )}
+        {/* ── הוראת F ────────────────────────────────────────────────
+            מופיעה רק כשיש פעולה פיזית לבצע, ומשתנה כשהיד כבר מחזיקה.
+            לא כתובית קבועה על המסך: אין פעולה — אין הוראה. */}
+        {stage === 'act' && !overlay && !openTask && !openFind && !encounter && (
+          <p className="hud-panel hud-hand" role="status">
+            {handHeld
+              ? <>ביד: <b>{handHeld}</b> · בחרו יעד ב־<i className="hud-key">←</i> <i className="hud-key">→</i> · <i className="hud-key">F</i> להנחה · <i className="hud-key">Esc</i> לביטול</>
+              : <>גררו בעכבר, או לחצו <i className="hud-key">F</i> לפעולה במקלדת</>}
+          </p>
+        )}
         {idleHint && hintText && !overlay && !openFind && !openTask && !encounter && (
           <p className="hud-panel hud-hint" role="status">{hintText}</p>
         )}
@@ -6914,23 +7037,6 @@ export default function Game() {
           <TaskPanel
             task={REGION_TASK}
             phase={stage === 'interpret' ? 'interpret' : 'act'}
-            /* ── הפעולה שביד, גם ללא עכבר ────────────────────────────
-               בתימן ובמכה `physDone` נמדד מגרירה בלבד, ולכן מי שאינו
-               יכול לגרור נעצר בתחנה הראשונה — שער היציאה מחכה לפעולה
-               שאין לה דרך שנייה. אלה אותם צעדים, ככפתורים. */
-            hand={
-              stage !== 'act'
-                ? null
-                : REGION.id === 'yemen-heights'
-                  ? [{ label: 'קרבו את הלפיד אל האבן והחזיקו', done: stoneLit, onDo: markStoneLit }]
-                  : REGION.id === 'mecca'
-                    ? EVIDENCE_SLOTS.map((sl, i) => ({
-                        label: `הניחו: ${sl.label} — ${sl.place}`,
-                        done: tablePlaced > i,
-                        onDo: () => setTablePut((n) => n + 1),
-                      }))
-                    : null
-            }
             onInterpret={interpretTask}
             chosen={taskChosen}
             found={found}
