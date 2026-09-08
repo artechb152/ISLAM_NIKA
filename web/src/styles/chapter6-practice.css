@@ -44,7 +44,8 @@
 /* the masthead's end slot, where the article puts its find-field — same height, same hairline
    on maroon, so the two mastheads read as one component family rather than two */
 .gv-back{
-  display:inline-flex;align-items:center;gap:7px;height:36px;text-decoration:none;
+  /* „חזרה" הוא אחד הכפתורים המרכזיים בדף, ולכן 44 ולא 36 */
+  display:inline-flex;align-items:center;gap:7px;min-height:44px;text-decoration:none;
   color:var(--cream);font-weight:600;font-size:15px;
   padding-inline:16px;border-radius:999px;border:1px solid rgba(245,236,214,.26);
   background:rgba(245,236,214,.1);
