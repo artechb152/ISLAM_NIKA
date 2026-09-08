@@ -287,6 +287,18 @@ body{
      וגם על הקלף הבהיר של התרגול, וצבע קבוע שובר את אחד מהם. */
   opacity:.6;cursor:default;
 }
+/* ── הכפתור על הקלף הבהיר ────────────────────────────────────────────
+   `.hud-card-btn` נבנה ל-HUD הכהה, וצבעו קרם. בסרגל המעבר של התרגול
+   הוא יושב על קלף בהיר בלי רקע משלו — נמדד בדפדפן: יחס ניגודיות 1.02,
+   כלומר הטקסט בצבע הרקע. הראשי ניצל מזה רק מפני שיש לו רקע מרון.
+   כאן הוא מקבל את צבע הדף. */
+.p1-steps .hud-card-btn:not(.is-primary){
+  color:#8a2733;
+  border-color:rgba(138,39,51,.42);
+}
+.p1-steps .hud-card-btn:not(.is-primary):hover:not(:disabled){
+  background:rgba(138,39,51,.09);
+}
 .hud-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .hud-card-btn.is-primary{background:var(--maroon);border-color:var(--maroon)}
 .hud-card-btn.is-primary:hover{background:var(--stamp)}
