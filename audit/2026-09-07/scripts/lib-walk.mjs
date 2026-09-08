@@ -24,7 +24,7 @@ export function bind(page) {
     await turn(tx,tz);await page.keyboard.down('KeyW');await page.waitForTimeout(d>8?1400:620)
     await page.keyboard.up('KeyW');await page.waitForTimeout(230)}return false}
   const start=async(region, size={width:1440,height:820})=>{
-    await page.goto(`http://localhost:3000/chapter1?region=${region}`, { waitUntil:'domcontentloaded' })
+    await page.goto(`http://localhost:3000/chapter1/play?region=${region}`, { waitUntil:'domcontentloaded' })
     for (let i=0;i<40;i++){ await page.waitForTimeout(900); let hit=false
       for (const b of await page.$$('button')){ const t=await b.innerText().catch(()=>''); if(t.includes('התחילו')||t.includes('המשיכו')){await b.click(); hit=true; break} }
       if (hit) break }
