@@ -1,20 +1,15 @@
 'use client'
 
 /* ── מסך הפתיחה של פרק 1 ─────────────────────────────────────────────
-   מסך אחד, משחקי: תמונה על כל המסך, כותרת, שורה אחת ולחצן — כך ביקשה
-   הבעלים. מה שמחבר אותו לאתר הוא לא מבנה של מאמר אלא החלקים עצמם:
-   המסטהד של האתר (אותן מחלקות, לא חיקוי), צעיף הבאנר של הפרקים,
-   Kedem 900 בקרם, לחצן הסיום של פרק 2 כלחצן ראשי, ורצועת קלף בתחתית
-   שבה תשע התחנות — עם וי ליד מה שכבר נעבר. */
+   מינימלי ככל האפשר, לבקשת הבעלים: המסטהד של האתר, התמונה, הכותרת,
+   ולחצן אחד. מי שכבר בדרך רואה גם „מסע חדש" קטן; מי שסיים — שני
+   קישורים קטנים. שום דבר אחר. המסטהד הוא של האתר (אותן מחלקות),
+   הכותרת Kedem 900 בקרם, והלחצן הוא לחצן הסיום של פרק 2. */
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import { REGIONS } from '@/lib/chapter1/dialogue'
 import { readNotebook, resetJourney } from '@/lib/chapter1/notebook'
-
-/** תחנות הדרך — בלי אזור היציאה, שהוא דף הסיום */
-const ROAD = REGIONS.filter((r) => r.id !== 'exit')
 
 /* המשחק יושב ב-play/ מתחת לכתובת הזאת. ניווט מלא ולא ניווט צד־לקוח:
    העולם נבנה פעם אחת בטעינת המודול וקורא את `?region=` מן הכתובת,
@@ -48,8 +43,6 @@ export default function Chapter1Entry() {
     void import('@/components/chapter1/Game')
   }, [])
 
-  const reached = resumeAt ? ROAD.findIndex((r) => r.id === resumeAt) : -1
-
   return (
     <div className="chapter-page p1-open">
       {/* המסטהד של האתר — אותן מחלקות שבמאמר ובתרגול */}
@@ -73,15 +66,7 @@ export default function Chapter1Entry() {
       <main className="p1-open-stage" aria-labelledby="p1-open-title">
         <div className="p1-open-media" aria-hidden="true" />
         <div className="p1-open-copy">
-          <p className="p1-open-kicker">פרק ראשון · מסע</p>
           <h1 id="p1-open-title">ערב טרום האסלאם</h1>
-          <p className="p1-open-lead">
-            הצטרפו לשיירה, חצו תשעה מקומות מרמות תימן ועד מכה, ופגשו את האנשים, המקומות והמושגים
-            שעיצבו את חצי האי ערב ערב עליית האסלאם.
-          </p>
-          <p className="p1-open-keys">
-            <b>W A S D</b>הליכה · <b>E</b>לדבר, לבחון, לפעול · <b>H</b>כל המקשים
-          </p>
           <div className="p1-open-actions" aria-busy={!know}>
             {know && resumeAt ? (
               <>
@@ -119,36 +104,6 @@ export default function Chapter1Entry() {
         </div>
       </main>
 
-      {/* תשע התחנות — על קלף, כמו כרטיסי הפרקים; וי ליד מה שנעבר */}
-      <nav className="p1-open-route" aria-label="תחנות הדרך">
-        <ol>
-          {ROAD.map((r, i) => {
-            const isDone = done || reached > i
-            const isHere = !done && reached === i
-            return (
-              <li key={r.id} className={isDone ? 'is-done' : isHere ? 'is-current' : undefined}>
-                <span className="p1-open-n">{String(i + 1).padStart(2, '0')}</span>
-                <span>{r.name}</span>
-                {isDone && (
-                  <svg className="p1-open-tick" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M5 12.5 10 17.5 19 7.5" />
-                  </svg>
-                )}
-                {isHere && <span className="sr-only"> — כאן נעצרתם</span>}
-              </li>
-            )
-          })}
-          <li className={done ? 'is-done' : undefined}>
-            <span className="p1-open-n">{String(ROAD.length + 1).padStart(2, '0')}</span>
-            <span>סוף הדרך</span>
-            {done && (
-              <svg className="p1-open-tick" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 12.5 10 17.5 19 7.5" />
-              </svg>
-            )}
-          </li>
-        </ol>
-      </nav>
     </div>
   )
 }
