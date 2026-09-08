@@ -42,6 +42,9 @@ export default function PracticeNav({
      הרכיב; פרק אחר שמשתמש בו מוסר את שלו — עד עכשיו התרגול של כל
      פרק הכריז על עצמו כפרק 6. */
   subtitle = 'פרק 6 · תרגול מסכם',
+  /* כותרת המגירה. „התרגול" הוא הבית של הרכיב; מסך הכניסה ודף הסיום
+     של פרק 1 יושבים באותה מעטפת ואינם תרגול, ולכן הם מוסרים את שלהם. */
+  title = 'התרגול',
   /* מה שיושב בסלוט הסופי של המסטהד, במקום כפתור החזרה.
      קיים בשביל חדר המבחנים: במהלך מבחן השעון והמונה צריכים להיות גלויים תמיד,
      ודווקא קישור החזרה צריך להיעלם — יציאה באמצע מבחן חייבת לעבור דרך אישור
@@ -53,6 +56,7 @@ export default function PracticeNav({
   stops: NavStop[]
   back?: { href: string; label: string }
   subtitle?: string
+  title?: string
   end?: React.ReactNode
   children: React.ReactNode
 }) {
@@ -175,7 +179,7 @@ export default function PracticeNav({
                 <path d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
-            <h2 className="menu-title">התרגול</h2>
+            <h2 className="menu-title">{title}</h2>
             <span className="menu-sub">{subtitle}</span>
           </div>
           <nav className="chapter-menu-nav" aria-label="ניווט בתרגול">

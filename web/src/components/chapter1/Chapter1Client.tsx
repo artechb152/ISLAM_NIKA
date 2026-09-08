@@ -2,21 +2,13 @@
 
 /* The 3D game must never render on the server: the site is a static export and
    three.js touches window/WebGL at module scope. dynamic(ssr:false) is only
-   allowed inside a client component, hence this thin wrapper. */
+   allowed inside a client component, hence this thin wrapper.
+
+   מסך הפתיחה שהיה כאן עבר אל /chapter1 (Chapter1Entry), בתוך מעטפת
+   האתר; הכתובת הזאת — /chapter1/play — היא המשחק בלבד, ומתחילה מיד. */
 
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
 import { useEffect, useState } from 'react'
-
-import { readNotebook, resetJourney } from '@/lib/chapter1/notebook'
-
-/* אזור הסיום אינו עולם. אין בו משימה, אין דמות ואין מה למסור — רק
-   הסרטון, דברי הסיכום והאבן האחרונה — ולכן הוא נטען כדף ולא כסצנה.
-   ‎`ssr:false` נשאר, כי הוא כותב אל המחברת ב-localStorage. */
-const Outro = dynamic(() => import('@/components/chapter1/ChapterOutro'), {
-  ssr: false,
-  loading: () => <div className="ch1-loading" aria-hidden="true" />,
-})
 
 const Game = dynamic(() => import('@/components/chapter1/Game'), {
   ssr: false,
@@ -28,114 +20,20 @@ const Game = dynamic(() => import('@/components/chapter1/Game'), {
 })
 
 export default function Chapter1Client() {
-  /* Crossing a region boundary reloads the document, because the world is built
-     once at module scope. A traveller who is already walking must not be handed
-     the title page again at every gate — the `?from=` the crossing carries says
-     they are mid-journey, so the game starts straight away.
-
-     Read in an effect rather than in the initial state: the page is
-     prerendered, so a first render that disagrees with the server is a
-     hydration mismatch. */
-  const [started, setStarted] = useState(false)
-  /* עד שהאפקט רץ אי אפשר לדעת אם זו כניסה חדשה או מעבר תחנה,
-     ולכן רינדור מסך הפתיחה בינתיים גרם לו להבהב בכל שער —
-     כאילו המסע מתחיל מחדש בכל פעם. עד שיודעים, לא מציגים
-     אף אחד מהשניים. */
-  const [know, setKnow] = useState(false)
-  /** האם ביקשו את אזור הסיום — הוא נטען כדף, לא כעולם */
-  const [outro, setOutro] = useState(false)
-  /* אזור אמצע-מסע שמור, אם יש התקדמות. המסך הזה תמיד שלח לרמות תימן —
-     גם מטייל שנעצר במכה. */
-  const [resumeAt, setResumeAt] = useState<string | null>(null)
+  /* אזור הסיום אינו עולם — הוא דף ב-/chapter1/end. השער האחרון במשחק
+     מנווט אל `?region=exit` על הכתובת הנוכחית, ומכאן ממשיכים אל הדף.
+     יחסית ל-pathname ולא בנתיב מוחלט, כי באתר החי יש basePath. */
+  const [show, setShow] = useState(false)
   useEffect(() => {
     const q = new URLSearchParams(window.location.search)
-    if (q.get('region') === 'exit') setOutro(true)
-    if (q.has('from')) setStarted(true)
-    const store = readNotebook()
-    if (store.seen.length > 0 || store.entries.length > 0) {
-      setResumeAt(store.region || 'yemen-heights')
+    if (q.get('region') === 'exit') {
+      const base = window.location.pathname.replace(/\/play\/?$/, '')
+      window.location.replace(`${base}/end/`)
+      return
     }
-    setKnow(true)
-    /* מושכים את צ׳אנק המשחק בזמן שקוראים את מסך הפתיחה. בלי זה
-       ההורדה מתחילה רק בלחיצה, ו„טוען את המסע…“ הוא המסך הראשון
-       שרואים אחריה. */
-    void import('@/components/chapter1/Game')
+    setShow(true)
   }, [])
 
-  if (!know) return <div className="ch1-loading" aria-hidden="true" />
-  if (outro) return <Outro />
-  if (started) return <Game />
-
-  return (
-    <main className="ch1-opening">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        className="ch1-opening-backdrop"
-        src="/assets/chapter1/concept/station1-camp.png"
-        alt=""
-        aria-hidden="true"
-      />
-      <div className="ch1-opening-shade" aria-hidden="true" />
-
-      <header className="ch1-opening-header">
-        <Link className="ch1-opening-logo" href="/chapters" aria-label="חזרה לעמוד הפרקים">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/logo-cream.png" alt="אסלאם" />
-        </Link>
-        <Link className="ch1-opening-back" href="/chapters">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
-          לכל הפרקים
-        </Link>
-      </header>
-
-      <section className="ch1-opening-content" aria-labelledby="ch1-opening-title">
-        <h1 id="ch1-opening-title">טרום האסלאם</h1>
-        {/* „חקרו את המחנה“ עמד כאן, אבל המחנה הוא התחנה השנייה מתשע
-            והכפתור מוביל לרמות תימן — הבטחה שהמסך הבא סותר. */}
-        <p className="ch1-opening-lead">
-          הצטרפו לשיירה, חצו תשעה מקומות מרמות תימן ועד מכה, ופגשו את האנשים,
-          המקומות והמושגים שעיצבו את חצי האי ערב ערב עליית האסלאם.
-        </p>
-
-        {resumeAt ? (
-          <>
-            <button
-              className="ch1-opening-start"
-              type="button"
-              onClick={() => {
-                /* ?region= מפורש ב-URL (קישור עמוק, הרנס) גובר על האזור השמור */
-                if (new URLSearchParams(window.location.search).has('region')) setStarted(true)
-                else window.location.assign(`?region=${resumeAt}&from=resume`)
-              }}
-            >
-              המשיכו במסע
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6" /></svg>
-            </button>
-            <button
-              className="ch1-opening-restart"
-              type="button"
-              onClick={() => {
-                if (!window.confirm('להתחיל מסע חדש? ההתקדמות והמחברת יימחקו.')) return
-                resetJourney()
-                setStarted(true)
-              }}
-            >
-              מסע חדש מההתחלה
-            </button>
-          </>
-        ) : (
-          <button className="ch1-opening-start" type="button" onClick={() => setStarted(true)}>
-            התחילו במסע
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6" /></svg>
-          </button>
-        )}
-      </section>
-
-      {/* נקודה לכל אזור. היו שבע לתשעה אזורים. */}
-      <div className="ch1-opening-route" aria-hidden="true">
-        <span className="is-current" />
-        <span /><span /><span /><span /><span /><span /><span /><span />
-      </div>
-    </main>
-  )
+  if (!show) return <div className="ch1-loading" aria-hidden="true" />
+  return <Game />
 }

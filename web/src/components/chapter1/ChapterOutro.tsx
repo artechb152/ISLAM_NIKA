@@ -3,16 +3,19 @@
 /* ── סוף הדרך ────────────────────────────────────────────────────────────
    האזור הזה היה עולם תלת-ממדי שאין בו מה לעשות: אין משימה, אין דמות
    לדבר איתה, ואין מה למסור. נשארו בו שני דברים בלבד — מה שראאווי אומר
-   במבט לאחור, והאבן שעל המשקיף — ושניהם טקסט. עולם שלם נטען כדי
-   להוליך אליהם רגליים.
+   במבט לאחור, והאבן שעל המשקיף — ושניהם טקסט.
 
-   כאן הם עומדים כפי שהם: הסרטון שמסכם את הפרק, המילים שאחריו, והאבן.
+   קודם הסרט, במסך מלא ובלי שום דבר סביבו. אחריו — דף, ובמעטפת האתר:
+   המסטהד, הבאנר, סרגל הצד והמקטעים של כל פרק אחר. הדף הכהה שעמד כאן
+   קודם היה שפה גרפית שלישית באתר שיש לו אחת.
+
    מה שהמחברת רושמת נשאר זהה — אותו מפגש ואותו ממצא — ולכן הספירה
    בסוף הפרק אינה משתנה. */
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
+import PracticeNav from '@/components/chapter6/summary/PracticeNav'
 import { FINDS } from '@/lib/chapter1/finds'
 import { REGIONS } from '@/lib/chapter1/dialogue'
 import { recordEncounter, recordFind } from '@/lib/chapter1/notebook'
@@ -21,15 +24,10 @@ import { ChapterFilm } from './ChapterFilm'
 const REGION = REGIONS.find((r) => r.id === 'exit')
 const CLOSING = REGION?.encounters.find((e) => e.id === 'rawi-summary')
 const STONE = FINDS.find((f) => f.id === 'find-exit-inscription')
+/* שם האזור בנתונים הוא „יציאה — ערב עליית האסלאם"; הכותרת היא החלק השני */
+const TITLE = (REGION?.name ?? 'ערב עליית האסלאם').split('—').pop()!.trim()
 
 export default function ChapterOutro() {
-  const video = useRef<HTMLVideoElement>(null)
-  const [playing, setPlaying] = useState(true)
-  const [muted, setMuted] = useState(true)
-  const [filmOver, setFilmOver] = useState(false)
-  /* ── קודם הסרט, במסך מלא ────────────────────────────────────────
-     הסרט ישב כאן בתוך תיבה ברוחב 760 פיקסלים. סרט סיכום הוא אולם, לא
-     תיבה: הוא ממלא את המסך, ורק אחריו נפתח הדף עם המילים והאבן. */
   const [cinema, setCinema] = useState(true)
 
   /* המחברת נסגרת כאן בדיוק כפי שנסגרה קודם: המפגש נשמע, האבן נמצאה,
@@ -42,75 +40,94 @@ export default function ChapterOutro() {
     } catch {}
   }, [])
 
-  useEffect(() => {
-    video.current?.play().catch(() => setPlaying(false))
-  }, [])
-
   if (cinema) return <ChapterFilm onDone={() => setCinema(false)} />
-  return (
-    <main className="ch1-outro">
-      <header className="ch1-outro-head">
-        <p className="ch1-outro-eyebrow">סיום פרק א׳</p>
-        <h1>{REGION?.name ?? 'ערב עליית האסלאם'}</h1>
-      </header>
 
-      <div className="ch1-outro-film">
-        <video
-          ref={video}
-          src="/assets/anim-video/ch1-summary.mp4"
-          poster="/assets/anim-video/ch1-summary-poster.jpg"
-          playsInline
-          muted={muted}
-          onEnded={() => { setFilmOver(true); setPlaying(false) }}
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-        >
-          <track kind="subtitles" srcLang="he" label="עברית" default src="/assets/anim-video/ch1-summary.he.vtt" />
-        </video>
-        <div className="ch1-outro-bar">
-          <button
-            type="button"
-            className="hud-card-btn"
-            onClick={() => {
-              const v = video.current
-              if (!v) return
-              if (v.paused) v.play().catch(() => {})
-              else v.pause()
-            }}
-          >
-            {playing ? 'השהו' : filmOver ? 'צפו שוב' : 'המשיכו'}
-          </button>
-          <button type="button" className="hud-card-btn" onClick={() => setMuted((m) => !m)}>
-            {muted ? 'הפעילו קול' : 'השתיקו'}
+  const stops = [
+    { id: 'p1-end-words', label: 'רָאוִי, במבט לאחור', done: true },
+    { id: 'p1-end-stone', label: STONE?.title ?? 'האבן על המשקיף', done: true },
+    { id: 'p1-end-next', label: 'הלאה מכאן', done: false },
+  ]
+
+  return (
+    <PracticeNav
+      stops={stops}
+      title="סוף הדרך"
+      subtitle="פרק 1 · ערב טרום האסלאם"
+      back={{ href: '/chapter1', label: 'חזרה לפרק 1' }}
+    >
+      <main className="chapter-article p2-main">
+        <div className="ch2-hero p1-banner p1-end-banner">
+          <div className="ch2-hero-media" aria-hidden="true" />
+          <div className="ch2-hero-copy">
+            <h1 id="p1-title" className="ch2-hero-title">
+              {TITLE}
+            </h1>
+          </div>
+        </div>
+
+        <p className="p2-lead">
+          המסע נגמר במכה. הסרט סיכם את הדרך; כאן דברי ראאווי במבט לאחור, והאבן שעל המשקיף.
+        </p>
+        <div className="p1-entry-actions p1-end-lead">
+          <button type="button" className="hud-card-btn" onClick={() => setCinema(true)}>
+            צפו בסרט שוב
           </button>
         </div>
-      </div>
 
-      {CLOSING && (
-        <section className="ch1-outro-words" aria-label="דברי הסיכום">
-          <h2>{'רָאוִי, במבט לאחור'}</h2>
-          {CLOSING.lines.map((l, i) => (
-            <p key={i}>
-              <span>{l.text}</span>
-              {l.source && <b className="ch1-outro-src">{l.source}</b>}
-            </p>
-          ))}
-        </section>
-      )}
+        {CLOSING && (
+          <section className="article-section" id="p1-end-words" aria-labelledby="p1-end-words-t">
+            <header className="section-heading">
+              <div>
+                <h2 id="p1-end-words-t">רָאוִי, במבט לאחור</h2>
+              </div>
+              <div className="title-ornament section-ornament" aria-hidden="true">
+                <span />
+              </div>
+            </header>
+            {/* מספר הסעיף במקור (§) הוא סימון של הכותבים, לא של הלומד —
+                הוא נשאר בנתונים בשביל שער הנאמנות ואינו מוצג, כמו בשיחות. */}
+            <div className="p1-end-words">
+              {CLOSING.lines.map((l, i) => (
+                <p key={i}>{l.text}</p>
+              ))}
+            </div>
+          </section>
+        )}
 
-      {STONE && (
-        <section className="ch1-outro-stone" aria-label="הממצא האחרון">
-          <h2>{STONE.title}</h2>
-          <p>{STONE.body}</p>
-          <b className="ch1-outro-src">{STONE.source}</b>
-        </section>
-      )}
+        {STONE && (
+          <section className="article-section" id="p1-end-stone" aria-labelledby="p1-end-stone-t">
+            <header className="section-heading">
+              <div>
+                <h2 id="p1-end-stone-t">{STONE.title}</h2>
+              </div>
+              <div className="title-ornament section-ornament" aria-hidden="true">
+                <span />
+              </div>
+            </header>
+            <div className="p1-end-words">
+              <p>{STONE.body}</p>
+            </div>
+          </section>
+        )}
 
-      <nav className="ch1-outro-foot">
-        <Link className="hud-card-btn is-primary" href="/chapter1/practice">לתרגול המסכם ←</Link>
-        <Link className="hud-card-btn" href="/notebook">מחברת המסע</Link>
-        <Link className="hud-card-btn" href="/chapters">לרשימת הפרקים</Link>
-      </nav>
-    </main>
+        <div className="p2-done p1-end-next" id="p1-end-next" role="status">
+          <div className="title-ornament" aria-hidden="true">
+            <span />
+          </div>
+          <p>הפרק הושלם.</p>
+          <nav className="p1-entry-actions p1-end-nav" aria-label="הלאה מכאן">
+            <Link className="ch2-end-link" href="/chapter1/practice">
+              לתרגול המסכם
+            </Link>
+            <Link className="hud-card-btn" href="/notebook">
+              מחברת המסע
+            </Link>
+            <Link className="hud-card-btn" href="/chapters">
+              לרשימת הפרקים
+            </Link>
+          </nav>
+        </div>
+      </main>
+    </PracticeNav>
   )
 }
