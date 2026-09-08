@@ -1,0 +1,40 @@
+=== ית'רב · עכבר
+== yathrib · פתיחה בשלב brief
+   הליכה אל jewish: הגעתי
+   הליכה אל jewish: הגעתי
+   הליכה אל jewish: הגעתי
+   הליכה אל jewish: הגעתי
+   הליכה אל jewish: הגעתי
+   אחרי השיחה: act
+   אחרי העדויות: act (0/2)
+   הליכה אל התחנה: הגעתי
+   גרירת trade: הונח
+   גרירת poetry: הונח
+   גרירת law: הונח
+   גרירת faith: הונח
+   גרירת messiah: הונח
+   אחרי הפעולה: interpret
+   אחרי הפירוש: done
+   השער: פתוח
+   [ראאווי בשער] רָאוִי רגע לפני שנמשיך — יש כאן דברים שפספסנו: נרתיק לספר · חרסים בשוק. תרצה להמשיך לחקור, או להתקדם? להשלמת השורה רווח או לחיצה
+   [כפתורים] ["נמשיך לחקור","להתקדם ←"]
+   הליכה אל השער: הגעתי · עברתי אל: yathrib
+   וידאו: /private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/video/play-yathrib/play.webm
+
+=== ית'רב · מקלדת F
+== yathrib · פתיחה: brief · [מקלדת בלבד לפעולה]
+   אחרי השיחות: act
+   אחרי העדויות: act (0/2)
+   הליכה אל התחנה: הגעתי
+   הוראה על המסך: "גררו בעכבר, או לחצו F לפעולה במקלדת"
+   אחרי F הראשון: "ביד: התמרים שהשכן קונה כל בוקר · בחרו יעד ב־← → · F להנחה · Esc לביטול"
+   סבב 0: [{"id":"trade","placed":true},{"id":"poetry","placed":false},{"id":"law","placed":false},{"id":"faith","placed":false},{"id":"messiah","placed":false}]
+   סבב 1: [{"id":"trade","placed":true},{"id":"poetry","placed":true},{"id":"law","placed":false},{"id":"faith","placed":false},{"id":"messiah","placed":false}]
+   סבב 2: [{"id":"trade","placed":true},{"id":"poetry","placed":true},{"id":"law","placed":true},{"id":"faith","placed":false},{"id":"messiah","placed":false}]
+   סבב 3: [{"id":"trade","placed":true},{"id":"poetry","placed":true},{"id":"law","placed":true},{"id":"faith","placed":true},{"id":"messiah","placed":false}]
+   סבב 4: [{"id":"trade","placed":true},{"id":"poetry","placed":true},{"id":"law","placed":true},{"id":"faith","placed":true},{"id":"messiah","placed":true}]
+   אחרי הפעולה: interpret
+   אחרי הפירוש: done
+   השער: פתוח
+   עברתי אל: yathrib
+   וידאו: /Users/nikagreenbaum/ISLAM_NIKA/audit/2026-09-07/video/f-yathrib.webm

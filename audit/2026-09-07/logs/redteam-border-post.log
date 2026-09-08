@@ -11,3 +11,4 @@ RT-5 E על התחנה בשלב look → פאנל: false · הודעה: ""
    [ניווט] http://localhost:3000/chapter1?region=border-post
 RT-6 רענון באמצע → שלב לפני: look · אחרי: look · אזור: border-post
 RT-7 E כפול על עדות → כרטיסים פתוחים: 1
+RT-8 חפצי משימה נגישים בשלב look? → 2 חפצים על המסך, נעולים: 1
