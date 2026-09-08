@@ -29,8 +29,13 @@ export const MAP_PINS: MapPin[] = [
   { id: 'loading-road', label: 'הדרך וההעמסה', left: 43, top: 45, side: 'start' },
   { id: 'yathrib', label: 'ית׳רב', left: 48.5, top: 40.5, side: 'end' },
   { id: 'monastery', label: 'המנזר', left: 65.5, top: 34.5, side: 'end' },
-  { id: 'mecca', label: 'מכה', left: 52.5, top: 13, side: 'start' },
-  { id: 'exit', label: 'ערב עליית האסלאם', left: 62, top: 7, side: 'end' },
+  /* ── מכה דרומית לית'רב ────────────────────────────────────────────
+     כך היא במציאות, כ-350 ק"מ מדרום לה, והמפה הציבה אותה צפונית —
+     כלומר לימדה גאוגרפיה שגויה. סדר הביקור נשאר כפי שהוא: השיירה
+     עולה צפונה עד ית'רב, ומשם פונה בחזרה דרומה אל מכה. הקו על המפה
+     מראה בדיוק את זה. */
+  { id: 'mecca', label: 'מכה', left: 38, top: 62, side: 'start' },
+  { id: 'exit', label: 'ערב עליית האסלאם', left: 31, top: 70, side: 'end' },
 ]
 
 /** The plate's own proportions — the overlay keeps them so pins stay on landmarks. */
