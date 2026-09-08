@@ -6467,7 +6467,12 @@ export default function Game() {
            היא בדיוק מה שהופך אותה לקישוט, וזה היה החריג היחיד שאיפשר
            את זה. */
         const st = stageRef.current
+        /* שיחה שנשארה חייבת להיות זמינה תמיד. אחרת נוצרת סתירה שנמדדה
+           בית'רב: ההנחיה אומרת „יש עוד נושאים לשמוע — לחצו E לידו",
+           ובאותו רגע השלב הוא `act` ו-E אינו מדבר כלל. השער נשאר נעול
+           ואין דרך לפתוח אותו. */
         const allowWho = st === 'brief' || st === 'interpret' || st === 'wrap' || st === 'done'
+          || talksLeftRef.current > 0
         const allowFind = st === 'look' || st === 'wrap' || st === 'done'
         /* המשימה נפתחת כרגיל; מה שמחכה לשיחה הוא הסגירה. נעילת הפתיחה
            שברה את הגבול, שבו השיחה השנייה עם השליח באה אחרי המטבע
@@ -6506,6 +6511,7 @@ export default function Game() {
               return null
             }
             if (near === 'who') {
+              if (talksLeftRef.current > 0) return null
               if (st === 'look') return 'רגע — קודם בוחנים את הראיות, ואז נדבר עליהן.'
               if (st === 'act') return 'רגע — קודם משלימים את הפעולה שכאן.'
               return null
