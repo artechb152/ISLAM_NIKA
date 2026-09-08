@@ -210,18 +210,6 @@ body{
      וגם על הקלף הבהיר של התרגול, וצבע קבוע שובר את אחד מהם. */
   opacity:.6;cursor:default;
 }
-/* ── הכפתור על הקלף הבהיר ────────────────────────────────────────────
-   `.hud-card-btn` נבנה ל-HUD הכהה, וצבעו קרם. בסרגל המעבר של התרגול
-   הוא יושב על קלף בהיר בלי רקע משלו — נמדד בדפדפן: יחס ניגודיות 1.02,
-   כלומר הטקסט בצבע הרקע. הראשי ניצל מזה רק מפני שיש לו רקע מרון.
-   כאן הוא מקבל את צבע הדף. */
-.p1-steps .hud-card-btn:not(.is-primary){
-  color:#8a2733;
-  border-color:rgba(138,39,51,.42);
-}
-.p1-steps .hud-card-btn:not(.is-primary):hover:not(:disabled){
-  background:rgba(138,39,51,.09);
-}
 .hud-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .hud-card-btn.is-primary{background:var(--maroon);border-color:var(--maroon)}
 .hud-card-btn.is-primary:hover{background:var(--stamp)}
@@ -1186,13 +1174,6 @@ body{
 .hud-film-still img{display:block;width:100%;height:100%;object-fit:cover}
 
 /* ===== תרגול: שאלה אחת בכל פעם, וסידור בגרירה ===== */
-.p1-steps{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  margin:26px auto 0;max-width:760px;padding-top:18px;
-  border-top:1px solid rgba(140,110,60,.22);
-}
-.p1-steps-count{font-size:14px;color:#6b5533;letter-spacing:.02em}
-.p1-steps .hud-card-btn{position:static;min-height:46px;padding:11px 22px;font-size:15px}
 
 .p1-order-how{margin:0 0 12px;font-size:14px;color:#6b5533}
 /* שורה שגוררים היא מטרה בגודל שורה, לא שני חצאי-חצים של כמה פיקסלים */
@@ -1209,12 +1190,10 @@ body{
 .p1-banner .ch2-hero-title{font-size:clamp(28px,4.4vw,44px)}
 /* הסרגל היה 300 פיקסלים והדחק את השאלה לשליש הימני של המסך */
 @media (min-width:1100px){
-  .chapter-shell:has(.p1-steps) .chapter-side{width:236px}
-  .chapter-shell:has(.p1-steps) .chapter-article{max-width:none}
 }
 /* ניגודיות: הטקסט המשני היה בהיר מדי על הרקע הקרמי */
 .p2-main .p2-lead{color:#4a3a20}
-.p1-steps-count,.p1-order-how{color:#5b4726}
+.p1-order-how{color:#5b4726}
 .p2-main .p2-option,.p2-main .p2-chip{min-height:48px}
 
 /* ===== שלב הפירוש ===== */
@@ -1274,31 +1253,75 @@ body{
   .ch1-find .ch1-find-card{max-width:min(540px,88vw)}
 }
 
-/* ===== מסך הכניסה ודף הסיום — בתוך מעטפת האתר =====
-   שני המסכים בנויים מחלקי המאמר (`.ch2-hero`, `.article-section`,
-   `.section-heading`, `.p2-lead`, `.p1-takeaways`, `.p2-done`). מה שנוסף
-   כאן הוא רק מה שאין למאמר: שורת כפתורים, רשימת תחנות ממוספרת, ותמונת
-   הבאנר של דף הסיום. הכול בטוקנים; אין כאן צבע משלו. */
+/* ===== מסך הפתיחה — מסך אחד, עם המסטהד של האתר =====
+   מסך משחקי: תמונה על כל המסך, כותרת, שורה אחת ולחצן — כפי שביקשה
+   הבעלים. מה שנלקח מן האתר: המסטהד עצמו (אותן מחלקות), צעיף הבאנר
+   של הפרקים, Kedem 900 בקרם לכותרת, כפתור הסיום של פרק 2 כלחצן
+   ראשי, ורצועת קלף בתחתית עם תשע התחנות. הכול בטוקנים. */
+.p1-open{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--panel)}
+.p1-open-stage{
+  position:relative;isolation:isolate;flex:1;min-height:0;display:flex;align-items:center;
+  overflow:hidden;background:var(--maroon-deep);
+}
+.p1-open-media{
+  position:absolute;inset:0;
+  background:var(--maroon-deep) url('/assets/chapter1/concept/station1-camp.png') center 42%/cover no-repeat;
+  animation:p1-open-drift 18s ease-out both;
+}
+/* צעיף הבאנר של האתר (rgba(30,18,8,.55)), כבד יותר בצד הטקסט */
+.p1-open-media::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to left,rgba(30,18,8,.74),rgba(30,18,8,.5) 55%,rgba(30,18,8,.32));
+}
+.p1-open-copy{
+  position:relative;z-index:1;width:min(1200px,94%);margin-inline:auto;
+  padding:clamp(24px,5vh,64px) var(--content-gutter,clamp(28px,4vw,64px));
+  direction:rtl;text-align:right;color:var(--cream);
+}
+.p1-open-kicker{margin:0 0 8px;font-size:14px;font-weight:600;letter-spacing:2.5px;color:var(--gold-soft)}
+.p1-open-copy h1{
+  margin:0;font-family:var(--font-heading);font-weight:900;color:var(--paper);
+  font-size:clamp(42px,5vw,72px);line-height:1.08;letter-spacing:-.015em;
+}
+.p1-open-lead{margin:18px 0 0;max-width:620px;font-size:var(--read,19px);line-height:1.7;color:var(--cream)}
+.p1-open-keys{margin:14px 0 0;font-size:14.5px;color:rgba(245,236,214,.78)}
+.p1-open-keys b{font-family:var(--font-heading);font-weight:700;color:var(--gold-soft);margin-inline-end:4px}
+.p1-open-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:26px;min-height:46px}
+.p1-open-actions .ch2-end-link{min-height:46px;padding:11px 26px}
+.p1-open-actions .hud-card-btn{
+  position:static;text-decoration:none;min-height:46px;padding:11px 22px;font-size:15px;
+  color:var(--cream);border-color:rgba(245,236,214,.45);
+}
+.p1-open-actions .hud-card-btn:hover{background:rgba(245,236,214,.14)}
+/* רצועת התחנות — קלף, קו שיער, מספרים בחותם: כמו כרטיסי הפרקים */
+.p1-open-route{
+  position:relative;z-index:1;flex:none;background:var(--paper);border-top:1px solid var(--edge);
+  padding:11px var(--content-gutter,clamp(28px,4vw,64px));
+}
+.p1-open-route ol{
+  list-style:none;margin:0 auto;padding:0;width:min(1200px,100%);
+  display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:center;
+}
+.p1-open-route li{display:inline-flex;align-items:center;gap:7px;font-size:14px;color:var(--muted);white-space:nowrap}
+.p1-open-n{font-family:var(--font-heading);font-weight:700;color:var(--stamp);font-variant-numeric:tabular-nums}
+.p1-open-route li.is-done{color:var(--ink)}
+.p1-open-route li.is-done .p1-open-n{color:var(--gold-text)}
+.p1-open-route li.is-current{color:var(--maroon-deep);font-weight:600}
+.p1-open-tick{width:12px;height:12px;stroke:var(--gold-text);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+@keyframes p1-open-drift{from{transform:scale(1.06)}to{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.p1-open-media{animation:none}}
+@media (max-width:720px){
+  .p1-open-copy h1{font-size:clamp(34px,9vw,48px)}
+  .p1-open-route li{font-size:13px}
+}
+
+/* ===== דף הסיום — בתוך מעטפת האתר =====
+   בנוי מחלקי המאמר; מה שנוסף כאן הוא שורת כפתורים ותמונת הבאנר. */
 .p1-entry-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:var(--flow-lead,56px)}
 .p1-end-lead{margin-top:var(--flow,14px);margin-bottom:clamp(46px,6vw,84px)}
 .p1-entry-actions .hud-card-btn{position:static;text-decoration:none;min-height:46px;padding:11px 22px;font-size:15px}
-/* `.hud-card-btn` נבנה ל-HUD הכהה וצבעו קרם — על הקלף הוא מקבל את צבע
-   הדף, כמו בסרגל המעבר של התרגול */
 .p1-entry-actions .hud-card-btn:not(.is-primary){color:var(--maroon);border-color:rgba(138,39,51,.42)}
 .p1-entry-actions .hud-card-btn:not(.is-primary):hover:not(:disabled){background:rgba(138,39,51,.09)}
-.p1-how li{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
-.p1-how-k{font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);white-space:nowrap}
-.p1-entry-route{list-style:none;margin:0;padding:0;width:100%;max-width:var(--measure,880px)}
-.p1-entry-route li{
-  display:flex;align-items:baseline;gap:14px;padding:13px 0;
-  border-bottom:1px solid var(--rule);font-size:var(--read,18.5px);line-height:1.5;color:var(--ink);
-}
-.p1-entry-route li:first-child{border-top:1px solid var(--rule)}
-.p1-entry-n{font-family:var(--font-heading);font-weight:700;color:var(--stamp);min-width:2.2ch;font-variant-numeric:tabular-nums}
-.p1-entry-state{margin-inline-start:auto;font-size:14px;color:var(--muted)}
-.p1-entry-route li.is-done .p1-entry-state{color:var(--gold-text)}
-.p1-entry-route li.is-current{color:var(--maroon-deep);font-weight:600}
-.p1-entry-route li.is-current .p1-entry-state{color:var(--maroon);font-weight:600}
 .p1-end-banner .ch2-hero-media{background-image:url('/assets/anim-video/ch1-summary-poster.jpg');background-position:center 40%}
 .p1-end-words{max-width:var(--measure,880px)}
 .p1-end-words p{margin:0;font-size:var(--read,18.5px);line-height:1.85;color:var(--ink)}
