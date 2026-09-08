@@ -1,0 +1,40 @@
+▲ Next.js 16.2.10 (webpack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1926ms
+  Running TypeScript ...
+  Finished TypeScript in 3.7s ...
+  Collecting page data using 14 workers ...
+  Generating static pages using 14 workers (0/21) ...
+  Generating static pages using 14 workers (5/21) 
+  Generating static pages using 14 workers (10/21) 
+  Generating static pages using 14 workers (15/21) 
+✓ Generating static pages using 14 workers (21/21) in 233ms
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /chapter1
+├ ○ /chapter1/dev-character
+├ ○ /chapter1/practice
+├ ○ /chapter2
+├ ○ /chapter2/practice
+├ ○ /chapter3
+├ ○ /chapter3/practice
+├ ○ /chapter4
+├ ○ /chapter4/looks
+├ ○ /chapter4/practice
+├ ○ /chapter5
+├ ○ /chapter5/practice
+├ ○ /chapter6
+├ ○ /chapter6/practice
+├ ○ /chapters
+├ ○ /exams
+├ ○ /icon.svg
+└ ○ /notebook
+
+
+○  (Static)  prerendered as static content
+

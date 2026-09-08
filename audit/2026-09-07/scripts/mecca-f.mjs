@@ -66,7 +66,7 @@ for (let r=0;r<10;r++){ w = await W(); if (w.stage!=='brief') break
 w = await W(); console.log('אחרי השיחה:', w.stage)
 
 /* השולחן לפני שהוא רלוונטי */
-const T = { x: w.task.x + 2.1, z: w.task.z + 1.3 }
+const T = { x: w.task.x, z: w.task.z }
 await walkTo(T.x, T.z, 2.4)
 /* גובה פני השולחן נמדד מן הרשת עצמה. `getWorldPosition` של הקבוצה
    מחזיר 0 — הילדים ממוקמים בקואורדינטות עולם — ולכן ההיטל היה שגוי

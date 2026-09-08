@@ -1,0 +1,13 @@
+01 הגעה · שלב brief · מטרה: ""
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForTimeout: Target page, context or browser has been closed
+    at talk (/Users/nikagreenbaum/ISLAM_NIKA/audit/2026-09-07/scripts/lib-walk.mjs:11:66)
+    at async Object.walk (/Users/nikagreenbaum/ISLAM_NIKA/audit/2026-09-07/scripts/lib-walk.mjs:22:20)
+    at async file:///Users/nikagreenbaum/ISLAM_NIKA/audit/2026-09-07/scripts/mecca-walk.mjs:19:3 {
+  log: []
+}
+
+Node.js v26.8.1

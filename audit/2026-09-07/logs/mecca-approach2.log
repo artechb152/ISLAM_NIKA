@@ -1,0 +1,21 @@
+   נקודות מסלול: 6
+שלב לפני השולחן: act
+   נקודות מסלול: 2
+הגעה לשולחן: false · מרחק 5.22 · atTask false · תקריב false · fov 55
+הוראת F על המסך: ""
+   מקור 0: לא
+אחרי השולחן: act
+הפאנל נפתח: false
+נפתרה: false
+אחרי סגירה: שלב act · fov 55 · תקריב false
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForTimeout: Target page, context or browser has been closed
+    at Object.walk (/Users/nikagreenbaum/ISLAM_NIKA/audit/2026-09-07/scripts/lib-walk.mjs:25:47)
+    at async file:///Users/nikagreenbaum/ISLAM_NIKA/audit/2026-09-07/scripts/mecca-approach.mjs:77:3 {
+  log: []
+}
+
+Node.js v26.8.1

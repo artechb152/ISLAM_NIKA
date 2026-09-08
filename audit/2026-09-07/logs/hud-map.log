@@ -1,0 +1,25 @@
+
+══ mecca · 1512×860 · שיחה
+     56.. 860  1512×804  z=39  ch1-arrive
+    581.. 842   272×261  z=10  hud-panel hud-controls
+    800.. 842   560× 42  z=10  hud-panel hud-goal
+    744.. 780   620× 36  z=auto  hud-objective
+    670.. 842   172×172  z=10  hud-panel hud-map
+   חפיפות: 4
+     ✗ ch1-arrive × hud-panel hud-controls — 272×261px
+     ✗ ch1-arrive × hud-panel hud-goal — 560×42px
+     ✗ ch1-arrive × hud-objective — 620×36px
+     ✗ ch1-arrive × hud-panel hud-map — 172×172px
+
+══ mecca · 1440×820 · שיחה
+     56.. 820  1440×764  z=39  ch1-arrive is-gone
+    -56..  20   197× 76  z=5  poi-marker is-gate-marker is-held-
+    541.. 802   272×261  z=10  hud-panel hud-controls
+    760.. 802   560× 42  z=10  hud-panel hud-goal
+    704.. 740   620× 36  z=auto  hud-objective
+    630.. 802   172×172  z=10  hud-panel hud-map
+   חפיפות: 4
+     ✗ ch1-arrive is-gone × hud-panel hud-controls — 272×261px
+     ✗ ch1-arrive is-gone × hud-panel hud-goal — 560×42px
+     ✗ ch1-arrive is-gone × hud-objective — 620×36px
+     ✗ ch1-arrive is-gone × hud-panel hud-map — 172×172px

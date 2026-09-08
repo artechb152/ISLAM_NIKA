@@ -47,7 +47,7 @@ for(let g=0;g<8;g++){ w=await W(); if(w.stage!=='look')break
   await page.keyboard.press('Escape');await page.waitForTimeout(400)}
 w=await W()
 console.log('שלב לפני השולחן:', w.stage)
-await walkTo(w.task.x+2.1, w.task.z+1.3+2.6, 1.8)
+await walkTo(w.task.x, w.task.z+2.6, 1.8)
 await page.waitForTimeout(3500)
 const t0 = await page.evaluate(()=>window.__ch1TableAt ? window.__ch1TableAt() : null)
 console.log('מצב השולחן:', JSON.stringify(t0))

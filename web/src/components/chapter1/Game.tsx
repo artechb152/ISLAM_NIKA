@@ -84,6 +84,8 @@ interface Live {
   taskFocus: { x: number; z: number; y: number; dist: number; fov: number; look: number } | null
   /** מה שהיד מחזיקה כרגע דרך המקלדת — כדי שההוראה על המסך תדע מה לומר */
   handHeld: string | null
+  /** תקריב על ראיה פתוחה: הכרטיס יושב בצד, והמצלמה על החפץ עצמו */
+  findFocus: { x: number; z: number; y: number; dist: number; fov: number; look: number } | null
   /** static props (tents, palms, well…) */
   colliders: Collider[]
   /** moving props (wandering camels) — mutated in place each frame */
@@ -149,6 +151,7 @@ function makeLive(): Live {
     atTask: false,
     taskFocus: null,
     handHeld: null,
+    findFocus: null,
     colliders: [],
     dynamic: [],
     lastDrag: 0,
@@ -1695,7 +1698,11 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
     for (const b of binSpots) consider(b.x, b.z)
     return planMode
       ? { x: cx, z: cz, y: 3.3 + spread * 0.95, dist: 1.0 + spread * 0.5, fov: 42, look: 0.1 }
-      : { x: cx, z: cz, y: 2.3 + spread * 0.55, dist: 2.2 + spread * 0.7, fov: 46, look: 0.55 }
+      : SURFACE_TASK
+        /* שולחן: מלמעלה יותר, כדי שגב השחקן יישאר בשולי המסגרת ולא
+           על שלושת החפצים. נמדד בצילום: הצללית כיסתה את החזית. */
+        ? { x: cx, z: cz, y: 3.9, dist: 3.1, fov: 44, look: 0.7 }
+        : { x: cx, z: cz, y: 2.3 + spread * 0.55, dist: 2.2 + spread * 0.7, fov: 46, look: 0.55 }
   }, [planMode, spots, binSpots])
   /* המשימה נפתרה או שעזבנו את האזור — המצלמה חוזרת אל הגב */
   useEffect(() => () => { live.taskFocus = null }, [live])
@@ -1962,7 +1969,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       force((n) => n + 1)
     }
     const key = (e: KeyboardEvent) => {
-      if (solvedTask || !armed) return
+      if (solvedTask || !armed || !live.atTask) return
       if (document.querySelector('.hud-dialogue, .ch1-task, .ch1-find, .ch1-overlay')) return
       const held = dragging.current
       if (e.code === 'KeyF') {
@@ -2022,6 +2029,15 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
   }, [camera, gl, live, opts, spots, binSpots, planMode, sortMode, sortLocked, locked, chosen, solvedTask, armed, activeIdx, yAt, SURFACE_Y, DROP_NEAR, LIFT_Y, onChoose, onSortDrop])
 
   useFrame((_, dt) => {
+    /* ── התקריב קודם לכול ──────────────────────────────────────────
+       היציאה המוקדמת „אין חפצים — אין מה להזיז" ישבה לפני קביעת
+       התקריב, ולכן במכה — שאין בה חפצי-אופציה כלל, הפעולה היא שולחן
+       הראיות — התקריב לא נכנס מעולם. נמדד: atTask=true, תקריב=false,
+       fov 55 ליד השולחן. */
+    live.taskFocus =
+      armed && atTask && !solvedTask && (planMode || sortMode || opts.length > 0 || SURFACE_TASK)
+        ? focusSpec
+        : null
     if (!state.current.length) return
     for (let i = 0; i < state.current.length; i++) {
       const st = state.current[i]
@@ -2109,13 +2125,6 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
        השיחה או בשלב בחינת העדויות — המצלמה כבר נכנסה לתקריב על
        משהו שעוד אי אפשר לגעת בו. זה מה ששבר את המצלמה בתחנת הגבול
        והפך את המשימה לכמעט בלתי אפשרית. */
-    /* במכה אין אף אופציה עם חפץ — הפעולה שם היא שולחן הראיות — ולכן
-       התנאי „יש חפצים" סינן אותה החוצה, והתקריב לא נכנס דווקא באחת
-       משתי התחנות שבהן הפעולה קורית על משטח קטן. */
-    live.taskFocus =
-      armed && atTask && !solvedTask && (planMode || sortMode || opts.length > 0 || SURFACE_TASK)
-        ? focusSpec
-        : null
     const pr = pingRing.current
     if (pr) {
       const pg = ping.current
@@ -2190,7 +2199,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         <ringGeometry args={[0.42, 0.54, 40]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      {planMode && (
+      {planMode && !solvedTask && (
         <>
           {/* בד המפה האמיתי — אריג עם רכס ההרים ממערב ונתיב מנוקד צפונה */}
           <PlanCloth x={T.x} z={T.z} />
@@ -2281,7 +2290,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
             )}
           </group>
         ))}
-      {!planMode &&
+      {!planMode && !solvedTask &&
         opts.map((o, i) => {
           const st = state.current[i]
           if (locked(o)) return null
@@ -2541,6 +2550,10 @@ function Player({ live }: { live: Live }) {
   const taskBlend = useRef(0)
   /** המוקד האחרון, כדי שהמצלמה תיסוג ממנו במקום לקפוץ ממנו */
   const taskLast = useRef<Live['taskFocus']>(null)
+  /** הזווית שממנה נכנסנו לתקריב, וזו שאליה חוזרים ביציאה */
+  const focusHeld = useRef(false)
+  const yawBefore = useRef(0)
+  const yawReturn = useRef<number | null>(null)
   const taskDir = useRef({ x: 0, z: 1 })
   const taskCamV = useRef(new THREE.Vector3())
   const twoShotV = useRef(new THREE.Vector3())
@@ -2634,7 +2647,7 @@ function Player({ live }: { live: Live }) {
          המצלמה מיישרת את עצמה לאט לכיוון ההליכה — מספיק איטי כדי
          לא להילחם ביד, ומספיק כדי ש-W+A יהיה פנייה שמאלה.
          היא מוותרת מיד ברגע שנוגעים בעכבר. */
-      if (moving && mz < 0 && performance.now() - live.lastDrag > 1200) {
+      if (moving && mz < 0 && performance.now() - live.lastDrag > 1200 && !live.taskFocus && !live.findFocus) {
         /* הקשר בין הזווית לכיוון ההליכה הוא `heading = π − yaw`, לא
            `yaw + π`: הקלט מסובב ב-`-yaw`, ולכן זווית מקומית α נותנת
            `heading = α − yaw`, ועבור W (כלומר α = π) יוצא π − yaw.
@@ -2797,12 +2810,26 @@ function Player({ live }: { live: Live }) {
        null. התוצאה היא קפיצה בסוף כל אינטראקציה, במקום נסיגה.
        שומרים את המוקד האחרון עד שהמשקל באמת התאפס, וכך שני הצדדים
        חוזרים יחד ובאותו קצב. */
-    if (live.taskFocus) taskLast.current = live.taskFocus
-    taskBlend.current += ((live.taskFocus && tb < 0.02 && !riseK ? 1 : 0) - taskBlend.current) * Math.min(1, dt * 2.0)
+    const focusNow = live.taskFocus ?? live.findFocus
+    if (focusNow) taskLast.current = focusNow
+    /* ── הזווית חוזרת ────────────────────────────────────────────────
+       נמדד בית'רב: yaw 0.545 לפני התקריב, 3.535 אחריו — 171° — וכך
+       הוא נשאר. התקריב עצמו אינו מסובב את השחקן, אבל ההליכה סביב
+       התחנה בזמן התקריב מיישרת את ה-yaw לכיוון ההליכה, ואחרי
+       היציאה המצלמה העוקבת יוצאת מן הזווית החדשה — ולכן „לא חזרה".
+       שומרים את הזווית ברגע הכניסה, ומחזירים אותה ברכות ביציאה. */
+    if (focusNow && !focusHeld.current) { yawBefore.current = live.yaw; focusHeld.current = true }
+    if (!focusNow && focusHeld.current) { focusHeld.current = false; yawReturn.current = yawBefore.current }
+    if (yawReturn.current !== null) {
+      const d = wrapPi(yawReturn.current - live.yaw)
+      live.yaw += d * Math.min(1, dt * 3)
+      if (Math.abs(d) < 0.01) yawReturn.current = null
+    }
+    taskBlend.current += ((focusNow && tb < 0.02 && !riseK ? 1 : 0) - taskBlend.current) * Math.min(1, dt * 2.0)
     const kf = taskBlend.current
     if (kf <= 0.002) taskLast.current = null
-    const tf = live.taskFocus ?? taskLast.current
-    if (live.taskFocus) {
+    const tf = focusNow ?? taskLast.current
+    if (focusNow) {
       const ddx = live.player.x - tf!.x
       const ddz = live.player.z - tf!.z
       const dl = Math.hypot(ddx, ddz) || 1
@@ -3534,6 +3561,11 @@ const INTRO_ID: string | null =
   (REGION.core ?? []).find((id) => REGION.encounters.some((e) => e.id === id)) ??
   REGION.encounters[0]?.id ??
   null
+/** הראיות שהמשימה דורשת — אלה שאסור לקרוא לפני תורן */
+const REQUIRED_FINDS = new Set<string>([
+  ...((REGION_TASK?.needsFinds ?? []) as string[]),
+  ...((REGION_TASK?.options ?? []).map((o) => o.needsFind).filter(Boolean) as string[]),
+])
 /* ── שיחות הליבה שקודמות למשימה ──────────────────────────────────────
    „התחנה לא יכולה להיות מושלמת עד שהלומד עבר את כל השיחה עם הדמות
    הרלוונטית." אלה השיחות שהאזור קיים בשבילן ושאינן נפתחות אחרי
@@ -3705,7 +3737,7 @@ function GroundGlow({ x, z, r = 1.1, live, tone = '#f0c877', rank = 'ready' }: {
        נשאר של האחד שתורו עכשיו בלבד. */
     const reach = rank === 'next' ? 26 : 15
     const near = Math.max(0, Math.min(1, (reach - d) / (rank === 'next' ? 18 : 11)))
-    const want = rank === 'done' ? 0 : rank === 'next' ? 1 : 0.42
+    const want = rank === 'done' ? 0 : rank === 'next' ? 1 : 0.7
     level.current += (want - level.current) * Math.min(1, dt * 3)
     const k = level.current
     const breathe = 0.5 + 0.5 * Math.sin(clock.elapsedTime * (rank === 'next' ? 1.25 : 2.1))
@@ -3839,6 +3871,7 @@ function LampReveal({ live, target, home, onRevealed, revealed, active }: {
        מה שהייתה — קרבה לאורך זמן — ולכן אין כאן קיצור אלא יד אחרת. */
     const key = (e: KeyboardEvent) => {
       if (doneRef.current || !activeRef.current) return
+      if (!live.atTask) return
       if (document.querySelector('.hud-dialogue, .ch1-task, .ch1-find, .ch1-overlay')) return
       if (e.code === 'KeyF') {
         e.preventDefault()
@@ -4132,6 +4165,10 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
     }
     const key = (e: KeyboardEvent) => {
       if (doneRef.current || !activeRef.current) return
+      /* F פועל רק ליד השולחן. בלעדי זה הוא סידר את השולחן מכל מקום
+         באזור — נמדד: שלושת המקורות הונחו מ-6 מטר, בלי שהתקריב נכנס
+         ובלי שהשולחן היה גדול מכמה פיקסלים. יד צריכה להיות במקום. */
+      if (!live.atTask) return
       if (document.querySelector('.hud-dialogue, .ch1-task, .ch1-find, .ch1-overlay')) return
       const held = kbHold()
       if (e.code === 'KeyF') {
@@ -4241,7 +4278,7 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
         </Html>
       ))}
       {EVIDENCE_SLOTS.map((s, i) =>
-        placed.current[i] || !active ? null : (
+        placed.current[i] || !active || held !== i ? null : (
           <Html key={`lab${i}`} center position={[pos.current[i].x, topY + (held === i ? 0.56 : 0.42), pos.current[i].z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
             <span className={`ch1-prop-label${held === i ? ' is-live' : ''}`}>{s.label}</span>
           </Html>
@@ -5000,6 +5037,23 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
           לשפוט, ושלושתם נדלקו יחד — מה שנקרא כשלוש מטלות מקבילות ולא
           כרצף. עכשיו רק הבא בתור זוהר במלוא העוצמה; מה שכבר נראה
           עומם, ומה שעוד לא תורו נשאר נוכח בלבד. */}
+      {/* ── יריעה מתחת לראיה ───────────────────────────────────────────
+          „לא רואים את הראיות כמעט": אבן אפורה על חול. הכלל מהמאמרים
+          חל גם כאן — סמן על רקע עמוס צריך שבב מאחוריו. יריעת בד כהה,
+          בצבע הבורדו העמוק של האתר, מתחת לכל עדות. */}
+      {REGION_FINDS.map((fd) => (
+        <group key={`cloth-${fd.id}`}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[fd.x, groundYAt(fd.x, fd.z) + 0.012, fd.z]} renderOrder={0}>
+            <circleGeometry args={[0.9, 40]} />
+            <meshStandardMaterial color="#571820" roughness={1} metalness={0} />
+          </mesh>
+          {/* שפה זהובה דקה: מה שמבדיל בד שהונח בכוונה מכתם על החול */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[fd.x, groundYAt(fd.x, fd.z) + 0.016, fd.z]} renderOrder={1}>
+            <ringGeometry args={[0.84, 0.9, 40]} />
+            <meshBasicMaterial color="#c79a3c" transparent opacity={0.8} depthWrite={false} />
+          </mesh>
+        </group>
+      ))}
       {REGION_FINDS.map((fd) => (
         <GroundGlow key={`glow-${fd.id}`} x={fd.x} z={fd.z} r={0.95} live={live}
           rank={
@@ -5049,7 +5103,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
         <Suspense fallback={null}>
           <EvidenceTable
             live={live}
-            at={{ x: REGION_TASK.x + 2.1, z: REGION_TASK.z + 1.3 }}
+            at={{ x: REGION_TASK.x, z: REGION_TASK.z }}
             done={tableSet}
             active={stage === 'act'}
             onComplete={onTableSet}
@@ -6166,6 +6220,16 @@ export default function Game() {
     [travel],
   )
 
+  /* ── הראיה בתקריב ─────────────────────────────────────────────────
+     „ראיות שנמצאות ומוסברות בצורה זרוקה על המפה": הכרטיס כיסה את המסך
+     והחפץ עצמו נשאר כמה פיקסלים על החול מאחוריו. עכשיו הכרטיס יושב
+     בצד, והמצלמה יורדת אל החפץ שבשבילו התכופפת. */
+  useEffect(() => {
+    live.findFocus = openFind
+      ? { x: openFind.x, z: openFind.z, y: 0.55 + openFind.h * 0.8, dist: 1.9 + openFind.h * 0.6, fov: 32, look: openFind.h * 0.45 + 0.08 }
+      : null
+    return () => { live.findFocus = null }
+  }, [openFind, live])
   const overlayRef = useRef<'notebook' | 'map' | null>(null)
   overlayRef.current = overlay
   /* one gate for "something is already on screen", so a keypress cannot open a
@@ -6525,7 +6589,13 @@ export default function Game() {
            ואין דרך לפתוח אותו. */
         const allowWho = st === 'brief' || st === 'interpret' || st === 'wrap' || st === 'done'
           || talksLeftRef.current > 0
+        /* ראיה שהמשימה דורשת נבחנת בשלב הבחינה בלבד — כך בתימן האבן
+           אינה נקראת לפני שהיא מוארת. ראיה שאינה חובה (שברי החרס על
+           הדרך) זמינה גם בשלב הפעולה: אחרת מי שראה אותה לא יכול
+           לפתוח אותה, וזו בדיוק התלונה „לא רואים את הראיות". */
+        const nearRequired = !!live.nearFind && REQUIRED_FINDS.has(live.nearFind)
         const allowFind = st === 'look' || st === 'wrap' || st === 'done'
+          || (st === 'act' && !nearRequired)
         /* המשימה נפתחת כרגיל; מה שמחכה לשיחה הוא הסגירה. נעילת הפתיחה
            שברה את הגבול, שבו השיחה השנייה עם השליח באה אחרי המטבע
            והחותם — התחנה נתקעה ב-interpret כי אי אפשר היה לענות.
@@ -6800,7 +6870,13 @@ export default function Game() {
               <Prop url="/assets/chapter1/models/camel-load.glb" x={5.7} z={1.1} ry={0.6} height={2.1} />
             </Suspense>
           )}
-          {REGION_TASK && !taskSolved && (
+          {/* ── הלוח נשאר אחרי הפתרון ────────────────────────────────
+              TaskProps מכיל לא רק את החפצים שגוררים אלא גם את הלוח
+              עצמו: השולחן, שתי החצרות והחבל בית'רב, עיגולי המיון
+              במנזר. הוא הוסר ברגע שהמשימה נפתרה — וזה קורה בדיוק כשמסיימים
+              את השיחה האחרונה עם הדמות — ולכן „השולחן נעלם" מול העיניים.
+              עכשיו הוא נשאר; רק החפצים הגרירים מתחלפים בגרסה המונחת. */}
+          {REGION_TASK && (
             <Suspense fallback={null}>
               <TaskProps
                 live={live}
@@ -6913,7 +6989,9 @@ export default function Game() {
             <span className="ch1-visually-hidden">{fd.title}</span>
           </div>
         ))}
-        {REGION_TASK && (stage === 'act' || stage === 'interpret') && (
+        {/* ליד התחנה בשלב הפעולה הוראת F כבר אומרת מה לעשות; התווית
+            המרחפת מעליה הייתה אותו משפט פעמיים, זו על זו. */}
+        {REGION_TASK && (stage === 'interpret' || (stage === 'act' && !atTask)) && (
           <div
             className="poi-marker is-task-marker"
             ref={(el) => {
@@ -6956,6 +7034,10 @@ export default function Game() {
                   <span>{actLine}</span>
                 </div>
               )}
+              {/* בשלב הפעולה E אינו עושה כאן דבר — הפעולה היא גרירה או F,
+                  והוראת F כבר על המסך. שבב E נוסף באותו מקום היה שני
+                  מקשים זה על זה. */}
+              {stage !== 'act' && (
               <div className="hud-panel poi-hint is-task-hint">
                 <i className="hud-key">E</i>
                 <span>
@@ -6966,6 +7048,7 @@ export default function Game() {
                       : REGION_TASK.prompt}
                 </span>
               </div>
+              )}
             </>
           )}
           {nearPending && !encounter && (
@@ -7056,14 +7139,14 @@ export default function Game() {
         {/* ── הוראת F ────────────────────────────────────────────────
             מופיעה רק כשיש פעולה פיזית לבצע, ומשתנה כשהיד כבר מחזיקה.
             לא כתובית קבועה על המסך: אין פעולה — אין הוראה. */}
-        {stage === 'act' && !overlay && !openTask && !openFind && !encounter && (
+        {stage === 'act' && atTask && !overlay && !openTask && !openFind && !encounter && (
           <p className="hud-panel hud-hand" role="status">
             {handHeld
               ? <>ביד: <b>{handHeld}</b> · בחרו יעד ב־<i className="hud-key">←</i> <i className="hud-key">→</i> · <i className="hud-key">F</i> להנחה · <i className="hud-key">Esc</i> לביטול</>
               : <>גררו בעכבר, או לחצו <i className="hud-key">F</i> לפעולה במקלדת</>}
           </p>
         )}
-        {idleHint && hintText && !overlay && !openFind && !openTask && !encounter && (
+        {idleHint && hintText && !objective && !overlay && !openFind && !openTask && !encounter && (
           <p className="hud-panel hud-hint" role="status">{hintText}</p>
         )}
         <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />

@@ -386,12 +386,16 @@ body{
 }
 @keyframes ch1-scrim-in{from{opacity:0}to{opacity:1}}
 
+/* ── סרט במסך מלא ────────────────────────────────────────────────────
+   הסרט מילא 74% מגובה המסך בתוך העולם המעומעם. עכשיו הוא האולם:
+   מסך שחור מקצה לקצה, התמונה בגודל המרבי שהיחס מאפשר, והכתוביות
+   מונחות עליה בתחתית — לא פאנל עם וידאו בתוכו. */
 .hud-dialogue.has-film{
   z-index:15;
-  bottom:auto;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:fit-content;max-width:96vw;
-  flex-direction:column;align-items:center;
-  padding:0;background:none;border:0;box-shadow:none;backdrop-filter:none;
+  position:fixed;inset:0;top:0;left:0;bottom:0;transform:none;
+  width:100vw;max-width:none;height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:0;background:#000;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;
 }
 .hud-dialogue.has-film .hud-portrait,
 .hud-dialogue.has-film .hud-speaker-avatar{display:none}
@@ -399,8 +403,8 @@ body{
 .hud-dialogue.has-film .hud-film{
   /* the box IS the film's shape, so nothing is letterboxed into it */
   aspect-ratio:16/9;
-  height:min(74vh, calc(96vw * 9 / 16));
-  width:auto;max-width:96vw;
+  height:min(100vh, calc(100vw * 9 / 16));
+  width:auto;max-width:100vw;border-radius:0;box-shadow:none;
   /* the generic .hud-film below caps every film at 200px for the small
      in-card use; a taller `height` cannot beat a `max-height`, and leaving
      this out is what pinned the screening at 356×200 */
@@ -417,6 +421,14 @@ body{
 .hud-dialogue.has-film .hud-choices{
   width:min(880px,92vw);
 }
+/* הסרט מתחת, הכתוביות והכפתורים מעליו. בלי סדר השכבות המפורש הווידאו —
+   שבא אחרון ב-DOM ופרוש על כל המסך — כיסה את כפתורי „דלגו" ו„סיום",
+   והלחיצה נחתה עליו: הסרט לא ניתן היה לסגירה, וכל המקשים נחסמו מאחוריו.
+   נמדד במכה: ההליכה נעצרה ב-34.7 מטר ולא זזה. */
+.hud-dialogue.has-film .hud-dialogue-body{position:absolute;inset:0;z-index:2;justify-content:flex-end;padding-bottom:28px;
+  background:linear-gradient(to top, rgba(0,0,0,.72) 0, rgba(0,0,0,.35) 22%, transparent 42%);pointer-events:none}
+.hud-dialogue.has-film .hud-dialogue-body>*{pointer-events:auto}
+.hud-dialogue.has-film .hud-film{position:absolute;inset:0;margin:auto;z-index:1;pointer-events:none}
 .hud-dialogue.has-film .hud-title{margin:16px 0 4px;text-align:center;opacity:.82}
 .hud-dialogue.has-film p.is-full{
   text-align:center;font-size:17.5px;line-height:1.62;min-height:0;
@@ -1001,11 +1013,16 @@ body{
   /* fixed ולא absolute: הבמה חותכת ב-overflow:hidden, וכרטיס גבוה ממסך
      איבד את כפתורי הסגירה מתחת לקו בלי שום גלילה — התקיעה שדווחה.
      אותו דפוס כמו .ch1-overlay: מיושר לראש, padding נושם, וגלילה. */
-  position:fixed;inset:0;z-index:26;display:grid;place-items:start center;
+  position:fixed;inset:0;z-index:26;display:grid;
+  /* ── באמצע, אלא אם אין מקום ────────────────────────────────────
+     `start center` הצמיד את הכרטיס לראש המסך תמיד — בגלל המקרה של
+     כרטיס גבוה ממסך שאיבד את כפתוריו. `safe center` פותר את שני
+     המקרים: כשהכרטיס נכנס במסך הוא באמצע; כשהוא גבוה ממנו, הוא
+     מיושר לראש ונגלל, ושום דבר לא נחתך. */
+  align-items:safe center;justify-items:center;
   padding:clamp(10px,2.4vh,30px);overflow-y:auto;
   background:rgba(20,13,8,.55);animation:ch1-end-in .28s ease both;
 }
-.ch1-find>*,.ch1-task>*{margin-block-start:clamp(6px,2.6vh,40px)}
 .ch1-find-card,.ch1-task-card{
   max-width:min(540px,88vw);padding:26px 30px 22px;
   background:linear-gradient(180deg,rgba(48,34,21,.97),rgba(31,21,13,.98));
@@ -1162,8 +1179,10 @@ body{
 
 /* מה עושים כאן — שורת ההנחיה הפיזית של המשימה, מעל פרומפט ה-E.
    יושבת באותו טור flex של poi-hints, ולכן רק צריכה להיראות כמו כותרת. */
+/* ישב ב-bottom:228px — כלומר באמצע המסך, בדיוק על השולחן שהוא מסביר.
+   עולה לרצועה העליונה, מתחת לכותרת, מחוץ לתקריב. */
 .ch1-task-hint{
-  position:absolute;inset-inline:0;bottom:228px;margin-inline:auto;z-index:12;
+  position:absolute;inset-inline:0;top:82px;margin-inline:auto;z-index:12;
   width:fit-content;max-width:min(560px,86vw);
   padding:9px 20px;font-size:15.5px;font-weight:600;text-align:center;
   color:#f7ecd2;background:rgba(41,29,17,.84);
@@ -1354,8 +1373,11 @@ body{
 .ch1-task-hand .hud-card-btn{text-align:start;width:100%}
 
 /* הוראת הפעולה במקלדת — שורה אחת מעל סרגל המטרה, רק כשיש מה לעשות */
+/* ── מדפי התחתית ─────────────────────────────────────────────────────
+   נמדד: שורת המטרה 64–124 מן התחתית, הוראת F מ-112 — 12 פיקסלים
+   זה על זה, והרמז ישב בדיוק על המטרה. מדף לכל אחד: מטרה 64, יד 136. */
 .hud-hand{
-  position:absolute;left:50%;bottom:112px;transform:translateX(-50%);
+  position:absolute;left:50%;bottom:136px;transform:translateX(-50%);
   display:flex;align-items:center;gap:.35em;white-space:nowrap;
   padding:7px 14px;font-size:13.5px;color:rgba(245,236,214,.94);
 }
@@ -1364,3 +1386,20 @@ body{
 
 /* קטע החזרה דרומה אל מכה — אותו קו, מקווקו, כדי שייקרא כפנייה חזרה */
 .pm-route-back{stroke-dasharray:5 4;opacity:.85}
+
+
+/* ── כרטיס הראיה בצד ─────────────────────────────────────────────────
+   הראיה עצמה עכשיו בתקריב במרכז המסך, ולכן הכרטיס אינו יכול לכסות
+   את המסך. הוא יושב בצד שמאל (הצד הריק של מסך RTL), על שיפוע כהה
+   שדועך אל העולם, והחפץ מסתובב לידו במרכז. */
+.ch1-find{
+  justify-items:start;align-items:safe center;
+  background:linear-gradient(to right, rgba(20,13,8,.78) 0, rgba(20,13,8,.55) 34%, rgba(20,13,8,0) 58%);
+  pointer-events:none;
+}
+.ch1-find .ch1-find-card{pointer-events:auto;max-width:min(400px,40vw)}
+.ch1-find .ch1-find-view{height:150px}
+@media (max-width:900px){
+  .ch1-find{justify-items:center;background:rgba(20,13,8,.55)}
+  .ch1-find .ch1-find-card{max-width:min(540px,88vw)}
+}

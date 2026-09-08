@@ -66,7 +66,7 @@ for (let r=0;r<10;r++){ w = await W(); if (w.stage!=='brief') break
 w = await W(); console.log('אחרי השיחה:', w.stage)
 
 /* השולחן לפני שהוא רלוונטי */
-const T = { x: w.task.x + 2.1, z: w.task.z + 1.3 }
+const T = { x: w.task.x, z: w.task.z }
 await walkTo(T.x, T.z, 2.4)
 /* גובה פני השולחן נמדד מן הרשת עצמה. `getWorldPosition` של הקבוצה
    מחזיר 0 — הילדים ממוקמים בקואורדינטות עולם — ולכן ההיטל היה שגוי
@@ -100,33 +100,65 @@ w = await W(); console.log('אחרי הממצאים:', w.stage, `(${w.finds.filt
 await walkTo(T.x, T.z + 2.2, 1.5)
 await page.waitForTimeout(1500)
 await page.screenshot({ path: '/private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/mecca-table.png' })
-const HOME = [0,1,2].map(i => ({ x: T.x + (i-1)*0.8, z: T.z + 0.36 }))
-const SLOT = [{dx:-0.95},{dx:0},{dx:0.95}].map(s => ({ x: T.x + s.dx, z: T.z - 0.3 }))
-const TOP = topY ?? 0
-for (let i=0;i<3;i++){
-  const a = await project(HOME[i].x, TOP + 0.15, HOME[i].z)
-  const b = await project(SLOT[i].x, TOP + 0.15, SLOT[i].z)
-  await page.mouse.move(a.sx, a.sy); await page.mouse.down()
-  for (let k=1;k<=14;k++){ await page.mouse.move(a.sx+(b.sx-a.sx)*k/14, a.sy+(b.sy-a.sy)*k/14); await page.waitForTimeout(60) }
-  await page.mouse.up(); await page.waitForTimeout(800)
-  console.log('   הנחה', i, '→ שלב', (await W()).stage)
+
+/* ── שולחן הראיות, בגרירת עכבר ──────────────────────────────────────
+   אוחזים בחפץ במקום שהרכיב מחשב, ואז מזיזים את הסמן בלולאה סגורה:
+   אחרי כל צעד קוראים איפה החפץ בעולם, ומכוונים אל השקע. כך הבדיקה
+   אינה תלויה בהיטל שלי אלא במה שהמשחק באמת עושה. */
+const tableAt = () => page.evaluate(()=>window.__ch1TableAt ? window.__ch1TableAt() : null)
+const slotWorld = async () => {
+  const t = await W()
+  const at = { x: t.task.x, z: t.task.z }
+  return [-0.95, 0, 0.95].map(dx => ({ x: at.x + dx, z: at.z - 0.3 }))
+}
+const slots = await slotWorld()
+for (let round=0; round<10; round++){
+  const st = await tableAt()
+  if (!st) { console.log('   אין וו מכשור לשולחן'); break }
+  const k = st.placed.findIndex(v=>!v)
+  if (k < 0) break
+  const a = st.at[k]
+  await page.mouse.move(a.x, a.y); await page.waitForTimeout(200)
+  await page.mouse.down(); await page.waitForTimeout(260)
+  const grabbed = (await tableAt()).drag
+  if (grabbed < 0) { await page.mouse.up(); console.log(`   מקור ${k}: לא נתפס`); break }
+  /* לולאה סגורה: מכוונים את הסמן עד שהחפץ בעולם קרוב לשקע שלו */
+  let mx = a.x, my = a.y
+  for (let step=0; step<22; step++){
+    const now = await tableAt()
+    const p = now.at[grabbed].pos
+    const dx = slots[grabbed].x - p.x, dz = slots[grabbed].z - p.z
+    if (Math.hypot(dx, dz) < 0.18) break
+    /* מסך: +x בעולם ≈ ימינה, +z ≈ למטה. מכוונים בצעדים קטנים ומודדים. */
+    const px = mx + 26, py = my
+    await page.mouse.move(px, py); await page.waitForTimeout(90)
+    const t1 = (await tableAt()).at[grabbed].pos
+    const gxx = (t1.x - p.x) / 26, gxz = (t1.z - p.z) / 26
+    await page.mouse.move(mx, my + 26); await page.waitForTimeout(90)
+    const t2 = (await tableAt()).at[grabbed].pos
+    const gyx = (t2.x - p.x) / 26, gyz = (t2.z - p.z) / 26
+    const det = gxx * gyz - gxz * gyx
+    if (Math.abs(det) < 1e-6) break
+    const ddx = ( gyz * dx - gyx * dz) / det
+    const ddy = (-gxz * dx + gxx * dz) / det
+    mx += Math.max(-90, Math.min(90, ddx))
+    my += Math.max(-90, Math.min(90, ddy))
+    await page.mouse.move(mx, my); await page.waitForTimeout(110)
+  }
+  await page.mouse.up(); await page.waitForTimeout(950)
+  const after = await tableAt()
+  console.log(`   גרירת מקור ${k} (נתפס ${grabbed}): ${JSON.stringify(after.placed)} · שלב ${(await W()).stage}`)
+  if (JSON.stringify(after.placed) === JSON.stringify(st.placed)) break
 }
 await page.screenshot({ path: '/private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/mecca-placed.png' })
 /* אם הגרירה לא נרשמה — מנסים את חלופת המקלדת, ומדווחים על שתיהן */
 if ((await W()).stage === 'act') {
-  console.log('   הגרירה לא נרשמה — בודקים את חלופת המקלדת (T)')
-  await page.keyboard.press('KeyT'); await page.waitForTimeout(1400)
-  console.log('   T פתח פאנל:', await page.evaluate(()=>!!document.querySelector('.ch1-task')))
-  const labels = await page.$$eval('.ch1-task-hand button', els=>els.map(e=>e.textContent.trim()))
-  console.log('   כפתורי הפעולה:', JSON.stringify(labels))
+  console.log('   הגרירה לא נרשמה — בודקים את חלופת המקלדת (F)')
   for (let i=0;i<3;i++){
-    const b = await page.$$('.ch1-task-hand button')
-    const free = b.find ? null : null
-    for (const el of b) { const dis = await el.isDisabled().catch(()=>true); if (!dis) { await el.click({timeout:3000}).catch(()=>{}); break } }
-    await page.waitForTimeout(800)
-    console.log('   כפתור', i, '→ שלב', (await W()).stage)
+    await page.keyboard.press('KeyF'); await page.waitForTimeout(700)
+    await page.keyboard.press('KeyF'); await page.waitForTimeout(900)
+    console.log('   F', i, '→ שלב', (await W()).stage)
   }
-  for (let k=0;k<12;k++){ if(!(await page.evaluate(()=>!!document.querySelector('.ch1-task')))) break; await page.keyboard.press('Escape'); await page.waitForTimeout(300) }
 }
 w = await W(); console.log('אחרי השולחן:', w.stage)
 
