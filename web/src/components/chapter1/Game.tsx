@@ -4044,15 +4044,38 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
     const screenOf = (i: number) => {
       const r = gl.domElement.getBoundingClientRect()
       const p = pos.current[i]
-      const q = new THREE.Vector3(p.x, topY + EVIDENCE_SLOTS[i].h * 0.5, p.z).project(camera)
-      return { x: (q.x * 0.5 + 0.5) * r.width + r.left, y: (-q.y * 0.5 + 0.5) * r.height + r.top, ok: q.z <= 1 }
+      const h = EVIDENCE_SLOTS[i].h
+      const q = new THREE.Vector3(p.x, topY + h * 0.5, p.z).project(camera)
+      const b = new THREE.Vector3(p.x, topY, p.z).project(camera)
+      const t = new THREE.Vector3(p.x, topY + h, p.z).project(camera)
+      return {
+        x: (q.x * 0.5 + 0.5) * r.width + r.left,
+        y: (-q.y * 0.5 + 0.5) * r.height + r.top,
+        ok: q.z <= 1,
+        px: Math.abs((-b.y * 0.5 + 0.5) * r.height - (-t.y * 0.5 + 0.5) * r.height),
+      }
     }
     const down = (e: PointerEvent) => {
       if (doneRef.current || !activeRef.current || e.target !== gl.domElement) return
+      /* ── מי נתפס ──────────────────────────────────────────────────
+         כאן נבחר הראשון ברשימה שנמצא בתוך 115 פיקסלים, ושלושת המקורות
+         עומדים 80 ס"מ זה מזה — כלומר עשרות פיקסלים. התוצאה: כל לחיצה,
+         על מה שלא תכוון, תפסה את השמאלי. נמדד: שלוש לחיצות על שלושה
+         מקורות שונים החזירו drag=0 בכל פעם.
+         עכשיו נבחר הקרוב ביותר, והרדיוס נגזר מגובה החפץ על המסך. */
+      let best = -1
+      let bd = Infinity
       for (let i = 0; i < 3; i++) {
         if (placed.current[i]) continue
         const s = screenOf(i)
-        if (s.ok && Math.hypot(e.clientX - s.x, e.clientY - s.y) < GRAB_PX) {
+        if (!s.ok) continue
+        const d = Math.hypot(e.clientX - s.x, e.clientY - s.y)
+        const tol = Math.max(GRAB_MIN_PX, Math.min(GRAB_PX, s.px * 0.9 + 24))
+        if (d < tol && d < bd) { bd = d; best = i }
+      }
+      {
+        const i = best
+        if (i >= 0) {
           drag.current = i
           setHeld(i)
           live.taskDrag = true
@@ -4060,7 +4083,6 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
              המודל, ולא כשהוא עובר מעל אלמנט אחר */
           ;(gl.domElement as Element).setPointerCapture?.(e.pointerId)
           e.preventDefault()
-          return
         }
       }
     }
@@ -4145,6 +4167,17 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
     window.addEventListener('pointercancel', up)
     window.addEventListener('keydown', key)
     if (process.env.NODE_ENV === 'development') {
+      /* מכשור: היכן הרכיב עצמו חושב שהחפצים נמצאים על המסך, ומה מצבו.
+         בלי זה אי אפשר להבדיל בין „הגרירה שבורה" ל„הבדיקה מכוונת
+         למקום אחר". */
+      ;(window as unknown as { __ch1TableAt?: () => unknown }).__ch1TableAt = () => ({
+        active: activeRef.current,
+        done: doneRef.current,
+        drag: drag.current,
+        placed: [...placed.current],
+        grabPx: GRAB_PX,
+        at: EVIDENCE_SLOTS.map((_, i) => ({ i, ...screenOf(i), pos: { ...pos.current[i] } })),
+      })
       ;(window as unknown as { __ch1TablePut?: (i: number) => void }).__ch1TablePut = (i: number) => {
         pos.current[i] = { ...slot[i] }
         placed.current[i] = true
