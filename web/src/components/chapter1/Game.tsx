@@ -6603,6 +6603,12 @@ export default function Game() {
         }
         return
       }
+      /* בזמן שהיד מחזיקה חפץ, החצים בוחרים יעד ואינם מזיזים את השחקן.
+         בלי זה אותה לחיצה עשתה את שני הדברים: בחרה שקע וגם צעדה. */
+      if (live.handHeld && (e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'ArrowLeft' || e.code === 'ArrowRight')) {
+        e.preventDefault()
+        return
+      }
       const k = codeMap[e.code]
       if (k) {
         /* החזקת מקש משדרת keydown שוב ושוב — כשלושים פעם בשנייה.
