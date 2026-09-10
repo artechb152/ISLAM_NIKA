@@ -1594,3 +1594,26 @@ html{scrollbar-gutter:stable}
   .ch2-mecca-hero > :first-child, .ch2-mecca-head > :first-child{margin-top:0}
   .ch2-mecca-hero > :last-child, .ch2-mecca-body > :last-child{margin-bottom:0}
 }
+
+/* ── תשובה נכונה, שאי אפשר לפספס ─────────────────────────────────────
+   `.p2-feedback.is-right` היה שינוי צבע טקסט בלבד, ולכן „צדקתי" ו„לא
+   צדקתי" נראו כמעט זהים. המחלקה `has-mark` מופיעה רק במקום שבו
+   נוסף הסימון (התרגול של פרק 2), כך שאף פרק אחר שחולק את הגיליון
+   הזה אינו משתנה. הצבעים הם של הסדין: קו זהב וגוון זהב, בדיוק כמו
+   `.p2-option.is-right` שמסמן את האפשרות הנכונה בשורה שמעל. */
+.p2-feedback.has-mark{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  padding:12px 16px;border-radius:12px;
+  border:1px solid var(--gold);background:rgba(199,154,60,.14);
+  color:var(--ink);max-width:var(--measure,880px);
+}
+.p2-feedback-mark{
+  display:inline-flex;align-items:center;gap:6px;flex:none;
+  font-family:var(--font-heading);font-weight:700;font-size:18px;
+  color:var(--gold-text);letter-spacing:.02em;
+}
+.p2-feedback-mark svg{width:19px;height:19px}
+@media (prefers-reduced-motion:no-preference){
+  .p2-feedback.has-mark{animation:p2-right-in .26s ease both}
+  @keyframes p2-right-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+}

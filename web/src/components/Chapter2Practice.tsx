@@ -49,11 +49,32 @@ function shuffled<T>(items: T[], seed: number): T[] {
 
 type State = 'idle' | 'wrong' | 'right'
 
+/* ── „ענית נכון" צריך להיאמר, לא להירמז ──────────────────────────────
+   תשובה נכונה קיבלה עד עכשיו את אותה פסקה בדיוק כמו תשובה שגויה,
+   ורק צבע הטקסט השתנה — `--stamp` (אדום) מול `--gold-text` (זהב כהה).
+   שני גוונים חמים על קלף חם: מי שלא מכיר את שניהם זה לצד זה אינו
+   יודע אם צדק. מה שנוסף כאן הוא סימון מפורש — וי ומילה — ומסגרת
+   בשפה שהסדין הזה כבר משתמש בה לתשובה הנכונה (`.p2-option.is-right`:
+   קו זהב וגוון זהב).
+
+   ההסבר עצמו (`q.ok`) לא נגע, השאלות לא נגעו, ומה שמוגדר כנכון לא
+   נגע. הסימון נוסף כאן בלבד, ולכן התרגולים של פרקים 1 ו-3 — שחולקים
+   את אותו גיליון — נשארים כפי שהיו. */
 function Feedback({ state, q }: { state: State; q: Q }) {
   if (state === 'idle') return null
+  const right = state === 'right'
   return (
-    <p className={'p2-feedback' + (state === 'right' ? ' is-right' : '')} role="status">
-      {state === 'right' ? q.ok : q.retry}
+    <p className={'p2-feedback' + (right ? ' is-right has-mark' : '')} role="status">
+      {right && (
+        <b className="p2-feedback-mark">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+               strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12.5 10 17.5 19 7.5" />
+          </svg>
+          נכון
+        </b>
+      )}
+      {right ? q.ok : q.retry}
     </p>
   )
 }
