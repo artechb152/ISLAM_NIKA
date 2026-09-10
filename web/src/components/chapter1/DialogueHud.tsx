@@ -6,7 +6,6 @@
    invents wording — every string comes from dialogue.json with its §source. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { isMuted } from '@/lib/chapter1/audio'
 import {
   PORTRAIT,
   SPEAKERS,
@@ -24,46 +23,103 @@ interface Step {
   source: string
 }
 
-/* סרט שלא מפענח פריים אינו מציג מלבן שחור.
-   `<video>` בלי poster הוא ריבוע שחור מרגע שהוא נמצא ב-DOM ועד שהפריים
-   הראשון מוכן — ובחיבור איטי זה כמה שניות של „המשחק נתקע". שני דברים
-   מונעים את זה: poster שנחתך מן הסרט עצמו ומצויר מיד, ושומר שבודק
-   אחרי 2.5 שניות אם באמת יש פריים (`videoWidth > 0`). אם אין — הסרט
-   יורד, הפוסטר נשאר, והשיחה ממשיכה בלעדיו. הטקסט הוא הערוץ העיקרי
-   כאן ממילא, ולכן אין שום דבר שאבד. */
+/* ── הסרט שבחלונית ──────────────────────────────────────────────────
+   שלוש תקלות ישבו כאן, וכולן אותה תקלה:
+
+   1. „הסרטון נתקע באמצע". הסרט התנגן ‎autoPlay‎ עם
+      ‎muted={!once || isMuted()}‎ — כלומר סרט „פעם אחת" (הפתיחה
+      ותמונת אבּרהה) התנגן *עם קול* אם צליל האתר דלוק. דפדפן חוסם
+      ניגון אוטומטי עם קול: ‎play()‎ נדחה, הסרט לא מתחיל, ואף אחד לא
+      שומע על כך. נמדד: ‎opening.mp4‎ ו-‎abraha.mp4‎ נושאים פס קול
+      אמיתי, ולכן דווקא הם נחסמו.
+   2. השומר שהרג את הסרט. אחרי 2.5 שניות נבדק ‎videoWidth === 0‎, ואם
+      לא היה פריים — הסרט הוחלף בתמונה קפואה לתמיד. ‎abraha.mp4‎ הוא
+      13.7MB; בחיבור סביר הוא לא מפענח פריים ראשון בשתי שניות וחצי,
+      וזה בדיוק „נתקע ולא ממשיך".
+   3. לא היו פקדים בכלל. אי אפשר היה לעצור סרט ולהמשיך אותו.
+
+   מה שיש כאן עכשיו: הסרט מתחיל תמיד מושתק — זה מה שהדפדפן מרשה —
+   ולידו כפתור קול, כפתור השהיה/המשך, וכפתור ניגון אם הדפדפן בכל
+   זאת סירב. השומר יורד רק על שגיאה אמיתית של הרכיב, והוא מתבטל ברגע
+   שמגיע ‎loadeddata‎, כך שסרט איטי מקבל את הזמן שלו במקום להימחק. */
 function FilmFrame({ file, once }: { file: string; once: boolean }) {
   const ref = useRef<HTMLVideoElement>(null)
   const [dead, setDead] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [muted, setMuted] = useState(true)
   const poster = `/assets/anim-video/${file.replace(/\.mp4$/, '')}-poster.jpg`
+
   useEffect(() => {
     setDead(false)
-    const t = window.setTimeout(() => {
-      const v = ref.current
-      if (!v || v.videoWidth === 0 || v.error) setDead(true)
-    }, 2500)
-    return () => window.clearTimeout(t)
+    setPlaying(false)
+    setMuted(true)
+    const v = ref.current
+    if (!v) return
+    v.muted = true
+    /* ניגון מושתק מותר תמיד; אם בכל זאת נדחה — מציגים כפתור ניגון
+       ולא מוחקים את הסרט. */
+    void v.play().then(() => setPlaying(true)).catch(() => setPlaying(false))
+    const onErr = () => setDead(true)
+    v.addEventListener('error', onErr)
+    return () => v.removeEventListener('error', onErr)
   }, [file])
+
+  const toggle = useCallback(() => {
+    const v = ref.current
+    if (!v) return
+    /* המשך מאותה נקודה: לא נוגעים ב-currentTime ולא טוענים מחדש */
+    if (v.paused) void v.play().then(() => setPlaying(true)).catch(() => setPlaying(false))
+    else v.pause()
+  }, [])
+
+  const toggleSound = useCallback(() => {
+    const v = ref.current
+    if (!v) return
+    const next = !v.muted
+    v.muted = next
+    setMuted(next)
+    /* הפעלת קול על סרט שכבר מתנגן מותרת — החסימה היא רק על *התחלה*
+       עם קול. אם הוא מושהה, ההפעלה מחזירה אותו לניגון. */
+    if (!next && v.paused) void v.play().then(() => setPlaying(true)).catch(() => {})
+  }, [])
+
   if (dead) {
     return (
       <div className="hud-film hud-film-still" role="img" aria-label="תמונה מן הסרט">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={poster} alt="" />
       </div>
     )
   }
   return (
-    <video
-      ref={ref}
-      key={file}
-      className="hud-film"
-      src={`/assets/anim-video/${file}`}
-      poster={poster}
-      autoPlay
-      muted={!once || isMuted()}
-      loop={!once}
-      playsInline
-      preload="auto"
-      aria-hidden="true"
-    />
+    <div className="hud-film-wrap">
+      <video
+        ref={ref}
+        key={file}
+        className="hud-film"
+        src={`/assets/anim-video/${file}`}
+        poster={poster}
+        loop={!once}
+        playsInline
+        preload="auto"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => setPlaying(false)}
+        aria-hidden="true"
+      />
+      {/* הפקדים יושבים על הסרט ולא בזרימת הטקסט, ולחיצה עליהם אינה
+          מקדמת את השיחה — הלחיצה על החלונית היא ההתקדמות. */}
+      <div className="hud-film-controls" onClick={(ev) => ev.stopPropagation()}>
+        <button type="button" className="hud-film-btn" onClick={toggle}
+                aria-label={playing ? 'להשהות את הסרטון' : 'להפעיל את הסרטון'}>
+          {playing ? '❚❚ השהו' : '▶ הפעילו'}
+        </button>
+        <button type="button" className="hud-film-btn" onClick={toggleSound}
+                aria-label={muted ? 'להפעיל קול' : 'להשתיק'}>
+          {muted ? '🔇 קול' : '🔊 קול'}
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -218,7 +274,15 @@ export function DialogueHud({
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
       if (ev.key === ' ' || ev.key === 'Enter') {
+        /* ── הקשה אחת, התקדמות אחת ──────────────────────────────────
+           רווח על כפתור שנמצא במיקוד מפעיל את הכפתור בברירת המחדל של
+           הדפדפן, ולכן בחירת נושא בעכבר הפכה כל רווח שאחריה לשתי
+           פעולות. `preventDefault` מבטל את הפעלת הכפתור, ו-blur מוציא
+           את המיקוד מן הפאנל כדי ש-Enter (שפועל ב-keydown על כפתור,
+           לפני שהמניעה מגיעה אליו בדפדפנים מסוימים) לא יעשה זאת גם כן. */
         ev.preventDefault()
+        const a = document.activeElement
+        if (a instanceof HTMLElement && a.closest('.hud-dialogue')) a.blur()
         /* במסך השאלות רווח מדלג וסוגר — השאלות הן העשרה למי שסקרן,
            לא שער חובה. מי שרוצה לשאול — לוחץ. */
         if (showDone || showChoices) onClose()
@@ -335,21 +399,12 @@ export function DialogueHud({
           <span className="hud-dialogue-count">
             {showDone && encounter.notebook > 0 ? '✓ נרשם במחברת' : ''}
           </span>
-          {/* „המשך" אמר את אותו דבר באמצע שיחה ובסופה, ולכן אי אפשר
-              היה לדעת אם עוד נשאר משהו לשמוע. שני כפתורים, שני
-              משפטים: בתוך הנושא מתקדמים לשורה, ובסופו סוגרים. */}
-          {!showChoices && !showDone && (
-            <button
-              type="button"
-              className="hud-card-btn"
-              onClick={(ev) => {
-                ev.stopPropagation()
-                advance()
-              }}
-            >
-              {complete ? 'לשורה הבאה ←' : 'להשלמת השורה'}
-            </button>
-          )}
+          {/* ── אין כפתור „לשורה הבאה" ────────────────────────────────
+              ההתקדמות בשיחה היא לחיצה או רווח, ותו לא. הכפתור שעמד כאן
+              היה דרך שלישית לאותה פעולה, והוא גם היה מוקד מיקוד: אחרי
+              לחיצה עליו הוא נשאר focused, ורווח הבא הפעיל גם את מטפל
+              המקלדת וגם את הכפתור — שתי התקדמויות בהקשה אחת. השורה
+              שמתחת אומרת מה עושים. */}
           {/* ── מסירת התור ליד ──────────────────────────────────────────
               כשהתחנה מחכה לפעולה פיזית, הכפתור אינו „סיום שיחה" סתם —
               הוא אומר מה ללכת לעשות, והשיחה הבאה תיפתח רק אחריה.
