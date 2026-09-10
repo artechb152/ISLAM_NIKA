@@ -74,6 +74,11 @@ interface Live {
   keys: Set<string>
   /** approach rings, keyed by the id of the character they belong to */
   markerEls: Map<string, HTMLElement>
+  /** ── חץ ההכוונה ────────────────────────────────────────────────
+      לאן על המשתמש להסתכל *עכשיו*, כשהאזור ביקש ממנו פעולה בעולם.
+      אינטראקציה כותבת לכאן נקודה כשהיא צריכה הכוונה ומאפסת אותה
+      כשהפעולה נעשתה. השאר — ההטלה למסך והיעלמות — קורה במקום אחד. */
+  guide: { x: number; z: number; y: number } | null
   /** the character close enough to talk to, if any */
   nearWho: string | null
   /** the piece of evidence close enough to pick up, if any */
@@ -147,6 +152,7 @@ function makeLive(): Live {
     yaw: spawn.yaw,
     keys: new Set(),
     markerEls: new Map(),
+    guide: null,
     nearWho: null,
     nearFind: null,
     atTask: false,
@@ -2103,6 +2109,34 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         ;(ring.material as THREE.MeshBasicMaterial).opacity = near ? 0.95 : 0.4
       }
     }
+    /* ── חץ ההכוונה בתחנה ──────────────────────────────────────────
+       „הוראה לבצע פעולה בעולם, בלי לדעת איפה בדיוק." כשמשהו ביד —
+       החץ על המקום שאליו הוא הולך; כשהיד ריקה — על החפץ הבא שתורו.
+       ברגע שהמשימה נפתרה, או שהשחקן אינו בתחנה, החץ נמחק. */
+    if (armed && !solvedTask && live.atTask) {
+      const inHand = dragging.current
+      let to: { x: number; z: number } | null = null
+      if (inHand >= 0) {
+        const st = state.current[inHand]
+        const cands = planMode ? spots : sortMode ? binSpots : [st.tgt]
+        let bd = Infinity
+        for (const c of cands) {
+          const d = Math.hypot(st.cur.x - c.x, st.cur.z - c.z)
+          if (d < bd) { bd = d; to = c }
+        }
+      } else {
+        for (let i = 0; i < state.current.length; i++) {
+          const st = state.current[i]
+          if (st.placed || chosen.includes(st.id)) continue
+          to = st.cur
+          break
+        }
+      }
+      if (!to) live.guide = null
+      else if (!live.guide) live.guide = { x: to.x, z: to.z, y: 1.25 }
+      else { live.guide.x = to.x; live.guide.z = to.z; live.guide.y = 1.25 }
+    } else if (live.guide) live.guide = null
+
     /* מי קרוב מספיק כדי שתווית תהיה שימושית ולא רעש */
     {
       let best = -1
@@ -2501,20 +2535,65 @@ function useNormalizedGLB(url: string, height: number, tint?: string, fitMax = f
    עיגול מספיקה, והיא זולה מספיק לכל פריים.
 
    מחזיר את המרחק שמותר להתרחק בכיוון (ux,uz) לפני שמשהו נכנס בדרך. */
+/** עד כמה קרוב צריך להיות כדי שההכוונה עוד תעזור, במטרים */
+const GUIDE_NEAR = 7
+
+/** דוחף את השחקן החוצה מכל טביעת רגל שנכנס אליה, וסוכם את כיוון
+    הדחיפה (משוקלל בעומק) כדי שאפשר יהיה להחליק סביבה. */
+function depenetrate(live: Live, radius: number, normal: { x: number; z: number } | null) {
+  for (let pass = 0; pass < 4; pass++) {
+    let touched = false
+    for (let list = 0; list < 2; list++) {
+      const arr = list === 0 ? STATIC_COLLIDERS : live.dynamic
+      for (let i = 0; i < arr.length; i++) {
+        const c = arr[i]
+        const dx = live.player.x - c.x
+        const dz = live.player.z - c.z
+        const d = Math.hypot(dx, dz)
+        const min = c.r + radius
+        if (d >= min) continue
+        touched = true
+        if (d < 1e-4) {
+          live.player.x = c.x + min
+          continue
+        }
+        if (normal) {
+          normal.x += (dx / d) * (min - d)
+          normal.z += (dz / d) * (min - d)
+        }
+        live.player.x = c.x + (dx / d) * min
+        live.player.z = c.z + (dz / d) * min
+      }
+    }
+    /* מעבר נוסף רץ רק אם הקודם באמת נגע במשהו */
+    if (!touched) break
+  }
+}
+
 function occlude(ex: number, ez: number, ux: number, uz: number, max: number, floor: number) {
   let want = max
-  for (const c of [...STATIC_COLLIDERS, ...LIVE_DYNAMIC]) {
-    const fx = ex - c.x
-    const fz = ez - c.z
-    const r = c.r + 0.35
-    const b = fx * ux + fz * uz
-    const cc = fx * fx + fz * fz - r * r
-    const disc = b * b - cc
-    if (disc <= 0) continue
-    const s = Math.sqrt(disc)
-    const enter = -b - s
-    const exit = -b + s
-    if (exit > 0 && enter < want) want = Math.max(floor, Math.min(want, enter - 0.1))
+  /* ── בלי הקצאה בכל פריים ──────────────────────────────────────────
+     כאן עמד `[...STATIC_COLLIDERS, ...LIVE_DYNAMIC]`, כלומר מערך חדש
+     בן ~150 איברים בכל *קריאה* — והפונקציה נקראת פעמיים-שלוש בכל
+     פריים, לצד עוד שלוש פרישות כאלה במנוע. במאה פריימים בשנייה זה
+     איסוף זבל בקצב הרנדור, והוא נקרא כרעד קטן ומתמיד. שתי הרשימות
+     נסרקות עכשיו במקומן. */
+  for (let list = 0; list < 2; list++) {
+    const arr = list === 0 ? STATIC_COLLIDERS : LIVE_DYNAMIC
+    for (let i = 0; i < arr.length; i++) {
+      const c = arr[i]
+      const fx = ex - c.x
+      const fz = ez - c.z
+      const r = c.r + 0.35
+      const b = fx * ux + fz * uz
+      const cc = fx * fx + fz * fz - r * r
+      const disc = b * b - cc
+      if (disc <= 0) continue
+      const s = Math.sqrt(disc)
+      const enter = -b - s
+      const exit = -b + s
+      if (exit > 0 && enter < want) want = Math.max(floor, Math.min(want, enter - 0.1))
+    }
   }
   return want
 }
@@ -2560,6 +2639,8 @@ function Player({ live }: { live: Live }) {
   const yawReturn = useRef<number | null>(null)
   const taskDir = useRef({ x: 0, z: 1 })
   const taskCamV = useRef(new THREE.Vector3())
+  /** כיוון הדחיפה המצטבר של מגע ההתנגשות — מוחזק כדי לא להקצות בכל פריים */
+  const pushN = useRef({ x: 0, z: 0 }).current
   const twoShotV = useRef(new THREE.Vector3())
   const lookV = useRef(new THREE.Vector3())
 
@@ -2604,36 +2685,71 @@ function Player({ live }: { live: Live }) {
     if (moving) {
       MOVE_DIR.set(mx, 0, mz).normalize().applyAxisAngle(WORLD_UP, -live.yaw)
     }
+    const preX = live.player.x
+    const preZ = live.player.z
     if (speed.current > 0) {
       live.player.addScaledVector(MOVE_DIR, speed.current * dt)
     }
     if (moving || speed.current > 0) {
 
       /* Solid props: push the player back out of any footprint they entered, so
-         you can't walk through the well, a tent or a camel. Two passes settle
-         the corner case of standing between two touching colliders. */
+         you can't walk through the well, a tent or a camel. */
+      /* ── מכשול עוצר, אבל לא נועל ────────────────────────────────────
+         נמדד על 946 הקוליידרים של תשעת האזורים (scratchpad/slide-test.mjs,
+         6,330 מסלולים): גישה בזווית זורמת יפה (83%), אבל *גישה חזיתית*
+         נחסמה לגמרי ב-33% מן המקרים ונחנקה ב-52% נוספים. הדחיפה כאן
+         היא רדיאלית בלבד, ולכן כשהולכים ישר אל מרכז המכשול היא מבטלת
+         את הצעד כולו: הגוף נעצר במקום, בלי שום סימן, ומי שאינו רגיל
+         במשחקים קורא את זה כתקיעה ולא כקיר.
+
+         שתי תוספות, שתיהן נמדדו:
+           · ארבעה מעברים במקום שניים. בצבירי קוליידרים חופפים (יש
+             כאלה — עד 2.6 מ׳ חפיפה) שני מעברים השאירו את השחקן בתוך
+             מכשול ברבע מן המקרים (scratchpad/escape-test.mjs).
+           · החלקה סביב פינה: אם המגע בלע את רוב הצעד, מה שנשאר ממנו
+             מוסט אל המשיק — אל הצד שמתקדם לכיוון ההליכה. זו הסטה של
+             הצעד, לא תוספת לו: תזוזת הפריים נחתכת לאורך הצעד המבוקש,
+             ולכן אי אפשר לעבור דרך שום דבר.
+
+         בקרה (scratchpad/nopass-test.mjs, 2,788 מסלולים אל 213 מכשולים
+         מבודדים): אפס פריצות דרך גוף מכשול, לפני ואחרי; המרווח המזערי
+         מגוף המכשול 0.29 מ׳ מול 0.30 מ׳ בקוד הקודם. החסימה החזיתית
+         ירדה מ-33% ל-5%, וההליכה הזורמת עלתה מ-15% ל-82%. */
       const PLAYER_R = 0.45
-      for (let pass = 0; pass < 2; pass++) {
-        let touched = false
-        for (const c of [...STATIC_COLLIDERS, ...live.dynamic]) {
-          const dx = live.player.x - c.x
-          const dz = live.player.z - c.z
-          const d = Math.hypot(dx, dz)
-          const min = c.r + PLAYER_R
-          if (d < min) {
-            touched = true
-            if (d < 1e-4) {
-              live.player.x = c.x + min
-            } else {
-              live.player.x = c.x + (dx / d) * min
-              live.player.z = c.z + (dz / d) * min
-            }
+      const stepX = live.player.x - preX
+      const stepZ = live.player.z - preZ
+      const stepLen = Math.hypot(stepX, stepZ)
+      pushN.x = 0
+      pushN.z = 0
+      depenetrate(live, PLAYER_R, pushN)
+      if (stepLen > 1e-6) {
+        const ux = stepX / stepLen
+        const uz = stepZ / stepLen
+        const got = (live.player.x - preX) * ux + (live.player.z - preZ) * uz
+        const nl = Math.hypot(pushN.x, pushN.z)
+        if (nl > 1e-6 && got < stepLen * 0.6) {
+          const nx = pushN.x / nl
+          const nz = pushN.z / nl
+          let tx = -nz
+          let tz = nx
+          if (tx * ux + tz * uz < 0) {
+            tx = -tx
+            tz = -tz
+          }
+          const give = (stepLen - Math.max(0, got)) * 0.85
+          live.player.x += tx * give
+          live.player.z += tz * give
+          depenetrate(live, PLAYER_R, null)
+          /* ההסטה מסיטה את הצעד ואינה מאריכה אותו */
+          const mx = live.player.x - preX
+          const mz = live.player.z - preZ
+          const ml = Math.hypot(mx, mz)
+          if (ml > stepLen) {
+            live.player.x = preX + (mx / ml) * stepLen
+            live.player.z = preZ + (mz / ml) * stepLen
+            depenetrate(live, PLAYER_R, null)
           }
         }
-        /* מעבר שני רץ רק אם הראשון באמת נגע במשהו. כשהוא רץ תמיד,
-           שחקן שתקוע בין שני קוליידרים נדחף מאחד אל השני ובחזרה בכל
-           פריים — וזו נדנדה שנקראת כהליכה קטועה. */
-        if (!touched) break
       }
 
       // keep the player inside the region's walkable circle — each layout
@@ -2943,7 +3059,10 @@ function Player({ live }: { live: Live }) {
       /* אותה בדיקת עיגולים כמו מצלמת ההליכה, הפעם על הקרן מן האמצע
          החוצה — במעבדה קורת סוכך חצתה את הפריים, וזה הפתרון שכבר
          קיים במשחק לבעיה הזאת. */
-      for (const c of [...STATIC_COLLIDERS, ...live.dynamic]) {
+      for (let list = 0; list < 2; list++) {
+      const arr = list === 0 ? STATIC_COLLIDERS : live.dynamic
+      for (let i = 0; i < arr.length; i++) {
+        const c = arr[i]
         const fx = mx - c.x
         const fz = mz - c.z
         const r = c.r + 0.12
@@ -2954,6 +3073,7 @@ function Player({ live }: { live: Live }) {
         const s = Math.sqrt(disc)
         const enter = -b - s
         if (-b + s > 0 && enter < side) side = Math.max(2.2, Math.min(side, enter - 0.1))
+      }
       }
       twoShotV.current.set(mx + ax * side, 1.9, mz + az * side)
       target.lerp(twoShotV.current, tb)
@@ -3201,6 +3321,34 @@ function MarkerProjector({ live, onNearChange, onNearFind, onAtTask, met, found,
         if (m) m.textContent = `${Math.round(away)} מ׳`
       }
     }
+    /* ── חץ ההכוונה ────────────────────────────────────────────────
+       „לא מספיק ברור איפה בדיוק לבצע את הפעולה". החץ יושב מעל היעד
+       עצמו ומוטל מחדש בכל פריים, ולכן הוא נשאר נכון גם כשהמצלמה
+       זזה. כשהיעד מאחורי המצלמה או מחוץ למסגרת הוא נצמד לשפת המסך
+       ומסתובב אל הכיוון הנכון — עדיף על חץ שנעלם בדיוק כשמחפשים
+       אותו, ועדיף בהרבה על חץ שנשאר על מקום שגוי. */
+    const guideEl = live.markerEls.get('__guide')
+    if (guideEl) {
+      const g = live.guide
+      if (!g) guideEl.style.display = 'none'
+      else {
+        v.set(g.x, groundYAt(g.x, g.z) + g.y, g.z)
+        v.project(camera)
+        const behind = v.z > 1
+        let sx = (v.x * 0.5 + 0.5) * size.width
+        let sy = (-v.y * 0.5 + 0.5) * size.height
+        if (behind) { sx = size.width - sx; sy = size.height - sy }
+        const pad = 46
+        const cx = Math.min(Math.max(sx, pad), size.width - pad)
+        const cy = Math.min(Math.max(sy, pad), size.height - pad)
+        const edge = behind || cx !== sx || cy !== sy
+        guideEl.style.display = ''
+        const ang = edge ? Math.atan2(sy - cy, sx - cx) * (180 / Math.PI) + 90 : 0
+        guideEl.style.transform = `translate(-50%,-100%) translate(${cx}px,${cy}px) rotate(${ang.toFixed(1)}deg)`
+        guideEl.classList.toggle('is-edge', edge)
+      }
+    }
+
     /* (המרחק אל הדמות הקרובה נמדד כאן פעם, כדי להכריע בין E של
        שיחה ל-E של תחנת משימה. ההכרעה עברה לסדר הטיפול במקש, ולכן
        הלולאה על כל הדמויות בכל פריים נמחקה איתה.) */
@@ -3826,6 +3974,18 @@ function LampReveal({ live, target, home, onRevealed, revealed, active }: {
   const lightRef = useRef<THREE.PointLight>(null)
   const pos = useRef({ x: home.x, z: home.z })
   const dragging = useRef(false)
+  /* ── לאן להסתכל ────────────────────────────────────────────────
+     „האירו את האבן" לא אמר *איפה* הלפיד ואיפה האבן. כל עוד הלפיד
+     בידיים החץ מצביע על האבן, ולפני כן — על הלפיד עצמו. ברגע
+     שהכתובת נחשפת, או שהתור אינו של הלפיד, החץ נמחק.
+
+     והוא נמחק גם כשמתרחקים. נמדד: בלי זה החץ נשאר נעוץ בשפת המסך
+     בכל מקום באזור, גם ממאה מטר — כלומר הפך מהכוונה לרעש קבוע.
+     המקום שבו מחפשים אותו הוא התחנה עצמה; מרחוק כבר יש סמן תחנה. */
+  useEffect(() => {
+    if (!active || revealed) live.guide = null
+    return () => { live.guide = null }
+  }, [live, active, revealed])
   const progress = useRef(0)
   const doneRef = useRef(revealed)
   doneRef.current = revealed
@@ -3961,6 +4121,17 @@ function LampReveal({ live, target, home, onRevealed, revealed, active }: {
     if (!g) return
     g.position.set(pos.current.x, groundYAt(pos.current.x, pos.current.z), pos.current.z)
     const d = Math.hypot(pos.current.x - target.x, pos.current.z - target.z)
+    /* החץ עובר אל האבן ברגע שהלפיד ביד, וחוזר אל הלפיד אם מניחים
+       אותו — כלומר הוא תמיד מצביע על הדבר הבא, לא על הדבר שנעשה.
+       GUIDE_NEAR הוא הטווח שבו ההכוונה עוד רלוונטית. */
+    const nearEnough =
+      Math.hypot(live.player.x - target.x, live.player.z - target.z) < GUIDE_NEAR ||
+      Math.hypot(live.player.x - pos.current.x, live.player.z - pos.current.z) < GUIDE_NEAR
+    if (activeRef.current && !doneRef.current && nearEnough) {
+      const to = dragging.current ? target : pos.current
+      if (!live.guide) live.guide = { x: to.x, z: to.z, y: 1.5 }
+      else { live.guide.x = to.x; live.guide.z = to.z; live.guide.y = dragging.current ? 1.1 : 1.5 }
+    } else if (live.guide) live.guide = null
     /* קרוב מ-1.7 מטר = חושפים. רחוק מזה — הצל חוזר לאט, כך שהיד
        מרגישה שהיא מחזיקה משהו ולא שהיא לחצה על כפתור. */
     const gain = d < 1.7 ? dt / 1.5 : -dt / 3
@@ -5231,42 +5402,46 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
 /* ---------------- HUD ---------------- */
 
 
+/** בחירת הלוח נשמרת בין התחנות — כל שער הוא טעינת מסמך חדשה */
+const KEYS_PANEL_KEY = 'ch1:keys-open'
+
 function ControlsPanel({ pressed, notebookDone }: { pressed: Set<string>; notebookDone: number }) {
-  /* לוח המקשים תפס רבע מהמסך לאורך כל המשחק. הוא נחוץ בדקה
-     הראשונה ומיותר אחריה, ונוכחות קבועה שלו היא מה שגורם למסך
-     להיקרא כהדגמה טכנית ולא כמשחק. הוא נסגר מעצמו ברגע שברור
-     שהשחקן הבין — כלומר אחרי שהוא זז — ונפתח שוב ב-H. */
-  const [open, setOpen] = useState(true)
-  const movedAt = useRef<number | null>(null)
+  /* ── הלוח נסגר רק כשסוגרים אותו ─────────────────────────────────
+     קודם היו כאן שני טיימרים: אחד סגר את הלוח שש שניות אחרי הצעד
+     הראשון, והשני אחרי עשרים וחמש שניות בכל מקרה. מי שפתח את הלוח
+     כדי לקרוא אותו איבד אותו באמצע הקריאה ברגע שזז — וזו בדיוק
+     התלונה. אין כאן טיימר, אין תלות בתנועה ואין שום state אחר
+     שסוגר אותו: הוא נסגר בלחיצה על ה-× שלו (או ב-H), ותו לא.
 
-  useEffect(() => {
-    const moving = ['w', 'a', 's', 'd'].some((k) => pressed.has(k))
-    if (moving && movedAt.current === null) movedAt.current = Date.now()
-  }, [pressed])
-
-  /* השעון נמדד מרגע שהלוח נראה, לא מטעינת המסמך. `performance.now()`
-     נספר מתחילת הניווט, ולכן טעינה איטית של האזור ועוד קריינות פתיחה
-     יכלו לבלוע כמעט את כל עשרים ושתיים השניות — והלוח נסגר לפני
-     שהשחקן קיבל שליטה. */
-  const shownAt = useRef(Date.now())
-  useEffect(() => {
-    if (!open) return
-    const t = window.setInterval(() => {
-      /* נסגר 6 שניות אחרי הצעד הראשון, או אחרי 25 שניות בכל מקרה —
-         מי שעומד ולא זז עדיין צריך לראות מה ללחוץ. */
-      const since = movedAt.current ? Date.now() - movedAt.current : 0
-      if ((movedAt.current && since > 6000) || Date.now() - shownAt.current > 25000) setOpen(false)
-    }, 500)
-    return () => window.clearInterval(t)
-  }, [open])
+     והבחירה נזכרת. כל מעבר שער בפרק הוא טעינת מסמך חדשה, ולכן לוח
+     שנפתח ב-useState(true) חזר ונפתח בכל אחת מתשע התחנות — כלומר
+     „נסגר מעצמו" מצד אחד ו„חוזר מעצמו" מן הצד השני. הרכיב נטען
+     ‎ssr:false‎, ולכן אפשר לקרוא את הבחירה כבר באתחול. */
+  const [open, setOpen] = useState(() => {
+    try {
+      return window.localStorage.getItem(KEYS_PANEL_KEY) !== '0'
+    } catch {
+      return true
+    }
+  })
+  const setOpenSticky = useCallback((v: boolean) => {
+    setOpen(v)
+    try {
+      window.localStorage.setItem(KEYS_PANEL_KEY, v ? '1' : '0')
+    } catch {
+      /* מצב פרטי — הלוח עדיין עובד, הוא רק לא זוכר */
+    }
+  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code === 'KeyH') setOpen((v) => !v)
+      if (e.code === 'KeyH') setOpenSticky(!openRef.current)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [])
+  }, [setOpenSticky])
+  const openRef = useRef(open)
+  openRef.current = open
 
   const key = (id: string, label: string) => (
     <i className={'hud-key' + (pressed.has(id) ? ' is-down' : '')}>{label}</i>
@@ -5274,7 +5449,7 @@ function ControlsPanel({ pressed, notebookDone }: { pressed: Set<string>; notebo
 
   if (!open) {
     return (
-      <button className="hud-controls-peek" onClick={() => setOpen(true)}>
+      <button className="hud-controls-peek" onClick={() => setOpenSticky(true)}>
         <i className="hud-key">H</i> מקשים
       </button>
     )
@@ -5283,7 +5458,7 @@ function ControlsPanel({ pressed, notebookDone }: { pressed: Set<string>; notebo
   return (
     <section className="hud-panel hud-controls" aria-labelledby="ch1-keys-title">
       <h2 className="hud-title" id="ch1-keys-title">מקשים
-        <button className="hud-controls-close" onClick={() => setOpen(false)} aria-label="לסגור">×</button>
+        <button className="hud-controls-close" onClick={() => setOpenSticky(false)} aria-label="לסגור">×</button>
       </h2>
       <div className="hud-keys">
         <span>{key('w', 'W')} קדימה</span>
@@ -6934,6 +7109,23 @@ export default function Game() {
             <span className="ch1-visually-hidden">שיחה עם {SPEAKERS[c.who]}</span>
           </div>
         ))}
+
+        {/* ── חץ ההכוונה ────────────────────────────────────────────
+            אלמנט אחד לכל הפרק. מי שמצייר אותו הוא MarkerProjector,
+            ומי שמחליט אם הוא קיים הוא האינטראקציה שכתבה live.guide. */}
+        <div
+          className="poi-guide"
+          aria-hidden="true"
+          style={{ display: 'none' }}
+          ref={(el) => {
+            if (el) live.markerEls.set('__guide', el)
+            else live.markerEls.delete('__guide')
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 4v13M6 12l6 6 6-6" />
+          </svg>
+        </div>
 
         {/* where the road leaves this region.
             מחנה הלילה הוא האזור הפותח והשקט, ושלט צף באמצע הנוף
