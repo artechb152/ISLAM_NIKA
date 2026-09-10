@@ -392,8 +392,11 @@
    two sides at one point — the click advanced on the left while the button
    marked 'next' sat on the right — and that contradiction is what made the
    controls read as broken. They are one decision. */
-.c3-arrow.is-next{inset-inline-start:var(--c3-out,20px)}
-.c3-arrow.is-prev{inset-inline-end:var(--c3-out,20px)}
+/* „הבא" יושב בצד שאליו הקריאה מתקדמת — בעברית זה הצד השמאלי,
+   כלומר inset-inline-end. קודם הוא ישב ב-inline-start (ימין) עם חץ
+   שמצביע ימינה: פריסה של ספר לועזי בתוך ממשק עברי. */
+.c3-arrow.is-next{inset-inline-end:var(--c3-out,20px)}
+.c3-arrow.is-prev{inset-inline-start:var(--c3-out,20px)}
 
 @media (max-width:860px){
   /* A WHOLE SPREAD CANNOT FIT A PHONE'S WIDTH. Measured at 390px, fitting it
@@ -407,8 +410,8 @@
   .c3-stage::-webkit-scrollbar{display:none}
   .c3-arrow{width:40px;height:40px}
   .c3-arrow svg{width:19px;height:19px}
-  .c3-arrow.is-next{inset-inline-start:6px}
-  .c3-arrow.is-prev{inset-inline-end:6px}
+  .c3-arrow.is-next{inset-inline-end:6px}
+  .c3-arrow.is-prev{inset-inline-start:6px}
   .c3-lift{display:none}
   .c3-place-part{display:none}
 }
@@ -465,3 +468,31 @@
 .c3-pn.is-half:has(.c3-say) .c3-caps,
 .c3-pn.is-half:has(.c3-verse) .c3-caps{bottom:auto;top:calc(8px * var(--u))}
 .c3-pn.is-half:has(.c3-caps) .c3-say{top:auto;bottom:calc(10px * var(--u))}
+
+/* ── מצב קריאה: הספר מקבל את המסך ─────────────────────────────────────
+   נמדד: ב-1440×900 הספר יצא 1224×798 והגובה היה חסום — 56 פיקסלים של
+   כותרת ועוד 46 של מרווח, כלומר 11% מן החלון. כאן הם חוזרים אליו,
+   ובמסך מלא חוזרים גם סרגלי הדפדפן. יחס הצדדים מחושב ב-fit() ולכן
+   הגדלה היא הגדלה — בלי מתיחה ובלי חיתוך. */
+.c3-shell:fullscreen,
+.c3-shell.is-full{height:100vh;height:100dvh;background:var(--panel)}
+.c3-shell:fullscreen .chapter-site-header,
+.c3-shell.is-full .chapter-site-header{display:none}
+/* היציאה חייבת להישאר בהישג יד גם כשהכותרת ירדה */
+.c3-shell:fullscreen .c3-zoom,
+.c3-shell.is-full .c3-zoom{
+  position:fixed;top:12px;inset-inline-end:14px;z-index:60;display:inline-flex;
+}
+/* כפתור ההגדלה — אותה גלולה של שדה החיפוש שבכותרת האתר */
+.c3-zoom{
+  all:unset;box-sizing:border-box;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;min-height:36px;
+  padding-inline:14px;border-radius:999px;
+  color:var(--cream);font-family:var(--font-body);font-size:14px;font-weight:600;
+  background:rgba(245,236,214,.1);border:1px solid rgba(245,236,214,.26);
+  transition:background .2s ease,border-color .2s ease;
+}
+.c3-zoom:hover{background:rgba(245,236,214,.18);border-color:var(--cream)}
+.c3-zoom:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
+.c3-zoom svg{width:16px;height:16px}
+@media (max-width:720px){.c3-zoom span,.c3-zoom{font-size:13px}}

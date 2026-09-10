@@ -284,14 +284,43 @@ export default function Chapter3Comic() {
     return () => clearTimeout(t)
   }, [moving])
 
+  const shellRef = useRef<HTMLDivElement>(null)
+
+  /* ── „הקומיקס מוצג קטן מדי" ─────────────────────────────────────
+     נמדד ב-1440×900: הספר יוצא 1224×798 — כלומר הוא כבר ממלא את כל
+     הגובה הפנוי, והרוחב אינו המגבלה (1308 היו זמינים). מה שגוזל את
+     הגובה הוא כותרת האתר (56) והמרווח הקבוע (46) — 11% מן החלון.
+     הגדלה אמיתית מחייבת להחזיר את הגובה הזה, ולכן: מצב קריאה במסך
+     מלא, שבו הכותרת יורדת והספר מקבל את המסך כולו (וגם את מה
+     שסרגלי הדפדפן תופסים). ה-fit הקיים מחשב הכול ביחס-גובה קבוע,
+     ולכן אין כאן מתיחה, חיתוך או עיוות — רק יותר פיקסלים. */
+  const [full, setFull] = useState(false)
+  useEffect(() => {
+    const sync = () => setFull(!!document.fullscreenElement)
+    document.addEventListener('fullscreenchange', sync)
+    return () => document.removeEventListener('fullscreenchange', sync)
+  }, [])
+  const toggleFull = useCallback(() => {
+    const el = shellRef.current
+    if (!el) return
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => {})
+    /* דפדפן שמסרב (או מצב שאינו מרשה) — נופלים למצב קריאה בתוך הדף,
+       שגם הוא מוריד את הכותרת ומחזיר את 102 הפיקסלים. */
+    else void el.requestFullscreen().catch(() => setFull(true))
+  }, [])
+
   /* the page is sized in real pixels; nothing is transform-scaled */
   useEffect(() => {
     const fit = () => {
       const book = bookRef.current
       if (!book) return
       const narrow = window.innerWidth < 860
-      const availW = window.innerWidth - (narrow ? 12 : 132)
-      const availH = window.innerHeight - 56 - 46
+      /* במצב קריאה אין כותרת, והמרווח הוא נשימה בלבד */
+      const wide = !!document.fullscreenElement || shellRef.current?.classList.contains('is-full')
+      /* החצים שומרים לעצמם רוחב; במצב קריאה הם מתקרבים, כי שם דווקא
+         הרוחב הוא שהתחיל להגביל אחרי שהגובה השתחרר. */
+      const availW = window.innerWidth - (narrow ? 12 : wide ? 96 : 132)
+      const availH = window.innerHeight - (wide ? 22 : 56 + 30)
       const ASPECT = 1380 / 900          /* two comic-book pages side by side */
       /* ON A PHONE THE SPREAD IS SIZED BY HEIGHT AND PANNED ACROSS. Fitting a
          whole spread into 390px of width leaves captions a few pixels tall —
@@ -318,16 +347,19 @@ export default function Chapter3Comic() {
     }
     fit()
     window.addEventListener('resize', fit)
-    return () => window.removeEventListener('resize', fit)
-  }, [at])
+    document.addEventListener('fullscreenchange', fit)
+    return () => {
+      window.removeEventListener('resize', fit)
+      document.removeEventListener('fullscreenchange', fit)
+    }
+  }, [at, full])
 
-  /* the right-hand cursor key advances, with the right half and the right
-     arrow — see the note at the top of the file */
+  /* מקש החץ נוסע עם החץ שעל המסך: בעברית ‎←‎ מקדם ו-‎→‎ חוזר */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { setDrawer(false); return }
-      if (e.key === 'ArrowRight') turn(1)
-      else if (e.key === 'ArrowLeft') turn(-1)
+      if (e.key === 'ArrowLeft') turn(1)
+      else if (e.key === 'ArrowRight') turn(-1)
       else if (e.key === 'Home') goTo(0)
       else if (e.key === 'End') goTo(sheets.length - 1)
       else return
@@ -397,7 +429,7 @@ export default function Chapter3Comic() {
     : undefined
 
   return (
-    <div className="c3-shell">
+    <div className={'c3-shell' + (full ? ' is-full' : '')} ref={shellRef}>
       {/* סימון משפט בקומיקס → "הוספה למחברת" */}
       <MarkToNotebook ch={3} />
       <header className="chapter-site-header">
@@ -424,6 +456,16 @@ export default function Chapter3Comic() {
               {at === 0 ? 'הכריכה' : `${shown}/${pages.length}`}
             </span>
           </div>
+          <button type="button" className="c3-zoom" onClick={toggleFull}
+                  aria-pressed={full} aria-label={full ? 'יציאה ממצב קריאה' : 'קריאה במסך מלא'}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
+                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              {full
+                ? <path d="M9 4v5H4M15 20v-5h5M20 9h-5V4M4 15h5v5" />
+                : <path d="M4 9V4h5M20 15v5h-5M15 4h5v5M9 20H4v-5" />}
+            </svg>
+            {full ? 'יציאה' : 'הגדלה'}
+          </button>
         </div>
       </header>
 
@@ -474,10 +516,13 @@ export default function Chapter3Comic() {
       {drawer && <div className="chapter-scrim" onClick={() => setDrawer(false)} aria-hidden="true" />}
 
       {/* CLICKING THE PAPER TURNS IT. The direction comes from where the click
-          landed: in an RTL book the left leaf carries you forward and the right
-          leaf back. It lives on the stage rather than on two overlay buttons
-          because an overlay would have to sit above the sheets, and then it
-          would swallow the one link the book contains. */}
+          landed: the leaf that actually moves is the right-hand one — it swings
+          leftward over the spine (`.c3-sheet.is-turned`) — so pressing the right
+          half carries you forward and the left half back. (The note that used to
+          stand here said the opposite of what the code does; the code is what
+          the animation shows.) It lives on the stage rather than on two overlay
+          buttons because an overlay would have to sit above the sheets, and then
+          it would swallow the one link the book contains. */}
       <div className={'c3-stage' + (peak ? ' is-peak' : '')}
            ref={stageRef} onClick={onStage} onPointerMove={onMove}
            onPointerLeave={(e) => e.currentTarget.classList.remove('hover-l', 'hover-r')}>
@@ -511,15 +556,22 @@ export default function Chapter3Comic() {
         </div>
       </div>
 
+      {/* ── הדפדוף ב-RTL ────────────────────────────────────────────
+          החץ „הבא" הצביע ימינה וישב מימין, ומקש החץ הימני קידם — כלומר
+          שלושתם היו בנויים לקריאה משמאל לימין. באתר הזה (ובעברית) ‎←‎
+          הוא „קדימה" ו-‎→‎ הוא „אחורה" — כך זה בכל כפתור אחר בפרויקט —
+          וגם העלה עצמו נע שמאלה כשמתקדמים (ראו `.c3-sheet.is-turned`).
+          לכן שלושת הרכיבים הועברו יחד: הצורה, הצד והמקש. האיורים לא
+          שוקפו ולא נגעו — ה-RTL כאן הוא של הממשק בלבד. */}
       <button className="c3-arrow is-next" onClick={() => turn(1)}
               disabled={atEnd} aria-label="העמוד הבא">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
-             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 5l7 7-7 7" /></svg>
+             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 5l-7 7 7 7" /></svg>
       </button>
       <button className="c3-arrow is-prev" onClick={() => turn(-1)}
               disabled={at === 0} aria-label="העמוד הקודם">
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
-             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 5l-7 7 7 7" /></svg>
+             strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 5l7 7-7 7" /></svg>
       </button>
     </div>
   )
