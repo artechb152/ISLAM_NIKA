@@ -47,7 +47,7 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter1',
         available: true,
       }),
-      ch(2, 'תרבות שבטית טרום עליית האסלאם', {
+      ch(2, 'השבטיות בחצי האי ערב טרום עליית האסלאם', {
         href: '/chapter2',
         available: true,
       }),

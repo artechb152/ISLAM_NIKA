@@ -506,8 +506,8 @@ export default function ChaptersScreen() {
               )}
             </div>
             <div className="hero-copy">
-              <h1 id="hero-title" className="hero-title">מסע אל<br />עולם האסלאם</h1>
-              <p className="hero-sub">מה שעיצב את האסלאם: היסטוריה, אמונה, הלכה וסמלים.</p>
+              <h1 id="hero-title" className="hero-title">מסע אל האסלאם</h1>
+              <p className="hero-sub">היסטוריה, אמונה, הלכה וסמלים</p>
             </div>
           </section>
 

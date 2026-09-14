@@ -1,6 +1,6 @@
 'use client'
 
-/* Chapter 2 — תרבות שבטית טרום עליית האסלאם.
+/* Chapter 2 — השבטיות בחצי האי ערב טרום עליית האסלאם.
 
    Same product as chapter 6: the masthead, the collapsible rail, the type scale,
    the reveal behaviour and every colour come from chapter6-article.css, which the
@@ -530,7 +530,7 @@ const LAYER_LABEL: Record<Layer, string> = {
    They were typed into the SVG as literals — ביזנטית, סאסאנית, דרך המשי,
    דרך הבשמים, מכה — which made them the only chapter text on the page that
    this component wrote itself, and left the map free to drift silently away
-   from §5.b, §6.a and §1.b if a word there were ever changed.
+   from §5.b, §6.a and §1.a if a word there were ever changed.
 
    Each name is now LOOKED UP in the fragment it comes from, at a word boundary,
    and a name that is no longer in its sentence throws at build time instead of
@@ -643,7 +643,7 @@ function PeninsulaChart() {
             {/* under the inherited direction:rtl, textAnchor="end" anchors the LEFT edge,
                 so the word runs rightward from x — at 352 it ran straight through
                 the dot it labels (measured: 77 units of overlap). */}
-            <text x="408" y="456" fontFamily="Kedem, serif" fontSize="36" fontWeight="700" fill="#571820" textAnchor="end">{mapLabel('§1.b', 'מכה')}</text>
+            <text x="408" y="456" fontFamily="Kedem, serif" fontSize="36" fontWeight="700" fill="#571820" textAnchor="end">{mapLabel('§1.a', 'מכה')}</text>
           </g>
         </svg>
       </figure>
@@ -996,12 +996,15 @@ export default function Chapter2() {
                     were not what was wanted. */}
                 <div className="ch2-body ch2-wide" data-reveal>
                   <T
-                    r={['§1.a', '§1.b', '(§1.gloss)']}
+                    r={['§1.a', '(§1.gloss)']}
                     em={['לחצי האי ערב', termOf('§1.gloss')]}
                   />
+                  {/* §4 אינו עוד המשפט על המבול — בסבב התיקונים הוא הפך
+                      להגדרת „בדווים", ומקומו אצל השבטים ולא אצל הכעבה.
+                      המבול נאמר עכשיו בתוך §2 עצמו. */}
                   <T
-                    r={['§2.a', '§3.a', '(§3.aside)', '§4.a']}
-                    em={['שיקמו את הכעבה', 'אבני היסוד']}
+                    r={['§2.a', '§3.a', '(§3.aside)']}
+                    em={['אבני היסוד', 'מַקַּאם אִבְּרָאהִים']}
                   />
                 </div>
               </Section>
@@ -1023,8 +1026,8 @@ export default function Chapter2() {
                         antecedent in the paragraph above and a different subject
                         (what the nomads lived on, §6) fused in beside it. §5 is
                         one passage in the source and is one paragraph here. */}
-                    <T r={['§5.a', '§5.b']} em={['רובם נודדים']} />
-                    <T r="§6.a" em={['בדואים', "בּאדִיה"]} />
+                    <T r={['§5.a', '§4.a']} em={['רובם נודדים', 'בדווים']} />
+                    <T r={['§6.a', '§5.b']} em={['דרך הבשמים', 'דרך המשי']} />
                   </div>
                   <PeninsulaChart />
                   {/* §7.a names two fathers and the pair below defines them —
@@ -1090,6 +1093,13 @@ export default function Chapter2() {
                     <Verse r="§16.poem" />
                     <div className="ch2-body">
                       <T r="§16.b" />
+                      {/* הפתגם שביקשה המרצה — הוא אומר את אותו דבר שהשיר
+                          אומר, אבל במשפט אחד שאפשר לזכור. */}
+                      <T r="§38.a" />
+                      <blockquote className="ch2-proverb">
+                        <T r="§38.quote" />
+                      </blockquote>
+                      <T r="§38.b" em={['הסולידריות השבטית']} />
                     </div>
                   </TraitDialog>
 
@@ -1097,6 +1107,9 @@ export default function Chapter2() {
                     <div className="ch2-body">
                       <T r={['§17.a', '§17.list', '§18.a', '§18.list']} em={['נדיב']} />
                       <T r="§19.a" em={['מעמדו וכבודו']} />
+                      {/* כבוד (שרף) — מאפיין שלישי שהמרצה הוסיפה לצד
+                          הגבריות, ולכן הוא יושב באותו מקטע ולא בחדש. */}
+                      <T r={['§39.a', '§39.b']} em={['כבוד המשפחה']} />
                     </div>
                   </TraitDialog>
 
@@ -1104,6 +1117,8 @@ export default function Chapter2() {
                       why that clause is the emphasis */}
                   <TraitDialog id="wad">
                     <div className="ch2-body">
+                      {/* המשפט שמקדים את שני המנהגים הנדחים */}
+                      <T r="§40.a" />
                       <T r={['§20.a', '§21.a', '§22.a', '§22.list']} em={['אינן מסוגלות להילחם כמו גברים']} />
                     </div>
                   </TraitDialog>
@@ -1114,6 +1129,8 @@ export default function Chapter2() {
                         seconds later says nothing the card has not already said */}
                     <div className="ch2-body">
                       <T r={['§23.a', '§23.b']} em={['מוסד חברתי מרכזי']} />
+                      {/* ההקבלה לתנ״ך וההסבר על ההרתעה — תוספת המרצה */}
+                      <T r={['§41.a', '§41.b']} em={['גואל הדם הוא ימית את הרוצח']} />
                     </div>
                     {/* the diagram IS the text: one default and the two ways out */}
                     <div className="ch2-diagram">
@@ -1172,7 +1189,7 @@ export default function Chapter2() {
                   </div>
                   <Head id="jahiliyya" />
                   <div className="ch2-body" data-reveal>
-                    <T r={['§27.a', '§27.list']} />
+                    <T r={['§27.a', '§27.b']} />
                   </div>
 
                 {/* THE FORK. §27.b is the sentence that names the period, so it is
@@ -1192,8 +1209,11 @@ export default function Chapter2() {
                       a `<p>` inside a `<p>` is closed by the parser — the server
                       and client then disagree and React re-renders the subtree.
                       The audit's pageerror listener caught it. */}
+                  {/* מי הציע את שני הפירושים — המרצה ביקשה את המשפט הזה
+                      במפורש. הוא עומד מעל העץ, כי הוא מה שהעץ מציג. */}
                   <div className="ch2-fork-head">
-                    <T r="§27.b" em={["הג'אהליה"]} />
+                    <T r="§27.c" em={["הג'אהליה"]} />
+                    <T r="§28.a" />
                   </div>
                   {/* A stem down from the sentence, a bar across, an arm into
                       each name — CENTRED. Three other shapes were tried after
@@ -1271,11 +1291,12 @@ export default function Chapter2() {
                 </div>
                 <div className="ch2-verdicts" data-reveal>
                   <p className="ch2-verdict-intro">{text('§35.a')}</p>
+                  {/* הכבוד הגברי ירד כשורה נפרדת: בסבב התיקונים הוא נאמר
+                      בתוך משפט הפתיחה עצמו — מנהגים שבטיים כמו נאמנות שבטית
+                      ואבירות גברית נטמעו — ושורה שחוזרת עליו מיד אחריו היא
+                      אותה אמירה פעמיים. נשאר תא אחד: התנאי המשפטי שהאסלאם
+                      הציב לנקמת הדם, שהוא באמת דבר נוסף. */}
                   <dl>
-                    <div className="ch2-verdict-row">
-                      <dt>{subLabel('culture', 'muruwa')}</dt>
-                      <dd>{text('§35.muruwa')}</dd>
-                    </div>
                     <div className="ch2-verdict-row">
                       <dt>{subLabel('culture', 'thar')}</dt>
                       <dd>{text('§35.thar')}</dd>
@@ -1299,9 +1320,11 @@ export default function Chapter2() {
                     markup pretending to a structure the text does not have. */}
                 <div className="ch2-verdicts ch2-after-device" data-reveal>
                   <p className="ch2-verdict-intro">{text('§36.a')}</p>
+                  {/* גם כאן: קבורת בנות ועבודת אלילים נאמרים בתוך משפט
+                      הדחייה עצמו, ומה שנשאר להוסיף הוא הסייג שביקשה המרצה —
+                      שלתרבות כזאת היה קשה להציב גבולות. */}
                   <ul className="ch2-verdict-list">
-                    <li className="ch2-verdict-row is-name">{text('§36.wad')}</li>
-                    <li className="ch2-verdict-row is-name">{text('§36.lots')}</li>
+                    <li className="ch2-verdict-row">{text('§36.b')}</li>
                   </ul>
                 </div>
                 {/* THE TURN CLOSES THE CHAPTER INSTEAD OF OPENING THE SECTION.
@@ -1312,6 +1335,11 @@ export default function Chapter2() {
                     adds up to — and it stands where chapter 6 puts its own
                     closing block, directly above the hand-off to the practice. */}
                 <Statement main="§34.a" />
+                {/* הסיום שביקשה המרצה: למה בכלל ללמוד את זה. הוא בא אחרי
+                    המשפט שהפרק הלך אליו, ולפני המסירה אל התרגול. */}
+                <div className="ch2-body ch2-after-device" data-reveal>
+                  <T r="§42.a" />
+                </div>
               </Section>
 
               <div className="ch2-end" ref={endRef} data-reveal>

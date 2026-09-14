@@ -14,7 +14,7 @@ import '@/styles/chapter2-article.css'
 import '@/styles/site-notebook.css'
 
 export const metadata: Metadata = {
-  title: 'פרק שני · תרבות שבטית טרום עליית האסלאם',
+  title: 'פרק שני · השבטיות בחצי האי ערב טרום עליית האסלאם',
 }
 
 export const viewport: Viewport = {
