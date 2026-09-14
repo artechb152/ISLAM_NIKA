@@ -1617,3 +1617,39 @@ html{scrollbar-gutter:stable}
   .p2-feedback.has-mark{animation:p2-right-in .26s ease both}
   @keyframes p2-right-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 }
+
+/* ── תצלום בתוך הפרק ──────────────────────────────────────────────────
+   ציור יושב על הקלף בלי מסגרת; תצלום ממוסגר — קו שיער ב-`--edge` והצל
+   היחיד של המערכת. שני התצלומים שצורפו לסבב התיקונים (מקאם אבראהים
+   והכעבה) הם היחידים בפרק, ולכן זה כל מה שהכלל הזה צריך לומר. */
+.ch2-photo{
+  margin:clamp(20px,2.6vw,30px) 0 0;width:100%;max-width:var(--measure,880px);
+}
+.ch2-photo img{
+  display:block;width:100%;height:auto;border-radius:14px;
+  border:1px solid var(--edge);box-shadow:var(--shadow);
+}
+.ch2-photo figcaption{
+  margin-top:9px;font-size:15px;line-height:1.6;color:var(--muted);
+}
+
+/* ── „ראו למשל את הסרטונים הבאים" ─────────────────────────────────────
+   שני קישורים חיצוניים, בגוש אחד שנקרא כהפניה ולא כתוכן הפרק. */
+.ch2-watch{
+  margin-top:clamp(28px,3.4vw,44px);padding:clamp(16px,2vw,22px) clamp(18px,2.2vw,26px);
+  width:100%;max-width:var(--measure,880px);
+  border:1px solid var(--edge);border-radius:14px;background:var(--paper);
+}
+.ch2-watch h3{
+  margin:0 0 10px;font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(19px,1.7vw,22px);color:var(--maroon);
+}
+.ch2-watch ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ch2-watch a{
+  display:inline-flex;align-items:center;gap:8px;font-size:var(--read,18px);
+  color:var(--maroon-deep);text-decoration:underline;text-underline-offset:4px;
+  text-decoration-color:rgba(87,24,32,.35);
+}
+.ch2-watch a::before{content:"▶";font-size:.75em;color:var(--stamp)}
+.ch2-watch a:hover{text-decoration-color:var(--maroon-deep)}
+.ch2-watch a:focus-visible{outline:2px solid var(--maroon);outline-offset:3px;border-radius:4px}

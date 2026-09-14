@@ -1006,6 +1006,16 @@ export default function Chapter2() {
                     r={['§2.a', '§3.a', '(§3.aside)']}
                     em={['אבני היסוד', 'מַקַּאם אִבְּרָאהִים']}
                   />
+                  {/* „עד היום (ראו תמונה)" — התצלום שהמרצה צירפה לסבב
+                      התיקונים. צילום ולכן ממוסגר בקו שיער ובצל של הפרק,
+                      להבדיל מן הציורים שיושבים על הקלף בלי מסגרת. */}
+                  <figure className="ch2-photo">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/chapter2/maqam-ibrahim.png"
+                         alt={'מַקַּאם אִבְּרָאהִים — „מקומו של אברהם“, האבן שצמודה לכעבה במכה'}
+                         loading="lazy" decoding="async" />
+                    <figcaption>{'מַקַּאם אִבְּרָאהִים — „מקומו של אברהם“, צמודה לכעבה במכה.'}</figcaption>
+                  </figure>
                 </div>
               </Section>
 
@@ -1273,6 +1283,15 @@ export default function Chapter2() {
                   </div>
                   <div className="ch2-mecca-body ch2-body" data-reveal>
                     <T r={['§30.a', '|§31.a']} em={['האבן השחורה']} />
+                    {/* „מבנה שחור גדול, מצ\u2019\u2019ב תמונה" — התצלום שצורף
+                        לסבב התיקונים, מיד אחרי המשפט שמתאר אותו. */}
+                    <figure className="ch2-photo">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src="/assets/chapter2/kaaba-photo.png"
+                           alt="הכעבה במכה — מבנה שחור גדול במרכז המתחם"
+                           loading="lazy" decoding="async" />
+                      <figcaption>הכעבה — מבנה שחור גדול במרכז מכה.</figcaption>
+                    </figure>
                     <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
                   </div>
                 </div>
@@ -1335,6 +1354,25 @@ export default function Chapter2() {
                     adds up to — and it stands where chapter 6 puts its own
                     closing block, directly above the hand-off to the practice. */}
                 <Statement main="§34.a" />
+                {/* שני הסרטונים שהמרצה צירפה אחרי „היה קשה להציב גבולות" —
+                    הם ההדגמה לאותו משפט. קישורים ולא הטמעה: הפרק נבנה
+                    כייצוא סטטי, ומסגרת של צד שלישי בתוך עמוד לימוד גוררת
+                    איתה מעקב ותלות בשירות שאיננו שולטים בו. */}
+                <aside className="ch2-watch" data-reveal>
+                  <h3>ראו למשל את הסרטונים הבאים</h3>
+                  <ul>
+                    <li>
+                      <a href="https://youtu.be/FFnY4KX90Ag" target="_blank" rel="noopener noreferrer">
+                        נקמת דם בחברה השבטית — סרטון ביוטיוב
+                      </a>
+                    </li>
+                    <li>
+                      <a href="https://x.com/mym1596097/status/2012173962688548957" target="_blank" rel="noopener noreferrer">
+                        תיעוד קצר ברשת X
+                      </a>
+                    </li>
+                  </ul>
+                </aside>
                 {/* הסיום שביקשה המרצה: למה בכלל ללמוד את זה. הוא בא אחרי
                     המשפט שהפרק הלך אליו, ולפני המסירה אל התרגול. */}
                 <div className="ch2-body ch2-after-device" data-reveal>
