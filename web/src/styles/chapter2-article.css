@@ -1566,9 +1566,12 @@ html{scrollbar-gutter:stable}
     --kaaba:clamp(320px,40%,560px);
     --kaaba-gap:clamp(28px,3.4vw,56px);
     display:grid;
+    /* שתי שורות: הכותרת מעל הטקסט, שתיהן בעמודת הטקסט. התצלום יושב
+       בשורת הטקסט בלבד, ולכן הוא ממורכז מולו ולא מול שניהם יחד —
+       „ממורכז ללא הכותרת" הוא המבנה, לא תיקון עליו. */
     grid-template-columns:var(--kaaba) minmax(0,1fr);
+    grid-template-rows:auto 1fr;
     column-gap:var(--kaaba-gap);
-    align-items:center;
   }
   .ch2-mecca-illus{
     /* בשורה השנייה בלבד — אותה שורה שבה הטקסט הרץ. כשהתצלום נפרש גם
@@ -1579,7 +1582,8 @@ html{scrollbar-gutter:stable}
        הגיע מראה הפרש של 22 פיקסלים בין העמודות — הפרש שאינו קיים
        בקריאה אמיתית. איבדתי עליו זמן; כתוב כאן כדי שלא יילקח שוב
        כבאג פריסה. עם החשיפה — 0 פיקסלים ב-1440, 1920 ו-1100. */
-    grid-column:1;position:relative;width:100%;margin:0;max-width:none;
+    grid-column:1;grid-row:2;align-self:center;
+    position:relative;width:100%;margin:0;max-width:none;
   }
   /* ── מה שמתמרכז הוא התמונה, לא התמונה-והכיתוב ─────────────────────
      הכיתוב מוסיף 24 פיקסלים לתחתית ה-figure, ולכן מרכז הקופסה נפל
@@ -1589,9 +1593,33 @@ html{scrollbar-gutter:stable}
   .ch2-mecca-illus figcaption{
     position:absolute;top:100%;inset-inline:0;margin-top:var(--flow-tight);
   }
-  /* הכותרת אינה עוד בתוך הרשת — היא מעליה, ברוחב המקטע. */
-  .ch2-mecca-head{width:auto;margin:0}
-  .ch2-mecca-body{grid-column:2;width:100%;max-width:min(680px,100%);margin:0}
+  /* ── הכותרת נוסעת עם הטקסט ────────────────────────────────────────
+     שתיהן בעמודה השנייה — בעמוד RTL זו השמאלית — ו-`justify-self:end`
+     מצמיד אותן לקצה השמאלי של המאמר. קודם הן נעצרו באמצע, צמודות
+     לתצלום, ונשארו 196 פיקסלים ריקים משמאלן ב-1920. */
+  /* ⚠ `justify-self:end` עם `width:100%` נתן 680 במקום 566: אחוז על
+     פריט רשת שאינו נמתח נפתר מול שטח הרשת, וכאן הוא נפתר מול משהו
+     אחר — הכותרת חרגה מעמודתה ונכנסה אל תחום התצלום. הדרך הבטוחה
+     היא להשאיר את הפריט מתוח (ברירת המחדל), לתת לו תקרה, ולדחוף
+     אותו עם שוליים אוטומטיים: ב-RTL `margin-inline-start:auto` הוא
+     הצד הימני, ולכן הבלוק נדחף שמאלה. */
+  /* ⚠ `min-width:0` הוא מה שמחזיק את שניהם בתוך העמודה. פריט רשת
+     מסרב כברירת מחדל להצטמצם מתחת לרוחב התוכן שלו (`min-width:auto`),
+     ולכן הכותרת יצאה 680 בעמודה של 566 ונכנסה אל תחום התצלום —
+     נמדד ב-1440 וב-1100, ולא ב-1920 שבו העמודה רחבה ממילא. */
+  /* ⚠ `width` מפורש, ולא fit-content. בלעדיו הכותרת יצאה 680 בעמודה
+     של 566 בעוד הטקסט יצא 566 — לא בגלל אחוזים אלא בגלל שמידת
+     ה-fit-content שונה: פסקאות נשברות, כותרת עם מעוין לא. `width:100%`
+     מודד את העמודה עצמה, `max-width` חוסם ב-680 כשהיא רחבה מזה,
+     ו-`margin-inline-start:auto` (ב-RTL — הצד הימני) דוחף את שניהם
+     אל הקצה השמאלי. */
+  .ch2-mecca-head,
+  .ch2-mecca-body{
+    grid-column:2;min-width:0;
+    width:100%;max-width:680px;margin:0;margin-inline-start:auto;
+  }
+  .ch2-mecca-head{grid-row:1}
+  .ch2-mecca-body{grid-row:2;align-self:center}
   .ch2-mecca-body > :first-child{margin-top:0}
   /* flex centres margin boxes, so a margin on either end of the stack tips the
      visible block off the middle by half its size — 24px of heading margin put
@@ -1693,16 +1721,28 @@ html{scrollbar-gutter:stable}
    הבא מחזיקה בדיוק את אותו יחס, והמספרים שלה כתובים שם: ציר אחד
    לשורות (`--flow`) ואחד צר יותר לעמודות. אותם שניים כאן. */
 .ch2-lineage-split{
-  display:grid;grid-template-columns:1.15fr 1fr;
+  display:grid;
+  /* ── התמונה גדולה יותר, ועד קצה המאמר ────────────────────────────
+     העמודה השנייה (בעמוד RTL — השמאלית) היא של התמונה, והיא רחבה
+     עכשיו מזו של הטקסט. וה-max-width ירד: ב-1920 הוא עצר את הרשת
+     ב-1180 והשאיר 312 פיקסלים ריקים משמאל, כלומר התמונה לא הגיעה
+     לקצה שאליו היא אמורה להגיע. עכשיו הרשת היא רוחב המאמר, והתמונה
+     נוגעת בשוליו. */
+  grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);
   gap:var(--flow) clamp(26px,2.8vw,40px);align-items:center;
-  width:100%;max-width:var(--wide, 1180px);
+  width:100%;
 }
+/* הטקסט ממורכז במה שנשאר לו, ולא נצמד לתמונה */
+.ch2-lineage-text{justify-self:center;max-width:var(--measure,880px)}
 /* אין כאן כלל מרווח משלו, וזה מכוון: `.article-section > * + *` של הפרק
    כבר נותן `--flow` בין בלוק לבלוק (34px ב-1440), ו-`--flow-lead` אחרי
    כותרת מקטע. נמדד — הבלוק הזה מקבל בדיוק את אותם מרווחים שכל בלוק
    אחר בפרק מקבל, ולכן כלל מקומי היה רק דרך לסטות מהם. */
-.ch2-lineage-text{min-width:0}
-.ch2-lineage-photo{margin:0;max-width:100%}
+/* מה שמתמרכז הוא התמונה, לא התמונה-והכיתוב: הכיתוב מוסיף 22 פיקסלים
+   לתחתית ה-figure ומושך את מרכזו מטה, והעין מודדת את התמונה. הוא יוצא
+   מן הזרימה ותלוי מתחתיה — בדיוק כמו במקטע מכה. */
+.ch2-lineage-photo{margin:0;max-width:100%;position:relative}
+.ch2-lineage-photo figcaption{position:absolute;top:100%;inset-inline:0}
 
 /* ── מתחת ל-900: אין שתי עמודות ───────────────────────────────────────
    שתי עמודות ברוחב כזה נותנות שורות של עשרים תווים, וזו לא שורה.

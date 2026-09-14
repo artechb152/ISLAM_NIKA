@@ -1274,12 +1274,13 @@ export default function Chapter2() {
                     The photographic precinct plate that stood here before was a
                     framed 16:9 rectangle above the prose; this is the chapter's
                     other register, the one the seated figure is painted in. */}
-                {/* הכותרת מחוץ לזוג תמונה-טקסט, ולא בתוכו: כך „הטקסט הרץ
-                    ממורכז ללא הכותרת" הוא המבנה עצמו ולא תיקון עליו. */}
-                <div className="ch2-mecca-head">
-                  <Head id="mecca" />
-                </div>
                 <div className="ch2-mecca-hero">
+                  {/* הכותרת היא פריט ברשת — בשורה הראשונה של עמודת הטקסט.
+                      מחוץ לרשת כללי המיקום שלה פשוט לא חלו, והיא יצאה
+                      ברוחב המקטע כולו במקום ברוחב העמודה. */}
+                  <div className="ch2-mecca-head">
+                    <Head id="mecca" />
+                  </div>
                   {/* ── התצלום שצורף לסבב התיקונים, במקום הציור ─────────
                       כאן עמד ציור מים שנמוג אל הקלף במסכה רדיאלית. תצלום
                       אינו נמוג — הוא ממוסגר — ולכן המסכה והחיתוך לריבוע
