@@ -1530,7 +1530,22 @@ html{scrollbar-gutter:stable}
    out — the air is the padding's, and the reserved height only adds to it. */
 .article-section.ch2-mecca-section{padding-block:clamp(46px,6vw,84px)}
 .ch2-mecca-hero{margin-top:0}
-.ch2-mecca-illus{display:none}
+/* ── במסך צר: התצלום נשאר ────────────────────────────────────────────
+   כאן עמד `display:none`, וזה היה נכון כשבמקום הזה ישב ציור דקורטיבי:
+   ציור שנעלם אינו מוריד מידע. עכשיו יושב כאן תצלום עם כיתוב, ותצלום
+   שנעלם בנייד הוא תוכן שנמחק ממחצית הקוראים. הוא עומד מעל הטקסט,
+   ברוחב הקריאה, ובלי המיקום המוחלט של המסך הרחב. */
+.ch2-mecca-illus{
+  display:block;position:static;width:100%;max-width:var(--measure,880px);
+  margin:0 0 clamp(20px,3vw,30px);
+}
+.ch2-mecca-illus img{
+  width:100%;height:auto;border-radius:14px;
+  border:1px solid var(--edge);box-shadow:var(--shadow);
+}
+.ch2-mecca-illus figcaption{
+  margin-top:9px;font-size:15px;line-height:1.6;color:var(--muted);
+}
 @media (min-width:900px){
   /* Heading and prose centre together between the two rules. The reserved
      height is what sets the air above and below them: 640px against a 430px
@@ -1575,17 +1590,17 @@ html{scrollbar-gutter:stable}
      throws away only the dead margins, which is why this is `cover` and not a
      smaller `contain`. 46% pulls the frame up a little — the horizon and the
      standing stones sit below centre in the painting. */
+  /* ── תצלום ולא ציור ────────────────────────────────────────────────
+     המסכה הרדיאלית והחיתוך לריבוע נכתבו לציור מים שנמוג אל הקלף.
+     תצלום אינו נמוג: הוא ממוסגר בקו שיער ובצל של המערכת, ושומר על
+     יחס הצדדים שלו (500×333) במקום להיחתך לריבוע. */
+  .ch2-mecca-illus{pointer-events:auto;user-select:auto}
   .ch2-mecca-illus img{
-    width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;object-position:center 46%;
-    /* TIGHTER than chapter 6 uses, and for a reason of this picture: the giving
-       illustration there is a cut-out on transparency, so its mask only has to
-       soften an edge. This one is painted ON parchment, and the parchment is a
-       shade lighter than the page — left to the wider fade it showed as a pale
-       rectangle behind the Kaaba. The window closes inside the painted subject,
-       so what reaches the page is the painting and none of its ground. */
-    -webkit-mask-image:radial-gradient(66% 62% at 50% 52%,#000 38%,transparent 76%);
-            mask-image:radial-gradient(66% 62% at 50% 52%,#000 38%,transparent 76%);
-    filter:drop-shadow(0 16px 30px rgba(60,35,18,.08));
+    width:100%;height:auto;border-radius:14px;
+    border:1px solid var(--edge);box-shadow:var(--shadow);
+  }
+  .ch2-mecca-illus figcaption{
+    margin-top:9px;font-size:15px;line-height:1.6;color:var(--muted);
   }
   .ch2-mecca-body > :first-child{margin-top:0}
   /* flex centres margin boxes, so a margin on either end of the stack tips the
@@ -1653,3 +1668,27 @@ html{scrollbar-gutter:stable}
 .ch2-watch a::before{content:"▶";font-size:.75em;color:var(--stamp)}
 .ch2-watch a:hover{text-decoration-color:var(--maroon-deep)}
 .ch2-watch a:focus-visible{outline:2px solid var(--maroon);outline-offset:3px;border-radius:4px}
+
+/* ── פתיחת הפרק: הטקסט מימין, התמונה משמאל ───────────────────────────
+   העמוד RTL, ולכן העמודה הראשונה ברשת היא הימנית — שם הטקסט, והוא גם
+   ראשון ב-DOM כדי שסדר הקריאה, המקלדת וקורא המסך יסכימו עם העין.
+   התמונה יושבת בעמודה השנייה, כלומר בצד שמאל של המסך.
+   היחס 1.15fr/1fr ולא חצי-חצי: פסקה צריכה מידה קריאה, ותצלום 960×752
+   מגיע לגובה שלה גם ברוחב קטן יותר. */
+.ch2-lineage-split{
+  display:grid;grid-template-columns:1.15fr 1fr;
+  gap:clamp(22px,3vw,46px);align-items:start;
+  width:100%;max-width:var(--wide, 1180px);
+}
+.ch2-lineage-text{min-width:0}
+/* התמונה כבר ממוסגרת ב-.ch2-photo; כאן רק המקום שלה ברשת */
+.ch2-lineage-photo{margin-top:0;max-width:100%;position:sticky;top:calc(var(--header-height) + 20px)}
+
+/* ── מתחת ל-900: אין שתי עמודות ───────────────────────────────────────
+   שתי עמודות ברוחב כזה נותנות שורות של עשרים תווים, וזו לא שורה.
+   חוזרות זו מתחת לזו, והטקסט קודם — כמו ב-DOM. */
+@media (max-width:900px){
+  .ch2-lineage-split{grid-template-columns:1fr;gap:clamp(18px,3vw,26px)}
+  .ch2-lineage-photo{position:static;max-width:var(--measure,880px)}
+}
+@media (prefers-reduced-motion:reduce){.ch2-lineage-photo{position:static}}

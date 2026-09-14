@@ -994,22 +994,29 @@ export default function Chapter2() {
                     parchment beside them at 1920, and this was asked for with the
                     line lengths on the table. Two columns were tried first and
                     were not what was wanted. */}
-                <div className="ch2-body ch2-wide" data-reveal>
-                  <T
-                    r={['§1.a', '(§1.gloss)']}
-                    em={['לחצי האי ערב', termOf('§1.gloss')]}
-                  />
-                  {/* §4 אינו עוד המשפט על המבול — בסבב התיקונים הוא הפך
-                      להגדרת „בדווים", ומקומו אצל השבטים ולא אצל הכעבה.
-                      המבול נאמר עכשיו בתוך §2 עצמו. */}
-                  <T
-                    r={['§2.a', '§3.a', '(§3.aside)']}
-                    em={['אבני היסוד', 'מַקַּאם אִבְּרָאהִים']}
-                  />
+                {/* ── התמונה משמאל, הטקסט מימין ──────────────────────────
+                    בעמוד RTL הטקסט מתחיל מימין, ולכן הוא ראשון ב-DOM —
+                    וזה גם סדר הקריאה למי שמגיע במקלדת או בקורא מסך.
+                    התמונה יושבת בעמודה השנייה, כלומר בצד שמאל של המסך.
+                    במסך צר השתיים חוזרות זו מתחת לזו, הטקסט קודם. */}
+                <div className="ch2-lineage-split" data-reveal>
+                  <div className="ch2-body ch2-lineage-text">
+                    <T
+                      r={['§1.a', '(§1.gloss)']}
+                      em={['לחצי האי ערב', termOf('§1.gloss')]}
+                    />
+                    {/* §4 אינו עוד המשפט על המבול — בסבב התיקונים הוא הפך
+                        להגדרת „בדווים", ומקומו אצל השבטים ולא אצל הכעבה.
+                        המבול נאמר עכשיו בתוך §2 עצמו. */}
+                    <T
+                      r={['§2.a', '§3.a', '(§3.aside)']}
+                      em={['אבני היסוד', 'מַקַּאם אִבְּרָאהִים']}
+                    />
+                  </div>
                   {/* „עד היום (ראו תמונה)" — התצלום שהמרצה צירפה לסבב
                       התיקונים. צילום ולכן ממוסגר בקו שיער ובצל של הפרק,
                       להבדיל מן הציורים שיושבים על הקלף בלי מסגרת. */}
-                  <figure className="ch2-photo">
+                  <figure className="ch2-photo ch2-lineage-photo">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/assets/chapter2/maqam-ibrahim.png"
                          alt={'מַקַּאם אִבְּרָאהִים — „מקומו של אברהם“, האבן שצמודה לכעבה במכה'}
@@ -1268,10 +1275,19 @@ export default function Chapter2() {
                     framed 16:9 rectangle above the prose; this is the chapter's
                     other register, the one the seated figure is painted in. */}
                 <div className="ch2-mecca-hero">
-                  <div className="ch2-mecca-illus" aria-hidden="true">
+                  {/* ── התצלום שצורף לסבב התיקונים, במקום הציור ─────────
+                      כאן עמד ציור מים שנמוג אל הקלף במסכה רדיאלית. תצלום
+                      אינו נמוג — הוא ממוסגר — ולכן המסכה והחיתוך לריבוע
+                      ירדו איתו. המיקום לא נגע: אותו `--kaaba` ואותו עוגן
+                      בצד ימין של המסך. וזו כבר אינה תמונה דקורטיבית אלא
+                      תצלום שנושא מידע, ולכן יש לו alt אמיתי וכיתוב. */}
+                  <figure className="ch2-mecca-illus">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/assets/chapter2/mecca-kaaba.webp" alt="" loading="lazy" decoding="async" />
-                  </div>
+                    <img src="/assets/chapter2/kaaba-photo.png"
+                         alt="הכעבה במכה — מבנה שחור גדול במרכז המתחם, ומסביבו עולי רגל"
+                         loading="lazy" decoding="async" />
+                    <figcaption>הכעבה — מבנה שחור גדול במרכז מכה.</figcaption>
+                  </figure>
                   {/* THE HEADING BELONGS TO THE SAME CENTRED GROUP AS THE PROSE.
                       Left outside this block it was pinned to the top of the
                       section while the prose centred itself against the picture
@@ -1283,15 +1299,6 @@ export default function Chapter2() {
                   </div>
                   <div className="ch2-mecca-body ch2-body" data-reveal>
                     <T r={['§30.a', '|§31.a']} em={['האבן השחורה']} />
-                    {/* „מבנה שחור גדול, מצ\u2019\u2019ב תמונה" — התצלום שצורף
-                        לסבב התיקונים, מיד אחרי המשפט שמתאר אותו. */}
-                    <figure className="ch2-photo">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src="/assets/chapter2/kaaba-photo.png"
-                           alt="הכעבה במכה — מבנה שחור גדול במרכז המתחם"
-                           loading="lazy" decoding="async" />
-                      <figcaption>הכעבה — מבנה שחור גדול במרכז מכה.</figcaption>
-                    </figure>
                     <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
                   </div>
                 </div>
