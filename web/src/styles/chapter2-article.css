@@ -1545,51 +1545,53 @@ html{scrollbar-gutter:stable}
      height is what sets the air above and below them: 640px against a 430px
      block leaves ~105px at each end, which is what תקופת הג'אהליה above it
      shows under its own rule (107px). Same spacing, and symmetrical. */
-  .ch2-mecca-hero{display:flex;flex-direction:column;justify-content:center;min-height:clamp(430px,38vw,640px)}
-  /* THE COLUMN IS MEASURED FROM THE PICTURE, not from either edge of the page,
-     and it is the same arithmetic `--plate` uses higher up this file. Three
-     attempts failed before this on percentages that do not know about each
-     other: `margin-inline-start:44%` beside `width:58%` adds to 102%, so at
-     1440 the prose ran past the article's own left edge; anchoring to the outer
-     edge instead left the gap to the picture at the window's mercy — 101px at
-     1850 and 17px at 1440; and two independent percentages, one for the text
-     and one for the watercolour, had them overlapping by 47px at 1100. One
-     variable holds the picture's width, the text reserves exactly that much
-     plus a gap, and the auto margin on the outer side takes whatever is left.
-     The distance between prose and painting is then the same at every width,
-     because it is written once. */
-  /* the picture's floor is 320px and not 390px: at 1100 the article is 713px
-     wide, a 390px watercolour takes 55% of it, and the column had 5px of slack
-     left — no room to move the prose at all */
-  .ch2-mecca-hero{--kaaba:clamp(320px,44%,620px);--kaaba-gap:clamp(28px,2.4vw,44px)}
-  /* THE HEADING SHARES THE PROSE'S BOX. Left at the article edge it hung above
-     the illustration with the prose starting far below and to the left of it,
-     so the section had two right edges. */
-  .ch2-mecca-body,.ch2-mecca-head{
-    width:min(680px,46%);max-width:none;
-    margin-inline-start:calc(var(--kaaba) - var(--content-gutter) + var(--kaaba-gap));
-    margin-inline-end:auto;
+  /* ── רשת, ולא חשבון שוליים ────────────────────────────────────────
+     כאן עמדו שלושה דברים שהתנגשו: פלקס שמרכז את הכותרת ואת הטקסט
+     כקבוצה אחת, תצלום ממוקם מוחלטות, וחשבון `margin-inline-start`
+     שהעמיד את העמודה מול רוחב התצלום. שתי בקשות פשוטות — „הטקסט
+     עוד שמאלה" ו„הטקסט הרץ ממורכז בלי הכותרת" — לא היו ניתנות
+     לביטוי בחשבון הזה בלי לשבור אותו, ולכן הוא הוחלף ברשת שאומרת
+     בדיוק את שתיהן: שתי עמודות, שתי שורות.
+
+     RTL: העמודה הראשונה היא הימנית, ושם התצלום. הכותרת בשורה
+     העליונה של עמודת הטקסט, הטקסט הרץ בשורה שמתחתיה וממורכז בה,
+     והתצלום בשורה השנייה בלבד, כלומר על אותו ציר של הטקסט — „ממורכז
+     ללא הכותרת" הוא מה שהרשת עושה, לא תיקון שמוסיפים עליה.
+
+     ⚠ שני המשתנים מוצהרים כאן ולא בכלל נפרד: הם היו בכלל שהוחלף,
+     והרשת נשארה עם `grid-template-columns:var(--kaaba) …` שלא מפוענח —
+     כלומר בלי רשת בכלל. נמדד: התצלום התכווץ ל-232 פיקסלים ולא היה
+     רווח בין העמודות. */
+  .ch2-mecca-hero{
+    --kaaba:clamp(320px,40%,560px);
+    --kaaba-gap:clamp(28px,3.4vw,56px);
+    display:grid;
+    grid-template-columns:var(--kaaba) minmax(0,1fr);
+    column-gap:var(--kaaba-gap);
+    align-items:center;
   }
   .ch2-mecca-illus{
-    display:block;position:absolute;top:50%;translate:0 -50%;
-    inset-inline-end:auto;inset-inline-start:calc(-1 * var(--content-gutter));
-    width:var(--kaaba);z-index:0;pointer-events:none;user-select:none;
+    /* בשורה השנייה בלבד — אותה שורה שבה הטקסט הרץ. כשהתצלום נפרש גם
+       על שורת הכותרת הוא התמרכז על גובה שכולל אותה, והטקסט נשאר
+       נמוך ממנו ב-71 פיקסלים. עכשיו שניהם ממורכזים על אותו ציר. */
+    /* ⚠ מדידת מרכוז חייבת לחכות לחשיפה. `data-reveal` מתחיל ב-
+       `translate:0 22px`, ולכן כל מדידה שנעשית לפני ש-`.is-inview`
+       הגיע מראה הפרש של 22 פיקסלים בין העמודות — הפרש שאינו קיים
+       בקריאה אמיתית. איבדתי עליו זמן; כתוב כאן כדי שלא יילקח שוב
+       כבאג פריסה. עם החשיפה — 0 פיקסלים ב-1440, 1920 ו-1100. */
+    grid-column:1;position:relative;width:100%;margin:0;max-width:none;
   }
-  /* THE FILE IS A PORTRAIT PLATE, 1200×1607, AND MOST OF IT IS EMPTY SKY AND
-     SAND — the Kaaba itself occupies the middle three fifths. Printed whole at a
-     width that makes the building large, the block came out 976px tall beside
-     309px of prose: the section was measured by the picture, the text was left
-     in a corner, and 331px of nothing opened between the heading and the first
-     line. Cropping to a square keeps the Kaaba at exactly the size it was and
-     throws away only the dead margins, which is why this is `cover` and not a
-     smaller `contain`. 46% pulls the frame up a little — the horizon and the
-     standing stones sit below centre in the painting. */
-  /* ── תצלום ולא ציור ────────────────────────────────────────────────
-     המסכה הרדיאלית והחיתוך לריבוע נכתבו לציור מים שנמוג אל הקלף.
-     תצלום אינו נמוג: הוא ממוסגר בקו שיער ובצל של המערכת, ושומר על
-     יחס הצדדים שלו (500×333) במקום להיחתך לריבוע. */
-  .ch2-mecca-illus{pointer-events:auto;user-select:auto}
-
+  /* ── מה שמתמרכז הוא התמונה, לא התמונה-והכיתוב ─────────────────────
+     הכיתוב מוסיף 24 פיקסלים לתחתית ה-figure, ולכן מרכז הקופסה נפל
+     22 פיקסלים מתחת למרכז התמונה — והעין מודדת את התמונה. הכיתוב
+     יוצא מן הזרימה ותלוי מתחתיה, כך שהקופסה שמתמרכזת היא התמונה
+     עצמה. יש לו מקום: המקטע שומר גובה מינימלי והתצלום ממורכז בתוכו. */
+  .ch2-mecca-illus figcaption{
+    position:absolute;top:100%;inset-inline:0;margin-top:var(--flow-tight);
+  }
+  /* הכותרת אינה עוד בתוך הרשת — היא מעליה, ברוחב המקטע. */
+  .ch2-mecca-head{width:auto;margin:0}
+  .ch2-mecca-body{grid-column:2;width:100%;max-width:min(680px,100%);margin:0}
   .ch2-mecca-body > :first-child{margin-top:0}
   /* flex centres margin boxes, so a margin on either end of the stack tips the
      visible block off the middle by half its size — 24px of heading margin put
@@ -1685,9 +1687,14 @@ html{scrollbar-gutter:stable}
    הרווח בין העמודות הוא `--content-gutter`, אותו מרווח שהאתר מודד בו
    את השוליים שלו, ולא clamp שנכתב כאן לבד. המרחק מן הכותרת שמעל הוא
    `--flow-lead`, כמו כל בלוק ראשון אחרי כותרת מקטע בפרק. */
+/* ── הרווח הוא זה של המפה ────────────────────────────────────────────
+   `--content-gutter` (57.6px ב-1440) הוא מרווח *שוליים*, ובין תמונה
+   לטקסט הוא רחב מדי — הזוג נקרא כשני דברים ולא כאחד. המפה שבמקטע
+   הבא מחזיקה בדיוק את אותו יחס, והמספרים שלה כתובים שם: ציר אחד
+   לשורות (`--flow`) ואחד צר יותר לעמודות. אותם שניים כאן. */
 .ch2-lineage-split{
   display:grid;grid-template-columns:1.15fr 1fr;
-  gap:var(--content-gutter);align-items:center;
+  gap:var(--flow) clamp(26px,2.8vw,40px);align-items:center;
   width:100%;max-width:var(--wide, 1180px);
 }
 /* אין כאן כלל מרווח משלו, וזה מכוון: `.article-section > * + *` של הפרק
@@ -1701,6 +1708,6 @@ html{scrollbar-gutter:stable}
    שתי עמודות ברוחב כזה נותנות שורות של עשרים תווים, וזו לא שורה.
    חוזרות זו מתחת לזו, והטקסט קודם — כמו ב-DOM, ובמרווח של בין-פסקאות. */
 @media (max-width:900px){
-  .ch2-lineage-split{grid-template-columns:1fr;gap:var(--flow-lead)}
+  .ch2-lineage-split{grid-template-columns:1fr;gap:var(--flow)}
   .ch2-lineage-photo{max-width:var(--measure,880px)}
 }

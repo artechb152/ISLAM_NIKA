@@ -1274,6 +1274,11 @@ export default function Chapter2() {
                     The photographic precinct plate that stood here before was a
                     framed 16:9 rectangle above the prose; this is the chapter's
                     other register, the one the seated figure is painted in. */}
+                {/* הכותרת מחוץ לזוג תמונה-טקסט, ולא בתוכו: כך „הטקסט הרץ
+                    ממורכז ללא הכותרת" הוא המבנה עצמו ולא תיקון עליו. */}
+                <div className="ch2-mecca-head">
+                  <Head id="mecca" />
+                </div>
                 <div className="ch2-mecca-hero">
                   {/* ── התצלום שצורף לסבב התיקונים, במקום הציור ─────────
                       כאן עמד ציור מים שנמוג אל הקלף במסכה רדיאלית. תצלום
@@ -1288,15 +1293,6 @@ export default function Chapter2() {
                          loading="lazy" decoding="async" />
                     <figcaption>הכעבה — מבנה שחור גדול במרכז מכה.</figcaption>
                   </figure>
-                  {/* THE HEADING BELONGS TO THE SAME CENTRED GROUP AS THE PROSE.
-                      Left outside this block it was pinned to the top of the
-                      section while the prose centred itself against the picture
-                      below, which opened 221px of nothing between the title and
-                      its first line — a hole, not air. Heading and prose centre
-                      together now, boxed to one column, sharing one right edge. */}
-                  <div className="ch2-mecca-head">
-                    <Head id="mecca" />
-                  </div>
                   <div className="ch2-mecca-body ch2-body" data-reveal>
                     <T r={['§30.a', '|§31.a']} em={['האבן השחורה']} />
                     <T r={['§32.a', '§33.a', '§33.list']} em={['קורייש']} />
