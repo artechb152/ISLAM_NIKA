@@ -1537,15 +1537,9 @@ html{scrollbar-gutter:stable}
    ברוחב הקריאה, ובלי המיקום המוחלט של המסך הרחב. */
 .ch2-mecca-illus{
   display:block;position:static;width:100%;max-width:var(--measure,880px);
-  margin:0 0 clamp(20px,3vw,30px);
+  margin:0 0 var(--flow-lead);
 }
-.ch2-mecca-illus img{
-  width:100%;height:auto;border-radius:14px;
-  border:1px solid var(--edge);box-shadow:var(--shadow);
-}
-.ch2-mecca-illus figcaption{
-  margin-top:9px;font-size:15px;line-height:1.6;color:var(--muted);
-}
+
 @media (min-width:900px){
   /* Heading and prose centre together between the two rules. The reserved
      height is what sets the air above and below them: 640px against a 430px
@@ -1595,13 +1589,7 @@ html{scrollbar-gutter:stable}
      תצלום אינו נמוג: הוא ממוסגר בקו שיער ובצל של המערכת, ושומר על
      יחס הצדדים שלו (500×333) במקום להיחתך לריבוע. */
   .ch2-mecca-illus{pointer-events:auto;user-select:auto}
-  .ch2-mecca-illus img{
-    width:100%;height:auto;border-radius:14px;
-    border:1px solid var(--edge);box-shadow:var(--shadow);
-  }
-  .ch2-mecca-illus figcaption{
-    margin-top:9px;font-size:15px;line-height:1.6;color:var(--muted);
-  }
+
   .ch2-mecca-body > :first-child{margin-top:0}
   /* flex centres margin boxes, so a margin on either end of the stack tips the
      visible block off the middle by half its size — 24px of heading margin put
@@ -1635,17 +1623,30 @@ html{scrollbar-gutter:stable}
 
 /* ── תצלום בתוך הפרק ──────────────────────────────────────────────────
    ציור יושב על הקלף בלי מסגרת; תצלום ממוסגר — קו שיער ב-`--edge` והצל
-   היחיד של המערכת. שני התצלומים שצורפו לסבב התיקונים (מקאם אבראהים
-   והכעבה) הם היחידים בפרק, ולכן זה כל מה שהכלל הזה צריך לומר. */
-.ch2-photo{
-  margin:clamp(20px,2.6vw,30px) 0 0;width:100%;max-width:var(--measure,880px);
-}
-.ch2-photo img{
+   היחיד של המערכת.
+
+   ── והפילטר ──────────────────────────────────────────────────────────
+   שני התצלומים שצורפו הם צילום דיגיטלי מודרני, והם נחתו בתוך עולם של
+   קלף, בורדו וזהב — כלומר נקראו כהדבקה. הטיפול כאן הוא זה שהאתר כבר
+   משתמש בו על מדיה צילומית (`.ch5-hero-media`: sepia .16 / saturate 1.12),
+   במינון מעט גבוה יותר מפני שכאן זו תמונה עומדת ולא באנר מתחת לצעיף.
+   זה חימום, לא אפקט: הצבעים נשארים הצבעים, הם רק מפסיקים להיות קרים
+   מן הדף שסביבם. */
+.ch2-photo{width:100%;max-width:var(--measure,880px)}
+.ch2-photo img,
+.ch2-mecca-illus img{
   display:block;width:100%;height:auto;border-radius:14px;
   border:1px solid var(--edge);box-shadow:var(--shadow);
+  filter:sepia(.18) saturate(1.1) contrast(.97);
 }
-.ch2-photo figcaption{
-  margin-top:9px;font-size:15px;line-height:1.6;color:var(--muted);
+@media (prefers-contrast:more){
+  .ch2-photo img,.ch2-mecca-illus img{filter:none}
+}
+/* הכיתוב הוא השורה שאחרי התמונה — אותו מרווח שכותרת משנה נותנת לשורה
+   הראשונה שלה */
+.ch2-photo figcaption,
+.ch2-mecca-illus figcaption{
+  margin-top:var(--flow-tight);font-size:15px;line-height:1.6;color:var(--muted);
 }
 
 /* ── „ראו למשל את הסרטונים הבאים" ─────────────────────────────────────
@@ -1672,23 +1673,34 @@ html{scrollbar-gutter:stable}
 /* ── פתיחת הפרק: הטקסט מימין, התמונה משמאל ───────────────────────────
    העמוד RTL, ולכן העמודה הראשונה ברשת היא הימנית — שם הטקסט, והוא גם
    ראשון ב-DOM כדי שסדר הקריאה, המקלדת וקורא המסך יסכימו עם העין.
-   התמונה יושבת בעמודה השנייה, כלומר בצד שמאל של המסך.
-   היחס 1.15fr/1fr ולא חצי-חצי: פסקה צריכה מידה קריאה, ותצלום 960×752
-   מגיע לגובה שלה גם ברוחב קטן יותר. */
+
+   ── ממורכזת אל הטקסט ─────────────────────────────────────────────────
+   `align-items:start` יישר את שתי העמודות לראש, ולכן תצלום נמוך מן
+   הפסקאות השאיר שדה ריק מתחתיו. כלל 53 של מערכת העיצוב אומר את זה
+   מפורשות: תמונה לצד טקסט ממורכזת אנכית מולו. וה-sticky ירד איתו —
+   תמונה שנוסעת עם הגלילה בזמן שהטקסט לצידה עומד היא בדיוק מה שמפרק
+   את הזיווג בין השניים.
+
+   ── והמרווחים ────────────────────────────────────────────────────────
+   הרווח בין העמודות הוא `--content-gutter`, אותו מרווח שהאתר מודד בו
+   את השוליים שלו, ולא clamp שנכתב כאן לבד. המרחק מן הכותרת שמעל הוא
+   `--flow-lead`, כמו כל בלוק ראשון אחרי כותרת מקטע בפרק. */
 .ch2-lineage-split{
   display:grid;grid-template-columns:1.15fr 1fr;
-  gap:clamp(22px,3vw,46px);align-items:start;
+  gap:var(--content-gutter);align-items:center;
   width:100%;max-width:var(--wide, 1180px);
 }
+/* אין כאן כלל מרווח משלו, וזה מכוון: `.article-section > * + *` של הפרק
+   כבר נותן `--flow` בין בלוק לבלוק (34px ב-1440), ו-`--flow-lead` אחרי
+   כותרת מקטע. נמדד — הבלוק הזה מקבל בדיוק את אותם מרווחים שכל בלוק
+   אחר בפרק מקבל, ולכן כלל מקומי היה רק דרך לסטות מהם. */
 .ch2-lineage-text{min-width:0}
-/* התמונה כבר ממוסגרת ב-.ch2-photo; כאן רק המקום שלה ברשת */
-.ch2-lineage-photo{margin-top:0;max-width:100%;position:sticky;top:calc(var(--header-height) + 20px)}
+.ch2-lineage-photo{margin:0;max-width:100%}
 
 /* ── מתחת ל-900: אין שתי עמודות ───────────────────────────────────────
    שתי עמודות ברוחב כזה נותנות שורות של עשרים תווים, וזו לא שורה.
-   חוזרות זו מתחת לזו, והטקסט קודם — כמו ב-DOM. */
+   חוזרות זו מתחת לזו, והטקסט קודם — כמו ב-DOM, ובמרווח של בין-פסקאות. */
 @media (max-width:900px){
-  .ch2-lineage-split{grid-template-columns:1fr;gap:clamp(18px,3vw,26px)}
-  .ch2-lineage-photo{position:static;max-width:var(--measure,880px)}
+  .ch2-lineage-split{grid-template-columns:1fr;gap:var(--flow-lead)}
+  .ch2-lineage-photo{max-width:var(--measure,880px)}
 }
-@media (prefers-reduced-motion:reduce){.ch2-lineage-photo{position:static}}
