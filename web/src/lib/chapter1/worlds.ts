@@ -19,7 +19,6 @@
 import campLayout from './camp-layout.json'
 import borderLayout from './border-layout.json'
 import yathribLayout from './yathrib-layout.json'
-import yemenLayout from './yemen-heights-layout.json'
 import passLayout from './narrow-pass-layout.json'
 import roadLayout from './loading-road-layout.json'
 import monasteryLayout from './monastery-layout.json'
@@ -140,8 +139,11 @@ export interface Layout {
 }
 
 /* In journey order, south to north: the table is the itinerary. */
+/* רמות תימן ירדה מהרשימה (15.9.2026): המרצה ביקשה להעביר אותה אל מחנה
+   הלילה, והמחנה הוא עכשיו התחנה הראשונה. `yemen-heights-layout.json`
+   נשאר בתיקייה — הוא עבודת פריסה שלמה, והוא חוזר ברגע שמוסיפים כאן
+   שורה אחת. */
 export const LAYOUTS: Record<string, Layout> = {
-  'yemen-heights': yemenLayout,
   'night-camp': campLayout,
   'border-post': borderLayout,
   'narrow-pass': passLayout,

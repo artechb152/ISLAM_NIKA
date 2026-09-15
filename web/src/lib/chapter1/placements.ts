@@ -35,7 +35,6 @@ export const PLACEMENTS: Record<string, Placement[]> = {
   yathrib: [{ who: 'jewish', x: 4.2, z: 8.6, ry: -2.5 }],
   /* The opening is the narrator's alone, and Rawi walks with the player from
      the first step — neither needs a body placed on the ground. */
-  'yemen-heights': [],
   /* The tribal chief stands at his own camp fire, facing the pass the caravans
      come up through. */
   'narrow-pass': [{ who: 'chief', x: -2.6, z: 6, ry: -1.1 }],

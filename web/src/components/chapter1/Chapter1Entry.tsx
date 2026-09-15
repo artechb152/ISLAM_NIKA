@@ -32,7 +32,7 @@ export default function Chapter1Entry() {
       return
     }
     const store = readNotebook()
-    if (store.seen.length > 0 || store.entries.length > 0) setResumeAt(store.region || 'yemen-heights')
+    if (store.seen.length > 0 || store.entries.length > 0) setResumeAt(store.region || 'night-camp')
     setKnow(true)
     /* מושכים את צ׳אנק המשחק בזמן שקוראים את המסך — כדי ש„טוען את
        המסע…" לא יהיה המסך הראשון אחרי הלחיצה */

@@ -41,10 +41,14 @@ import { notebookCount, readNotebook, recordEncounter, recordFind, recordTask, s
    it only ever evaluates in the browser. A region that has no authored layout
    falls back to the camp instead of crashing — the journey grows one region at
    a time and half-built regions are the normal state of the world. */
-/* The chapter opens where the road opens. The default used to be the night
-   camp — the second region — so anyone starting the chapter normally skipped
-   the Yemen heights entirely, and with them the narrator's opening line: one of
-   the twenty-seven notebook entries was unreachable in ordinary play. */
+/* The chapter opens where the road opens — the first region in the registry.
+
+   ⚠ זה קבוע אחד שששה מקומות בקובץ הזה נשענים עליו, וכולם שואלים אותו דבר:
+   „האם זו התחנה שהפרק נפתח בה" — מי מדליק את האבן, מי מקבל את שורת הפעולה
+   הראשונה, ומאיפה ראאווי הולך אל השחקן בזמן הקריינות. הם נהגו לשאול
+   `REGION.id === 'yemen-heights'`, ולכן איחוד רמות תימן לתוך מחנה הלילה
+   (15.9.2026, לבקשת המשתמשת) היה מכבה את כולם בבת אחת. עכשיו הם נגזרים
+   מהרשימה: `PLAYABLE[0]` הוא מה ש-LAYOUTS פותח בו. */
 const FIRST_REGION = PLAYABLE[0]
 function requestedRegion(): string {
   if (typeof window === 'undefined') return FIRST_REGION
@@ -3764,14 +3768,14 @@ const HOST_NAME: string = (() => {
 })()
 /** תחנה שבה הפעולה הפיזית קודמת לבחינת העדות: אי אפשר לקרוא כתובת
     שיושבת בצל, והלפיד הוא מה שמוציא אותה משם. */
-const REVEAL_FIRST = REGION.id === 'yemen-heights'
+const REVEAL_FIRST = REGION.id === FIRST_REGION
 
 /* ההוראה של שלב הפעולה — משפט אחד שמתחיל בפועל. „גררו", „הניחו",
    „חברו", „האירו", „מסרו". הטקסטים של התחנות כבר כתובים כך ב-tasks.ts;
    שתי התחנות שיש להן שער נפרד מקבלות ניסוח משלהן, כי שם הפעולה
    הפיזית אינה המשימה עצמה אלא מה שפותח אותה. */
 const ACT_LINE: string =
-  REGION.id === 'yemen-heights'
+  REGION.id === FIRST_REGION
     ? 'האירו את האבן: קחו את הלפיד שלצידה, גררו אותו אליה והחזיקו.'
     : REGION.id === 'mecca'
       ? 'סדרו את השולחן: הניחו כל דבר במקומו — מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.'
@@ -4607,7 +4611,7 @@ const HAND_OBSTACLES: Collider[] = (() => {
   const t = REGION_TASK
   if (t) {
     out.push({ x: t.x, z: t.z, r: Math.max(1.4, t.h * 0.8) })
-    if (REGION.id === 'yemen-heights') out.push({ x: t.x + 2.3, z: t.z + 1.5, r: 1.0 })
+    if (REGION.id === FIRST_REGION) out.push({ x: t.x + 2.3, z: t.z + 1.5, r: 1.0 })
   }
   return out
 })()
@@ -5074,7 +5078,7 @@ function RawiCompanion({ live, talking, gesture }: {
   /* בביקור הראשון ראאווי לא מתחיל צמוד לכתף אלא במעלה הדרך — והולך
      אל השחקן בזמן קריינות הפתיחה. כניסה של דמות, לא הופעה של מודל. */
   const introAhead = useMemo(() => {
-    if (REGION.id !== 'yemen-heights' || typeof window === 'undefined') return false
+    if (REGION.id !== FIRST_REGION || typeof window === 'undefined') return false
     if (new URLSearchParams(window.location.search).get('from')) return false
     try {
       return !window.localStorage.getItem(INTRO_KEY)
@@ -5315,7 +5319,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
           />
         </Suspense>
       )}
-      {REGION.id === 'yemen-heights' && REGION_TASK && (
+      {REGION.id === FIRST_REGION && REGION_TASK && (
         <Suspense fallback={null}>
           <LampReveal
             live={live}
@@ -6177,7 +6181,7 @@ export default function Game() {
      התשיעית של הפרק לא נטענה בכלל. */
   const evidenceDone = (REGION_TASK?.needsFinds ?? []).every((f) => found.includes(f)) &&
     (REGION_TASK?.options ?? []).every((o) => !o.needsFind || found.includes(o.needsFind))
-  const physDone = REGION.id === 'yemen-heights' ? stoneLit
+  const physDone = REGION.id === FIRST_REGION ? stoneLit
     : REGION.id === 'mecca' ? tableSet
     : placedAll
   /* ── מתי התחנה באמת נסגרת ───────────────────────────────────────
@@ -6478,7 +6482,7 @@ export default function Game() {
     const prev = prevEncounterId.current
     prevEncounterId.current = encounter?.id ?? null
     if (encounter || prev !== 'opening') return
-    if (REGION.id !== 'yemen-heights') return
+    if (REGION.id !== FIRST_REGION) return
     try {
       if (window.localStorage.getItem(INTRO_KEY)) return
       window.localStorage.setItem(INTRO_KEY, '1')

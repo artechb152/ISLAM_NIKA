@@ -59,6 +59,20 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
      standing out by the station. */
   const [held, setHeld] = useState<string | null>(null)
 
+  /* ⚠ שלב הפירוש נפתח רק אחרי שהתשובה הראשונה ניתנה.
+     `phase` מגיע ממכונת השלבים של האזור, ושם „interpret" פירושו „הפעולה
+     הפיזית נגמרת, עכשיו התשובה" — ובתחנה שבה הפעולה הפיזית אינה התשובה
+     (מחנה הלילה: מדליקים את האבן, ורק אז שואלים מה היא מוכיחה) הפאנל
+     קפץ ישר אל שאלת הפירוש. השאלה הראשונה לא נשאלה מעולם, ולכן
+     `placedAll` לא יכול היה להתקיים והתחנה לא נסגרה לעולם.
+     בתחנות שבהן ההנחה היא התשובה, `mainDone` מתקיים ברגע שהוצב הפריט
+     ושום דבר לא משתנה. */
+  const mainNeeded = (sorting || task.kind === 'present'
+    ? task.options.filter((o) => o.prop)
+    : task.options.filter((o) => o.right)).map((o) => o.id)
+  const mainDone = mainNeeded.length === 0 || mainNeeded.every((id) => chosen.includes(id))
+  const interpreting = phase === 'interpret' && !!task.interpret && mainDone
+
   return (
     <div className="ch1-task" role="dialog" aria-labelledby="ch1-task-title">
       <div className="ch1-task-card">
@@ -66,11 +80,11 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
         <h3 id="ch1-task-title">{task.title}</h3>
         {/* שאלת הפעולה שייכת לשלב הפעולה. בשלב הפירוש היא עמדה מעל
             שאלת הפירוש, ושתי שאלות זו מעל זו נקראות כשאלה אחת מבולבלת. */}
-        {!(phase === 'interpret' && task.interpret) && (
+        {!interpreting && (
           <p className="ch1-task-question">{task.question}</p>
         )}
 
-        {phase === 'interpret' && task.interpret ? (
+        {interpreting && task.interpret ? (
           /* ── הפירוש ─────────────────────────────────────────────────
              הפעולה כבר נעשתה, והפאנל אינו חוזר עליה: הוא שואל מה היא
              אמרה. עד עכשיו ההנחה הייתה גם התשובה, ולכן השלב הזה לא

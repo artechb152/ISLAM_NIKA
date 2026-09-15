@@ -22,7 +22,7 @@ export interface MapPin {
 }
 
 export const MAP_PINS: MapPin[] = [
-  { id: 'yemen-heights', label: 'רמות תימן', left: 43, top: 90, side: 'end' },
+  /* המסע מתחיל כאן מאז שרמות תימן אוחדה לתוך המחנה — הסיכה שלה ירדה. */
   { id: 'night-camp', label: 'מחנה הלילה', left: 39.5, top: 78.5, side: 'start' },
   { id: 'border-post', label: 'תחנת הגבול', left: 46, top: 57.5, side: 'end' },
   { id: 'narrow-pass', label: 'המעבר הצר', left: 52.5, top: 50, side: 'end' },

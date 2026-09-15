@@ -22,7 +22,7 @@ export interface NotebookStore {
   chosen: string[]
 }
 
-const EMPTY: NotebookStore = { seen: [], entries: [], region: 'yemen-heights', found: [], solved: [], chosen: [] }
+const EMPTY: NotebookStore = { seen: [], entries: [], region: 'night-camp', found: [], solved: [], chosen: [] }
 
 export function readNotebook(): NotebookStore {
   if (typeof window === 'undefined') return EMPTY

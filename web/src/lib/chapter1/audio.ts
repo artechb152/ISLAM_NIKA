@@ -33,7 +33,6 @@ type Ambience = {
 }
 
 const AMBIENCE: Record<string, Ambience> = {
-  'yemen-heights': { wind: 0.85, windTone: 620, fire: 0, crowd: 0 },
   'night-camp': { wind: 0.34, windTone: 300, fire: 0.7, crowd: 0.1 },
   'border-post': { wind: 0.42, windTone: 420, fire: 0.35, crowd: 0.3 },
   'narrow-pass': { wind: 1.0, windTone: 760, fire: 0.2, crowd: 0 },

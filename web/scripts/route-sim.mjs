@@ -24,17 +24,24 @@ const LIB = join(dirname(fileURLToPath(import.meta.url)), '..', 'src', 'lib', 'c
 export const PLAYER_R = 0.45
 export const TALK_RANGE = 3.6
 
-const FILES = {
-  'yemen-heights': 'yemen-heights-layout.json',
-  'night-camp': 'camp-layout.json',
-  'border-post': 'border-layout.json',
-  'narrow-pass': 'narrow-pass-layout.json',
-  'loading-road': 'loading-road-layout.json',
-  yathrib: 'yathrib-layout.json',
-  monastery: 'monastery-layout.json',
-  mecca: 'mecca-layout.json',
-  exit: 'exit-layout.json',
-}
+/* ⚠ אין כאן רשימת אזורים משלנו — היא נקראת מ-worlds.ts, שהוא הרישום שהמשחק
+   עצמו טוען. הייתה כאן טבלה כתובה ביד, וברגע שרמות תימן אוחדה לתוך מחנה
+   הלילה (15.9.2026) היא נשארה מאחור: הסימולציה המשיכה לדווח „yemen-heights
+   ✓ → שער night-camp" על אזור שאינו בפרק, כלומר שער ירוק על מסלול שאיש לא
+   הולך בו. רשימה שנייה היא תמיד רשימה שתישאר מאחור. */
+const worldsSrc = readFileSync(join(LIB, 'worlds.ts'), 'utf8')
+const IMPORTS = Object.fromEntries(
+  [...worldsSrc.matchAll(/^import (\w+) from '\.\/([\w-]+\.json)'/gm)].map((m) => [m[1], m[2]]),
+)
+const registry = worldsSrc.match(/export const LAYOUTS[^{]*\{([\s\S]*?)\n\}/)
+if (!registry) throw new Error('route-sim: לא נמצא רישום LAYOUTS ב-worlds.ts')
+const FILES = Object.fromEntries(
+  [...registry[1].matchAll(/^\s*'?([\w-]+)'?\s*:\s*(\w+),/gm)].map(([, id, ident]) => {
+    const file = IMPORTS[ident]
+    if (!file) throw new Error(`route-sim: אין ייבוא ל-${ident} (אזור ${id})`)
+    return [id, file]
+  }),
+)
 /** journey order, south to north — the itinerary the player walks */
 export const ORDER = Object.keys(FILES)
 
