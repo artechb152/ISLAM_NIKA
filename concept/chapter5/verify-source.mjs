@@ -15,7 +15,15 @@
 import { readFile } from 'node:fs/promises'
 
 const here = new URL('.', import.meta.url)
-const md = await readFile(new URL('SOURCE-TEXT.md', here), 'utf8')
+const mdFull = await readFile(new URL('SOURCE-TEXT.md', here), 'utf8')
+
+/* סבב התיקונים של המרצה אינו מה-PDF ואינו נבדק מולו — הוא נוסף אחרי שהחוברת
+   נכתבה, בנוסח שלה. החיתוך כאן מפורש ומודפס בכל ריצה: המקטע הזה הוא החריגה
+   היחידה, וכל מה שמעליו עדיין חייב להיות זהה לעמודים 40–43 אות באות. */
+const FIX_HEAD = '## תוספת · סבב התיקונים של המרצה'
+const cut = mdFull.indexOf(FIX_HEAD)
+const md = cut === -1 ? mdFull : mdFull.slice(0, cut) + mdFull.slice(mdFull.indexOf('\n---', cut))
+const fixed = cut === -1 ? [] : [...mdFull.slice(cut).matchAll(/^### (§\d+)/gm)].map((m) => m[1])
 const dump = await readFile(new URL('pdf-extract.txt', here), 'utf8')
 const ch4 = await readFile(new URL('../chapter4/pdf-extract.txt', here), 'utf8')
 
@@ -81,5 +89,6 @@ for (const c of new Set([...mine.keys(), ...theirs.keys()])) {
 if (diffs.length) { bad++; console.log('✗ ריבוי התווים אינו זהה:\n   ' + diffs.join('\n   ')) }
 else console.log(`✓ ${[...mine.values()].reduce((s, n) => s + n, 0)} תווים — ריבוי זהה ל-dump המכני של עמודים 40–43`)
 
+if (fixed.length) console.log(`· מחוץ להשוואה מול ה-PDF, בנוסח המרצה: ${fixed.join(', ')}`)
 console.log(bad ? `❌ ${bad} כשלים` : `✅ ${secs.length} סעיפים · שתי בדיקות עצמאיות · אפס סטיות מהמקור`)
 process.exit(bad ? 1 : 0)

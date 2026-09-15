@@ -67,7 +67,7 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter4',
         available: true,
       }),
-      ch(5, 'שאלת הירושה והח׳ליפים ישרי הדרך', {
+      ch(5, 'הח׳ליפים ישרי הדרך', {
         href: '/chapter5',
         available: true,
       }),

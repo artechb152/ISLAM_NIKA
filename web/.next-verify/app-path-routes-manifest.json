@@ -4,13 +4,20 @@
   "/icon.svg/route": "/icon.svg",
   "/(chapter1)/chapter1/dev-character/page": "/chapter1/dev-character",
   "/(chapter1)/chapter1/page": "/chapter1",
+  "/(chapter1)/chapter1/practice/page": "/chapter1/practice",
   "/(chapter2)/chapter2/page": "/chapter2",
   "/(chapter2)/chapter2/practice/page": "/chapter2/practice",
   "/(chapter3)/chapter3/page": "/chapter3",
   "/(chapter3)/chapter3/practice/page": "/chapter3/practice",
+  "/(chapter4)/chapter4/looks/page": "/chapter4/looks",
   "/(chapter4)/chapter4/page": "/chapter4",
+  "/(chapter4)/chapter4/practice/page": "/chapter4/practice",
+  "/(chapter5)/chapter5/page": "/chapter5",
+  "/(chapter5)/chapter5/practice/page": "/chapter5/practice",
   "/(chapter6)/chapter6/page": "/chapter6",
   "/(chapter6)/chapter6/practice/page": "/chapter6/practice",
   "/(chapters)/chapters/page": "/chapters",
-  "/(entrance)/page": "/"
+  "/(entrance)/page": "/",
+  "/(exams)/exams/page": "/exams",
+  "/(notebook)/notebook/page": "/notebook"
 }

@@ -58,6 +58,17 @@ async function walkTo(tx,tz,stop=2.0,budget=26){ for(let n=0;n<budget;n++){
   const p=await live(); return Math.hypot(tx-p.x,tz-p.z)<=stop+1.2 }
 
 let w = await W()
+/* 0. F לפני שהגיע שלב הפעולה */
+{
+  const before = await page.evaluate(()=>{ const o=window.__ch1Scene?.getObjectByName('task:lamp')
+    if(!o) return null; const v=o.getWorldPosition(new o.position.constructor()); return {x:+v.x.toFixed(2), z:+v.z.toFixed(2)} })
+  await page.keyboard.press('KeyF'); await page.waitForTimeout(700)
+  const after = await page.evaluate(()=>{ const o=window.__ch1Scene?.getObjectByName('task:lamp')
+    if(!o) return null; const v=o.getWorldPosition(new o.position.constructor()); return {x:+v.x.toFixed(2), z:+v.z.toFixed(2)} })
+  const hand = await page.evaluate(()=>(document.querySelector('.hud-hand')?.textContent??'').trim())
+  console.log('0. F בשלב', (await W()).stage, '→ הלפיד', JSON.stringify(before), '→', JSON.stringify(after), '· הוראה על המסך:', hand ? `"${hand.slice(0,60)}"` : 'אין')
+}
+
 console.log('פתיחה בשלב', w.stage)
 for (let r=0;r<8;r++){ w = await W(); if (w.stage!=='brief') break
   if (w.cast.length){ const c=w.cast[0]; await walkTo(c.x,c.z,2.2); await talkOut()
@@ -77,24 +88,29 @@ console.log('   ההודעה:', JSON.stringify(await note()))
 console.log('   פאנל נפתח:', await page.evaluate(()=>!!document.querySelector('.ch1-task')))
 await page.screenshot({ path:'/private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/shots/yemen-notyet.png' })
 
-console.log('2. גרירת הלפיד אל האבן, בעכבר:')
-/* הלפיד עצמו בסצנה בשם task:lamp — לוקחים ממנו מיקום אמיתי */
-const lamp = await page.evaluate(()=>{
-  const o = window.__ch1Scene.getObjectByName('task:lamp')
-  if (!o) return null
-  const v = o.getWorldPosition(new o.position.constructor())
-  return { x: v.x, y: v.y, z: v.z }
-})
-console.log('   הלפיד:', JSON.stringify(lamp))
-const a = await project(lamp.x, lamp.y + 0.6, lamp.z)
-const bY = await page.evaluate(()=>{
-  const o = window.__ch1Scene.getObjectByName('task:lamp')
-  return o ? o.getWorldPosition(new o.position.constructor()).y : 0 })
-const b = await project(T.x + 0.55, bY + 0.6, T.z + 0.35)
-await page.mouse.move(a.sx, a.sy); await page.mouse.down()
-for (let i=1;i<=18;i++){ await page.mouse.move(a.sx+(b.sx-a.sx)*i/18, a.sy+(b.sy-a.sy)*i/18); await page.waitForTimeout(70) }
-await page.waitForTimeout(3200)
-await page.mouse.up(); await page.waitForTimeout(900)
+console.log('2. הלפיד — במקלדת בלבד (F):')
+console.log('   הוראה על המסך:', JSON.stringify(await page.evaluate(()=>(document.querySelector('.hud-hand')?.textContent??'').trim().slice(0,90))))
+/* F לפני שהגיע שלב הפעולה? כאן אנחנו כבר ב-act, ולכן הבדיקה הזאת
+   נעשתה קודם, בשלב brief — ראו סעיף 0 למטה. */
+const lampPos = () => page.evaluate(()=>{ const o=window.__ch1Scene.getObjectByName('task:lamp')
+  if(!o) return null; const v=o.getWorldPosition(new o.position.constructor()); return {x:+v.x.toFixed(2), z:+v.z.toFixed(2)} })
+console.log('   הלפיד לפני:', JSON.stringify(await lampPos()))
+await page.keyboard.press('KeyF'); await page.waitForTimeout(700)
+console.log('   אחרי F (הרמה):', JSON.stringify(await page.evaluate(()=>(document.querySelector('.hud-hand')?.textContent??'').trim().slice(0,90))))
+console.log('   שלב אחרי הרמה:', (await W()).stage)
+/* ניסיון שגוי מכוון: מרחיקים את הלפיד מן האבן ומניחים — אין חשיפה */
+await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(400)
+await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(400)
+console.log('   אחרי שני חצים אחורה:', JSON.stringify(await lampPos()), '· שלב', (await W()).stage)
+await page.keyboard.press('KeyF'); await page.waitForTimeout(2500)
+console.log('   הנחה רחוקה → שלב:', (await W()).stage, '(אמור להישאר act)')
+/* ועכשיו כמו שצריך: מרימים, מקרבים צעד-צעד, ומחזיקים */
+await page.keyboard.press('KeyF'); await page.waitForTimeout(600)
+for (let i=0;i<10;i++){ await page.keyboard.press('ArrowRight'); await page.waitForTimeout(320)
+  const st=(await W()).stage; if(st!=='act'){ console.log('   נחשף אחרי', i+1, 'צעדים'); break } }
+console.log('   הלפיד אחרי:', JSON.stringify(await lampPos()))
+await page.waitForTimeout(2500)
+await page.keyboard.press('KeyF'); await page.waitForTimeout(800)
 w = await W(); console.log('   אחרי הגרירה:', w.stage)
 await page.screenshot({ path:'/private/tmp/claude-501/-Users-nikagreenbaum/9aa07fdd-34f8-43ce-9d20-79d7f178ec6f/scratchpad/shots/yemen-lit.png' })
 

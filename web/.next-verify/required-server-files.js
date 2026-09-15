@@ -103,7 +103,7 @@ self.__SERVER_FILES_MANIFEST={
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "C:\\Users\\nikag\\ISLAM_NIKA\\web",
+    "outputFileTracingRoot": "/Users/nikagreenbaum/ISLAM_NIKA/web",
     "cacheComponents": false,
     "cacheLife": {
       "default": {
@@ -165,7 +165,7 @@ self.__SERVER_FILES_MANIFEST={
       "proxyPrefetch": "flexible",
       "optimisticClientCache": true,
       "manualClientBasePath": false,
-      "cpus": 7,
+      "cpus": 14,
       "memoryBasedWorkersCount": false,
       "imgOptConcurrency": null,
       "imgOptTimeoutInSeconds": 7,
@@ -303,32 +303,32 @@ self.__SERVER_FILES_MANIFEST={
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
     "turbopack": {
-      "root": "C:\\Users\\nikag\\ISLAM_NIKA\\web"
+      "root": "/Users/nikagreenbaum/ISLAM_NIKA/web"
     },
     "distDirRoot": ".next-verify"
   },
-  "appDir": "C:\\Users\\nikag\\ISLAM_NIKA\\web",
+  "appDir": "/Users/nikagreenbaum/ISLAM_NIKA/web",
   "relativeAppDir": "",
   "files": [
-    ".next-verify\\package.json",
-    ".next-verify\\routes-manifest.json",
-    ".next-verify\\server\\pages-manifest.json",
-    ".next-verify\\build-manifest.json",
-    ".next-verify\\prerender-manifest.json",
-    ".next-verify\\server\\functions-config-manifest.json",
-    ".next-verify\\server\\middleware-manifest.json",
-    ".next-verify\\server\\middleware-build-manifest.js",
-    ".next-verify\\server\\middleware-react-loadable-manifest.js",
-    ".next-verify\\react-loadable-manifest.json",
-    ".next-verify\\server\\app-paths-manifest.json",
-    ".next-verify\\app-path-routes-manifest.json",
-    ".next-verify\\server\\server-reference-manifest.js",
-    ".next-verify\\server\\server-reference-manifest.json",
-    ".next-verify\\server\\prefetch-hints.json",
-    ".next-verify\\BUILD_ID",
-    ".next-verify\\server\\next-font-manifest.js",
-    ".next-verify\\server\\next-font-manifest.json",
-    ".next-verify\\required-server-files.json"
+    ".next-verify/package.json",
+    ".next-verify/routes-manifest.json",
+    ".next-verify/server/pages-manifest.json",
+    ".next-verify/build-manifest.json",
+    ".next-verify/prerender-manifest.json",
+    ".next-verify/server/functions-config-manifest.json",
+    ".next-verify/server/middleware-manifest.json",
+    ".next-verify/server/middleware-build-manifest.js",
+    ".next-verify/server/middleware-react-loadable-manifest.js",
+    ".next-verify/react-loadable-manifest.json",
+    ".next-verify/server/app-paths-manifest.json",
+    ".next-verify/app-path-routes-manifest.json",
+    ".next-verify/server/server-reference-manifest.js",
+    ".next-verify/server/server-reference-manifest.json",
+    ".next-verify/server/prefetch-hints.json",
+    ".next-verify/BUILD_ID",
+    ".next-verify/server/next-font-manifest.js",
+    ".next-verify/server/next-font-manifest.json",
+    ".next-verify/required-server-files.json"
   ],
   "ignore": []
 }

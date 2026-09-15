@@ -452,9 +452,19 @@ export default function Chapter5() {
 
                 <Env id="claims" sectionId="succession" />
                 <Claims refs={['§0.sahaba', '§0.shia']} />
+                {/* המרצה הוסיפה את המשפט הזה מתחת לשתי התביעות (סבב 15.9.2026):
+                    המחלוקת נפתחה כפוליטית, והצביון הדתי בא אחריה. הוא עומד אחרי
+                    שתי הכרטיסיות ולא בתוך אחת מהן — הוא אומר משהו על שתיהן. */}
+                <T refs={['§10.a']} />
 
                 <Env id="baya" sectionId="succession" />
                 <T refs={['§1.a']} />
+                {/* ההרחבה על השורא, בנוסח המרצה: הפסוק שממנו היא נלמדת, מה
+                    שחכמי האסלאם למדו ממנו, ומה שהשיעים משיבים עליו. הפסוק יושב
+                    בתוך המשפט ולא ככרטיס ציטוט — כך הוא נדפס אצלה, והכרטיס
+                    בפרק הזה שמור לחדית' שסוגר את המקטע. */}
+                <T refs={['§11.quran', '§11.council']} />
+                <T refs={['§11.shia']} />
                 <T refs={['§2.a']} className="ch5-quote-lead" />
                 <blockquote className="ch5-quote" data-reveal>{text('§2.hadith')}</blockquote>
               </Section>
@@ -462,18 +472,13 @@ export default function Chapter5() {
               {/* ============ 02 · Abu Bakr ============ */}
               <Section id="abubakr">
                 <Head id="abubakr" />
-                <div className="ch5-figrow">
-                  <div className="ch5-figrow-copy">
-                    <T refs={['§3.a']} className="ch5-lead" />
-                    <Env id="ridda" sectionId="abubakr" />
-                    <T refs={['§3.ridda', '§3.authority']} />
-                    <T refs={['§3.death', '§3.heir']} />
-                  </div>
-                  <figure className="ch5-figure is-cutout is-lifted" data-reveal>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src="/assets/chapter5/snake.png" alt="" loading="lazy" decoding="async" />
-                  </figure>
-                </div>
+                {/* אין כאן תמונה. הנחש עמד בצד המקטע הזה עד סבב התיקונים של
+                    המרצה — „התמונה של הנחש מיותרת מאוד" — והמקטע חזר לעמודה
+                    אחת של פרוזה, כרוחב שכל מקטע אחר בפרק נקרא בו. */}
+                <T refs={['§3.a']} className="ch5-lead" />
+                <Env id="ridda" sectionId="abubakr" />
+                <T refs={['§3.ridda', '§3.authority']} />
+                <T refs={['§3.death', '§3.heir']} />
               </Section>
 
               {/* ============ 03 · Umar — the chapter's one journey ============ */}
@@ -498,7 +503,9 @@ export default function Chapter5() {
                 <T refs={['§5.modest', '§5.model', '§5.reforms']} />
                 <T refs={['§5.calendar', '§5.hijri']} />
                 <T refs={['§5.status']} />
-                <T refs={['§6.a', '§6.shia']} className="ch5-close" />
+                {/* §6.shia ירד בסבב התיקונים („כל השאר מיותר"). נשאר משפט אחד:
+                    כמה שנים, ומי הרג. */}
+                <T refs={['§6.a']} className="ch5-close" />
               </Section>
 
               {/* ============ 04 · Uthman ============ */}
@@ -549,6 +556,15 @@ export default function Chapter5() {
                   </div>
                   <Lineage />
                 </div>
+                {/* הרצח, בנוסח המרצה (סבב 15.9.2026). המקור תלה אותו בכך שעלי
+                    לא סייע בלכידת קרובי עות'מאן; המרצה מחליפה את העילה —
+                    ההסכמה לבוררות מול מעאויה — ומוסיפה את הפרט שהמקור לא נותן:
+                    היכן נפצע ומתי מת. הבלוק עומד ברוחב המלא ולא בעמודה שלצד
+                    לוח הייחוס, מפני שהוא כבר לא מדבר על הקרבה אלא על הסוף. */}
+                <Env id="murder" sectionId="ali" />
+                <T refs={['§12.a', '§12.why']} />
+                <T refs={['§12.claim']} />
+                <T refs={['§13.a']} className="ch5-close" />
               </Section>
 
               {/* ============ 06 · the golden age ============ */}

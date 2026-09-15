@@ -54,6 +54,12 @@
       "namedRegex": "^/chapter1/dev\\-character(?:/)?$"
     },
     {
+      "page": "/chapter1/practice",
+      "regex": "^/chapter1/practice(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter1/practice(?:/)?$"
+    },
+    {
       "page": "/chapter2",
       "regex": "^/chapter2(?:/)?$",
       "routeKeys": {},
@@ -84,6 +90,30 @@
       "namedRegex": "^/chapter4(?:/)?$"
     },
     {
+      "page": "/chapter4/looks",
+      "regex": "^/chapter4/looks(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter4/looks(?:/)?$"
+    },
+    {
+      "page": "/chapter4/practice",
+      "regex": "^/chapter4/practice(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter4/practice(?:/)?$"
+    },
+    {
+      "page": "/chapter5",
+      "regex": "^/chapter5(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter5(?:/)?$"
+    },
+    {
+      "page": "/chapter5/practice",
+      "regex": "^/chapter5/practice(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/chapter5/practice(?:/)?$"
+    },
+    {
       "page": "/chapter6",
       "regex": "^/chapter6(?:/)?$",
       "routeKeys": {},
@@ -102,10 +132,22 @@
       "namedRegex": "^/chapters(?:/)?$"
     },
     {
+      "page": "/exams",
+      "regex": "^/exams(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/exams(?:/)?$"
+    },
+    {
       "page": "/icon.svg",
       "regex": "^/icon\\.svg(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/icon\\.svg(?:/)?$"
+    },
+    {
+      "page": "/notebook",
+      "regex": "^/notebook(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/notebook(?:/)?$"
     }
   ],
   "dataRoutes": [],

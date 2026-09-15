@@ -15,7 +15,7 @@ import '@/styles/chapter5-article.css'
 import '@/styles/site-notebook.css'
 
 export const metadata: Metadata = {
-  title: 'פרק חמישי · שאלת הירושה והח׳ליפים ישרי הדרך',
+  title: 'פרק חמישי · הח׳ליפים ישרי הדרך',
 }
 
 export const viewport: Viewport = {

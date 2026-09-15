@@ -74,6 +74,53 @@ async function talkOut(max = 14) {
     await page.keyboard.press('Space'); await page.waitForTimeout(420)
   }
 }
+/* ── ניתוב אמיתי ─────────────────────────────────────────────────────
+   „לא הצלחתי להגיע" של הבדיקה אינו „אי אפשר להגיע": מדידת מילוי-שטח
+   הראתה שכל היעדים מחוברים לנקודת ההתחלה. מה שחסר היה מסלול. BFS על
+   רשת 0.5 מ׳ מול הקוליידרים של האזור, ואז הליכה מנקודה לנקודה. */
+const routePoints = async (tx, tz) => page.evaluate(({tx,tz}) => {
+  const C = window.__ch1Statics, L = window.__ch1Live
+  const R = 0.5, STEP = 0.5, LIM = 70
+  const free = (x, z) => { for (const c of C) if (Math.hypot(c.x-x, c.z-z) < c.r + R) return false; return true }
+  const k = (i,j) => i+','+j
+  const si = Math.round(L.player.x/STEP), sj = Math.round(L.player.z/STEP)
+  const ti = Math.round(tx/STEP), tj = Math.round(tz/STEP)
+  const prev = new Map([[k(si,sj), null]]); const q = [[si,sj]]
+  let hit = null, best = 1e9
+  while (q.length) { const [i,j] = q.shift()
+    const d = Math.hypot(i-ti, j-tj)
+    if (d < best) { best = d; hit = [i,j] }
+    if (d < 1.5) { hit = [i,j]; break }
+    for (const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]) {
+      const ni=i+di, nj=j+dj
+      if (Math.abs(ni*STEP) > LIM || Math.abs(nj*STEP) > LIM) continue
+      const key = k(ni,nj); if (prev.has(key)) continue
+      if (!free(ni*STEP, nj*STEP)) continue
+      prev.set(key, k(i,j)); q.push([ni,nj]) } }
+  if (!hit) return []
+  const path = []; let cur = k(hit[0],hit[1])
+  while (cur) { const [i,j] = cur.split(',').map(Number); path.push({x:i*STEP, z:j*STEP}); cur = prev.get(cur) }
+  path.reverse()
+  /* מדללים: נקודת ציון כל שלושה מטרים בערך */
+  const out = []
+  for (let i = 0; i < path.length; i += 6) out.push(path[i])
+  out.push({x:tx, z:tz})
+  return out
+}, {tx,tz})
+
+async function routeTo(tx, tz, stop = 2.0) {
+  const pts = await routePoints(tx, tz)
+  if (!pts.length) return false
+  for (const pt of pts) {
+    const ok = await walkTo(pt.x, pt.z, 1.6, 8)
+    const p = await live()
+    if (Math.hypot(tx-p.x, tz-p.z) <= stop) return true
+    if (!ok) continue
+  }
+  const p = await live()
+  return Math.hypot(tx-p.x, tz-p.z) <= stop + 1.0
+}
+
 let stuck = 0
 async function walkTo(tx, tz, stopAt = 1.9, budget = 26) {
   for (let n=0; n<budget; n++) {
@@ -119,7 +166,8 @@ for (let round=0; round<14; round++) {
   if (w.stage !== 'brief' && !owed) break
   if (w.cast.length) {
     const c = w.cast[0]
-    const got = await walkTo(c.x, c.z, 2.2)
+    let got = await walkTo(c.x, c.z, 2.2)
+    if (!got) got = await routeTo(c.x, c.z, 2.2)
     say(`   הליכה אל ${c.who}: ${got ? 'הגעתי' : 'לא הצלחתי להגיע'}`)
     await talkOut()
     await page.keyboard.press('KeyE'); await page.waitForTimeout(900)
@@ -136,7 +184,8 @@ for (let guard=0; guard<8; guard++) {
   if (w.stage !== 'look') break
   const f = w.finds.find(q => !q.done)
   if (!f) break
-  const got = await walkTo(f.x, f.z, 1.7)
+  let got = await walkTo(f.x, f.z, 1.7)
+  if (!got) got = await routeTo(f.x, f.z, 1.7)
   say(`   הליכה אל ${f.id}: ${got ? 'הגעתי' : 'לא הצלחתי'}`)
   await talkOut()
   await page.keyboard.press('KeyE'); await page.waitForTimeout(900)
@@ -147,7 +196,8 @@ w = await W(); say(`   אחרי העדויות: ${w.stage} (${w.finds.filter(f=>
 
 // 3) הפעולה
 if (w.task) {
-  const got = await walkTo(w.task.x, w.task.z, 2.3)
+  let got = await walkTo(w.task.x, w.task.z, 2.3)
+  if (!got) got = await routeTo(w.task.x, w.task.z, 2.3)
   say(`   הליכה אל התחנה: ${got ? 'הגעתי' : 'לא הצלחתי'}`)
   await page.waitForTimeout(5000)
   for (let round=0; round<10; round++) {
