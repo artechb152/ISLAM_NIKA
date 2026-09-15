@@ -1765,7 +1765,16 @@ html{scrollbar-gutter:stable}
    `object-position` שומר על מַקַּאם אִבְּרָאהִים עצמו במרכז החיתוך:
    מה שנחתך הוא הקהל שסביבו, לא המבנה. גבול תחתון 280 פיקסלים כדי
    שבטקסט קצר התצלום לא יהפוך לפס. */
-.ch2-lineage-photo{margin:0;max-width:100%;position:relative;align-self:stretch;min-height:280px}
+/* ── ועוד קצת לאורך ─────────────────────────────────────────────────
+   גובה התצלום היה גובה הטקסט בדיוק, וזה יצא שטוח מדי ברוחב גדול
+   (2.11 ב-1920). המסגרת נמתחת מעט מעבר לשורה בשני הכיוונים, כך
+   שהתצלום גבוה מן הטקסט בכ-60 פיקסלים ועדיין ממורכז אליו — 1.78
+   ב-1920, בערך היחס שסומן. המרווח מעל (‎--flow-lead) ומתחת (84)
+   גדולים מן החריגה, ולכן היא אינה נוגעת בשכנים. */
+.ch2-lineage-photo{
+  margin:calc(-1 * clamp(14px,1.6vw,30px)) 0;
+  max-width:100%;position:relative;align-self:stretch;min-height:280px;
+}
 /* ⚠ התצלום מוחלט בתוך ה-figure, ולא זורם בתוכו. אם הוא זורם, *הוא*
    קובע את גובה השורה (680×533 ב-1920), והטקסט מתמרכז לצידו עם 105
    פיקסלים ריקים מעל ומתחת — כלומר בדיוק השארית שהמלבנים שסומנו באו
@@ -1786,7 +1795,7 @@ html{scrollbar-gutter:stable}
    הבא עוברת לעמודה אחת בערך באותו מקום, וזה הקצב של הפרק. */
 @media (max-width:1200px){
   .ch2-lineage-split{grid-template-columns:1fr;gap:var(--flow)}
-  .ch2-lineage-photo{max-width:var(--measure,880px);min-height:0}
+  .ch2-lineage-photo{max-width:var(--measure,880px);min-height:0;margin:0}
   /* ובעמודה אחת התצלום חוזר לזרום ביחס שלו — אין לצידו טקסט להיחתך אליו */
   .ch2-lineage-photo img{position:static;height:auto}
   .ch2-lineage-text{max-width:var(--measure,880px)}
