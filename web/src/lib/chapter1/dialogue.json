@@ -75,7 +75,7 @@
           "id": "camp-departure",
           "speaker": "rawi",
           "notebook": 0,
-          "trigger": "task:task-compare",
+          "trigger": "task:task-plan-route",
           "gesture": "talk-happy",
           "lines": [
             {
@@ -88,7 +88,7 @@
       "core": [
         "opening",
         "rawi-intro",
-        "task-compare"
+        "task-plan-route"
       ],
       "$note": "רמות תימן אוחדה לתוך המחנה (15.9.2026, לבקשת המשתמשת): החוברת אינה מכירה תחנה בשם הזה, והיא אמרה „תעביר את רמות תימן למחנה לילה\". הפתיחה, האבן החרוטה והמשימה הראשונה יושבות כאן עכשיו, והפרק נפתח במחנה."
     },

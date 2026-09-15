@@ -3768,14 +3768,20 @@ const HOST_NAME: string = (() => {
 })()
 /** תחנה שבה הפעולה הפיזית קודמת לבחינת העדות: אי אפשר לקרוא כתובת
     שיושבת בצל, והלפיד הוא מה שמוציא אותה משם. */
-const REVEAL_FIRST = REGION.id === FIRST_REGION
+/* ── האבן שהלפיד מאיר ──────────────────────────────────────────────
+   היא עדות (`find`) ולא תחנה. כל עוד התחנה של המחנה הייתה שאלת האבן
+   הן ישבו באותה נקודה, ולכן הלפיד כוון אל `REGION_TASK`; מאז שהמפה
+   חזרה להיות התחנה הן במקומות שונים — האבן לצד הדרך, המפה ליד
+   המדורה — והלפיד חייב להצביע על האבן. */
+const REVEAL_FIND = REGION_FINDS.find((f) => f.id === 'find-terrace-inscription') ?? null
+const REVEAL_FIRST = !!REVEAL_FIND
 
 /* ההוראה של שלב הפעולה — משפט אחד שמתחיל בפועל. „גררו", „הניחו",
    „חברו", „האירו", „מסרו". הטקסטים של התחנות כבר כתובים כך ב-tasks.ts;
    שתי התחנות שיש להן שער נפרד מקבלות ניסוח משלהן, כי שם הפעולה
    הפיזית אינה המשימה עצמה אלא מה שפותח אותה. */
 const ACT_LINE: string =
-  REGION.id === FIRST_REGION
+  REVEAL_FIRST
     ? 'האירו את האבן שלצד הדרך: קחו את הלפיד שלידה, גררו אותו אל האבן והחזיקו. החץ מצביע על הבא בתור.'
     : REGION.id === 'mecca'
       ? 'סדרו את השולחן: הניחו כל דבר במקומו — מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.'
@@ -4611,7 +4617,11 @@ const HAND_OBSTACLES: Collider[] = (() => {
   const t = REGION_TASK
   if (t) {
     out.push({ x: t.x, z: t.z, r: Math.max(1.4, t.h * 0.8) })
-    if (REGION.id === FIRST_REGION) out.push({ x: t.x + 2.3, z: t.z + 1.5, r: 1.0 })
+  }
+  if (REVEAL_FIND) {
+    /* האבן והלפיד שלצידה — שניהם גופים שגמל אינו עובר דרכם */
+    out.push({ x: REVEAL_FIND.x, z: REVEAL_FIND.z, r: 1.2 })
+    out.push({ x: REVEAL_FIND.x + 2.3, z: REVEAL_FIND.z + 1.5, r: 1.0 })
   }
   return out
 })()
@@ -4904,7 +4914,7 @@ const RAWI_INTRO: Encounter = {
   gesture: 'talk-happy',
   lines: [
     { source: '', text: 'שלום עליך, נוסע! חיכיתי לך. רָאוִי שמי — מלווה שיירות, ואוסף סיפורים.' },
-    { source: '', text: 'הדרך שלפנינו היא דרך הבשמים: מרמות תימן הירוקות האלה, דרך תחנות המסחר והמדבר, צפונה עד מכה.' },
+    { source: '', text: 'הדרך שלפנינו היא דרך הבשמים: מן הדרום הזה, דרך תחנות המסחר והמדבר, צפונה עד מכה.' },
     { source: '', text: 'אני אצעד לצידך. כל דבר ששווה לזכור — אכתוב במחברת המסע, ובסוף הדרך נדע איך נראה העולם שאל תוכו עתיד לבוא האסלאם.' },
     { source: '', text: 'קדימה — השער הראשון מחכה במעלה הדרך.' },
   ],
@@ -5319,12 +5329,12 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
           />
         </Suspense>
       )}
-      {REGION.id === FIRST_REGION && REGION_TASK && (
+      {REVEAL_FIND && (
         <Suspense fallback={null}>
           <LampReveal
             live={live}
-            target={{ x: REGION_TASK.x, z: REGION_TASK.z }}
-            home={{ x: REGION_TASK.x + 2.3, z: REGION_TASK.z + 1.5 }}
+            target={{ x: REVEAL_FIND.x, z: REVEAL_FIND.z }}
+            home={{ x: REVEAL_FIND.x + 2.3, z: REVEAL_FIND.z + 1.5 }}
             revealed={stoneLit}
             active={stage === 'act'}
             onRevealed={onStoneLit}
@@ -5676,7 +5686,7 @@ function MiniMap({ pos, yaw, met, found, solved }: {
  * region has to say has been said. */
 /* סרטון הסיכום — מסך מלא, בסוף הדרך.
    הסיכום התלת-ממדי שהיה כאן ניסה להסביר את הפרק בתוך עוד אינטראקציה,
-   ולא הצליח: אחרי תשע תחנות של עשייה, מה שנדרש הוא רגע של צפייה.
+   ולא הצליח: אחרי שמונה תחנות של עשייה, מה שנדרש הוא רגע של צפייה.
    הכתוביות בעברית מגיעות מקובץ VTT ולא נשרפות בתמונה, כדי שאפשר יהיה
    לתקן טקסט בלי לקודד מחדש. הפוסטר מונע את המסך השחור בזמן הטעינה,
    וה-faststart בקובץ עצמו מונע את ההמתנה שקדמה לו. */
@@ -5700,7 +5710,9 @@ function ChapterEnd({ done, evidence, onNotebook, onMap, onLeave, onClose, onPra
         <p className="ch1-end-eyebrow">סוף המסע</p>
         <h2 id="ch1-end-title">ערב עליית האסלאם</h2>
         <p className="ch1-end-body">
-          הלכתם מרמות תימן עד מכה — תשע תחנות, דרך אחת. פגשתם שליח של אימפריה,
+          {/* שמונה, לא תשע: רמות תימן אוחדה לתוך מחנה הלילה. מספר שנשאר
+              מאחור בטקסט סיום הוא בדיוק מה שלומד סופר ומגלה שאינו נכון. */}
+          הלכתם ממחנה הלילה עד מכה — שמונה תחנות, דרך אחת. פגשתם שליח של אימפריה,
           ראש שבט, סוחר יהודי, נזיר וסוחר מכי, וכל אחד מהם סיפר לכם על העולם
           שלו במילים שלו.
         </p>
@@ -6181,7 +6193,7 @@ export default function Game() {
      התשיעית של הפרק לא נטענה בכלל. */
   const evidenceDone = (REGION_TASK?.needsFinds ?? []).every((f) => found.includes(f)) &&
     (REGION_TASK?.options ?? []).every((o) => !o.needsFind || found.includes(o.needsFind))
-  const physDone = REGION.id === FIRST_REGION ? stoneLit
+  const physDone = REVEAL_FIRST ? stoneLit
     : REGION.id === 'mecca' ? tableSet
     : placedAll
   /* ── מתי התחנה באמת נסגרת ───────────────────────────────────────
@@ -7307,7 +7319,7 @@ export default function Game() {
             עד כאן ה-HUD ספר שני מלאים בבת אחת — „מחברת: 0 מתוך 26“ ו„עדויות:
             0 מתוך 21“ — 47 פריטים שרובם אופציונליים. מי שעמד בתחנה השנייה
             וראה 0/26 קרא את זה כ„לא התקדמתי“, בעוד שבפועל הוא סיים תחנה
-            שלמה. המונה הנכון הוא זה שסופר את מה שהפרק באמת מבקש: תשע תחנות.
+            שלמה. המונה הנכון הוא זה שסופר את מה שהפרק באמת מבקש: שמונה תחנות.
             שני המלאים לא נמחקו — הם חיים במחברת (Notebook.tsx), שם הם
             מידע שמבקשים, ולא ציון שרודף. */}
         <div className="hud-panel hud-goal">
