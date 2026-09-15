@@ -1286,6 +1286,21 @@ body{
 }
 .p1-open-actions .hud-card-btn:hover{color:var(--cream);text-decoration-color:var(--cream)}
 .p1-open-actions .hud-card-btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:3px}
+/* שורת ההסבר של מסך הפתיחה: שקטה, מתחת ללחצן, ובצבע של האתר. היא
+   נמצאת כאן מפני שהערת המרצה על הפרק הייתה „לא הצלחתי לנווט" —
+   ושלוש פקודות הן ההבדל בין מדבר שאפשר ללכת בו למדבר שעומדים בו. */
+.p1-open-keys{
+  margin:0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:center;
+  font-size:clamp(13px,1.1vw,15px);line-height:1.6;color:rgba(245,236,214,.78);
+  text-shadow:0 1px 10px rgba(20,10,4,.6);
+}
+.p1-open-keys kbd{
+  font-family:var(--font-body);font-size:.92em;line-height:1;color:var(--paper);
+  background:rgba(245,236,214,.14);border:1px solid rgba(245,236,214,.34);border-radius:5px;
+  padding:3px 7px;margin-inline-start:3px;
+}
+@media (prefers-contrast:more){.p1-open-keys{color:var(--paper)}}
+
 @keyframes p1-open-drift{from{transform:scale(1.06)}to{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.p1-open-media{animation:none}}
 
