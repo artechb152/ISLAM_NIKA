@@ -104,9 +104,13 @@ const BY_HAND = {
   p25: 'light', p26: 'light', q29: 'light', q30: 'light',  /* §18–§19 · המערה */
   p08: 'embers', q74: 'embers', q75: 'embers',    /* §5–§6 · שדה המוץ והאפר */
 }
-/* the four spreads the chapter turns on. On these the room around the book
-   takes the colour of the page — nothing else about them changes. */
-const PEAKS = new Set([4, 30, 67, 68, 75])
+/* the spreads the chapter turns on. On these the room around the book takes the
+   colour of the page — nothing else about them changes.
+
+   ⚠ אלה היו מספרי עמודים (4, 30, 67, 68, 75), וסבב התיקונים המבני של המרצה
+   הזיז כל קוביה אחרי השביעית. מספר סידורי אינו מזהה: קוביה נמחקת ומספר 30
+   מצביע פתאום על משהו אחר. עכשיו אלה מזהי קוביות, והם שורדים כל איחוד. */
+const PEAKS = new Set(['q04', 'q30', 'q67', 'q68', 'q72'])
 
 for (const pg of pages) {
   const src = fileURLToPath(new URL('../../web/public/assets/chapter3/comic/' + pg.a + '.jpg', here))
@@ -124,7 +128,7 @@ for (const pg of pages) {
   pg.m = BY_HAND[pg.a] ?? (dark || blue > 8 ? 'stars' : 'dust')
   pg.c = dark ? 'out' : 'in'
 }
-for (const [i, pg] of pages.entries()) if (PEAKS.has(i + 1)) pg.peak = 1
+for (const [i, pg] of pages.entries()) if (PEAKS.has(M.panels[i].id)) pg.peak = 1
 
 /* ---- the number every panel carries ----
    Straight through the book, 1 to 75, not restarted per page. A reader who has

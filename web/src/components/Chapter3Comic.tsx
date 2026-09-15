@@ -181,7 +181,13 @@ function PanelView({ panel, order, hideVerse, live, half }: {
             <p className={'c3-cap ' + SLOTS[caps.length][k]} key={k}>{b.t}</p>
           ))}
       {says.map((b, k) => <p className="c3-say" key={k}>{b.t}</p>)}
-      {verses.map((b, k) => <p className="c3-verse" key={k}>{b.t}</p>)}
+      {/* ⚠ כרטיס פסוק אחד לקוביה, גם כששני ביטים נושאים פסוק.
+          `.c3-verse` ממוקם מוחלט בתחתית הקוביה, ולכן שני כרטיסים נחתו זה על
+          זה בדיוק — נמדד: שניהם ב-(146,753), והראשון נעלם מאחורי השני. זה
+          קרה לקוביה 6 ברגע שפסוקי סורת הפיל נוספו לה בסבב התיקונים.
+          שני פסוקים רצופים מאותה סורה הם ממילא ציטוט אחד, ולכן הם נדפסים
+          בכרטיס אחד — בלי לשנות מילה. */}
+      {verses.length > 0 && <p className="c3-verse">{verses.map((b) => b.t).join(' ')}</p>}
     </figure>
   )
 }
