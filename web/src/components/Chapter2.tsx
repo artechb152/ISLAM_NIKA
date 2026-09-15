@@ -970,9 +970,6 @@ export default function Chapter2() {
                   </div>
                 </div>
                 <Head id="lineage" />
-                <div className="ch2-body ch2-wide" data-reveal>
-                  <T r="§0.a" em={['ישמעאל']} />
-                </div>
 
                 {/* PLAIN RUNNING TEXT, in the document's own paragraphing.
 
@@ -989,11 +986,14 @@ export default function Chapter2() {
                     it already open, so a heading with those words on it was the
                     page saying the same thing twice, once in a louder voice.
 
-                    The prose runs the FULL COLUMN here — see `.ch2-wide`. Three
-                    short paragraphs at the chapter's measure left 612px of empty
-                    parchment beside them at 1920, and this was asked for with the
-                    line lengths on the table. Two columns were tried first and
-                    were not what was wanted. */}
+                    ⚠ ההיסטוריה של המקטע הזה, כדי שלא יחזור: הפרוזה רצה כאן
+                    פעם ברוחב המאמר המלא (`.ch2-wide`), מפני ששלוש פסקאות
+                    במידת הפרק השאירו 612 פיקסלים של קלף ריק לצידן ב-1920.
+                    אחר כך הגיע התצלום ומילא את השטח ההוא, ומשפט הפתיחה
+                    נשאר לבדו מעל הזוג ברוחב מלא — שורה אחת במידה אחת מעל
+                    פסקאות במידה אחרת, כלומר שורה יתומה. הוא ירד אל תוך
+                    העמודה, והמקטע הוא בלוק אחד: תצלום משמאל, שלוש פסקאות
+                    מימין, מתחילות במשפט שפותח את הפרק. */}
                 {/* ── התמונה משמאל, הטקסט מימין ──────────────────────────
                     בעמוד RTL הטקסט מתחיל מימין, ולכן הוא ראשון ב-DOM —
                     וזה גם סדר הקריאה למי שמגיע במקלדת או בקורא מסך.
@@ -1001,6 +1001,12 @@ export default function Chapter2() {
                     במסך צר השתיים חוזרות זו מתחת לזו, הטקסט קודם. */}
                 <div className="ch2-lineage-split" data-reveal>
                   <div className="ch2-body ch2-lineage-text">
+                    {/* ── משפט הפתיחה יושב בעמודה, לא מעליה ─────────────
+                        הוא עמד לבדו ברוחב המאמר המלא, מעל הזוג — שורה אחת
+                        קצרה במידה אחת, ומתחתיה פסקאות במידה אחרת. זה נקרא
+                        כשורה יתומה ולא כפתיחה של הטקסט שאחריה, וזה מה
+                        שדווח. עכשיו הוא הפסקה הראשונה של אותה עמודה. */}
+                    <T r="§0.a" em={['ישמעאל']} />
                     <T
                       r={['§1.a', '(§1.gloss)']}
                       em={['לחצי האי ערב', termOf('§1.gloss')]}
