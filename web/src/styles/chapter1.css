@@ -378,6 +378,9 @@ body{
   pointer-events:none;
 }
 .hud-goal .hud-progress{max-width:130px}
+/* הנושא ליד שם התחנה — מה לומדים כאן, כל הזמן על המסך */
+.hud-goal .hud-topic{font-weight:400;color:var(--gold-soft)}
+@media (max-width:640px){.hud-goal .hud-topic{display:none}}
 
 /* המטרה של התחנה — משפט אחד מעל שורת ההתקדמות.
    בלי מסגרת, בלי רקע, בלי תג: זו שורת טקסט בעולם ולא רכיב ממשק.
@@ -627,6 +630,10 @@ body{
   background:rgba(122,90,28,.08);border-radius:7px;padding:12px 14px;
 }
 .nb-card.is-verse-card{background:rgba(122,90,28,.13);border-inline-start:3px solid var(--gold)}
+/* כרטיס סיכום: בלי דיוקן — זו לא שיחה אלא מה שנשאר ממנה */
+.nb-card.is-lesson{grid-template-columns:1fr;border-inline-start:3px solid #8a6a2a;background:rgba(122,90,28,.1)}
+.nb-lesson-list{margin:0;padding:0 1.1em 0 0;display:grid;gap:5px}
+.nb-lesson-list li{line-height:1.6}
 .nb-card-body{min-width:0;display:grid;gap:6px}
 .nb-face{
   width:44px;height:44px;border-radius:50%;flex:none;object-fit:cover;object-position:center 12%;
@@ -799,6 +806,12 @@ body{
   color:var(--cream);letter-spacing:.03em;
   text-shadow:0 2px 20px rgba(0,0,0,.6);
   animation:ch1-arrive-word 1.1s ease both;
+}
+/* הנושא של התחנה מתחת לשמה — כותרת המקור, קטנה ושקטה, באותה כניסה */
+.ch1-arrive small{
+  display:block;margin-top:10px;font-family:var(--font-body);
+  font-size:clamp(14px,1.2vw,17px);letter-spacing:.02em;color:var(--gold-soft);
+  animation:ch1-arrive-word 1.1s ease .25s both;
 }
 .ch1-arrive.is-gone{opacity:0;visibility:hidden}
 @keyframes ch1-arrive-word{
@@ -1312,6 +1325,13 @@ body{
 .p1-entry-actions .hud-card-btn:not(.is-primary){color:var(--maroon);border-color:rgba(138,39,51,.42)}
 .p1-entry-actions .hud-card-btn:not(.is-primary):hover:not(:disabled){background:rgba(138,39,51,.09)}
 .p1-end-banner .ch2-hero-media{background-image:url('/assets/anim-video/ch1-summary-poster.jpg');background-position:center 40%}
+/* מה למדנו בדרך — תחנה, ומתחתיה השורות שנאמרו בסיומה */
+.p1-end-learned{max-width:var(--measure,880px);display:grid;gap:var(--flow-lead,28px)}
+.p1-end-lesson h3{
+  margin:0 0 8px;font-family:var(--font-heading);font-weight:700;font-size:21px;color:var(--maroon);
+}
+.p1-end-lesson ul{margin:0;padding:0 1.15em 0 0;display:grid;gap:6px}
+.p1-end-lesson li{font-size:var(--read,18.5px);line-height:1.75;color:var(--ink)}
 .p1-end-words{max-width:var(--measure,880px)}
 .p1-end-words p{margin:0;font-size:var(--read,18.5px);line-height:1.85;color:var(--ink)}
 .p1-end-words p + p{margin-top:var(--flow,14px)}

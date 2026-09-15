@@ -65,6 +65,11 @@ export interface Encounter {
   rawi_followup?: Line[]
   choices?: Choice[]
   blocked_action_note?: string
+  /** סיכום התחנה. ראאווי אומר אותו ברגע שהתחנה נפתרת (`task:` trigger),
+      והוא מה שסוגר אותה — אי אפשר לצאת בלי לשמוע מה למדנו כאן. המחברת
+      ודף הסיום אוספים את הביטים האלה לבדם ל„סיכומים". `notebook: 0`, כדי
+      שלא יגזלו רשומה מן ה-26. */
+  lesson?: boolean
 }
 
 export interface Region {
@@ -74,6 +79,10 @@ export interface Region {
       עדויות אופציונליות לעולם לא מופיעות כאן, ושערים אחורה תמיד פתוחים —
       check-journey אוכף שכל מזהה קיים ובר-השגה. */
   core?: string[]
+  /** מה התחנה מלמדת — כותרת המקור עצמה (## ב-SOURCE-TEXT), לא ניסוח של
+      המשחק. נאמרת בלוח ההגעה ובשורת המצב, כדי שהלומד יידע על מה הוא
+      מסתכל לפני שהוא מתחיל לחפש. */
+  topic?: string
   encounters: Encounter[]
 }
 
@@ -186,6 +195,12 @@ export function regionProgress(seen: string[]): RegionProgress[] {
 
 /** Flattened speech for an encounter, in the order it is heard. A line speaks
     in its own voice when it names one, and otherwise in the encounter's. */
+/** The station summaries the traveller has actually heard, in journey order —
+    the notebook's „סיכומים" tab and the end page read only these. */
+export function lessons(seen: string[]): JournalEntry[] {
+  return journal(seen).filter((e) => e.encounter.lesson)
+}
+
 export function encounterScript(e: Encounter): { speaker: SpeakerId; line: Line }[] {
   return [
     ...e.lines.map((line) => ({ speaker: line.speaker ?? e.speaker, line })),

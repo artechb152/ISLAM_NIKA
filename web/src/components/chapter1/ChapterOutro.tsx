@@ -17,8 +17,8 @@ import { useEffect, useState } from 'react'
 
 import PracticeNav from '@/components/chapter6/summary/PracticeNav'
 import { FINDS } from '@/lib/chapter1/finds'
-import { REGIONS } from '@/lib/chapter1/dialogue'
-import { recordEncounter, recordFind } from '@/lib/chapter1/notebook'
+import { REGIONS, lessons } from '@/lib/chapter1/dialogue'
+import { readNotebook, recordEncounter, recordFind } from '@/lib/chapter1/notebook'
 import { ChapterFilm } from './ChapterFilm'
 
 const REGION = REGIONS.find((r) => r.id === 'exit')
@@ -29,6 +29,12 @@ const TITLE = (REGION?.name ?? 'ערב עליית האסלאם').split('—').po
 
 export default function ChapterOutro() {
   const [cinema, setCinema] = useState(true)
+  /* הסיכומים של התחנות, כפי שנשמעו. מי שהגיע לכאן סגר את כל התחנות,
+     ולכן כולם כאן — אבל הדף קורא מן המחברת ולא מניח: משפט שלא נשמע
+     אינו מודפס, כמו בכל מקום אחר בפרק. */
+  const [heard, setHeard] = useState<string[]>([])
+  useEffect(() => { setHeard(readNotebook().seen) }, [])
+  const learned = lessons(heard).filter((e) => e.regionId !== 'exit')
 
   /* המחברת נסגרת כאן בדיוק כפי שנסגרה קודם: המפגש נשמע, האבן נמצאה,
      והפרק מסומן כהושלם. בלי זה הספירה הייתה נעצרת על 20 מתוך 21. */
@@ -43,6 +49,7 @@ export default function ChapterOutro() {
   if (cinema) return <ChapterFilm onDone={() => setCinema(false)} />
 
   const stops = [
+    { id: 'p1-end-learned', label: 'מה למדנו בדרך', done: true },
     { id: 'p1-end-words', label: 'רָאוִי, במבט לאחור', done: true },
     { id: 'p1-end-stone', label: STONE?.title ?? 'האבן על המשקיף', done: true },
     { id: 'p1-end-next', label: 'הלאה מכאן', done: false },
@@ -73,6 +80,35 @@ export default function ChapterOutro() {
             צפו בסרט שוב
           </button>
         </div>
+
+        {/* ── מה למדנו בדרך ─────────────────────────────────────────
+            תחנה אחר תחנה, בארבע-שש שורות לכל אחת — הסיכומים שראאווי אמר
+            כשכל תחנה נסגרה. זה הדף שהפרק לא נתן ללומד: התמונה השלמה,
+            לפני ההסקה של הסיום. */}
+        {learned.length > 0 && (
+          <section className="article-section" id="p1-end-learned" aria-labelledby="p1-end-learned-t">
+            <header className="section-heading">
+              <div>
+                <h2 id="p1-end-learned-t">מה למדנו בדרך</h2>
+              </div>
+              <div className="title-ornament section-ornament" aria-hidden="true">
+                <span />
+              </div>
+            </header>
+            <div className="p1-end-learned">
+              {learned.map((entry) => (
+                <article key={entry.encounter.id} className="p1-end-lesson">
+                  <h3>{entry.regionName}</h3>
+                  <ul>
+                    {entry.encounter.lines.map((l, i) => (
+                      <li key={i}>{l.text}</li>
+                    ))}
+                  </ul>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         {CLOSING && (
           <section className="article-section" id="p1-end-words" aria-labelledby="p1-end-words-t">
