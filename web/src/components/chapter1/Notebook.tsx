@@ -13,7 +13,6 @@ import {
   PORTRAIT,
   SPEAKERS,
   journal,
-  lessons,
   verses,
   type JournalEntry,
   type SpeakerId,
@@ -23,14 +22,10 @@ import { FINDS, FINDS_TOTAL } from '@/lib/chapter1/finds'
 import { TASKS, TASKS_TOTAL } from '@/lib/chapter1/tasks'
 import enrichment from '@/lib/chapter1/enrichment.json'
 
-type Tab = 'all' | 'lessons' | 'region' | 'speaker' | 'verses' | 'finds'
+type Tab = 'all' | 'region' | 'speaker' | 'verses' | 'finds'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'all', label: 'הכול' },
-  /* הסיכומים שראאווי אומר בסוף כל תחנה, לבדם. „הכול" הוא תמליל — נכון
-     אבל ארוך; מי שרוצה לדעת מה למד צריך עמוד שבו זה כתוב בארבע שורות
-     לתחנה. אותו כלל כמו כל המחברת: רק מה שנשמע. */
-  { id: 'lessons', label: 'סיכומים' },
   { id: 'region', label: 'לפי אזור' },
   { id: 'speaker', label: 'לפי דמות' },
   { id: 'verses', label: 'פסוקים' },
@@ -115,7 +110,6 @@ export function Notebook({ seen, found, solved, onClose }: {
     [seen],
   )
   const verseEntries = useMemo(() => verses(seen), [seen])
-  const lessonEntries = useMemo(() => lessons(seen), [seen])
 
   /* Grouping keeps journey order: a Map preserves insertion order, and the
      journal already comes out in the order the road runs. */
@@ -232,31 +226,6 @@ export function Notebook({ seen, found, solved, onClose }: {
                 </section>
               )}
             </>
-          )}
-
-          {tab === 'lessons' && (
-            lessonEntries.length ? (
-              <div className="nb-grid">
-                {lessonEntries.map((entry) => (
-                  <article key={entry.encounter.id} className="nb-card is-lesson">
-                    <div className="nb-card-body">
-                      <p className="nb-who">
-                        מה למדנו ב{entry.regionName}
-                      </p>
-                      <ul className="nb-lesson-list">
-                        {entry.encounter.lines.map((l, i) => (
-                          <li key={i} className="nb-txt">{l.text}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <p className="nb-empty">
-                הסיכום של תחנה נכתב כאן ברגע שהיא נסגרת — כשראאווי מסכם מה למדנו בה.
-              </p>
-            )
           )}
 
           {!empty && tab === 'region' &&
