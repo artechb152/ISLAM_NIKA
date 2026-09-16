@@ -80,7 +80,7 @@ export const LINKS: ChainLink[] = [
     label: 'עבודת האלילים בחצי האי ערב',
     source: '§32',
     region: 'mecca',
-    unlockedBy: 'task-stones',
+    unlockedBy: 'task-hubal',
     key: {
       source: '§40',
       text: 'לפי המסורת מוחמד התחבר לדת אברהם — דת אבותיו הקדמונים, שהתמסרו לאל אחד ויחיד.',

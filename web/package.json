@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "verify": "tsc --noEmit && eslint . && node ../concept/chapter1/verify-dialogue.mjs && node scripts/check-summary-sources.mjs && node scripts/check-camp.mjs && node scripts/check-layouts.mjs && node scripts/check-journey.mjs && node scripts/check-interactions.mjs && node scripts/check-walkable.mjs && node scripts/check-playable.mjs",
+    "verify": "tsc --noEmit && eslint . && node ../concept/chapter1/verify-dialogue.mjs && node scripts/check-summary-sources.mjs && node scripts/check-camp.mjs && node scripts/check-layouts.mjs && node scripts/check-content.mjs && node scripts/check-journey.mjs && node scripts/check-interactions.mjs && node scripts/check-walkable.mjs && node scripts/check-playable.mjs",
     "ch1:verify": "node ../concept/chapter1/verify-dialogue.mjs",
     "verify:live": "node scripts/verify-live.mjs",
     "verify:all": "npm run verify && npm run verify:live",

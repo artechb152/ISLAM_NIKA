@@ -257,13 +257,29 @@ for (const region of dialogue.regions) {
   }
 }
 
-/* the HUD promises a notebook total; it must match what actually exists */
-const promised = notebookSrc.match(/NOTEBOOK_TOTAL\s*=\s*(\d+)/)
-if (promised && +promised[1] !== total) {
+/* ── the HUD promises a notebook total; it must match what actually exists ──
+   ⚠ this read `notebook.ts`, which only *imports* the constant — it has lived
+   in dialogue.ts since the constant moved, so `promised` was null and the
+   check had been silently skipped. And it compared against the encounter
+   count, which is wrong by construction: arrival beats and task summaries
+   carry `notebook: 0` on purpose and fill no slot. What must match is the
+   number of distinct slots actually used. */
+const dialogueSrc = read('dialogue.ts')
+const promised = dialogueSrc.match(/NOTEBOOK_TOTAL\s*=\s*(\d+)/)
+const slots = new Set(
+  dialogue.regions.flatMap((r) => r.encounters.map((e) => e.notebook)).filter((n) => n > 0),
+)
+if (!promised) {
+  problems.push('NOTEBOOK_TOTAL was not found in dialogue.ts — the notebook check is blind again.')
+} else if (+promised[1] !== slots.size) {
   problems.push(
-    `the HUD promises ${promised[1]} notebook entries but dialogue.json holds ${total} encounters — ` +
-    `update NOTEBOOK_TOTAL in notebook.ts, or the learner is told they missed something that was never there.`,
+    `the HUD promises ${promised[1]} notebook entries but dialogue.json fills ${slots.size} — ` +
+    `update NOTEBOOK_TOTAL in dialogue.ts, or the learner is told they missed something that was never there.`,
   )
+} else {
+  const missing = []
+  for (let i = 1; i <= slots.size; i++) if (!slots.has(i)) missing.push(i)
+  if (missing.length) problems.push(`notebook slots are not contiguous 1..${slots.size}: missing ${missing.join(', ')}`)
 }
 
 console.log('\nchapter 1 — journey coverage\n')
