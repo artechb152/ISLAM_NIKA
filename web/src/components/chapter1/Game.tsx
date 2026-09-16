@@ -3800,7 +3800,14 @@ const PANEL_ONLY_TASK = !!REGION_TASK && !REGION_TASK.options.some((o) => o.prop
     שני חריגים נשארים, ובשניהם הסדר הוא התוכן: במחנה מאירים לפני שקוראים
     (REVEAL_FIRST), ובמכה מסדרים את השולחן לפני שמשווים (אין אופציות). */
 const ACT_PANEL_TASK =
-  !!REGION_TASK && REGION_TASK.kind !== 'plan' && REGION_TASK.options.length > 0 && !REVEAL_FIRST
+  !!REGION_TASK &&
+  REGION_TASK.kind !== 'plan' &&
+  /* ⚠ ולא רק `options`: משימת שליפה נושאת את שאלותיה ב-`steps`, ורשימת
+     האופציות שלה ריקה — ולכן נקודת השליפה נשארה סגורה בדיוק כמו קודם,
+     והתנאי החדש לא כיסה אותה. נמדד במעבר מלא של הפרק. */
+  (REGION_TASK.options.length > 0 || (REGION_TASK.steps?.length ?? 0) > 0) &&
+  !REVEAL_FIRST &&
+  REGION.id !== 'mecca'
 
 const ACT_LINE: string =
   REVEAL_FIRST

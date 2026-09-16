@@ -161,6 +161,9 @@ export default function ChapterOutro() {
             <Link className="ch2-end-link" href="/chapter1/practice">
               לתרגול המסכם
             </Link>
+            <Link className="hud-card-btn" href="/chapter1/guide">
+              דף מלווה
+            </Link>
             <Link className="hud-card-btn" href="/notebook">
               מחברת המסע
             </Link>
