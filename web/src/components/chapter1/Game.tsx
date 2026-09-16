@@ -3790,12 +3790,27 @@ const REVEAL_FIRST = !!REVEAL_FIND
    „חברו", „האירו", „מסרו". הטקסטים של התחנות כבר כתובים כך ב-tasks.ts;
    שתי התחנות שיש להן שער נפרד מקבלות ניסוח משלהן, כי שם הפעולה
    הפיזית אינה המשימה עצמה אלא מה שפותח אותה. */
+/** משימה שאין לה אף חפץ בעולם: כל מה שהיא מבקשת קורה בפאנל, ולכן
+    הדרך היחידה להגיע אליה היא E — ואת זה בדיוק המנוע לא הרשה. */
+const PANEL_ONLY_TASK = !!REGION_TASK && !REGION_TASK.options.some((o) => o.prop)
+/** ── מתי E פותח את התחנה כבר בשלב הפעולה ────────────────────────────────
+    הפאנל הוא המסלול הנגיש של הפרק — „הכפתורים נשארים למקלדת, לקורא המסך
+    ולרתמות" — אבל E פתח אותו רק בשלב הפירוש, כלומר אחרי שהפעולה נעשתה
+    ביד. מי שאינו יכול לגרור לא יכול היה להתחיל אף תחנת מיון.
+    שני חריגים נשארים, ובשניהם הסדר הוא התוכן: במחנה מאירים לפני שקוראים
+    (REVEAL_FIRST), ובמכה מסדרים את השולחן לפני שמשווים (אין אופציות). */
+const ACT_PANEL_TASK =
+  !!REGION_TASK && REGION_TASK.kind !== 'plan' && REGION_TASK.options.length > 0 && !REVEAL_FIRST
+
 const ACT_LINE: string =
   REVEAL_FIRST
     ? 'האירו את הדף שעל האוכף: קחו את הלפיד שלידו, גררו אותו אל הדף והחזיקו.'
     : REGION.id === 'mecca'
       ? 'סדרו את השולחן: הניחו כל דבר במקומו — מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.'
-      : (REGION_TASK?.hint ?? REGION_TASK?.prompt ?? '')
+      : PANEL_ONLY_TASK
+        /* אין מה לגרור כאן, ולכן ההוראה חייבת לומר איפה זה נפתח */
+        ? `${REGION_TASK?.prompt ?? ''}: התקרבו אל התחנה ולחצו E`
+        : (REGION_TASK?.hint ?? REGION_TASK?.prompt ?? '')
 
 
 /** Drop scattered spots that would clash with a prop or a person standing there. */
@@ -6324,7 +6339,9 @@ export default function Game() {
      אינו הגרירה אלא ההסתכלות — ולומר \"גררו\" למי שעוד לא ראה דבר
      הוא לתת הוראה שאי אפשר לבצע. */
   const actLine = sightsLeft > 0
-    ? `הביטו במה שמאיר — נותרו ${sightsLeft} דברים לראות כאן`
+    ? (sightsLeft === 1
+        ? 'הביטו במה שמאיר — נותר כאן דבר אחד לראות'
+        : `הביטו במה שמאיר — נותרו כאן ${sightsLeft} דברים לראות`)
     : ACT_LINE
   const actLineRef = useRef(actLine)
   actLineRef.current = actLine
@@ -6336,9 +6353,19 @@ export default function Game() {
      אליהן במקום לשלוח לעבודה. בלי זה הלומד נשלח למשימה, פותר אותה,
      והתחנה אינה נסגרת בלי שהוא יודע למה. */
   const talksLeft = CORE_TALKS.filter((id) => !seen.includes(id)).length
+  /* ⚠ מי מהן עוד לא נשמעה קובע את המקש. השורה אמרה תמיד „לחצו E לידו",
+     גם כשמה שנשאר הוא מונולוג של ראאווי — ולראאווי אין E: הוא צועד
+     לצידך ומדבר ברגע שקט, או נענה ל-R. הוראה למקש שאין לו יעד היא
+     בדיוק מה שגורם למשחק להיקרא כשבור, וזה קרה בתחנה הראשונה. */
+  const talksLeftAllRawi = CORE_TALKS.every(
+    (id) => seen.includes(id) || REGION.encounters.find((e) => e.id === id)?.speaker === 'rawi',
+  )
+  const talksLeftWho = talksLeftAllRawi
+    ? 'רָאוִי — עצרו רגע, או קראו לו ב-R'
+    : `${HOST_NAME} — לחצו E לידו`
   const objective =
     talksLeft > 0 && stage !== 'brief'
-      ? `יש עוד ${talksLeft === 1 ? 'נושא אחד' : `${talksLeft} נושאים`} לשמוע מ${HOST_NAME} — לחצו E לידו`
+      ? `יש עוד ${talksLeft === 1 ? 'נושא אחד' : `${talksLeft} נושאים`} לשמוע מ${talksLeftWho}`
       : stage === 'brief'
       /* השאלה של התחנה היא המטרה שלה. עד כה השורה אמרה „דברו עם X",
          כלומר את הפעולה ולא את הסיבה; מי שקורא „מי הן שתי האימפריות"
@@ -6352,7 +6379,9 @@ export default function Game() {
           : HOST_NAME === SPEAKERS.rawi ? 'עצרו רגע — לרָאוִי יש מה לומר כאן' : `דברו עם ${HOST_NAME}`)
       : stage === 'look'
         ? (sightsLeft > 0
-            ? `הביטו במה שמאיר — נותרו ${sightsLeft} דברים לראות כאן`
+            ? (sightsLeft === 1
+                ? 'הביטו במה שמאיר — נותר כאן דבר אחד לראות'
+                : `הביטו במה שמאיר — נותרו כאן ${sightsLeft} דברים לראות`)
             /* לא „על הקרקע”: במחנה הלילה העדות היא אבן עומדת, ובמכה
                היא על שולחן. מה שמשותף לכולן הוא שהן מאירות, ושנפתחות
                ב-E — וזה מה שההוראה אומרת. */
@@ -6880,7 +6909,13 @@ export default function Game() {
            והחותם — התחנה נתקעה ב-interpret כי אי אפשר היה לענות.
            ומרגע שהתשובה ניתנה, המשימה מפסיקה לתפוס את E: אחרת היא
            נפתחת שוב במקום השיחה שנשארה, והיא זו שסוגרת את התחנה. */
-        const allowTask = st === 'interpret' && !interpretedRef.current
+        /* ⚠ עד כאן E פתח את התחנה רק בשלב הפירוש, מתוך הנחה ששלב
+           הפעולה נעשה ביד — גוררים חפץ אל מקומו. במשימה שכולה בפאנל
+           אין חפץ לגרור, ולכן לא הייתה שום דרך לפתוח אותה: התחנה
+           ענתה „רגע — הפעולה עצמה עוד לא הושלמה" למי שעמד עליה ולחץ
+           את המקש הנכון. נמדד בדפדפן בתחנת הגבול ובנקודת השליפה. */
+        const allowTask =
+          (st === 'interpret' && !interpretedRef.current) || (st === 'act' && ACT_PANEL_TASK)
 
         const dWho = allowWho && live.nearWho ? live.nearWhoD : Infinity
         const dFind = allowFind && live.nearFind ? live.nearFindD : Infinity

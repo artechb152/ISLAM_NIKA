@@ -16,9 +16,12 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import PracticeNav from '@/components/chapter6/summary/PracticeNav'
+import { TASKS } from '@/lib/chapter1/tasks'
+import { CHAPTER_QUESTION } from '@/lib/chapter1/links'
+import { ExitAssembly } from './ExitAssembly'
 import { FINDS } from '@/lib/chapter1/finds'
 import { REGIONS } from '@/lib/chapter1/dialogue'
-import { recordEncounter, recordFind, recordTask } from '@/lib/chapter1/notebook'
+import { readNotebook, recordEncounter, recordFind, recordTask } from '@/lib/chapter1/notebook'
 import { ChapterFilm } from './ChapterFilm'
 
 const REGION = REGIONS.find((r) => r.id === 'exit')
@@ -27,30 +30,40 @@ const CLOSING = REGION?.encounters.find((e) => e.id === 'rawi-summary')
    מסלול העוקף של סוף הפרק, ולכן הוא אומר את שניהם — אחרת המסקנה של הפרק
    פשוט לא נקראת כאן. */
 const ECHOES = REGION?.encounters.find((e) => e.id === 'rawi-echoes')
-const STONE = FINDS.find((f) => f.id === 'find-exit-inscription')
+const ASSEMBLY = TASKS.find((t) => t.id === 'task-links')
+const STONE = FINDS.find((f) => f.id === 'find-exit-quran')
 /* שם האזור בנתונים הוא „יציאה — ערב עליית האסלאם"; הכותרת היא החלק השני */
 const TITLE = (REGION?.name ?? 'ערב עליית האסלאם').split('—').pop()!.trim()
 
 export default function ChapterOutro() {
   const [cinema, setCinema] = useState(true)
+  /* ההרכבה נרשמת כשהיא נעשית, לא כשהדף נטען: §48 הוא המסקנה, ומסקנה
+     שמוצגת לפני שהשאלה נענתה היא בדיוק מה שהיה כאן קודם. */
+  const [assembled, setAssembled] = useState(false)
 
   /* המחברת נסגרת כאן בדיוק כפי שנסגרה קודם: המפגש נשמע, האבן נמצאה,
      והפרק מסומן כהושלם. בלי זה הספירה הייתה נעצרת על 20 מתוך 21. */
   useEffect(() => {
     if (CLOSING) recordEncounter(CLOSING.id, CLOSING.notebook)
-    if (ECHOES) recordEncounter(ECHOES.id, ECHOES.notebook)
-    recordTask('task-links')
     if (STONE) recordFind(STONE.id)
     try {
+      setAssembled(readNotebook().solved.includes('task-links'))
       localStorage.setItem('islam:chapter:1', 'done')
     } catch {}
   }, [])
+
+  const finishAssembly = () => {
+    setAssembled(true)
+    recordTask('task-links')
+    if (ECHOES) recordEncounter(ECHOES.id, ECHOES.notebook)
+  }
 
   if (cinema) return <ChapterFilm onDone={() => setCinema(false)} />
 
   const stops = [
     { id: 'p1-end-words', label: 'רָאוִי, במבט לאחור', done: true },
-    { id: 'p1-end-stone', label: STONE?.title ?? 'האבן על המשקיף', done: true },
+    { id: 'p1-end-links', label: 'חמש חוליות, תשובה אחת', done: assembled },
+    { id: 'p1-end-stone', label: STONE?.title ?? 'מה שהדהד אל הקוראן', done: assembled },
     { id: 'p1-end-next', label: 'הלאה מכאן', done: false },
   ]
 
@@ -94,16 +107,35 @@ export default function ChapterOutro() {
                 הוא נשאר בנתונים בשביל שער הנאמנות ואינו מוצג, כמו בשיחות. */}
             <div className="p1-end-words">
               {CLOSING.lines.map((l, i) => (
-                <p key={i}>{l.text}</p>
-              ))}
-              {ECHOES?.lines.map((l, i) => (
-                <p key={`e${i}`}>{l.text}</p>
+                <p key={i} className={l.key ? 'is-key' : undefined}>{l.text}</p>
               ))}
             </div>
           </section>
         )}
 
-        {STONE && (
+        {ASSEMBLY && (
+          <section className="article-section" id="p1-end-links" aria-labelledby="p1-end-links-t">
+            <header className="section-heading">
+              <div>
+                <h2 id="p1-end-links-t">{ASSEMBLY.title}</h2>
+                <p className="section-kicker">{CHAPTER_QUESTION.text}</p>
+              </div>
+              <div className="title-ornament section-ornament" aria-hidden="true">
+                <span />
+              </div>
+            </header>
+            <ExitAssembly task={ASSEMBLY} solved={assembled} onSolved={finishAssembly} />
+            {assembled && ECHOES && (
+              <div className="p1-end-words p1-end-echoes">
+                {ECHOES.lines.map((l, i) => (
+                  <p key={i} className={l.key ? 'is-key' : undefined}>{l.text}</p>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {STONE && assembled && (
           <section className="article-section" id="p1-end-stone" aria-labelledby="p1-end-stone-t">
             <header className="section-heading">
               <div>
@@ -115,6 +147,7 @@ export default function ChapterOutro() {
             </header>
             <div className="p1-end-words">
               <p>{STONE.body}</p>
+              <p className="p1-end-sourcing"><b>מי מסר את זה?</b> {STONE.sourcing}</p>
             </div>
           </section>
         )}

@@ -1451,3 +1451,30 @@ body{
 .ch1-find-card .hud-card-btn,
 .ch1-task-card .hud-card-btn{font-size:15.5px}
 .ch1-task-options .hud-card-btn{font-size:16px;line-height:1.5;padding:12px 18px}
+
+
+/* ── ההרכבה שבסוף הדרך ────────────────────────────────────────────────
+   מקטע בתוך המאמר, לא חלונית של משחק: אותו נייר, אותם כפתורים שהפרק
+   משתמש בהם ממילא, ורוחב טקסט של מאמר. שני קליקים — חוליה, ואז מקומה. */
+.p1-assembly{margin:0 0 6px}
+.p1-assembly-q{
+  margin:0 0 16px;font-size:17.5px;line-height:1.85;color:var(--ink);
+}
+.p1-assembly-tray{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.p1-assembly-bins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.p1-assembly-answers{display:flex;flex-direction:column;gap:8px}
+.p1-assembly-hint{margin:10px 0 0;font-size:14px;color:#7a5a1c}
+.p1-assembly-note{
+  margin:14px 0 0;padding:10px 14px;border-radius:10px;font-size:15px;line-height:1.7;
+  background:rgba(122,90,28,.08);border-inline-start:3px solid rgba(122,90,28,.4);color:var(--ink);
+}
+.p1-assembly-note.is-right{border-inline-start-color:var(--olive,#7c8a4f);background:rgba(124,138,79,.12)}
+.p1-assembly-done{
+  margin:16px 0 0;font-family:var(--font-heading);font-size:18px;line-height:1.75;color:var(--ink);
+}
+/* המשפט שסומן בשיחה, גם בדף הסיום */
+.p1-end-words p.is-key{border-inline-start:3px solid rgba(154,120,42,.75);padding-inline-start:12px}
+.p1-end-echoes{margin-top:18px}
+@media (max-width:720px){.p1-assembly-bins{grid-template-columns:1fr}}
+.p1-end-sourcing{font-size:16px;color:#6b5636}
+.p1-end-sourcing b{color:#7a5a1c}
