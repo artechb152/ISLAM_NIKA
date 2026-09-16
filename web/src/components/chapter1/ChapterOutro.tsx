@@ -18,11 +18,15 @@ import { useEffect, useState } from 'react'
 import PracticeNav from '@/components/chapter6/summary/PracticeNav'
 import { FINDS } from '@/lib/chapter1/finds'
 import { REGIONS } from '@/lib/chapter1/dialogue'
-import { recordEncounter, recordFind } from '@/lib/chapter1/notebook'
+import { recordEncounter, recordFind, recordTask } from '@/lib/chapter1/notebook'
 import { ChapterFilm } from './ChapterFilm'
 
 const REGION = REGIONS.find((r) => r.id === 'exit')
 const CLOSING = REGION?.encounters.find((e) => e.id === 'rawi-summary')
+/* §48 יצא מן הסיכום והוא נאמר עכשיו אחרי הרכבת חמש החוליות. הדף הזה הוא
+   מסלול העוקף של סוף הפרק, ולכן הוא אומר את שניהם — אחרת המסקנה של הפרק
+   פשוט לא נקראת כאן. */
+const ECHOES = REGION?.encounters.find((e) => e.id === 'rawi-echoes')
 const STONE = FINDS.find((f) => f.id === 'find-exit-inscription')
 /* שם האזור בנתונים הוא „יציאה — ערב עליית האסלאם"; הכותרת היא החלק השני */
 const TITLE = (REGION?.name ?? 'ערב עליית האסלאם').split('—').pop()!.trim()
@@ -34,6 +38,8 @@ export default function ChapterOutro() {
      והפרק מסומן כהושלם. בלי זה הספירה הייתה נעצרת על 20 מתוך 21. */
   useEffect(() => {
     if (CLOSING) recordEncounter(CLOSING.id, CLOSING.notebook)
+    if (ECHOES) recordEncounter(ECHOES.id, ECHOES.notebook)
+    recordTask('task-links')
     if (STONE) recordFind(STONE.id)
     try {
       localStorage.setItem('islam:chapter:1', 'done')
@@ -89,6 +95,9 @@ export default function ChapterOutro() {
             <div className="p1-end-words">
               {CLOSING.lines.map((l, i) => (
                 <p key={i}>{l.text}</p>
+              ))}
+              {ECHOES?.lines.map((l, i) => (
+                <p key={`e${i}`}>{l.text}</p>
               ))}
             </div>
           </section>

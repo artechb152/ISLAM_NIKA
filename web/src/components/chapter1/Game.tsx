@@ -19,6 +19,7 @@ import { TASK_RANGE, taskIn } from '@/lib/chapter1/tasks'
 import { FindCard } from './FindCard'
 import { wrapPi } from '@/lib/chapter1/angles'
 import { MAP_PINS } from '@/lib/chapter1/journey'
+import { linkState } from '@/lib/chapter1/links'
 import { allowedBecause } from '@/lib/chapter1/overlap-allow'
 import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
 import { TaskPanel } from './TaskPanel'
@@ -4986,15 +4987,22 @@ const RAWI_ARRIVALS: Record<string, { gesture: Gesture; text: string }> = {
   },
 }
 
+/* ── והשאלה שנשאלת לפני שמישהו עונה ────────────────────────────────────
+   שאלה שנשאלת *לפני* החומר משפרת את הזכירה שלו — וגם של מה שלא נשאל
+   עליו. עד כה התחנה נפתחה בהכרזה („התחנה הזאת היא על היהודים"), והלומד
+   קיבל תשובות לשאלה שאיש לא שאל אותו. עכשיו ראאווי שואל בהגעה, והדמות
+   המארחת היא שעונה — והשאלה עצמה נושאת § כי היא תוכן הסעיף בצורת שאלה
+   (`Region.ask` ב-dialogue.json). */
 function arrivalBeat(regionId: string): Encounter | null {
   const a = RAWI_ARRIVALS[regionId]
   if (!a) return null
+  const ask = regionById(regionId).ask
   return {
     id: `rawi-arrive-${regionId}`,
     speaker: 'rawi',
     notebook: 0,
     gesture: a.gesture,
-    lines: [{ source: '', text: a.text }],
+    lines: ask ? [{ source: '', text: a.text }, ask] : [{ source: '', text: a.text }],
   }
 }
 
@@ -5965,25 +5973,27 @@ export default function Game() {
      להניח את המטבע: החותם מעולם לא נדרש, והרצף שהמשתמשת ביקשה
      (מטבע ← חותם ← פירוש) לא התקיים. כל פריט שיש לו גוף בעולם
      צריך להימסר. */
-  const placedAll = useMemo(() => {
-    if (!REGION_TASK) return false
+  /* ⚠ מיון שכולו בפאנל: ספירה לפי `prop` בלבד השאירה אותו פתוח לנצח.
+     „כל מה שיש לו גוף בעולם צריך להימסר" נכון כל עוד יש גוף למישהו —
+     ובמשימת היציאה (חמש החוליות) אין אף חפץ, כי אין מה להרים ביד:
+     חוליה היא נושא, לא אבן. כשלאף אופציה אין `prop`, הפעולה היא
+     המיון עצמו, וכל האופציות נדרשות. */
+  const taskNeeded = useMemo(() => {
+    if (!REGION_TASK) return [] as string[]
     const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
     const present = REGION_TASK.kind === 'present'
-    const needed = (sortLike || present
-      ? REGION_TASK.options.filter((o) => o.prop)
-      : REGION_TASK.options.filter((o) => o.right)
-    ).map((o) => o.id)
-    return needed.length > 0 && needed.every((n) => taskChosen.includes(n))
-  }, [taskChosen])
-  /* יש בכלל מה למסור כאן? במכה אין, ושם הפעולה היא השולחן. */
-  const hasPlaceables = useMemo(() => {
-    if (!REGION_TASK) return false
-    const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
-    const present = REGION_TASK.kind === 'present'
-    return (sortLike || present
-      ? REGION_TASK.options.filter((o) => o.prop)
-      : REGION_TASK.options.filter((o) => o.right)).length > 0
+    if (sortLike || present) {
+      const withProp = REGION_TASK.options.filter((o) => o.prop)
+      return (withProp.length > 0 ? withProp : REGION_TASK.options).map((o) => o.id)
+    }
+    return REGION_TASK.options.filter((o) => o.right).map((o) => o.id)
   }, [])
+  const placedAll = useMemo(
+    () => taskNeeded.length > 0 && taskNeeded.every((n) => taskChosen.includes(n)),
+    [taskChosen, taskNeeded],
+  )
+  /* יש בכלל מה למסור כאן? במכה אין, ושם הפעולה היא השולחן. */
+  const hasPlaceables = taskNeeded.length > 0
 
   /* ── מתי התחנה נסגרת ─────────────────────────────────────────────────
      בתחנה שיש לה שלב פירוש, ההנחה מסיימת את הפעולה בלבד. מה שסוגר
@@ -6116,6 +6126,12 @@ export default function Game() {
   const [encounter, setEncounter] = useState<Encounter | null>(null)
   const [notebook, setNotebook] = useState(() => notebookCount())
   const [seen, setSeen] = useState<string[]>([])
+  /* ── לוח חמש החוליות ────────────────────────────────────────────────
+     שמות חמשת הנושאים מוצגים מן הרגע הראשון, ריקים. מי שמכיר את שמות
+     הדברים לפני הפרטים לומד אותם טוב יותר — ומי שרואה חמש משבצות
+     יודע שהדרך היא טיעון ולא רצף עצירות. אין כאן מצב חדש: ההשלמה
+     נגזרת ממה שנשמע ומה שנפתר (links.ts). */
+  const links = useMemo(() => linkState(seen, solved), [seen, solved])
   const encounterRef = useRef<Encounter | null>(null)
   encounterRef.current = encounter
 
@@ -6284,10 +6300,16 @@ export default function Game() {
     talksLeft > 0 && stage !== 'brief'
       ? `יש עוד ${talksLeft === 1 ? 'נושא אחד' : `${talksLeft} נושאים`} לשמוע מ${HOST_NAME} — לחצו E לידו`
       : stage === 'brief'
-      /* כשהמארח הוא ראאווי אין למי ללחוץ E: הוא צועד לצידך ומדבר
-         מעצמו אחרי רגע של עמידה. הוראה ללחוץ מקש שאין לו יעד היא
-         בדיוק מה שגורם למשחק להיקרא כשבור. */
-      ? (HOST_NAME === SPEAKERS.rawi ? 'עצרו רגע — לרָאוִי יש מה לומר כאן' : `דברו עם ${HOST_NAME}`)
+      /* השאלה של התחנה היא המטרה שלה. עד כה השורה אמרה „דברו עם X",
+         כלומר את הפעולה ולא את הסיבה; מי שקורא „מי הן שתי האימפריות"
+         הולך אל השליח בשביל תשובה, ולא בשביל להשלים משבצת.
+         ── וכשאין למי ללחוץ E ─────────────────────────────────────
+         כשהמארח הוא ראאווי הוא צועד לצידך ומדבר מעצמו אחרי רגע של
+         עמידה. הוראה ללחוץ מקש שאין לו יעד היא בדיוק מה שגורם
+         למשחק להיקרא כשבור. */
+      ? (REGION.ask
+          ? `${REGION.ask.text}${HOST_NAME === SPEAKERS.rawi ? '' : ` — ${HOST_NAME} כאן (E)`}`
+          : HOST_NAME === SPEAKERS.rawi ? 'עצרו רגע — לרָאוִי יש מה לומר כאן' : `דברו עם ${HOST_NAME}`)
       : stage === 'look'
         ? (sightsLeft > 0
             ? `הביטו במה שמאיר — נותרו ${sightsLeft} דברים לראות כאן`
@@ -7333,6 +7355,21 @@ export default function Game() {
             שלמה. המונה הנכון הוא זה שסופר את מה שהפרק באמת מבקש: שמונה תחנות.
             שני המלאים לא נמחקו — הם חיים במחברת (Notebook.tsx), שם הם
             מידע שמבקשים, ולא ציון שרודף. */}
+        {/* חמש החוליות של התשובה — מתמלאות בדרך, ומורכבות ביציאה */}
+        {!overlay && !openTask && !openFind && !encounter && (
+          <div className="hud-panel hud-links" role="status" aria-label="חמש החוליות של התשובה">
+            {links.map((l) => (
+              <i
+                key={l.id}
+                className={
+                  'hud-link' + (l.done ? ' is-done' : '') + (l.region === REGION.id ? ' is-here' : '')
+                }
+              >
+                {l.label}
+              </i>
+            ))}
+          </div>
+        )}
         <div className="hud-panel hud-goal">
           <span style={{ whiteSpace: 'nowrap' }}>
             {REGION.name}

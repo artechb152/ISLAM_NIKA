@@ -19,6 +19,7 @@ import {
   type VerseEntry,
 } from '@/lib/chapter1/dialogue'
 import { FINDS, FINDS_TOTAL } from '@/lib/chapter1/finds'
+import { CHAPTER_QUESTION, linkState } from '@/lib/chapter1/links'
 import { TASKS, TASKS_TOTAL } from '@/lib/chapter1/tasks'
 import enrichment from '@/lib/chapter1/enrichment.json'
 
@@ -51,8 +52,10 @@ function Card({ entry }: { entry: JournalEntry }) {
           {SPEAKERS[e.speaker]}
           <span className="nb-where"> · {entry.regionName}</span>
         </p>
+        {/* המשפט שסומן ב-`key` נשאר במקומו בשיחה — סדר הדיבור הוא מה
+            שנשמע — ומסומן, כדי שמי שחוזר לקרוא ידע מה כאן העיקר. */}
         {e.lines.map((l, i) => (
-          <p key={i} className={'nb-txt' + (l.verse ? ' is-verse' : '')}>
+          <p key={i} className={'nb-txt' + (l.verse ? ' is-verse' : '') + (l.key ? ' is-key' : '')}>
             {l.text}
           </p>
         ))}
@@ -129,6 +132,7 @@ export function Notebook({ seen, found, solved, onClose }: {
   }, [entries])
 
   const filled = useMemo(() => new Set(entries.map((e) => e.encounter.notebook)).size, [entries])
+  const links = useMemo(() => linkState(seen, solved), [seen, solved])
 
   useEffect(() => {
     const onKey = (ev: KeyboardEvent) => {
@@ -175,19 +179,23 @@ export function Notebook({ seen, found, solved, onClose }: {
         </header>
 
         <div className="nb-body">
-          {/* ארבע השאלות שהפרק שואל, בעמוד הראשון של המחברת ולא ככרטיסי
-              ממשק. הן נכתבות ביד בתחילת מסע, לפני שיודעים את התשובות,
-              וזה בדיוק תפקידן כאן: לתת לתשע התחנות כיוון במקום להשאיר
-              אותן רצף של עצירות. נשארות גלויות לכל אורך הדרך, כי שאלה
-              שנעלמת אחרי הקריאה הראשונה אינה מלווה שום דבר. */}
+          {/* ── השאלה, וחמש החוליות שעונות עליה ────────────────────
+              כאן עמדו ארבע שאלות שנכתבו לממשק ולא נאמרו באף מקום.
+              עכשיו עומדת כאן השאלה של §0 — זו שהפרק נפתח בה — ותחתיה
+              חמשת הנושאים שהחוברת פורשת כתשובה. חוליה שהושלמה מראה את
+              המשפט שהיא תרמה, בניסוח הסעיף; מה שטרם נקנה נשאר ריק,
+              ולכן הדף הזה גם אומר מה עוד חסר. */}
           {tab === 'all' && (
             <section className="nb-questions" aria-labelledby="nb-q-title">
-              <h3 className="nb-questions-title" id="nb-q-title">מה שואלים בדרך הזאת</h3>
-              <ol className="nb-questions-list">
-                <li>אילו מקורות מספרים לנו על ערב לפני האסלאם?</li>
-                <li>כיצד הייתה ערב מחוברת למסחר ולאימפריות?</li>
-                <li>אילו דתות וקהילות פעלו בה?</li>
-                <li>מה ידוע בוודאות, ומה נשאר שנוי במחלוקת?</li>
+              <h3 className="nb-questions-title" id="nb-q-title">השאלה של הדרך</h3>
+              <p className="nb-question-main">{CHAPTER_QUESTION.text}</p>
+              <ol className="nb-links-list">
+                {links.map((l) => (
+                  <li key={l.id} className={l.done ? 'is-done' : ''}>
+                    <b>{l.label}</b>
+                    <span>{l.done ? l.key.text : 'עוד לא — התחנה הזאת לפנינו'}</span>
+                  </li>
+                ))}
               </ol>
             </section>
           )}

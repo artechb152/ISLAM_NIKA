@@ -18,6 +18,13 @@ export interface Line {
   text: string
   /** Quotes or cites the Qur'an — collected into the notebook's verses tab. */
   verse?: boolean
+  /** ── המשפט שלוקחים מכאן ──────────────────────────────────────────────
+   *  אחת מכל שיחת ליבה, ולא יותר: השורה שהתחנה קיימת בשבילה.
+   *
+   *  בלעדיה כל השורות נשמעו באותו משקל, ומי שסיים תחנה של חמש שורות לא
+   *  ידע איזו מהן היא זו שנשארת. היא מודגשת בחלונית, והיא נכתבת ראשונה
+   *  בכרטיס המחברת. אין בה תוכן חדש — היא אחת השורות של הסעיף. */
+  key?: true
   /** Who says this line, when it is not the encounter's own speaker.
    *
    *  Without this the model could only produce one voice per encounter, with
@@ -78,6 +85,11 @@ export interface Region {
       המשחק. נאמרת בלוח ההגעה ובשורת המצב, כדי שהלומד יידע על מה הוא
       מסתכל לפני שהוא מתחיל לחפש. */
   topic?: string
+  /** ── השאלה שנשאלת בהגעה, לפני שמישהו מדבר ─────────────────────────
+   *  ראאווי שואל אותה כשנכנסים, והדמות המארחת היא שעונה. זו שאלה על
+   *  תוכן הסעיפים של התחנה ולא טענה חדשה, ולכן היא נושאת § כמו כל
+   *  שורה — ולכן גם מאומתת ב-verify-dialogue. */
+  ask?: Line
   encounters: Encounter[]
 }
 

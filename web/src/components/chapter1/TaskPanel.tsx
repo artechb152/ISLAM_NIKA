@@ -67,9 +67,16 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
      `placedAll` לא יכול היה להתקיים והתחנה לא נסגרה לעולם.
      בתחנות שבהן ההנחה היא התשובה, `mainDone` מתקיים ברגע שהוצב הפריט
      ושום דבר לא משתנה. */
-  const mainNeeded = (sorting || task.kind === 'present'
-    ? task.options.filter((o) => o.prop)
-    : task.options.filter((o) => o.right)).map((o) => o.id)
+  /* ⚠ ובמשימה שכולה בפאנל אין לאף אופציה `prop`, ואז „מה שיש לו גוף"
+     הוא רשימה ריקה — כלומר „הכול נעשה" לפני שנגעו בדבר. כשאין גוף
+     לאיש, כל האופציות הן הפעולה. (אותו חישוב בדיוק ב-Game: taskNeeded) */
+  const mainNeeded = ((): string[] => {
+    if (sorting || task.kind === 'present') {
+      const withProp = task.options.filter((o) => o.prop)
+      return (withProp.length > 0 ? withProp : task.options).map((o) => o.id)
+    }
+    return task.options.filter((o) => o.right).map((o) => o.id)
+  })()
   const mainDone = mainNeeded.length === 0 || mainNeeded.every((id) => chosen.includes(id))
   const interpreting = phase === 'interpret' && !!task.interpret && mainDone
 

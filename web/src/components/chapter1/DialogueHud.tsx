@@ -21,6 +21,8 @@ interface Step {
   speaker: SpeakerId
   text: string
   source: string
+  /** המשפט שלוקחים מן השיחה הזאת — מודגש, אחד לכל שיחת ליבה */
+  key?: boolean
 }
 
 /* ── הסרט שבחלונית ──────────────────────────────────────────────────
@@ -128,6 +130,7 @@ function buildSteps(e: Encounter): Step[] {
     speaker,
     text: line.text,
     source: line.source,
+    key: line.key,
   }))
 }
 
@@ -357,7 +360,11 @@ export function DialogueHud({
         {/* מספר הסעיף במקור (§) הוא סימון של הכותבים, לא של הלומד — הוא
             נשאר בנתונים בשביל שער הנאמנות ואינו מוצג עוד. */}
         <h3 className="hud-title">{SPEAKERS[step.speaker]}</h3>
-        <p className="is-full">
+        {/* ── המשפט שנשאר ────────────────────────────────────────────
+            חמש שורות נאמרות באותו משקל, ומי שסיים תחנה לא ידע איזו
+            מהן היא זו שהתחנה קיימת בשבילה. אחת מכל שיחת ליבה מסומנת
+            ב-`key` בנתונים, והיא זו שנכתבת ראשונה בכרטיס המחברת. */}
+        <p className={'is-full' + (step.key ? ' is-key' : '')}>
           {full.slice(0, revealed)}
           <span className="hud-reveal-rest">{full.slice(revealed)}</span>
         </p>

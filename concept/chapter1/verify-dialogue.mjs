@@ -28,12 +28,23 @@ const collect = (lines, where) => {
 }
 let notebooks = new Set()
 for (const r of dlg.regions) {
+  /* שאלת ההגעה היא תוכן לימודי כמו כל שורה — היא נשאלת על סעיפי התחנה,
+     ולכן היא נושאת § ונספרת ככיסוי. */
+  if (r.ask) collect([r.ask], `${r.id}/ask`)
   for (const e of r.encounters) {
     collect(e.lines, `${r.id}/${e.id}`)
     collect(e.rawi_followup, `${r.id}/${e.id}/rawi`)
     for (const c of e.choices ?? []) collect(c.lines, `${r.id}/${e.id}/choice`)
     if (e.notebook) notebooks.add(e.notebook)
     if (!dlg.speakers[e.speaker]) errors.push(`דובר לא מוכר: ${e.speaker} ב־${e.id}`)
+    /* ── משפט מפתח אחד, לא שניים ולא אפס ──────────────────────────
+       לכל שיחת ליבה יש משפט אחד שהיא קיימת בשבילו, והוא זה שמודגש
+       בחלונית ובמחברת. שניים מבטלים זה את זה; אפס מחזיר את המצב
+       שבו כל השורות נשמעות באותו משקל, וזה מה שהוועדה מצאה. */
+    const keys = [...(e.lines ?? []), ...(e.rawi_followup ?? [])].filter((l) => l.key).length
+    const isCore = (r.core ?? []).includes(e.id)
+    if (isCore && keys !== 1) errors.push(`שיחת ליבה ${r.id}/${e.id}: ${keys} משפטי מפתח (צריך 1)`)
+    if (!isCore && keys > 1) errors.push(`${r.id}/${e.id}: יותר ממשפט מפתח אחד`)
   }
 }
 

@@ -370,6 +370,14 @@ body{
 .hud-speak:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .hud-speak svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
+/* ── המשפט שנלקח מן השיחה ────────────────────────────────────────────
+   פס זהב בצד ההתחלה, ולא צבע אחר או גופן אחר: ההדגשה אומרת „זה
+   המשפט", לא „זה סוג אחר של טקסט". */
+.hud-dialogue p.is-key{
+  border-inline-start:3px solid var(--gold);
+  padding-inline-start:11px;color:#f8ecd4;
+}
+
 /* goal bar — bottom center */
 .hud-goal{
   inset-inline:0;margin-inline:auto;bottom:18px;width:min(560px,92vw);
@@ -382,11 +390,35 @@ body{
 .hud-goal .hud-topic{font-weight:400;color:var(--gold-soft)}
 @media (max-width:640px){.hud-goal .hud-topic{display:none}}
 
+/* ── לוח חמש החוליות ──────────────────────────────────────────────────
+   יושב בין שורת המטרה לשורת התחנה, ונקרא כחלק מאותה ערימה: השאלה
+   למעלה, החוליות באמצע, המקום למטה. שורת מצב ולא פקד — pointer-events
+   כבויים, כמו בשורת התחנה. */
+.hud-links{
+  inset-inline:0;margin-inline:auto;bottom:64px;width:min(560px,92vw);
+  display:flex;align-items:stretch;gap:6px;padding:7px 10px;
+  pointer-events:none;
+}
+.hud-link{
+  flex:1;min-width:0;font-style:normal;font-size:11px;line-height:1.25;
+  text-align:center;padding:5px 4px;border-radius:7px;
+  border:1px solid rgba(245,236,214,.16);color:rgba(245,236,214,.46);
+  display:flex;align-items:center;justify-content:center;
+  transition:color .4s ease,border-color .4s ease,background .4s ease;
+}
+.hud-link.is-done{
+  color:var(--gold);border-color:rgba(198,160,74,.5);background:rgba(198,160,74,.12);
+}
+.hud-link.is-here{border-color:rgba(245,236,214,.42);color:rgba(245,236,214,.82)}
+.hud-link.is-done.is-here{color:var(--gold);border-color:var(--gold)}
+/* מתחת ל-900px חמש תוויות בשורה אחת הן חמישה חצאי-מילים */
+@media (max-width:900px){.hud-links{display:none}}
+
 /* המטרה של התחנה — משפט אחד מעל שורת ההתקדמות.
    בלי מסגרת, בלי רקע, בלי תג: זו שורת טקסט בעולם ולא רכיב ממשק.
    רוחב זהה לשורת ההתקדמות כדי שהשתיים ייקראו כדבר אחד. */
 .hud-objective{
-  position:absolute;inset-inline:0;margin-inline:auto;bottom:64px;
+  position:absolute;inset-inline:0;margin-inline:auto;bottom:108px;
   width:min(620px,94vw);text-align:center;
   font-size:15.5px;font-weight:500;line-height:1.55;letter-spacing:.01em;
   color:#f4e3c1;padding:6px 16px;border-radius:10px;
@@ -399,7 +431,7 @@ body{
 /* שורת הרמז יושבת מעל שורת המטרה ובאותו רוחב, כדי שתיקרא כהמשך שלה
    ולא כהתראה חדשה. נכנסת ברכות — רמז שקופץ קורא כשגיאה. */
 .hud-hint{
-  inset-inline:0;margin-inline:auto;bottom:64px;width:min(560px,92vw);
+  inset-inline:0;margin-inline:auto;bottom:108px;width:min(560px,92vw);
   padding:9px 18px;font-size:13.5px;line-height:1.5;text-align:center;
   color:var(--cream,#efe2c8);opacity:.94;animation:ch1-hint-in .5s ease both;
   pointer-events:none;
@@ -668,6 +700,30 @@ body{
   color:#8a6a2a;font-family:var(--font-heading);
 }
 @media (max-width:720px){.nb-questions-list{font-size:13.5px}}
+/* השאלה עצמה — משפט אחד, בגופן הכותרות, שנקרא כשאלה ולא כפריט ברשימה */
+.nb-question-main{
+  margin:0 0 10px;font-family:var(--font-heading);font-weight:400;
+  font-size:19px;line-height:1.6;color:var(--ink);
+}
+/* חמש החוליות: שם הנושא, ותחתיו המשפט שהוא תרם — או ריק, אם טרם נקנה */
+.nb-links-list{
+  margin:0;padding:0 1.35em 0 0;list-style:none;counter-reset:nbq;
+  display:grid;gap:8px;font-size:14px;line-height:1.7;color:var(--ink);
+}
+.nb-links-list li{counter-increment:nbq;position:relative;opacity:.55}
+.nb-links-list li.is-done{opacity:1}
+.nb-links-list li::before{
+  content:counter(nbq) ".";position:absolute;inset-inline-start:-1.35em;
+  color:#8a6a2a;font-family:var(--font-heading);
+}
+.nb-links-list b{display:block;font-weight:600;color:#7a5a1c}
+.nb-links-list span{display:block}
+.nb-links-list li:not(.is-done) span{font-style:italic;color:#8a7350}
+/* המשפט שסומן בשיחה — אותו פס זהב שהיה בחלונית, בצבעי הנייר */
+.nb-txt.is-key{
+  border-inline-start:3px solid rgba(154,120,42,.75);padding-inline-start:10px;
+}
+@media (max-width:720px){.nb-links-list{font-size:13.5px}.nb-question-main{font-size:17px}}
 .nb-foot{
   display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:13px;color:#7a5a1c;
   border-top:1px solid rgba(122,90,28,.28);padding-top:10px;
