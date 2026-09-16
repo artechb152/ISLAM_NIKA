@@ -426,6 +426,14 @@ body{
   text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 16px rgba(0,0,0,.65);
   pointer-events:none;animation:ch1-objective-in .5s ease both;
 }
+/* המצפן שבסוף שורת המטרה: כיוון יחסי ומרחק. חץ מסתובב ולא מילים —
+   „ימינה ואחורה" בסוף משפט ארוך נקרא כהמשך המשפט. */
+.hud-aim{
+  display:inline-flex;align-items:center;gap:5px;margin-inline-start:10px;
+  padding-inline-start:10px;border-inline-start:1px solid rgba(245,236,214,.28);
+  color:var(--gold);font-size:14px;white-space:nowrap;
+}
+.hud-aim i{display:inline-block;font-style:normal;font-size:12px;line-height:1}
 @keyframes ch1-objective-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.hud-objective{animation:none}}
 /* שורת הרמז יושבת מעל שורת המטרה ובאותו רוחב, כדי שתיקרא כהמשך שלה
@@ -1041,6 +1049,13 @@ body{
 .ch1-find-body,.ch1-task-question{
   margin:0 0 18px;font-size:17px;line-height:1.85;color:rgba(245,236,214,.9);
 }
+/* שאלת הייחוס, מתחת לגוף הכרטיס: קטנה יותר ועמומה יותר — היא נקראת
+   כהערה על המקור ולא כעובדה נוספת עליו. */
+.ch1-find-sourcing{
+  margin:-8px 0 18px;padding-top:12px;border-top:1px solid rgba(245,236,214,.16);
+  font-size:14px;line-height:1.7;color:rgba(245,236,214,.76);
+}
+.ch1-find-sourcing b{color:var(--gold);font-weight:600}
 .ch1-find-foot,.ch1-task-foot{
   display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
 }

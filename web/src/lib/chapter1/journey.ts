@@ -25,9 +25,11 @@ export const MAP_PINS: MapPin[] = [
   /* המסע מתחיל כאן מאז שרמות תימן אוחדה לתוך המחנה — הסיכה שלה ירדה. */
   { id: 'night-camp', label: 'מחנה הלילה', left: 39.5, top: 78.5, side: 'start' },
   { id: 'border-post', label: 'תחנת הגבול', left: 46, top: 57.5, side: 'end' },
-  { id: 'narrow-pass', label: 'המעבר הצר', left: 52.5, top: 50, side: 'end' },
-  { id: 'loading-road', label: 'הדרך וההעמסה', left: 43, top: 45, side: 'start' },
+  { id: 'loading-road', label: 'הדרך וההעמסה', left: 43, top: 48, side: 'start' },
   { id: 'yathrib', label: 'ית׳רב', left: 48.5, top: 40.5, side: 'end' },
+  /* המעבר הצר אינו עוד תחנת תוכן אלא העצירה שבה שולפים את מה שכבר
+     נאמר, והיא יושבת על הדרך בין ית׳רב למנזר. */
+  { id: 'narrow-pass', label: 'המעבר הצר', left: 57, top: 37, side: 'start' },
   { id: 'monastery', label: 'המנזר', left: 65.5, top: 34.5, side: 'end' },
   /* ── מכה דרומית לית'רב ────────────────────────────────────────────
      כך היא במציאות, כ-350 ק"מ מדרום לה, והמפה הציבה אותה צפונית —

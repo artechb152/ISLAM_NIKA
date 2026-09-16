@@ -143,12 +143,15 @@ export interface Layout {
    הלילה, והמחנה הוא עכשיו התחנה הראשונה. `yemen-heights-layout.json`
    נשאר בתיקייה — הוא עבודת פריסה שלמה, והוא חוזר ברגע שמוסיפים כאן
    שורה אחת. */
+/* המעבר הצר עבר אל אחרי ית׳רב (16.9.2026): השבטים שישבו בו אוחדו אל
+   תחנת הגבול, והעולם שהתפנה הוא נקודת השליפה שבאמצע הדרך — שלוש שאלות
+   על שלוש התחנות שמאחור, לפני שיורדים אל הנוצרים. */
 export const LAYOUTS: Record<string, Layout> = {
   'night-camp': campLayout,
   'border-post': borderLayout,
-  'narrow-pass': passLayout,
   'loading-road': roadLayout,
   yathrib: yathribLayout,
+  'narrow-pass': passLayout,
   monastery: monasteryLayout,
   mecca: meccaLayout,
   exit: exitLayout,

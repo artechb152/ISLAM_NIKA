@@ -3767,6 +3767,15 @@ const HOST_NAME: string = (() => {
   const who = intro && intro.speaker !== 'narrator' ? intro.speaker : 'rawi'
   return SPEAKERS[who] ?? 'רָאוִי'
 })()
+/** איפה עומדת הדמות המארחת — היעד של המצפן בשלב הפתיחה. ראווי אינו כאן:
+    הוא צועד לצד הלומד, ואין לאן להצביע. */
+const HOST_SPOT: { x: number; z: number } | null = (() => {
+  const intro = REGION.encounters.find((e) => e.id === INTRO_ID)
+  if (!intro || intro.speaker === 'narrator' || intro.speaker === 'rawi') return null
+  const p = (PLACEMENTS[REGION.id] ?? []).find((c) => c.who === intro.speaker)
+  return p ? { x: p.x, z: p.z } : null
+})()
+
 /** תחנה שבה הפעולה הפיזית קודמת לבחינת העדות: אי אפשר לקרוא כתובת
     שיושבת בצל, והלפיד הוא מה שמוציא אותה משם. */
 /* ── האבן שהלפיד מאיר ──────────────────────────────────────────────
@@ -3774,7 +3783,7 @@ const HOST_NAME: string = (() => {
    הן ישבו באותה נקודה, ולכן הלפיד כוון אל `REGION_TASK`; מאז שהמפה
    חזרה להיות התחנה הן במקומות שונים — האבן לצד הדרך, המפה ליד
    המדורה — והלפיד חייב להצביע על האבן. */
-const REVEAL_FIND = REGION_FINDS.find((f) => f.id === 'find-terrace-inscription') ?? null
+const REVEAL_FIND = REGION_FINDS.find((f) => f.id === 'find-camp-tradition') ?? null
 const REVEAL_FIRST = !!REVEAL_FIND
 
 /* ההוראה של שלב הפעולה — משפט אחד שמתחיל בפועל. „גררו", „הניחו",
@@ -3783,7 +3792,7 @@ const REVEAL_FIRST = !!REVEAL_FIND
    הפיזית אינה המשימה עצמה אלא מה שפותח אותה. */
 const ACT_LINE: string =
   REVEAL_FIRST
-    ? 'האירו את האבן שלצד הדרך: קחו את הלפיד שלידה, גררו אותו אל האבן והחזיקו. החץ מצביע על הבא בתור.'
+    ? 'האירו את הדף שעל האוכף: קחו את הלפיד שלידו, גררו אותו אל הדף והחזיקו.'
     : REGION.id === 'mecca'
       ? 'סדרו את השולחן: הניחו כל דבר במקומו — מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.'
       : (REGION_TASK?.hint ?? REGION_TASK?.prompt ?? '')
@@ -4076,7 +4085,13 @@ function LampReveal({ live, target, home, onRevealed, revealed, active }: {
        מה שהייתה — קרבה לאורך זמן — ולכן אין כאן קיצור אלא יד אחרת. */
     const key = (e: KeyboardEvent) => {
       if (doneRef.current || !activeRef.current) return
-      if (!live.atTask) return
+      /* ⚠ כאן עמד `if (!live.atTask) return`, כלומר F על הלפיד נפתח רק
+         כשעומדים ליד *המשימה*. במחנה הלילה המשימה היא המפה שליד
+         המדורה, והלפיד עומד 6.3 מטר ממנה, ליד האבן: מי שהלך אל האבן
+         כפי שההוראה אמרה עמד מול לפיד שלא הגיב למקש, ומי שעמד ליד
+         המפה קיבל מקש שמרים לפיד שאינו נראה. זו הייתה התחנה שהסוקר
+         לא סיים ביושר. המידה הנכונה היא המרחק מן הלפיד עצמו. */
+      if (Math.hypot(live.player.x - pos.current.x, live.player.z - pos.current.z) > 4.5) return
       if (document.querySelector('.hud-dialogue, .ch1-task, .ch1-find, .ch1-overlay')) return
       if (e.code === 'KeyF') {
         e.preventDefault()
@@ -4915,7 +4930,7 @@ const RAWI_INTRO: Encounter = {
   gesture: 'talk-happy',
   lines: [
     { source: '', text: 'שלום עליך, נוסע! חיכיתי לך. רָאוִי שמי — מלווה שיירות, ואוסף סיפורים.' },
-    { source: '', text: 'הדרך שלפנינו היא דרך הבשמים: מן הדרום הזה, דרך תחנות המסחר והמדבר, צפונה עד מכה.' },
+    { source: '', text: 'הדרך שלפנינו עולה מן הדרום הזה צפונה, ואחר כך פונה בחזרה דרומה עד מכה — שמונה עצירות.' },
     { source: '', text: 'אני אצעד לצידך. כל דבר ששווה לזכור — אכתוב במחברת המסע, ובסוף הדרך נדע איך נראה העולם שאל תוכו עתיד לבוא האסלאם.' },
     { source: '', text: 'קדימה — השער הראשון מחכה במעלה הדרך.' },
   ],
@@ -4959,11 +4974,11 @@ const RAWI_ARRIVALS: Record<string, { gesture: Gesture; text: string }> = {
   },
   'border-post': {
     gesture: 'talk-nod',
-    text: 'שים לב איך משתנה הדרך. מכאן והלאה יש למי לתת דין וחשבון. התחנה הזאת היא על שתי האימפריות שמצפון — ויש שם אדם שיסביר לך מי הן.',
+    text: 'שים לב איך משתנה הדרך. מכאן והלאה יש למי לתת דין וחשבון. שני אנשים עומדים כאן: שליח של אימפריה, וראש שבט שחונה אצל המדורה.',
   },
   'narrow-pass': {
-    gesture: 'talk',
-    text: 'המעבר הזה צר, ומי ששולט בו שולט בכל מה שעובר. כאן נלמד על השבטים ועל נתיבי המסחר — יש מדורה למעלה, ומי שיושב לידה יודע את זה מבפנים.',
+    gesture: 'talk-nod',
+    text: 'המעבר הזה צר, ואין בו איש מלבדנו. כאן נעצור רגע ונבדוק מה נשאר לך משלוש התחנות שמאחורינו — ואז נמשיך.',
   },
   'loading-road': {
     gesture: 'talk',
@@ -5004,6 +5019,25 @@ function arrivalBeat(regionId: string): Encounter | null {
     gesture: a.gesture,
     lines: ask ? [{ source: '', text: a.text }, ask] : [{ source: '', text: a.text }],
   }
+}
+
+/* ── השורה הבאה של ראווי ─────────────────────────────────────────────────
+   מי שקורא לו (R) ומי שמחכה שידבר מעצמו צריכים לקבל את אותה שורה, ולפי
+   אותם כללים: ביט שממתין ל-`after:` או ל-`task:` אינו נדחף לפני תורו,
+   ובתחנה שיש לה דמות מארחת ראווי אינו מקדים אותה — הוא בן-לוויה, לא
+   מחליף. שני המסלולים קראו עד כה כל אחד לחישוב משלו, וזה היה ההבדל. */
+function nextRawi(seen: string[], solved: string[]): Encounter | null {
+  const heard = new Set(seen)
+  const worked = new Set(solved)
+  const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.has(x.id))
+  if (!next) return null
+  const t = next.trigger ?? 'arrive'
+  if (t.startsWith('after:') && !heard.has(t.slice(6))) return null
+  if (t.startsWith('task:') && !worked.has(t.slice(5))) return null
+  /* המארח מדבר ראשון. בתחנה שהפתיחה שלה שייכת לשליח או לסוחר, ראווי
+     האוטומטי נכנס בזמן ההליכה אליו ובלע את ה-E שיועד לו. */
+  if (INTRO_ID && next.id !== INTRO_ID && !heard.has(INTRO_ID) && HOST_NAME !== SPEAKERS.rawi) return null
+  return next
 }
 
 /* שער ליבה סגור אינו קיר שקוף: כשהמטייל נכנס לשער קדימה לפני שהליבה
@@ -5980,6 +6014,10 @@ export default function Game() {
      המיון עצמו, וכל האופציות נדרשות. */
   const taskNeeded = useMemo(() => {
     if (!REGION_TASK) return [] as string[]
+    /* שליפה: „הפעולה" היא שלוש התשובות הנכונות, בזו אחר זו */
+    if (REGION_TASK.steps?.length) {
+      return REGION_TASK.steps.map((st) => st.options.find((o) => o.right)?.id ?? st.id)
+    }
     const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
     const present = REGION_TASK.kind === 'present'
     if (sortLike || present) {
@@ -6026,7 +6064,9 @@ export default function Game() {
   const chooseTask = useCallback(
     (id: string) => {
       if (!REGION_TASK) return
-      const opt = REGION_TASK.options.find((o) => o.id === id)
+      const opt =
+        REGION_TASK.options.find((o) => o.id === id) ??
+        (REGION_TASK.steps ?? []).flatMap((st) => st.options).find((o) => o.id === id)
       if (!opt) return
       setTaskLast(id)
       setTaskLastOk(!!opt.right)
@@ -6328,6 +6368,36 @@ export default function Game() {
                 : 'הדרך הסתיימה'
   objectiveRef.current = objective
   talksLeftRef.current = talksLeft
+  /* ── המצפן ──────────────────────────────────────────────────────────
+     שורת המטרה אמרה מה לעשות ולא איפה, ובמכה כל היעדים רחוקים 33–49
+     מטר מנקודת הכניסה: הלומד ידע שעליו לדבר עם הסוחר ולא ידע לאן
+     ללכת, ו-W מוליך לפי המצלמה שמתחלפת אחרי כל שיחה. כאן נוסף החסר —
+     מרחק וכיוון יחסי אל מה שהשלב הנוכחי מבקש. מתחת לשני מטרים הוא
+     נעלם: מי שעומד על היעד אינו צריך חץ. */
+  const aim = useMemo<{ x: number; z: number } | null>(() => {
+    if (stage === 'brief') return HOST_SPOT
+    if (stage === 'look') {
+      const f = REGION_FINDS.find((x) => x.id === nextSight)
+      return f ? { x: f.x, z: f.z } : null
+    }
+    if (stage === 'act') {
+      if (REVEAL_FIRST && REVEAL_FIND) return { x: REVEAL_FIND.x, z: REVEAL_FIND.z }
+      return REGION_TASK ? { x: REGION_TASK.x, z: REGION_TASK.z } : null
+    }
+    if (stage === 'interpret' || stage === 'wrap') {
+      return REGION_TASK ? { x: REGION_TASK.x, z: REGION_TASK.z } : null
+    }
+    const g = ONWARD ? (campLayout.exits ?? []).find((e) => e.to === ONWARD) : null
+    return g ? { x: g.x, z: g.z } : null
+  }, [stage, nextSight])
+  const aimInfo = useMemo(() => {
+    if (!aim) return null
+    const dx = aim.x - mapPos.x
+    const dz = aim.z - mapPos.z
+    const dist = Math.hypot(dx, dz)
+    if (dist < 2) return null
+    return { dist: Math.round(dist), deg: (wrapPi(Math.atan2(dx, -dz) - mapYaw) * 180) / Math.PI }
+  }, [aim, mapPos, mapYaw])
   /* רמז התקיעות אחרי 25 שניות. קודם הוא פתח תמיד במשימה — גם כשהיא
      עדיין נעולה מאחורי שיחה שלא נשמעה, כלומר הפנה את הלומד אל מה
      שלא ייפתח לו. הוא הולך עכשיו לפי אותו סדר של השלבים. */
@@ -6628,16 +6698,7 @@ export default function Game() {
   useEffect(() => {
     quietSince.current = performance.now()
   }, [encounter, openFind, openTask, finale, sceneReady])
-  const rawiAutoNext = useMemo(() => {
-    const heard = new Set(seen)
-    const worked = new Set(solved)
-    const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.has(x.id))
-    if (!next) return null
-    const t = next.trigger ?? 'arrive'
-    if (t.startsWith('after:') && !heard.has(t.slice(6))) return null
-    if (t.startsWith('task:') && !worked.has(t.slice(5))) return null
-    return next
-  }, [seen, solved])
+  const rawiAutoNext = useMemo(() => nextRawi(seen, solved), [seen, solved])
   useEffect(() => {
     if (!sceneReady || !rawiAutoNext || encounter || openFind || openTask || finale === 'card' || finale === 'film') return
     const iv = window.setInterval(() => {
@@ -6742,8 +6803,12 @@ export default function Game() {
          whoever you are standing next to. Both read the store rather than the
          `seen` state so a keypress can never act on a stale render. */
       if (e.code === 'KeyR' && !encounterRef.current) {
-        const heard = readNotebook().seen
-        const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.includes(x.id))
+        /* ⚠ כאן נבחר פשוט „הראשון שלא נשמע", בלי להביט ב-trigger — ולכן
+           R הקדים ביטים שממתינים למשימה או לשיחה אחרת: במכה הוא מסר
+           את הסיכום של תחנה לפני שהתחנה נעשתה. `nextRawi` הוא אותו
+           חישוב שראווי האוטומטי כבר עשה, ועכשיו שניהם קוראים ממנו. */
+        const store = readNotebook()
+        const next = nextRawi(store.seen, store.solved)
         if (next) setEncounter(next)
         else if (coreMissingRef.current.length > 0) {
           /* אין לראווי מונולוג כאן — אבל מקש מת גרוע יותר: הוא מפנה
@@ -7388,19 +7453,32 @@ export default function Game() {
             שורה פעמיים נקראת כתקלה, לא כדגש. */}
         {objective && !overlay && !openTask && !openFind && !encounter &&
           !(stage === 'brief' && nearPending) && !(atTask && REGION_TASK) && (
-          <p className="hud-objective" role="status">{objective}</p>
+          <p className="hud-objective" role="status">
+            {objective}
+            {aimInfo && (
+              <span className="hud-aim">
+                <i style={{ transform: `rotate(${aimInfo.deg}deg)` }} aria-hidden="true">▲</i>
+                {aimInfo.dist} מ׳
+              </span>
+            )}
+          </p>
         )}
         {/* ── הוראת F ────────────────────────────────────────────────
             מופיעה רק כשיש פעולה פיזית לבצע, ומשתנה כשהיד כבר מחזיקה.
             לא כתובית קבועה על המסך: אין פעולה — אין הוראה. */}
-        {stage === 'act' && atTask && !overlay && !openTask && !openFind && !encounter && (
+        {stage === 'act' && (atTask || REVEAL_FIRST) && !overlay && !openTask && !openFind && !encounter && (
           <p className="hud-panel hud-hand" role="status">
             {handHeld
               ? <>ביד: <b>{handHeld}</b> · בחרו יעד ב־<i className="hud-key">←</i> <i className="hud-key">→</i> · <i className="hud-key">F</i> להנחה · <i className="hud-key">Esc</i> לביטול</>
               : <>גררו בעכבר, או לחצו <i className="hud-key">F</i> לפעולה במקלדת</>}
           </p>
         )}
-        {idleHint && hintText && !objective && !overlay && !openFind && !openTask && !encounter && (
+        {/* ⚠ התנאי כאן היה `!objective`, ושורת המטרה אינה ריקה באף שלב —
+            כלומר רמז התקיעות של 25 השניות לא הוצג מעולם, מאז שנכתב.
+            הוא נועד למי שעומד ולא מוצא, ולכן התנאי הנכון הוא שלא
+            נחזור על אותה שורה: הרמז מוסיף *איפה*, כשהמטרה כבר אמרה
+            *מה*, ולכן הוא מוצג רק כששניהם אינם זהים. */}
+        {idleHint && hintText && hintText !== objective && !overlay && !openFind && !openTask && !encounter && (
           <p className="hud-panel hud-hint" role="status">{hintText}</p>
         )}
         <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />

@@ -46,12 +46,21 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
   /* connect חולק את מכניקת השני-קליקים של sort — רק התמונה שונה:
      מעגל משותף שעוטף את "בבית פנימה" במקום שני דליים זה לצד זה. */
   const sorting = task.kind === 'sort' || task.kind === 'connect' || task.kind === 'observe'
+  /* ── שליפה: שאלה אחת על המסך בכל רגע ────────────────────────────
+     שלוש שאלות זו מתחת לזו הן מבחן; שאלה אחת שנפתחת אחרי שקודמתה
+     נענתה היא שיחה. השלב הנוכחי הוא מספר הצעדים שכבר נענו נכון. */
+  const steps = task.steps ?? []
+  const stepIdx = steps.findIndex((st) => !st.options.some((o) => o.right && chosen.includes(o.id)))
+  const step = stepIdx >= 0 ? steps[stepIdx] : null
   const nested = task.kind === 'connect'
-  const needed = sorting ? task.options : task.options.filter((o) => o.right)
+  const needed = (task.steps?.length ?? 0) > 0
+    ? (task.steps ?? [])
+    : sorting ? task.options : task.options.filter((o) => o.right)
   /* ההערה מוצגת גם לתשובת פירוש, ולא רק לאופציה של ההנחה */
   const lastOpt: { note: string; wrong?: string } | null = last
     ? (task.options.find((o) => o.id === last) ??
-       task.interpret?.options.find((o) => o.id === last) ?? null)
+       task.interpret?.options.find((o) => o.id === last) ??
+       (task.steps ?? []).flatMap((st) => st.options).find((o) => o.id === last) ?? null)
     : null
   /* Two clicks, not a drag: pick the thing up, then say which side it goes on.
      A pointer drag would shut out the keyboard and the screen reader, and this
@@ -71,6 +80,9 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
      הוא רשימה ריקה — כלומר „הכול נעשה" לפני שנגעו בדבר. כשאין גוף
      לאיש, כל האופציות הן הפעולה. (אותו חישוב בדיוק ב-Game: taskNeeded) */
   const mainNeeded = ((): string[] => {
+    if (steps.length > 0) {
+      return steps.map((st) => st.options.find((o) => o.right)?.id ?? st.id)
+    }
     if (sorting || task.kind === 'present') {
       const withProp = task.options.filter((o) => o.prop)
       return (withProp.length > 0 ? withProp : task.options).map((o) => o.id)
@@ -87,7 +99,7 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
         <h3 id="ch1-task-title">{task.title}</h3>
         {/* שאלת הפעולה שייכת לשלב הפעולה. בשלב הפירוש היא עמדה מעל
             שאלת הפירוש, ושתי שאלות זו מעל זו נקראות כשאלה אחת מבולבלת. */}
-        {!interpreting && (
+        {!interpreting && !step && (
           <p className="ch1-task-question">{task.question}</p>
         )}
 
@@ -125,6 +137,27 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
                 </li>
               ))}
             </ul>
+          </div>
+        ) : step ? (
+          /* ── שאלת השליפה הנוכחית ──────────────────────────────────
+              אין כאן חפצים ואין מיון: שלוש שאלות על מה שכבר עבר, אחת
+              אחרי השנייה. תשובה שגויה מנמקת ונשארת פתוחה, כמו בכל
+              מקום אחר בפרק — מה שעולה בטעות הוא הסבר, לא ציון. */
+          <div className="ch1-task-steps">
+            <p className="ch1-task-step-of">שאלה {stepIdx + 1} מתוך {steps.length}</p>
+            <p className="ch1-task-question is-interpret">{step.question}</p>
+            <div className="ch1-task-options">
+              {step.options.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  className={`hud-card-btn${last === o.id ? ' is-last' : ''}`}
+                  onClick={() => onChoose(o.id)}
+                >
+                  {o.label}
+                </button>
+              ))}
+            </div>
           </div>
         ) : sorting ? (
           <div className="ch1-task-sort">
@@ -189,7 +222,7 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
                 <path d="M132 178 C 120 150, 122 120, 110 92 C 104 78, 100 66, 98 56" className="pm-route" />
                 <path d="M98 56 C 88 66, 80 78, 76 92" className="pm-route pm-route-back" />
                 <circle cx="132" cy="178" r="6" className="pm-here" />
-                <text x="146" y="183" className="pm-stop">המחנה · רמות תימן</text>
+                <text x="146" y="183" className="pm-stop">מחנה הלילה</text>
                 <circle cx="116" cy="118" r="3.4" className="pm-dot" />
                 <text x="128" y="122" className="pm-stop">תחנת הגבול</text>
                 <circle cx="98" cy="56" r="3.4" className="pm-dot" />

@@ -46,8 +46,8 @@ export const LINKS: ChainLink[] = [
     id: 'tribes',
     label: 'השבטים ונתיבי המסחר',
     source: '§6',
-    region: 'narrow-pass',
-    unlockedBy: 'task-protection',
+    region: 'border-post',
+    unlockedBy: 'task-border',
     key: {
       source: '§7',
       text: 'השבטים נדדו צפונה מאזור תימן ושימשו מתווכים בין האימפריות — בעיקר לשמירה על נתיבי הסחר.',

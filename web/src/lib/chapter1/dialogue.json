@@ -102,7 +102,7 @@
     {
       "id": "border-post",
       "name": "תחנת הגבול",
-      "topic": "שתי האימפריות",
+      "topic": "שתי האימפריות · השבטים ונתיבי המסחר",
       "ask": {
         "source": "§2",
         "text": "מי הן שתי האימפריות שמצפון לחצי האי, ובמה מאמינה כל אחת מהן?"
@@ -169,23 +169,7 @@
               "text": "אל טוב ואל רע, שנלחמים זה בזה. דואליות — שניות של האלוהות."
             }
           ]
-        }
-      ],
-      "core": [
-        "envoy-empires",
-        "envoy-sasanian",
-        "task-toll"
-      ]
-    },
-    {
-      "id": "narrow-pass",
-      "name": "המעבר הצר",
-      "topic": "השבטים ונתיבי המסחר",
-      "ask": {
-        "source": "§6",
-        "text": "מי חי כאן בין שתי האימפריות, ומה היה תפקידו בדרך?"
-      },
-      "encounters": [
+        },
         {
           "id": "chief-tribes",
           "speaker": "chief",
@@ -216,8 +200,10 @@
         }
       ],
       "core": [
+        "envoy-empires",
+        "envoy-sasanian",
         "chief-tribes",
-        "task-protection"
+        "task-border"
       ]
     },
     {
@@ -389,6 +375,47 @@
         "jewish-difference",
         "jewish-messiah",
         "task-market"
+      ]
+    },
+    {
+      "id": "narrow-pass",
+      "name": "המעבר הצר",
+      "topic": "חלחול מונותאיסטי — מה נשאר ביד",
+      "ask": {
+        "source": "§9",
+        "text": "שלוש תחנות מאחורינו. מה מכל מה שנאמר בהן כבר חלחל אל החג׳אז?"
+      },
+      "encounters": [
+        {
+          "id": "rawi-checkpoint",
+          "speaker": "rawi",
+          "notebook": 0,
+          "gesture": "talk-nod",
+          "lines": [
+            {
+              "source": "§9",
+              "key": true,
+              "text": "עצור רגע. אזור החג׳אז היה יחסית חבוי, והאימפריות לא גילו בו עניין רב — ובכל זאת חלחלו אליו רעיונות ומושגים מונותאיסטיים, בתהליך איטי ומדורג. אנחנו באמצע התהליך הזה, ולפני שנרד אל הנוצרים אני רוצה לדעת מה נשאר לך ביד."
+            }
+          ]
+        },
+        {
+          "id": "rawi-recall-done",
+          "speaker": "rawi",
+          "trigger": "task:task-recall",
+          "notebook": 0,
+          "gesture": "talk",
+          "lines": [
+            {
+              "source": "§9",
+              "text": "אלה הותירו רושם בארצם של הערבים. שלוש חוליות מאחורינו, שתיים לפנינו — ועכשיו אל המנזר."
+            }
+          ]
+        }
+      ],
+      "core": [
+        "rawi-checkpoint",
+        "task-recall"
       ]
     },
     {
