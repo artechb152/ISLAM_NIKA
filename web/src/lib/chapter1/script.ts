@@ -279,13 +279,13 @@ export function instructionFor(step: Step, script: Script, st: ScriptState, ctx:
           return 'סדרו את השולחן: הניחו כל מקור במקומו — מה שנמסר מחוץ לאסלאם, מה שנאמר בקוראן, ומה שנכתב דורות אחר כך.'
         case 'panel':
           /* אין מה לגרור כאן, ולכן ההוראה חייבת לומר איפה זה נפתח */
-          return `${task?.prompt ?? ''}: התקרבו אל התחנה ולחצו E`
+          return `${task?.prompt ?? ''}: התקרבו אל ${task?.landmark ?? 'התחנה'} ולחצו E`
         case 'place':
           return task?.hint ?? task?.prompt ?? ''
       }
       return ''
     case 'interpret':
-      return `${asker} מחכה לתשובה — לחצו E ליד התחנה`
+      return `${asker} מחכה לתשובה — לחצו E ליד ${task?.landmark ?? 'התחנה'}`
     case 'onward':
       return ctx.onward ? 'התחנה הושלמה — המשיכו בדרך' : 'הדרך הסתיימה'
   }
@@ -303,9 +303,9 @@ export function whereFor(step: Step, ctx: ScriptCtx, task: Task | null): string 
     case 'look':
       return 'חפשו את מה שמאיר על הקרקע'
     case 'act':
-      return step.mode === 'lamp' ? 'הלפיד עומד ליד הכתב' : `התחנה של ${task?.asker ?? 'רָאוִי'} מסומנת באור`
+      return step.mode === 'lamp' ? 'הלפיד עומד ליד הכתב' : `${task?.landmark ?? `התחנה של ${task?.asker ?? 'רָאוִי'}`} — מסומנת באור`
     case 'interpret':
-      return 'עמדו ליד התחנה'
+      return `עמדו ליד ${task?.landmark ?? 'התחנה'}`
     case 'onward':
       return ctx.onward ? 'צאו מהאזור בכיוון שהמצפן מסמן בזהב' : null
   }
