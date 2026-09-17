@@ -4,3 +4,6 @@ out
 next-env.d.ts
 *.tsbuildinfo
 web/scratchpad/committee-r2/chrome-profile/
+
+# מטמון הבנייה של verify-live — נוצר בכל ריצה, 300MB, ואין לו מקום בריפו
+.next-verify

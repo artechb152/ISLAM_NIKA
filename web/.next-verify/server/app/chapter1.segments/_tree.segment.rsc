@@ -1,3 +1,0 @@
-:HL["/_next/static/css/a899503b8cd1429d.css","style"]
-:HL["/_next/static/css/3edd63d10047ca95.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":0,"slots":{"children":{"name":"(chapter1)","param":null,"prefetchHints":16,"slots":{"children":{"name":"chapter1","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"2D1LVqx08OjTqQePz34na"}
