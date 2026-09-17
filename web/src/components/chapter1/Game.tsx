@@ -2641,7 +2641,7 @@ function Player({ live }: { live: Live }) {
   /** המוקד האחרון, כדי שהמצלמה תיסוג ממנו במקום לקפוץ ממנו */
   const taskLast = useRef<Live['taskFocus']>(null)
   /** הצד שממנו המצלמה משקיפה על התקריב — נבחר לפי מה שפנוי, ומוחזק */
-  const focusSide = useRef<{ cx: number; cz: number; seg: number; ok: number } | null>(null)
+  const focusSide = useRef<{ cx: number; cz: number; seg: number; ok: number; roofed: boolean } | null>(null)
   const focusSideAt = useRef(0)
   /** הזווית שממנה נכנסנו לתקריב, וזו שאליה חוזרים ביציאה */
   const focusHeld = useRef(false)
@@ -3119,8 +3119,14 @@ function Player({ live }: { live: Live }) {
         const ddx = cx - live.player.x
         const ddz = cz - live.player.z
         const seg = Math.hypot(ddx, ddz) || 1e-3
-        const ok = occlude(live.player.x, live.player.z, ddx / seg, ddz / seg, seg, 1.4)
-        return { cx, cz, seg, ok }
+        let ok = occlude(live.player.x, live.player.z, ddx / seg, ddz / seg, seg, 1.4)
+        /* מתחת לסככה אין מה לראות — הצד הזה נחשב חסום לגמרי, ואם גם
+           השני חסום, המצלמה עולה מעל הבד (ראו `blocked` למטה). */
+        let roofed = false
+        for (const rf of CAMERA_ROOFS) {
+          if (Math.hypot(cx - rf.x, cz - rf.z) < rf.r + 0.6) { roofed = true; ok = 0; break }
+        }
+        return { cx, cz, seg, ok, roofed }
       }
       if (!focusSide.current || performance.now() - focusSideAt.current > 900) {
         const a = cand(1)
@@ -3130,9 +3136,11 @@ function Player({ live }: { live: Live }) {
       }
       const side = focusSide.current
       const blocked = side.ok < side.seg * 0.7
+      /* גג: לא די ב-1.6 — הבד של הסככה עומד ב-2.3 מטר, והמצלמה צריכה
+         לעבור אותו בבירור ולהביט מטה */
       taskCamV.current.set(
         side.cx,
-        groundYAt(tf.x, tf.z) + tf.y + (blocked ? 1.6 : 0),
+        groundYAt(tf.x, tf.z) + tf.y + (side.roofed ? 2.6 : blocked ? 1.6 : 0),
         side.cz,
       )
       target.lerp(taskCamV.current, kf)
@@ -3548,6 +3556,13 @@ interface WorldDef {
   layout: Layout
   props: CampProp[]
   colliders: Collider[]
+  /** ── גגות בלי רגליים ────────────────────────────────────────────────
+      סככה (awning) היא `r: 0` בכוונה: הולכים מתחתיה. אבל המצלמה אינה
+      הולכת — היא עומדת, ובגובה 3 מטר היא עומדת *בתוך* הבד. מבחן ההסתרה
+      של תקריב המשימה ראה רק את רשימת הקוליידרים, ולכן ליד שולחן השוק
+      בית׳רב הוא בחר בשקט את הצד שמתחת לסככה: חצי מסך של גג, ולא רואים
+      מה עושים. הרשימה הזאת היא מה שהמצלמה — ורק היא — נמנעת ממנו. */
+  roofs: Collider[]
   herd: Layout['herd']
   cast: Placement[]
 }
@@ -3591,6 +3606,10 @@ function buildWorld(regionId: string, layout: Layout): WorldDef {
         .map((p) => ({ x: p.x, z: p.z, r: p.r })),
       { ...layout.campfire },
     ],
+    /* awning.glb נמדד: 3.8 × 3.0 מטר בבסיס, 2.3 גובה — רדיוס 1.9 */
+    roofs: layout.props
+      .filter((p) => p.model === 'awning')
+      .map((p) => ({ x: p.x, z: p.z, r: 1.9 })),
     herd: layout.herd,
     cast: PLACEMENTS[regionId] ?? [],
   }
@@ -3613,6 +3632,7 @@ const WORLD: WorldDef = WORLDS[REGION.id]
 for (const url of new Set(WORLD.props.map((p) => p.url))) useGLTF.preload(url)
 const CAMP = WORLD.props
 const STATIC_COLLIDERS = WORLD.colliders
+const CAMERA_ROOFS = WORLD.roofs
 const HERD = WORLD.herd
 /* Extras' models start downloading with the region's own, so an extra whose
    model is not in the cast (a chief in Mecca) is not the last thing to arrive. */
@@ -7099,7 +7119,10 @@ export default function Game() {
             הוא נועד למי שעומד ולא מוצא, ולכן התנאי הנכון הוא שלא
             נחזור על אותה שורה: הרמז מוסיף *איפה*, כשהמטרה כבר אמרה
             *מה*, ולכן הוא מוצג רק כששניהם אינם זהים. */}
-        {idleHint && hintText && hintText !== objective && !overlay && !openFind && !openTask && !encounter && (
+        {/* ולא כשההנחיה כבר עומדת ליד המקש: ליד התחנה שורת המשימה כבר
+            אומרת את זה, ואותו משפט פעמיים זה מעל זה נקרא כתקלה. */}
+        {idleHint && hintText && hintText !== objective && !overlay && !openFind && !openTask && !encounter &&
+          !nearPending && !(atTask && REGION_TASK) && (
           <p className="hud-panel hud-hint" role="status">{hintText}</p>
         )}
         <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />
