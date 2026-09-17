@@ -240,13 +240,20 @@ export function DialogueHud({
   const showChoices = atScriptEnd && remainingChoices.length > 0
   const showDone = atScriptEnd && remainingChoices.length === 0
 
-  // file the notebook entry once the script has been heard through
-  useEffect(() => {
-    if (atScriptEnd && !filed) {
-      setFiled(true)
-      onFinished(encounter)
-    }
-  }, [atScriptEnd, filed, encounter, onFinished])
+  /* ── נרשם בסגירה, לא בשורה האחרונה ──────────────────────────────
+     המפגש נרשם כאן עד עכשיו ברגע שהשורה האחרונה הוקלדה — לחיצה אחת
+     לפני שהלומד סגר אותו. Game חישב מזה את הצעד הבא בזמן שהחלונית
+     עוד על המסך, ותווית הכפתור נשארה מן הערכים הישנים. כל דרכי
+     הסגירה עוברות עכשיו דרך `close`, ורק היא רושמת. */
+  const file = useCallback(() => {
+    if (filed) return
+    setFiled(true)
+    onFinished(encounter)
+  }, [filed, encounter, onFinished])
+  const close = useCallback(() => {
+    file()
+    onClose()
+  }, [file, onClose])
 
   const advance = useCallback(() => {
     if (!completeRef.current) {
@@ -288,11 +295,11 @@ export function DialogueHud({
         if (a instanceof HTMLElement && a.closest('.hud-dialogue')) a.blur()
         /* במסך השאלות רווח מדלג וסוגר — השאלות הן העשרה למי שסקרן,
            לא שער חובה. מי שרוצה לשאול — לוחץ. */
-        if (showDone || showChoices) onClose()
+        if (showDone || showChoices) close()
         else advance()
       }
       if (ev.key === 'Escape') {
-        if (showDone || showChoices) onClose()
+        if (showDone || showChoices) close()
         else {
           /* דילוג: קפיצה לסוף המפגש — לחיצה שנייה תסגור. עדיף על מקש
              שמתעלם ממך (דוח השחקנית). */
@@ -304,7 +311,7 @@ export function DialogueHud({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [advance, onClose, showChoices, showDone])
+  }, [advance, close, showChoices, showDone])
 
   if (!step) return null
   const portrait = PORTRAIT[step.speaker]
@@ -387,7 +394,7 @@ export function DialogueHud({
               className="hud-card-btn is-primary"
               onClick={(ev) => {
                 ev.stopPropagation()
-                onClose()
+                close()
               }}
             >
               מספיק לי — נמשיך
@@ -424,7 +431,7 @@ export function DialogueHud({
                   className="hud-card-btn is-primary"
                   onClick={(ev) => {
                     ev.stopPropagation()
-                    onClose()
+                    close()
                   }}
                 >
                   {decide.stay}
@@ -433,6 +440,7 @@ export function DialogueHud({
                   className="hud-card-btn"
                   onClick={(ev) => {
                     ev.stopPropagation()
+                    file()
                     decide.onGo()
                   }}
                 >
@@ -444,7 +452,7 @@ export function DialogueHud({
                 className="hud-card-btn is-primary"
                 onClick={(ev) => {
                   ev.stopPropagation()
-                  onClose()
+                  close()
                 }}
               >
                 {handoff ? 'לעבודה ←' : 'סיום שיחה'}

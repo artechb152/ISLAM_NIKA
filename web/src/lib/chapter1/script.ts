@@ -251,12 +251,17 @@ export function instructionFor(step: Step, script: Script, st: ScriptState, ctx:
       if (step.speaker === 'narrator') return NARRATOR_WAIT
       if (step.speaker === 'rawi') return RAWI_WAIT
       const host = hostName(step.speaker, ctx)
-      const first = !script.some(
+      /* השאלה של התחנה היא המטרה שלה: מי שקורא „מי הן שתי האימפריות"
+         הולך אל השליח בשביל תשובה, לא בשביל להשלים משבצת. היא שייכת
+         לשיחה הראשונה של הדמות הראשונה — לא לכל דמות שמדברת ראשונה:
+         בגבול היא נדבקה גם לראש השבט, וזה נקרא „מי הן שתי האימפריות —
+         ראש השבט כאן". */
+      const firstHostTalk = script.find((s) => s.kind === 'talk' && !s.auto)
+      if (firstHostTalk?.key === step.key && ctx.region.ask) return `${ctx.region.ask.text} — ${host} כאן (E)`
+      const heardFromHost = script.some(
         (s) => s.kind === 'talk' && s.speaker === step.speaker && s.key !== step.key && isDone(s, st, task),
       )
-      /* השאלה של התחנה היא המטרה שלה: מי שקורא „מי הן שתי האימפריות"
-         הולך אל השליח בשביל תשובה, לא בשביל להשלים משבצת. */
-      if (first && ctx.region.ask) return `${ctx.region.ask.text} — ${host} כאן (E)`
+      if (!heardFromHost) return `דברו עם ${host} — לחצו E לידו`
       const n = talksLeftFor(step, script, st, task)
       return `יש עוד ${n === 1 ? 'נושא אחד' : `${n} נושאים`} לשמוע מ${host} — לחצו E לידו`
     }

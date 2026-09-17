@@ -20,6 +20,11 @@ import { FindCard } from './FindCard'
 import { wrapPi } from '@/lib/chapter1/angles'
 import { MAP_PINS } from '@/lib/chapter1/journey'
 import { linkState } from '@/lib/chapter1/links'
+import {
+  arriveId, buildScript, encounterOf, instructionFor, isDone, mayOpen, nextStep, optionalLeft,
+  placeablesOf, positionFor, refusalFor, requiredLeft, stageOf, whereFor,
+  type ScriptCtx, type ScriptState, type Step,
+} from '@/lib/chapter1/script'
 import { allowedBecause } from '@/lib/chapter1/overlap-allow'
 import { cue, footstep, isMuted, setMuted, startAmbience, stopAmbience, unlock } from '@/lib/chapter1/audio'
 import { TaskPanel } from './TaskPanel'
@@ -28,7 +33,7 @@ import { ChapterFilm } from './ChapterFilm'
 import { DialogueHud } from './DialogueHud'
 import { Notebook } from './Notebook'
 import { WorldMap } from './WorldMap'
-import { MODEL, NOTEBOOK_TOTAL, SPEAKERS, regionById, type Encounter, type Gesture } from '@/lib/chapter1/dialogue'
+import { MODEL, NOTEBOOK_TOTAL, SPEAKERS, regionById, type Choice, type Encounter, type Gesture, type SpeakerId } from '@/lib/chapter1/dialogue'
 import { PLACEMENTS, type Placement } from '@/lib/chapter1/placements'
 import { notebookCount, readNotebook, recordEncounter, recordFind, recordTask, setRegion, recordChoice } from '@/lib/chapter1/notebook'
 
@@ -3743,41 +3748,15 @@ const REGION_TASK = taskIn(REGION.id)
    „הפעולה הפיזית" אינה אותו דבר בכל תחנה, ולכן היא נשאלת ולא מונחת:
    בתימן זה הלפיד, במכה השולחן, ובשאר — ההנחה עצמה היא התשובה. */
 type Stage = 'brief' | 'look' | 'act' | 'interpret' | 'wrap' | 'done'
-/** שיחת הפתיחה: הראשונה מבין שיחות הליבה של האזור. */
-const INTRO_ID: string | null =
-  (REGION.core ?? []).find((id) => REGION.encounters.some((e) => e.id === id)) ??
-  REGION.encounters[0]?.id ??
-  null
 /** הראיות שהמשימה דורשת — אלה שאסור לקרוא לפני תורן */
 const REQUIRED_FINDS = new Set<string>([
   ...((REGION_TASK?.needsFinds ?? []) as string[]),
   ...((REGION_TASK?.options ?? []).map((o) => o.needsFind).filter(Boolean) as string[]),
 ])
-/* ── שיחות הליבה שקודמות למשימה ──────────────────────────────────────
-   „התחנה לא יכולה להיות מושלמת עד שהלומד עבר את כל השיחה עם הדמות
-   הרלוונטית." אלה השיחות שהאזור קיים בשבילן ושאינן נפתחות אחרי
-   המשימה: מפגש שה-trigger שלו הוא `task:` הוא הסיכום שבא אחריה, והוא
-   אינו נספר כאן — אחרת התחנה הייתה מחכה לעצמה. */
-const CORE_TALKS: string[] = (REGION.core ?? []).filter((id) =>
-  REGION.encounters.some((e) => e.id === id && !String(e.trigger ?? '').startsWith('task:')),
-)
-/** מי מארח את התחנה — הדמות שאיתה מדברים כאן, לצורך „דברו עם X". */
-const HOST_NAME: string = (() => {
-  const intro = REGION.encounters.find((e) => e.id === INTRO_ID)
-  const who = intro && intro.speaker !== 'narrator' ? intro.speaker : 'rawi'
-  return SPEAKERS[who] ?? 'רָאוִי'
-})()
-/** איפה עומדת הדמות המארחת — היעד של המצפן בשלב הפתיחה. ראווי אינו כאן:
-    הוא צועד לצד הלומד, ואין לאן להצביע. */
-const HOST_SPOT: { x: number; z: number } | null = (() => {
-  const intro = REGION.encounters.find((e) => e.id === INTRO_ID)
-  if (!intro || intro.speaker === 'narrator' || intro.speaker === 'rawi') return null
-  const p = (PLACEMENTS[REGION.id] ?? []).find((c) => c.who === intro.speaker)
-  return p ? { x: p.x, z: p.z } : null
-})()
-
-/** תחנה שבה הפעולה הפיזית קודמת לבחינת העדות: אי אפשר לקרוא כתובת
-    שיושבת בצל, והלפיד הוא מה שמוציא אותה משם. */
+/** מי מארח את התחנה — הדמות הראשונה שמדברת כאן, לצורך „דברו עם X". */
+const HOST_ID: SpeakerId | null =
+  REGION.encounters.find((e) => e.speaker !== 'rawi' && e.speaker !== 'narrator')?.speaker ?? null
+const HOST_NAME: string = HOST_ID ? SPEAKERS[HOST_ID] ?? 'רָאוִי' : SPEAKERS.rawi
 /* ── האבן שהלפיד מאיר ──────────────────────────────────────────────
    היא עדות (`find`) ולא תחנה. כל עוד התחנה של המחנה הייתה שאלת האבן
    הן ישבו באותה נקודה, ולכן הלפיד כוון אל `REGION_TASK`; מאז שהמפה
@@ -3786,38 +3765,25 @@ const HOST_SPOT: { x: number; z: number } | null = (() => {
 const REVEAL_FIND = REGION_FINDS.find((f) => f.id === 'find-camp-tradition') ?? null
 const REVEAL_FIRST = !!REVEAL_FIND
 
-/* ההוראה של שלב הפעולה — משפט אחד שמתחיל בפועל. „גררו", „הניחו",
-   „חברו", „האירו", „מסרו". הטקסטים של התחנות כבר כתובים כך ב-tasks.ts;
-   שתי התחנות שיש להן שער נפרד מקבלות ניסוח משלהן, כי שם הפעולה
-   הפיזית אינה המשימה עצמה אלא מה שפותח אותה. */
-/** משימה שאין לה אף חפץ בעולם: כל מה שהיא מבקשת קורה בפאנל, ולכן
-    הדרך היחידה להגיע אליה היא E — ואת זה בדיוק המנוע לא הרשה. */
-const PANEL_ONLY_TASK = !!REGION_TASK && !REGION_TASK.options.some((o) => o.prop)
-/** ── מתי E פותח את התחנה כבר בשלב הפעולה ────────────────────────────────
-    הפאנל הוא המסלול הנגיש של הפרק — „הכפתורים נשארים למקלדת, לקורא המסך
-    ולרתמות" — אבל E פתח אותו רק בשלב הפירוש, כלומר אחרי שהפעולה נעשתה
-    ביד. מי שאינו יכול לגרור לא יכול היה להתחיל אף תחנת מיון.
-    שני חריגים נשארים, ובשניהם הסדר הוא התוכן: במחנה מאירים לפני שקוראים
-    (REVEAL_FIRST), ובמכה מסדרים את השולחן לפני שמשווים (אין אופציות). */
-const ACT_PANEL_TASK =
-  !!REGION_TASK &&
-  REGION_TASK.kind !== 'plan' &&
-  /* ⚠ ולא רק `options`: משימת שליפה נושאת את שאלותיה ב-`steps`, ורשימת
-     האופציות שלה ריקה — ולכן נקודת השליפה נשארה סגורה בדיוק כמו קודם,
-     והתנאי החדש לא כיסה אותה. נמדד במעבר מלא של הפרק. */
-  (REGION_TASK.options.length > 0 || (REGION_TASK.steps?.length ?? 0) > 0) &&
-  !REVEAL_FIRST &&
-  REGION.id !== 'mecca'
-
-const ACT_LINE: string =
-  REVEAL_FIRST
-    ? 'האירו את הכתב שעל האוכף: קחו את הלפיד שלידו, גררו אותו אליו והחזיקו.'
-    : REGION.id === 'mecca'
-      ? 'סדרו את השולחן: הניחו כל דבר במקומו — מה שנחצב באבן, מה שנאמר בפסוק, ומה שנכתב מאוחר יותר.'
-      : PANEL_ONLY_TASK
-        /* אין מה לגרור כאן, ולכן ההוראה חייבת לומר איפה זה נפתח */
-        ? `${REGION_TASK?.prompt ?? ''}: התקרבו אל התחנה ולחצו E`
-        : (REGION_TASK?.hint ?? REGION_TASK?.prompt ?? '')
+/* ── התסריט של התחנה ─────────────────────────────────────────────────────
+   כאן ישבו עד 16.9.2026 חמישה קבועים שכל אחד מהם ענה בנפרד על „מה
+   עכשיו": INTRO_ID (השיחה שממנה נגזר השלב), CORE_TALKS (השיחות שסגירת
+   התחנה דרשה), ACT_PANEL_TASK ו-PANEL_ONLY_TASK (מתי E פותח את התחנה),
+   ו-ACT_LINE (הוראת הפעולה). הם לא הסכימו ביניהם, ולכן השלב היה 'act'
+   עם שתי שיחות שלא נשמעו, וההוראה על המסך אמרה דבר אחד בעוד המשחק
+   דרש אחר. עכשיו יש רשימה אחת של צעדים (script.ts) ומצביע אחד —
+   `next` בקומפוננטה — וכל משטח קורא ממנו. */
+const SCRIPT = buildScript(REGION, REGION_TASK, { revealFirst: REVEAL_FIRST, isMecca: REGION.id === 'mecca' })
+const CTX: ScriptCtx = {
+  region: REGION,
+  task: REGION_TASK,
+  finds: REGION_FINDS,
+  speakers: SPEAKERS,
+  hostSpot: Object.fromEntries((PLACEMENTS[REGION.id] ?? []).map((p) => [p.who, { x: p.x, z: p.z }])),
+  gate: ONWARD ? ((campLayout.exits ?? []).find((e) => e.to === ONWARD) ?? null) : null,
+  revealFind: REVEAL_FIND,
+  onward: !!ONWARD,
+}
 
 
 /** Drop scattered spots that would clash with a prop or a person standing there. */
@@ -4945,38 +4911,6 @@ function WanderingCamel({ live, index, speed, phase, h }: {
    exactly where he was — he only turns his body to keep facing you. */
 const RAWI_SIDE = 1.45
 const RAWI_SPEED = 3.4
-/* ── פתיחת המדריך ─────────────────────────────────────────────────────────
-   מפגש היכרות מסונתז: אינו יושב ב-dialogue.json כי אינו נשען על המקור —
-   אין בו אף טענה היסטורית, רק היכרות, תפקיד והזמנה. notebook: 0 מסמן
-   שהוא לא נרשם במחברת. השאלות הן של השחקן; שתיהן נענות, אין שגויה. */
-const INTRO_KEY = 'ch1:intro:v1'
-const RAWI_INTRO: Encounter = {
-  id: 'rawi-hello',
-  speaker: 'rawi',
-  notebook: 0,
-  gesture: 'talk-happy',
-  lines: [
-    { source: '', text: 'שלום עליך, נוסע! חיכיתי לך. רָאוִי שמי — מלווה שיירות, ואוסף סיפורים.' },
-    { source: '', text: 'הדרך שלפנינו עולה מן הדרום הזה צפונה, ואחר כך פונה בחזרה דרומה עד מכה — שמונה עצירות.' },
-    { source: '', text: 'אני אצעד לצידך. כל דבר ששווה לזכור — אכתוב במחברת המסע, ובסוף הדרך נדע איך נראה העולם שאל תוכו עתיד לבוא האסלאם.' },
-    { source: '', text: 'קדימה — השער הראשון מחכה במעלה הדרך.' },
-  ],
-  choices: [
-    {
-      prompt: 'רָאוִי — זה שם?',
-      lines: [
-        { source: '', text: 'זה גם שם וגם מקצוע: רָאוִי פירושו מוסר־סיפורים. מה ששמעתי בדרכים אני נושא איתי — ומה שנגלה יחד, אספר הלאה.' },
-      ],
-    },
-    {
-      prompt: 'איך נדבר בדרך?',
-      lines: [
-        { source: '', text: 'קרא לי עם R בכל עת. וכל השאר הוא מקש אחד: E — לדבר עם מי שעומד מולך, לבחון מה שמונח על הקרקע, ולעשות את מה שהמקום מבקש.' },
-      ],
-    },
-  ],
-}
-
 /* ── פעימת ההגעה ──────────────────────────────────────────────────────────
    שבעה מתשעת האזורים נפתחו בשקט מוחלט: שלט מכריז על שם המקום, נעלם, ומשם
    השחקן עומד במדבר בלי לדעת לאן ללכת ולמה. הדבר הראשון שיש לקרוא הגיע רק
@@ -4984,20 +4918,29 @@ const RAWI_INTRO: Encounter = {
 
    ראאווי צועד לצידו בכל אזור, ולכן זה תפקידו: משפט אחד שאומר לאן הגענו ומה
    שווה כאן מבט. אלה אינם תוכן לימודי ולכן אינם ב-dialogue.json ואינם נושאים
-   §: אין בהם שום טענה היסטורית — רק מקום, כיוון וסקרנות.
+   §: אין בהם שום טענה היסטורית — רק מקום, כיוון וסקרנות. השאלה של התחנה
+   (`Region.ask`) כן נושאת §, והיא נאמרת כאן כשורה שנייה.
 
-   ── ומאז סבב „התוכן לא מובן" (15.9.2026) — גם *על מה* התחנה ─────────
-   הלומד נכנס לתחנה ולא ידע מה היא מלמדת, ולכן חיפש סמנים במקום נושא.
-   כל פעימה אומרת עכשיו את הנושא במילים של כותרת המקור („שתי האימפריות",
-   „היהודים של חצי האי") — שם הפרק בחוברת, לא עובדה חדשה. העובדות עצמן
-   נשארות במפגשים המעוגנים ובסיכום שסוגר כל תחנה (`lesson`). אותו דפוס בדיוק
-   של `rawi-hello`, ואותו `notebook: 0` שמוודא שהם לא גוזלים רשומה. כל טענה
-   על העבר נשארת במפגשים המעוגנים. */
-const ARRIVAL_KEY = (id: string) => `ch1:arrived:${id}:v1`
-const RAWI_ARRIVALS: Record<string, { gesture: Gesture; text: string }> = {
+   ── והיכרות ────────────────────────────────────────────────────────────
+   במחנה ישבה קודם פעימת היכרות נפרדת (`rawi-hello`), אחריה פעימת ההגעה,
+   ואחריהן שיחת הליבה של ראאווי: שלושה מסכים שלו לפני הפעולה הראשונה.
+   ההיכרות התמזגה לתוך ההגעה — שלום, המקום, השאלה, והמקשים — ומה שנשאר
+   הוא סרט, פעימה אחת, ואז הלפיד. */
+type Arrival = { gesture: Gesture; text: string; lines?: string[]; tail?: string[]; choices?: Choice[] }
+const RAWI_ARRIVALS: Record<string, Arrival> = {
   'night-camp': {
-    gesture: 'talk',
-    text: 'כאן נעצור ללילה. לפני שיוצאים נברר שני דברים: מאיפה בכלל יודעים משהו על התקופה הזאת — ולאן הדרך. קרא לי ב-R כשתרצה.',
+    gesture: 'talk-happy',
+    text: 'שלום עליך, נוסע! חיכיתי לך. רָאוִי שמי — מלווה שיירות, ואוסף סיפורים. אני אצעד לצידך, וכל דבר ששווה לזכור אכתוב במחברת המסע.',
+    lines: ['כאן נעצור ללילה. לפני שיוצאים נברר שני דברים: מאיפה בכלל יודעים משהו על התקופה הזאת — ולאן הדרך.'],
+    tail: ['קרא לי עם R בכל עת. וכל השאר הוא מקש אחד: E — לדבר עם מי שעומד מולך, לבחון מה שמונח על הקרקע, ולעשות את מה שהמקום מבקש.'],
+    choices: [
+      {
+        prompt: 'רָאוִי — זה שם?',
+        lines: [
+          { source: '', text: 'זה גם שם וגם מקצוע: רָאוִי פירושו מוסר־סיפורים. מה ששמעתי בדרכים אני נושא איתי — ומה שנגלה יחד, אספר הלאה.' },
+        ],
+      },
+    ],
   },
   'border-post': {
     gesture: 'talk-nod',
@@ -5039,62 +4982,29 @@ function arrivalBeat(regionId: string): Encounter | null {
   const a = RAWI_ARRIVALS[regionId]
   if (!a) return null
   const ask = regionById(regionId).ask
+  const plain = (t: string) => ({ source: '', text: t })
   return {
-    id: `rawi-arrive-${regionId}`,
+    id: arriveId(regionId),
     speaker: 'rawi',
     notebook: 0,
     gesture: a.gesture,
-    lines: ask ? [{ source: '', text: a.text }, ask] : [{ source: '', text: a.text }],
+    lines: [plain(a.text), ...(a.lines ?? []).map(plain), ...(ask ? [ask] : []), ...(a.tail ?? []).map(plain)],
+    choices: a.choices,
   }
 }
 
-/* ── השורה הבאה של ראווי ─────────────────────────────────────────────────
-   מי שקורא לו (R) ומי שמחכה שידבר מעצמו צריכים לקבל את אותה שורה, ולפי
-   אותם כללים: ביט שממתין ל-`after:` או ל-`task:` אינו נדחף לפני תורו,
-   ובתחנה שיש לה דמות מארחת ראווי אינו מקדים אותה — הוא בן-לוויה, לא
-   מחליף. שני המסלולים קראו עד כה כל אחד לחישוב משלו, וזה היה ההבדל. */
-function nextRawi(seen: string[], solved: string[]): Encounter | null {
-  const heard = new Set(seen)
-  const worked = new Set(solved)
-  const next = REGION.encounters.find((x) => x.speaker === 'rawi' && !heard.has(x.id))
-  if (!next) return null
-  const t = next.trigger ?? 'arrive'
-  if (t.startsWith('after:') && !heard.has(t.slice(6))) return null
-  if (t.startsWith('task:') && !worked.has(t.slice(5))) return null
-  /* המארח מדבר ראשון. בתחנה שהפתיחה שלה שייכת לשליח או לסוחר, ראווי
-     האוטומטי נכנס בזמן ההליכה אליו ובלע את ה-E שיועד לו. */
-  if (INTRO_ID && next.id !== INTRO_ID && !heard.has(INTRO_ID) && HOST_NAME !== SPEAKERS.rawi) return null
-  return next
-}
-
-/* שער ליבה סגור אינו קיר שקוף: כשהמטייל נכנס לשער קדימה לפני שהליבה
-   הושלמה, ראווי אומר דיאגטית מה בדיוק חסר ואיפה — לא הודעת מערכת,
-   אלא בן-לוויה שמצביע. שערים אחורה לא נשערים לעולם. */
-function coreHoldBeat(missing: string[]): Encounter {
-  const hints = missing.map((id) => {
-    const e = REGION.encounters.find((x) => x.id === id)
-    if (e) {
-      if (e.speaker === 'rawi') return 'יש לי עוד משהו לספר לך — קרא לי (R)'
-      if (e.speaker === 'narrator') return 'יש כאן עוד רגע אחד שמחכה לקרות'
-      return `${SPEAKERS[e.speaker]} עוד מחכה לדבר איתך (E)`
-    }
-    if (REGION_TASK && REGION_TASK.id === id) {
-      return `${REGION_TASK.prompt} — התחנה של ${REGION_TASK.asker} (E)`
-    }
-    return id
-  })
-  const uniq = [...new Set(hints)]
+/* ── „רגע — הדרך לא תברח" ──────────────────────────────────────────────
+   R כשאין לראאווי מה לומר, ושער קדימה כשהליבה לא הושלמה: שניהם אומרים
+   את אותו דבר — מה הצעד הבא. לא רשימה של כל מה שחסר (זה מה שהיה כאן,
+   וזה נקרא כמטלות) אלא הדבר האחד שעושים עכשיו. */
+function holdBeat(step: Step, st: ScriptState): Encounter {
+  const what = instructionFor(step, SCRIPT, st, CTX, REGION_TASK)
   return {
     id: `rawi-hold-${REGION.id}`,
     speaker: 'rawi',
     notebook: 0,
     gesture: 'talk-nod',
-    lines: [
-      {
-        source: '',
-        text: `רגע — הדרך לא תברח. עוד לא סיימנו כאן: ${uniq.join(' · ')}. ואז נמשיך.`,
-      },
-    ],
+    lines: [{ source: '', text: step.kind === 'onward' ? what : `רגע — הדרך לא תברח. קודם: ${what}. ואז נמשיך.` }],
   }
 }
 
@@ -5166,7 +5076,7 @@ function RawiCompanion({ live, talking, gesture }: {
     if (REGION.id !== FIRST_REGION || typeof window === 'undefined') return false
     if (new URLSearchParams(window.location.search).get('from')) return false
     try {
-      return !window.localStorage.getItem(INTRO_KEY)
+      return !readNotebook().seen.includes(arriveId(REGION.id))
     } catch {
       return false
     }
@@ -6039,26 +5949,11 @@ export default function Game() {
      ובמשימת היציאה (חמש החוליות) אין אף חפץ, כי אין מה להרים ביד:
      חוליה היא נושא, לא אבן. כשלאף אופציה אין `prop`, הפעולה היא
      המיון עצמו, וכל האופציות נדרשות. */
-  const taskNeeded = useMemo(() => {
-    if (!REGION_TASK) return [] as string[]
-    /* שליפה: „הפעולה" היא שלוש התשובות הנכונות, בזו אחר זו */
-    if (REGION_TASK.steps?.length) {
-      return REGION_TASK.steps.map((st) => st.options.find((o) => o.right)?.id ?? st.id)
-    }
-    const sortLike = ['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')
-    const present = REGION_TASK.kind === 'present'
-    if (sortLike || present) {
-      const withProp = REGION_TASK.options.filter((o) => o.prop)
-      return (withProp.length > 0 ? withProp : REGION_TASK.options).map((o) => o.id)
-    }
-    return REGION_TASK.options.filter((o) => o.right).map((o) => o.id)
-  }, [])
+  const taskNeeded = useMemo(() => placeablesOf(REGION_TASK).needed, [])
   const placedAll = useMemo(
     () => taskNeeded.length > 0 && taskNeeded.every((n) => taskChosen.includes(n)),
     [taskChosen, taskNeeded],
   )
-  /* יש בכלל מה למסור כאן? במכה אין, ושם הפעולה היא השולחן. */
-  const hasPlaceables = taskNeeded.length > 0
 
   /* ── מתי התחנה נסגרת ─────────────────────────────────────────────────
      בתחנה שיש לה שלב פירוש, ההנחה מסיימת את הפעולה בלבד. מה שסוגר
@@ -6074,19 +5969,7 @@ export default function Game() {
     if (!opt) return
     setTaskLast(id)
     setTaskLastOk(!!opt.right)
-    if (opt.right) {
-      setInterpreted(id)
-      /* התשובה נכונה, אבל התחנה נסגרת רק אחרי שהדמות סיימה לדבר.
-         אומרים זאת כאן, ברגע התשובה — לא משאירים חלונית שנראית
-         פתורה ותחנה שאינה נסגרת. */
-      if (!talksDoneRef.current) {
-        setTaskNote({
-          who: 'רָאוִי',
-          text: `נכון. ורגע לפני שנסגור כאן — ל${HOST_NAME} יש עוד מה לומר לך. חזרו אליו (E), והתחנה תושלם.`,
-          ok: true,
-        })
-      }
-    }
+    if (opt.right) setInterpreted(id)
   }, [setTaskLast, setTaskLastOk])
   const chooseTask = useCallback(
     (id: string) => {
@@ -6275,162 +6158,43 @@ export default function Game() {
      כל החפצים שהתחנה מבקשת כבר מונחים במקומם (`taskChosen`), וזה קורה
      לפני ש-`solved` נרשם. */
   const taskSolvedNow = !!REGION_TASK && solved.includes(REGION_TASK.id)
-  const introSeen = !INTRO_ID || seen.includes(INTRO_ID)
-  /* `REGION_TASK!` כאן היה סימן קריאה על ערך שבאמת יכול להיות null:
-     לאזור הסיום אין משימה כלל, ולכן הוא קרס בטעינה —
-     "Cannot read properties of null (reading 'options')" — והתחנה
-     התשיעית של הפרק לא נטענה בכלל. */
-  const evidenceDone = (REGION_TASK?.needsFinds ?? []).every((f) => found.includes(f)) &&
-    (REGION_TASK?.options ?? []).every((o) => !o.needsFind || found.includes(o.needsFind))
-  const physDone = REVEAL_FIRST ? stoneLit
-    : REGION.id === 'mecca' ? tableSet
-    : placedAll
-  /* ── מתי התחנה באמת נסגרת ───────────────────────────────────────
-     שלושה תנאים, וכל אחד מהם נשבר פעם אחת:
-
-     · ההנחה. במכה אין אפילו אופציה אחת עם חפץ — הפעולה שם היא שולחן
-       הראיות — ולכן „כל מה שצריך להימסר" היה רשימה ריקה, ותנאי
-       „ריק ⇐ לא הושלם" מנע סגירה לנצח. זו הייתה התחנה השבורה: אין
-       תשובה נכונה, כי אין תשובה שתיחשב. כשאין מה למסור, הפעולה
-       הפיזית עצמה היא ההנחה.
-     · הפירוש, כשיש שאלת פירוש.
-     · והשיחה. תחנה אינה מושלמת כל עוד הלומד לא שמע את מה שיש לדמות
-       הרלוונטית לומר. שיחות הליבה שאינן נפתחות אחרי המשימה נדרשות
-       כאן במפורש. */
-  const talksDone = CORE_TALKS.every((id) => seen.includes(id))
-  const talksDoneRef = useRef(true)
-  talksDoneRef.current = talksDone
-  const talksLeftRef = useRef(0)
+  /* ── הצעד הבא, ורק הוא ────────────────────────────────────────────────
+     מה שהיה כאן: introSeen (שיחה אחת), evidenceDone, physDone, talksDone
+     (כל השיחות), summarySeen, ומהם מכונת שלבים שנגזרה מאחד ונסגרה לפי
+     כולם. עכשיו מצב אחד נכנס ל-script.ts, ויוצא ממנו צעד אחד. */
+  const scriptState = useMemo<ScriptState>(
+    () => ({ seen, found, solved, stoneLit, tableSet, placedAll, interpreted: !!interpreted || taskSolvedNow, nearWho }),
+    [seen, found, solved, stoneLit, tableSet, placedAll, interpreted, taskSolvedNow, nearWho],
+  )
+  const scriptStateRef = useRef(scriptState)
+  scriptStateRef.current = scriptState
+  const next = useMemo(() => nextStep(SCRIPT, scriptState, REGION_TASK), [scriptState])
+  const nextRef = useRef<Step>(next)
+  nextRef.current = next
+  /* ── מתי התחנה נסגרת ──────────────────────────────────────────────
+     כל הפעולות נעשו (הלפיד, השולחן, ההנחה — מה שהתחנה מבקשת), והפירוש
+     נענה אם יש. השיחות אינן תנאי כאן יותר: הסדר מבטיח שהן קדמו. */
+  const actsDone = SCRIPT.filter((st) => st.kind === 'act').every((st) => isDone(st, scriptState, REGION_TASK))
   useEffect(() => {
     if (!REGION_TASK || taskSolved) return
-    if (!(placedAll || (!hasPlaceables && physDone))) return
+    if (!actsDone) return
     if (REGION_TASK.interpret && !interpreted) return
-    if (!talksDone) return
     setSolved(recordTask(REGION_TASK.id).solved)
     setTaskNote({ who: 'רָאוִי', text: REGION_TASK.done, ok: true })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [taskChosen, taskSolved, interpreted, placedAll, physDone, talksDone])
-  const interpretDone = taskSolvedNow
-  /* הסיכום: המשפט הסוגר של התחנה נאמר. בתחנות שיש להן מפגש שנפתח
-     ב-`task:` זה אותו מפגש; בשאר זו שורת ה-`done` של המשימה, שנרשמת
-     ברגע שהיא מוצגת. */
-  const summaryEncounter = useMemo(
-    () => REGION_TASK ? REGION.encounters.find((e) => e.trigger === `task:${REGION_TASK.id}`) : undefined,
-    [],
-  )
-  const [summaryShown, setSummaryShown] = useState(false)
-  const summarySeen = summaryEncounter ? seen.includes(summaryEncounter.id) : summaryShown
-  useEffect(() => { if (interpretDone) setSummaryShown(true) }, [interpretDone])
-  /* ברמות תימן הפעולה קודמת לקריאה: אי אפשר לקרוא כתובת שיושבת בצל,
-     והלפיד הוא מה שמוציא אותה משם. בכל שאר התחנות בוחנים קודם ואז
-     פועלים. זה ההבדל היחיד בסדר, והוא נובע מן התוכן. */
-  const stage: Stage = !introSeen ? 'brief'
-    : REVEAL_FIRST
-      ? (!physDone ? 'act' : !evidenceDone ? 'look' : !interpretDone ? 'interpret' : !summarySeen ? 'wrap' : 'done')
-      : (!evidenceDone ? 'look' : !physDone ? 'act' : !interpretDone ? 'interpret' : !summarySeen ? 'wrap' : 'done')
+  }, [taskSolved, interpreted, actsDone])
+  /* תאימות: World, TaskProps ו-TaskPanel עדיין חושבים בשלבים */
+  const stage: Stage = stageOf(next, SCRIPT)
   const stageRef = useRef<Stage>(stage)
   stageRef.current = stage
-  /* וו בדיקה, בפיתוח בלבד: מה יש כאן ואיפה הוא עומד. בלעדיו כל פרוב
-     חייב לשכפל את הנתונים של האזור, ואז הוא בודק את עצמו. */
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'production') return
-    ;(window as unknown as Record<string, unknown>).__ch1Where = {
-      region: REGION.id, stage, host: HOST_NAME, objective,
-      seen, notebook: notebook.done,
-      finds: REGION_FINDS.map((f) => ({ id: f.id, x: f.x, z: f.z, done: found.includes(f.id) })),
-      bound: WORLD.layout.bound ?? 24,
-      gate: ONWARD ? (campLayout.exits ?? []).find((e) => e.to === ONWARD) ?? null : null,
-      task: REGION_TASK ? { id: REGION_TASK.id, x: REGION_TASK.x, z: REGION_TASK.z, solved: solved.includes(REGION_TASK.id) } : null,
-      cast: CAST.map((c) => ({ who: c.who, x: c.x, z: c.z })),
-    }
-  })
-  /* התצפית הבאה בתור: הראשונה מבין הנדרשות שעוד לא נראתה. */
-  const nextSight = REGION_TASK?.needsFinds?.find((f) => !found.includes(f)) ?? null
-  const sightsLeft = (REGION_TASK?.needsFinds ?? []).filter((f) => !found.includes(f)).length
-  /* הוראת הפעולה. בתחנה שדורשת לראות לפני שהיא שואלת, השלב הראשון
-     אינו הגרירה אלא ההסתכלות — ולומר \"גררו\" למי שעוד לא ראה דבר
-     הוא לתת הוראה שאי אפשר לבצע. */
-  const actLine = sightsLeft > 0
-    ? (sightsLeft === 1
-        ? 'הביטו במה שמאיר — נותר כאן דבר אחד לראות'
-        : `הביטו במה שמאיר — נותרו כאן ${sightsLeft} דברים לראות`)
-    : ACT_LINE
-  const actLineRef = useRef(actLine)
-  actLineRef.current = actLine
+  const nextSight = next.kind === 'look' ? next.id : null
+  const objective = instructionFor(next, SCRIPT, scriptState, CTX, REGION_TASK)
   const objectiveRef = useRef('')
-  const sightsLeftRef = useRef(sightsLeft)
-  sightsLeftRef.current = sightsLeft
-  /* מה עכשיו — משפט אחד, שמשתנה עם השלב ולא עם המיקום. */
-  /* שיחות ליבה שנשארו — הן נדרשות לסגירת התחנה, ולכן ההנחיה מפנה
-     אליהן במקום לשלוח לעבודה. בלי זה הלומד נשלח למשימה, פותר אותה,
-     והתחנה אינה נסגרת בלי שהוא יודע למה. */
-  const talksLeft = CORE_TALKS.filter((id) => !seen.includes(id)).length
-  /* ⚠ מי מהן עוד לא נשמעה קובע את המקש. השורה אמרה תמיד „לחצו E לידו",
-     גם כשמה שנשאר הוא מונולוג של ראאווי — ולראאווי אין E: הוא צועד
-     לצידך ומדבר ברגע שקט, או נענה ל-R. הוראה למקש שאין לו יעד היא
-     בדיוק מה שגורם למשחק להיקרא כשבור, וזה קרה בתחנה הראשונה. */
-  const talksLeftAllRawi = CORE_TALKS.every(
-    (id) => seen.includes(id) || REGION.encounters.find((e) => e.id === id)?.speaker === 'rawi',
-  )
-  const talksLeftWho = talksLeftAllRawi
-    ? 'רָאוִי — עצרו רגע, או קראו לו ב-R'
-    : `${HOST_NAME} — לחצו E לידו`
-  const objective =
-    talksLeft > 0 && stage !== 'brief'
-      ? `יש עוד ${talksLeft === 1 ? 'נושא אחד' : `${talksLeft} נושאים`} לשמוע מ${talksLeftWho}`
-      : stage === 'brief'
-      /* השאלה של התחנה היא המטרה שלה. עד כה השורה אמרה „דברו עם X",
-         כלומר את הפעולה ולא את הסיבה; מי שקורא „מי הן שתי האימפריות"
-         הולך אל השליח בשביל תשובה, ולא בשביל להשלים משבצת.
-         ── וכשאין למי ללחוץ E ─────────────────────────────────────
-         כשהמארח הוא ראאווי הוא צועד לצידך ומדבר מעצמו אחרי רגע של
-         עמידה. הוראה ללחוץ מקש שאין לו יעד היא בדיוק מה שגורם
-         למשחק להיקרא כשבור. */
-      ? (REGION.ask
-          ? `${REGION.ask.text}${HOST_NAME === SPEAKERS.rawi ? '' : ` — ${HOST_NAME} כאן (E)`}`
-          : HOST_NAME === SPEAKERS.rawi ? 'עצרו רגע — לרָאוִי יש מה לומר כאן' : `דברו עם ${HOST_NAME}`)
-      : stage === 'look'
-        ? (sightsLeft > 0
-            ? (sightsLeft === 1
-                ? 'הביטו במה שמאיר — נותר כאן דבר אחד לראות'
-                : `הביטו במה שמאיר — נותרו כאן ${sightsLeft} דברים לראות`)
-            /* לא „על הקרקע”: במחנה הלילה העדות היא אבן עומדת, ובמכה
-               היא על שולחן. מה שמשותף לכולן הוא שהן מאירות, ושנפתחות
-               ב-E — וזה מה שההוראה אומרת. */
-            : 'התקרבו אל מה שמאיר ולחצו E כדי לבחון אותו')
-        : stage === 'act'
-          ? ACT_LINE
-          : stage === 'interpret'
-            ? `${REGION_TASK?.asker ?? HOST_NAME} מחכה לתשובה — לחצו E ליד התחנה`
-            : stage === 'wrap'
-              ? `${REGION_TASK?.asker ?? HOST_NAME} מסכם`
-              : ONWARD
-                ? 'התחנה הושלמה — המשיכו בדרך'
-                : 'הדרך הסתיימה'
   objectiveRef.current = objective
-  talksLeftRef.current = talksLeft
   /* ── המצפן ──────────────────────────────────────────────────────────
-     שורת המטרה אמרה מה לעשות ולא איפה, ובמכה כל היעדים רחוקים 33–49
-     מטר מנקודת הכניסה: הלומד ידע שעליו לדבר עם הסוחר ולא ידע לאן
-     ללכת, ו-W מוליך לפי המצלמה שמתחלפת אחרי כל שיחה. כאן נוסף החסר —
-     מרחק וכיוון יחסי אל מה שהשלב הנוכחי מבקש. מתחת לשני מטרים הוא
-     נעלם: מי שעומד על היעד אינו צריך חץ. */
-  const aim = useMemo<{ x: number; z: number } | null>(() => {
-    if (stage === 'brief') return HOST_SPOT
-    if (stage === 'look') {
-      const f = REGION_FINDS.find((x) => x.id === nextSight)
-      return f ? { x: f.x, z: f.z } : null
-    }
-    if (stage === 'act') {
-      if (REVEAL_FIRST && REVEAL_FIND) return { x: REVEAL_FIND.x, z: REVEAL_FIND.z }
-      return REGION_TASK ? { x: REGION_TASK.x, z: REGION_TASK.z } : null
-    }
-    if (stage === 'interpret' || stage === 'wrap') {
-      return REGION_TASK ? { x: REGION_TASK.x, z: REGION_TASK.z } : null
-    }
-    const g = ONWARD ? (campLayout.exits ?? []).find((e) => e.to === ONWARD) : null
-    return g ? { x: g.x, z: g.z } : null
-  }, [stage, nextSight])
+     מרחק וכיוון יחסי אל מה שהצעד הבא מבקש. מתחת לשני מטרים הוא נעלם:
+     מי שעומד על היעד אינו צריך חץ. */
+  const aim = useMemo(() => positionFor(next, CTX), [next])
   const aimInfo = useMemo(() => {
     if (!aim) return null
     const dx = aim.x - mapPos.x
@@ -6439,39 +6203,34 @@ export default function Game() {
     if (dist < 2) return null
     return { dist: Math.round(dist), deg: (wrapPi(Math.atan2(dx, -dz) - mapYaw) * 180) / Math.PI }
   }, [aim, mapPos, mapYaw])
-  /* רמז התקיעות אחרי 25 שניות. קודם הוא פתח תמיד במשימה — גם כשהיא
-     עדיין נעולה מאחורי שיחה שלא נשמעה, כלומר הפנה את הלומד אל מה
-     שלא ייפתח לו. הוא הולך עכשיו לפי אותו סדר של השלבים. */
-  const hintText = (() => {
-    if (stage === 'brief') {
-      return HOST_NAME === SPEAKERS.rawi
-        ? 'ראאווי מחכה לרגע של שקט כדי לספר — עצרו לרגע'
-        : `${HOST_NAME} עומד כאן ומחכה — התקרבו ולחצו E`
-    }
-    if (stage === 'look') return 'נשארה כאן עדות שלא נבחנה — חפשו את מה שמאיר ולחצו E לידו'
-    if (stage === 'act') return ACT_LINE || null
-    if (stage === 'interpret' && REGION_TASK) return `${REGION_TASK.asker} מחכה לתשובה — עמדו ליד התחנה ולחצו E`
-    if (ONWARD) return 'הדרך ממשיכה — צאו מהאזור בכיוון שהמצפן מסמן בזהב'
-    return null
-  })()
-  const coreMissing = (REGION.core ?? []).filter((id) => !seen.includes(id) && !solved.includes(id))
+  /* רמז התקיעות אחרי 25 שניות: אותו „מה" עם „איפה" */
+  const where = whereFor(next, CTX, REGION_TASK)
+  const hintText = where ? `${objective} · ${where}` : objective
+  const coreMissing = useMemo(() => requiredLeft(SCRIPT, scriptState, REGION_TASK), [scriptState])
   const coreMissingRef = useRef<string[]>([])
   coreMissingRef.current = coreMissing
+  /* וו בדיקה, בפיתוח בלבד: מה יש כאן ואיפה הוא עומד. בלעדיו כל פרוב
+     חייב לשכפל את הנתונים של האזור, ואז הוא בודק את עצמו. */
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production') return
+    ;(window as unknown as Record<string, unknown>).__ch1Where = {
+      region: REGION.id, stage, next: next.key, host: HOST_NAME, objective,
+      script: SCRIPT.map((st) => st.key), coreMissing,
+      seen, notebook: notebook.done,
+      finds: REGION_FINDS.map((f) => ({ id: f.id, x: f.x, z: f.z, done: found.includes(f.id) })),
+      bound: WORLD.layout.bound ?? 24,
+      gate: ONWARD ? (campLayout.exits ?? []).find((e) => e.to === ONWARD) ?? null : null,
+      task: REGION_TASK ? { id: REGION_TASK.id, x: REGION_TASK.x, z: REGION_TASK.z, solved: solved.includes(REGION_TASK.id) } : null,
+      cast: CAST.map((c) => ({ who: c.who, x: c.x, z: c.z })),
+    }
+  })
   const coreHeldAt = useRef(0)
   /* מה שהתחנה כוללת ולא נעשה — בלי הליבה, שכבר נבדקה למעלה: עדויות
      שנשארו על הרצפה, ונושאים שהדמות מוכנה לדבר עליהם ולא נשמעו. */
   const missedRef = useRef<{ finds: string[]; talks: string[] }>({ finds: [], talks: [] })
   missedRef.current = {
     finds: REGION_FINDS.filter((f) => !found.includes(f.id)).map((f) => f.id),
-    talks: REGION.encounters
-      .filter(
-        (e) =>
-          !seen.includes(e.id) &&
-          !(REGION.core ?? []).includes(e.id) &&
-          !String(e.trigger ?? '').startsWith('task:') &&
-          !String(e.trigger ?? '').startsWith('after:'),
-      )
-      .map((e) => e.id),
+    talks: optionalLeft(SCRIPT, scriptState, REGION_TASK).talks,
   }
   /** נשאל פעם אחת לביקור, ולא בכל צעד בתוך השער */
   const askedMissed = useRef(false)
@@ -6514,7 +6273,7 @@ export default function Game() {
         if (now - coreHeldAt.current < 4000) return
         coreHeldAt.current = now
         cue('ui')
-        setEncounter(coreHoldBeat(coreMissingRef.current))
+        setEncounter(holdBeat(nextRef.current, scriptStateRef.current))
         return
       }
       /* אחורה באמצע תחנה — שואלים פעם אחת. השער נשאר פתוח. */
@@ -6628,131 +6387,31 @@ export default function Game() {
     setNotebook(notebookCount(store))
   }, [])
 
-  /* פתיחת המדריך: בביקור הראשון ברמות תימן ראאווי מתחיל במעלה הדרך
-     והולך אל השחקן בזמן קריינות הפתיחה. כשהיא נסגרת — הוא כבר כאן,
-     ומציג את עצמו בצילום־שניים. פעם אחת בלבד. */
-  const prevEncounterId = useRef<string | null>(null)
+  /* ── הפותח האחד ──────────────────────────────────────────────────────
+     כאן עמדו חמישה אפקטים שכל אחד מהם פתח שיחה בזמן משלו: ההיכרות 700
+     מ״ש אחרי הסרט, הסרט 1.1 שניות אחרי שהסצנה מוכנה, ההגעה אחרי 1.4,
+     המשכי after:/task: אחרי 0.9, וראאווי האוטומטי אחרי 4.2 שניות של
+     שקט — או 12 של הליכה — בלי קשר למה שהלומד באמצע לעשות. „ראאווי
+     מדבר באמצע דברים אחרים" הוא בדיוק זה.
+
+     עכשיו אפקט אחד: כשהצעד הבא הוא אוטומטי (הגעה, ראאווי, קריין) והמסך
+     פנוי, הוא נפתח אחרי 1.2 שניות. כשהצעד הבא הוא של הלומד — לא נפתח
+     דבר. אין טיימר שקט ואין מגן atTask, כי צעד אוטומטי הוא הבא רק כשאין
+     פעולה תלויה. R פותח את אותו צעד מיד. */
   useEffect(() => {
-    const prev = prevEncounterId.current
-    prevEncounterId.current = encounter?.id ?? null
-    if (encounter || prev !== 'opening') return
-    if (REGION.id !== FIRST_REGION) return
-    try {
-      if (window.localStorage.getItem(INTRO_KEY)) return
-      window.localStorage.setItem(INTRO_KEY, '1')
-    } catch {
+    if (!sceneReady || encounter || openFind || openTask || overlay || travelTo || finale !== 'none') return
+    if (!(next.kind === 'arrive' || (next.kind === 'talk' && next.auto))) return
+    const enc = next.kind === 'arrive' ? arrivalBeat(REGION.id) : encounterOf(next, REGION)
+    if (!enc) {
+      /* תחנה בלי פעימת הגעה: הצעד נחשב נעשה, אחרת התסריט נתקע בו */
+      if (next.kind === 'arrive') { const store = recordEncounter(next.id, 0); setSeen(store.seen) }
       return
     }
-    const t = window.setTimeout(() => setEncounter(RAWI_INTRO), 700)
+    const wait = next.kind === 'talk' && next.after ? 500 : 1200
+    const t = window.setTimeout(() => setEncounter((cur) => cur ?? enc), wait)
     return () => window.clearTimeout(t)
-  }, [encounter])
-
-  /* The narrator has no body to stand next to and no key of his own, so the two
-     encounters he carries — the chapter's opening line and the birds over
-     Abraha's army — had no way to fire at all. The notebook could never fill,
-     and the very first thing the chapter says was unreachable.
-
-     They play as the region opens: a beat you walk into rather than press. */
-  useEffect(() => {
-    /* הטיימר נספר קודם מרגע ההרכבה, בזמן שלוח ההגעה עדיין מכסה את
-       המסך — והלוח יושב ב-z-index 39 מול 10 של החלונית. כלומר
-       המשפט הראשון של הפרק נפתח מאחורי מסך אטום והקלדתו הסתיימה
-       לפני שמישהו ראה אותו. הוא מחכה עכשיו לרגע שבו האזור באמת
-       על המסך. */
-    if (!sceneReady) return
-    const heard = readNotebook().seen
-    const cine = REGION.encounters.find(
-      (e) => e.speaker === 'narrator' && !heard.includes(e.id) && (e.trigger ?? 'arrive') === 'arrive',
-    )
-    if (!cine) return
-    const t = window.setTimeout(() => setEncounter(cine), 1100)
-    return () => window.clearTimeout(t)
-  }, [sceneReady])
-
-  /* Rawi's word on arrival — the region says where you are, he says why you
-     would walk anywhere. It waits for the arrival plate to clear and for any
-     narrator cinematic the region opens with, so it lands as the first thing
-     said rather than on top of the film. Once per region, ever. */
-  /* Fires once, on arrival, and never re-arms. Keyed off `sceneReady` alone:
-     an earlier version also depended on `encounter`, so the timer restarted
-     every time a panel closed — the greeting could then open minutes later,
-     on top of the player walking up to a piece of evidence, and F is correctly
-     refused while a dialogue is up. `check-notebook` caught it as two finds
-     that did nothing. */
-  const arrivalFired = useRef(false)
-  useEffect(() => {
-    if (!sceneReady || arrivalFired.current) return
-    const beat = arrivalBeat(REGION.id)
-    if (!beat) return
-    /* a region that opens on the narrator gets its cinematic first; the
-       greeting follows it, not over it */
-    const heard = readNotebook().seen
-    const cinePending = REGION.encounters.some(
-      (e) => e.speaker === 'narrator' && !heard.includes(e.id) && (e.trigger ?? 'arrive') === 'arrive',
-    )
-    if (cinePending) return
-    try {
-      if (window.localStorage.getItem(ARRIVAL_KEY(REGION.id))) return
-      window.localStorage.setItem(ARRIVAL_KEY(REGION.id), '1')
-    } catch {
-      return
-    }
-    arrivalFired.current = true
-    const t = window.setTimeout(() => {
-      /* if the player already got into something in the meantime, the moment
-         for a greeting has passed — say nothing rather than interrupt */
-      setEncounter((cur) => cur ?? beat)
-    }, 1400)
-    return () => window.clearTimeout(t)
-  }, [sceneReady])
-
-  /* A beat that waits for its setup. `birds-cinematic` is the payoff to
-     `abraha-story`; `task:` beats fire when a station is worked out — the
-     loading road's "what was never packed travelled anyway" line lands right
-     after the crate closes. No marker to find, no key to press: a payoff is
-     not something the player goes and collects. */
-  useEffect(() => {
-    /* כרטיס עדות פתוח — הסרט (birds-cinematic) נדחף מעליו בריצת R3.
-       ה-payoff מחכה שהכרטיס ייסגר; הוא יירה כשה-deps יתחלפו. */
-    if (!sceneReady || encounter || openFind || openTask) return
-    const heard = new Set(seen)
-    const worked = new Set(solved)
-    const due = REGION.encounters.find((e) => {
-      if (heard.has(e.id)) return false
-      const t = e.trigger ?? 'arrive'
-      if (t.startsWith('after:')) return heard.has(t.slice(6))
-      if (t.startsWith('task:')) return worked.has(t.slice(5))
-      return false
-    })
-    if (!due) return
-    const t = window.setTimeout(() => setEncounter(due), 900)
-    return () => window.clearTimeout(t)
-  }, [sceneReady, seen, solved, encounter, openFind, openTask])
-
-  /* ראווי מדבר מעצמו. R היה מקש שצריך לדעת עליו — ומי שלא לחץ, עבר
-     פרק שלם לצד בן-לוויה אילם. עכשיו מה שיש לו לומר נפתח לבד, ברגע
-     שקט: כמה שניות אחרי שהמסך התפנה (שיחה/פאנל נסגרו), כשלא באמצע
-     גרירה, ועדיף כשעומדים — הליכה ארוכה לא חוסמת לנצח (תקרה 12ש).
-     סדר הטריגרים נשמר: beat שממתין ל-task/after לא יידחף מוקדם. R
-     נשאר כקיצור למי שרוצה את השורה הבאה מיד. */
-  const quietSince = useRef(0)
-  useEffect(() => {
-    quietSince.current = performance.now()
-  }, [encounter, openFind, openTask, finale, sceneReady])
-  const rawiAutoNext = useMemo(() => nextRawi(seen, solved), [seen, solved])
-  useEffect(() => {
-    if (!sceneReady || !rawiAutoNext || encounter || openFind || openTask || finale === 'card' || finale === 'film') return
-    const iv = window.setInterval(() => {
-      /* ליד תחנת משימה E שייך לתחנה — שיחה אוטומטית כאן חסמה את
-         "שלוש האבנים" (דוח R3). ראווי ימתין צעד אחד הצידה. */
-      if (encounterRef.current || openRef.current || live.taskDrag || live.atTask) return
-      const quiet = performance.now() - quietSince.current
-      const standing = live.keys.size === 0
-      if (quiet > 4200 && (standing || quiet > 12000)) setEncounter(rawiAutoNext)
-    }, 400)
-    return () => window.clearInterval(iv)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sceneReady, rawiAutoNext, encounter, openFind, openTask, finale])
+  }, [sceneReady, next.key, encounter, openFind, openTask, overlay, travelTo, finale])
 
   /* A read-only handle on where the traveller is standing. This used to be
      dev-only, which meant the built chapter — the one people actually play —
@@ -6844,18 +6503,11 @@ export default function Game() {
          whoever you are standing next to. Both read the store rather than the
          `seen` state so a keypress can never act on a stale render. */
       if (e.code === 'KeyR' && !encounterRef.current) {
-        /* ⚠ כאן נבחר פשוט „הראשון שלא נשמע", בלי להביט ב-trigger — ולכן
-           R הקדים ביטים שממתינים למשימה או לשיחה אחרת: במכה הוא מסר
-           את הסיכום של תחנה לפני שהתחנה נעשתה. `nextRawi` הוא אותו
-           חישוב שראווי האוטומטי כבר עשה, ועכשיו שניהם קוראים ממנו. */
-        const store = readNotebook()
-        const next = nextRawi(store.seen, store.solved)
-        if (next) setEncounter(next)
-        else if (coreMissingRef.current.length > 0) {
-          /* אין לראווי מונולוג כאן — אבל מקש מת גרוע יותר: הוא מפנה
-             אל מה שהאזור עוד מבקש (דוח השחקנית: R מת ברמות תימן) */
-          setEncounter(coreHoldBeat(coreMissingRef.current))
-        }
+        /* R הוא קיצור לצעד האוטומטי הבא של ראאווי — ואם הצעד הבא אינו
+           שלו, הוא אומר מה כן. מקש מת גרוע מכל תשובה. */
+        const n = nextRef.current
+        const enc = n.kind === 'arrive' ? arrivalBeat(REGION.id) : n.kind === 'talk' && n.auto ? encounterOf(n, REGION) : null
+        setEncounter(enc ?? holdBeat(n, scriptStateRef.current))
         return
       }
       /* מקש פעולה אחד.
@@ -6884,110 +6536,43 @@ export default function Game() {
         return true
       }
       if (interact && !encounterRef.current && !openRef.current) {
-        /* ── מה E מותר לגעת בו, לפי השלב ─────────────────────────────
-           קודם E בחר לפי מרחק בלבד, ולכן ליד תחנה שבה דמות, עדות
-           ומשימה עומדות בתוך שני מטרים אפשר היה לפתוח את המשימה לפני
-           השיחה שמסבירה אותה, או להרים עדות שעוד אין לה הקשר.
-
-           הסדר הנכון הוא הפוך: קודם קובעים אילו סוגי יעד מותרים
-           בשלב הזה, מכבים את כל השאר, ורק מתוך המותרים בוחרים את
-           הקרוב ביותר.
-
-             brief      רק הדמות שמציגה את התחנה
-             look       רק העדויות שהמשימה דורשת
-             act        רק חלקי האינטראקציה (הם אינם עוברים דרך E)
-             interpret  המשימה, או הדמות שמסכמת
-             wrap/done  הדמות, ומשם השער
-
-           „לחיצה שנייה פותחת בכל זאת" ירדה. עקיפה של הפעולה הפיזית
-           היא בדיוק מה שהופך אותה לקישוט, וזה היה החריג היחיד שאיפשר
-           את זה. */
-        const st = stageRef.current
-        /* שיחה שנשארה חייבת להיות זמינה תמיד. אחרת נוצרת סתירה שנמדדה
-           בית'רב: ההנחיה אומרת „יש עוד נושאים לשמוע — לחצו E לידו",
-           ובאותו רגע השלב הוא `act` ו-E אינו מדבר כלל. השער נשאר נעול
-           ואין דרך לפתוח אותו. */
-        const allowWho = st === 'brief' || st === 'interpret' || st === 'wrap' || st === 'done'
-          || talksLeftRef.current > 0
-        /* ראיה שהמשימה דורשת נבחנת בשלב הבחינה בלבד — כך בתימן האבן
-           אינה נקראת לפני שהיא מוארת. ראיה שאינה חובה (שברי החרס על
-           הדרך) זמינה גם בשלב הפעולה: אחרת מי שראה אותה לא יכול
-           לפתוח אותה, וזו בדיוק התלונה „לא רואים את הראיות". */
-        const nearRequired = !!live.nearFind && REQUIRED_FINDS.has(live.nearFind)
-        const allowFind = st === 'look' || st === 'wrap' || st === 'done'
-          || (st === 'act' && !nearRequired)
-        /* המשימה נפתחת כרגיל; מה שמחכה לשיחה הוא הסגירה. נעילת הפתיחה
-           שברה את הגבול, שבו השיחה השנייה עם השליח באה אחרי המטבע
-           והחותם — התחנה נתקעה ב-interpret כי אי אפשר היה לענות.
-           ומרגע שהתשובה ניתנה, המשימה מפסיקה לתפוס את E: אחרת היא
-           נפתחת שוב במקום השיחה שנשארה, והיא זו שסוגרת את התחנה. */
-        /* ⚠ עד כאן E פתח את התחנה רק בשלב הפירוש, מתוך הנחה ששלב
-           הפעולה נעשה ביד — גוררים חפץ אל מקומו. במשימה שכולה בפאנל
-           אין חפץ לגרור, ולכן לא הייתה שום דרך לפתוח אותה: התחנה
-           ענתה „רגע — הפעולה עצמה עוד לא הושלמה" למי שעמד עליה ולחץ
-           את המקש הנכון. נמדד בדפדפן בתחנת הגבול ובנקודת השליפה. */
-        const allowTask =
-          (st === 'interpret' && !interpretedRef.current) || (st === 'act' && ACT_PANEL_TASK)
-
-        const dWho = allowWho && live.nearWho ? live.nearWhoD : Infinity
-        const dFind = allowFind && live.nearFind ? live.nearFindD : Infinity
-        const dTask = allowTask && live.atTask ? live.atTaskD : Infinity
-
-        if (dWho === Infinity && dFind === Infinity && dTask === Infinity) {
-          /* ── „עדיין לא" שאומר למה ──────────────────────────────────
-             כאן הוצג עד עכשיו טקסט המטרה הכללי, ולכן מי שלחץ E על
-             האבן בתימן קיבל תשובה שאינה על האבן. התשובה צריכה להיות
-             על מה שנגעת בו: מה חוסם עכשיו, ומה הצעד שפותח אותו. */
-          const near = live.nearFind ? 'find' : live.atTask ? 'task' : live.nearWho ? 'who' : null
-          const say = (() => {
-            if (near === 'find') {
-              if (st === 'brief') return 'רגע — קודם נשמע מה יש לספר על המקום הזה.'
-              if (st === 'act') {
-                return REVEAL_FIRST
-                  ? 'רגע — עדיין אי אפשר לקרוא את החקוק. קרבו אליו את הלפיד והחזיקו, עד שהאותיות יוצאות מן הצל.'
-                  : 'רגע — קודם משלימים את הפעולה שכאן, ואז נחזור לראיות.'
-              }
-              return 'את זה כבר בחנת. מה שנשאר הוא השאלה עצמה.'
-            }
-            if (near === 'task') {
-              if (interpretedRef.current && !talksDoneRef.current) {
-                return `על השאלה כבר ענית. מה שנשאר הוא ל${HOST_NAME} — חזרו אליו (E), והתחנה תושלם.`
-              }
-              if (st === 'brief') return 'רגע — קודם נשמע את מי שעומד כאן.'
-              if (st === 'look') return 'רגע — קודם בוחנים את מה שמונח כאן. אי אפשר להשיב על מה שלא ראית.'
-              if (st === 'act') return 'רגע — הפעולה עצמה עוד לא הושלמה.'
-              return null
-            }
-            if (near === 'who') {
-              if (talksLeftRef.current > 0) return null
-              if (st === 'look') return 'רגע — קודם בוחנים את הראיות, ואז נדבר עליהן.'
-              if (st === 'act') return 'רגע — קודם משלימים את הפעולה שכאן.'
-              return null
-            }
-            return null
-          })()
-          if (near) {
-            setTaskNote({
-              who: REGION_TASK?.asker ?? HOST_NAME,
-              text: say ?? objectiveRef.current,
-              ok: false,
-            })
-            cue('ui')
-          }
-          return
+        /* ── E עושה את הצעד הבא, ורק אותו ──────────────────────────────
+           קודם היו כאן שלושה דגלי-היתר לפי שלב ואז הכרעה לפי מרחק:
+           `dWho <= dTask` — והשליח עומד 2.25 מטר מן התחנה, כלומר אותה
+           לחיצה פתחה שיחה או פאנל לפי סנטימטרים. עכשיו אין הכרעה: יש
+           צעד אחד שהוא הבא, ו-E עושה אותו אם עומדים ליד מה שהוא מבקש.
+           מה שמותר תמיד: עדות שאינה חובה, ונושא נוסף של מי שעומד כאן
+           אם תורו הגיע. כל השאר מקבל משפט אחד מראאווי — מה כן. */
+        const n = nextRef.current
+        const heard = readNotebook().seen
+        const stNow: ScriptState = { ...scriptStateRef.current, seen: heard }
+        const openTalk = (id: string) => {
+          const enc = REGION.encounters.find((x) => x.id === id)
+          if (enc) setEncounter(enc)
+          return !!enc
         }
-        if (dFind <= dWho && dFind <= dTask && examineFind()) return
-        if (dWho <= dTask && live.nearWho) {
-          const heard = readNotebook().seen
-          const next = REGION.encounters.find((x) => x.speaker === live.nearWho && !heard.includes(x.id))
-          if (next) { setEncounter(next); return }
-        }
-        if (allowTask && live.atTask) {
+        if (n.kind === 'talk' && !n.auto && live.nearWho === n.speaker && openTalk(n.id)) return
+        if (((n.kind === 'act' && (n.mode === 'panel' || n.mode === 'place')) || n.kind === 'interpret') && live.atTask) {
           cue('task')
           setOpenTask(true)
           return
         }
-        if (live.nearFind && examineFind()) return
+        if (n.kind === 'look' && live.nearFind === n.id && examineFind()) return
+        if (live.nearFind && !REQUIRED_FINDS.has(live.nearFind) && examineFind()) return
+        if (live.nearWho) {
+          const cand = REGION.encounters.find(
+            (x) => x.speaker === live.nearWho && !heard.includes(x.id) && !String(x.trigger ?? '').startsWith('task:'),
+          )
+          if (cand) {
+            const i = SCRIPT.findIndex((st) => st.kind === 'talk' && st.id === cand.id)
+            if (i >= 0 && mayOpen(SCRIPT, i, stNow, REGION_TASK) && openTalk(cand.id)) return
+          }
+        }
+        if (live.nearFind || live.atTask || live.nearWho) {
+          setTaskNote({ who: SPEAKERS.rawi, text: refusalFor(n, SCRIPT, stNow, CTX, REGION_TASK), ok: false })
+          cue('ui')
+        }
+        return
       }
       /* לא הולכים בזמן שיחה או כרטיס. עד עכשיו רק המחברת והמפה חסמו
          תנועה, ולכן אפשר היה לצאת מטווח השיחה תוך כדי שהדמות מדברת —
@@ -7074,8 +6659,18 @@ export default function Game() {
     return () => window.clearInterval(t)
   }, [live])
 
-  /** The person you are standing next to who still has something to say. */
-  const nearPending = nearWho ? nextFrom(nearWho) : null
+  /** מי שעומד כאן ו-E באמת יפתח את שיחתו עכשיו — לפי התסריט, לא לפי
+      „יש לו עוד משהו לומר". אחרת צ׳יפ E מבטיח שיחה שהמקש מסרב לה. */
+  const nearPending = useMemo(() => {
+    if (!nearWho) return null
+    if (next.kind === 'talk' && !next.auto && next.speaker === nearWho) return encounterOf(next, REGION)
+    const cand = REGION.encounters.find(
+      (x) => x.speaker === nearWho && !seen.includes(x.id) && !String(x.trigger ?? '').startsWith('task:'),
+    )
+    if (!cand) return null
+    const i = SCRIPT.findIndex((st) => st.kind === 'talk' && st.id === cand.id)
+    return i >= 0 && mayOpen(SCRIPT, i, scriptState, REGION_TASK) ? cand : null
+  }, [nearWho, next, seen, scriptState])
 
   return (
     <div className="ch1-page">
@@ -7339,7 +6934,7 @@ export default function Game() {
         ))}
         {/* ליד התחנה בשלב הפעולה הוראת F כבר אומרת מה לעשות; התווית
             המרחפת מעליה הייתה אותו משפט פעמיים, זו על זו. */}
-        {REGION_TASK && (stage === 'interpret' || (stage === 'act' && !atTask)) && (
+        {REGION_TASK && (next.kind === 'interpret' || (next.kind === 'act' && next.mode !== 'lamp' && !atTask)) && (
           <div
             className="poi-marker is-task-marker"
             ref={(el) => {
@@ -7374,30 +6969,19 @@ export default function Game() {
               <span>הביטו מקרוב</span>
             </div>
           )}
-          {atTask && !encounter && !openTask && !openFind && REGION_TASK && (
-            <>
-              {/* מה עושים כאן, במילים — ורק בשלב שבו זה מה שעושים */}
-              {stage === 'act' && actLine && (
-                <div className="hud-panel ch1-task-hint" role="status">
-                  <span>{actLine}</span>
-                </div>
-              )}
-              {/* בשלב הפעולה E אינו עושה כאן דבר — הפעולה היא גרירה או F,
-                  והוראת F כבר על המסך. שבב E נוסף באותו מקום היה שני
-                  מקשים זה על זה. */}
-              {stage !== 'act' && (
-              <div className="hud-panel poi-hint is-task-hint">
-                <i className="hud-key">E</i>
-                <span>
-                  {stage === 'brief'
-                    ? (HOST_NAME === SPEAKERS.rawi ? 'עצרו רגע — ראאווי מדבר' : `דברו קודם עם ${HOST_NAME}`)
-                    : stage === 'wrap'
-                      ? 'סכמו את מה שעשיתם'
-                      : REGION_TASK.prompt}
-                </span>
+          {atTask && !encounter && !openTask && !openFind && REGION_TASK && !nearPending && (
+            /* ליד התחנה: אם זה תורה — מה עושים בה; אם לא — מה כן, בלי
+               צ׳יפ E שמבטיח משהו שהמקש יסרב לו */
+            (next.kind === 'act' || next.kind === 'interpret') ? (
+              <div className="hud-panel ch1-task-hint" role="status">
+                {(next.kind === 'interpret' || next.mode === 'panel' || next.mode === 'place') && <i className="hud-key">E</i>}
+                <span>{objective}</span>
               </div>
-              )}
-            </>
+            ) : (
+              <div className="hud-panel poi-hint is-task-hint" role="status">
+                <span>קודם: {objective}</span>
+              </div>
+            )
           )}
           {nearPending && !encounter && (
             <div className="hud-panel poi-hint">
@@ -7412,13 +6996,15 @@ export default function Game() {
             key={encounter.id}
             encounter={encounter}
             /* אם אחרי השיחה הזאת התחנה מחכה לפעולה — הכפתור אומר זאת */
-            handoff={
-              encounter.speaker !== 'narrator' &&
-              !talksLeftRef.current &&
-              (stage === 'brief' || stage === 'look' || stage === 'act')
-                ? objective
+            handoff={(() => {
+              /* מה יהיה הצעד הבא כשהשיחה הזאת תיסגר — ואם הוא של הלומד
+                 (לראות, לעשות, לענות), הכפתור אומר זאת במקום „סיום שיחה" */
+              if (encounter.speaker === 'narrator') return null
+              const after = nextStep(SCRIPT, { ...scriptState, seen: [...scriptState.seen, encounter.id] }, REGION_TASK)
+              return after.kind === 'look' || after.kind === 'act' || after.kind === 'interpret'
+                ? instructionFor(after, SCRIPT, scriptState, CTX, REGION_TASK)
                 : null
-            }
+            })()}
             /* שיחת „פספסנו" נגמרת בהכרעה: להישאר ולחקור, או להתקדם */
             decide={
               encounter.id === `rawi-back-${REGION.id}`
@@ -7445,19 +7031,7 @@ export default function Game() {
             }
             onSpeakerChange={setStepSpeaker}
             onFinished={finishEncounter}
-            onClose={() => {
-              /* ממשיכים רק כשהנתונים אומרים שזו אותה שיחה.
-                 בסבב הקודם שרשרתי כל מפגש של אותו דובר — וזה הפך את
-                 חמשת הנושאים של הסוחר היהודי למונולוג אחד ארוך. מה
-                 שמסמן המשך אמיתי הוא `trigger: after:<id>`: בפרק כולו
-                 יש בדיוק אחד כזה (הציפורים אחרי סיפור אברהה), והוא
-                 באמת ההמשך של אותו רגע. כל השאר הם נושאים נפרדים —
-                 הם נסגרים, המצלמה חוזרת לעולם, והמטרה הבאה מוצגת. */
-              const cont = REGION.encounters.find(
-                (x) => x.trigger === `after:${encounter.id}` && !readNotebook().seen.includes(x.id),
-              )
-              setEncounter(cont ?? null)
-            }}
+            onClose={() => setEncounter(null)}
           />
         )}
         {/* ההתקדמות היא המסע, לא המלאי.
@@ -7499,7 +7073,7 @@ export default function Game() {
         {/* כשההנחיה כבר עומדת ליד המקש — לא חוזרים עליה מתחת. אותה
             שורה פעמיים נקראת כתקלה, לא כדגש. */}
         {objective && !overlay && !openTask && !openFind && !encounter &&
-          !(stage === 'brief' && nearPending) && !(atTask && REGION_TASK) && (
+          !nearPending && !(atTask && REGION_TASK) && (
           <p className="hud-objective" role="status">
             {objective}
             {aimInfo && (
@@ -7513,7 +7087,7 @@ export default function Game() {
         {/* ── הוראת F ────────────────────────────────────────────────
             מופיעה רק כשיש פעולה פיזית לבצע, ומשתנה כשהיד כבר מחזיקה.
             לא כתובית קבועה על המסך: אין פעולה — אין הוראה. */}
-        {stage === 'act' && (atTask || REVEAL_FIRST) && !overlay && !openTask && !openFind && !encounter && (
+        {next.kind === 'act' && (next.mode === 'lamp' || (atTask && next.mode !== 'panel')) && !overlay && !openTask && !openFind && !encounter && (
           <p className="hud-panel hud-hand" role="status">
             {handHeld
               ? <>ביד: <b>{handHeld}</b> · בחרו יעד ב־<i className="hud-key">←</i> <i className="hud-key">→</i> · <i className="hud-key">F</i> להנחה · <i className="hud-key">Esc</i> לביטול</>
