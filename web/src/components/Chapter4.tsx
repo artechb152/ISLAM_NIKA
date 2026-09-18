@@ -1015,13 +1015,20 @@ export default function Chapter4() {
                 <SubHead section="hijra" id="escape" />
                 <Block>
                   <T r="§58.a" className="ch4-body" reveal em={['קורי עכביש']} />
-                  <T r="§58.b" className="ch4-body" reveal />
                 </Block>
-                <Verse r="§59.verse" cite="סורה 8, פסוק 30" />
-                <Block>
-                  <T r="§60.a" className="ch4-body" reveal />
-                </Block>
-                <Verse r="§60.verse" cite="סורה 9, פסוק 40" />
+                {/* שני הפסוקים זה לצד זה, כל אחד עם שורת ההפניה שלו מעליו —
+                    לבקשת המשתמשת: זה אחר זה השאירו חצי עמוד ריק. מתחת ל-900px
+                    הם חוזרים לעמודה אחת. */}
+                <div className="ch4-verse-pair">
+                  <div>
+                    <T r="§58.b" className="ch4-body" reveal />
+                    <Verse r="§59.verse" cite="סורה 8, פסוק 30" />
+                  </div>
+                  <div>
+                    <T r="§60.a" className="ch4-body" reveal />
+                    <Verse r="§60.verse" cite="סורה 9, פסוק 40" />
+                  </div>
+                </div>
                 <Block>
                   <T r="§2.flight" className="ch4-body" reveal em={['הזמינו אותו להיות בורר']} />
                   {/* „להרחבה" — משמעות ההגירה, לוח השנה ההג'רי, ואלתכפיר
