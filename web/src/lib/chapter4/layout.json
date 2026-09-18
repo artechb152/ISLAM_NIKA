@@ -7,6 +7,10 @@
       "device": "hero video + map-timeline · 622",
       "subs": [
         {
+          "id": "escape",
+          "title": "ההימלטות ממכה וסיפור המערה"
+        },
+        {
           "id": "groups",
           "title": "מכה וית'רב"
         },
@@ -28,7 +32,7 @@
         },
         {
           "id": "jihad",
-          "title": "מעבר מהטפה לג'האד"
+          "title": "מעבר מהטפה בדרכי נועם לג'האד"
         }
       ],
       "$note": "המקטע הגדול בפרק — 25 קטעים — ולכן הוא היחיד שנושא שתי תנועות. §2 נושא שתי גרסאות של אותו אירוע והמקור לא מכריע ביניהן, ולכן שני סלוטים ולא פסקה אחת.",
@@ -45,9 +49,6 @@
         ],
         "versionFlight": [
           "§2.flight"
-        ],
-        "versionInvited": [
-          "§2.invited"
         ],
         "groupsLead": [
           "§3.a",
@@ -95,6 +96,13 @@
         "hijraMeaning": [
           "§52.a",
           "§53.a"
+        ],
+        "escape": [
+          "§58.a",
+          "§58.b",
+          "§59.verse",
+          "§60.a",
+          "§60.verse"
         ]
       }
     },
@@ -120,6 +128,9 @@
           "§15.echo",
           "§16.a",
           "§16.echo"
+        ],
+        "figureNote": [
+          "§61.a"
         ]
       },
       "figure": {
@@ -203,7 +214,8 @@
       "links": {
         "hindVideo": {
           "href": "https://youtu.be/29gwMHlJsXY",
-          "label": "ראו את הסרטון המצורף, דקה 4:51–8:31"
+          "label": "ראו את הסרטון המצורף, דקה 4:51–8:31",
+          "embed": "https://www.youtube-nocookie.com/embed/29gwMHlJsXY?start=291&end=511"
         }
       }
     },
@@ -488,7 +500,9 @@
       "links": {
         "polka": {
           "href": "https://youtu.be/Hx75a1VGR8Y",
-          "label": "הניתוח המלא של ד\"ר שגיא פולקה"
+          "label": "הניתוח המלא של ד\"ר שגיא פולקה",
+          "embed": "https://www.youtube-nocookie.com/embed/Hx75a1VGR8Y",
+          "poster": "/assets/chapter4/polka-video.jpg"
         }
       }
     }

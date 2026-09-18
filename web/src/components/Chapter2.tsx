@@ -1370,6 +1370,19 @@ export default function Chapter2() {
                     איתה מעקב ותלות בשירות שאיננו שולטים בו. */}
                 <aside className="ch2-watch" data-reveal>
                   <h3>ראו למשל את הסרטונים הבאים</h3>
+                  {/* הכרעת המשתמשת (18.9.2026, פרק 4): סרטון שבמסמך המרצה נכנס
+                      כסרטון. ההערה שלמעלה על „קישורים ולא הטמעה" נסוגה מולה;
+                      youtube-nocookie מונע עוגיות עד הניגון. סרטון X נשאר
+                      קישור — ההטמעה שלו דורשת סקריפט של X. */}
+                  <div className="ch2-watch-frame">
+                    <iframe
+                      src="https://www.youtube-nocookie.com/embed/FFnY4KX90Ag"
+                      title="נקמת דם בחברה השבטית"
+                      loading="lazy"
+                      allow="accelerometer; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
                   <ul>
                     <li>
                       <a href="https://youtu.be/FFnY4KX90Ag" target="_blank" rel="noopener noreferrer">

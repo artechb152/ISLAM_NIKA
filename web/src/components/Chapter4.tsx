@@ -109,7 +109,7 @@ const card = (sectionId: string, cardId: string): Sub => {
     layout.json beside the section they serve — the JSX writes no word. The
     section's `figure`/`links` are optional in the data, hence the loose read. */
 type Figure = { src: string; caption: string }
-type OutLink = { href: string; label: string }
+type OutLink = { href: string; label: string; embed?: string; poster?: string }
 const figureOf = (sectionId: string): Figure => {
   const f = (meta(sectionId) as unknown as { figure?: Figure }).figure
   if (!f) throw new Error(`chapter 4: no figure in ${sectionId}`)
@@ -119,6 +119,32 @@ const linkOf = (sectionId: string, id: string): OutLink => {
   const l = (meta(sectionId) as unknown as { links?: Record<string, OutLink> }).links?.[id]
   if (!l) throw new Error(`chapter 4: unknown link ${sectionId}/${id}`)
   return l
+}
+
+/** A VIDEO, IN THE PAGE. The lecturer's corrections attach two YouTube videos;
+    the user's ruling (18.9.2026) is that everything in the document goes in —
+    „כולל תמונות סרטונים" — so they are embedded, not linked. youtube-nocookie
+    keeps the frame from setting tracking cookies until it is played. The link
+    under it is the same video for anyone whose network blocks the frame. */
+function VideoEmbed({ link }: { link: OutLink }) {
+  return (
+    <figure className="ch4-video" data-reveal>
+      {link.embed && (
+        <div className="ch4-video-frame">
+          <iframe
+            src={link.embed}
+            title={link.label}
+            loading="lazy"
+            allow="accelerometer; encrypted-media; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      )}
+      <figcaption>
+        <a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>
+      </figcaption>
+    </figure>
+  )
 }
 
 /** The stage's camera: where it holds, how close, and which markers it shows.
@@ -979,14 +1005,27 @@ export default function Chapter4() {
                 <Head id="hijra" />
                 <Block>
                   <T r="§0.a" className="ch4-body" reveal em={['לא השתכנעו שמוחמד אכן נביא אמת']} />
-                  <T r="§0.b" className="ch4-body" reveal em={['נאלץ להגר']} />
+                  <T r="§0.b" className="ch4-body" reveal em={['תפנית']} />
                   <T r="§1.a" className="ch4-body" em={["ית'רב"]} reveal />
-                  <T r="§1.b" className="ch4-body" reveal em={['שלושה שבטים יהודים']} />
-                  <T r="§2.flight" className="ch4-body" reveal em={['כאילו הייתה בריחה']} />
-                  <T r="§2.invited" className="ch4-body" reveal em={['הזמינו את מוחמד לשמש כבורר']} />
-                  {/* סבב התיקונים של המרצה (18.9.2026): „להרחבה" — משמעות
-                      ההגירה, לוח השנה ההג'רי, ואלתכפיר ואלהג'רה. שני הסעיפים
-                      בנוסחה, מאחורי הכפתור שהיא ביקשה בשמו. */}
+                  <T r="§1.b" className="ch4-body" reveal em={['עירו של הנביא']} />
+                </Block>
+                {/* סבב התיקונים של המרצה (18.9.2026): סיפור המערה — לא היה
+                    בפרק. הנרטיב, שני הפסוקים שהיא ציטטה, ואחריהם המיסגור
+                    בנוסחה (page של §2.flight; §2.invited נבלע בו). */}
+                <SubHead section="hijra" id="escape" />
+                <Block>
+                  <T r="§58.a" className="ch4-body" reveal em={['קורי עכביש']} />
+                  <T r="§58.b" className="ch4-body" reveal />
+                </Block>
+                <Verse r="§59.verse" cite="סורה 8, פסוק 30" />
+                <Block>
+                  <T r="§60.a" className="ch4-body" reveal />
+                </Block>
+                <Verse r="§60.verse" cite="סורה 9, פסוק 40" />
+                <Block>
+                  <T r="§2.flight" className="ch4-body" reveal em={['הזמינו אותו להיות בורר']} />
+                  {/* „להרחבה" — משמעות ההגירה, לוח השנה ההג'רי, ואלתכפיר
+                      ואלהג'רה. שני הסעיפים בנוסחה, מאחורי הכפתור שהיא ביקשה בשמו. */}
                   <More id="hijra-meaning" title="להרחבה: משמעות ההגירה">
                     <T r="§52.a" className="ch4-body" em={['לוח שנה הג\'רי']} />
                     <T r="§53.a" className="ch4-body" em={['אלתכפיר ואלהג\'רה']} />
@@ -1002,7 +1041,7 @@ export default function Chapter4() {
                   <T
                     r={['§3.a', '§3.b']}
                     className="ch4-body"
-                    em={['התגוררו ארבע קבוצות אנשים']}
+                    em={['ארבע גורמים ראשיים']}
                     emClass="ch4-points"
                     reveal
                   />
@@ -1042,14 +1081,14 @@ export default function Chapter4() {
                     },
                     {
                       id: 'jews',
-                      name: pick('§3.jews', 'שלושת השבטים היהודים'),
+                      name: pick('§3.jews', 'היהודים'),
                       text: text('§3.jews'),
                       img: 'who-jews',
                       angle: 225,
                     },
                     {
                       id: 'quraysh',
-                      name: pick('§3.quraysh', 'הכופרים משבט קריש'),
+                      name: pick('§3.quraysh', 'הכופרים'),
                       text: text('§3.quraysh'),
                       img: 'who-quraysh',
                       angle: 135,
@@ -1094,8 +1133,8 @@ export default function Chapter4() {
                   <T r="§4.b" className="ch4-body" reveal em={['ראש ישות מדינית בעלת דת, מוסר, ערכים וצבא']} />
                 </Block>
                 <Block>
-                  <T r="§8.a" className="ch4-body" em={['פתנה']} reveal />
-                  <T r="§8.b" className="ch4-body" reveal em={['אסר עליהם במסגרת החוזה לכרות בריתות עם הכופרים במכה']} />
+                  <T r="§8.a" className="ch4-body" em={['חוזה האומה המוסלמית']} reveal />
+                  <T r="§8.b" className="ch4-body" reveal em={['אסר עליהם מוחמד לכרות ברית עם הכופרים ממכה']} />
                 </Block>
 
                 {/* THE CLOSING RUN OF THE SECTION — three movements, one painting.
@@ -1274,6 +1313,9 @@ export default function Chapter4() {
                   <img src={figureOf('badr').src} alt="" loading="lazy" decoding="async" />
                   <figcaption>{figureOf('badr').caption}</figcaption>
                 </figure>
+                <Block>
+                  <T r="§61.a" className="ch4-body" reveal em={['חובה דתית להשמיד את הכופרים']} />
+                </Block>
               </Section>
 
               {/* ============ 04 · קרב אֻחֻד ============
@@ -1313,11 +1355,7 @@ export default function Chapter4() {
                         עם הסרטון שהיא צירפה והדקות שציינה. */}
                     <More id="hind-today" title="להרחבה: 7 באוקטובר">
                       <T r="§54.a" className="ch4-body" em={['לשתות מדמם של היהודים']} />
-                      <p className="ch4-body ch4-link-row">
-                        <a href={linkOf('uhud', 'hindVideo').href} target="_blank" rel="noopener noreferrer">
-                          {linkOf('uhud', 'hindVideo').label}
-                        </a>
-                      </p>
+                      <VideoEmbed link={linkOf('uhud', 'hindVideo')} />
                     </More>
                   </Card>
                 </div>
@@ -1569,11 +1607,7 @@ export default function Chapter4() {
                     לניתוח של ד"ר פולקה, ואחריה הפסקה שהיא ביקשה להוסיף. */}
                 <Block>
                   <T r="§56.a" className="ch4-body" reveal />
-                  <p className="ch4-body ch4-link-row">
-                    <a href={linkOf('today', 'polka').href} target="_blank" rel="noopener noreferrer">
-                      {linkOf('today', 'polka').label}
-                    </a>
-                  </p>
+                  <VideoEmbed link={linkOf('today', 'polka')} />
                   <T r="§57.a" className="ch4-body" reveal em={['„דת מוחמד"']} />
                 </Block>
               </Section>
