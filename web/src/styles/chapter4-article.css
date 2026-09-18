@@ -1797,3 +1797,17 @@
   width:min(700px,100%);margin-inline:auto;text-align:center;
 }
 .ch4-verse.is-mid cite{display:block;margin-inline:0}
+
+/* ------------------------------ a photograph ------------------------------
+   תמונה ממסמך התיקונים של המרצה (קרב בדר: הטיל האיראני והפסוק שעליו). אותו
+   נייר ואותו קו כמו „אדם" (.ch4-figure) — התמונה בתוך המסגרת, הכיתוב מתחתיה,
+   בגודל של הערת שוליים. הכיתוב הוא עריכה (layout.json), לא מקור. */
+.ch4-photo{
+  margin:1.4em 0 0;padding:14px;
+  border:1px solid var(--rule);border-inline-start:3px solid var(--maroon);
+  background:var(--panel);
+}
+.ch4-photo img{display:block;width:100%;height:auto;max-height:520px;object-fit:cover;object-position:50% 40%}
+.ch4-photo figcaption{margin:10px 2px 0;font-size:.9em;line-height:1.6;color:var(--ink)}
+/* קישור חיצוני בתוך גוף הטקסט — כמו בפרק 2: צבע היין של הפרק, קו תחתון עדין */
+.ch4-link-row a{color:var(--maroon);text-decoration:underline;text-underline-offset:3px}

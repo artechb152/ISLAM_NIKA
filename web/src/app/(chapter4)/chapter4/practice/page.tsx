@@ -11,7 +11,7 @@ import '@/styles/chapter4-practice.css'
 import Chapter4Practice from '@/components/Chapter4Practice'
 
 export const metadata: Metadata = {
-  title: 'ההג׳רה והקרבות · תרגול מסכם · פרק 4',
+  title: 'ההגירה והקרבות · תרגול מסכם · פרק 4',
 }
 
 export default function Page() {

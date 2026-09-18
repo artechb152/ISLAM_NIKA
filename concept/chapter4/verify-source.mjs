@@ -1,6 +1,15 @@
 /* שער נאמנות: כל §N חייב להימצא מילה-במילה בטקסט המחולץ מה-PDF */
 import fs from 'node:fs'
-const md = fs.readFileSync(process.argv[2], 'utf8')
+/* התוספת של המרצה (18.9.2026) אינה מה-PDF ומוחרגת כאן במפורש — הקטע נחתך
+   לפני הכותרת שלה, וההחרגה מודפסת בכל ריצה כדי שתישאר גלויה. */
+const FIX_HEAD = '## תוספת · סבב התיקונים של המרצה'
+const mdAll = fs.readFileSync(process.argv[2], 'utf8')
+const cutAt = mdAll.indexOf(FIX_HEAD)
+const md = cutAt >= 0 ? mdAll.slice(0, cutAt) : mdAll
+if (cutAt >= 0) {
+  const extra = [...mdAll.slice(cutAt).matchAll(/^### (§\d+)/gm)].map((m) => m[1])
+  console.log(`⚠ מוחרגים מהבדיקה מול ה-PDF (תוספת המרצה): ${extra.join(', ')}`)
+}
 /* הכותרת הרצה של החוברת נתחבת באמצע משפטים שחוצים עמוד — מסירים אותה */
 const raw = fs.readFileSync(process.argv[3], 'utf8').split('\n')
   .filter((l) => !/^===== PAGE|^\d+$|^-מוגבל-$|^האסלאם - דת ותרבות$|^גירסת טיוטה - מערך ההדרכה/.test(l.trim()))

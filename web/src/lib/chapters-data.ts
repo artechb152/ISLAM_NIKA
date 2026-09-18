@@ -63,7 +63,7 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter3',
         available: true,
       }),
-      ch(4, 'ההג׳רה והקרבות', {
+      ch(4, 'ההגירה והקרבות', {
         href: '/chapter4',
         available: true,
       }),

@@ -16,7 +16,7 @@ import '@/styles/chapter4-looks.css'
 import '@/styles/site-notebook.css'
 
 export const metadata: Metadata = {
-  title: 'פרק רביעי · ההג׳רה והקרבות',
+  title: 'פרק רביעי · ההגירה והקרבות',
 }
 
 export const viewport: Viewport = {

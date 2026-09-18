@@ -103,6 +103,24 @@ const card = (sectionId: string, cardId: string): Sub => {
   return t
 }
 
+/** A PHOTOGRAPH AND ITS CAPTION, AND AN OUTSIDE LINK AND ITS LABEL.
+    Both arrived with the lecturer's corrections (18.9.2026). A caption is
+    editorial and a link label is editorial (rule 24), so both live in
+    layout.json beside the section they serve — the JSX writes no word. The
+    section's `figure`/`links` are optional in the data, hence the loose read. */
+type Figure = { src: string; caption: string }
+type OutLink = { href: string; label: string }
+const figureOf = (sectionId: string): Figure => {
+  const f = (meta(sectionId) as unknown as { figure?: Figure }).figure
+  if (!f) throw new Error(`chapter 4: no figure in ${sectionId}`)
+  return f
+}
+const linkOf = (sectionId: string, id: string): OutLink => {
+  const l = (meta(sectionId) as unknown as { links?: Record<string, OutLink> }).links?.[id]
+  if (!l) throw new Error(`chapter 4: unknown link ${sectionId}/${id}`)
+  return l
+}
+
 /** The stage's camera: where it holds, how close, and which markers it shows.
     Same rule as the cards and the deed — the pin labels are mine and not the
     booklet's, so they live in the layout where a reader of the data can see
@@ -966,6 +984,13 @@ export default function Chapter4() {
                   <T r="§1.b" className="ch4-body" reveal em={['שלושה שבטים יהודים']} />
                   <T r="§2.flight" className="ch4-body" reveal em={['כאילו הייתה בריחה']} />
                   <T r="§2.invited" className="ch4-body" reveal em={['הזמינו את מוחמד לשמש כבורר']} />
+                  {/* סבב התיקונים של המרצה (18.9.2026): „להרחבה" — משמעות
+                      ההגירה, לוח השנה ההג'רי, ואלתכפיר ואלהג'רה. שני הסעיפים
+                      בנוסחה, מאחורי הכפתור שהיא ביקשה בשמו. */}
+                  <More id="hijra-meaning" title="להרחבה: משמעות ההגירה">
+                    <T r="§52.a" className="ch4-body" em={['לוח שנה הג\'רי']} />
+                    <T r="§53.a" className="ch4-body" em={['אלתכפיר ואלהג\'רה']} />
+                  </More>
                 </Block>
                 <SubHead section="hijra" id="groups" />
                 <Block>
@@ -1232,13 +1257,23 @@ export default function Chapter4() {
                       <T r="§13.a" className="ch4-body" em={['ישועה וניצחון מזהיר']} />
                       <T r="§13.b" className="ch4-body" em={['יום הישועה']} />
                       <T r={['§14.a', '|§14.verse']} className="ch4-body" em={['תופעה חריגה למבנה הקוראן']} />
-                      <T r={['§15.a', '|§15.verse']} className="ch4-body" em={['פרשת השלל']} />
+                      <T r={['§15.a', '|§15.verse']} className="ch4-body" em={['סורת השלל']} />
                       <T r="§15.echo" className="ch4-body" em={['משתמשים במוטיב הפסוק הזה']} />
                       <T r="§16.a" className="ch4-body" em={['משמעות סמלית']} />
                       <T r="§16.echo" className="ch4-body" em={['מערכת בדר']} />
                     </article>
                   </div>
                 </div>
+                {/* התמונה ממסמך התיקונים של המרצה: חלק מטיל איראני שלא
+                    התפוצץ, והפסוק עליו. מחוץ למגירה — היא ביקשה „להוסיף את
+                    התמונה הזאת" לקרב בדר, ותמונה מאחורי „הצגת הסיפור המלא"
+                    אינה תמונה שרואים. הכיתוב הוא תיאורה שלה (עריכה,
+                    ב-layout.json — כלל 24), לא משפט של הקומפוננטה. */}
+                <figure className="ch4-photo" data-reveal>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={figureOf('badr').src} alt="" loading="lazy" decoding="async" />
+                  <figcaption>{figureOf('badr').caption}</figcaption>
+                </figure>
               </Section>
 
               {/* ============ 04 · קרב אֻחֻד ============
@@ -1267,12 +1302,23 @@ export default function Chapter4() {
                     <T r="§19.a" className="ch4-body" em={['בעיצוב התודעה']} />
                   </Card>
                   <Card id="hamza">
-                    <T r="§20.a" className="ch4-body" />
-                    <T r="§20.saying" className="ch4-body" />
-                    <T r="§20.translit" className="ch4-body" tr={["סיד אלשהדאא', אסד אללה ואסד רסולה"]} />
+                    {/* המרצה נתנה את המשפט בנוסחה — „אבי השהידים" — והוא יושב
+                        ב-page של §20.a; הכינוי והתעתיק שהיו פיסות נפרדות
+                        (§20.saying, §20.translit) מסומנים omitted. */}
+                    <T r="§20.a" className="ch4-body" em={['אבי השהידים']} />
                   </Card>
                   <Card id="hind">
                     <T r="§20.hind" className="ch4-body" em={['שתתה את הכבד שלו כנקמה']} />
+                    {/* „אולי בצורה של הרחבה" — 7 באוקטובר וההנחיות שנתפסו,
+                        עם הסרטון שהיא צירפה והדקות שציינה. */}
+                    <More id="hind-today" title="להרחבה: 7 באוקטובר">
+                      <T r="§54.a" className="ch4-body" em={['לשתות מדמם של היהודים']} />
+                      <p className="ch4-body ch4-link-row">
+                        <a href={linkOf('uhud', 'hindVideo').href} target="_blank" rel="noopener noreferrer">
+                          {linkOf('uhud', 'hindVideo').label}
+                        </a>
+                      </p>
+                    </More>
                   </Card>
                 </div>
                 <SubHead section="uhud" id="shahids" />
@@ -1407,6 +1453,9 @@ export default function Chapter4() {
                   <T r="§47.echo" className="ch4-body" reveal />
                 </Block>
                 <Chant />
+                <Block>
+                  <T r="§55.a" className="ch4-body" reveal em={["ח'יבר ח'יבר יא יהוד; סאבע אוקטובר ס-יעוד"]} />
+                </Block>
                 <SubHead section="khaybar" id="mecca" />
                 <Block>
                   <T r="§48.a" className="ch4-body" reveal em={['הכרעה נחרצת']} />
@@ -1421,7 +1470,8 @@ export default function Chapter4() {
                 <Block>
                   <T r="§50.a" className="ch4-body" reveal em={['מת בשנת 632 בגיל 63']} />
                   <T r="§50.b" className="ch4-body" reveal em={['לדבוק בקוראן ובסונה']} />
-                  <T r="§51.a" className="ch4-body" reveal em={['שמת בשיא כוחו']} />
+                  {/* §51.a — מותו בחיקה של עאא'שה — ירד לבקשת המרצה (18.9.2026);
+                      הקטע נשאר ב-passages.json מסומן omitted. */}
                 </Block>
               </Section>
 
@@ -1515,6 +1565,17 @@ export default function Chapter4() {
                     living political actor, which makes it the one thing that
                     can close a section whose own note says it does not close. */}
                 <Verse r="§39.verse" cite="קוראן 8:61" mid />
+                {/* סבב התיקונים של המרצה (18.9.2026): „להוסיף בסוף" — ההפניה
+                    לניתוח של ד"ר פולקה, ואחריה הפסקה שהיא ביקשה להוסיף. */}
+                <Block>
+                  <T r="§56.a" className="ch4-body" reveal />
+                  <p className="ch4-body ch4-link-row">
+                    <a href={linkOf('today', 'polka').href} target="_blank" rel="noopener noreferrer">
+                      {linkOf('today', 'polka').label}
+                    </a>
+                  </p>
+                  <T r="§57.a" className="ch4-body" reveal em={['„דת מוחמד"']} />
+                </Block>
               </Section>
 
               <div className="ch4-end" ref={endRef} data-reveal>
