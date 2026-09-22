@@ -38,16 +38,16 @@ export interface PillarDef {
 
 export const PILLARS: PillarDef[] = [
   { key: 'shahada', name: 'השהאדה', icon: 'icon-shahada.png', anchor: '/chapter6#shahada' },
-  { key: 'prayer', name: 'התפילה', icon: 'icon-prayer.png', anchor: '/chapter6#prayer' },
-  { key: 'charity', name: 'הצדקה', icon: 'icon-charity.png', anchor: '/chapter6#charity' },
+  { key: 'prayer', name: 'תפילה', icon: 'icon-prayer.png', anchor: '/chapter6#prayer' },
+  { key: 'charity', name: 'צדקה', icon: 'icon-charity.png', anchor: '/chapter6#charity' },
   { key: 'ramadan', name: 'צום רמדאן', icon: 'icon-ramadan.png', anchor: '/chapter6#ramadan' },
   { key: 'hajj', name: "החג'", icon: 'icon-hajj.png', anchor: '/chapter6#hajj' },
 ]
 
 export const PILLAR_NAME: Record<PillarKey, string> = {
   shahada: 'השהאדה',
-  prayer: 'התפילה',
-  charity: 'הצדקה',
+  prayer: 'תפילה',
+  charity: 'צדקה',
   ramadan: 'צום רמדאן',
   hajj: "החג'",
 }

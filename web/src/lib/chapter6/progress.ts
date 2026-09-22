@@ -23,8 +23,8 @@ const DOM_TO_DATA: Record<string, string> = {
   opening: 'פתיחה',
   pillars: 'פתיחה',
   shahada: 'השהאדה',
-  prayer: 'התפילה',
-  charity: 'הצדקה',
+  prayer: 'תפילה',
+  charity: 'צדקה',
   ramadan: 'צום רמדאן',
   hajj: "החג'",
 }
