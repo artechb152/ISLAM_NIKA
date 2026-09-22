@@ -7,7 +7,7 @@
    screen positions are written imperatively each frame (no per-frame React
    state) — the same discipline as the chapter 6 scroll engine. */
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { Suspense, memo, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { Html, useAnimations, useGLTF } from '@react-three/drei'
@@ -431,6 +431,21 @@ function registerTerrain(obj: THREE.Object3D) {
   })
   terrainMesh = best
   groundCache.clear()
+  const t0 = performance.now()
+  heightField = best ? buildHeightField(best) : null
+  if (process.env.NODE_ENV !== 'production') {
+    console.info(`[chapter1] height field: ${heightField ? heightField.cellItems.length : 0} triangle slots in ${heightField ? heightField.nx * heightField.nz : 0} cells, ${Math.round(performance.now() - t0)}ms`)
+    /* בדיקת נכונות מול הקרן: scratchpad/walk/groundcheck.mjs */
+    ;(window as unknown as { __ch1GroundProbe: (x: number, z: number) => [number | undefined, number] }).__ch1GroundProbe = (x, z) => {
+      const field = heightField ? heightAt(heightField, x, z) : undefined
+      const m = terrainMesh
+      if (!m) return [field, 0]
+      m.updateMatrixWorld(true)
+      groundRay.set(groundOrigin.set(x, 400, z), GROUND_DOWN)
+      const res = groundRay.intersectObject(m, true)
+      return [field, res.length ? res[0].point.y : NaN]
+    }
+  }
   terrainVersion++
   /* מחוץ לשלב הרינדור, אחרת React מתלונן על עדכון בזמן רינדור */
   queueMicrotask(() => { for (const cb of terrainSubs) cb() })
@@ -439,8 +454,123 @@ function registerTerrain(obj: THREE.Object3D) {
 const GROUND_UP = new THREE.Vector3(0, 1, 0)
 const groundOrigin = new THREE.Vector3()
 
+/* ── שדה גבהים במקום קרן ─────────────────────────────────────────────
+   הגובה נשאל בכל פריים על ידי כל מה שזז — השחקן, ראאווי, הגמלים,
+   הניצבים, האבק — ועד עכשיו כל מיקום חדש שילם קרן מול כל משולשי
+   הטרסה (עשרות אלפים, בלי BVH): מילישניות אחדות לכל החטאה, כמה
+   החטאות בפריים. זה מה שהפך את ההליכה הראשונה על כל דרך למקוטעת
+   ואת השנייה — כשהמטמון כבר מלא — לחלקה (נמדד ב-WebKit: 44 פריימים
+   ארוכים במעבר הראשון, 26 בשני, ובכרום אותו יחס ב-120Hz).
+
+   במקום זה: פעם אחת, כשהטרסה נרשמת, כל משולש נכנס לתא ברשת של 2 מ׳
+   במישור XZ. שאילתה היא תא אחד וכמה משולשים — בדיקה בריצנטרית,
+   בלי הקצאה, ובדיוק מלא (המטמון הישן עיגל לרבע מטר). הקרן נשארת
+   רק כגיבוי לשוליים. */
+type HeightField = {
+  minX: number
+  minZ: number
+  cell: number
+  nx: number
+  nz: number
+  cellStart: Uint32Array
+  cellItems: Uint32Array
+  pos: Float32Array
+  idx: ArrayLike<number> | null
+}
+let heightField: HeightField | null = null
+/* מערכי ה-CSR נבנים בשני מעברים, ולכן חיים מחוץ לפונקציה */
+let heightFieldStart = new Uint32Array(0)
+let heightFieldItems = new Uint32Array(0)
+const hfV = new THREE.Vector3()
+function buildHeightField(mesh: THREE.Mesh): HeightField | null {
+  const g = mesh.geometry
+  const pa = g.attributes.position as THREE.BufferAttribute | undefined
+  if (!pa) return null
+  mesh.updateMatrixWorld(true)
+  const n = pa.count
+  const pos = new Float32Array(n * 3)
+  let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity
+  for (let i = 0; i < n; i++) {
+    hfV.fromBufferAttribute(pa, i).applyMatrix4(mesh.matrixWorld)
+    pos[i * 3] = hfV.x
+    pos[i * 3 + 1] = hfV.y
+    pos[i * 3 + 2] = hfV.z
+    if (hfV.x < minX) minX = hfV.x
+    if (hfV.x > maxX) maxX = hfV.x
+    if (hfV.z < minZ) minZ = hfV.z
+    if (hfV.z > maxZ) maxZ = hfV.z
+  }
+  const idx = g.index ? (g.index.array as ArrayLike<number>) : null
+  const triCount = Math.floor((idx ? idx.length : n) / 3)
+  if (!triCount) return null
+  const cell = 2
+  const nx = Math.ceil((maxX - minX) / cell) + 1
+  const nz = Math.ceil((maxZ - minZ) / cell) + 1
+  const counts = new Uint32Array(nx * nz)
+  const vi = (t: number, k: number) => (idx ? idx[t * 3 + k] : t * 3 + k)
+  const cellOf = (v: number, min: number) => Math.max(Math.floor((v - min) / cell), 0)
+  /* מעבר ראשון: ספירה לכל תא; שני: מילוי (CSR — שני מערכים שטוחים) */
+  for (let pass = 0; pass < 2; pass++) {
+    const cellStart = pass === 1 ? heightFieldStart : null
+    for (let t = 0; t < triCount; t++) {
+      const a = vi(t, 0), b = vi(t, 1), c = vi(t, 2)
+      const x0 = Math.min(pos[a * 3], pos[b * 3], pos[c * 3])
+      const x1 = Math.max(pos[a * 3], pos[b * 3], pos[c * 3])
+      const z0 = Math.min(pos[a * 3 + 2], pos[b * 3 + 2], pos[c * 3 + 2])
+      const z1 = Math.max(pos[a * 3 + 2], pos[b * 3 + 2], pos[c * 3 + 2])
+      const cx0 = cellOf(x0, minX), cx1 = Math.min(cellOf(x1, minX), nx - 1)
+      const cz0 = cellOf(z0, minZ), cz1 = Math.min(cellOf(z1, minZ), nz - 1)
+      for (let cz = cz0; cz <= cz1; cz++) {
+        for (let cx = cx0; cx <= cx1; cx++) {
+          const ci = cz * nx + cx
+          if (pass === 0) counts[ci]++
+          else heightFieldItems[cellStart![ci] + counts[ci]++] = t
+        }
+      }
+    }
+    if (pass === 0) {
+      heightFieldStart = new Uint32Array(nx * nz + 1)
+      for (let i = 0; i < nx * nz; i++) heightFieldStart[i + 1] = heightFieldStart[i] + counts[i]
+      heightFieldItems = new Uint32Array(heightFieldStart[nx * nz])
+      counts.fill(0)
+    }
+  }
+  return { minX, minZ, cell, nx, nz, cellStart: heightFieldStart, cellItems: heightFieldItems, pos, idx }
+}
+/** הגובה הגבוה ביותר של הטרסה מעל (x,z), או undefined מחוץ לרשת */
+function heightAt(hf: HeightField, x: number, z: number): number | undefined {
+  const cx = Math.floor((x - hf.minX) / hf.cell)
+  const cz = Math.floor((z - hf.minZ) / hf.cell)
+  if (cx < 0 || cz < 0 || cx >= hf.nx || cz >= hf.nz) return undefined
+  const ci = cz * hf.nx + cx
+  const { pos, idx, cellStart, cellItems } = hf
+  let best = -Infinity
+  for (let k = cellStart[ci]; k < cellStart[ci + 1]; k++) {
+    const t = cellItems[k]
+    const a = idx ? idx[t * 3] : t * 3
+    const b = idx ? idx[t * 3 + 1] : t * 3 + 1
+    const c = idx ? idx[t * 3 + 2] : t * 3 + 2
+    const ax = pos[a * 3], az = pos[a * 3 + 2]
+    const bx = pos[b * 3], bz = pos[b * 3 + 2]
+    const qx = pos[c * 3], qz = pos[c * 3 + 2]
+    const d = (bz - qz) * (ax - qx) + (qx - bx) * (az - qz)
+    if (Math.abs(d) < 1e-12) continue
+    const l1 = ((bz - qz) * (x - qx) + (qx - bx) * (z - qz)) / d
+    const l2 = ((qz - az) * (x - qx) + (ax - qx) * (z - qz)) / d
+    const l3 = 1 - l1 - l2
+    if (l1 < -1e-5 || l2 < -1e-5 || l3 < -1e-5) continue
+    const y = l1 * pos[a * 3 + 1] + l2 * pos[b * 3 + 1] + l3 * pos[c * 3 + 1]
+    if (y > best) best = y
+  }
+  return best === -Infinity ? undefined : best
+}
+
 export function groundYAt(x: number, z: number): number {
   if (!terrainMesh) return 0
+  if (heightField) {
+    const y = heightAt(heightField, x, z)
+    if (y !== undefined) return y
+  }
   const key = `${Math.round(x * 4)},${Math.round(z * 4)}`
   const hit = groundCache.get(key)
   if (hit !== undefined) return hit
@@ -567,6 +697,24 @@ function Sway({ x, z, children }: { x: number; z: number; children: React.ReactN
    איטי לא יחביא את האזור. */
 function StagedProps({ placed, live }: { placed: CampProp[]; live: Live }) {
   const FIRST_BATCH = 30
+  /* חימום אחרי המנה האחרונה. החימום שמאחורי לוח הטעינה תופס רק את
+     המנה הראשונה — השאר מצטרפים במנות אחרי שהלוח כבר ירד, ובלי חימום
+     כל אחד מהם משלם את העלאת הגאומטריה והשיידר ברגע שהוא נכנס לראשונה
+     למסגרת, כלומר באמצע ההליכה הראשונה (נמדד ב-WebKit: 20–33 פריימים
+     ארוכים בארבע שניות, ואפס במעבר השני על אותה דרך). כאן: כשהפרופ
+     האחרון עלה, פריים אחד של חימום — בזמן שהלומד עדיין קורא את שורת
+     ההגעה של ראאווי. */
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
+  const loaded = useRef(0)
+  const warmed = useRef(false)
+  const onLoaded = useCallback(() => {
+    loaded.current += 1
+    if (warmed.current || loaded.current < placed.length) return
+    warmed.current = true
+    requestAnimationFrame(() => warmUp(gl, scene, camera))
+  }, [gl, scene, camera, placed.length])
   const ordered = useMemo(() => {
     const px = live.player.x
     const pz = live.player.z
@@ -588,10 +736,10 @@ function StagedProps({ placed, live }: { placed: CampProp[]; live: Live }) {
     <>
       {ordered.slice(0, count).map((p, i) =>
         i < FIRST_BATCH ? (
-          <Prop key={i} url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} />
+          <Prop key={i} url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} onLoaded={onLoaded} />
         ) : (
           <Suspense key={i} fallback={null}>
-            <Prop url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} />
+            <Prop url={p.url} x={p.x} z={p.z} ry={p.ry} height={p.h} tint={p.tint} sink={p.sink} widen={p.widen} onLoaded={onLoaded} />
           </Suspense>
         ),
       )}
@@ -599,8 +747,13 @@ function StagedProps({ placed, live }: { placed: CampProp[]; live: Live }) {
   )
 }
 
-function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1, atX, atZ }: {
+/* memo: כשהעולם מתרנדר מחדש, 121 פרופים קיבלו אלמנטים חדשים ורונדרו
+   כולם — 33 פעמים בשנייה בזמן הליכה (נמדד דרך onCommitFiberRoot).
+   ה-props כאן הם ערכים פשוטים, ולכן השוואה רדודה מספיקה. */
+const Prop = memo(function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1, atX, atZ, onLoaded }: {
   url: string
+  /** נקרא פעם אחת כשהדגם נטען והפרופ עלה — לספירת המנות של StagedProps */
+  onLoaded?: () => void
   x: number
   z: number
   ry?: number
@@ -626,6 +779,7 @@ function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1, atX
   const { scene } = useGLTF(url)
   /* מרנדר מחדש כשהקרקע מגיעה, אחרת הגובה נשאר על אפס לנצח */
   useGroundReady()
+  useEffect(() => { onLoaded?.() }, [onLoaded])
   const { object, dims } = useMemo(() => {
     const c = scene.clone(true)
     const box = new THREE.Box3().setFromObject(c)
@@ -747,7 +901,7 @@ function Prop({ url, x, z, ry = 0, height, liner, tint, sink = 0, widen = 1, atX
       )}
     </group>
   )
-}
+})
 
 /** hand-authored camp assets supplied by the author (Blender → GLB) */
 const MODEL_TENT = '/assets/chapter1/models/blacktent-hero.glb'
@@ -2671,13 +2825,25 @@ function Player({ live }: { live: Live }) {
        gives the learner no time to look at anything on the way. 2.6 is a
        purposeful walk, and Shift is there when the road is long. */
     const run = running ? 6 : 2.6
-    let mx = 0
+    /* A ו-D (והחצים) הם פנייה, לא צעד הצידה. לוח המקשים אומר „שמאלה"
+       ו„ימינה", ומי שאינו רגיל במשחקים לוחץ שמאלה כדי לפנות שמאלה.
+       כשהם היו צעד הצידה, W+A הוליך באלכסון ביחס למצלמה, והיישור
+       האוטומטי של המצלמה אל כיוון ההליכה רדף אחרי אלכסון שזז איתה —
+       המצלמה הסתובבת בלי סוף (נמדד: 163° בשלוש שניות) והשחקן הלך
+       במעגל. עכשיו הפנייה מסובבת את ה-yaw עצמו, בקצב קבוע וכל עוד
+       המקש לחוץ, והדמות והמצלמה נשארות מיושרות זו לזו. */
+    const TURN_RATE = 1.7
+    const turn = (k.has('a') ? 1 : 0) - (k.has('d') ? 1 : 0)
+    if (turn !== 0 && !live.taskFocus && !live.findFocus) {
+      live.yaw -= turn * dt * TURN_RATE
+      /* W: heading = π − yaw (ראו את ההערה על היישור למטה) */
+      heading.current = wrapPi(Math.PI - live.yaw)
+    }
+    const mx = 0
     let mz = 0
     if (k.has('w')) mz -= 1
     if (k.has('s')) mz += 1
-    if (k.has('a')) mx -= 1
-    if (k.has('d')) mx += 1
-    const moving = mx !== 0 || mz !== 0
+    const moving = mz !== 0
     /* המהירות הייתה בינארית: מקש למטה = מהירות מלאה בפריים הראשון,
        מקש למעלה = עצירה מוחלטת בפריים הראשון. גוף שמגיע למהירותו
        המלאה באפס זמן נקרא כאיקון שנגרר על מפה, לא כאדם שהולך —
@@ -2968,7 +3134,7 @@ function Player({ live }: { live: Live }) {
     }
 
     const CAM_DIST = 3.7 + rb * 0.65
-    const camOffset = new THREE.Vector3(0, 2.45 - rb * 0.15, CAM_DIST).applyAxisAngle(new THREE.Vector3(0, 1, 0), -live.yaw)
+    const camOffset = CAM_OFFSET_V.set(0, 2.45 - rb * 0.15, CAM_DIST).applyAxisAngle(WORLD_UP, -live.yaw)
     const followFov = 55 + rb * 7 + (34 - (55 + rb * 7)) * tb
     let wantFov = followFov + (28 - followFov) * riseK
     if (tf && kf > 0.002) wantFov += (tf.fov - wantFov) * kf
@@ -3015,7 +3181,7 @@ function Player({ live }: { live: Live }) {
     const tucked = Math.max(0, Math.min(1, (CAM_DIST - dist) / (CAM_DIST - 1.15)))
     camOffset.y = 2.45 - rb * 0.15 + tucked * 1.25
 
-    const target = live.player.clone().add(camOffset)
+    const target = CAM_TARGET_V.copy(live.player).add(camOffset)
     /* עומדים במקום, והפריים קפוא לגמרי: המצלמה נעולה, השחקן סטטי,
        ורק גרגרי האבק זזים. נשימה איטית מתחת לסף המודע היא ההבדל
        בין „המשחק רץ“ לבין „זה צילום מסך“. היא נכבית ברגע שזזים. */
@@ -3336,7 +3502,10 @@ function MarkerProjector({ live, onNearChange, onNearFind, onAtTask, met, found,
       if (!behind) {
         gateEl.style.transform = `translate(-50%,-100%) translate(${(v.x * 0.5 + 0.5) * size.width}px,${(-v.y * 0.5 + 0.5) * size.height}px)`
         const m = gateEl.querySelector('.poi-gate-dist')
-        if (m) m.textContent = `${Math.round(away)} מ׳`
+        const label = `${Math.round(away)} מ׳`
+        /* כתיבה רק כשהמספר השתנה: החלפת צומת טקסט בכל פריים היא
+           מוטציית DOM לחינם (נמדד: 120 בשנייה בעמידה במקום). */
+        if (m && m.textContent !== label) m.textContent = label
       }
     }
     /* ── חץ ההכוונה ────────────────────────────────────────────────
@@ -3674,6 +3843,9 @@ const ROAD_MAT = {
 /* מוקצים פעם אחת: כל אלה רצים בכל פריים */
 const FILL_FWD = new THREE.Vector3()
 const MOVE_DIR = new THREE.Vector3(0, 0, -1)
+/* וקטורי עבודה של המצלמה — היו שלוש הקצאות בכל פריים */
+const CAM_OFFSET_V = new THREE.Vector3()
+const CAM_TARGET_V = new THREE.Vector3()
 const WORLD_UP = new THREE.Vector3(0, 1, 0)
 
 function ViewerFill({ intensity }: { intensity: number }) {
@@ -5110,6 +5282,7 @@ function RawiCompanion({ live, talking, gesture }: {
   const clipRef = useRef<RawiClip>('idle')
   /** his actual ground speed this frame — the step rate is derived from it */
   const paceRef = useRef(0)
+  const movingRef = useRef(false)
 
   useFrame((_, dt) => {
     const p = live.player
@@ -5129,7 +5302,16 @@ function RawiCompanion({ live, talking, gesture }: {
     prevPlayer.current.set(p.x, 0, p.z)
 
     const gap = pos.current.distanceTo(target.current)
-    const moving = gap > RAWI_WALK_GAP && !talking
+    /* היסטרזיס. הצעד האחרון נחתך ל-gap − 0.225, כלומר ראאווי נעצר
+       בתוך המרווח, ובפריים הבא השחקן כבר זז והמרווח שוב גדול — וכך
+       הוא החליף walk/idle 34 פעמים בשנייה (נמדד: root.memoizedUpdaters).
+       כל החלפה היא setClip, כלומר רינדור של הרכיב ושל תווית ה-Html
+       שלו, וגם התחלת crossfade מחדש — הרגליים שלו נראו מגמגמות.
+       עכשיו: מתחיל ללכת כשהמרווח נפתח, וממשיך כל עוד השחקן צועד או עד
+       שהוא באמת סגר אותו. */
+    const wasMoving = movingRef.current
+    const moving = !talking && (gap > RAWI_WALK_GAP || (wasMoving && (stepped > PLAYER_MOVE_EPS || gap > RAWI_WALK_GAP * 0.55)))
+    movingRef.current = moving
     if (moving) {
       /* הראוי הלך ב-3.4 מ״ש בזמן שהריצה היא 6, ובלי שום איבר של
          השגה — כלומר ספרינט אחד לרוחב האזור הראשון השאיר את המדריך
@@ -5170,7 +5352,10 @@ function RawiCompanion({ live, talking, gesture }: {
   return <Rawi clip={clip} position={pos.current} lookAt={look.current} groundAt={groundYAt} speed={paceRef} />
 }
 
-function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet }: {
+/* memo: Game מתרנדר גם כשרק המיני-מפה זזה, וכל רינדור שלו הריץ את
+   Canvas ואת כל עץ הסצנה מחדש. כל ה-props של World יציבים (callbacks
+   ב-useCallback, מערכי state, ערכים פשוטים), ולכן העולם נשאר במקום. */
+const World = memo(function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet }: {
   live: Live
   /** שלב התחנה — קובע מה זוהר ומה עומם */
   stage: Stage
@@ -5416,7 +5601,7 @@ function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, spe
       <ExitWatcher live={live} onReach={onExit} />
     </>
   )
-}
+})
 
 /* ---------------- HUD ---------------- */
 
@@ -5551,14 +5736,54 @@ const PLAN = (() => {
   return { bound, shapes, roads, exits: campLayout.exits ?? [] }
 })()
 
-function MiniMap({ pos, yaw, met, found, solved }: {
-  pos: { x: number; z: number }
-  yaw: number
+/* המיקום והזווית של השחקן ב-React, בקצב נמוך ורק כשבאמת השתנו.
+   עד עכשיו זה ישב ב-Game עצמו: אובייקט חדש כל רבע שנייה = רינדור של
+   כל ה-HUD, ודרכו של Canvas וכל עץ הסצנה — 4 פעמים בשנייה גם בעמידה.
+   מי שצריך את זה (המיני-מפה, חץ הכיוון) מנוי כאן בעצמו, ו-Game שקט. */
+function useLivePose(live: Live) {
+  const [pose, setPose] = useState(() => ({ x: live.player.x, z: live.player.z, yaw: live.yaw }))
+  useEffect(() => {
+    let last = { x: NaN, z: NaN, yaw: NaN }
+    const t = window.setInterval(() => {
+      const { x, z } = live.player
+      const yaw = live.yaw
+      if (Math.abs(x - last.x) < 0.05 && Math.abs(z - last.z) < 0.05 && Math.abs(yaw - last.yaw) < 0.01) return
+      last = { x, z, yaw }
+      setPose(last)
+    }, 250)
+    return () => window.clearInterval(t)
+  }, [live])
+  return pose
+}
+
+/* חץ קטן ומרחק אל מה שהצעד הבא מבקש. מתחת לשני מטרים הוא נעלם:
+   מי שעומד על היעד אינו צריך חץ. */
+function AimChip({ live, aim }: { live: Live; aim: { x: number; z: number } | null }) {
+  const pose = useLivePose(live)
+  if (!aim) return null
+  const dx = aim.x - pose.x
+  const dz = aim.z - pose.z
+  const dist = Math.hypot(dx, dz)
+  if (dist < 2) return null
+  const deg = (wrapPi(Math.atan2(dx, -dz) - pose.yaw) * 180) / Math.PI
+  return (
+    <span className="hud-aim">
+      <i style={{ transform: `rotate(${deg}deg)` }} aria-hidden="true">▲</i>
+      {Math.round(dist)} מ׳
+    </span>
+  )
+}
+
+function MiniMap({ live, met, found, solved }: {
+  live: Live
   met: (who: string) => boolean
   /** ids already collected / already worked out, so the map can grey them out */
   found: string[]
   solved: string[]
 }) {
+  const pose = useLivePose(live)
+  const pos = pose
+  const yaw = pose.yaw
   const R = 78 // map radius in viewBox units
   /* The whole region, not a fixed 28 m window. Every layout declares its own
      walkable radius — Yathrib's is 46 — so a fixed window drew the player
@@ -5897,7 +6122,49 @@ function DevAudit() {
   return null
 }
 
+/* חימום הסצנה מאחורי לוח הטעינה.
+
+   three.js מהדר שיידר ומעלה טקסטורה וגאומטריה ל-GPU ברגע שהחפץ נכנס
+   לראשונה לפריים — כלומר באמצע ההליכה, כשמשהו חדש נכנס למסגרת.
+   בכרום זה נבלע ב-120Hz; במנוע של ספארי (WebKit) נמדד: המעבר הראשון
+   על דרך חדשה הפיל 13 פריימים בארבע שניות (עד 25ms של JS בפריים),
+   ואותו מעבר בפעם השנייה — אפס. זה מה שנקרא כ„הליכה מקוטעת".
+
+   לכן, פעם אחת לפני שהלוח נעלם: כל הטקסטורות מועלות, כל החומרים
+   מהודרים, וכל הסצנה נצבעת פעם אחת בלי חיתוך-מסגרת כדי שגם
+   הגאומטריות יעלו. הכול מאחורי הלוח, שממילא מחכה לפריים השני. */
+function warmUp(gl: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera) {
+  const t0 = performance.now()
+  const seen = new Set<THREE.Texture>()
+  const culled: THREE.Object3D[] = []
+  scene.traverse((o) => {
+    if (o.frustumCulled) {
+      o.frustumCulled = false
+      culled.push(o)
+    }
+    const mats = (o as THREE.Mesh).material
+    if (!mats) return
+    for (const m of Array.isArray(mats) ? mats : [mats]) {
+      for (const v of Object.values(m as unknown as Record<string, unknown>)) {
+        if (v instanceof THREE.Texture && !seen.has(v)) {
+          seen.add(v)
+          if (v.image) gl.initTexture(v)
+        }
+      }
+    }
+  })
+  gl.compile(scene, camera)
+  gl.render(scene, camera)
+  for (const o of culled) o.frustumCulled = true
+  if (process.env.NODE_ENV !== 'production') {
+    console.info(`[chapter1] warm-up: ${seen.size} textures, ${culled.length} objects, ${Math.round(performance.now() - t0)}ms`)
+  }
+}
+
 function SceneReady({ onReady }: { onReady: () => void }) {
+  const gl = useThree((s) => s.gl)
+  const scene = useThree((s) => s.scene)
+  const camera = useThree((s) => s.camera)
   useEffect(() => {
     /* שני פריימים אחרי שה-Suspense נפתר: הראשון הוא זה שבו הסצנה
        נצבעת לראשונה, והמתנה לו מונעת הבזק של מסך ריק בין הלוח
@@ -5908,13 +6175,14 @@ function SceneReady({ onReady }: { onReady: () => void }) {
        שוב בכל רינדור של המשחק (חזרת מקש היא כ-30 פעם בשנייה). */
     let inner = 0
     const outer = requestAnimationFrame(() => {
+      warmUp(gl, scene, camera)
       inner = requestAnimationFrame(onReady)
     })
     return () => {
       cancelAnimationFrame(outer)
       if (inner) cancelAnimationFrame(inner)
     }
-  }, [onReady])
+  }, [onReady, gl, scene, camera])
   return null
 }
 
@@ -6078,15 +6346,19 @@ export default function Game() {
   const [soundOff, setSoundOff] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
   const onSceneReady = useCallback(() => setSceneReady(true), [])
-  const [mapPos, setMapPos] = useState({ x: 0, z: 4 })
-  const [mapYaw, setMapYaw] = useState(0)
   const [pressed, setPressed] = useState<Set<string>>(() => new Set())
   /* מה שהיד מחזיקה יושב ב-live (נכתב מתוך הסצנה, לא מ-React), ולכן
      ה-HUD קורא אותו בקצב נמוך — עשר פעמים בשנייה מספיקות לשורת טקסט. */
   const [handHeld, setHandHeld] = useState<string | null>(null)
+  const handHeldRef = useRef<string | null>(null)
   useEffect(() => {
     const t = window.setInterval(() => {
-      setHandHeld((prev) => (prev === live.handHeld ? prev : live.handHeld))
+      /* משווים לפני setState, לא בתוכו: עדכון-ללא-שינוי עדיין מתזמן
+         רינדור של Game כשיש לו עדכון אחר תלוי ועומד (נמדד: 10 בשנייה
+         בזמן הליכה, אפס בעמידה). */
+      if (live.handHeld === handHeldRef.current) return
+      handHeldRef.current = live.handHeld
+      setHandHeld(live.handHeld)
     }, 100)
     return () => window.clearInterval(t)
   }, [live])
@@ -6215,14 +6487,6 @@ export default function Game() {
      מרחק וכיוון יחסי אל מה שהצעד הבא מבקש. מתחת לשני מטרים הוא נעלם:
      מי שעומד על היעד אינו צריך חץ. */
   const aim = useMemo(() => positionFor(next, CTX), [next])
-  const aimInfo = useMemo(() => {
-    if (!aim) return null
-    const dx = aim.x - mapPos.x
-    const dz = aim.z - mapPos.z
-    const dist = Math.hypot(dx, dz)
-    if (dist < 2) return null
-    return { dist: Math.round(dist), deg: (wrapPi(Math.atan2(dx, -dz) - mapYaw) * 180) / Math.PI }
-  }, [aim, mapPos, mapYaw])
   /* רמז התקיעות אחרי 25 שניות: אותו „מה" עם „איפה" */
   const where = whereFor(next, CTX, REGION_TASK)
   const hintText = where ? `${objective} · ${where}` : objective
@@ -6670,14 +6934,6 @@ export default function Game() {
     live.lastDrag = performance.now()
   }, [live])
 
-  // low-frequency minimap refresh
-  useEffect(() => {
-    const t = window.setInterval(() => {
-      setMapPos({ x: live.player.x, z: live.player.z })
-      setMapYaw(live.yaw)
-    }, 250)
-    return () => window.clearInterval(t)
-  }, [live])
 
   /** מי שעומד כאן ו-E באמת יפתח את שיחתו עכשיו — לפי התסריט, לא לפי
       „יש לו עוד משהו לומר". אחרת צ׳יפ E מבטיח שיחה שהמקש מסרב לה. */
@@ -7096,12 +7352,7 @@ export default function Game() {
           !nearPending && !(atTask && REGION_TASK) && (
           <p className="hud-objective" role="status">
             {objective}
-            {aimInfo && (
-              <span className="hud-aim">
-                <i style={{ transform: `rotate(${aimInfo.deg}deg)` }} aria-hidden="true">▲</i>
-                {aimInfo.dist} מ׳
-              </span>
-            )}
+            <AimChip live={live} aim={aim} />
           </p>
         )}
         {/* ── הוראת F ────────────────────────────────────────────────
@@ -7125,7 +7376,7 @@ export default function Game() {
           !nearPending && !(atTask && REGION_TASK) && (
           <p className="hud-panel hud-hint" role="status">{hintText}</p>
         )}
-        <MiniMap pos={mapPos} yaw={mapYaw} met={met} found={found} solved={solved} />
+        <MiniMap live={live} met={met} found={found} solved={solved} />
 
         {/* the road stops here, and everything this place had to say is said */}
         {finale === 'film' && <ChapterFilm onDone={() => setFinale('card')} />}
