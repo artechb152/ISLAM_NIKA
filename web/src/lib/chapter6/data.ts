@@ -54,27 +54,27 @@ export const CH6: ChapterData = {
       "actionDetails": [
         {
           "commandment": "השהאדה",
-          "action": "להעיד",
+          "action": "עדות",
           "quote": "אין אל מבלעדי אללה ושמוחמד הוא שליחו."
         },
         {
-          "commandment": "התפילה",
-          "action": "להתפלל",
+          "commandment": "תפילה",
+          "action": "תפילה",
           "quote": "חמש תפילות ביום."
         },
         {
-          "commandment": "הצדקה",
-          "action": "לתת",
+          "commandment": "צדקה",
+          "action": "נתינה",
           "quote": "לתת צדקה."
         },
         {
           "commandment": "צום רמדאן",
-          "action": "לצום",
+          "action": "צום",
           "quote": "לצום את צום הרמדאן."
         },
         {
           "commandment": "החג'",
-          "action": "לעלות לרגל",
+          "action": "עלייה לרגל",
           "quote": "לעלות לרגל פעם בחיים, אם ביכולתך."
         }
       ]
