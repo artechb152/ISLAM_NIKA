@@ -13,6 +13,7 @@ import {
   PORTRAIT,
   SPEAKERS,
   journal,
+  regionById,
   verses,
   type JournalEntry,
   type SpeakerId,
@@ -22,6 +23,8 @@ import { FINDS, FINDS_TOTAL } from '@/lib/chapter1/finds'
 import { CHAPTER_QUESTION, linkState } from '@/lib/chapter1/links'
 import { TASKS, TASKS_TOTAL } from '@/lib/chapter1/tasks'
 import enrichment from '@/lib/chapter1/enrichment.json'
+import { buildScript, summaryId } from '@/lib/chapter1/script'
+import { boardNotes } from './StationBoard'
 
 type Tab = 'all' | 'region' | 'speaker' | 'verses' | 'finds'
 
@@ -94,6 +97,31 @@ function Group({ title, entries }: { title: string; entries: JournalEntry[] }) {
           <Card key={entry.encounter.id} entry={entry} />
         ))}
       </div>
+    </section>
+  )
+}
+
+/* סיכום התחנה, כפי שנסגר בדרך: שורות ה-key ששמעת, מה שעלה במשימה,
+   והחוליה שנוספה. גם הוא רק מה שנשמע — לא סיכום שנכתב לכבוד המחברת. */
+function Recap({ regionId, seen, solved }: { regionId: string; seen: string[]; solved: string[] }) {
+  const region = regionById(regionId)
+  const task = TASKS.find((t) => t.region === regionId) ?? null
+  const notes = boardNotes(region, buildScript(region, task, { revealFirst: false, isMecca: false }), seen).filter((n) => n.heard)
+  const earned = linkState(seen, solved).filter((l) => l.region === regionId && l.done)
+  return (
+    <section className="nb-recap" aria-label={`סיכום התחנה · ${region.name}`}>
+      <h4 className="nb-recap-title">סיכום התחנה</h4>
+      <ul className="nb-recap-list">
+        {notes.map((n) => (
+          <li key={n.id}>{n.text} <i dir="ltr">{n.source}</i></li>
+        ))}
+        {task && solved.includes(task.id) && <li className="is-task">{task.done} <i dir="ltr">{task.source}</i></li>}
+      </ul>
+      {earned.map((l) => (
+        <p key={l.id} className="nb-recap-link">
+          <b>נוספה חוליה: {l.label}</b> {l.key.text} <i dir="ltr">{l.key.source}</i>
+        </p>
+      ))}
     </section>
   )
 }
@@ -237,7 +265,14 @@ export function Notebook({ seen, found, solved, onClose }: {
           )}
 
           {!empty && tab === 'region' &&
-            byRegion.map(([region, list]) => <Group key={region} title={region} entries={list} />)}
+            byRegion.map(([region, list]) => (
+              <div key={region}>
+                <Group title={region} entries={list} />
+                {seen.includes(summaryId(list[0].regionId)) && (
+                  <Recap regionId={list[0].regionId} seen={seen} solved={solved} />
+                )}
+              </div>
+            ))}
 
           {!empty && tab === 'speaker' &&
             bySpeaker.map(([who, list]) => <Group key={who} title={SPEAKERS[who]} entries={list} />)}

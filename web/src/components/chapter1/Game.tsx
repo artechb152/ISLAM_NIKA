@@ -20,8 +20,9 @@ import { FindCard } from './FindCard'
 import { wrapPi } from '@/lib/chapter1/angles'
 import { MAP_PINS } from '@/lib/chapter1/journey'
 import { linkState } from '@/lib/chapter1/links'
+import { StationBoard, StationSummary } from './StationBoard'
 import {
-  arriveId, buildScript, encounterOf, instructionFor, isDone, mayOpen, nextStep, optionalLeft,
+  arriveId, buildScript, encounterOf, summaryId, instructionFor, isDone, mayOpen, nextStep, optionalLeft,
   placeablesOf, positionFor, refusalFor, requiredLeft, stageOf, whereFor,
   type ScriptCtx, type ScriptState, type Step,
 } from '@/lib/chapter1/script'
@@ -6345,6 +6346,8 @@ export default function Game() {
   )
   const [soundOff, setSoundOff] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
+  /** כרטיס הסיכום של התחנה פתוח — חוסם תנועה כמו פאנל המשימה */
+  const [summaryOpen, setSummaryOpen] = useState(false)
   const onSceneReady = useCallback(() => setSceneReady(true), [])
   const [pressed, setPressed] = useState<Set<string>>(() => new Set())
   /* מה שהיד מחזיקה יושב ב-live (נכתב מתוך הסצנה, לא מ-React), ולכן
@@ -6603,7 +6606,13 @@ export default function Game() {
   /* one gate for "something is already on screen", so a keypress cannot open a
      second panel behind the first */
   const openRef = useRef(false)
-  openRef.current = !!openFind || openTask || finale === 'card' || finale === 'film'
+  openRef.current = !!openFind || openTask || summaryOpen || finale === 'card' || finale === 'film'
+  /* הסיכום נרשם כשנסגר, כמו כל מפגש — וכך הצעד הבא בתסריט הוא השער */
+  const closeSummary = useCallback(() => {
+    const store = recordEncounter(summaryId(REGION.id), 0)
+    setSeen(store.seen)
+    setSummaryOpen(false)
+  }, [])
 
   /* Escape סגר דיאלוג, מחברת ומפה — אבל לא כרטיס ראיה, לוח משימה או את
      כרטיס הסיום. מקש אחד לסגירה חייב לעבוד על כל מה שנפתח. הפעולה נקראת
@@ -6618,6 +6627,10 @@ export default function Game() {
       setOpenTask(false)
       return true
     }
+    if (summaryOpen) {
+      closeSummary()
+      return true
+    }
     if (finale === 'card') {
       live.riseAt = 0
       setFinale('closed')
@@ -6630,11 +6643,11 @@ export default function Game() {
      שמנקה אותו, ועד אז השחקן ממשיך ללכת מתחת לחלון. הדרך היחידה
      לעצור אותו היא לנקות ברגע הפתיחה עצמו. */
   useEffect(() => {
-    if (encounter || openFind || openTask) {
+    if (encounter || openFind || openTask || summaryOpen) {
       live.keys.clear()
       setPressed(new Set())
     }
-  }, [encounter, openFind, openTask, live])
+  }, [encounter, openFind, openTask, summaryOpen, live])
 
   useEffect(() => {
     const store = readNotebook()
@@ -6683,7 +6696,11 @@ export default function Game() {
      דבר. אין טיימר שקט ואין מגן atTask, כי צעד אוטומטי הוא הבא רק כשאין
      פעולה תלויה. R פותח את אותו צעד מיד. */
   useEffect(() => {
-    if (!sceneReady || encounter || openFind || openTask || overlay || travelTo || finale !== 'none') return
+    if (!sceneReady || encounter || openFind || openTask || summaryOpen || overlay || travelTo || finale !== 'none') return
+    if (next.kind === 'summary') {
+      const t = window.setTimeout(() => setSummaryOpen(true), 1200)
+      return () => window.clearTimeout(t)
+    }
     if (!(next.kind === 'arrive' || (next.kind === 'talk' && next.auto))) return
     const enc = next.kind === 'arrive' ? arrivalBeat(REGION.id) : encounterOf(next, REGION)
     if (!enc) {
@@ -6695,7 +6712,7 @@ export default function Game() {
     const t = window.setTimeout(() => setEncounter((cur) => cur ?? enc), wait)
     return () => window.clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sceneReady, next.key, encounter, openFind, openTask, overlay, travelTo, finale])
+  }, [sceneReady, next.key, encounter, openFind, openTask, summaryOpen, overlay, travelTo, finale])
 
   /* A read-only handle on where the traveller is standing. This used to be
      dev-only, which meant the built chapter — the one people actually play —
@@ -6790,6 +6807,7 @@ export default function Game() {
         /* R הוא קיצור לצעד האוטומטי הבא של ראאווי — ואם הצעד הבא אינו
            שלו, הוא אומר מה כן. מקש מת גרוע מכל תשובה. */
         const n = nextRef.current
+        if (n.kind === 'summary') { setSummaryOpen(true); return }
         const enc = n.kind === 'arrive' ? arrivalBeat(REGION.id) : n.kind === 'talk' && n.auto ? encounterOf(n, REGION) : null
         setEncounter(enc ?? holdBeat(n, scriptStateRef.current))
         return
@@ -7317,20 +7335,18 @@ export default function Game() {
             שלמה. המונה הנכון הוא זה שסופר את מה שהפרק באמת מבקש: שמונה תחנות.
             שני המלאים לא נמחקו — הם חיים במחברת (Notebook.tsx), שם הם
             מידע שמבקשים, ולא ציון שרודף. */}
-        {/* חמש החוליות של התשובה — מתמלאות בדרך, ומורכבות ביציאה */}
-        {!overlay && !openTask && !openFind && !encounter && (
-          <div className="hud-panel hud-links" role="status" aria-label="חמש החוליות של התשובה">
-            {links.map((l) => (
-              <i
-                key={l.id}
-                className={
-                  'hud-link' + (l.done ? ' is-done' : '') + (l.region === REGION.id ? ' is-here' : '')
-                }
-              >
-                {l.label}
-              </i>
-            ))}
-          </div>
+        {/* כרטיס התחנה ולוח התחנה: השאלה, השאלה של הדרך, חמש החוליות,
+            ומה שכבר נאמר כאן — מה שנשאר על המסך אחרי שהשיחה נסגרה.
+            מעל שכבת המשימה, כדי שהלומד יראה את מה שנאמר בזמן שהוא עונה. */}
+        {!overlay && !openFind && !summaryOpen && finale === 'none' && (
+          <StationBoard
+            region={REGION}
+            script={SCRIPT}
+            seen={seen}
+            links={links}
+            review={REGION.id === 'narrow-pass'}
+            raised={!!openTask}
+          />
         )}
         <div className="hud-panel hud-goal">
           <span style={{ whiteSpace: 'nowrap' }}>
@@ -7348,7 +7364,7 @@ export default function Game() {
             חסר: לא רשימת מטלות ולא לוח בקרה — משפט אחד שאומר מה עכשיו. */}
         {/* כשההנחיה כבר עומדת ליד המקש — לא חוזרים עליה מתחת. אותה
             שורה פעמיים נקראת כתקלה, לא כדגש. */}
-        {objective && !overlay && !openTask && !openFind && !encounter &&
+        {objective && !overlay && !openTask && !openFind && !encounter && !summaryOpen &&
           !nearPending && !(atTask && REGION_TASK) && (
           <p className="hud-objective" role="status">
             {objective}
@@ -7405,6 +7421,18 @@ export default function Game() {
               setOpenFind(null)
               setOverlay('notebook')
             }}
+          />
+        )}
+        {summaryOpen && (
+          <StationSummary
+            region={REGION}
+            script={SCRIPT}
+            seen={seen}
+            links={links}
+            task={REGION_TASK}
+            solved={solved}
+            review={REGION.id === 'narrow-pass'}
+            onClose={closeSummary}
           />
         )}
         {openTask && REGION_TASK && (

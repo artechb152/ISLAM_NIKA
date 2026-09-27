@@ -21,20 +21,20 @@ const ok = (c, m) => { if (!c) errors.push(m) }
 
 /* רצפי הזהב: מה כל תחנה עושה, בסדר. שינוי בנתונים = דיף כאן. */
 const GOLD = {
-  'night-camp': ['opening', 'arrive', 'rawi-intro', 'act:lamp', 'look:find-camp-tradition', 'act:place', 'interpret', 'camp-departure', 'onward'],
-  'border-post': ['arrive', 'envoy-empires', 'envoy-sasanian', 'rawi-zoroaster', 'chief-tribes', 'rawi-ghassan', 'act:panel', 'interpret', 'onward'],
-  'loading-road': ['arrive', 'rawi-seep', 'act:place', 'ideas-afterload', 'onward'],
-  yathrib: ['arrive', 'jewish-arrival', 'jewish-south', 'jewish-neighbors', 'jewish-difference', 'jewish-messiah', 'act:place', 'interpret', 'onward'],
-  'narrow-pass': ['arrive', 'rawi-checkpoint', 'act:panel', 'interpret', 'rawi-recall-done', 'onward'],
-  monastery: ['arrive', 'monk-christianity', 'monk-influence', 'monk-practices', 'monk-quran', 'act:place', 'onward'],
-  mecca: ['arrive', 'merchant-idols', 'merchant-blackstone', 'merchant-hubal', 'merchant-goddesses', 'rawi-hisham', 'rawi-abraham', 'abraha-story', 'birds-cinematic', 'act:table', 'act:panel', 'interpret', 'onward'],
+  'night-camp': ['opening', 'arrive', 'rawi-intro', 'act:lamp', 'look:find-camp-tradition', 'act:place', 'interpret', 'camp-departure', 'summary', 'onward'],
+  'border-post': ['arrive', 'envoy-empires', 'envoy-sasanian', 'rawi-zoroaster', 'chief-tribes', 'rawi-ghassan', 'act:panel', 'interpret', 'summary', 'onward'],
+  'loading-road': ['arrive', 'rawi-seep', 'act:place', 'ideas-afterload', 'summary', 'onward'],
+  yathrib: ['arrive', 'jewish-arrival', 'jewish-south', 'jewish-neighbors', 'jewish-difference', 'jewish-messiah', 'act:place', 'interpret', 'summary', 'onward'],
+  'narrow-pass': ['arrive', 'rawi-checkpoint', 'act:panel', 'interpret', 'rawi-recall-done', 'summary', 'onward'],
+  monastery: ['arrive', 'monk-christianity', 'monk-influence', 'monk-practices', 'monk-quran', 'act:place', 'summary', 'onward'],
+  mecca: ['arrive', 'merchant-idols', 'merchant-blackstone', 'merchant-hubal', 'merchant-goddesses', 'rawi-hisham', 'rawi-abraham', 'abraha-story', 'birds-cinematic', 'act:table', 'act:panel', 'interpret', 'summary', 'onward'],
   exit: ['arrive', 'rawi-summary', 'act:panel', 'interpret', 'rawi-echoes', 'onward'],
 }
 
 const empty = () => ({ seen: [], found: [], solved: [], stoneLit: false, tableSet: false, placedAll: false, interpreted: false, nearWho: null })
 const complete = (step, st, task) => {
   switch (step.kind) {
-    case 'arrive': case 'talk': st.seen = [...st.seen, step.id]; break
+    case 'arrive': case 'talk': case 'summary': st.seen = [...st.seen, step.id]; break
     case 'look': st.found = [...st.found, step.id]; break
     case 'act': if (step.mode === 'lamp') st.stoneLit = true; else if (step.mode === 'table') st.tableSet = true; else st.placedAll = true; break
     case 'interpret': st.interpreted = true; if (task) st.solved = [...st.solved, task.id]; break

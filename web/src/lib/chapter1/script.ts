@@ -33,6 +33,8 @@ export type Step =
   | { kind: 'look'; key: string; id: string; core: true; auto: false }
   | { kind: 'act'; key: string; mode: ActMode; core: boolean; auto: false }
   | { kind: 'interpret'; key: 'interpret'; core: boolean; auto: false }
+  /** כרטיס הסיכום של התחנה — לפני שיוצאים, מה נאמר בה ואיזו חוליה נוספה */
+  | { kind: 'summary'; key: 'summary'; id: string; core: false; auto: true }
   | { kind: 'onward'; key: 'onward'; core: false; auto: false }
 
 export type Script = Step[]
@@ -65,6 +67,8 @@ export interface ScriptCtx {
 
 /** מזהה הפעימה הסינתטית של ההגעה — נרשם ב-seen כמו כל מפגש */
 export const arriveId = (regionId: string) => `rawi-arrive-${regionId}`
+/** מזהה כרטיס הסיכום של התחנה — גם הוא נרשם ב-seen כשנסגר */
+export const summaryId = (regionId: string) => `station-summary-${regionId}`
 
 const isTaskTriggered = (e: Encounter) => String(e.trigger ?? '').startsWith('task:')
 const isArriveCine = (e: Encounter) => e.speaker === 'narrator' && (e.trigger ?? 'arrive') === 'arrive'
@@ -134,7 +138,10 @@ export function buildScript(
   if (task?.interpret) script.push({ kind: 'interpret', key: 'interpret', core: taskCore, auto: false })
   /* 9. מה שנאמר אחרי שהתחנה נעשתה */
   for (const e of region.encounters) if (isTaskTriggered(e)) script.push(talk(e))
-  /* 10. והלאה */
+  /* 10. הסיכום: מה נאמר כאן, ואיזו חוליה נוספה. היציאה היא דף ולא עולם,
+     ויש לה סיכום משלה בדף הסיום. */
+  if (region.id !== 'exit') script.push({ kind: 'summary', key: 'summary', id: summaryId(region.id), core: false, auto: true })
+  /* 11. והלאה */
   script.push({ kind: 'onward', key: 'onward', core: false, auto: false })
   return script
 }
@@ -144,6 +151,7 @@ export function isDone(step: Step, st: ScriptState, task: Task | null): boolean 
   switch (step.kind) {
     case 'arrive':
     case 'talk':
+    case 'summary':
       return st.seen.includes(step.id)
     case 'look':
       return st.found.includes(step.id)
@@ -191,6 +199,7 @@ export function stageOf(step: Step, script: Script): Stage {
   if (step.kind === 'act') return 'act'
   if (step.kind === 'interpret') return 'interpret'
   if (step.kind === 'onward') return 'done'
+  if (step.kind === 'summary') return 'wrap'
   const i = indexOf(script, step)
   const afterWork = script.slice(0, i).some((s) => s.kind === 'act' || s.kind === 'look' || s.kind === 'interpret')
   return afterWork ? 'wrap' : 'brief'
@@ -247,6 +256,8 @@ export function instructionFor(step: Step, script: Script, st: ScriptState, ctx:
   switch (step.kind) {
     case 'arrive':
       return RAWI_WAIT
+    case 'summary':
+      return 'עצרו רגע — סיכום התחנה לפני שממשיכים'
     case 'talk': {
       if (step.speaker === 'narrator') return NARRATOR_WAIT
       if (step.speaker === 'rawi') return RAWI_WAIT
@@ -296,6 +307,8 @@ export function whereFor(step: Step, ctx: ScriptCtx, task: Task | null): string 
   switch (step.kind) {
     case 'arrive':
       return 'ראאווי צועד לצידכם — עצרו לרגע והוא ידבר'
+    case 'summary':
+      return 'הסיכום נפתח מעצמו, או לחצו R'
     case 'talk':
       if (step.speaker === 'rawi') return 'ראאווי צועד לצידכם — עצרו לרגע, או לחצו R'
       if (step.speaker === 'narrator') return null
@@ -315,6 +328,7 @@ export function whereFor(step: Step, ctx: ScriptCtx, task: Task | null): string 
 export function positionFor(step: Step, ctx: ScriptCtx): { x: number; z: number } | null {
   switch (step.kind) {
     case 'arrive':
+    case 'summary':
       return null
     case 'talk':
       return step.auto ? null : ctx.hostSpot[step.speaker] ?? null
