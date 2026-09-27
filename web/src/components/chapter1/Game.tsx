@@ -6434,8 +6434,11 @@ export default function Game() {
         const key = step?.id ?? 'main'
         const n = (wrongTries.current[key] ?? 0) + 1
         wrongTries.current[key] = n
-        const right = (step ? step.options : REGION_TASK.options).find((o) => o.right)
-        if (n >= 2 && right) {
+        const pool = step ? step.options : REGION_TASK.options
+        const right = pool.find((o) => o.right)
+        /* רק בשאלה של תשובה אחת: בארגז יש שתיים נכונות, והטעות („רעיונות")
+           היא עצמה השיעור — שם אין מה לחשוף */
+        if (n >= 2 && right && pool.filter((o) => o.right).length === 1) {
           recordChoice(REGION_TASK.id, right.id)
           setTaskChosen((prev) => (prev.includes(right.id) ? prev : [...prev, right.id]))
           setTaskLast(right.id)

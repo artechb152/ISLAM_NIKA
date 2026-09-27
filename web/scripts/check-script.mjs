@@ -26,7 +26,7 @@ const GOLD = {
   'loading-road': ['arrive', 'rawi-seep', 'act:place', 'ideas-afterload', 'summary', 'onward'],
   yathrib: ['arrive', 'jewish-arrival', 'jewish-south', 'jewish-neighbors', 'jewish-difference', 'jewish-messiah', 'act:place', 'interpret', 'summary', 'onward'],
   'narrow-pass': ['arrive', 'rawi-checkpoint', 'act:panel', 'interpret', 'rawi-recall-done', 'summary', 'onward'],
-  monastery: ['arrive', 'monk-christianity', 'monk-influence', 'monk-practices', 'monk-quran', 'act:place', 'summary', 'onward'],
+  monastery: ['arrive', 'monk-christianity', 'monk-influence', 'monk-practices', 'monk-quran', 'act:place', 'interpret', 'summary', 'onward'],
   mecca: ['arrive', 'merchant-idols', 'merchant-blackstone', 'merchant-hubal', 'merchant-goddesses', 'rawi-hisham', 'rawi-abraham', 'abraha-story', 'birds-cinematic', 'act:table', 'act:panel', 'interpret', 'summary', 'onward'],
   exit: ['arrive', 'rawi-summary', 'act:panel', 'interpret', 'rawi-echoes', 'onward'],
 }

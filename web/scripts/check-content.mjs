@@ -70,6 +70,28 @@ for (const t of TASKS) {
 }
 
 /* העדויות */
+/* ── שכבת הלמידה (StationBoard) ─────────────────────────────────────
+   הלוח וכרטיס הסיכום מציגים את שורת ה-key של כל מפגש ליבה. מפגש ליבה
+   בלי key הוא חור בלוח; שניים — הלוח לא יודע מה נשאר. */
+for (const r of dlg.regions) {
+  for (const id of r.core ?? []) {
+    const e = r.encounters.find((x) => x.id === id)
+    if (!e) continue
+    const keys = e.lines.filter((l) => l.key).length
+    ok(keys === 1, `מפגש ליבה ${r.id}/${id}: ${keys} שורות key — צריך אחת בדיוק (הלוח מציג אותה)`)
+  }
+}
+/* מסדרים ואז בודקים: הבדיקה מציגה הסבר לכל פריט, נכון או לא */
+for (const t of TASKS) {
+  if (!['sort', 'connect', 'observe'].includes(t.kind ?? '')) continue
+  for (const o of t.options) {
+    ok(!!o.note?.trim(), `מיון ${t.id}: לפריט ${o.id} אין הסבר לתשובה נכונה`)
+    ok(!!o.wrong?.trim() || !!o.note?.trim(), `מיון ${t.id}: לפריט ${o.id} אין הסבר לתשובה שגויה`)
+  }
+  for (const b of t.bins ?? []) sect(b.source, `${t.id}/bin ${b.id}`)
+}
+for (const t of TASKS) for (const st of t.steps ?? []) sect(st.source, `${t.id}/step ${st.id}`)
+
 for (const f of FINDS) {
   sect(f.source, `find ${f.id}`)
   ok(regionIds.has(f.region), `עדות ${f.id} באזור שאינו קיים: ${f.region}`)
