@@ -1734,7 +1734,7 @@ const GRAB_PX = 115
 const GRAB_MIN_PX = 34
 const DROP_R = 2.1
 
-function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, onSortDrop }: {
+function TaskProps({ live, atTask, armed, chosen, pending = {}, solvedTask, found, onChoose, onSortDrop }: {
   live: Live
   atTask: boolean
   /** האינטראקציה היא התור הנוכחי — שלב הפעולה או שלב הפירוש בלבד.
@@ -1744,6 +1744,8 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
       זה קרה בכל פעם שניגשים לדבר איתו. */
   armed: boolean
   chosen: string[]
+  /** מיון: מה שהונח ועוד לא נבדק — פריט -> צד */
+  pending?: Record<string, string>
   solvedTask: boolean
   found: string[]
   onChoose: (id: string) => void
@@ -1812,7 +1814,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
             home: { x: (REGION_TASK?.x ?? 0) - 0.85, z: (REGION_TASK?.z ?? 0) + 0.95 },
             tgt: { x: (REGION_TASK?.x ?? 0) - 0.85, z: (REGION_TASK?.z ?? 0) + 0.95 },
             cur: { x: (REGION_TASK?.x ?? 0) - 0.85, z: (REGION_TASK?.z ?? 0) + 0.95 },
-            lift: 0, hop: 0, returning: false, placed: false,
+            lift: 0, hop: 0, returning: false, placed: false, bin: null as string | null,
           },
         ]
       : opts.map((o, i) => {
@@ -1826,7 +1828,7 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
             x: (REGION_TASK?.x ?? 0) + (o.spot?.dx ?? 0),
             z: (REGION_TASK?.z ?? 0) + (o.spot?.dz ?? 0),
           }
-          return { id: o.id, home, tgt, cur: { ...home }, lift: 0, hop: 0, returning: false, placed: false }
+          return { id: o.id, home, tgt, cur: { ...home }, lift: 0, hop: 0, returning: false, placed: false, bin: null as string | null }
         }),
   )
   /* שלוש הדרכים על המפה — עמדות קבועות, נגזרות מה-spot של כל אופציה */
@@ -1912,6 +1914,43 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
   const nearTarget = useRef(false)
   const solvedAt = useRef(0)
   const [, force] = useState(0)
+  /* פיזור קטן סביב העמדה — חמישה חפצים לא נערמים לנקודה */
+  const binSlot = useCallback((bin: { x: number; z: number }, i: number) => {
+    const sp = SURFACE_Y != null ? 0.24 : 0.55
+    return { x: bin.x + ((i % 3) - 1) * sp, z: bin.z + (i % 2 === 0 ? sp * 0.6 : -sp * 0.55) }
+  }, [SURFACE_Y])
+  /* אחרי בדיקה: מה שנפסל חוזר הביתה בקפיצה; מה שננעל — ובחשיפת הפתרון
+     גם מה שהיה בצד הלא נכון — עובר לצד שלו */
+  useEffect(() => {
+    if (!sortMode) return
+    let moved = false
+    for (let i = 0; i < state.current.length; i++) {
+      const st = state.current[i]
+      const opt = opts[i]
+      if (!opt) continue
+      if (chosen.includes(opt.id)) {
+        if (!st.placed || st.bin !== opt.bin) {
+          const bin = binSpots.find((b) => b.id === opt.bin)
+          if (bin) {
+            st.placed = true
+            st.returning = false
+            st.bin = bin.id
+            st.tgt = binSlot(bin, i)
+            moved = true
+          }
+        }
+        continue
+      }
+      if (st.placed && !(opt.id in pending)) {
+        st.placed = false
+        st.bin = null
+        st.returning = true
+        st.hop = 1
+        moved = true
+      }
+    }
+    if (moved) force((n) => n + 1)
+  }, [chosen, pending, sortMode, opts, binSpots, binSlot])
 
   /* טבעת יעד + טבעת hover — חומרים בסיסיים, מחוץ לטווח של Painterly */
   const targetRing = useRef<THREE.Mesh>(null)
@@ -1956,7 +1995,8 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
     const hitAt = (cx: number, cy: number) => {
       for (let i = 0; i < state.current.length; i++) {
         const st = state.current[i]
-        if (st.placed || chosen.includes(st.id)) continue
+        /* במיון, מה שהונח ועוד לא נבדק אפשר להרים שוב ולהעביר */
+        if ((st.placed && !sortMode) || chosen.includes(st.id)) continue
         if (sortLocked) continue
         if (!planMode && locked(opts[i])) continue
         /* רק מה שתורו עכשיו נתפס בכלל */
@@ -2074,16 +2114,11 @@ function TaskProps({ live, atTask, armed, chosen, solvedTask, found, onChoose, o
         if (best >= 0) {
           const bin = binSpots[best]
           const opt = opts[i]
-          ping.current = { x: st.cur.x, z: st.cur.z, at: performance.now(), ok: opt.bin === bin.id }
-          if (opt.bin === bin.id) {
-            st.placed = true
-            /* פיזור קטן סביב העמדה — חמישה חפצים לא נערמים לנקודה */
-            const sp = SURFACE_Y != null ? 0.24 : 0.55
-            st.tgt = { x: bin.x + ((i % 3) - 1) * sp, z: bin.z + (i % 2 === 0 ? sp * 0.6 : -sp * 0.55) }
-          } else {
-            st.returning = true
-            st.hop = 1 /* הצד הלא-נכון מחזיר — והנזיר מסביר למה */
-          }
+          /* ההנחה אינה נשפטת: החפץ נשאר במקום שבו הונח עד „בדיקה".
+             בלי הבהוב ירוק או אדום — אחרת הפינג היה השיפוט עצמו. */
+          st.placed = true
+          st.bin = bin.id
+          st.tgt = binSlot(bin, i)
           onSortDrop(opt.id, bin.id)
         } else {
           st.returning = true
@@ -3966,6 +4001,8 @@ const REVEAL_FIRST = !!REVEAL_FIND
    עם שתי שיחות שלא נשמעו, וההוראה על המסך אמרה דבר אחד בעוד המשחק
    דרש אחר. עכשיו יש רשימה אחת של צעדים (script.ts) ומצביע אחד —
    `next` בקומפוננטה — וכל משטח קורא ממנו. */
+/** משימה שמניחים בה פריטים בצדדים — נבדקת בכפתור ולא בכל הנחה */
+const SORT_KIND = ['sort', 'connect', 'observe'].includes(REGION_TASK?.kind ?? '')
 const SCRIPT = buildScript(REGION, REGION_TASK, { revealFirst: REVEAL_FIRST, isMecca: REGION.id === 'mecca' })
 const CTX: ScriptCtx = {
   region: REGION,
@@ -4444,10 +4481,14 @@ function SurfaceGlow({ x, y, z, r = 0.42, tone = '#f0c877', on = true }: {
   )
 }
 
-function EvidenceTable({ live, at, done, active, onComplete }: {
+function EvidenceTable({ live, at, done, active, onComplete, onNote, onReady }: {
   live: Live
   at: { x: number; z: number }
   done: boolean
+  /** הערת הבדיקה — נאמרת בשורת העולם, כמו בשאר המשימות */
+  onNote?: (text: string, ok: boolean) => void
+  /** שלושת המקורות מונחים ועוד לא נבדקו */
+  onReady?: (ready: boolean) => void
   /** האם זה בכלל התור של השולחן. אחרת אפשר היה לסדר את שלושת המקורות
       לפני ששמעת את הסוחר ולפני שראית את שלושת הממצאים — כלומר לפתור
       את הפעולה לפני שנשאלה. */
@@ -4469,8 +4510,20 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
     [at],
   )
   const pos = useRef(home.map((h) => ({ ...h })))
+  /* ── מסדרים ואז בודקים ────────────────────────────────────────────
+     עד כאן מקור נצמד רק לשקע שלו, והיה נמשך אליו כבר בזמן שהוא ביד —
+     כלומר השולחן סימן את התשובה, ומקום שגוי החזיר את המקור הביתה בלי
+     מילה. עכשיו כל מקור נכנס לכל שקע פנוי; כשהשלושה מונחים, „בדיקה"
+     נועלת את מה שבמקומו ומחזירה את השאר עם הסבר. אחרי בדיקה שנייה
+     שגויה — הסידור הנכון מוצג. `placed` הוא מה שננעל; `assign` הוא
+     השקע שבו מקור מונח כרגע. */
   const placed = useRef<boolean[]>([false, false, false])
-  const [placedN, setPlacedN] = useState(0)
+  const assign = useRef<number[]>([-1, -1, -1])
+  const checks = useRef(0)
+  const [, setPlacedN] = useState(0)
+  const [filled, setFilled] = useState<boolean[]>([false, false, false])
+  const [ready, setReady] = useState(false)
+  const checkRef = useRef<() => void>(() => {})
   const [held, setHeld] = useState(-1)
   const drag = useRef(-1)
   /** איזה שקע נבחר בחצים כשהמקור מוחזק במקלדת */
@@ -4529,6 +4582,7 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
           drag.current = i
           setHeld(i)
           live.taskDrag = true
+          if (assign.current[i] >= 0) { assign.current[i] = -1; sync() }
           /* pointer capture: היד לא מאבדת את החפץ כשהסמן יוצא מגבולות
              המודל, ולא כשהוא עובר מעל אלמנט אחר */
           ;(gl.domElement as Element).setPointerCapture?.(e.pointerId)
@@ -4542,26 +4596,79 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
       const p = toPlane(e.clientX, e.clientY, topY + 0.1)
       const d = Math.hypot(p.x - at.x, p.z - at.z)
       let np = d > 2.6 ? { x: at.x + ((p.x - at.x) / d) * 2.6, z: at.z + ((p.z - at.z) / d) * 2.6 } : p
-      /* Snap אל המקום הנכון בזמן שהחפץ עוד ביד */
-      const sd = Math.hypot(np.x - slot[i].x, np.z - slot[i].z)
-      if (sd < SNAP) {
+      /* משיכה קלה אל השקע הקרוב שאינו נעול — לא אל השקע הנכון, שאז
+         השולחן היה מסמן את התשובה בזמן שהחפץ עוד ביד */
+      const k = nearestFree(np)
+      if (k >= 0) {
+        const sd = Math.hypot(np.x - slot[k].x, np.z - slot[k].z)
         const pull = (1 - sd / SNAP) * 0.55
-        np = { x: np.x + (slot[i].x - np.x) * pull, z: np.z + (slot[i].z - np.z) * pull }
+        np = { x: np.x + (slot[k].x - np.x) * pull, z: np.z + (slot[k].z - np.z) * pull }
       }
       pos.current[i] = np
     }
+    /** שקע קרוב (בתוך SNAP) שאין בו מקור נעול */
+    function nearestFree(p: { x: number; z: number }) {
+      let best = -1
+      let bd = SNAP
+      for (let k = 0; k < 3; k++) {
+        if (placed.current[k]) continue
+        const d = Math.hypot(p.x - slot[k].x, p.z - slot[k].z)
+        if (d < bd) { bd = d; best = k }
+      }
+      return best
+    }
+    const sync = () => {
+      setFilled([0, 1, 2].map((k) => placed.current[k] || assign.current.includes(k)))
+      setPlacedN(placed.current.filter(Boolean).length)
+      const r = [0, 1, 2].every((i) => placed.current[i] || assign.current[i] >= 0) && !placed.current.every(Boolean)
+      setReady(r)
+      onReady?.(r)
+    }
     const settle = (i: number) => {
-      /* נחת על המקום שלו? נצמד. נחת במקום אחר — חוזר הביתה, בלי עונש. */
-      const p = pos.current[i]
-      if (Math.hypot(p.x - slot[i].x, p.z - slot[i].z) < SNAP) {
-        pos.current[i] = { ...slot[i] }
-        placed.current[i] = true
-        cue('task')
-        const n = placed.current.filter(Boolean).length
-        setPlacedN(n)
-        if (n === 3 && !doneRef.current) onComplete()
+      /* נחת ליד שקע פנוי — נכנס אליו, בלי שיפוט. מקור שכבר עמד שם חוזר הביתה. */
+      const k = nearestFree(pos.current[i])
+      if (k >= 0) {
+        const j = assign.current.indexOf(k)
+        if (j >= 0 && j !== i) { assign.current[j] = -1; pos.current[j] = { ...home[j] } }
+        assign.current[i] = k
+        pos.current[i] = { ...slot[k] }
+        cue('ui')
       } else {
+        assign.current[i] = -1
         pos.current[i] = { ...home[i] }
+      }
+      sync()
+    }
+    const lockAll = () => {
+      for (let i = 0; i < 3; i++) { placed.current[i] = true; assign.current[i] = -1; pos.current[i] = { ...slot[i] } }
+    }
+    checkRef.current = () => {
+      if (doneRef.current) return
+      if (![0, 1, 2].every((i) => placed.current[i] || assign.current[i] >= 0)) return
+      checks.current += 1
+      const wrong: number[] = []
+      for (let i = 0; i < 3; i++) {
+        if (placed.current[i]) continue
+        if (assign.current[i] === i) { placed.current[i] = true; assign.current[i] = -1; pos.current[i] = { ...slot[i] } }
+        else { wrong.push(i); assign.current[i] = -1; pos.current[i] = { ...home[i] } }
+      }
+      /* ההסבר בנוי מן התוויות שכבר על השולחן: מה המקור, ואיפה מקומו */
+      const why = wrong.map((i) => `${EVIDENCE_SLOTS[i].label} — מקומו: ${EVIDENCE_SLOTS[i].place}.`).join(' ')
+      if (wrong.length === 0) {
+        cue('task')
+        onNote?.('כל מקור במקומו.', true)
+        sync()
+        onComplete()
+      } else if (checks.current >= 2) {
+        lockAll()
+        cue('ui')
+        onNote?.(`אחרי שתי בדיקות — הנה הסידור הנכון. ${why}`, false)
+        sync()
+        onComplete()
+      } else {
+        cue('ui')
+        onNote?.(`לא הכול במקומו, ומה שלא — חזר. ${why}`, false)
+        sync()
       }
     }
     const up = () => {
@@ -4591,7 +4698,9 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
       if (e.code === 'KeyF') {
         e.preventDefault()
         if (held >= 0) { drag.current = -1; setHeld(-1); live.taskDrag = false; live.handHeld = null; settle(held); kbSlot.current = 0; return }
-        const i = placed.current.findIndex((v) => !v)
+        /* שלושתם מונחים ואין דבר ביד: F בודק */
+        if ([0, 1, 2].every((k) => placed.current[k] || assign.current[k] >= 0)) { checkRef.current(); return }
+        const i = [0, 1, 2].find((k) => !placed.current[k] && assign.current[k] < 0) ?? -1
         if (i < 0) return
         drag.current = i
         setHeld(i)
@@ -4603,7 +4712,7 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
            פעמיים פתרה את השולחן בלי לקרוא מילה. מתחילים בשקע פנוי
            שאינו שלו; רק אם נשאר אחד בלבד, הוא זה. */
         const free: number[] = []
-        for (let k = 0; k < 3; k++) if (!placed.current[k]) free.push(k)
+        for (let k = 0; k < 3; k++) if (!placed.current[k] && !assign.current.includes(k)) free.push(k)
         const other = free.filter((k) => k !== i)
         kbSlot.current = (other.length ? other : free)[0] ?? 0
         showAt(i, kbSlot.current)
@@ -4621,7 +4730,7 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
         const step = e.code === 'ArrowLeft' || e.code === 'ArrowDown' ? -1 : 1
         for (let n = 0; n < 3; n++) {
           kbSlot.current = (kbSlot.current + step + 3) % 3
-          if (!placed.current[kbSlot.current]) break
+          if (!placed.current[kbSlot.current] && !assign.current.includes(kbSlot.current)) break
         }
         showAt(held, kbSlot.current)
       }
@@ -4646,10 +4755,15 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
       ;(window as unknown as { __ch1TablePut?: (i: number) => void }).__ch1TablePut = (i: number) => {
         pos.current[i] = { ...slot[i] }
         placed.current[i] = true
-        const n = placed.current.filter(Boolean).length
-        setPlacedN(n)
-        if (n === 3) onComplete()
+        assign.current[i] = -1
+        sync()
+        if (placed.current.every(Boolean)) onComplete()
       }
+      ;(window as unknown as { __ch1TableAssign?: (i: number, k: number) => void }).__ch1TableAssign = (i: number, k: number) => {
+        pos.current[i] = { ...slot[k] }
+        settle(i)
+      }
+      ;(window as unknown as { __ch1TableCheck?: () => void }).__ch1TableCheck = () => checkRef.current()
     }
     return () => {
       window.removeEventListener('pointerdown', down)
@@ -4659,7 +4773,7 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
       window.removeEventListener('keydown', key)
       live.taskDrag = false
     }
-  }, [camera, gl, live, at, home, slot, topY, onComplete])
+  }, [camera, gl, live, at, home, slot, topY, onComplete, onNote, onReady])
 
   return (
     <group name="task:evidence-table">
@@ -4669,7 +4783,7 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
         <group key={`slot${i}`}>
           <mesh position={[s.x, topY + 0.002, s.z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={1}>
             <planeGeometry args={[0.68, 0.5]} />
-            <meshStandardMaterial color={placedN > i ? '#7a6034' : '#5d3f24'} roughness={0.95} metalness={0} />
+            <meshStandardMaterial color={filled[i] ? '#7a6034' : '#5d3f24'} roughness={0.95} metalness={0} />
           </mesh>
           <SurfaceGlow x={s.x} y={topY + 0.012} z={s.z} r={0.34}
             tone={placed.current[i] ? '#cfe0b8' : '#f0c877'} on={!done} />
@@ -4691,9 +4805,17 @@ function EvidenceTable({ live, at, done, active, onComplete }: {
           מפני ש-e.target לא היה הקנבס. */}
       {!done && active && slot.map((sp, i) => (
         <Html key={`slab${i}`} center position={[sp.x, topY + 0.30, sp.z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
-          <span className={`ch1-slot-label${placedN > i ? ' is-filled' : ''}`}>{EVIDENCE_SLOTS[i].place}</span>
+          <span className={`ch1-slot-label${filled[i] ? ' is-filled' : ''}`}>{EVIDENCE_SLOTS[i].place}</span>
         </Html>
       ))}
+      {/* הבדיקה: כפתור אחד מעל השולחן, רק כשהשלושה מונחים (או F) */}
+      {!done && active && ready && (
+        <Html center position={[at.x, topY + 0.62, at.z - 0.3]} zIndexRange={[6, 6]}>
+          <button type="button" className="hud-card-btn is-primary ch1-table-check" onClick={() => checkRef.current()}>
+            בדיקה <i className="hud-key">F</i>
+          </button>
+        </Html>
+      )}
       {EVIDENCE_SLOTS.map((s, i) =>
         placed.current[i] || !active || held !== i ? null : (
           <Html key={`lab${i}`} center position={[pos.current[i].x, topY + (held === i ? 0.56 : 0.42), pos.current[i].z]} zIndexRange={[4, 4]} style={{ pointerEvents: 'none' }}>
@@ -5356,7 +5478,7 @@ function RawiCompanion({ live, talking, gesture }: {
 /* memo: Game מתרנדר גם כשרק המיני-מפה זזה, וכל רינדור שלו הריץ את
    Canvas ואת כל עץ הסצנה מחדש. כל ה-props של World יציבים (callbacks
    ב-useCallback, מערכי state, ערכים פשוטים), ולכן העולם נשאר במקום. */
-const World = memo(function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet }: {
+const World = memo(function World({ live, onNearChange, onNearFind, onAtTask, talking, gesture, speakingWho, attendWho, onExit, met, found, solved, stage, nextSight, stoneLit, onStoneLit, tableSet, onTableSet, onTableNote, onTableReady }: {
   live: Live
   /** שלב התחנה — קובע מה זוהר ומה עומם */
   stage: Stage
@@ -5381,6 +5503,10 @@ const World = memo(function World({ live, onNearChange, onNearFind, onAtTask, ta
   /** מכה: האם שלושת הפריטים כבר על השולחן */
   tableSet: boolean
   onTableSet: () => void
+  /** הערת הבדיקה של שולחן המקורות */
+  onTableNote?: (text: string, ok: boolean) => void
+  /** שלושת המקורות מונחים ועוד לא נבדקו */
+  onTableReady?: (ready: boolean) => void
 }) {
   /* Scatter rocks and shrubs only where they don't intersect a placed prop or
      a person standing there — this is what stops models growing through each other.
@@ -5517,6 +5643,8 @@ const World = memo(function World({ live, onNearChange, onNearFind, onAtTask, ta
             done={tableSet}
             active={stage === 'act'}
             onComplete={onTableSet}
+            onNote={onTableNote}
+            onReady={onTableReady}
           />
         </Suspense>
       )}
@@ -6214,6 +6342,25 @@ export default function Game() {
      task cannot, because every item is right somewhere — what matters is which
      side it was put on, and the miss carries its own correction. */
   const [taskLastOk, setTaskLastOk] = useState(false)
+  /* ── מסדרים ואז בודקים ────────────────────────────────────────────────
+     „לא לומדים ממנו": כל הנחה ענתה מיד נכון או לא, והפריט השגוי חזר
+     עם הסבר — כך שאפשר היה לנסות כל צד עד שמשהו נתפס, בלי לחשוב. עכשיו
+     הנחה אינה נשפטת. כשהכול מונח, „בדיקה" מסמנת כל פריט, נועלת את
+     הנכונים ומחזירה את השגויים עם ההערה שלהם. אחרי בדיקה שנייה שעדיין
+     שגויה, הפתרון מוצג עם ההסבר לכל פריט — אי אפשר לנחש עד שעובר. */
+  const [taskPending, setTaskPending] = useState<Record<string, string>>({})
+  const taskPendingRef = useRef(taskPending)
+  taskPendingRef.current = taskPending
+  const [taskChecks, setTaskChecks] = useState(0)
+  const taskChecksRef = useRef(0)
+  taskChecksRef.current = taskChecks
+  const [taskResults, setTaskResults] = useState<{ id: string; ok: boolean }[] | null>(null)
+  const [taskRevealed, setTaskRevealed] = useState(false)
+  const taskChosenRef = useRef<string[]>([])
+  taskChosenRef.current = taskChosen
+  /* שאלות בחירה: טעות מסבירה, ניסיון שני אחד, ואז התשובה מוצגת */
+  const wrongTries = useRef<Record<string, number>>({})
+  const [taskAnswerShown, setTaskAnswerShown] = useState(false)
   const taskSolved = REGION_TASK ? solved.includes(REGION_TASK.id) : false
   /* היציאה נראית רק כשהמסלול נבחר עכשיו, בישיבה הזאת — טעינה של שמירה
      שכבר פתורה לא משחזרת את הרגע */
@@ -6256,6 +6403,19 @@ export default function Game() {
     if (!REGION_TASK?.interpret) return
     const opt = REGION_TASK.interpret.options.find((o) => o.id === id)
     if (!opt) return
+    if (!opt.right) {
+      const n = (wrongTries.current.interpret ?? 0) + 1
+      wrongTries.current.interpret = n
+      const right = REGION_TASK.interpret.options.find((o) => o.right)
+      if (n >= 2 && right) {
+        setTaskLast(right.id)
+        setTaskLastOk(true)
+        setTaskAnswerShown(true)
+        setInterpreted(right.id)
+        return
+      }
+    }
+    setTaskAnswerShown(false)
     setTaskLast(id)
     setTaskLastOk(!!opt.right)
     if (opt.right) setInterpreted(id)
@@ -6267,11 +6427,30 @@ export default function Game() {
         REGION_TASK.options.find((o) => o.id === id) ??
         (REGION_TASK.steps ?? []).flatMap((st) => st.options).find((o) => o.id === id)
       if (!opt) return
-      setTaskLast(id)
-      setTaskLastOk(!!opt.right)
       /* ב-`present` שתי ההצגות נכונות כפעולה — כל אחת מראה דבר אחר,
          וההערה שלה היא מה שמלמד. „לא נכון" שמור למשימות בחירה. */
-      if (!opt.right && REGION_TASK.kind !== 'present') return
+      if (!opt.right && REGION_TASK.kind !== 'present') {
+        const step = (REGION_TASK.steps ?? []).find((st) => st.options.some((o) => o.id === id))
+        const key = step?.id ?? 'main'
+        const n = (wrongTries.current[key] ?? 0) + 1
+        wrongTries.current[key] = n
+        const right = (step ? step.options : REGION_TASK.options).find((o) => o.right)
+        if (n >= 2 && right) {
+          recordChoice(REGION_TASK.id, right.id)
+          setTaskChosen((prev) => (prev.includes(right.id) ? prev : [...prev, right.id]))
+          setTaskLast(right.id)
+          setTaskLastOk(true)
+          setTaskAnswerShown(true)
+          return
+        }
+        setTaskAnswerShown(false)
+        setTaskLast(id)
+        setTaskLastOk(false)
+        return
+      }
+      setTaskAnswerShown(false)
+      setTaskLast(id)
+      setTaskLastOk(!!opt.right)
       recordChoice(REGION_TASK.id, id)
       setTaskChosen((prev) => (prev.includes(id) ? prev : [...prev, id]))
     },
@@ -6284,16 +6463,38 @@ export default function Game() {
     (itemId: string, binId: string) => {
       if (!REGION_TASK || !['sort', 'connect', 'observe'].includes(REGION_TASK.kind ?? '')) return
       const opt = REGION_TASK.options.find((o) => o.id === itemId)
-      if (!opt) return
-      setTaskLast(itemId)
-      const ok = opt.bin === binId
-      setTaskLastOk(ok)
-      if (!ok) return
-      recordChoice(REGION_TASK.id, itemId)
-      setTaskChosen((prev) => (prev.includes(itemId) ? prev : [...prev, itemId]))
+      if (!opt || taskChosenRef.current.includes(itemId)) return
+      setTaskPending((prev) => ({ ...prev, [itemId]: binId }))
+      setTaskResults(null)
+      setTaskLast(null)
     },
     [],
   )
+  /* הבדיקה: הנכונים ננעלים, השגויים חוזרים עם ההערה שלהם */
+  const checkSort = useCallback(() => {
+    if (!REGION_TASK) return
+    const pending = taskPendingRef.current
+    const results = Object.entries(pending).map(([id, bin]) => ({
+      id,
+      ok: REGION_TASK.options.find((o) => o.id === id)?.bin === bin,
+    }))
+    if (results.length === 0) return
+    const good = results.filter((r) => r.ok).map((r) => r.id)
+    const wrong = results.some((r) => !r.ok)
+    const n = taskChecksRef.current + 1
+    setTaskChecks(n)
+    if (wrong && n >= 2) {
+      for (const id of taskNeeded) recordChoice(REGION_TASK.id, id)
+      setTaskChosen((prev) => [...new Set([...prev, ...taskNeeded])])
+      setTaskRevealed(true)
+    } else {
+      for (const id of good) recordChoice(REGION_TASK.id, id)
+      setTaskChosen((prev) => [...new Set([...prev, ...good])])
+    }
+    setTaskPending({})
+    setTaskResults(results)
+    cue(wrong ? 'ui' : 'task')
+  }, [taskNeeded])
   /* גרירה שנחתה עונה בעולם, לא במודל: ההערה המלמדת מופיעה כשורת
      דיבור למטה — התנועה נשארת חופשית, והפאנל של E נשאר למי שרוצה
      את השאלה במלואה. הפאנל-אחרי-גרירה נפסל על-ידי המשתמשת: "פתאום
@@ -6307,6 +6508,8 @@ export default function Game() {
   const tableSetRef = useRef(false)
   tableSetRef.current = tableSet
   const markTableSet = useCallback(() => { setTableSet(true); cue('find') }, [setTableSet])
+  /** השולחן מלא ועוד לא נבדק — המטרה היא הבדיקה */
+  const [tableReady, setTableReady] = useState(false)
   const stoneLitRef = useRef(false)
   stoneLitRef.current = stoneLit
   const markStoneLit = useCallback(() => {
@@ -6314,6 +6517,9 @@ export default function Game() {
     cue('find')
   }, [setStoneLit])
   const [taskNote, setTaskNote] = useState<{ who: string; text: string; ok: boolean } | null>(null)
+  const tableNote = useCallback((text: string, ok: boolean) => {
+    if (REGION_TASK) setTaskNote({ who: REGION_TASK.asker, text, ok })
+  }, [])
   const taskNoteRef = useRef(taskNote)
   taskNoteRef.current = taskNote
   useEffect(() => {
@@ -6335,14 +6541,9 @@ export default function Game() {
   const sortByDrop = useCallback(
     (itemId: string, binId: string) => {
       sortTask(itemId, binId)
-      cue('task')
-      const opt = REGION_TASK?.options.find((o) => o.id === itemId)
-      if (opt && REGION_TASK) {
-        const ok = opt.bin === binId
-        setTaskNote({ who: REGION_TASK.asker, text: ok ? opt.note : (opt.wrong ?? opt.note), ok })
-      }
+      cue('ui')
     },
-    [sortTask, setTaskNote],
+    [sortTask],
   )
   const [soundOff, setSoundOff] = useState(false)
   const [sceneReady, setSceneReady] = useState(false)
@@ -6483,7 +6684,14 @@ export default function Game() {
   const stageRef = useRef<Stage>(stage)
   stageRef.current = stage
   const nextSight = next.kind === 'look' ? next.id : null
-  const objective = instructionFor(next, SCRIPT, scriptState, CTX, REGION_TASK)
+  /* מיון שכל פריטיו מונחים ועוד לא נבדקו: המטרה היא הבדיקה */
+  const sortReady = SORT_KIND && !placedAll && taskNeeded.length > 0 &&
+    taskNeeded.every((id) => taskChosen.includes(id) || id in taskPending)
+  const objective = sortReady && next.kind === 'act'
+    ? `הכול מונח — לחצו E ליד ${REGION_TASK?.landmark ?? 'התחנה'} ובדקו`
+    : tableReady && next.kind === 'act' && next.mode === 'table'
+      ? 'שלושת המקורות על השולחן — לחצו „בדיקה" או F'
+      : instructionFor(next, SCRIPT, scriptState, CTX, REGION_TASK)
   const objectiveRef = useRef('')
   objectiveRef.current = objective
   /* ── המצפן ──────────────────────────────────────────────────────────
@@ -7059,6 +7267,8 @@ export default function Game() {
               onStoneLit={markStoneLit}
               tableSet={tableSet}
               onTableSet={markTableSet}
+              onTableNote={tableNote}
+              onTableReady={setTableReady}
             />
             <SceneReady onReady={onSceneReady} />
             <DevAudit />
@@ -7098,6 +7308,7 @@ export default function Game() {
                 atTask={atTask}
                 armed={stage === 'act' || stage === 'interpret'}
                 chosen={taskChosen}
+                pending={taskPending}
                 solvedTask={taskSolved}
                 found={found}
                 onChoose={chooseByDrop}
@@ -7441,6 +7652,12 @@ export default function Game() {
             phase={stage === 'interpret' ? 'interpret' : 'act'}
             onInterpret={interpretTask}
             chosen={taskChosen}
+            pending={taskPending}
+            results={taskResults}
+            checks={taskChecks}
+            revealed={taskRevealed}
+            answerShown={taskAnswerShown}
+            onCheck={checkSort}
             found={found}
             last={taskLast}
             lastOk={taskLastOk}

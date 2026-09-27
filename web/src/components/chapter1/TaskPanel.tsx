@@ -2,12 +2,13 @@
 
 /* The one thing each region asks you to work out.
  *
- * Nothing here fails. Choosing wrong plays the note attached to that choice —
- * which is a real explanation, not a buzzer — and leaves the question open, so
- * the cost of being wrong is that somebody tells you something you did not
- * know. Multi-answer tasks (the caravan crate) keep going until every right
- * answer is in, and the wrong one is left deliberately reachable because its
- * note is the lesson: some things travelled that nobody could pack.
+ * ── מסדרים ואז בודקים ──────────────────────────────────────────────────
+ * עד כאן שום דבר כאן לא נכשל: כל הנחה ענתה מיד, והפריט השגוי חזר עם
+ * הסבר — כך שאפשר היה לנסות כל צד עד שמשהו נתפס, בלי לחשוב („לא לומדים
+ * ממנו"). עכשיו במיון ההנחה אינה נשפטת. כשהכול מונח, „בדיקה" מסמנת כל
+ * פריט ב-✓ או ✗ עם ההערה שלו, נועלת את הנכונים ומחזירה את השגויים; אחרי
+ * בדיקה שנייה שעדיין שגויה מוצג הפתרון עם ההסבר לכל פריט. בשאלות בחירה:
+ * טעות מסבירה, יש ניסיון שני אחד, ואז התשובה מוצגת.
  *
  * The state lives in Game, not here: the same question can now also be
  * answered with the hands — dragging the option's physical stand-in onto the
@@ -23,12 +24,23 @@ const OBSERVE_LABELS: Record<string, string> = Object.fromEntries(
   FINDS.map((f) => [f.id, f.title]),
 )
 
-export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phase, onChoose, onSort, onInterpret, onClose }: {
+export function TaskPanel({ task, chosen, pending = {}, results = null, checks = 0, revealed = false, answerShown = false, onCheck, found = [], last, lastOk, solved, phase, onChoose, onSort, onInterpret, onClose }: {
   task: Task
   /** באיזה שלב הפאנל נפתח: הפעולה עצמה, או הפירוש שאחריה */
   phase: 'act' | 'interpret'
   /** right answers already given, by either hand or button */
   chosen: string[]
+  /** מיון: מה שהונח ועוד לא נבדק — פריט -> צד */
+  pending?: Record<string, string>
+  /** תוצאות הבדיקה האחרונה */
+  results?: { id: string; ok: boolean }[] | null
+  /** כמה בדיקות נעשו */
+  checks?: number
+  /** אחרי בדיקה שנייה שגויה — הפתרון מוצג */
+  revealed?: boolean
+  /** בשאלת בחירה: אחרי שני ניסיונות שגויים התשובה הוצגה */
+  answerShown?: boolean
+  onCheck?: () => void
   /** evidence already picked up — `present` options stay locked without theirs */
   found?: string[]
   /** the most recent choice — its note is on display */
@@ -90,7 +102,11 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
     return task.options.filter((o) => o.right).map((o) => o.id)
   })()
   const mainDone = mainNeeded.length === 0 || mainNeeded.every((id) => chosen.includes(id))
-  const interpreting = phase === 'interpret' && !!task.interpret && mainDone
+  /* תוצאות הבדיקה שסגרה את המיון נשארות על המסך עד שממשיכים — אחרת
+     הפאנל קפץ ישר לשאלת הפירוש, וההסברים (והפתרון שנחשף) נבלעו */
+  const [ackResults, setAckResults] = useState<typeof results>(null)
+  const holdResults = sorting && mainDone && !!results && results !== ackResults
+  const interpreting = phase === 'interpret' && !!task.interpret && mainDone && !holdResults
 
   return (
     <div className="ch1-task" role="dialog" aria-labelledby="ch1-task-title">
@@ -164,16 +180,19 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
             <div className="ch1-task-tray" role="group" aria-label="הדברים למיון">
               {task.options.map((o) => {
                 const placed = chosen.includes(o.id)
+                const at = pending[o.id]
+                const atLabel = at ? (task.bins ?? []).find((b) => b.id === at)?.label : null
                 return (
                   <button
                     key={o.id}
                     type="button"
-                    className={`hud-card-btn ch1-sort-item${placed ? ' is-taken' : ''}${held === o.id ? ' is-held' : ''}`}
+                    className={`hud-card-btn ch1-sort-item${placed ? ' is-taken' : ''}${at ? ' is-pending' : ''}${held === o.id ? ' is-held' : ''}`}
                     disabled={placed || solved}
                     aria-pressed={held === o.id}
                     onClick={() => setHeld(held === o.id ? null : o.id)}
                   >
-                    {o.label}
+                    {placed && '✓ '}{o.label}
+                    {atLabel && <span className="ch1-sort-at"> · {atLabel}</span>}
                   </button>
                 )
               })}
@@ -193,13 +212,63 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
                 >
                   <span className="ch1-sort-bin-label">{b.label}</span>
                   <span className="ch1-sort-bin-has">
-                    {task.options.filter((o) => chosen.includes(o.id) && o.bin === b.id).map((o) => o.label).join(' · ') || '—'}
+                    {[
+                      ...task.options.filter((o) => chosen.includes(o.id) && o.bin === b.id).map((o) => `✓ ${o.label}`),
+                      ...task.options.filter((o) => pending[o.id] === b.id).map((o) => o.label),
+                    ].join(' · ') || '—'}
                   </span>
                 </button>
               ))}
             </div>
-            {!held && !solved && (
-              <p className="ch1-task-hint">בחרו דבר, ואז את הצד שלו.</p>
+            {!held && !solved && !mainDone && (
+              <p className="ch1-task-hint">בחרו דבר, ואז את הצד שלו. אפשר לשנות עד שבודקים.</p>
+            )}
+            {!solved && !mainDone && onCheck && (() => {
+              const placedN = task.options.filter((o) => chosen.includes(o.id) || o.id in pending).length
+              const ready = placedN === task.options.length
+              return (
+                <div className="ch1-task-check">
+                  <button type="button" className="hud-card-btn is-primary" disabled={!ready} onClick={onCheck}>
+                    בדיקה
+                  </button>
+                  <span className="ch1-task-check-note">
+                    {!ready
+                      ? `הונחו ${placedN} מתוך ${task.options.length}`
+                      : checks === 0
+                        ? 'הכול מונח. בודקים?'
+                        : 'בדיקה שנייה — אחריה מוצג הפתרון'}
+                  </span>
+                </div>
+              )
+            })()}
+            {results && results.length > 0 && (
+              <div className="ch1-task-results" role="status" aria-live="polite">
+                <p className="ch1-task-results-title">
+                  {revealed ? 'הנה הפתרון, עם ההסבר לכל פריט:' : results.every((r) => r.ok) ? 'הכול במקום.' : 'מה במקום ומה לא:'}
+                </p>
+                <ul>
+                  {(revealed ? task.options.map((o) => ({ id: o.id, ok: results.find((r) => r.id === o.id)?.ok ?? true })) : results).map((r) => {
+                    const o = task.options.find((x) => x.id === r.id)
+                    if (!o) return null
+                    const side = (task.bins ?? []).find((b) => b.id === o.bin)?.label
+                    return (
+                      <li key={r.id} className={r.ok ? 'is-ok' : 'is-wrong'}>
+                        <b>{r.ok ? '✓' : '✗'} {o.label}</b>
+                        {revealed && side && <span className="ch1-task-results-side"> — {side}</span>}
+                        <span className="ch1-task-results-note">{r.ok ? o.note : (o.wrong ?? o.note)}</span>
+                      </li>
+                    )
+                  })}
+                </ul>
+                {!revealed && results.some((r) => !r.ok) && (
+                  <p className="ch1-task-hint">מה שלא במקום חזר. הניחו אותו שוב ובדקו.</p>
+                )}
+                {holdResults && task.interpret && (
+                  <button type="button" className="hud-card-btn is-primary" onClick={() => setAckResults(results)}>
+                    הלאה לשאלה
+                  </button>
+                )}
+              </div>
             )}
           </div>
         ) : (
@@ -258,6 +327,7 @@ export function TaskPanel({ task, chosen, found = [], last, lastOk, solved, phas
 
         {lastOpt && (
           <p className={`ch1-task-note${lastOk ? ' is-right' : ''}`} role="status" aria-live="polite">
+            {answerShown && lastOk && <b className="ch1-task-answer">אחרי שני ניסיונות — התשובה: </b>}
             {lastOk ? lastOpt.note : (lastOpt.wrong ?? lastOpt.note)}
           </p>
         )}

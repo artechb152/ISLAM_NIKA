@@ -1044,6 +1044,9 @@ body{
      מיושר לראש ונגלל, ושום דבר לא נחתך. */
   align-items:safe center;justify-items:center;
   padding:clamp(10px,2.4vh,30px);overflow-y:auto;
+  /* ראש האתר (56px) יושב מעל השכבה: בלי מרווח, כרטיס גבוה ממסך איבד
+     את שורת הכותרת שלו מתחתיו */
+  padding-top:max(72px,clamp(10px,2.4vh,30px));
   background:rgba(20,13,8,.55);animation:ch1-end-in .28s ease both;
 }
 .ch1-find-card,.ch1-task-card{
@@ -1594,3 +1597,20 @@ body{
 .nb-recap i,.nb-recap-link i{font-style:normal;font-size:11px;color:#8a6a2a}
 .nb-recap-link{margin:8px 0 0;font-size:14px;line-height:1.55;color:#3f2a14}
 .nb-recap-link b{display:block;font-weight:600;color:#7a5a1c;font-size:13px}
+
+/* ── מסדרים ואז בודקים (TaskPanel) ───────────────────────────────── */
+.ch1-sort-item.is-pending{border-style:dashed}
+.ch1-sort-at{font-size:.86em;color:var(--gold-soft)}
+.ch1-task-check{display:flex;align-items:center;gap:12px;margin:12px 0 4px;flex-wrap:wrap}
+.ch1-task-check .hud-card-btn:disabled{opacity:.45;cursor:default}
+.ch1-task-check-note{font-size:13px;color:rgba(245,236,214,.72)}
+.ch1-task-results{margin:12px 0 4px;padding:10px 12px;border-radius:10px;border:1px solid rgba(245,236,214,.14);background:rgba(245,236,214,.05)}
+.ch1-task-results-title{margin:0 0 8px;font-size:14px;color:var(--gold-soft)}
+.ch1-task-results ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ch1-task-results li{display:grid;gap:2px;font-size:14px;line-height:1.5}
+.ch1-task-results li b{font-weight:600}
+.ch1-task-results li.is-ok b{color:var(--olive)}
+.ch1-task-results li.is-wrong b{color:#d98b6a}
+.ch1-task-results-side{font-size:13px;color:var(--gold-soft)}
+.ch1-task-results-note{color:rgba(245,236,214,.86)}
+.ch1-task-answer{color:var(--gold)}
