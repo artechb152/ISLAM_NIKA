@@ -98,3 +98,15 @@ export function resumeSectionId(): string | null {
 export function completedSections(): string[] {
   return readStore().sections
 }
+
+/** the practice was finished — the flag the practice page writes, and the only
+    thing the closing block's „הושלם" chip reads (rule 33). `completed` above
+    means the READING is done, which is not the same claim. */
+export function practiceComplete(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem('islam:chapter:2') === 'done'
+  } catch {
+    return false
+  }
+}

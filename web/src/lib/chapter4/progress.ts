@@ -98,3 +98,16 @@ export function resumeSectionId(): string | null {
 export function completedSections(): string[] {
   return readStore().sections
 }
+
+/** the practice was finished — the flag `markChapterComplete()` writes, and
+    NOT `readStore().completed`, which only says the reading reached the end.
+    Chapter4.tsx reads this for the closing block's „הושלם" chip; it never gates
+    entry to the practice. */
+export function practiceComplete(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem('islam:chapter:4') === 'done'
+  } catch {
+    return false
+  }
+}

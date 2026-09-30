@@ -1,6 +1,6 @@
 'use client'
 
-/* Chapter 2's closing practice.
+/* Chapter 4's closing practice.
 
    Same contract as chapter 6's: the chapter is not finished by reading it, only
    by working through this. `islam:chapter:4 = 'done'` is written here and
@@ -25,13 +25,11 @@ import {
   type PracticeStore,
 } from '@/lib/chapter4/practice-progress'
 
-/* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED, and that is the whole
-   principle here. The practice does not get a picture set of its own: the four
-   trait figures are the ones that open the cards in section 04, the four desert
-   frames are beats of the stage the reader has just walked, the two camps are
-   the valley the wars happen in, and the arbiter is the man section 04 draws
-   sitting beside the prose. A reader who worked the chapter recognises every one
-   of them, and recognition is the exercise. */
+/* `photo` NAMES A FILE FROM THE CHAPTER'S OWN ASSETS, never a practice set:
+   the dusk map of the Khaybar stage, the deed, the plain, the forts, the pact.
+   Recognition is part of the exercise. ⚠ Six of them (stage-3-night,
+   stage-4-arrival, trench-after, kaaba-precinct, mosque-yard, uhud-mount) are
+   no longer printed on the chapter page — see $photos-note in practice.json. */
 type Q =
   | { id: string; label: string; photo?: string; type: 'single' | 'multi'; prompt: string; ok: string; retry: string; options: { text: string; right: boolean }[] }
   | { id: string; label: string; photo?: string; type: 'match'; prompt: string; ok: string; retry: string; pairs: { left: string; right: string; photo?: string }[] }
@@ -88,6 +86,9 @@ type Ex<T extends Q['type']> = {
   onMissed: () => void
   initial: unknown
   onWork: (value: unknown) => void
+  /** already solved in the store — the board reopens solved, not idle with
+      its answer showing and „בדיקה" live again (seen after a reload, 29.9) */
+  solved: boolean
 }
 
 const asStrings = (v: unknown): string[] =>
@@ -101,12 +102,12 @@ const asMap = (v: unknown): Record<string, string> => {
 }
 
 
-function Choice({ q, onSolved, onMissed, initial, onWork }: Ex<'single' | 'multi'>) {
+function Choice({ q, onSolved, onMissed, initial, onWork, solved }: Ex<'single' | 'multi'>) {
   const opts = useMemo(() => shuffled(q.options, q.id.length * 97), [q])
   /* the board is restored from the store, so a half-marked question survives a
      reload exactly as it was left */
   const [picked, setPicked] = useState<string[]>(() => asStrings(initial))
-  const [state, setState] = useState<State>('idle')
+  const [state, setState] = useState<State>(solved ? 'right' : 'idle')
   const multi = q.type === 'multi'
 
   function toggle(text: string) {
@@ -152,7 +153,7 @@ function Choice({ q, onSolved, onMissed, initial, onWork }: Ex<'single' | 'multi
   )
 }
 
-function Match({ q, onSolved, onMissed, initial, onWork }: Ex<'match' | 'situations'>) {
+function Match({ q, onSolved, onMissed, initial, onWork, solved }: Ex<'match' | 'situations'>) {
   const rows =
     q.type === 'match'
       ? q.pairs.map((p) => ({ left: p.left, right: p.right, photo: p.photo }))
@@ -162,7 +163,7 @@ function Match({ q, onSolved, onMissed, initial, onWork }: Ex<'match' | 'situati
   const [chosen, setChosen] = useState<Record<string, string>>(() => asMap(initial))
   const [held, setHeld] = useState<string | null>(null)
   const heldRef = useRef<string | null>(null)
-  const [state, setState] = useState<State>('idle')
+  const [state, setState] = useState<State>(solved ? 'right' : 'idle')
   const done = state === 'right'
   const placed = new Set(Object.values(chosen))
 
@@ -235,10 +236,9 @@ function Match({ q, onSolved, onMissed, initial, onWork }: Ex<'match' | 'situati
           clicked with an empty hand simply does nothing. */}
       {/* WITH PICTURES IT IS A ROW OF BOARDS, WITHOUT THEM IT IS A LIST OF ROWS.
           Chapter 6's exercises put the answer UNDER the thing it belongs to —
-          each picture is a place, and the reader fills the place. Where this
-          chapter has painted the subject already (the four traits, the desert's
-          own beats) the exercise takes that shape; where it has not, the row
-          keeps its plain two-column form rather than reaching for stock art. */}
+          each picture is a place, and the reader fills the place. Where a pair
+          carries a painting of the chapter's the exercise takes that shape;
+          where not, the row keeps its plain two-column form. */}
       <ul className={'p4-match' + (withArt ? ' is-boards' : '')}>
         {rows.map((r) => (
           <li className="p4-match-row" key={r.left}>
@@ -278,7 +278,7 @@ function Match({ q, onSolved, onMissed, initial, onWork }: Ex<'match' | 'situati
 
 /** Put the steps in order. The board starts shuffled and the reader walks a
     step up or down until the chain reads the way it happened. */
-function Order({ q, onSolved, onMissed, initial, onWork }: Ex<'order'>) {
+function Order({ q, onSolved, onMissed, initial, onWork, solved }: Ex<'order'>) {
   /* the order the reader left it in, or the deterministic shuffle on a first
      visit. A stored order is accepted only if it is the same set of steps —
      anything else is a store written against a different question. */
@@ -287,7 +287,7 @@ function Order({ q, onSolved, onMissed, initial, onWork }: Ex<'order'>) {
     const same = kept.length === q.steps.length && kept.every((x) => q.steps.includes(x))
     return same ? kept : shuffled(q.steps, q.id.length * 71)
   })
-  const [state, setState] = useState<State>('idle')
+  const [state, setState] = useState<State>(solved ? 'right' : 'idle')
 
   const move = (i: number, dir: -1 | 1) => {
     setState('idle')
@@ -308,12 +308,10 @@ function Order({ q, onSolved, onMissed, initial, onWork }: Ex<'order'>) {
 
   return (
     <>
-      {/* THE PICTURE TRAVELS WITH THE STEP. The chain is four beats of the
-          desert stage the reader has just walked — the dusk valley, the shrunken
-          waterhole, the two camps facing each other, the lone traveller — so
-          ordering the chain is ordering those four pictures, and the sentence
-          under each is what the frame says. Keyed by the step's own text, so a
-          step carries its frame wherever it is moved to. */}
+      {/* THE PICTURE TRAVELS WITH THE STEP. Each step of the timeline carries
+          a painting of its event, so ordering the chain is ordering those
+          pictures. Keyed by the step's own text, so a step carries its frame
+          wherever it is moved to. */}
       <ol className={'p4-order' + (q.photos ? ' is-illustrated' : '')}>
         {items.map((s, i) => (
           <li key={s}>
@@ -474,12 +472,11 @@ export default function Chapter4Practice() {
               <div className="title-ornament section-ornament" aria-hidden="true"><span /></div>
             </header>
             <div className={'p4-work' + (q.photo ? ' has-plate' : '')} data-reveal>
-              {/* A QUESTION THAT NAMES A THING GETS THE THING BESIDE IT. „ממה
-                  התעשר שבט קורייש" over the Kaaba, „כיצד נפתרו סכסוכים" over
-                  the seated arbiter, the two ancestors over the map of the
-                  peninsula — the picture is not decoration, it is the subject
-                  the four options are about, and the reader has met all three
-                  in the chapter. */}
+              {/* A QUESTION THAT NAMES A THING GETS THE THING BESIDE IT — the
+                  three tribes over the map they were driven across, the terms
+                  over the deed, the banner over the forts. The picture is the
+                  subject the options are about, and the reader has met it in
+                  the chapter. */}
               {q.photo && (
                 <figure className="p4-plate" aria-hidden="true">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -487,13 +484,13 @@ export default function Chapter4Practice() {
                 </figure>
               )}
               {(q.type === 'single' || q.type === 'multi') && (
-                <Choice key={ready ? 'r' : 'i'} q={q} onSolved={() => solve(q.id)} onMissed={() => miss(q.id)} initial={store.work[q.id]} onWork={(v) => saveWork(q.id, v)} />
+                <Choice key={ready ? 'r' : 'i'} q={q} onSolved={() => solve(q.id)} onMissed={() => miss(q.id)} initial={store.work[q.id]} solved={solved.has(q.id)} onWork={(v) => saveWork(q.id, v)} />
               )}
               {(q.type === 'match' || q.type === 'situations') && (
-                <Match key={ready ? 'r' : 'i'} q={q} onSolved={() => solve(q.id)} onMissed={() => miss(q.id)} initial={store.work[q.id]} onWork={(v) => saveWork(q.id, v)} />
+                <Match key={ready ? 'r' : 'i'} q={q} onSolved={() => solve(q.id)} onMissed={() => miss(q.id)} initial={store.work[q.id]} solved={solved.has(q.id)} onWork={(v) => saveWork(q.id, v)} />
               )}
               {q.type === 'order' && (
-                <Order key={ready ? 'r' : 'i'} q={q} onSolved={() => solve(q.id)} onMissed={() => miss(q.id)} initial={store.work[q.id]} onWork={(v) => saveWork(q.id, v)} />
+                <Order key={ready ? 'r' : 'i'} q={q} onSolved={() => solve(q.id)} onMissed={() => miss(q.id)} initial={store.work[q.id]} solved={solved.has(q.id)} onWork={(v) => saveWork(q.id, v)} />
               )}
             </div>
           </section>
@@ -534,7 +531,7 @@ export default function Chapter4Practice() {
             )}
 
             <div className="p4-out">
-              <Link className="ch4-end-link" href="/chapters">לכל פרקי הלמידה</Link>
+              <Link className="chapter-end-back" href="/chapters">לכל פרקי הלמידה</Link>
               {askReset ? (
                 <span className="p4-reset-confirm" role="group" aria-label="אישור חזרה על התרגול">
                   <span className="p4-reset-ask">לאפס ולהתחיל מחדש?</span>

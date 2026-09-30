@@ -50,13 +50,21 @@
    is the distance each layer travels through the handover, and no layer is
    ever allowed below a scale of 1, because that is what would expose an edge.
 
-   `transform-origin` and `scale` and nothing else: a scale of 1 or more about
-   ANY origin can never expose an empty edge, which is why the camera is built
-   this way rather than out of translations that would need clamping.
+   THE SHOT'S x/y ARE A POINT ON THE PAINTING, NOT ON THE SCREEN. Each
+   painting is laid out at its own proportions over the stage (the cover box,
+   wider than a phone), and the camera is a scale plus a translation clamped so
+   no edge ever shows. The first build scaled a `cover`-cropped <img> about
+   x%/y% of the STAGE: right on a desktop, where the stage is nearly the map's
+   shape, and wrong on a phone, where the crop is a third of the map wide — the
+   Khaybar pin marked the caravan track, and „דרום סוריה" the middle of it.
 
-   THE MARKER COUNTER-SCALES. It rides inside the frame so it stays glued to
-   its place on the painting, and takes `scale(1/z)` so it is the same size on
-   screen at every zoom.
+   ON A NARROW SCREEN THE CAMERA HOLDS ITS POINT HIGH. On a desktop the words
+   sit at the reading edge and the point stays where the painting has it; below
+   920px the card spans the width and is read across the middle, so the point
+   is brought to the upper quarter — otherwise „מדינה" sat under the heading.
+
+   THE MARKER IS PLACED, NOT SCALED. Its screen position is computed from the
+   map's camera, so it stays glued to its place at one size at every zoom.
 
    NOTHING IS PAINTED INTO THE MAP. Every name is DOM text — the rule chapter
    6's committee set for the hajj map: an image model invents Arabic script,
@@ -67,7 +75,7 @@
    active step's target. */
 
 import { Scrolly, clamp01, lerp, seg, type ScrollyState } from '@/components/chapter6/scrolly'
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 /** the painting the first four steps ride on */
 const MAP = 'hijaz-map-night.webp'
@@ -112,7 +120,72 @@ export default function TribesStage({
   )
 }
 
+/** each painting's own width over height — the cover box is computed from it */
+const ASPECT: Record<string, number> = {
+  'hijaz-map-night.webp': 1600 / 1063,
+  'khaybar-forts.webp': 1600 / 905,
+  'khaybar-people.webp': 1600 / 905,
+}
+const aspectOf = (src: string): number => {
+  const a = ASPECT[src]
+  if (!a) throw new Error(`chapter 4 stage: no aspect for ${src}`)
+  return a
+}
+
+/** below this the stage card spans the width (the shared sheet's 920) */
+const NARROW = 920
+/** where a narrow screen holds the camera's point, as a fraction of the height */
+const HOLD_Y = 0.24
+
+/** the painting laid out to cover the stage, in stage fractions */
+interface Box {
+  x0: number
+  y0: number
+  w: number
+  h: number
+}
+function coverBox(imageAspect: number, stageAspect: number): Box {
+  if (stageAspect < imageAspect) {
+    const w = imageAspect / stageAspect
+    return { x0: (1 - w) / 2, y0: 0, w, h: 1 }
+  }
+  const h = stageAspect / imageAspect
+  return { x0: 0, y0: (1 - h) / 2, w: 1, h }
+}
+
+interface Cam {
+  box: Box
+  /** the shot's point, in stage fractions */
+  px: number
+  py: number
+  z: number
+  /** where that point lands on screen, in stage fractions */
+  tx: number
+  ty: number
+}
+
+/** the range a point may be held at without the painting's edge entering */
+const hold = (want: number, p: number, lo: number, len: number, z: number): number =>
+  Math.min(z * (p - lo), Math.max(1 - z * (lo + len - p), want))
+
+const pct = (v: number): string => `${(v * 100).toFixed(3)}%`
+
 function Camera({ shots, s }: { shots: StageShot[]; s: ScrollyState }) {
+  const stageRef = useRef<HTMLDivElement | null>(null)
+  const [size, setSize] = useState({ w: 0, h: 0 })
+  useEffect(() => {
+    const el = stageRef.current
+    if (!el) return
+    const read = () => setSize({ w: el.clientWidth, h: el.clientHeight })
+    read()
+    const ro = new ResizeObserver(read)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  /* before the first measure (and on the server) assume a desktop stage */
+  const stageAspect = size.h ? size.w / size.h : 1.35
+  const narrow = size.w > 0 && size.w <= NARROW
+
   const i = Math.min(s.step, shots.length - 1)
   const a = shots[i]
   const b = shots[Math.min(i + 1, shots.length - 1)]
@@ -137,48 +210,70 @@ function Camera({ shots, s }: { shots: StageShot[]; s: ScrollyState }) {
   const f = seg(ease, 0.22, 0.78)
   const fade = f * f * (3 - 2 * f)
 
-  function layerState(src: string): { style: React.CSSProperties } {
+  /** a shot seen on its painting: the point in stage fractions, and where the
+      camera wants it on screen before clamping */
+  const aim = (sh: StageShot) => {
+    const box = coverBox(aspectOf(srcOf(sh)), stageAspect)
+    const px = box.x0 + (sh.x / 100) * box.w
+    const py = box.y0 + (sh.y / 100) * box.h
+    return { box, px, py, wx: narrow ? 0.5 : px, wy: narrow ? HOLD_Y : py }
+  }
+  const cam = (box: Box, px: number, py: number, z: number, wx: number, wy: number): Cam => ({
+    box,
+    px,
+    py,
+    z,
+    tx: hold(wx, px, box.x0, box.w, z),
+    ty: hold(wy, py, box.y0, box.h, z),
+  })
+
+  /* the camera for a layer, or null when the layer is not on screen */
+  function cameraFor(src: string): { c: Cam; opacity: number } | null {
+    const A = aim(a)
+    const B = aim(b)
     /* the two steps share a painting: one camera, straight through */
     if (!swapping) {
-      const on = srcOf(a) === src
+      if (srcOf(a) !== src) return null
+      const z = Math.max(1, lerp(a.z, b.z, ease))
       return {
-        style: {
-          opacity: on ? 1 : 0,
-          transformOrigin: `${lerp(a.x, b.x, ease)}% ${lerp(a.y, b.y, ease)}%`,
-          transform: `scale(${Math.max(1, lerp(a.z, b.z, ease))})`,
-        },
+        c: cam(A.box, lerp(A.px, B.px, ease), lerp(A.py, B.py, ease), z, lerp(A.wx, B.wx, ease), lerp(A.wy, B.wy, ease)),
+        opacity: 1,
       }
     }
+    /* outgoing — goes on pushing in as it leaves */
     if (srcOf(a) === src) {
-      /* outgoing — goes on pushing in as it leaves */
-      return {
-        style: {
-          opacity: 1 - fade,
-          transformOrigin: `${a.x}% ${a.y}%`,
-          transform: `scale(${Math.max(1, lerp(a.z, a.z * K, ease))})`,
-        },
-      }
+      return { c: cam(A.box, A.px, A.py, Math.max(1, lerp(a.z, a.z * K, ease)), A.wx, A.wy), opacity: 1 - fade }
     }
+    /* incoming — arrives short of its mark and settles onto it */
     if (srcOf(b) === src) {
-      /* incoming — arrives short of its mark and settles onto it */
-      return {
-        style: {
-          opacity: fade,
-          transformOrigin: `${b.x}% ${b.y}%`,
-          transform: `scale(${Math.max(1, lerp(b.z / K, b.z, ease))})`,
-        },
-      }
+      return { c: cam(B.box, B.px, B.py, Math.max(1, lerp(b.z / K, b.z, ease)), B.wx, B.wy), opacity: fade }
     }
-    return { style: { opacity: 0 } }
+    return null
   }
 
-  /* the markers ride the layer the map is on, so they stay glued to the
-     painting they belong to */
-  const mapState = layerState(MAP)
-  const heldZ = swapping ? a.z : Math.max(1, lerp(a.z, b.z, ease))
+  /* screen = held point + zoom × distance from the point; the translation is a
+     percentage of the element's own box, hence the division */
+  function layerStyle(src: string): React.CSSProperties {
+    const v = cameraFor(src)
+    if (!v) return { opacity: 0 }
+    const { box, px, py, z, tx, ty } = v.c
+    const dx = tx - box.x0 - z * (px - box.x0)
+    const dy = ty - box.y0 - z * (py - box.y0)
+    return {
+      left: pct(box.x0),
+      top: pct(box.y0),
+      width: pct(box.w),
+      height: pct(box.h),
+      opacity: Number(v.opacity.toFixed(4)),
+      transform: `translate(${pct(dx / box.w)},${pct(dy / box.h)}) scale(${z.toFixed(4)})`,
+    }
+  }
+
+  /* the markers ride the map's camera */
+  const mapCam = cameraFor(MAP)?.c ?? null
 
   return (
-    <div className="ch4-stage">
+    <div className="ch4-stage" ref={stageRef}>
       {/* THE SCRIM SITS BETWEEN THE PAINTINGS AND THE MARKERS: over the
           picture, so the type is readable on it, and under the markers, so a
           marker is not washed out by the very scrim that makes the words
@@ -192,28 +287,30 @@ function Camera({ shots, s }: { shots: StageShot[]; s: ScrollyState }) {
             src={`/assets/chapter4/${src}`}
             alt={src === MAP ? "מפה מצוירת של צפון החיג'אז — מדינה, ח'יבר והדרך צפונה" : ''}
             aria-hidden={src === MAP ? undefined : true}
-            style={layerState(src).style}
+            style={layerStyle(src)}
           />
         ))}
       </div>
       <span className="ch4-stage-veil" />
-      <div className="ch4-stage-frame ch4-stage-marks" style={{ ...mapState.style, opacity: undefined }}>
-        {shots.map((sh, k) =>
-          sh.place ? (
-            <span
-              key={k}
-              className={'ch4-stage-pin' + (shown === sh ? ' is-on' : '')}
-              style={{
-                left: `${sh.x}%`,
-                top: `${sh.y}%`,
-                transform: `translate(-50%,-50%) scale(${1 / heldZ})`,
-              }}
-            >
-              <span className="ch4-stage-dot" />
-              <span className="ch4-stage-label">{sh.place}</span>
-            </span>
-          ) : null,
-        )}
+      <div className="ch4-stage-marks">
+        {mapCam &&
+          shots.map((sh, k) => {
+            if (!sh.place || sh.img) return null
+            const q = aim(sh)
+            return (
+              <span
+                key={k}
+                className={'ch4-stage-pin' + (shown === sh ? ' is-on' : '')}
+                style={{
+                  left: pct(mapCam.tx + mapCam.z * (q.px - mapCam.px)),
+                  top: pct(mapCam.ty + mapCam.z * (q.py - mapCam.py)),
+                }}
+              >
+                <span className="ch4-stage-dot" />
+                <span className="ch4-stage-label">{sh.place}</span>
+              </span>
+            )
+          })}
       </div>
     </div>
   )

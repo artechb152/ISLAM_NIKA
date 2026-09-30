@@ -4,20 +4,20 @@
 
    Same product as chapters 2 and 6: the masthead, the collapsible rail, the type
    scale, the reveal behaviour and every colour come from chapter6-article.css,
-   which the route layout loads first. chapter5-article.css adds only the four
-   devices this content asks for and declares no colour, font or radius of its own.
+   which the route layout loads first. chapter5-article.css adds only the devices
+   this content asks for — the two claims, the conquest map, the Uthman split, the
+   lineage plate and the reign axis — and declares no colour, font or radius of its own.
 
    THE SHAPE — six sections, one per person, plus the question that opens and the
-   claim that closes. Measured against chapter 6 (7 top-level sections, 15
-   sub-headings) and against chapter 2's gate, which fails a chapter that runs
-   twelve thin sections: six sections with eight sub-headings inside them, and
+   claim that closes. Measured against chapter 6 (7 top-level sections) and against
+   chapter 2's gate, which fails a chapter that runs twelve thin sections: six
+   sections with their sub-headings inside them (listed in layout.json), and
    adjacent source sentences set as ONE paragraph rather than one apiece.
 
-   THE SOURCE IS SHORT. 3,485 characters — a quarter of chapter 4's — so the
-   danger here is the opposite of chapter 2's: not too many thin sections but too
-   many devices for too little text. Hence ONE scroll journey (Umar's conquests,
-   the only genuinely sequential thing in the chapter) and ONE clicked plate
-   (Uthman's Quran). The other four sections are read, not operated.
+   THE SOURCE IS SHORT, so the danger is too many devices for too little text.
+   Hence ONE scroll journey (Umar's conquests, the only genuinely sequential thing
+   in the chapter) and nothing clicked: the Quran plate, the snake and the bay'a
+   poster were all removed as furniture. The rest is read, not operated.
 
    AND NO CHECKS. Chapter 6 does not test inside the chapter; its questions live
    in a separate practice screen. This chapter follows that: everything that asks
@@ -35,7 +35,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import ConquestMap from '@/components/chapter5/ConquestMap'
 import Lineage from '@/components/chapter5/Lineage'
-import { P, Scrolly } from '@/components/chapter6/scrolly'
+import { CONQUESTS } from '@/lib/chapter5/map'
+import { Scrolly, useStep } from '@/components/chapter6/scrolly'
 import MarkToNotebook from '@/components/MarkToNotebook'
 import { CH5, em, frag, text, tr } from '@/lib/chapter5/content'
 import layoutData from '@/lib/chapter5/layout.json'
@@ -87,19 +88,20 @@ const sub = (sectionId: string, subId: string): string => {
 
     Nothing is reworded — every phrase is a substring of the sentence, and the gate fails
     if one drifts out of it or is claimed by both lists at once. */
-function mark(t: string, groups: { phrases: string[]; cls: string }[], key: string): React.ReactNode[] {
-  const all = groups.flatMap((g) => g.phrases.map((phrase) => ({ phrase, cls: g.cls })))
+type Paint = (phrase: string, key: string) => React.ReactNode
+function mark(t: string, groups: { phrases: string[]; paint: Paint }[], key: string): React.ReactNode[] {
+  const all = groups.flatMap((g) => g.phrases.map((phrase) => ({ phrase, paint: g.paint })))
   if (!all.length) return [t]
   /* longest first, so a phrase that contains another is not cut in half by it */
   all.sort((a, b) => b.phrase.length - a.phrase.length)
   let parts: React.ReactNode[] = [t]
-  for (const [pi, { phrase, cls }] of all.entries()) {
+  for (const [pi, { phrase, paint }] of all.entries()) {
     const next: React.ReactNode[] = []
     for (const part of parts) {
       if (typeof part !== 'string') { next.push(part); continue }
       const bits = part.split(phrase)
       bits.forEach((bit, i) => {
-        if (i) next.push(<b className={cls} key={`${key}-${pi}-${i}`}>{phrase}</b>)
+        if (i) next.push(paint(phrase, `${key}-${pi}-${i}`))
         if (bit) next.push(bit)
       })
     }
@@ -108,10 +110,14 @@ function mark(t: string, groups: { phrases: string[]; cls: string }[], key: stri
   return parts
 }
 
-/** every marked phrase a fragment carries, in the two colours it carries them in */
-const marks = (r: string) => [
-  { phrases: em(r), cls: 'key' },
-  { phrases: tr(r), cls: 'ch5-tr' },
+const bold = (cls: string): Paint =>
+  function paintBold(phrase, k) { return <b className={cls} key={k}>{phrase}</b> }
+
+/** every marked phrase a fragment carries, in the two colours it carries them in;
+    `skip` leaves out phrases another painter owns (the map's scroll-lit places) */
+const marks = (r: string, skip: string[] = []) => [
+  { phrases: em(r).filter((p) => !skip.includes(p)), paint: bold('key') },
+  { phrases: tr(r).filter((p) => !skip.includes(p)), paint: bold('ch5-tr') },
 ]
 
 /** One paragraph carrying one or more fragments, joined by a space — the shape that
@@ -129,20 +135,50 @@ function T({ refs, className }: { refs: string[]; className?: string }) {
 
 /** The section heading, part for part as chapters 2 and 6 set it: the title, the
     term beside it — here the YEARS — and the diamond ornament beneath.
-    `dir="ltr"` on the term: chapter 6's `.section-term` is an Arabic span and its
-    RTL direction turned „632–634" into „634–632". The years get their own class. */
+    The span stays RTL so it sits on the reading edge when it wraps under the title
+    on a phone; only the years inside run LTR (a bare RTL run turned „632–634" into
+    „634–632"), isolated with the brackets so every heading prints the same shape. */
 function Head({ id }: { id: string }) {
   const s = meta(id)
   return (
     <header className="section-heading" data-reveal>
       <div>
         <h2 id={`${id}-title`}>{s.title}</h2>
-        <span className="section-term ch5-years" dir="ltr">({s.term})</span>
+        <span className="section-term ch5-years"><bdi dir="ltr">({s.term})</bdi></span>
       </div>
       <div className="title-ornament section-ornament" aria-hidden="true"><span /></div>
     </header>
   )
 }
+
+/** A paragraph in a card over the conquest stage. The fragments' own em/tr paint as
+    everywhere else in the chapter; `lit` phrases instead light with the scroll, on the
+    thresholds chapter 6's `P` uses — (i+1)/(n+1) — which ConquestMap shares, so a place
+    lighting in the card and its pin landing on the map are one event. */
+function StageP({ refs, lit = [] }: { refs: string[]; lit?: string[] }) {
+  const { t } = useStep()
+  const glow: Paint = (phrase, k) => {
+    const i = lit.indexOf(phrase)
+    const on = t >= (i + 1) / (lit.length + 1) - 0.001
+    return <mark className={'wmark' + (on ? ' is-on' : '')} key={k}>{phrase}</mark>
+  }
+  return (
+    <p>
+      {refs.flatMap((r, i) => [
+        ...(i ? [' '] : []),
+        ...mark(text(r), [...marks(r, lit), { phrases: lit.filter((p) => text(r).includes(p)), paint: glow }], r),
+      ])}
+    </p>
+  )
+}
+
+/* The four scroll-lit places are DERIVED, not copied: for each pin on the map, the
+   emphasised phrase of §4.conquests that names it. A pin with no phrase, or two, throws. */
+const CONQUEST_MARKS = CONQUESTS.map((c) => {
+  const hits = em('§4.conquests').filter((p) => p.includes(c.label))
+  if (hits.length !== 1) throw new Error(`chapter 5: pin ${c.id} matches ${hits.length} phrases of §4.conquests`)
+  return hits[0]
+})
 
 function Env({ id, sectionId }: { id: string; sectionId: string }) {
   return <h3 className="scrolly-env" id={id}>{sub(sectionId, id)}</h3>
@@ -216,10 +252,13 @@ function ReignAxis() {
     return { id: s.id, title: s.title, term: s.term, years: to - from }
   })
   const longest = Math.max(...reigns.map((r) => r.years))
+  /* ONE TRACK FOR ALL FOUR. `--f` is a fraction of a bar track the rows share (a
+     subgrid column), not of each row's own track: per-row tracks shrank by the width
+     of each name and 2:10:12:5 rendered as 89:472:505:236. */
   return (
     <figure className="ch5-axis" data-reveal>
       {reigns.map((r) => (
-        <div className="ch5-axis-row" key={r.id} style={{ ['--w' as string]: `${(r.years / longest) * 100}%` }}>
+        <div className="ch5-axis-row" key={r.id} style={{ ['--f' as string]: (r.years / longest).toFixed(4) }}>
           <b className="ch5-axis-name">{r.title}</b>
           <span className="ch5-axis-bar"><i /><em>{r.years}</em></span>
           <span className="ch5-axis-years" dir="ltr">{r.term}</span>
@@ -341,6 +380,12 @@ export default function Chapter5() {
     })
   }, [])
   const onMenuJump = useCallback(() => { jumpUntil.current = Date.now() + 1800 }, [])
+  /* ChapterSearch announces its jump with `chapter:jump` just before it scrolls — the
+     sections it flies past were not read, so they earn no tick */
+  useEffect(() => {
+    window.addEventListener('chapter:jump', onMenuJump)
+    return () => window.removeEventListener('chapter:jump', onMenuJump)
+  }, [onMenuJump])
 
   return (
     <div className="chapter-page">
@@ -487,17 +532,14 @@ export default function Chapter5() {
                 <Env id="conquests" sectionId="umar" />
                 {/* Chapter 6's full-screen stage, the shape the prayer day uses: the map
                     fills the viewport and the reading rides over it in parchment cards.
-                    The four marks are the four places in the order the sentence names
-                    them, and ConquestMap drops its pins on the same thresholds — so the
-                    word lighting in the card and the pin landing on the map are the same
-                    event, not two that have to be kept in step by hand. */}
+                    The four lit places are derived from the map's own pins (CONQUEST_MARKS),
+                    in the order the sentence names them, and ConquestMap drops its pins
+                    on the same thresholds — so the word lighting in the card and the pin
+                    landing on the map are one event, not two kept in step by hand. */}
                 <Scrolly full art={(s) => <ConquestMap {...s} />}>
-                  <P text={[text('§4.a'), text('§4.b'), text('§4.faruq')].join(' ')} />
-                  <P
-                    text={text('§4.conquests')}
-                    marks={['עיראק בקרב אלקאדסיה', 'סוריה בקרב הירמוכ', 'ירושלים בשנת 638', 'מצרים בשנת 640']}
-                  />
-                  <P text={text('§4.fell')} />
+                  <StageP refs={['§4.a', '§4.b', '§4.faruq']} />
+                  <StageP refs={['§4.conquests']} lit={CONQUEST_MARKS} />
+                  <StageP refs={['§4.fell']} />
                 </Scrolly>
                 <Env id="reforms" sectionId="umar" />
                 <T refs={['§5.modest', '§5.model', '§5.reforms']} />

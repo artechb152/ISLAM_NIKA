@@ -38,9 +38,15 @@
    computed in pixels from the laid-out picture through a ResizeObserver, so the
    ring is a real circle on a picture that is wider than it is tall and every
    connector comes out the same length. Below 900px the faces leave the picture,
-   become a row beneath it, and no lines are drawn. */
+   become a row beneath it, and no lines are drawn.
+
+   ALL FOUR SENTENCES ARE IN THE DOM. Only the selected one is shown; the other
+   three are clipped by CSS, not unmounted and not `hidden`, so the chapter's
+   search reaches them — and when it lands on one, `useFindHit` selects that
+   group so the hit is on screen. */
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useFindHit } from '@/lib/chapter3/useFindHit'
 
 export interface Group {
   id: string
@@ -79,16 +85,22 @@ interface Spot {
 export default function Groups({
   groups,
   city,
+  cityWidth,
+  cityHeight,
   cityAlt,
   question,
 }: {
   groups: Group[]
   /** the painted view of the town, without extension */
   city: string
+  /** the painting's pixel size, so its box is reserved before it loads */
+  cityWidth: number
+  cityHeight: number
   cityAlt: string
   question: string
 }) {
   const uid = useId().replace(/:/g, '')
+  const root = useRef<HTMLElement | null>(null)
   const stage = useRef<HTMLDivElement | null>(null)
   const town = useRef<HTMLImageElement | null>(null)
   const dots = useRef<Array<HTMLButtonElement | null>>([])
@@ -208,8 +220,38 @@ export default function Groups({
     dots.current[to]?.focus()
   }
 
+  /* a search hit in a clipped sentence opens its group */
+  const openFrom = useCallback(
+    (el: Element) => {
+      const panel = el.closest<HTMLElement>('[data-group]')
+      const i = groups.findIndex((g) => g.id === panel?.dataset.group)
+      if (i < 0 || !panel) return
+      setAt(i)
+      /* the search aimed at the clipped box; once open, bring the whole group in */
+      requestAnimationFrame(() => panel.scrollIntoView({ block: 'center', behavior: 'smooth' }))
+    },
+    [groups],
+  )
+  useFindHit(root, openFrom)
+  /* the scroll signal misses a hit the search does not need to scroll to — the
+     four clipped boxes share one spot, so the second hit in a row never moved
+     the page. `chapter:jump` fires after the hit is painted, scroll or not. */
+  useEffect(() => {
+    const onJump = () =>
+      requestAnimationFrame(() => {
+        const reg = (CSS as unknown as { highlights?: Map<string, Iterable<Range>> }).highlights
+        for (const range of reg?.get('chapter-find-current') ?? []) {
+          const n = range.startContainer
+          const el = n instanceof Element ? n : n.parentElement
+          if (el && root.current?.contains(el)) openFrom(el)
+          return
+        }
+      })
+    window.addEventListener('chapter:jump', onJump)
+    return () => window.removeEventListener('chapter:jump', onJump)
+  }, [openFrom])
+
   const on = shown || still
-  const open = groups[at]
 
   /* THE LIST'S OWN SEPARATOR, DROPPED WHEN THE ITEM STANDS ALONE. §3 prints its
      four groups as one sentence — „…שהגיעו ממכה; …בעירם; …במדינה, ו…קריש." —
@@ -219,14 +261,25 @@ export default function Groups({
      THIS CHANGES NO WORD, and it is the one thing the chapter's rule allows to
      change: the fidelity gate compares with punctuation stripped, precisely so
      a sentence can be set in a caption or a panel without being rewritten. */
-  const said = (open?.text ?? '').replace(/\s*[;,]\s*$/, '')
+  const said = (text: string) => text.replace(/\s*[;,]\s*$/, '')
 
   return (
-    <figure className={`ch4-who${on ? ' is-on' : ''}${still ? ' is-still' : ''}`} aria-label={question}>
+    <figure
+      ref={root}
+      className={`ch4-who${on ? ' is-on' : ''}${still ? ' is-still' : ''}`}
+      aria-label={question}
+    >
       <div className="ch4-who-body">
         <div className="ch4-who-stage" ref={stage}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="ch4-who-town" ref={town} src={`/assets/chapter4/${city}.webp`} alt={cityAlt} />
+          <img
+            className="ch4-who-town"
+            ref={town}
+            src={`/assets/chapter4/${city}.webp`}
+            width={cityWidth}
+            height={cityHeight}
+            alt={cityAlt}
+          />
 
           <svg className="ch4-who-web" viewBox={`0 0 ${box.w || 1} ${box.h || 1}`} aria-hidden="true">
             {lines.map((l, i) => (
@@ -250,7 +303,7 @@ export default function Groups({
                 role="tab"
                 id={`${uid}-tab-${g.id}`}
                 aria-selected={at === i}
-                aria-controls={`${uid}-panel`}
+                aria-controls={`${uid}-panel-${g.id}`}
                 tabIndex={at === i ? 0 : -1}
                 ref={(el) => {
                   dots.current[i] = el
@@ -274,15 +327,20 @@ export default function Groups({
         {/* WHAT THE OPEN FACE SAYS, on the far side of the picture — one place,
             not four, so there is somewhere for the eye to go back to. Not a
             card: a rule on its reading edge and the chapter's own reading size. */}
-        <div
-          className={`ch4-who-said${open?.away ? ' is-away' : ''}`}
-          id={`${uid}-panel`}
-          role="tabpanel"
-          aria-labelledby={`${uid}-tab-${open?.id}`}
-          key={open?.id}
-        >
-          <h4>{open?.name}</h4>
-          <p>{said}</p>
+        <div className="ch4-who-panels">
+          {groups.map((g, i) => (
+            <div
+              key={g.id}
+              className={`ch4-who-said${at === i ? ' is-open' : ''}${g.away ? ' is-away' : ''}`}
+              id={`${uid}-panel-${g.id}`}
+              role="tabpanel"
+              aria-labelledby={`${uid}-tab-${g.id}`}
+              data-group={g.id}
+            >
+              <h4>{g.name}</h4>{' '}
+              <p>{said(g.text)}</p>
+            </div>
+          ))}
         </div>
       </div>
     </figure>

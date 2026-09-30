@@ -46,14 +46,14 @@ import comicData from '@/lib/chapter3/comic.json'
 import { markContentComplete } from '@/lib/chapter3/progress'
 import MarkToNotebook from '@/components/MarkToNotebook'
 
-interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
-interface Panel {
+export interface Beat { t: string; s: string; k?: 'v' | 'say' | 'time' }
+export interface Panel {
   a: string; p: number; e?: number; b: Beat[]; m: string; c: string
   n: number            /* its place in the book, 1–75, printed on the frame */
   op: number           /* where to crop it, measured — see sync-comic.mjs   */
   peak?: number; film?: number
 }
-interface Part { title: string; first: number }
+export interface Part { title: string; first: number }
 const PANELS = (comicData as unknown as { pages: Panel[] }).pages
 const PARTS = (comicData as unknown as { parts: Part[] }).parts
 
@@ -85,25 +85,25 @@ const capsOf = (p: Panel) => p.b.filter((b) => !b.k).length
 const isHero = (p: Panel) =>
   (p.b.find((b) => b.k === 'v')?.t.split(/s+/).length ?? 0) > 8
 
-interface Page { t: 'hero' | 'grid'; tiers: Panel[][] }
-function paginate(): Page[] {
+export interface Page { t: 'hero' | 'grid'; tiers: Panel[][] }
+function paginate(list: Panel[] = PANELS): Page[] {
   const out: Page[] = []
   let i = 0
   let r = 0
-  while (i < PANELS.length) {
-    if (isHero(PANELS[i])) { out.push({ t: 'hero', tiers: [[PANELS[i++]]] }); continue }
+  while (i < list.length) {
+    if (isHero(list[i])) { out.push({ t: 'hero', tiers: [[list[i++]]] }); continue }
     const want = TIERS_PER_PAGE[r++ % TIERS_PER_PAGE.length]
     const tiers: Panel[][] = []
-    const epi = !!PANELS[i].e
-    while (tiers.length < want && i < PANELS.length &&
-           !!PANELS[i].e === epi && !isHero(PANELS[i])) {
-      const a = PANELS[i++]
-      const b = PANELS[i]
+    const epi = !!list[i].e
+    while (tiers.length < want && i < list.length &&
+           !!list[i].e === epi && !isHero(list[i])) {
+      const a = list[i++]
+      const b = list[i]
       /* pairs only on the three-tier page: on a two-tier page a paired panel
          would be 316×416, ratio 0.76, and lose nearly half the painting */
       const canPair = want === 3 && b && !isHero(b) && !!b.e === epi &&
                       capsOf(a) + capsOf(b) <= PAIR_BUDGET
-      tiers.push(canPair ? [a, PANELS[i++]] : [a])
+      tiers.push(canPair ? [a, list[i++]] : [a])
     }
     out.push({ t: 'grid', tiers })
   }
@@ -131,7 +131,7 @@ const SLOTS: Record<number, string[]> = {
    it cannot arrive after it; a staged entrance read as a slideshow build. The
    page turn is the animation, and what still moves is only what would move if
    the panel were a window. */
-function PanelView({ panel, order, hideVerse, live, half }: {
+export function PanelView({ panel, order, hideVerse, live, half }: {
   panel: Panel; order: number; hideVerse?: boolean; live: boolean; half?: boolean
 }) {
   const time = panel.b.find((b) => b.k === 'time')
@@ -192,7 +192,7 @@ function PanelView({ panel, order, hideVerse, live, half }: {
   )
 }
 
-function PageView({ page, folio, side, live, parts }: {
+export function PageView({ page, folio, side, live, parts }: {
   page: Page | null; folio: number; side: 'r' | 'l'; live: boolean; parts: Part[]
 }) {
   if (!page) return <div className="c3-page is-blank" />

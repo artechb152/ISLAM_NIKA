@@ -2,6 +2,12 @@
 
 מסמך מיפוי בלבד. לא נגעתי בקוד ולא הצעתי תיקונים — המטרה היא שהמחבר יאשר, ואז מישהו אחר יחליף.
 
+> **עדכון 29.9.2026 — מה מההפניות כאן עדיין קיים.** המיפוי נכתב מול הקוד של 16.8.2026, ומספרי השורות שבו הם של אז.
+> מאז הוסרו מהקוד `film.ts`, כל קובצי `mech-*.ts`, `engine.ts` ו-`art.ts` (המנוע של מסך-אחרי-מסך והמנגנונים שלו). הטקסט שהם החזיקו חי היום רק ב:
+> `lib/chapter6/data.ts` (המקור, מילה במילה), `components/Chapter6.tsx` (קורא מ-data.ts; מוקלדים בו מחדש רק פתיח השהאדה והעדות, ותוויות מסגרת קצרות), `components/chapter6/film-cues.ts` ו-`public/assets/ch6-story.vtt` (כתוביות הסרטון), `lib/chapter6/summary-data.ts` (התרגול).
+> שורה שמפנה ל-`mech-*.ts`, `film.ts` או `engine.ts` מתעדת הפרש שנעלם עם הקובץ; ההחלטה העורכית שבה (אם יש) עדיין תקפה.
+> חמשת משפטי התפילות (`Chapter6.tsx` "באזור התפילות", ¶007) נקראים היום מ-`pr-2` ב-data.ts — כבר אין בהם גרש עברי `׳`.
+
 **מקור חדש:** `scratchpad/ch6/new-text.md`, ¶001–¶029.
 **מקורות בקוד שנסרקו במלואם:** `lib/chapter6/data.ts`, `summary-data.ts`, `film.ts`, `mech-opening.ts`, `mech-shahada.ts`, `mech-prayer.ts`, `mech-charity.ts`, `mech-ramadan.ts`, `mech-hajj.ts`, `mech-checks.ts`, `mech-summary.ts`, `engine.ts`, `progress.ts`, `art.ts`, `components/Chapter6.tsx`, `components/chapter6/*.tsx`, `components/chapter6/film-cues.ts`, `components/chapter6/summary/*`, וכן `public/assets/ch6-story.vtt`.
 

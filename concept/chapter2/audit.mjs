@@ -10,37 +10,39 @@
    viewport, not a preference:
 
      top-level sections    7      (ch6: 7 — the first build had 12)
-     sub-headings         ≥6      (ch6: 15 — the first build had 2)
+     sub-headings         ≥5      (ch6: 15 — the first build had 2; see 1)
      words per paragraph  ≥15     (ch6: 16.7 — the first build had 10.8)
-     ornaments in prose    0      (ch6 puts its diamond under pillar titles only)
-     centred running text  0      (ch6 never centres a paragraph)
+     ornaments             one per section heading, none anywhere else
+     centred running text  0      (ch6 never centres a paragraph; the named
+                                   display moments are listed in check 5)
      letterspaced labels   0      (ch6 has none)
+   …plus every source fragment on the page, the four trait dialogs, the
+   stage's controls holding still, and a 390px pass.
 
-   Requires the dev server on :3000 and puppeteer-core.
+   Requires the dev server on :3000 and the installed Google Chrome, driven by
+   the playwright-core in web/node_modules — headless, as every script here.
    Run: node concept/chapter2/audit.mjs [url]
 */
-import puppeteer from 'puppeteer-core'
+import { chromium } from '../../web/node_modules/playwright-core/index.mjs'
 import { readFile } from 'node:fs/promises'
 
 const URL = process.argv[2] ?? 'http://localhost:3000/chapter2'
-const CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
 
-const browser = await puppeteer.launch({
-  executablePath: CHROME,
-  headless: true,
-  args: ['--enable-unsafe-swiftshader'],
-  defaultViewport: { width: 1600, height: 1000 },
-})
-const page = await browser.newPage()
+const browser = await chromium.launch({ channel: 'chrome', headless: true })
+const context = await browser.newContext({ viewport: { width: 1600, height: 1000 } })
+const page = await context.newPage()
 const runtime = []
-page.on('pageerror', (e) => runtime.push('pageerror: ' + String(e).slice(0, 160)))
-page.on('requestfailed', (r) => runtime.push('failed request: ' + r.url().slice(-64)))
+const listen = (pg) => {
+  pg.on('pageerror', (e) => runtime.push('pageerror: ' + String(e).slice(0, 160)))
+  pg.on('requestfailed', (r) => runtime.push('failed request: ' + r.url().slice(-64)))
+}
+listen(page)
 
 /* a plain path: this file shadows the global URL with its own `const URL` */
 const PASSAGES_PATH = new globalThis.URL('../../web/src/lib/chapter2/passages.json', import.meta.url)
 const PASSAGES = JSON.parse(await readFile(PASSAGES_PATH, 'utf8')).passages
-await page.evaluateOnNewDocument((p) => { window.__CH2_PASSAGES__ = p }, PASSAGES)
-await page.goto(URL, { waitUntil: 'networkidle0', timeout: 120000 })
+await page.addInitScript((p) => { window.__CH2_PASSAGES__ = p }, PASSAGES)
+await page.goto(URL, { waitUntil: 'networkidle', timeout: 120000 })
 await page.evaluate(() => document.fonts.ready)
 await new Promise((r) => setTimeout(r, 1800))
 
@@ -246,7 +248,11 @@ const result = await page.evaluate(() => {
        arrow comes down — an explicit instruction, and the only running text in
        the chapter that is centred. Named here so the exemption is a fact on the
        record and not a quietly loosened rule. */
-    if (el.closest('.ch2-lead, .ch2-statement, .ch2-verse, .ch2-saying, .ch2-cycle-arm, .ch2-meanings.is-forked')) continue
+    /* `.ch2-fork-head` is the head of that same tree — the sentence the two
+       arms come down from — and is centred over it for the same reason. The
+       oversize check (4) already exempts it as a display moment; this check
+       did not, and failed on the one head it was never meant to catch. */
+    if (el.closest('.ch2-lead, .ch2-statement, .ch2-verse, .ch2-saying, .ch2-cycle-arm, .ch2-meanings.is-forked, .ch2-fork-head')) continue
     if (getComputedStyle(el).textAlign === 'center' && (el.textContent || '').trim().length > 30) {
       fail.push(`פסקה ממורכזת: "${(el.textContent || '').trim().slice(0, 30)}…"`)
     }
@@ -352,7 +358,7 @@ const result = await page.evaluate(() => {
     /* the banner, the bleeding watercolour and the full-screen stage are
        deliberately full-bleed: they carry a negative inline margin so the art
        reaches the window edge. Everything else must stay in the column. */
-    if (el.closest('.ch2-hero, .ch2-bleed-img, .ch2-stage, .ch2-plate.is-bleed, .ch2-mecca-illus')) continue
+    if (el.closest('.ch2-hero, .ch2-bleed-img, .ch2-stage, .ch2-mecca-illus')) continue
     if (r.right > art.right + 2 || r.left < art.left - 2) {
       fail.push(`חורג מהעמודה: ${el.tagName}.${(el.className || '').toString().slice(0, 26)}`)
     }
@@ -362,11 +368,12 @@ const result = await page.evaluate(() => {
   return { fail: [...new Set(fail)], info }
 })
 
-/* 9b · THE PANELS. The four traits are `<details>`, and a disclosure has exactly
-   one failure mode that matters here: content that is not in the page until the
-   reader clicks. Check 2c above already proves every source fragment is present
-   with three of the four panels SHUT — that is the invariant, and it is only
-   meaningful because these panels keep their children mounted.
+/* 9b · THE PANELS. The four traits are cards opening `<dialog>`s, and a
+   click-to-open panel has exactly one failure mode that matters here: content
+   that is not in the page until the reader clicks. Check 2c above already
+   proves every source fragment is present with all four dialogs SHUT — that is
+   the invariant, and it is only meaningful because a dialog keeps its children
+   mounted.
 
    What is left to prove is that shut is not the resting state of the whole
    section, that opening one actually reveals it, and that a panel closed by the
@@ -425,7 +432,7 @@ const opened = await page.evaluate(async () => {
 })
 result.fail.push(...opened)
 
-/* 9c · THE STAGE'S CONTROLS MUST NOT MOVE. The five beats are different lengths,
+/* 9c · THE STAGE'S CONTROLS MUST NOT MOVE. The ten beats are different lengths,
    and for a long time the box that held them reserved its height with a guessed
    `min-height` — the short beats fitted, the long ones overflowed, and the row of
    arrows and dots travelled 102px between the first beat and the last. A reader
@@ -463,10 +470,12 @@ result.fail.push(...stage)
    phone and swipe — is not a finding. The exemption is written against the
    computed overflow rather than against the class name, so it holds for any
    scroller and cannot be used to wave through a clipped one. */
-await page.setViewport({ width: 390, height: 844, isMobile: true })
-await page.reload({ waitUntil: 'networkidle0' })
+const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+const mpage = await phone.newPage()
+listen(mpage)
+await mpage.goto(URL, { waitUntil: 'networkidle', timeout: 120000 })
 await new Promise((r) => setTimeout(r, 1400))
-const mobile = await page.evaluate(() => {
+const mobile = await mpage.evaluate(() => {
   const out = []
   if (document.documentElement.scrollWidth > document.documentElement.clientWidth + 1) {
     out.push('גלישה אופקית במובייל')

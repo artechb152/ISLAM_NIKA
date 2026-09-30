@@ -111,6 +111,11 @@ export default function ChapterSearch({ containerRef }: { containerRef: RefObjec
     }
     const rect = range.getBoundingClientRect()
     if (!rect.height && !rect.width) return
+    // THE CONTRACT WITH THE CHAPTERS: this scroll is a jump, not reading. Each chapter's
+    // progress code listens for 'chapter:jump' and stops crediting the sections the
+    // smooth scroll flies past — otherwise a search credited every section between here
+    // and the hit. Fired immediately before the scroll, in both branches below.
+    window.dispatchEvent(new CustomEvent('chapter:jump'))
     // Inside a modal the window does not scroll — the sheet does. Bring the match
     // into view within its own scroll container instead.
     if (inDialog) {

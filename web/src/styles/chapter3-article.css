@@ -49,8 +49,7 @@
   --lh:1.82;         /* leading for every block set at --read   */
 }
 
-.chapter-article .article-section > * + *,
-.chapter-article .ch3-readings > * + *{margin-top:var(--flow)}
+.chapter-article .article-section > * + *{margin-top:var(--flow)}
 /* PARAGRAPHS ARE PARAGRAPHS, whichever wrapper they sit in. Splitting a
    section's prose across several .ch3-body blocks was putting --flow (34px)
    between two consecutive paragraphs while the gap inside a block stayed 16px.
@@ -76,10 +75,8 @@
 .chapter-article .ch3-verse + *,
 .chapter-article .ch3-statement + *{margin-top:var(--flow-lead)}
 /* each device is a movement of its own — a full step before what follows */
-.chapter-article .ch3-lineage + *,
 .chapter-article .ch3-ascent + *,
-.chapter-article .ch3-reuse + *,
-.chapter-article .ch3-readings + *{margin-top:var(--flow-part)}
+.chapter-article .ch3-reuse + *{margin-top:var(--flow-part)}
 
 /* ============================ running text ============================ */
 .ch3-body{display:grid;gap:16px;width:100%;max-width:var(--measure,880px)}
@@ -207,6 +204,7 @@
   aspect-ratio:auto;object-fit:contain;
   width:100%;max-width:100%;margin-inline:auto;
 }
+
 /* THE CUT-OUT GETS THE BIGGER HALF, AND THE TEXT STAYS AT THE TOP.
    Two things were fighting here. Centred, a picture taller than its column
    pushed the text down — measured at 1920: figure 710px against text 355px, so
@@ -217,10 +215,15 @@
    :has() rather than a class on the wrapper — the size belongs to the PLATE,
    and the component should not have to name its own layout twice. */
 .chapter-article .ch3-withplate:has(.ch3-plate.is-cut){
-  /* the text column is the NARROWER one here. A portrait illustration beside a
-     short text block cannot be both large and the same height as it; narrowing
-     the column makes the text taller, which lets the picture be taller with it. */
-  grid-template-columns:minmax(0,.82fr) minmax(0,1fr);
+  /* ⚠ THE TEXT COLUMN USED TO BE THE NARROWER ONE — `.82fr 1fr`, the picture
+     taking the bigger half — and measured at 1440 that gave the prose 444px of
+     a 1025px article. Everywhere else in this chapter prose runs the full
+     column, so the section's own paragraphs were set at 43% of the width they
+     have on every other screen: five short lines each, a column 611px tall, and
+     a picture beside it whose top quarter was blank. That is what „מלא רווחים"
+     was, and rule 48 says it plainly — פרוזה על מלוא העמודה, מנגנונים צרים
+     יותר. The prose takes the bigger half now and the cut-out keeps the rest. */
+  grid-template-columns:minmax(0,1fr) minmax(0,.62fr);
   align-items:stretch;
 }
 /* THE PICTURE TAKES THE ROW'S HEIGHT, WHICH THE TEXT SETS. Top-aligned it was
@@ -233,6 +236,104 @@
 .chapter-article .ch3-plate.is-cut img{
   height:100%;width:auto;max-width:100%;min-height:0;object-fit:contain;
 }
+
+/* the transliteration register (rule 38) — chapter 5's `.ch5-tr`, value for
+   value: gold ink for the Arabic term, maroon stays with the idea */
+.chapter-article .ch3-tr{font-weight:700;color:var(--gold-text)}
+
+/* ===================== a document, not a painting =====================
+   The Hamas proclamation in section 02 — the only picture in this chapter that
+   is a photograph of a real object rather than a commissioned painting, and the
+   only one that states a fact, so the only one with a caption.
+
+   THIS IS CHAPTER 2'S `.ch2-photo`, PROPERTY FOR PROPERTY: hairline `--edge`,
+   14px, the one `--shadow`, and the sepia grade that settles a photograph onto
+   the parchment. Chapter 2 wrote the reason in its own comment — a photograph
+   is FRAMED precisely so it does not read as one of the paintings, which sit on
+   the paper with no frame at all. `object-fit` is deliberately absent: a
+   document is never cropped, so it keeps its own proportions.
+
+   The caption is the row after the picture, at the spacing a sub-heading gives
+   its first line — `--flow-tight`, as chapter 2 sets it. */
+.ch3-doc{width:100%;max-width:var(--measure,880px);margin-inline:auto}
+.ch3-doc img{
+  display:block;width:100%;height:auto;border-radius:14px;
+  border:1px solid var(--edge);box-shadow:var(--shadow);
+  filter:sepia(.18) saturate(1.1) contrast(.97);
+}
+@media (prefers-contrast:more){
+  .ch3-doc img{filter:none}
+}
+.ch3-doc figcaption{
+  margin-top:var(--flow-tight);font-size:15px;line-height:1.6;color:var(--muted);
+}
+
+/* ================= section 05 · ההתגלות — the comic itself =================
+   The book's pages for this part, drawn by the book's own sheet
+   (chapter3-comic.css). Only the frame around the book is set here: where it
+   stands in the column, and the way through under it. */
+.ch3-book{width:100%;display:grid;justify-items:center;gap:var(--flow-tight)}
+.ch3-book-stage{cursor:pointer;outline:none;border-radius:4px}
+.ch3-book-stage:focus-visible{outline:2px solid var(--maroon-deep);outline-offset:6px}
+/* THE HEBREW TURN (see Chapter3ComicPart.tsx). Page 1 is a fixed base on the
+   right half; every leaf lies on the LEFT half, hinged at the spine — its right
+   edge — and turning swings it over to the right. The book's own sheet sits on
+   the right half and swings left, which is the English turn. Physical sides on
+   purpose: this is the paper, not the paragraph. */
+.ch3-book .ch3-book-base{
+  position:absolute;top:0;right:0;width:50%;height:100%;overflow:hidden;
+  background:var(--surface);box-shadow:0 0 0 1px var(--edge);
+  /* ⚠ ITS OWN STACKING CONTEXT, UNDER EVERY LEAF. Without it the lettering
+     inside page 1 (z-index 5–6) competed with the leaves (z-index 1–3) at the
+     book's level, and after the first turn page 1's boxes sat on top of the
+     verse page that had just landed over it. */
+  z-index:0;isolation:isolate;
+}
+.ch3-book .c3-sheet{inset-inline-start:auto;left:0;right:auto;transform-origin:right center}
+.ch3-book .c3-sheet.is-turned{transform:rotateY(180deg)}
+/* panning: the spread is wider than the column and slides under the finger */
+.ch3-book-stage.is-pan{
+  width:100%;overflow-x:auto;overscroll-behavior-x:contain;
+  scrollbar-width:thin;padding-bottom:10px;
+}
+/* THE LETTERING HAS A FLOOR. Every size in the book is a multiple of --u, the
+   page's share of 900px, and in the article column the page is ~670px tall —
+   u 0.74, which set the narration at 11.8px. The book on its own screen runs at
+   u 0.89. The floor keeps the boxes readable; they grow a little and cover a
+   little more of the picture, which is the right trade in a book to be read. */
+.ch3-book .c3-cap,.ch3-book .c3-caps .c3-cap{font-size:max(13.5px,calc(16px * var(--u)))}
+.ch3-book .c3-say{font-size:max(16px,calc(19px * var(--u)))}
+.ch3-book .c3-verse{font-size:max(15px,calc(19px * var(--u)))}
+.ch3-book .c3-stamp{font-size:max(14px,calc(19px * var(--u)))}
+/* THE BALLOON TAKES THE BOTTOM WHEN A CAPTION HAS THE TOP. The book puts its
+   balloon top-right, on panels with no caption; in this script panels 4 and 5
+   carry both, and the balloon landed on the caption box — measured, one over
+   the other. Caption first (top-right), then the spoken word (bottom-left):
+   the RTL Z the lettering already follows. */
+.ch3-book .c3-pn:has(.c3-cap.is-tr) .c3-say{
+  top:auto;bottom:calc(30px * var(--u));
+  inset-inline-start:auto;inset-inline-end:calc(80px * var(--u));
+}
+
+.ch3-book-nav{
+  width:100%;max-width:520px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.ch3-book-where{font-size:15px;color:var(--muted)}
+.ch3-book-go{
+  display:inline-flex;align-items:center;gap:6px;
+  min-height:44px;padding:0 18px 0 14px;border-radius:999px;
+  font:inherit;font-size:16px;font-weight:600;cursor:pointer;
+  background:var(--paper);border:1px solid var(--edge);color:var(--maroon-deep);
+  transition:background .2s ease,opacity .2s ease;
+}
+.ch3-book-go.is-next{background:var(--maroon-deep);border-color:var(--maroon-deep);color:var(--paper);padding:0 14px 0 18px}
+.ch3-book-go svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.ch3-book-go.is-prev:hover:not(:disabled){background:var(--surface)}
+.ch3-book-go.is-next:hover:not(:disabled){filter:brightness(1.12)}
+.ch3-book-go:disabled{opacity:.3;cursor:default}
+@media (prefers-reduced-motion:reduce){.ch3-book-go{transition:none}}
 
 /* ============================ the two set-apart voices ============================
    Two costumes, two uses each, and the audit fails at three. See
@@ -250,7 +351,13 @@
 
    The two-costume ceiling is untouched: still two costumes, two uses each. */
 .ch3-verse{
-  position:relative;margin:0;width:min(660px,100%);
+  /* ⚠ CENTRED, and it was not. Measured at 1440: the card is 660px in a 1025px
+     article and sat at the reading edge with `margin:0`, so every verse in the
+     chapter trailed 365px of bare parchment down its outer side — while
+     `.ch3-statement`, the chapter's other narrow block, was centred at 102/102.
+     Two narrow devices, two different alignments, and rule 48 names the right
+     one: מנגנונים צרים יותר וממורכזים. */
+  position:relative;margin:0;margin-inline:auto;width:min(660px,100%);
   padding:clamp(26px,3.2vw,38px) clamp(26px,4vw,44px);
   background:linear-gradient(180deg,var(--cream),var(--panel));
   border:1.5px solid var(--gold);border-radius:16px;
@@ -275,53 +382,6 @@
   font-size:clamp(23px,2.6vw,35px);line-height:1.3;text-wrap:balance;
 }
 
-/* ============================ 1 · the lineage strip ============================
-   Static. No clicks, nothing focusable, nothing hidden from chapter search.
-   HTML and CSS and not SVG: Hebrew text in SVG flows right-to-left from its x,
-   and that trap has already cost this project a labelling bug.
-
-   THE RULES ARE THE POINT. This drew two flat lists and no connecting line for
-   a while, which meant the one thing it exists to show — that עבד אלמטלב stands
-   in both rows in two different roles — was not on the page at all. A rail
-   joins the rows, and both of his appearances carry the same gold lozenge. */
-.ch3-lineage{
-  width:100%;max-width:var(--wide);
-  display:grid;gap:0;
-  padding:clamp(20px,2.6vw,30px);
-  background:var(--mat);border:1px solid var(--edge);
-}
-.ch3-lin-row{
-  margin:0;display:grid;gap:clamp(14px,1.8vw,22px);
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-}
-.ch3-lin-node{display:grid;gap:5px;align-content:start}
-.ch3-lin-node dt{
-  font-family:var(--font-heading);font-weight:700;color:var(--maroon);
-  font-size:clamp(17px,1.6vw,21px);line-height:1.25;
-}
-.ch3-lin-node dd{margin:0;font-size:15.5px;line-height:1.6;color:var(--muted)}
-/* the same person, twice, in two roles — one mark on both, no caption needed */
-.ch3-lin-node.is-tied dt::before{
-  content:"";display:inline-block;width:9px;height:9px;
-  margin-inline-end:9px;vertical-align:middle;
-  background:var(--gold);transform:rotate(45deg);
-}
-/* the rail: a horizontal rule between the generations, dropped into on the
-   inline-start (RIGHT in RTL — the reading edge, where both tied nodes sit) */
-.ch3-lin-rail{position:relative;height:clamp(26px,3vw,38px)}
-.ch3-lin-rail::before{
-  content:"";position:absolute;top:50%;
-  inset-inline-start:4px;width:calc(100% - 8px);height:1px;background:var(--edge);
-}
-.ch3-lin-rail::after{
-  content:"";position:absolute;top:0;height:50%;
-  inset-inline-start:4px;width:1px;background:var(--edge);
-}
-.ch3-lin-drop{
-  position:absolute;top:50%;height:50%;
-  inset-inline-start:4px;width:1px;background:var(--edge);
-}
-
 /* ==================== 1b · the ancient word, reused today ====================
    §§4–6, the chapter's register change, which had no visual event at all.
    NO IMAGERY — no drones, no ordnance, no organisation marks, no operations
@@ -341,6 +401,48 @@
   font-size:clamp(17px,1.7vw,22px);line-height:1.2;
 }
 .ch3-reuse-row + .ch3-reuse-row{border-top:1px solid var(--rule)}
+
+/* ===== the claim and its evidence, on one row =====
+   The two rows on the READING EDGE (right in RTL, so they are the first child)
+   and the proclamation on the outer edge. Stacked they were two blocks at the
+   full column with a screen of scroll between the sentence that says the phrase
+   was taken and the picture of it being used; side by side the reader sees both
+   at once, which is the only reason the picture is in this section at all.
+
+   CENTRED ON EACH OTHER, not top-aligned: rule 53. The rows are a short block
+   and the banner is wide and shallow, so `start` left one of them hanging.
+
+   ⚠ `.ch3-reuse` AND `.ch3-doc` BOTH CARRY THEIR OWN max-width — `--wide` and
+   `--measure` — which inside a grid column would fight the track. `width:100%`
+   on the children hands the sizing back to the columns. */
+/* ⚠ THE PROCLAMATION STAYS INSIDE THE GUTTER. For one round it bled past it to
+   the screen's edge (`.ch3-plate.is-bleed`'s trick), and measured at 1440 it
+   and its caption were then the ONLY things on the whole page touching x=0 —
+   every other block stops at the 58px gutter. Bleed is for paintings, which
+   dissolve into the edge; this is a DOCUMENT, with its own logo in the corner,
+   and against the screen it read as a poster cut off square with its caption
+   pressed to the glass. It now holds the article's left edge — as far left as
+   the page goes — with its full frame. */
+/* FULL COLUMN, like the prose above and below it. Capped at `--wide` (1120px)
+   the row stopped short on a wide screen — at 1920 the proclamation's left edge
+   sat 372px inside the line every paragraph ends on. */
+.ch3-evidence{
+  width:100%;max-width:none;
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);
+  gap:clamp(18px,2.4vw,34px);align-items:center;
+}
+.ch3-evidence > .ch3-reuse,
+.ch3-evidence > .ch3-doc{width:100%;max-width:none;margin-inline:0}
+/* a device is a movement of its own — the same full step the reuse block had
+   when it stood alone */
+.chapter-article .ch3-evidence + *{margin-top:var(--flow-part)}
+
+@media (max-width:900px){
+  /* under the fold the two stop being a pair and become a sequence: the claim,
+     then the evidence. The rows come first because they are the sentence.
+     */
+  .ch3-evidence{grid-template-columns:1fr;gap:clamp(20px,4vw,30px)}
+}
 
 
 /* ============================ 2 · the ascent ============================
@@ -402,7 +504,10 @@
    the near layer expands faster than the far one, so it is travel and not a
    zoom of a flat image. */
 .ch3-skyimg{
-  position:absolute;inset:0;
+  /* ⚠ WIDER THAN THE FRAME ON THE RIGHT. The camera drifts the picture up to
+     110px LEFT (below), and with `inset:0` its right edge left the frame and
+     the maroon under it showed as a stripe down the reading edge (30.9). */
+  position:absolute;inset:0;right:-130px;
   background-image:url('/assets/chapter3/heavens-sky.jpg');
   background-repeat:no-repeat;background-size:cover;
   /* THE PICTURE IS STORED FLIPPED — horizon at its head. The rungs run Adam
@@ -504,7 +609,9 @@
      rung is a name and one line — roughly a third of that — so 64vh keeps the
      same one-screen-per-beat feeling without adding five thousand pixels of
      dead scroll to a page that is already twelve. */
-  min-height:52vh;
+  /* 40vh, not 52: at 52 two heavens stood a screen apart with nothing but
+     dark sky between them — 3,500px for seven lines (measured 30.9) */
+  min-height:40vh;
   padding-block:clamp(14px,1.8vw,20px);
   padding-inline-start:clamp(28px,3vw,40px);
   /* PLACED IN THE SKY, NOT ON A RAIL. --x is the star's offset from the reading
@@ -577,74 +684,26 @@
    A dashed ground rule is the full measure, the solid span is what this reading
    claims, and an unlabelled bracket marks the peninsula's own extent so
    inside and beyond are legible without naming a place. */
-.ch3-readings{width:100%;max-width:var(--wide);display:grid}
-.ch3-read-legend{display:flex;flex-wrap:wrap;gap:10px}
-.ch3-read-btn{
-  font-family:var(--font-body);font-size:15px;font-weight:600;
-  color:var(--maroon);background:var(--surface);
-  border:1px solid var(--edge);padding:9px 18px;min-height:44px;
-  cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease;
-}
-.ch3-read-btn:hover{border-color:var(--maroon)}
-.ch3-read-btn[aria-pressed="true"]{background:var(--maroon);color:var(--cream);border-color:var(--maroon)}
 
-.ch3-read-fig{
-  position:relative;height:104px;margin-top:var(--flow);
-  padding-inline:2px;
-}
-.ch3-read-ground{
-  position:absolute;inset-inline:0;top:46%;height:1px;transform:translateY(-50%);
-  background:repeating-linear-gradient(to right,var(--edge) 0 7px,transparent 7px 14px);
-}
-.ch3-read-span{
-  position:absolute;inset-inline-start:0;top:46%;height:3px;
-  background:var(--maroon);transform:translateY(-50%);
-  transition:width .32s ease;
-}
-.ch3-read-fig.is-far .ch3-read-span{width:100%}
-.ch3-read-fig.is-near .ch3-read-span{width:38%}
 /* the peninsula's own extent — a bracket under the rule, never a label */
-.ch3-read-extent{
-  position:absolute;inset-inline-start:0;width:38%;
-  top:calc(46% + 16px);height:14px;
-  /* --edge was too faint to read as a bracket on parchment at all; this is the
-     rule colour the rest of the sheet uses for a real hairline */
-  border:1px solid rgba(87,24,32,.34);border-top:0;
-}
-.ch3-read-dot{
-  position:absolute;top:46%;width:13px;height:13px;
-  transform:translate(50%,-50%) rotate(45deg);background:var(--maroon);
-}
-.ch3-read-dot.is-start{inset-inline-start:0}
-.ch3-read-dot.is-end{background:var(--stamp);transition:inset-inline-start .32s ease}
-.ch3-read-fig.is-far .ch3-read-dot.is-end{inset-inline-start:calc(100% - 13px)}
-.ch3-read-fig.is-near .ch3-read-dot.is-end{inset-inline-start:calc(38% - 13px)}
 
 @media (prefers-reduced-motion:reduce){
-  .ch3-read-span,.ch3-read-dot.is-end,.ch3-rung,.ch3-rung-mark{transition:none}
 }
 
 /* ============================ the hand-off ============================
-   The same button as chapters 2 and 6, in the same colours — `--maroon-deep`
-   on `--cream`, which is what the palette declares primary buttons to be. */
-.ch3-end{
-  margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);
-  border-top:1px solid var(--rule);display:grid;justify-items:center;
-}
-.ch3-end-link{
-  display:inline-flex;align-items:center;text-decoration:none;
-  font-family:var(--font-heading);font-weight:700;font-size:clamp(15px,1.3vw,18px);
-  color:var(--cream);background:var(--maroon-deep);
-  padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);
-  transition:background .2s ease,transform .2s ease;
-}
-.ch3-end-link:hover{background:var(--maroon);transform:translateY(-2px)}
-@media (prefers-reduced-motion:reduce){.ch3-end-link{transition:none}}
+   NO `.chapter-end` RULES HERE, AND NONE MAY BE ADDED — the same line chapter 5
+   holds. The closing block, its button and the „הושלם" chip are chapter 6's and
+   this chapter uses them unchanged.
+
+   What stood here was `.ch3-end` / `.ch3-end-link`, declared TWICE in this one
+   sheet (here and again beside the practice rules), and the second copy's own
+   comment said the declarations were `.chapter-end-back`'s property for
+   property. Two copies of a restatement of a rule that already exists is three
+   places for the button to drift. */
 
 /* ============================ narrow ============================ */
 @media (max-width:680px){
   .ch3-hero{height:300px}
-  .ch3-lin-row{grid-template-columns:1fr}
   .ch3-rung{padding-inline-start:26px}
 }
 
@@ -837,29 +896,12 @@
 .p3-done .title-ornament{margin:0 auto}
 .p3-done p{margin:0;font-family:var(--font-heading);font-size:clamp(26px,2.8vw,36px);color:var(--maroon)}
 
-/* the closing link — chapter 6 ends on exactly one link and nothing else */
-.ch3-end{margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);border-top:1px solid var(--rule);display:grid;justify-items:center}
-/* THE SAME BUTTON AS CHAPTER 6'S, IN THE SAME COLOURS. It was painted
-   `--maroon` on `--mat` with a `--stamp` hover — the token set for TITLES — and
-   chapter 6's hand-off is `--maroon-deep` on `--cream` with a `--maroon` hover,
-   which is what the palette says primary buttons are ("masthead + primary
-   buttons (flat)", where that token is declared). Two chapters ending on the
-   same act, in two different reds. `--mat` and `--cream` are the same value;
-   the token here is the one that means text on a dark band. The shadow comes
-   with it, because without it the same fill still reads as a flatter object.
-
-   THE DECLARATIONS BELOW ARE `.chapter-end-back`'s, PROPERTY FOR PROPERTY —
-   padding and type size included. 14px/32px against 12px/28px and a fixed 18px
-   against a size that answers the window are differences nobody can name and
-   everybody sees when the two pages sit side by side. */
-.ch3-end-link{
-  display:inline-flex;align-items:center;text-decoration:none;
-  font-family:var(--font-heading);font-weight:700;font-size:clamp(15px,1.3vw,18px);color:var(--cream);
-  background:var(--maroon-deep);padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);
-  transition:background .2s ease,transform .2s ease;
-}
-.ch3-end-link:hover{background:var(--maroon);transform:translateY(-2px)}
-.ch3-end-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+/* THE CLOSING BUTTON IS `.chapter-end-back`, FROM CHAPTER 6'S SHEET — on the
+   chapter and on this practice page both. What stood here was a restatement of
+   it, property for property by its own admission, and the only line it added
+   was a `:focus-visible` ring in `--gold`; chapter 6's own focus treatment is
+   the maroon ring at 3px offset that BUILD-RULES names, so the ring went with
+   the restatement rather than being carried over. */
 
 
 /* the line that introduces a list keeps its OWN LINE — the items below belong
@@ -922,10 +964,8 @@
    ⚠ RANK 3 WAS BROKEN BY PUTTING THE DEVICES BESIDE THE PROSE. At .92fr against
    a column of text the ladder read as a margin note, when it is what §39 IS.
    The width saved 500px and cost the hierarchy, which was the wrong trade. */
-.chapter-article .ch3-lineage,
 .chapter-article .ch3-ascent,
-.chapter-article .ch3-reuse,
-.chapter-article .ch3-readings{margin-top:var(--flow-part)}
+.chapter-article .ch3-reuse{margin-top:var(--flow-part)}
 
 /* ============================ 6 · the note ============================
    Apparatus, not story: an etymology, what the commentators make of a passage,
@@ -998,5 +1038,131 @@
   .chapter-article .ch3-withplate .ch3-body{max-width:none}
   .chapter-article .ch3-withplate .ch3-plate{margin-top:6px}
 }
+/* ================ chapter 6's `.bleed-aside`, used once here ================
+   Section 04 (ח'דיג'ה) sits on the shared device the shahada and the charity
+   are built on. Two things about it are adjusted for THIS use only.
+
+   1 · A LOWER FLOOR. The device floors its painting at clamp(520px,72vh,880px)
+   because it was built for long runs — the shahada, chapter 4's two sections —
+   where the prose is taller than any painting. ח'דיג'ה is four paragraphs,
+   ~320px at 1440, so the floor stretched the row to 720 and centred the words
+   in it: two hundred pixels of bare parchment between the heading and the first
+   line, which is exactly the „מלא רווחים" that section 01 had. The cutout at
+   its column width is ~380px tall, so the floor comes down to that. */
+@media (min-width:900px){
+  #khadija .bleed-aside-art{min-height:clamp(340px,42vh,460px)}
+}
+/* 1b · SECTION 03 DOES NOT BLEED. The town stands on the text's own left edge
+   rather than in the page gutter — the same line the poster in section 02 and
+   every paragraph stop on — which is what „מיושר לטקסט" asked for. */
+@media (min-width:900px){
+  #birth .bleed-aside{margin-inline-end:0}
+  /* THE FLOOR IS THE PAINTING'S OWN HEIGHT. The cut-out is 1086×751, so at
+     its widest column (540px) it stands 373px — a floor above that only makes
+     the row taller than the picture and floats the words in it (measured at
+     1920 with 440: 266px of text centred in 440). */
+  #birth .bleed-aside-art{min-height:clamp(300px,34vh,380px)}
+  #birth .bleed-aside + .ch3-body{margin-top:var(--flow)}
+}
+/* 2 · the reduced-motion `position:static` that sent the painting over the
+   prose is gone from the shared sheet (29.9), so no local patch is needed. */
+
 /* stacked below 1100px, where there is no outer edge to take */
 .chapter-article .ch3-withplate .ch3-plate{max-width:var(--measure,880px)}
+
+/* THE BANNER'S PULL-UP MATCHES THE LAYOUT'S TOP PADDING AT EVERY WIDTH —
+   chapter 6's fix, restated for this banner. The base -42px is the desktop
+   padding; at ≤920 the layout pads 26px and at ≤680 18px, so a fixed -42 slid
+   the banner 16–24px under the masthead (measured 29.9). */
+@media (max-width:920px){.ch3-hero{margin-block-start:-26px}}
+@media (max-width:680px){.ch3-hero{margin-block-start:-18px}}
+
+/* ================= section 06 · a painting as the ground of its opening =================
+   Chapter 4's `.ch4-plainhero`, property for property, behind the opening of
+   section 06 only — heading, claims, Mecca's answer, the fold-out — and not
+   under אלצחאבה or the first hijra (30.9). The wrapper is its own stacking
+   context, so the ground sits at z-index -1 behind every block without any
+   block being repositioned.
+
+   ⚠ „לא ככ קריא" AT A 62% VEIL. THE BLUR IS THE LEGIBILITY FIX (chapter 4
+   measured it: what fights a letter on a painting is texture, not luminance),
+   so the painting is softened more rather than hidden more; and the veil is
+   graded like chapter 4's — deepest on the reading edge, where every line
+   starts, thinner on the outer edge, where the lines end short and the
+   painting shows through. */
+.ch3-grounded{position:relative;isolation:isolate}
+/* the wrapper stands where its blocks used to stand, so the section's flow
+   between them is restated here, value for value */
+.chapter-article .ch3-grounded > * + *{margin-top:var(--flow)}
+.chapter-article .ch3-grounded > .section-heading + *{margin-top:var(--flow-lead)}
+.ch3-ground{
+  position:absolute;z-index:-1;pointer-events:none;overflow:hidden;
+  /* it reaches past the words into the gap that already follows the
+     fold-out, so the fade happens on bare paper without adding space */
+  inset-block:-12px calc(-1 * var(--flow-part));inset-inline:calc(-1 * var(--content-gutter));
+  /* ⚠ the fade is on the BOX, not the image: on the image it rode the
+     `scale()` that hides the blur's rim and was clipped into a hard line */
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 78%,transparent 100%);
+          mask-image:linear-gradient(to bottom,transparent 0,#000 14%,#000 78%,transparent 100%);
+}
+.ch3-ground img{
+  width:100%;height:100%;object-fit:cover;object-position:center 45%;display:block;
+  filter:blur(5px) sepia(.1);transform:scale(1.05);
+}
+.ch3-ground::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(to left,
+    color-mix(in srgb, var(--panel) 86%, transparent) 0%,
+    color-mix(in srgb, var(--panel) 80%, transparent) 45%,
+    color-mix(in srgb, var(--panel) 58%, transparent) 100%);
+}
+/* the paper halo on the glyphs — no shape of its own, not a panel */
+.ch3-grounded .ch3-body,
+.ch3-grounded .ch3-note-btn{
+  text-shadow:
+    0 1px 0 var(--panel), 0 -1px 0 var(--panel),
+    1px 0 0 var(--panel), -1px 0 0 var(--panel),
+    0 0 8px var(--panel), 0 0 14px color-mix(in srgb, var(--panel) 80%, transparent);
+}
+.ch3-grounded h2{text-shadow:0 0 18px var(--panel)}
+@media (max-width:820px){
+  .ch3-ground::after{background:color-mix(in srgb, var(--panel) 84%, transparent)}
+}
+
+/* ================= section 06 · אלצחאבה and the first hijra, as a pair =================
+   Two cards side by side, the first on the reading edge (the right). Chapter
+   5's `.ch5-claim` without its picture — `--paper`, the one hairline, 16px, no
+   shadow (rule 36: a card is `--paper`). The grid stretches both to one
+   height, so neither reads as the bigger story. Stacked below 900px, where two
+   columns would set a few words a line (see the query below). */
+.chapter-article * + .ch3-pair{margin-top:var(--flow-part)}
+.ch3-pair{
+  display:grid;grid-template-columns:1fr;gap:clamp(18px,2.2vw,28px);
+  align-items:stretch;
+}
+/* side by side wherever the COLUMN is wide enough, not the window: the rail
+   takes 300px from 1024 up, so at 1024–1179 two cards came out 310px each —
+   five words a line and a wrapped title. Below 1024 the rail is a drawer and
+   the column is wide again. */
+@media (min-width:1180px), (min-width:760px) and (max-width:1023px){
+  .ch3-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.ch3-card{
+  min-width:0;
+  background:var(--paper);border:1px solid var(--edge);border-radius:16px;
+  padding:clamp(20px,2.4vw,32px) clamp(20px,2.4vw,30px);
+}
+/* inside a card the sub-heading opens the box: no rule above it, the usual
+   tight step below it */
+.chapter-article .ch3-card > .ch3-sub{margin-top:0}
+.chapter-article .ch3-card .ch3-body{max-width:none}
+
+/* a card's own title when it is not a rail sub-heading — the `.ch3-sub` voice,
+   without the anchor */
+.ch3-card-title{
+  margin:0;font-family:var(--font-heading);font-size:var(--sub);font-weight:700;
+  color:var(--maroon);line-height:1.2;width:fit-content;max-width:100%;
+  padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);
+}
+.chapter-article .ch3-card-title + *{margin-top:var(--flow-tight)}
+

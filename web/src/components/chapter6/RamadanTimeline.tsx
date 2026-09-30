@@ -4,7 +4,7 @@
    under each, and a connector dropping from the selected node into a card with that era's text. */
 
 import { useState, type ReactNode } from 'react'
-import { type IconName } from './RamadanIcons'
+import { RamadanIcon, type IconName } from './RamadanIcons'
 
 export interface TimelineItem {
   label: string
@@ -29,7 +29,9 @@ export function RamadanTimeline({ items }: { items: TimelineItem[] }) {
             className={'rm-tl-stop' + (active === i ? ' is-active' : '') + (it.qadr ? ' is-qadr' : '')}
             onClick={() => setActive(i)}
           >
-            <span className="rm-tl-med" aria-hidden="true" />
+            <span className="rm-tl-med" aria-hidden="true">
+              {it.icon && <RamadanIcon name={it.icon} />}
+            </span>
             <span className="rm-tl-cap">{it.label}</span>
           </button>
         ))}

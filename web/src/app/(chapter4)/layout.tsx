@@ -12,7 +12,6 @@ import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter4-article.css'
-import '@/styles/chapter4-looks.css'
 import '@/styles/site-notebook.css'
 
 export const metadata: Metadata = {

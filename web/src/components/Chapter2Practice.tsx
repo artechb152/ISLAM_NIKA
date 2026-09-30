@@ -12,17 +12,18 @@
    invents a fact the source does not carry. */
 
 import Link from 'next/link'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PracticeNav from '@/components/chapter6/summary/PracticeNav'
 import raw from '@/lib/chapter2/practice.json'
 import { CH2 } from '@/lib/chapter2/content'
 import { markChapterComplete } from '@/lib/chapter2/progress'
+import { readPractice, writePractice, type PracticeStore } from '@/lib/chapter2/practice-progress'
 
 /* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED, and that is the whole
    principle here. The practice does not get a picture set of its own: the four
    trait figures are the ones that open the cards in section 04, the four desert
    frames are beats of the stage the reader has just walked, the two camps are
-   the valley the wars happen in, and the arbiter is the man section 04 draws
+   the valley the wars happen in, and the arbiter is the man section 05 draws
    sitting beside the prose. A reader who worked the chapter recognises every one
    of them, and recognition is the exercise. */
 type Q =
@@ -34,6 +35,51 @@ type Q =
 const ART = '/assets/chapter2/'
 
 const QUESTIONS = (raw as unknown as { questions: Q[] }).questions
+const KNOWN = new Set(QUESTIONS.map((q) => q.id))
+
+/* THE COUNT IN THE LEAD IS DERIVED (rule 32) — it said „שמונה" by hand. A count
+   the map has no word for throws, rather than printing a digit in a sentence
+   of words. */
+const COUNT_WORDS: Record<number, string> = {
+  2: 'שתי', 3: 'שלוש', 4: 'ארבע', 5: 'חמש', 6: 'שש', 7: 'שבע', 8: 'שמונה', 9: 'תשע', 10: 'עשר',
+  11: 'אחת-עשרה', 12: 'שתים-עשרה',
+}
+const COUNT_WORD = COUNT_WORDS[QUESTIONS.length]
+if (!COUNT_WORD) throw new Error(`chapter 2 practice: no number word for ${QUESTIONS.length} questions`)
+
+/* EVERY TYPE TAKES THE SAME THINGS: the question, the board it was left on,
+   whether it was already solved, and three STABLE callbacks keyed by question
+   id. Stable matters: the boards hand their work back from an effect, and an
+   inline callback would re-run that effect on every render of the page. */
+type Ex<T extends Q['type']> = {
+  q: Extract<Q, { type: T }>
+  initial: unknown
+  wasSolved: boolean
+  onSolved: (id: string) => void
+  onMissed: (id: string) => void
+  onWork: (id: string, value: unknown) => void
+}
+
+const asStrings = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
+
+const asMap = (v: unknown): Record<string, string> => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {}
+  const out: Record<string, string> = {}
+  for (const [k, x] of Object.entries(v as Record<string, unknown>)) if (typeof x === 'string') out[k] = x
+  return out
+}
+
+/** hand a board back to the store — from an effect, never from inside a state
+    updater (a side effect there is what the React compiler refuses), and only
+    once the reader has touched it, so a mount never writes an empty board */
+function useWork(id: string, value: unknown, onWork: Ex<Q['type']>['onWork']) {
+  const touchedRef = useRef(false)
+  useEffect(() => {
+    if (touchedRef.current) onWork(id, value)
+  }, [id, value, onWork])
+  return touchedRef
+}
 
 /** deterministic shuffle — the same reader gets the same board on a reload */
 function shuffled<T>(items: T[], seed: number): T[] {
@@ -81,14 +127,16 @@ function Feedback({ state, q }: { state: State; q: Q }) {
 
 /* ---------------- one question per type ---------------- */
 
-function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; onSolved: () => void }) {
+function Choice({ q, initial, wasSolved, onSolved, onMissed, onWork }: Ex<'single' | 'multi'>) {
   const opts = useMemo(() => shuffled(q.options, q.id.length * 97), [q])
-  const [picked, setPicked] = useState<string[]>([])
-  const [state, setState] = useState<State>('idle')
+  const [picked, setPicked] = useState<string[]>(() => asStrings(initial))
+  const [state, setState] = useState<State>(wasSolved ? 'right' : 'idle')
   const multi = q.type === 'multi'
+  const touchedRef = useWork(q.id, picked, onWork)
 
   function toggle(text: string) {
     if (state === 'right') return
+    touchedRef.current = true
     setState('idle')
     setPicked((p) => (multi ? (p.includes(text) ? p.filter((x) => x !== text) : [...p, text]) : [text]))
   }
@@ -97,7 +145,8 @@ function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; 
     const got = new Set(picked)
     const ok = want.size === got.size && [...want].every((w) => got.has(w))
     setState(ok ? 'right' : 'wrong')
-    if (ok) onSolved()
+    if (ok) onSolved(q.id)
+    else onMissed(q.id)
   }
 
   return (
@@ -127,17 +176,18 @@ function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; 
   )
 }
 
-function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }>; onSolved: () => void }) {
+function Match({ q, initial, wasSolved, onSolved, onMissed, onWork }: Ex<'match' | 'situations'>) {
   const rows =
     q.type === 'match'
       ? q.pairs.map((p) => ({ left: p.left, right: p.right, photo: p.photo }))
       : q.pairs.map((p) => ({ left: p.key + ' — ' + p.text, right: p.to, photo: p.photo }))
   const withArt = rows.some((r) => r.photo)
   const answers = useMemo(() => shuffled(rows.map((r) => r.right), q.id.length * 53), [q])
-  const [chosen, setChosen] = useState<Record<string, string>>({})
+  const [chosen, setChosen] = useState<Record<string, string>>(() => asMap(initial))
   const [held, setHeld] = useState<string | null>(null)
   const heldRef = useRef<string | null>(null)
-  const [state, setState] = useState<State>('idle')
+  const [state, setState] = useState<State>(wasSolved ? 'right' : 'idle')
+  const touchedRef = useWork(q.id, chosen, onWork)
   const done = state === 'right'
   const placed = new Set(Object.values(chosen))
 
@@ -155,6 +205,7 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
      Measured, this is the same class of bug as the stage's forty-clicks-one-beat. */
   const put = (row: string) => {
     const h = heldRef.current
+    touchedRef.current = true
     setState('idle')
     setChosen((c) => {
       const next = { ...c }
@@ -182,7 +233,8 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
   function check() {
     const ok = rows.every((r) => chosen[r.left] === r.right)
     setState(ok ? 'right' : 'wrong')
-    if (ok) onSolved()
+    if (ok) onSolved(q.id)
+    else onMissed(q.id)
   }
 
   return (
@@ -251,11 +303,19 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
 
 /** Put the steps in order. The board starts shuffled and the reader walks a
     step up or down until the chain reads the way it happened. */
-function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: () => void }) {
-  const [items, setItems] = useState<string[]>(() => shuffled(q.steps, q.id.length * 71))
-  const [state, setState] = useState<State>('idle')
+function Order({ q, initial, wasSolved, onSolved, onMissed, onWork }: Ex<'order'>) {
+  /* the order the reader left, if it is still this question's set of steps;
+     otherwise the deterministic shuffle */
+  const [items, setItems] = useState<string[]>(() => {
+    const kept = asStrings(initial)
+    const same = kept.length === q.steps.length && kept.every((x) => q.steps.includes(x))
+    return same ? kept : shuffled(q.steps, q.id.length * 71)
+  })
+  const [state, setState] = useState<State>(wasSolved ? 'right' : 'idle')
+  const touchedRef = useWork(q.id, items, onWork)
 
   const move = useCallback((i: number, dir: -1 | 1) => {
+    touchedRef.current = true
     setState('idle')
     setItems((cur) => {
       const j = i + dir
@@ -264,12 +324,13 @@ function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: ()
       ;[next[i], next[j]] = [next[j], next[i]]
       return next
     })
-  }, [])
+  }, [touchedRef])
 
   function check() {
     const ok = items.every((s, i) => s === q.steps[i])
     setState(ok ? 'right' : 'wrong')
-    if (ok) onSolved()
+    if (ok) onSolved(q.id)
+    else onMissed(q.id)
   }
 
   return (
@@ -311,19 +372,50 @@ function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: ()
 /* ---------------- the page ---------------- */
 
 export default function Chapter2Practice() {
-  const [solved, setSolved] = useState<Set<string>>(new Set())
+  const [store, setStore] = useState<PracticeStore>({ done: [], missed: [], work: {} })
   const [finished, setFinished] = useState(false)
+  /* THE BOARDS REMOUNT ONCE, WHEN THE STORE HAS BEEN READ (chapter 4's fix,
+     BUILD-RULES 75). Each board seeds from `initial` in a lazy useState, which
+     runs on the first render only, and the store arrives one render later —
+     so flipping this changes their `key` and they seed again, from the store. */
+  const [ready, setReady] = useState(false)
+  /* the writer below must not clear storage with the empty first-render store */
+  const loaded = useRef(false)
+  /* all solved on arrival: completion is a state then, not an event */
+  const restored = useRef(false)
+
+  /* read in an effect: there is no localStorage on the server */
+  useEffect(() => {
+    const read = readPractice(KNOWN)
+    if (read.done.length || read.missed.length || Object.keys(read.work).length) {
+      restored.current = read.done.length === QUESTIONS.length
+      setStore(read)
+      if (restored.current) setFinished(true)
+    }
+    loaded.current = true
+    setReady(true)
+  }, [])
+
+  /* side effects here, not in a state updater */
+  useEffect(() => {
+    if (!loaded.current) return
+    writePractice(store)
+    if (store.done.length === QUESTIONS.length && !restored.current) {
+      markChapterComplete()
+      setFinished(true)
+    }
+  }, [store])
+
+  const solved = useMemo(() => new Set(store.done), [store.done])
 
   const solve = useCallback((id: string) => {
-    setSolved((s) => {
-      if (s.has(id)) return s
-      const next = new Set(s).add(id)
-      if (next.size === QUESTIONS.length) {
-        markChapterComplete()
-        setFinished(true)
-      }
-      return next
-    })
+    setStore((s) => (s.done.includes(id) ? s : { ...s, done: [...s.done, id] }))
+  }, [])
+  const miss = useCallback((id: string) => {
+    setStore((s) => (s.missed.includes(id) ? s : { ...s, missed: [...s.missed, id] }))
+  }, [])
+  const saveWork = useCallback((id: string, value: unknown) => {
+    setStore((s) => ({ ...s, work: { ...s.work, [id]: value } }))
   }, [])
 
   /* the rail IS the progress display, as it is on chapter 6's practice: a tick
@@ -350,7 +442,7 @@ export default function Chapter2Practice() {
         </div>
 
         <p className="p2-lead" data-reveal>
-          {CH2.title} — שמונה שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
+          {CH2.title} — {COUNT_WORD} שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
         </p>
 
         {/* EACH EXERCISE IS A SECTION OF THE ARTICLE, not an item of a list.
@@ -387,9 +479,15 @@ export default function Chapter2Practice() {
                   <img src={ART + q.photo} alt="" loading="lazy" decoding="async" />
                 </figure>
               )}
-              {(q.type === 'single' || q.type === 'multi') && <Choice q={q} onSolved={() => solve(q.id)} />}
-              {(q.type === 'match' || q.type === 'situations') && <Match q={q} onSolved={() => solve(q.id)} />}
-              {q.type === 'order' && <Order q={q} onSolved={() => solve(q.id)} />}
+              {(q.type === 'single' || q.type === 'multi') && (
+                <Choice key={ready ? 'r' : 'i'} q={q} initial={store.work[q.id]} wasSolved={solved.has(q.id)} onSolved={solve} onMissed={miss} onWork={saveWork} />
+              )}
+              {(q.type === 'match' || q.type === 'situations') && (
+                <Match key={ready ? 'r' : 'i'} q={q} initial={store.work[q.id]} wasSolved={solved.has(q.id)} onSolved={solve} onMissed={miss} onWork={saveWork} />
+              )}
+              {q.type === 'order' && (
+                <Order key={ready ? 'r' : 'i'} q={q} initial={store.work[q.id]} wasSolved={solved.has(q.id)} onSolved={solve} onMissed={miss} onWork={saveWork} />
+              )}
             </div>
           </section>
         ))}

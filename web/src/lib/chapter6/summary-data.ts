@@ -2,9 +2,8 @@
 
    ONE VERB, FIVE SPACES. Everything the learner does here is the same act: take a label and
    put it into a numbered empty slot on an illustrated surface. What changes between the five
-   commandments is not the interaction but the SHAPE the slots make — a circle around the
-   testimony, an arc over a day, a flow from a balance into vessels, a line of stages, pins on
-   a map. The space is what carries the meaning; a second mechanic would only be a second thing
+   commandments is not the interaction but the SHAPE the slots make — a row (the shahada, the
+   prayer, the charity), a line of stages (the fast), pins on a map (the hajj). The space is what carries the meaning; a second mechanic would only be a second thing
    to learn how to operate.
 
    WHAT THE NUMBER MEANS IS NOT THE SAME EVERYWHERE, so every exercise says which it is:
@@ -77,9 +76,9 @@ export interface SlotDef {
   locked?: string
 }
 
-/* A multiple-choice question. Used both for the two closing questions and for the charity
-   beat, which was always a single-choice question in the source (`ch-c`) and had been dressed
-   up as a fill-the-gap sentence for no reason. */
+/* A multiple-choice question. Used for the two closing questions; a beat may carry one too
+   (`BeatDef.mcq`), though none does now — the charity beat that did (`ch-c`) became a
+   sentence. */
 export interface McqDef {
   id: string
   question: string
@@ -222,8 +221,7 @@ const EX_PRAYER: ExerciseDef = {
   },
 }
 
-/* 3 · הצדקה — FLOW. Downward, because the meaning is a movement of something from one hand
-   to another. The fifth vessel is LOCKED and says so: ch-1 ends „…בתי תמחוי ועוד“, and four
+/* 3 · הצדקה — ROW. The fifth slot is LOCKED and says so: ch-1 ends „…בתי תמחוי ועוד“, and four
    slots would close a list the source leaves open. */
 const EX_CHARITY: ExerciseDef = {
   key: 'charity',
@@ -313,10 +311,8 @@ const EX_RAMADAN: ExerciseDef = {
   },
 }
 
-/* 5 · החג' — MAP. Seven empty numbered pins on the painting, because the journey is a place
-   and not only an order. The seven coordinates were measured off the painting itself (the
-   Kaaba's black block sits at 76.6% / 72.1%, the mountain at 28.5% / 21.5%, the tent city at
-   45.2% / 63%) — every pin lands on something that is drawn there. */
+/* 5 · החג' — MAP. Six empty numbered pins on the painting, because the journey is a place
+   and not only an order. The coordinates are the article's own (see `slots` below). */
 const EX_HAJJ: ExerciseDef = {
   key: 'hajj',
   title: "מפת מסע החג'",

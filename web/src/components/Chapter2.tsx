@@ -37,9 +37,10 @@
 
    WHAT THIS FILE STILL MAY NOT DO: write a sentence. Every string comes from
    passages.json through `text()` / `list()`, addressed by the §N.fragment it
-   belongs to. concept/chapter2/verify-chapter2.mjs fails if a fragment is
-   printed twice or dropped; concept/chapter2/audit.mjs fails if the rendered
-   page drifts from chapter 6's own measurements. */
+   belongs to. concept/chapter2/verify-chapter2.mjs fails if layout.json
+   consumes a fragment twice or not at all — it reads the layout, not this
+   file. concept/chapter2/audit.mjs is the one that reads the rendered page:
+   every fragment present, and the shape still chapter 6's. */
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -52,6 +53,7 @@ import {
   completedSections,
   markContentComplete,
   markSectionDone,
+  practiceComplete,
   resumeSectionId,
   saveCurrentSection,
   SECTION_ORDER,
@@ -84,7 +86,7 @@ const sub = (sectionId: string, subId: string): Sub => {
   if (!s) throw new Error(`chapter 2: unknown sub ${sectionId}/${subId}`)
   return s
 }
-/** "גבריות (מרואה)" — the way the ledger and the rail both name a practice */
+/** "גבריות (מרואה)" — the way the ledger names a practice */
 const subLabel = (sectionId: string, subId: string): string => {
   const s = sub(sectionId, subId)
   return s.term ? `${s.title} (${s.term})` : s.title
@@ -382,8 +384,8 @@ const TRAIT_ART: Record<string, { src: string; alt: string }> = {
   },
 }
 
-/** Open a trait's dialog. Addressed by id rather than through a ref because the
-    rail links to the same id from outside this subtree. */
+/** Open a trait's dialog. Addressed by id: the card and the chapter search
+    (which opens a closed dialog on a hit) both reach it from outside. */
 function openTrait(id: string): void {
   const d = document.getElementById(`trait-${id}`) as HTMLDialogElement | null
   if (d && !d.open) d.showModal()
@@ -476,11 +478,18 @@ function Verse({ r }: { r: string }) {
 }
 
 /** A saying — speech, not scripture. Display type on the reading edge and
-    nothing else around it: no card, no rule, no quotation mark. */
+    nothing else around it: no card, no rule, no quotation mark.
+    A hyphenated word is held on one line — at display size „בן-דודי" broke
+    at its hyphen into „בן-" / „דודי". A span, not U+2011, so the text the
+    search and the gates read is untouched. */
 function Saying({ r }: { r: string }) {
   return (
     <blockquote className="ch2-saying" data-reveal>
-      <p>{text(r)}</p>
+      <p>
+        {text(r).split(/(\S+-\S+)/).map((part, n) =>
+          n % 2 ? <span className="ch2-nobreak" key={n}>{part}</span> : part,
+        )}
+      </p>
     </blockquote>
   )
 }
@@ -662,9 +671,14 @@ export default function Chapter2() {
   const [isDesktop, setIsDesktop] = useState(true)
   const [collapsed, setCollapsed] = useState(false)
   const [currentSection, setCurrentSection] = useState(SECTION_ORDER[0])
-  const [currentSub, setCurrentSub] = useState<string | null>(null)
   const [doneSections, setDoneSections] = useState<Set<string>>(new Set())
   const jumpUntil = useRef(0)
+  /* the chapter is finished only by its practice, and the closing button says
+     so with a quiet chip. Read in an effect: there is no localStorage on the
+     server, and a chip in the HTML but not in the browser is a hydration
+     mismatch. */
+  const [practiceDone, setPracticeDone] = useState(false)
+  useEffect(() => { setPracticeDone(practiceComplete()) }, [])
 
   useEffect(() => {
     setDoneSections(new Set(completedSections()))
@@ -714,51 +728,15 @@ export default function Chapter2() {
       centre.observe(n)
       completion.observe(n)
     })
+    /* a search hit is a jump like a menu click: the sections scrolled past on
+       the way to it were not read. ChapterSearch fires this just before it
+       scrolls. */
+    const onJump = () => { jumpUntil.current = Date.now() + 1800 }
+    window.addEventListener('chapter:jump', onJump)
     return () => {
       centre.disconnect()
       completion.disconnect()
-    }
-  }, [])
-
-  /* Which MOVEMENT the reader is in, not just which section. Six sub-headings
-     sit in the rail; without this they are links that never say where you are,
-     and a reader inside גבריות sees only "התרבות השבטית" lit. A sub stays
-     current from its own heading until the next one arrives. */
-  useEffect(() => {
-    const subs = SECTIONS.flatMap((s) => (s.subs ?? []).map((x) => x.id))
-    const nodes = subs.map((id) => document.getElementById(id)).filter((n): n is HTMLElement => !!n)
-    if (!nodes.length) return
-    const io = new IntersectionObserver(
-      () => {
-        const line = window.innerHeight * 0.34
-        let active: string | null = null
-        for (const n of nodes) {
-          const r = n.getBoundingClientRect()
-          /* the last sub-heading whose top has crossed the line, and only while
-             its own section is still on screen */
-          const sec = n.closest('.article-section')?.getBoundingClientRect()
-          if (r.top <= line && sec && sec.bottom > line) active = n.id
-        }
-        setCurrentSub(active)
-      },
-      { rootMargin: '0px', threshold: [0, 0.5, 1] },
-    )
-    nodes.forEach((n) => io.observe(n))
-    const onScroll = () => {
-      const line = window.innerHeight * 0.34
-      let active: string | null = null
-      for (const n of nodes) {
-        const r = n.getBoundingClientRect()
-        const sec = n.closest('.article-section')?.getBoundingClientRect()
-        if (r.top <= line && sec && sec.bottom > line) active = n.id
-      }
-      setCurrentSub((cur) => (cur === active ? cur : active))
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => {
-      io.disconnect()
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('chapter:jump', onJump)
     }
   }, [])
 
@@ -886,30 +864,8 @@ export default function Chapter2() {
                       <svg className="menu-done" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7.5" /></svg>
                     )}
                   </a>
-                  {/* the sub-headings ride under their section, as chapter 6's rail does */}
-                  {s.subs && (
-                    <ul className="menu-subs">
-                      {/* THE DIALOG IS THE DESTINATION, so the fragment jump is
-                          not merely redundant but harmful: the browser followed
-                          `#thar` after the dialog had opened and reset focus to
-                          the hash target, leaving the reader on <body> with a
-                          modal up and nothing announced. The href stays — it is
-                          what makes this a real link, and where a reader opening
-                          it in a new tab should land. */}
-                      {s.subs.map((sb) => (
-                        <li key={sb.id}>
-                          <a
-                            href={`#${sb.id}`}
-                            className={currentSub === sb.id ? 'is-current' : undefined}
-                            aria-current={currentSub === sb.id ? 'true' : undefined}
-                            onClick={(event) => { event.preventDefault(); openTrait(sb.id); onMenuJump(); setDrawer(false) }}
-                          >
-                            {sb.title}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  {/* main sections only (rule 29). The four traits used to ride
+                      here as sub-rows; their cards are the way into them. */}
                 </li>
               ))}
             </ol>
@@ -927,7 +883,6 @@ export default function Chapter2() {
           <div className="chapter-layout">
             <main className="chapter-article" ref={articleRef}>
 
-              {/* ============ 01 · the peninsula ============ */}
               {/* ============ 01 · the lineage, and the Kaaba ============
                   The content document opens here — „ייחוסו של מוחמד וישמעאל" is
                   its first topic, and §1–§4 belong to it. An earlier build folded
@@ -1042,13 +997,12 @@ export default function Chapter2() {
                     otherwise empty down the whole opening. */}
                 <div className="ch2-withmap" data-reveal>
                   <div className="ch2-body">
-                    {/* ONE PARAGRAPH PER SOURCE PASSAGE. §5.a led alone so the
-                        layers could speak about the tribes without a dangling
-                        pronoun — but that only moved the dangle down a line:
-                        §5.b opens „חלקם" and was starting a paragraph, with its
-                        antecedent in the paragraph above and a different subject
-                        (what the nomads lived on, §6) fused in beside it. §5 is
-                        one passage in the source and is one paragraph here. */}
+                    {/* TWO PARAGRAPHS, NOT ONE PER SOURCE PASSAGE: who lived
+                        here (§5.a, with §4.a's gloss of „בדווים"), then what
+                        tied them outward — the trade roads (§6.a) and the two
+                        empires (§5.b). §5.b opens „חלקם", and after §6.a's
+                        „השבטים הנודדים" its antecedent is the sentence just
+                        before it rather than a paragraph away. */}
                     <T r={['§5.a', '§4.a']} em={['רובם נודדים', 'בדווים']} />
                     <T r={['§6.a', '§5.b']} em={['דרך הבשמים', 'דרך המשי']} />
                   </div>
@@ -1064,7 +1018,7 @@ export default function Chapter2() {
                 </div>
               </Section>
 
-              {/* ============ 02 · the desert — the full-screen stage ============
+              {/* ============ 03 · the desert — the full-screen stage ============
                   The heading stays on the paper, as chapter 6 does above its own
                   immersive scene; the stage itself is full-bleed underneath it. */}
               <Section id="desert">
@@ -1072,7 +1026,7 @@ export default function Chapter2() {
                 <DesertStage />
               </Section>
 
-              {/* ============ 03 · tribal culture — all FOUR traits inside ============
+              {/* ============ 04 · tribal culture — all FOUR traits inside ============
                   עצביה, מרואה, קבורת בנות and ת'אר. The source sets all four under one
                   running head, „מאפייני התרבות השבטית · …", and an earlier build split
                   the last two off into a section of their own called „שני מנהגים" —
@@ -1110,7 +1064,7 @@ export default function Chapter2() {
                       <T r={['§15.a', '§15.b']} em={['בלתי אפשרי']} />
                     </div>
                     <Cycle refs={['§15.one', '§15.many']} />
-                    <div className="ch2-body ch2-after-device">
+                    <div className="ch2-body">
                       <T r="§16.a" />
                     </div>
                     <Verse r="§16.poem" />
@@ -1119,9 +1073,11 @@ export default function Chapter2() {
                       {/* הפתגם שביקשה המרצה — הוא אומר את אותו דבר שהשיר
                           אומר, אבל במשפט אחד שאפשר לזכור. */}
                       <T r="§38.a" />
-                      <blockquote className="ch2-proverb">
-                        <T r="§38.quote" />
-                      </blockquote>
+                    </div>
+                    {/* the proverb is speech, so it takes the saying's voice —
+                        the same one ת'אר's proverb wears */}
+                    <Saying r="§38.quote" />
+                    <div className="ch2-body">
                       <T r="§38.b" em={['הסולידריות השבטית']} />
                     </div>
                   </TraitDialog>
@@ -1183,7 +1139,7 @@ export default function Chapter2() {
                         glued to the sentence that hands off to the saying. It
                         keeps its own line under the diagram it belongs to, and
                         §26.a starts the paragraph that introduces the proverb. */}
-                    <div className="ch2-body ch2-after-device">
+                    <div className="ch2-body">
                       <T r="§25.b" />
                     </div>
                     <div className="ch2-body">
@@ -1194,7 +1150,7 @@ export default function Chapter2() {
                 </div>
               </Section>
 
-              {/* ============ 06 · the jahiliyya — claim and answer ============ */}
+              {/* ============ 05 · the jahiliyya — claim and answer ============ */}
               <Section id="jahiliyya">
                 {/* The seated figure bleeds off the OUTER (left) edge and the
                     section reads down the column he leaves free — the heading,
@@ -1270,7 +1226,7 @@ export default function Chapter2() {
                 </div>
               </Section>
 
-              {/* ============ 05 · Mecca and the Kaaba ============ */}
+              {/* ============ 06 · Mecca before Islam ============ */}
               <Section id="mecca" className="ch2-mecca-section">
                 {/* Chapter 6's charity hero, exactly: a watercolour bleeding off
                     the RIGHT edge with the reading column beside it on the left.
@@ -1307,7 +1263,7 @@ export default function Chapter2() {
                 </div>
               </Section>
 
-              {/* ============ 07 · what was kept and what was rejected ============ */}
+              {/* ============ 07 · the tribal legacy in Islam — kept and rejected ============ */}
               <Section id="legacy">
                 <Head id="legacy" />
                 {/* §34.b is ordinary prose and now reads as such, on the line
@@ -1347,7 +1303,7 @@ export default function Chapter2() {
                     source's own gloss of it, and here the source gives the names
                     alone. A definition list with nothing to define would be
                     markup pretending to a structure the text does not have. */}
-                <div className="ch2-verdicts ch2-after-device" data-reveal>
+                <div className="ch2-verdicts" data-reveal>
                   <p className="ch2-verdict-intro">{text('§36.a')}</p>
                   {/* גם כאן: קבורת בנות ועבודת אלילים נאמרים בתוך משפט
                       הדחייה עצמו, ומה שנשאר להוסיף הוא הסייג שביקשה המרצה —
@@ -1398,13 +1354,15 @@ export default function Chapter2() {
                 </aside>
                 {/* הסיום שביקשה המרצה: למה בכלל ללמוד את זה. הוא בא אחרי
                     המשפט שהפרק הלך אליו, ולפני המסירה אל התרגול. */}
-                <div className="ch2-body ch2-after-device" data-reveal>
+                <div className="ch2-body" data-reveal>
                   <T r="§42.a" />
                 </div>
               </Section>
 
-              <div className="ch2-end" ref={endRef} data-reveal>
-                <Link className="ch2-end-link" href="/chapter2/practice">לתרגול המסכם</Link>
+              {/* chapter 6's closing block, part for part (rule 33) */}
+              <div className="chapter-end" ref={endRef} id="chapter-end" data-reveal>
+                <Link className="chapter-end-back" href="/chapter2/practice">לתרגול המסכם</Link>
+                {practiceDone && <span className="chapter-end-done">הושלם</span>}
               </div>
             </main>
           </div>

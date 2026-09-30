@@ -10,12 +10,12 @@
    that Chapter3.tsx books is still owed, and taking it here would have meant
    editing a file another session had open.
 
-   THE SHAPE. Ten sections — exactly the ten running heads the source prints.
-   The first build ran on twenty-eight and read as a list with no end: the rail
-   alone carried twenty-eight numbered lines, and eleven of those sections held
-   a paragraph or two, which is a heading larger than the thing beneath it.
-   Nothing was lost in the reduction — what had been a section is a SubHead now,
-   and the rail shows it nested. See concept/chapter4/STRUCTURE.md.
+   THE SHAPE. Eight sections, one per event. The first build ran on
+   twenty-eight and read as a list with no end: the rail alone carried
+   twenty-eight numbered lines, and eleven of those sections held a paragraph
+   or two, which is a heading larger than the thing beneath it. Nothing was lost
+   in the reduction — what had been a section is a SubHead now. The rail lists
+   the eight and nothing under them (rule 29).
 
    THE ONE DISTINCTION THE CHAPTER CANNOT DO WITHOUT is the echo box. Half this
    material is seventh-century narrative and half is what has been done with it
@@ -24,10 +24,10 @@
    two in adjacent sentences. A reader must never have to work out which one
    they are reading.
 
-   WHAT IS DRAWN AND WHAT IS NOT. Three plates, all of them places, none of them
-   people: the events turn on a prophet, and drawing one is religiously
-   impossible. The massacres — §26 and §41–§43 — get no picture and no device at
-   all, the same call chapter 2 made for ואד אלבנת.
+   WHAT IS DRAWN AND WHAT IS NOT. Places, objects and veiled figures, never
+   the prophet: the events turn on him, and drawing him is religiously
+   impossible. The massacres — §26 and §41–§43 — get no device of their own,
+   the same call chapter 2 made for ואד אלבנת.
 
    WHAT THIS FILE MAY NOT DO: write a sentence of the chapter. Every content
    string comes from passages.json through `text()` / `list()` / `nameOf()`,
@@ -50,6 +50,7 @@ import {
   completedSections,
   markContentComplete,
   markSectionDone,
+  practiceComplete,
   resumeSectionId,
   saveCurrentSection,
   SECTION_ORDER,
@@ -94,9 +95,9 @@ const sub = (sectionId: string, subId: string): Sub => {
   return t
 }
 
-/** A CARD'S NAME. Cards are NOT `subs`: a sub is a rail anchor, and four more
-    rows in a rail that already carries nineteen would bury the sections the
-    reader navigates by. They live in their own array, and only this reads it. */
+/** A CARD'S NAME. Cards are NOT `subs`: a sub is a sub-heading in the page,
+    and a card title is not one. They live in their own array, and only this
+    reads it. */
 const card = (sectionId: string, cardId: string): Sub => {
   const t = meta(sectionId).cards?.find((x) => x.id === cardId)
   if (!t) throw new Error(`chapter 4: unknown card ${sectionId}/${cardId}`)
@@ -108,8 +109,8 @@ const card = (sectionId: string, cardId: string): Sub => {
     editorial and a link label is editorial (rule 24), so both live in
     layout.json beside the section they serve — the JSX writes no word. The
     section's `figure`/`links` are optional in the data, hence the loose read. */
-type Figure = { src: string; caption: string }
-type OutLink = { href: string; label: string; embed?: string; poster?: string }
+type Figure = { src: string; caption: string; width: number; height: number }
+type OutLink = { href: string; label: string; embed?: string }
 const figureOf = (sectionId: string): Figure => {
   const f = (meta(sectionId) as unknown as { figure?: Figure }).figure
   if (!f) throw new Error(`chapter 4: no figure in ${sectionId}`)
@@ -174,9 +175,9 @@ const meta = (id: string): LayoutSection => {
 }
 
 /* ---------------- text primitives ----------------
-   Lifted from Chapter2.tsx unchanged. They are chapter-agnostic once `content`
-   and `layout` are swapped, and the three copies (2, 3 and 6) are booked to be
-   folded into one module after this chapter stands. */
+   Adapted from Chapter2.tsx (this copy adds the gold `tr` register and the
+   ruled `pt` hand-off). The copies across chapters are booked to be folded into
+   one module. */
 
 /** „(§3.aside)" — a fragment the source prints in brackets at the END of the
     sentence before it. The preceding sentence gives up its full stop, the
@@ -323,6 +324,16 @@ function T({
     ...tr.map((phrase) => ({ phrase, cls: 'ch4-tr' })),
     ...pt.map((phrase) => ({ phrase, cls: 'ch4-points' })),
   ]
+  /* emphasis is a claim (rule 26): a phrase that is not in its line lights
+     nothing and says nothing — §57's „דת מוחמד" missed on one quote glyph for
+     weeks. Loud in development, silent in production. */
+  if (process.env.NODE_ENV !== 'production') {
+    for (const m of marks) {
+      if (!lines.some((l) => l.text.includes(m.phrase))) {
+        console.error(`chapter 4: emphasis "${m.phrase}" is not in ${refs.join(' ')}`)
+      }
+    }
+  }
   const out: React.ReactNode[] = []
   lines.forEach((line, i) => {
     if (line.intro) {
@@ -413,26 +424,19 @@ function Section({
   )
 }
 
-/* ---------------- the two set-apart voices ----------------
+/* ---------------- the set-apart verse ----------------
 
-   The chapter quotes the Quran SIX times, and the audit allows a costume two
-   uses. They cannot be split into three costumes: it is one voice, and giving
-   one verse a frame and another a plain rule would assert a hierarchy among
-   revealed text that the source does not make.
+   One costume for every verse the booklet prints as a sentence of its own: it
+   is one voice, and giving one verse a frame and another a plain rule would
+   assert a hierarchy among revealed text that the source does not make.
 
-   The test comes from chapter 2's decision on terms — „the source defines each
-   term INSIDE the sentence, so it stays inside the sentence". Applied to the
-   verses: four of the six are printed by the booklet as subordinate clauses
-   („שם אללה שואל את נביאו:", „למשל:", „כדבריהם", „מרומז"), and they stay in
-   their sentences, emphasised, with no costume at all. Only the two the EVENT
-   rests on stand alone. */
+   A verse the booklet prints INSIDE a sentence („למשל:", „כדבריהם") stays in
+   that sentence, as chapter 2 keeps its terms. */
 
 
-/** THE COSTUME, worn twice and no more.
-
-    The note above says which two verses get it: the two the EVENT rests on,
-    printed by the booklet as sentences of their own rather than as clauses
-    inside another. The other four stay in their sentences, emphasised.
+/** THE COSTUME — worn four times: the two verses of the cave (§59, §60), the
+    shahids' (§21) and 8:61, which closes the chapter (§39). The audit's limit
+    is two; the other two were the user's call.
 
     It composes nothing — the text is a fragment, and the citation beside it is
     the fragment's own reference, printed as the source prints it. The marks
@@ -449,16 +453,15 @@ function Verse({ r, cite, mid = false }: { r: string; cite?: string; mid?: boole
   )
 }
 
-/** „להרחבה" — a passage the reader opens, and the only one in the chapter.
+/** „להרחבה" — a passage the reader opens. Three in the chapter: the meaning
+    of the hijra (§52–§53), its modern echo (§6) and 7 October (§54).
 
-    WHAT IT HOLDS AND WHY IT IS NOT IN THE FLOW. §6 leaves the seventh century:
-    a group that named itself after the hijra and murdered a president in 1981,
-    and men who left Europe for Syria in the twenty-first. It belongs to the
-    chapter — the source prints it as the next sentences of the same passage —
-    but it is a different register from the paragraph above it, and dropping the
-    reader into 1981 mid-sentence is the jolt the „איפה זה פוגש אותנו" box was
-    invented for and then removed with. A named door does the same work without
-    a second ground on the page: whoever wants the modern echo asks for it.
+    WHY THEY ARE NOT IN THE FLOW. Each leaves the seventh century — §6 is a
+    group that named itself after the hijra and murdered a president in 1981,
+    and men who left Europe for Syria in the twenty-first. The source prints
+    them as the next sentences of the same passage, but dropping the reader into
+    1981 mid-paragraph is a jolt. A named door does the work without a second
+    ground on the page: whoever wants the modern echo asks for it.
 
     THE CONTENT IS IN THE DOM WHETHER IT IS OPEN OR NOT. That is why this is a
     real `<dialog>` and not a panel mounted on demand: the chapter's own search
@@ -512,10 +515,11 @@ function More({ id, title, children }: { id: string; title: string; children: Re
     that sentence already has. Nothing is invented; the shape is read off the
     text.
 
-    AND WHY THEY DO NOT OPEN. The first build put each tradition behind a
-    dialog. Every one of them is one to three sentences: a click that reveals
-    forty words costs the reader more than the words are worth, and it hides
-    from a skim the very thing a skim should catch. They are open. What the
+    AND WHY THE TRADITIONS ARE NOT BEHIND A CLICK. The first build put each
+    one behind a dialog. Every one of them is one to three sentences: a click
+    that reveals forty words costs the reader more than the words are worth, and
+    it hides from a skim the very thing a skim should catch. They are open (only
+    Hind's card carries a „להרחבה", for §54, which is not a tradition). What the
     card gives is not concealment but a boundary — four traditions, four edges,
     so that „many traditions exist" is visible as a count and not only as a
     claim. */
@@ -536,13 +540,8 @@ function Card({ id, children }: { id: string; children: React.ReactNode }) {
 
 /* ---------------- chapter 4's own devices ----------------
 
-   Five, and every one of them is markup around sentences that already exist in
-   passages.json. None of them composes a word. The two that STRUCTURE.md asks
-   for and this file does NOT yet build are the map-timeline and the trench
-   diagram: both need artwork that has not been commissioned, and a placeholder
-   drawing would assert a geography the source does not give. Until they exist,
-   their sections print their sentences in full — nothing is withheld from the
-   reader, only from the page's decoration. */
+   Every one of them is markup around sentences that already exist in
+   passages.json. None of them composes a word. */
 
 /** A run of the chapter's sentences, held as one block.
 
@@ -670,9 +669,9 @@ function Mufti({ name, children }: { name: string; children: React.ReactNode }) 
 }
 
 
-/** A movement inside a section. With ten sections instead of twenty-eight,
-    what used to be a section of its own is a sub-heading here — and the rail
-    shows it nested, so no anchor was lost in the reduction. */
+/** A movement inside a section. With eight sections instead of twenty-eight,
+    what used to be a section of its own is a sub-heading here. It keeps its id,
+    so a link to it still lands; the rail lists sections only (rule 29). */
 function SubHead({ section, id }: { section: string; id: string }) {
   return (
     <h3 className="ch4-sub" id={id} data-reveal>
@@ -692,7 +691,6 @@ export default function Chapter4() {
   const [isDesktop, setIsDesktop] = useState(true)
   const [collapsed, setCollapsed] = useState(false)
   const [currentSection, setCurrentSection] = useState(SECTION_ORDER[0])
-  const [currentSub, setCurrentSub] = useState<string | null>(null)
   const [doneSections, setDoneSections] = useState<Set<string>>(new Set())
   const jumpUntil = useRef(0)
 
@@ -748,30 +746,14 @@ export default function Chapter4() {
     }
   }, [])
 
-  /* which MOVEMENT the reader is in — nine sub-headings sit in the rail, and
-     without this they are links that never say where you are */
+  /* a search jump is a jump: ChapterSearch fires this right before it scrolls,
+     and the sections it flies past were not read */
   useEffect(() => {
-    const subs = SECTIONS.flatMap((s) => (s.subs ?? []).map((x) => x.id))
-    const nodes = subs.map((id) => document.getElementById(id)).filter((n): n is HTMLElement => !!n)
-    if (!nodes.length) return
-    const read = () => {
-      const line = window.innerHeight * 0.34
-      let active: string | null = null
-      for (const n of nodes) {
-        const r = n.getBoundingClientRect()
-        const sec = n.closest('.article-section')?.getBoundingClientRect()
-        if (r.top <= line && sec && sec.bottom > line) active = n.id
-      }
-      setCurrentSub((cur) => (cur === active ? cur : active))
+    const onJump = () => {
+      jumpUntil.current = Date.now() + 1800
     }
-    const io = new IntersectionObserver(read, { rootMargin: '0px', threshold: [0, 0.5, 1] })
-    nodes.forEach((n) => io.observe(n))
-    window.addEventListener('scroll', read, { passive: true })
-    read()
-    return () => {
-      io.disconnect()
-      window.removeEventListener('scroll', read)
-    }
+    window.addEventListener('chapter:jump', onJump)
+    return () => window.removeEventListener('chapter:jump', onJump)
   }, [])
 
   useEffect(() => {
@@ -830,6 +812,13 @@ export default function Chapter4() {
       return next
     })
   }, [])
+  /* read in an effect: the server has no localStorage, and a chip present on
+     one side only is a hydration mismatch */
+  const [practiceDone, setPracticeDone] = useState(false)
+  useEffect(() => {
+    setPracticeDone(practiceComplete())
+  }, [])
+
   const onMenuJump = useCallback(() => {
     jumpUntil.current = Date.now() + 1800
   }, [])
@@ -921,29 +910,6 @@ export default function Chapter4() {
                       </svg>
                     )}
                   </a>
-                  {/* the sub-headings ride under their section, as chapter 6's rail
-                      does. Here they are PLAIN ANCHORS — this chapter has no
-                      dialogs, so the fragment jump is the whole behaviour and
-                      nothing has to be prevented. */}
-                  {s.subs && (
-                    <ul className="menu-subs">
-                      {s.subs.map((sb) => (
-                        <li key={sb.id}>
-                          <a
-                            href={`#${sb.id}`}
-                            className={currentSub === sb.id ? 'is-current' : undefined}
-                            aria-current={currentSub === sb.id ? 'true' : undefined}
-                            onClick={() => {
-                              onMenuJump()
-                              setDrawer(false)
-                            }}
-                          >
-                            {sb.title}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </li>
               ))}
             </ol>
@@ -974,9 +940,7 @@ export default function Chapter4() {
             <main className="chapter-article" ref={articleRef}>
 
               {/* ============ 01 · ההגירה למדינה ============
-                  המקטע הגדול בפרק, 25 קטעים, ולכן היחיד שנושא שתי תנועות.
-                  §2 נושא שתי גרסאות של אותו אירוע והמקור לא מכריע ביניהן —
-                  זו הסיבה שהן עומדות זו מול זו ולא זו אחרי זו. */}
+                  המקטע הגדול בפרק, ולכן היחיד שנושא שבע כותרות משנה. */}
               <Section id="hijra" className="opening-section">
                 {/* THE CHAPTER'S BANNER, and its only <h1>. It was lost when the
                     chapter was stripped to running text: that script rewrote
@@ -1069,6 +1033,8 @@ export default function Chapter4() {
                     somewhere else. */}
                 <Groups
                   city="medina-622"
+                  cityWidth={1100}
+                  cityHeight={699}
                   cityAlt="ית'רב — שחזור מצויר"
                   question={sub('hijra', 'groups').title}
                   groups={[
@@ -1263,7 +1229,7 @@ export default function Chapter4() {
                 <div className="film-wrap">
                   <BadrFilm />
                 </div>
-                {/* THE FILM'S OWN WORDS, IN WRITING. The narration is section 03
+                {/* THE FILM'S OWN WORDS, IN WRITING. The narration is §10–§16
                     read aloud, and until now the only way to have it was to
                     watch. That is not a choice everyone can make: a reader on a
                     quiet train, a reader who takes text faster than speech, a
@@ -1316,8 +1282,17 @@ export default function Chapter4() {
                     אינה תמונה שרואים. הכיתוב הוא תיאורה שלה (עריכה,
                     ב-layout.json — כלל 24), לא משפט של הקומפוננטה. */}
                 <figure className="ch4-photo" data-reveal>
+                  {/* width/height reserve the box before the lazy load; without them
+                      the page grew under a #chapter-end jump and it landed short */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={figureOf('badr').src} alt="" loading="lazy" decoding="async" />
+                  <img
+                    src={figureOf('badr').src}
+                    width={figureOf('badr').width}
+                    height={figureOf('badr').height}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <figcaption>{figureOf('badr').caption}</figcaption>
                 </figure>
                 <Block>
@@ -1325,7 +1300,7 @@ export default function Chapter4() {
                 </Block>
               </Section>
 
-              {/* ============ 04 · קרב אֻחֻד ============
+              {/* ============ 03 · קרב אֻחֻד ============
                   §20.hind הוא הקשה בפרק, והוא נשאר טקסט. בלי דימוי. */}
               <Section id="uhud">
                 <Head id="uhud" />
@@ -1373,11 +1348,12 @@ export default function Chapter4() {
                 </Block>
                 <Verse r="§21.verse" cite="סורת בית עמרם, פסוק 169" />
                 <Block>
-                  <T r="§22.echo" className="ch4-body" em={['אבטאל']} reveal />
+                  {/* the page's rewording dropped „אבטאל", so the emphasis is on what it kept */}
+                  <T r="§22.echo" className="ch4-body" em={['בכל הלווה ואזכרה של שהידים']} reveal />
                 </Block>
               </Section>
 
-              {/* ============ קרב השוחה ============
+              {/* ============ 04 · קרב השוחה ============
                   A SECTION OF ITS OWN, not a movement inside אֻחֻד. Two battles
                   two years apart under one heading is one heading too few: the
                   rail could not name the second, and a reader looking for it had
@@ -1456,7 +1432,7 @@ export default function Chapter4() {
                 </div>
               </Section>
 
-              {/* ============ 07 · טבח יהודי ח'יבר ============
+              {/* ============ 06 · ח'יבר וכיבוש מכה ============
                   §41.year — התאריך השגוי — מסומן omitted ואינו מודפס.
                   הגירוש מוצג ביחסו לקרב בדר, כפי שהמקור עצמו עושה לבני נדיר.
                   אין כאן תיקון של המקור ואין הדפסה של טעות. */}
@@ -1520,9 +1496,8 @@ export default function Chapter4() {
                 </Block>
               </Section>
 
-              {/* ============ 10 · חודיביה בפסקי ההלכה ============
-                  שלוש עמדות, אותה תבנית. §36 נספח לכרטיס הראשון ולא כרטיס
-                  רביעי. החלק לא נסגר בהסכמה, וזו הנקודה. */}
+              {/* ============ 08 · הסכם חודיביה בפסקי ההלכה ============
+                  חמישה קולות, כל אחד תחת שמו. החלק לא נסגר בהסכמה, וזו הנקודה. */}
               <Section id="today">
                 {/* THE PLACE THEY ARE ALL ARGUING ABOUT, AS THE GROUND.
                     Every other section of this chapter opens on something to
@@ -1615,18 +1590,18 @@ export default function Chapter4() {
                 <Block>
                   <T r="§56.a" className="ch4-body" reveal />
                   <VideoEmbed link={linkOf('today', 'polka')} />
-                  <T r="§57.a" className="ch4-body" reveal em={['„דת מוחמד"']} />
+                  <T r="§57.a" className="ch4-body" reveal em={['"דת מוחמד"']} />
                 </Block>
               </Section>
 
-              <div className="ch4-end" ref={endRef} data-reveal>
-                {/* THE CHAPTER IS NOT FINISHED BY READING IT. `islam:chapter:4`
-                    is written by the practice screen and by nowhere else, which
-                    is chapter 6's own contract; the article's last act is to
-                    hand the reader over to it. */}
-                <Link className="ch4-end-link" href="/chapter4/practice">
+              {/* THE SHARED CLOSE (rule 33): one way on, and a quiet „הושלם" once
+                  the practice — not the reading — is finished. The practice's
+                  „חזרה לפרק 4" lands on this id. */}
+              <div className="chapter-end" id="chapter-end" ref={endRef} data-reveal>
+                <Link className="chapter-end-back" href="/chapter4/practice">
                   לתרגול המסכם
                 </Link>
+                {practiceDone && <span className="chapter-end-done">הושלם</span>}
               </div>
             </main>
           </div>

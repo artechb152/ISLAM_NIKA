@@ -22,22 +22,42 @@ import {
 import type { Screen } from '@/lib/chapter6/types'
 import MarkToNotebook from '@/components/MarkToNotebook'
 
-const SECTION_LINKS = [
-  { id: 'opening', label: 'פתיחת הפרק' },
-  { id: 'pillars', label: 'חמש מצוות היסוד' },
-  { id: 'shahada', label: 'השהאדה' },
-  { id: 'prayer', label: 'התפילה' },
-  { id: 'charity', label: 'הצדקה' },
-  { id: 'ramadan', label: 'צום רמדאן' },
-  { id: 'hajj', label: "החג'" },
-] as const
-
 const SCREENS = new Map(CH6.screens.map((screen) => [screen.id, screen]))
 
 function screen(id: string): Screen {
   const value = SCREENS.get(id)
   if (!value) throw new Error(`Chapter 6 content is missing screen ${id}`)
   return value
+}
+
+/* a commandment's name is its screens' `section` in data.ts — the rail row and the section's
+   h2 both read it from here, so the two can never disagree (they once did: „צום הרמדאן") */
+const SECTION_NAME = {
+  shahada: screen('sh-1').section,
+  prayer: screen('pr-1').section,
+  charity: screen('ch-1').section,
+  ramadan: screen('rm-1').section,
+  hajj: screen('hj-1').section,
+}
+
+const SECTION_LINKS = [
+  { id: 'opening', label: 'פתיחת הפרק' },
+  { id: 'pillars', label: 'חמש מצוות היסוד' },
+  { id: 'shahada', label: SECTION_NAME.shahada },
+  { id: 'prayer', label: SECTION_NAME.prayer },
+  { id: 'charity', label: SECTION_NAME.charity },
+  { id: 'ramadan', label: SECTION_NAME.ramadan },
+  { id: 'hajj', label: SECTION_NAME.hajj },
+] as const
+
+/* pr-2[1..5]: each prayer's sentence, split into its name, its Arabic name in parentheses,
+   and its time — sliced from the verbatim string, so the step can never drift from the data
+   again (it did: the Asr line kept the pre-revision rule). Throws on a sentence of another shape. */
+function prayerStep(index: number): { name: string; ar: string; when: string } {
+  const text = para('pr-2', index)
+  const match = /^(.+?) (\(.+?\)) (.+)$/.exec(text)
+  if (!match) throw new Error(`Chapter 6: pr-2[${index}] is not "name (Arabic) time": ${text}`)
+  return { name: match[1], ar: match[2], when: match[3] }
 }
 
 /* every paragraph is read from the verbatim data — nothing here retypes content */
@@ -110,8 +130,6 @@ function PillarIcon({ image, alt }: { image: string; alt: string }) {
     <img src={`/assets/anim-video/${image}`} alt={alt} />
   )
 }
-
-const MENU_POS_KEY = 'ch6:menu-pos'
 
 const PILLAR_ICONS = ['icon-shahada.png', 'icon-prayer.png', 'icon-charity.png', 'icon-ramadan.png', 'icon-hajj.png']
 
@@ -208,6 +226,16 @@ export default function Chapter6() {
   function onMenuJump(): void {
     jumpUntil.current = Date.now() + 1800
   }
+
+  /* the header search (ChapterSearch) fires 'chapter:jump' right before it scrolls to a hit —
+     the same grace as a menu jump, so the sections it flies past are not credited */
+  useEffect(() => {
+    function onJump(): void {
+      jumpUntil.current = Date.now() + 1800
+    }
+    window.addEventListener('chapter:jump', onJump)
+    return () => window.removeEventListener('chapter:jump', onJump)
+  }, [])
 
   /* the last section (the hajj) has no anchor after it, so it is marked done when the reader
      reaches the closing block. That records the READING — every section of ch6:v1 — but no
@@ -311,113 +339,6 @@ export default function Chapter6() {
     })
   }
 
-  /* ---------------- draggable menu (desktop only) ----------------
-     The panel keeps its layout slot — dragging moves it with a transform, so the article
-     never shifts. The offset is clamped to the window (and below the header) and persists. */
-  const [menuOffset, setMenuOffset] = useState({ x: 0, y: 0 })
-  const menuOffsetRef = useRef(menuOffset)
-  menuOffsetRef.current = menuOffset
-  const [menuDragging, setMenuDragging] = useState(false)
-  const dragBase = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null)
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(MENU_POS_KEY)
-      if (raw) {
-        const p = JSON.parse(raw) as { x?: number; y?: number } | null
-        if (p && typeof p.x === 'number' && typeof p.y === 'number') setMenuOffset({ x: p.x, y: p.y })
-      }
-    } catch {}
-  }, [])
-
-  function clampMenuOffset(x: number, y: number): { x: number; y: number } {
-    const aside = asideRef.current
-    if (!aside) return { x, y }
-    const rect = aside.getBoundingClientRect()
-    const current = menuOffsetRef.current
-    const baseLeft = rect.left - current.x
-    const baseTop = rect.top - current.y
-    const headerHeight = document.querySelector('.chapter-site-header')?.getBoundingClientRect().height ?? 56
-    /* flush edges: the panel rests ON the window edge, so a drag must start from 0 */
-    const minX = -baseLeft
-    const maxX = window.innerWidth - rect.width - baseLeft
-    const minY = headerHeight - baseTop
-    const maxY = window.innerHeight - rect.height - baseTop
-    return {
-      x: maxX < minX ? 0 : Math.min(Math.max(x, minX), maxX),
-      y: maxY < minY ? 0 : Math.min(Math.max(y, minY), maxY),
-    }
-  }
-
-  function persistMenuOffset(offset: { x: number; y: number }): void {
-    try {
-      if (offset.x === 0 && offset.y === 0) localStorage.removeItem(MENU_POS_KEY)
-      else localStorage.setItem(MENU_POS_KEY, JSON.stringify(offset))
-    } catch {}
-  }
-
-  function onGripPointerDown(event: React.PointerEvent<HTMLButtonElement>): void {
-    if (!isDesktop) return
-    event.preventDefault()
-    event.currentTarget.setPointerCapture(event.pointerId)
-    dragBase.current = { px: event.clientX, py: event.clientY, ox: menuOffsetRef.current.x, oy: menuOffsetRef.current.y }
-    setMenuDragging(true)
-  }
-
-  function onGripPointerMove(event: React.PointerEvent<HTMLButtonElement>): void {
-    const base = dragBase.current
-    if (!base) return
-    setMenuOffset(clampMenuOffset(base.ox + (event.clientX - base.px), base.oy + (event.clientY - base.py)))
-  }
-
-  function onGripPointerUp(): void {
-    if (!dragBase.current) return
-    dragBase.current = null
-    setMenuDragging(false)
-    persistMenuOffset(menuOffsetRef.current)
-  }
-
-  function onGripKeyDown(event: React.KeyboardEvent<HTMLButtonElement>): void {
-    const step = 24
-    let next: { x: number; y: number } | null = null
-    if (event.key === 'ArrowLeft') next = clampMenuOffset(menuOffsetRef.current.x - step, menuOffsetRef.current.y)
-    else if (event.key === 'ArrowRight') next = clampMenuOffset(menuOffsetRef.current.x + step, menuOffsetRef.current.y)
-    else if (event.key === 'ArrowUp') next = clampMenuOffset(menuOffsetRef.current.x, menuOffsetRef.current.y - step)
-    else if (event.key === 'ArrowDown') next = clampMenuOffset(menuOffsetRef.current.x, menuOffsetRef.current.y + step)
-    else if (event.key === 'Home') next = { x: 0, y: 0 }
-    if (!next) return
-    event.preventDefault()
-    setMenuOffset(next)
-    persistMenuOffset(next)
-  }
-
-  function resetMenuOffset(): void {
-    setMenuOffset({ x: 0, y: 0 })
-    persistMenuOffset({ x: 0, y: 0 })
-  }
-
-  /* no text selection while dragging; re-clamp when the window changes size */
-  useEffect(() => {
-    if (!menuDragging) return
-    const previous = document.body.style.userSelect
-    document.body.style.userSelect = 'none'
-    return () => {
-      document.body.style.userSelect = previous
-    }
-  }, [menuDragging])
-
-  useEffect(() => {
-    function onResize(): void {
-      const current = menuOffsetRef.current
-      if (current.x === 0 && current.y === 0) return
-      setMenuOffset((value) => clampMenuOffset(value.x, value.y))
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
-  const menuMoved = menuOffset.x !== 0 || menuOffset.y !== 0
-
   /* Logo click: always return to the chapters screen (the list of all chapters). */
   function goBack(): void {
     router.push('/chapters')
@@ -488,13 +409,7 @@ export default function Chapter6() {
       <aside
         id="chapter-menu"
         ref={asideRef}
-        className={
-          'chapter-drawer' +
-          (drawer ? ' is-open' : '') +
-          (collapsed ? ' is-collapsed' : '') +
-          (menuDragging ? ' is-dragging' : '')
-        }
-        style={isDesktop && menuMoved ? { transform: `translate(${menuOffset.x}px, ${menuOffset.y}px)` } : undefined}
+        className={'chapter-drawer' + (drawer ? ' is-open' : '') + (collapsed ? ' is-collapsed' : '')}
         aria-label="תפריט הפרק"
         aria-hidden={!isDesktop && !drawer ? true : undefined}
         inert={!isDesktop && !drawer}
@@ -503,31 +418,8 @@ export default function Chapter6() {
           <button type="button" className="menu-close" aria-label="סגירת התפריט" onClick={() => setDrawer(false)}>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </button>
-          <h2 className="menu-title">תוכן הפרק</h2>
+          <p className="menu-title">תוכן הפרק</p>
           <span className="menu-sub">פרק 6 · חמש מצוות היסוד</span>
-        </div>
-        <div className="menu-grip-row">
-          <button
-            type="button"
-            className="menu-grip"
-            aria-label="גרירת התפריט (חיצי המקלדת מזיזים, Home מאפס)"
-            title="גרירת התפריט"
-            onPointerDown={onGripPointerDown}
-            onPointerMove={onGripPointerMove}
-            onPointerUp={onGripPointerUp}
-            onPointerCancel={onGripPointerUp}
-            onKeyDown={onGripKeyDown}
-          >
-            <svg viewBox="0 0 24 10" aria-hidden="true">
-              <circle cx="5" cy="3" r="1.4" /><circle cx="12" cy="3" r="1.4" /><circle cx="19" cy="3" r="1.4" />
-              <circle cx="5" cy="7" r="1.4" /><circle cx="12" cy="7" r="1.4" /><circle cx="19" cy="7" r="1.4" />
-            </svg>
-          </button>
-          {menuMoved && (
-            <button type="button" className="menu-reset" onClick={resetMenuOffset}>
-              החזרה למקום
-            </button>
-          )}
         </div>
         <nav className="chapter-menu-nav" aria-label="ניווט בפרק">
           <ol>
@@ -660,7 +552,7 @@ export default function Chapter6() {
               <div className="shahada-body" data-reveal>
                 <header className="shahada-head">
                   <h2 id="shahada-title">
-                    השהאדה <span className="shahada-ar" lang="ar" dir="rtl">(الشهادة)</span>
+                    {SECTION_NAME.shahada} <span className="shahada-ar" lang="ar" dir="rtl">(الشهادة)</span>
                   </h2>
                   <div className="title-ornament" aria-hidden="true"><span /></div>
                 </header>
@@ -698,7 +590,7 @@ export default function Chapter6() {
             {/* the title reads as a normal editorial heading (like every other section); only the
                 paragraphs live in the photo-scrolly. Four grouped steps, the five-prayers step
                 keeps the click-to-change-the-sky interaction; the qibla is its own block below. */}
-            <SectionHeading id="prayer-title" title="התפילה" term="(الصلاة)" />
+            <SectionHeading id="prayer-title" title={SECTION_NAME.prayer} term="(الصلاة)" />
             {/* pr-1 — the night journey → five prayers, as regular parchment reading (like the
                 shahada): no immersive scene, just the text on the paper (sub-heading removed) */}
             <div className="prayer-block" data-reveal>
@@ -708,33 +600,23 @@ export default function Chapter6() {
 
             {/* pr-2 — THE DAY JOURNEY: the five daily prayers read on one screen while the day
                 passes behind them (dawn → night), scroll-driven. The opening "על המוסלמי…" line
-                stays; each prayer's verbatim sentence rides its own moment of the day. No buttons. */}
+                stays; each prayer's verbatim sentence (pr-2[1..5], via prayerStep) rides its own
+                moment of the day. No buttons. */}
             <div className="prayer-day">
               <Scrolly full art={(s) => <PrayerDayStage {...s} />}>
                 <div className="pd-open">
                   <P text={para('pr-2', 0)} />
                   <span className="pd-scrollcue" aria-hidden="true">גללו לאורך היום ↓</span>
                 </div>
-                <div className="pd-step">
-                  <h3 className="pd-name">תפילת השחר <span className="pd-ar">(צלאה אלפג׳ר)</span></h3>
-                  <p>זמנה בעלות השחר, כשהאדם יכול להבחין בין חוט לבן לחוט שחור (קוראן 2:187).</p>
-                </div>
-                <div className="pd-step">
-                  <h3 className="pd-name">תפילת הצהריים <span className="pd-ar">(צלאה אלט׳הר)</span></h3>
-                  <p>זמנה בחצות היום.</p>
-                </div>
-                <div className="pd-step">
-                  <h3 className="pd-name">תפילת אחר הצהריים <span className="pd-ar">(צלאה אלעצר)</span></h3>
-                  <p>זמנה כשצלו של חפץ והחפץ עצמו באותו הגודל.</p>
-                </div>
-                <div className="pd-step">
-                  <h3 className="pd-name">תפילת הערב <span className="pd-ar">(צלאה אלמע׳רב)</span></h3>
-                  <p>זמנה בשקיעת השמש.</p>
-                </div>
-                <div className="pd-step">
-                  <h3 className="pd-name">תפילת הלילה <span className="pd-ar">(צלאה אלעשאא׳)</span></h3>
-                  <p>זמנה בצאת הכוכבים ועד הבוקר.</p>
-                </div>
+                {[1, 2, 3, 4, 5].map((i) => {
+                  const step = prayerStep(i)
+                  return (
+                    <div className="pd-step" key={i}>
+                      <h3 className="pd-name">{step.name} <span className="pd-ar">{step.ar}</span></h3>
+                      <p>{step.when}</p>
+                    </div>
+                  )
+                })}
               </Scrolly>
             </div>
 
@@ -784,10 +666,11 @@ export default function Chapter6() {
 
           {/* ===================== area 4 — the charity ===================== */}
           <section className="commandment-section charity-section article-section" id="charity" aria-labelledby="charity-title">
-            {/* charity as an illustrated hero, like the shahada: a large watercolor of giving —
-                coins and grain poured from hand to hand — bleeds in from the LEFT edge of the
-                screen, the reading column on the right. The 2.5% still lives in the text. */}
-            <SectionHeading id="charity-title" title="הצדקה" term="(الزكاة)" />
+            {/* charity as an illustrated hero, the mirror of the shahada: a large watercolor of
+                giving — coins and grain poured from hand to hand — bleeds in from the RIGHT edge
+                of the screen (the minaret stands on the left), the reading column beside it. The
+                2.5% still lives in the text. */}
+            <SectionHeading id="charity-title" title={SECTION_NAME.charity} term="(الزكاة)" />
             <div className="charity-hero">
               <div className="charity-illus" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -809,9 +692,9 @@ export default function Chapter6() {
 
           {/* ===================== area 5 — the Ramadan fast ===================== */}
           <section className="commandment-section ramadan-section article-section" id="ramadan" aria-labelledby="ramadan-title">
-            {/* editorial heading above the scene; six grouped steps, ליל אלקדר on step 2, the two
-                crescent-sighting schools as the split step at the end */}
-            <SectionHeading id="ramadan-title" title="צום הרמדאן" term="(الصوم)" />
+            {/* editorial heading, then three blocks: how the fast was born (a timeline), a fast
+                day (three arches), and the close of the month (three cards) */}
+            <SectionHeading id="ramadan-title" title={SECTION_NAME.ramadan} term="(الصوم)" />
 
             {/* how the fast was born — a vertical accordion timeline; click an era to open it */}
             <div className="rm-ed-block" data-reveal>
@@ -877,7 +760,7 @@ export default function Chapter6() {
           {/* ===================== area 6 — the hajj ===================== */}
           <section className="commandment-section hajj-section article-section" id="hajj" aria-labelledby="hajj-title">
             {/* the framing (who, when, why) reads first, as a normal editorial block */}
-            <SectionHeading id="hajj-title" title="החג'" term="(الحج)" />
+            <SectionHeading id="hajj-title" title={SECTION_NAME.hajj} term="(الحج)" />
             <div className="hajj-intro content-block-wide" data-reveal>
               <Env>{screen('hj-1').title}</Env>
               <KP text={para('hj-1', 0)} of={["בין היום ה־8 ל־13 לחודש ד'ו אלחג'ה"]} />

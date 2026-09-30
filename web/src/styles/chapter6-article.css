@@ -33,7 +33,7 @@
      which section (reading block, photo card, map column) it lives in */
   --read:clamp(18px,1.55vw,20px);   /* body / reading text — everywhere */
   --sub:clamp(21px,2vw,27px);       /* the sub-section heading (Env) — everywhere */
-  --emph:clamp(23px,2.4vw,31px);    /* the emphasised in-text line (scrolly-big) */
+  --emph:clamp(23px,2.4vw,31px);    /* an emphasised in-text line (chapters 2 and 5) */
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -73,7 +73,6 @@ a{color:inherit}
 .chapter-logo:hover{opacity:.85}
 .chapter-logo:focus-visible{outline:2px solid var(--mat,#f5ecd6);outline-offset:2px;border-radius:6px}
 .chapter-logo img{display:block;width:auto;height:clamp(22px,3vh,32px)}
-.back-to-chapters svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* ---- in-chapter find (mirrors the chapters-page header search field) ---- */
 .chapter-find{position:relative;display:flex;align-items:center;width:clamp(180px,26vw,300px)}
@@ -225,13 +224,6 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .story-film-stage video{width:100%;height:100%;display:block;object-fit:cover;cursor:pointer}
 .story-film-caption{pointer-events:none}
 .story-film-grade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(15,7,3,.04),rgba(15,7,3,.13) 58%,rgba(15,7,3,.78))}
-.story-film-pillars{
-  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:clamp(10px,2vw,30px);
-  background:var(--maroon-deep);
-}
-.story-film-pillars span{width:15%;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--cream)}
-.story-film-pillars img{width:100%;height:auto;max-height:130px;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.35))}
-.story-film-pillars b{font-family:var(--font-heading);font-size:clamp(12px,1.5vw,22px)}
 .story-film-caption{
   position:absolute;z-index:3;inset-inline:5%;bottom:5%;margin:auto;padding:8px 18px;width:fit-content;max-width:90%;
   color:#fff;text-align:center;font-size:clamp(15px,1.4vw,21px);line-height:1.45;
@@ -250,10 +242,6 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 @media (prefers-reduced-motion:reduce){.story-film-title{transition:opacity .2s linear;scale:1}}
 /* the dramatic reveal ("זהו המלאך גבריאל") — centered on the stage, large, no box */
 .story-film-caption.is-reveal{top:50%;bottom:auto;translate:0 -50%;inset-inline:8%;width:auto;max-width:88%;padding:0;background:none;border:none;font-family:var(--font-heading);font-weight:700;font-size:clamp(30px,5.2vw,68px);line-height:1.12;text-shadow:0 4px 26px rgba(0,0,0,.92)}
-.story-film-emphasis{
-  position:absolute;z-index:3;inset-inline:8%;top:42%;translate:0 -50%;
-  font-family:var(--font-heading);font-size:clamp(28px,4.6vw,64px);line-height:1.1;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.9);
-}
 .story-film-big-play{
   all:unset;box-sizing:border-box;cursor:pointer;position:absolute;z-index:4;inset:50% auto auto 50%;translate:-50% -50%;
   width:70px;height:70px;border-radius:50%;display:grid;place-items:center;
@@ -309,7 +297,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .story-copy{
   width:100%;margin:24px 0 0;padding:0;text-align:start;
 }
-.story-label,.section-eyebrow{display:block;color:var(--maroon);font-size:13px;font-weight:600;letter-spacing:1.8px;margin-bottom:5px}
+.section-eyebrow{display:block;color:var(--maroon);font-size:13px;font-weight:600;letter-spacing:1.8px;margin-bottom:5px}
 .story-copy h2{font-size:clamp(27px,3vw,38px);margin-bottom:18px}
 .story-copy p{margin-top:12px;color:var(--ink);line-height:1.82}
 
@@ -339,7 +327,6 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 }
 
 .content-columns{display:grid;gap:clamp(24px,3vw,44px)}
-.three-columns{grid-template-columns:repeat(3,minmax(0,1fr))}
 .two-columns{grid-template-columns:repeat(2,minmax(0,1fr))}
 .content-block{min-width:0}
 .content-columns > .content-block{
@@ -351,35 +338,13 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .content-block-wide h3{font-size:clamp(26px,2.7vw,36px)}
 .arabic-quote{font-family:"Segoe UI",Tahoma,sans-serif;font-size:clamp(25px,3vw,38px);color:var(--maroon);line-height:1.6;margin:12px 0}
 
-.shahada-statement{
-  width:min(820px,100%);margin:0 0 34px;padding:28px;display:flex;align-items:center;justify-content:flex-start;gap:clamp(18px,4vw,52px);flex-wrap:wrap;
-  background:var(--mat);border-block:1px solid rgba(138,39,51,.3);
-}
-.shahada-statement span{font-family:"Segoe UI",Tahoma,sans-serif;font-size:clamp(42px,5vw,68px);color:var(--maroon)}
-.shahada-statement b{font-family:var(--font-heading);font-size:clamp(28px,3vw,42px);color:var(--maroon-deep)}
-.shahada-statement small{font-size:18px;color:var(--stamp);font-weight:600}
-
-.prayer-cycle{
-  display:grid;grid-template-columns:minmax(260px,.75fr) minmax(0,1.25fr);overflow:hidden;
-  margin:34px 0;border-radius:14px;background:var(--mat);border:1px solid var(--edge);
-}
-.prayer-sky{position:relative;min-height:520px;overflow:hidden;background:linear-gradient(180deg,#28213e 0,#e2a25a 22%,#93c2dd 48%,#d97849 76%,#1a1630 100%)}
-.prayer-sky::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 55% 20%,rgba(255,244,207,.92) 0 4%,rgba(255,226,168,.25) 10%,transparent 28%)}
-.prayer-sky .sun{position:absolute;top:17%;left:53%;width:34px;height:34px;border-radius:50%;background:#fff4cf;box-shadow:0 0 35px 12px rgba(255,226,168,.7)}
-.prayer-sky .horizon{position:absolute;inset-inline:0;bottom:0;height:27%;background:#1c1320;clip-path:polygon(0 72%,8% 63%,13% 70%,18% 43%,23% 69%,31% 58%,38% 72%,45% 50%,53% 71%,62% 60%,69% 72%,75% 45%,82% 70%,90% 58%,100% 68%,100% 100%,0 100%)}
-.prayer-cycle-copy{padding:clamp(26px,4vw,48px)}
-.prayer-cycle-copy h3{font-size:clamp(27px,3vw,40px);margin-bottom:10px}
-.prayer-cycle-copy > p{margin-bottom:20px;color:var(--muted)}
-.prayer-cycle-copy ol{list-style:none}
-.prayer-cycle-copy li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--rule)}
-.prayer-cycle-copy li > span{color:var(--stamp);font-size:12px;padding-top:5px;font-variant-numeric:tabular-nums}
-.prayer-cycle-copy li p{font-size:16px;line-height:1.55}
-
 .qibla-feature{display:grid;grid-template-columns:minmax(0,.9fr) minmax(420px,1.1fr);gap:10px 28px;align-items:start;margin-top:34px}
 /* the title spans the top; the map then aligns to the body text, not the title */
 .qibla-feature > .scrolly-env{grid-column:1 / -1;margin-bottom:6px}
 .map-figure{position:relative;overflow:hidden;background:#e6d6b4;border:1px solid var(--edge);border-radius:14px;box-shadow:0 10px 26px rgba(60,35,18,.12)}
-/* qibla map: the painted regional map fills the figure; the ornamental border is part of the artwork */
+/* qibla map: the painted regional map fills the figure; the ornamental border is part of the artwork.
+   The figure IS the image box (no aspect-ratio of its own), so the % pins and the 0–100 SVG
+   lines stay on the painting at every width (rule 63) */
 .qibla-map{aspect-ratio:auto;overflow:visible;background:none;border:none;box-shadow:none}
 .qibla-mapimg{width:100%;height:auto;display:block;border-radius:14px;box-shadow:0 10px 26px rgba(60,35,18,.14)}
 .qibla-lines{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
@@ -387,7 +352,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .qline-second{fill:none;stroke:var(--maroon);stroke-width:3;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .map-plate,.map-plate svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .map-figure figcaption{position:absolute;inset-inline:12px;bottom:10px;width:fit-content;padding:4px 10px;border-radius:6px;background:rgba(245,236,214,.9);font-size:12px;color:var(--maroon-deep)}
-.map-pin,.hajj-pin{position:absolute;z-index:2;translate:-50% -50%;font-size:12px;font-weight:600;color:var(--maroon);background:var(--mat);border:1px solid rgba(138,39,51,.4);border-radius:99px;padding:3px 8px;box-shadow:0 4px 10px rgba(60,35,18,.14);white-space:nowrap}
+.map-pin{position:absolute;z-index:2;translate:-50% -50%;font-size:12px;font-weight:600;color:var(--maroon);background:var(--mat);border:1px solid rgba(138,39,51,.4);border-radius:99px;padding:3px 8px;box-shadow:0 4px 10px rgba(60,35,18,.14);white-space:nowrap}
 .map-pin::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--maroon);margin-inline-end:5px}
 .qibla-map .jerusalem{left:40%;top:19%}.qibla-map .medina{left:62%;top:42%}.qibla-map .makkah{left:60%;top:66%}
 /* the two-direction legend under the qibla map — reads the faint dashed line and the bold one */
@@ -398,7 +363,8 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .qibla-legend .second::before{border-top:4px solid var(--maroon)}
 .qibla-legend .second{color:var(--maroon-deep);font-weight:600}
 
-/* charity hero — the illustration bleeds from the LEFT like the shahada minaret, text on the right */
+/* charity hero — the mirror of the shahada: the illustration bleeds off the RIGHT edge (the
+   minaret stands on the left), the reading column sits left of it */
 .charity-hero{position:relative;margin-top:8px}
 .charity-illus{display:none}
 .charity-body .content-block + .content-block{margin-top:26px;padding-top:26px;border-top:1px solid var(--rule)}
@@ -435,51 +401,8 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 @media (min-width:900px){
   .charity-section{display:flex;flex-direction:column;justify-content:center;min-height:clamp(560px,72vh,720px)}
 }
-.charity-layout{display:grid;grid-template-columns:minmax(320px,.8fr) minmax(0,1.2fr);gap:clamp(28px,5vw,70px);align-items:center}
-.charity-figure{position:relative;min-height:440px;display:grid;place-items:center}
-.charity-figure img{width:100%;max-width:min(400px,100%);height:auto;display:block;filter:drop-shadow(0 14px 30px rgba(60,35,18,.14))}
-.charity-ring{width:220px;aspect-ratio:1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:conic-gradient(var(--maroon) 0 2.5%,rgba(138,39,51,.16) 2.5% 100%);position:relative}
-.charity-ring::before{content:"";position:absolute;inset:20px;border-radius:50%;background:var(--surface);box-shadow:inset 0 0 0 1px rgba(138,39,51,.28)}
-.charity-ring b,.charity-ring small{position:relative;z-index:1}
-.charity-ring b{font-family:var(--font-heading);font-size:54px;color:var(--maroon);line-height:1}
-.charity-ring small{color:var(--muted);font-size:14px}
-.charity-flow{position:absolute;top:255px;width:2px;height:56px;background:var(--maroon)}
-.charity-figure ul{position:absolute;bottom:12px;list-style:none;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.charity-figure li{padding:7px 13px;border:1px solid var(--edge);border-radius:99px;background:var(--mat);font-size:14px;color:var(--maroon-deep)}
-.charity-copy{display:flex;flex-direction:column;gap:28px}
-.charity-copy .content-block + .content-block{padding-top:28px;border-top:1px solid var(--rule)}
-
-.ramadan-history .content-block:nth-child(2){margin-top:28px}.ramadan-history .content-block:nth-child(3){margin-top:56px}
-.fast-day{margin:38px 0;padding:clamp(28px,4vw,46px);border-radius:14px;color:var(--cream);background:var(--maroon-deep);overflow:hidden}
-.fast-day-head{width:min(760px,100%)}
-.fast-day h3{color:var(--cream);font-size:clamp(28px,3vw,40px);margin-bottom:10px}
-.fast-day-head p{color:rgba(245,236,214,.86)}
-.fast-day ol{position:relative;list-style:none;display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:32px}
-.fast-day ol::before{content:"";position:absolute;inset-inline:7%;top:17px;height:1px;background:rgba(245,236,214,.4)}
-.fast-day li{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
-.fast-day li span{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--mat);color:var(--maroon-deep);font-weight:600;font-size:13px}
-.fast-day li b{font-size:14px;line-height:1.35;color:var(--cream)}
-
-.hajj-pin{font-size:11px;padding:2px 6px}
-.hajj-pin i{font-style:normal;color:var(--stamp);margin-inline-end:4px}
-.hajj-map .pin-1{left:9.5%;top:74.1%}.hajj-map .pin-2{left:20.5%;top:53.6%}.hajj-map .pin-3{left:24%;top:63%}.hajj-map .pin-4{left:86%;top:71.4%}.hajj-map .pin-5{left:65.5%;top:78%}.hajj-map .pin-6{left:45.5%;top:74%}.hajj-map .pin-7{left:18.5%;top:42%}
-.hajj-journey{position:relative;display:flex;flex-direction:column;gap:0;width:min(940px,100%);margin-inline:auto}
-.hajj-journey::before{content:"";position:absolute;inset-block:0;inset-inline-start:24px;width:1px;background:linear-gradient(var(--maroon),rgba(138,39,51,.12))}
-.hajj-stop{display:grid;grid-template-columns:48px 1fr;gap:20px;padding:0 0 34px}
-.hajj-stop > span{position:relative;z-index:1;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--maroon);color:var(--maroon);font-size:12px;font-variant-numeric:tabular-nums}
-.hajj-stop .content-block{padding:0 0 0}
-
-.summary-section{text-align:right;background:var(--panel)}
-.summary-section .section-heading{text-align:start}
-.summary-band{display:grid;grid-template-columns:repeat(5,1fr);border-block:1px solid var(--edge);margin:30px 0}
-.summary-band a{display:flex;flex-direction:column;align-items:center;padding:22px 10px;text-decoration:none;border-inline-start:1px solid var(--rule)}
-.summary-band a:last-child{border-inline-start:0}
-.summary-band span{color:var(--stamp);font-size:12px}.summary-band b{font-family:var(--font-heading);font-size:20px;color:var(--maroon)}.summary-band small{color:var(--muted)}
-.summary-band a:hover{background:rgba(165,50,47,.08)}
 
 @media (max-width:1180px){
-  .three-columns{grid-template-columns:1fr 1fr}.three-columns > :last-child{grid-column:1/-1}
-  .ramadan-history .content-block:nth-child(2),.ramadan-history .content-block:nth-child(3){margin-top:0}
   .qibla-feature{grid-template-columns:1fr}.qibla-feature .content-block{width:min(800px,100%)}
 }
 
@@ -488,10 +411,14 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   .chapter-site-header-inner{width:100%;padding-inline:clamp(16px,4vw,40px)}
   .chapter-logo img{height:26px}
   .chapter-layout{width:100%;padding-block:26px 70px}
-  .pillars-path{width:100%;min-width:0;grid-template-columns:repeat(5,140px);overflow-x:auto;padding-bottom:14px;scroll-snap-type:x proximity}
-  .pillars-path a{scroll-snap-align:start}.pillars-line{inset-inline:60px;width:600px}
-  .prayer-cycle,.charity-layout{grid-template-columns:1fr}
-  .prayer-sky{min-height:260px}.charity-figure{min-height:390px}
+  /* the banner's pull-up must equal the layout's top padding at every width, or it slides
+     under the masthead (base: 42px) */
+  .ch6-hero{margin-block-start:-26px}
+  /* all five stay in view: the row wraps (centred) instead of scrolling sideways, and the
+     hairline, which can only join a single row, steps out */
+  .pillars-path{display:flex;flex-wrap:wrap;justify-content:center;gap:22px 12px}
+  .pillars-path a{flex:0 1 120px}
+  .pillars-line{display:none}
 }
 
 @media (max-width:680px){
@@ -499,6 +426,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   .chapter-site-header-inner{width:100%;padding-inline:14px}
   .chapter-find{width:clamp(120px,40vw,220px)}
   .chapter-layout{padding-top:18px}
+  .ch6-hero{margin-block-start:-18px}
   .chapter-article{padding-inline:0}
   .article-section + .article-section{margin-top:36px;padding-top:36px}
   h1{font-size:38px;text-wrap:balance}
@@ -515,23 +443,20 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   .section-heading > div:not(.title-ornament){width:100%;min-width:0;display:block}
   .section-heading h2{width:100%;font-size:31px;text-wrap:balance}.section-heading .section-term{display:block;margin-top:5px}
   .section-heading > p{width:100%;max-width:100%;font-size:19px}
-  .three-columns,.two-columns{grid-template-columns:1fr}.three-columns > :last-child{grid-column:auto}
+  .two-columns{grid-template-columns:1fr}
   .content-columns > .content-block{padding-top:16px}
-  .shahada-statement{flex-direction:column;gap:5px;padding:22px}.shahada-statement span{font-size:48px}
-  .prayer-cycle-copy{padding:25px 18px}.prayer-cycle-copy li{grid-template-columns:28px 1fr}
-  .qibla-map{aspect-ratio:1.3}.map-plate svg{preserve-aspect-ratio:none}
+  .map-plate svg{preserve-aspect-ratio:none}
   .map-pin{font-size:10px;padding:2px 5px}
-  .fast-day ol{grid-template-columns:1fr;gap:0;margin-top:22px}.fast-day ol::before{inset-block:16px 16px;inset-inline-start:17px;width:1px;height:auto}
-  .fast-day li{display:grid;grid-template-columns:34px 1fr;text-align:start;gap:12px;padding-bottom:12px}.fast-day li b{font-size:15px}
-  .hajj-map{aspect-ratio:1.25}.hajj-pin{font-size:0;width:25px;height:25px;padding:0;display:grid;place-items:center}.hajj-pin i{font-size:11px;margin:0}
-  .hajj-stop{grid-template-columns:38px 1fr;gap:13px}.hajj-stop > span{width:38px;height:38px}.hajj-journey::before{inset-inline-start:19px}
-  .summary-band{grid-template-columns:1fr}.summary-band a{flex-direction:row;gap:10px;justify-content:flex-start;border-inline:0;border-top:1px solid var(--rule);padding:13px 10px}.summary-band a:first-child{border-top:0}.summary-band small{margin-inline-start:auto}
+  /* three pillars to a row, then two */
+  .pillars-path{column-gap:8px}
+  .pillars-path a{flex-basis:104px}
+  .pillar-icon{width:70px;height:70px}
+  .pillars-path b{font-size:18px;white-space:nowrap}
 }
 
 /* ===================================================================================
-   Spec revision (7.2026): scroll reveals, the two explore interactions, the summary
-   practice, the Magnific scene plates, the commandment transitions and the draggable
-   menu — all in the existing parchment language, nothing replaces an existing component.
+   Spec revision (7.2026): scroll reveals and the rail's current / done marks — in the
+   existing parchment language.
    =================================================================================== */
 
 /* ---- scroll-driven reveals: armed only once JS mounts (js-reveal), reversible on
@@ -542,32 +467,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 }
 .js-reveal [data-reveal].is-inview{opacity:1;translate:0 0}
 
-/* ---- menu: drag grip, reset, current highlight, done marks ---- */
-.menu-grip-row{display:none}
-@media (min-width:1024px){
-  .menu-grip-row{
-    display:none;
-  }
-  .menu-grip{
-    all:unset;box-sizing:border-box;cursor:grab;touch-action:none;
-    width:56px;height:22px;border-radius:8px;display:grid;place-items:center;color:var(--muted);
-  }
-  .menu-grip:hover{background:rgba(165,50,47,.1);color:var(--maroon)}
-  .menu-grip:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-  .menu-grip svg{width:24px;height:10px;fill:currentColor}
-  .menu-reset{
-    all:unset;box-sizing:border-box;cursor:pointer;font-size:12px;font-weight:600;color:var(--maroon);
-    padding:3px 10px;border:1px solid var(--edge);border-radius:999px;background:var(--mat);
-  }
-  .menu-reset:hover{background:rgba(165,50,47,.1)}
-  .menu-reset:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-  .chapter-drawer.is-collapsed .menu-reset{display:none}
-  .chapter-drawer.is-dragging{
-    cursor:grabbing;box-shadow:0 22px 54px rgba(28,10,2,.3);
-    border:1px solid var(--edge);border-radius:0 0 12px 12px;
-  }
-  .chapter-drawer.is-dragging .menu-grip{cursor:grabbing}
-}
+/* ---- menu: current highlight, done marks ---- */
 .chapter-menu-nav a{position:relative}
 .chapter-menu-nav a.is-current{background:rgba(165,50,47,.12);color:var(--maroon);font-weight:700}
 .menu-done{
@@ -575,47 +475,19 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   fill:none;stroke:var(--maroon);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;opacity:.75;
 }
 .chapter-drawer.is-collapsed .menu-done{display:none}
+/* sub-rows under a section (chapters that nest them): no markers, indented to the label
+   (10 padding + 22 number + 10 gap), smaller and muted; hidden on the collapsed rail */
+.menu-subs{list-style:none;margin:0 0 6px;padding:0}
+.menu-subs a{display:block;min-height:0;padding-block:5px;padding-inline:42px 10px;font-size:13.5px;font-weight:500;color:var(--muted);line-height:1.4}
+.menu-subs a:hover{color:var(--maroon);background:rgba(165,50,47,.07)}
+.menu-subs a.is-current{background:none;color:var(--maroon);font-weight:700}
+.chapter-drawer.is-collapsed .menu-subs{display:none}
 
-/* ---- Magnific scene plates: alongside the didactic components, never instead ---- */
-.scene-plate{
-  position:relative;width:min(880px,100%);margin:30px auto;overflow:hidden;
-  background:var(--mat);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);
-}
-.scene-plate.ratio-wide{aspect-ratio:16/9}
-.scene-plate.ratio-square{aspect-ratio:1}
-.scene-plate-narrow{width:min(430px,100%)}
-.scene-plate img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.scene-plate figcaption{
-  position:absolute;inset-inline:12px;bottom:10px;width:fit-content;padding:4px 10px;border-radius:6px;
-  background:rgba(245,236,214,.92);font-size:12px;color:var(--maroon-deep);
-}
-
-/* ---- the two explore interactions: plain tab pairs, text always above, nothing blocks ----
-   the block is flush to the inline-start (the right, in RTL) so it lines up with the intro
-   text above it rather than floating centred. */
-.explore{width:min(760px,100%);margin:44px 0 24px}
-.explore-tabs{display:flex;gap:10px;border-bottom:1px solid var(--edge);padding-bottom:0}
-.explore-tabs button{
-  all:unset;box-sizing:border-box;cursor:pointer;min-height:44px;padding:11px 24px;
-  border:1px solid var(--edge);border-bottom:none;border-radius:10px 10px 0 0;
-  background:var(--panel);color:var(--muted);font-weight:600;font-size:15px;
-  transition:background .2s ease,color .2s ease;
-}
-.explore-tabs button:hover{color:var(--maroon)}
-.explore-tabs button.is-active{background:var(--mat);color:var(--maroon);border-color:rgba(138,39,51,.4)}
-.explore-tabs button:focus-visible{outline:2px solid var(--maroon);outline-offset:-2px}
-.explore-panel{
-  background:var(--mat);border:1px solid var(--edge);border-top:none;border-radius:0 0 12px 12px;
-  padding:26px 26px 22px;
-}
-.explore-scene{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:9px;background:var(--surface)}
-.explore-scene img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.explore-caption{margin-top:16px;font-size:14px;color:var(--muted);text-align:right;line-height:1.6}
 /* =================================================================================
    THE SHAHADA — an illustrated hero (in the site's graphic language):
-   a large watercolor minaret bleeds off the RIGHT edge, the reading column sits on the
-   LEFT — centred title with the Arabic word + ornament, the origin, the testimony in an
-   illuminated frame, and the "when is it heard" segmented control with an info note.
+   a large watercolor minaret bleeds off the LEFT edge, the reading column sits on the
+   RIGHT — the title with the Arabic word + ornament, the origin, the testimony in an
+   illuminated frame, then when it is heard, as continuous prose.
    ================================================================================= */
 .shahada-hero{position:relative;margin-top:8px}
 .shahada-minaret{display:none}
@@ -659,39 +531,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 /* the testimony itself is centred (only this block) */
 .shahada-quote p{margin:0;font-family:var(--font-heading);font-weight:700;font-size:clamp(20px,2.3vw,28px);color:var(--maroon-deep);line-height:1.4;text-align:center}
 
-/* "השהאדה – באזכורים שונים" — a centred rule heading */
-.shahada-when-head{display:flex;align-items:center;gap:16px;margin:34px 0 18px;color:var(--maroon)}
-.shahada-when-head::before,.shahada-when-head::after{content:"";height:1px;flex:1;background:linear-gradient(to var(--_d,left),transparent,rgba(138,39,51,.4))}
-.shahada-when-head::after{--_d:right}
-.shahada-when-head span{font-family:var(--font-heading);font-weight:700;font-size:clamp(17px,1.7vw,21px);white-space:nowrap}
-
-/* the segmented control + info note (no photo, no icon) */
-.shahada-when{width:min(520px,100%);margin:0}
-.sw-tabs{display:flex;align-items:stretch;gap:8px;justify-content:center}
-.sw-tabs button{
-  all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;min-height:44px;
-  display:flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:12px;
-  border:1px solid var(--edge);background:var(--mat);color:var(--muted);
-  font-family:var(--font-body);font-weight:600;font-size:15.5px;
-  transition:background .2s,color .2s,border-color .2s,box-shadow .2s;
-}
-.sw-tabs button:hover{color:var(--maroon)}
-.sw-tabs button.is-active{background:var(--maroon);color:var(--cream);border-color:var(--maroon-deep);box-shadow:0 6px 16px rgba(87,24,32,.22)}
-.sw-tabs button:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-/* a basic parchment card that "drops" from the active tab via a small caret above it */
-.sw-info{
-  position:relative;margin-top:12px;padding:15px 18px;text-align:start;
-  background:var(--cream);border:1px solid var(--edge);border-radius:12px;box-shadow:0 4px 12px rgba(60,35,18,.06);
-}
-.sw-info[hidden]{display:none}
-.sw-caret{
-  position:absolute;top:-7px;inset-inline-start:var(--pos,25%);width:13px;height:13px;
-  background:var(--cream);border-inline-start:1px solid var(--edge);border-block-start:1px solid var(--edge);
-  transform:translateX(50%) rotate(45deg);
-}
-.sw-info p{margin:0;font-size:15px;line-height:1.65;color:var(--ink)}
-
-/* desktop: the minaret takes the right, the reading column the left */
+/* desktop: the minaret takes the left, the reading column the right */
 @media (min-width:900px){
   /* centre the whole section vertically between the two divider rules — a modest,
      viewport-relative height (no near-screen-tall empty band on large displays) */
@@ -721,46 +561,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   }
 }
 
-/* ========== prayer: five prayers as buttons → the WHOLE-screen background changes ==========
-   the buttons sit in the text; clicking one crossfades the full-screen scene to that prayer's
-   time of day (the .st-pick layer in PrayerStage), with its explanation shown beside them */
-.st-photo > img.st-pick{transition:opacity .6s ease}
-/* afternoon (asr): the midday photo pushed to a warm late-afternoon grade — golden, lower,
-   dimmer — so צהריים and אחר הצהריים read as two different times of day */
-.st-photo > img.st-pick-asr{filter:blur(7px) saturate(1.35) sepia(.34) hue-rotate(-12deg) brightness(.82) contrast(1.05)}
-.ptimes{margin-top:20px}
-.ptimes-btns{display:flex;flex-wrap:wrap;gap:9px}
-.ptimes-btn{
-  all:unset;box-sizing:border-box;cursor:pointer;padding:9px 17px;border-radius:999px;min-height:40px;
-  border:1px solid var(--edge);background:rgba(250,246,236,.85);color:var(--muted);font-weight:600;font-size:15px;
-  transition:background .2s,color .2s,border-color .2s;
-}
-.ptimes-btn:hover{color:var(--maroon);border-color:rgba(138,39,51,.4)}
-.ptimes-btn.is-active{background:var(--maroon);color:var(--cream);border-color:var(--maroon)}
-.ptimes-btn:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-.ptimes-copy{display:flex;flex-direction:column;gap:8px;margin-top:18px}
-.ptimes-copy b{font-family:var(--font-heading);font-size:clamp(23px,2.6vw,34px);color:var(--maroon-deep);line-height:1.15}
-.ptimes-when{align-self:flex-start;font-weight:600;color:var(--stamp);background:rgba(250,246,236,.9);
-  border:1px solid var(--edge);border-radius:999px;padding:3px 14px;font-size:15px}
-.ptimes-copy p{font-size:clamp(17px,1.6vw,22px);line-height:1.75;color:var(--ink)}
-@media (prefers-reduced-motion:reduce){
-  .st-photo > img.st-pick{transition:none}
-}
-
-/* ---- the summary practice: click-only, no score, no failure screen ---- */
-.practice-wrap{width:min(820px,100%);margin:10px auto 0;text-align:start}
-.practice-title{font-size:clamp(24px,2.4vw,32px);margin-bottom:14px}
-.practice{
-  background:var(--mat);border:1px solid var(--edge);border-radius:14px;padding:clamp(20px,3vw,34px);
-}
-.practice-head{text-align:center}
-.practice-count{font-size:12px;color:var(--stamp);font-variant-numeric:tabular-nums;letter-spacing:1px}
-.practice-quote{
-  margin:10px auto 6px;width:min(640px,100%);
-  font-family:var(--font-heading);font-weight:700;font-size:clamp(20px,2.2vw,27px);line-height:1.45;color:var(--maroon-deep);
-}
-.practice-ask{display:block;font-size:14px;color:var(--muted)}
-.practice-options{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:22px}
+/* ---- a picture-option button (Mcq.tsx, the practice page) ---- */
 .practice-option{
   all:unset;box-sizing:border-box;cursor:pointer;position:relative;
   display:flex;flex-direction:column;align-items:center;gap:8px;min-height:44px;padding:14px 8px;
@@ -773,28 +574,11 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .practice-option b{font-family:var(--font-heading);font-size:16px;color:var(--maroon)}
 .practice-option.is-wrong{opacity:.38;cursor:default}
 .practice-option.is-right{border-color:var(--maroon);background:rgba(165,50,47,.08)}
-.practice-check{
-  position:absolute;top:6px;inset-inline-end:6px;width:22px;height:22px;padding:4px;border-radius:50%;
-  background:var(--maroon);fill:none;stroke:var(--cream);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
-}
-.practice-say{min-height:24px;margin-top:14px;text-align:center;font-weight:600;color:var(--maroon)}
-.practice-finished{display:flex;align-items:center;justify-content:center;gap:12px;text-align:center}
-.practice-finished svg{
-  width:34px;height:34px;padding:6px;border-radius:50%;background:var(--maroon);flex:none;
-  fill:none;stroke:var(--cream);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;
-}
-.practice-finished p{font-family:var(--font-heading);font-weight:700;font-size:clamp(19px,2vw,25px);color:var(--maroon-deep)}
 
 @media (max-width:1180px){
-  /* on narrow screens the map column sits ABOVE its text */
+  /* on narrow screens the map column sits ABOVE its text — but under its own title */
+  .qibla-feature > .scrolly-env{order:-2}
   .qibla-feature .qibla-mapcol{order:-1}
-}
-
-@media (max-width:680px){
-  .practice-options{grid-template-columns:repeat(2,1fr)}
-  .practice-options .practice-option:last-child{grid-column:1/-1}
-  .explore-tabs button{flex:1;text-align:center;padding-inline:8px}
-  .scene-plate{border-radius:10px}
 }
 
 /* ===================================================================================
@@ -823,16 +607,12 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   height:min(72vh,560px);overflow:hidden;border-radius:14px;
   background:var(--mat);border:1px solid var(--edge);box-shadow:var(--shadow);
 }
-.scn{width:100%;height:100%;display:block}
-.scn circle,.scn rect,.scn path,.scn ellipse,.scn text,.scn g{transition:opacity .5s ease}
-.scn .zoom{transition:transform .85s cubic-bezier(.3,.75,.3,1)}
 
 .scrolly-step{min-height:52vh;display:flex;flex-direction:column;justify-content:center;padding:10px 0;opacity:.4;transition:opacity .45s ease}
 .scrolly-step.is-active{opacity:1}
 .scrolly-step:first-child{min-height:34vh}
 .scrolly-step:last-child{min-height:40vh}
 .scrolly-step p{font-size:var(--read);line-height:1.85;color:var(--ink)}
-.scrolly-big{font-family:var(--font-heading);font-weight:700;font-size:var(--emph)!important;line-height:1.5!important;color:var(--maroon-deep)!important}
 .scrolly-env{
   font-family:var(--font-heading);font-size:var(--sub);color:var(--maroon);
   margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);width:fit-content;
@@ -844,15 +624,6 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 /* emphasis of words that already exist in the text, timed to the scroll */
 mark.wmark{background:transparent;color:inherit;border-radius:3px;padding-inline:1px;box-shadow:inset 0 -2px 0 transparent;transition:background .45s ease,box-shadow .45s ease,color .45s ease}
 mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--maroon);color:var(--maroon-deep)}
-
-/* the intro line before an explore interaction */
-.explore-block{width:min(760px,100%);margin:52px 0 0}
-.explore-block p{font-size:var(--read);line-height:1.85}
-.explore-block .scrolly-env{margin-bottom:16px}
-
-.hijri-link{width:min(760px,100%);margin:14px auto 0;font-size:16.5px;color:var(--ink)}
-.hijri-link a{color:var(--maroon);font-weight:600;text-decoration-color:rgba(138,39,51,.5);text-underline-offset:3px}
-.hijri-link a:hover{color:var(--maroon-deep)}
 
 /* the closing blessing: Arabic first and large, the translation beneath */
 .blessing{text-align:center;margin-top:clamp(40px,7vw,90px)}
@@ -875,21 +646,6 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   background:var(--maroon-deep);padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);
   transition:background .2s ease,transform .2s ease}
 .chapter-end-back:hover{background:var(--maroon);transform:translateY(-2px)}
-
-/* --- the chapter's close: five icons, each carrying one small memory of the journey --- */
-.summary-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin:30px 0}
-.summary-cards a{
-  display:flex;flex-direction:column;text-decoration:none;border-radius:12px;overflow:hidden;
-  background:var(--mat);border:1px solid var(--edge);transition:transform .22s ease,box-shadow .22s ease;
-}
-.summary-cards a:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
-.summary-visual{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--surface);display:grid;place-items:center}
-.summary-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.summary-visual i{font-style:normal;padding:10px;font-family:var(--font-heading);font-weight:700;font-size:14.5px;line-height:1.5;color:var(--maroon-deep);text-align:center}
-.summary-name{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--rule)}
-.summary-name img{width:30px;height:30px;object-fit:contain;flex:none}
-.summary-name b{font-family:var(--font-heading);font-size:16.5px;color:var(--maroon)}
-.summary-name small{margin-inline-start:auto;color:var(--muted);font-size:12.5px}
 
 /* ===================================================================================
    Full-screen stages: the scene fills the viewport, the scroll drives it, and the
@@ -934,38 +690,9 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 /* the photo-card sub-heading matches every other sub-heading — only its border is a touch
    heavier for legibility over the image; the SIZE is the shared token */
 .stage-card .scrolly-env{font-size:var(--sub);border-bottom-width:3px;margin-bottom:16px}
-.stage-card .scrolly-big{font-size:var(--emph)!important}
 
-/* ---- photographic stage: blurred realistic scene + a white veil, strong on the
-   right (where the text sits) and fading toward the left ---- */
-/* ---- a full-screen step that carries an illustration/interaction on the LEFT while its
-   text sits on the RIGHT: both belong to the same scroll step, so they move together and
-   there is no sticky/overlap fragility ---- */
-.scrolly-fullstage .scrolly-step .step-split{
-  width:100%;display:flex;align-items:center;justify-content:space-between;gap:clamp(16px,3vw,48px);
-}
-.step-aside{margin:0;width:min(400px,40%);flex:none}
-.step-aside > img{
-  width:100%;height:auto;display:block;border-radius:14px;
-  border:1px solid var(--edge);box-shadow:0 18px 50px rgba(28,10,2,.32);background:var(--surface);
-}
-.step-aside figcaption{
-  margin-top:8px;text-align:center;font-size:13px;color:var(--maroon-deep);
-  background:rgba(250,246,236,.9);border-radius:8px;padding:4px 10px;width:fit-content;margin-inline:auto;
-}
-.step-aside-wide{width:min(500px,46%)}
-.step-aside-wide .explore{width:100%;margin:0}
-.step-aside-wide .explore-tabs button{background:rgba(250,246,236,.92)}
-.step-aside-wide .explore-panel{box-shadow:0 18px 50px rgba(28,10,2,.32)}
-.step-split .stage-card{flex:1;min-width:0}
-
-@media (max-width:920px){
-  /* no room beside the text — stack: text first, then the illustration below it */
-  .scrolly-fullstage .scrolly-step .step-split{flex-direction:column;gap:16px}
-  .step-aside,.step-aside-wide{width:min(430px,100%);order:2}
-  .step-split .stage-card{order:1;width:100%}
-}
-
+/* ---- photographic stage: blurred realistic scene + a veil (the prayer day overrides
+   both below) ---- */
 .st-photo{background:#efe6d2}
 .st-photo > img{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
@@ -1037,155 +764,7 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
     var(--paper) 0%, rgba(237,228,208,.82) 20%, rgba(237,228,208,.5) 46%, rgba(237,228,208,.2) 72%, transparent 100%);
 }
 
-/* =====================================================================================
-   THE HAJJ — an immersive walk through the seven stations (same language as the prayer
-   day journey), the scroll crossfading between full-screen scenes, with two embodied
-   rituals: the seven tawaf circuits and the seven stones at Mina.
-   ===================================================================================== */
-/* cancel the old (map-era) .hajj-journey constraints — this class now wraps the full-bleed
-   immersive walk, so it must be full width with no centering and no trail line */
-.hajj-journey{margin-block:clamp(34px,5vw,66px);width:auto;max-width:none;margin-inline:0;display:block}
-.hajj-journey::before{content:none;display:none}
-/* the rotor holds the scene photos and spins on the tawaf circuits (the veil stays put) */
-.st-rotor{position:absolute;inset:0;transform-origin:center center;will-change:transform;
-  transition:transform 1.05s cubic-bezier(.33,.03,.25,1)}
-.st-rotor > img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .001s linear}
-.hajj-journey .st-rotor > img{filter:blur(2.4px) saturate(1.05) brightness(1.02)}
-.hajj-journey .st-veil{
-  background:linear-gradient(to left,
-    rgba(20,12,6,.8) 0%, rgba(20,12,6,.64) 24%, rgba(20,12,6,.32) 52%, rgba(20,12,6,.06) 82%, transparent 100%);
-}
-.hajj-journey .scrolly-fullstage .scrolly-step{justify-content:flex-start;align-items:center}
-.hajj-journey .stage-card{width:min(600px,92%);text-align:start}
-.hajj-journey .stage-card .scrolly-env{color:#fff;border-bottom-color:rgba(244,231,192,.5);text-shadow:0 2px 14px rgba(10,6,3,.85)}
-.hajj-journey .stage-card p{color:#f6eeda;text-shadow:0 2px 14px rgba(10,6,3,.8)}
-/* feather the entry/exit into the parchment (like the prayer day) */
-.hajj-journey .scrolly-fullstage::before{
-  height:clamp(200px,34vh,440px);
-  background:linear-gradient(to bottom,
-    var(--paper) 0%, var(--paper) 10%, rgba(237,228,208,.92) 26%, rgba(237,228,208,.62) 48%,
-    rgba(237,228,208,.3) 72%, rgba(237,228,208,.09) 90%, transparent 100%);
-}
-.hajj-journey .scrolly-fullstage::after{
-  content:"";position:absolute;inset-inline:0;bottom:0;height:clamp(140px,22vh,300px);z-index:4;pointer-events:none;
-  background:linear-gradient(to top,var(--paper) 0%,rgba(237,228,208,.7) 22%,rgba(237,228,208,.2) 60%,transparent 100%);
-}
-
-/* the embodied ritual moments (tawaf circuits, Mina stones) */
-.hajj-ritual{margin-top:22px}
-.ritual-dots{display:flex;gap:9px;margin-bottom:14px}
-.ritual-dots span{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(244,231,192,.7);transition:background .3s,transform .3s,box-shadow .3s}
-.ritual-dots span.is-on{background:var(--gold);border-color:var(--gold);transform:scale(1.12);box-shadow:0 0 10px rgba(199,154,60,.6)}
-.ritual-btn{
-  all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
-  background:rgba(199,154,60,.96);color:#2a1608;font-weight:700;font-size:15px;padding:11px 22px;border-radius:999px;
-  box-shadow:0 6px 18px rgba(10,6,3,.4);transition:transform .1s,background .2s;
-}
-.ritual-btn:hover{background:var(--gold)}
-.ritual-btn:active{transform:translateY(1px)}
-.ritual-btn:disabled{cursor:default;background:rgba(244,231,192,.28);color:#f6eeda;box-shadow:none}
-.ritual-count{font-family:var(--font-heading);font-size:20px;color:#fff;margin-bottom:12px;text-shadow:0 2px 12px rgba(10,6,3,.8)}
-.pebbles{display:flex;gap:10px;flex-wrap:wrap}
-.pebble{
-  all:unset;cursor:pointer;width:26px;height:26px;border-radius:52% 48% 50% 50%/50% 52% 48% 50%;
-  background:radial-gradient(circle at 35% 30%,#d8c7a6,#8a7a5e);box-shadow:0 3px 6px rgba(10,6,3,.5);
-  transition:transform .12s,opacity .3s;
-}
-.pebble:hover{transform:scale(1.14) rotate(6deg)}
-.pebble:active{transform:scale(.9)}
-.pebble.is-used{opacity:.2;pointer-events:none;transform:scale(.7)}
-.ritual-hint{margin-top:10px;font-size:13px;color:rgba(246,238,218,.72);text-shadow:0 2px 10px rgba(10,6,3,.7)}
-
-/* ===== ramadan — the MONTH JOURNEY: the same immersive full-screen treatment as the hajj ===== */
-.ramadan-journey{margin-block:clamp(34px,5vw,66px)}
-.ramadan-journey .st-photo > img{filter:blur(2.4px) saturate(1.05) brightness(1.02);transform:scale(1.06)}
-.ramadan-journey .st-veil{
-  background:linear-gradient(to left,
-    rgba(20,12,6,.8) 0%, rgba(20,12,6,.64) 24%, rgba(20,12,6,.32) 52%, rgba(20,12,6,.06) 82%, transparent 100%);
-}
-.ramadan-journey .scrolly-fullstage .scrolly-step{justify-content:flex-start;align-items:center}
-.ramadan-journey .stage-card{width:min(600px,92%);text-align:start}
-.ramadan-journey .stage-card .scrolly-env{color:#fff;border-bottom-color:rgba(244,231,192,.5);text-shadow:0 2px 14px rgba(10,6,3,.85)}
-.ramadan-journey .stage-card p{color:#f6eeda;text-shadow:0 2px 14px rgba(10,6,3,.8)}
-.ramadan-journey .scrolly-fullstage::before{
-  height:clamp(200px,34vh,440px);
-  background:linear-gradient(to bottom,
-    var(--paper) 0%, var(--paper) 10%, rgba(237,228,208,.92) 26%, rgba(237,228,208,.62) 48%,
-    rgba(237,228,208,.3) 72%, rgba(237,228,208,.09) 90%, transparent 100%);
-}
-.ramadan-journey .scrolly-fullstage::after{
-  content:"";position:absolute;inset-inline:0;bottom:0;height:clamp(140px,22vh,300px);z-index:4;pointer-events:none;
-  background:linear-gradient(to top,var(--paper) 0%,rgba(237,228,208,.7) 22%,rgba(237,228,208,.2) 60%,transparent 100%);
-}
-/* the moon-sighting closes on the parchment, with the two-schools interaction */
-.ramadan-moon{margin-top:clamp(30px,4.5vw,56px)}
-.ramadan-moon .explore{margin-top:22px}
-
-/* the night sky held across the month, and the moon that changes its face with the scroll */
-.rm-night{background:radial-gradient(150% 115% at 50% -12%,#25315e 0%,#131a3c 55%,#0b1029 100%);overflow:hidden}
-.rm-stars{position:absolute;inset:0;pointer-events:none;opacity:.85;
-  background-image:
-    radial-gradient(1.4px 1.4px at 12% 22%,#fff,transparent),
-    radial-gradient(1.2px 1.2px at 27% 61%,#f4e7c0,transparent),
-    radial-gradient(1px 1px at 44% 17%,#fff,transparent),
-    radial-gradient(1.5px 1.5px at 61% 43%,#fff,transparent),
-    radial-gradient(1px 1px at 73% 25%,#f4e7c0,transparent),
-    radial-gradient(1.2px 1.2px at 88% 57%,#fff,transparent),
-    radial-gradient(1px 1px at 18% 82%,#fff,transparent),
-    radial-gradient(1.3px 1.3px at 52% 79%,#f4e7c0,transparent),
-    radial-gradient(1px 1px at 82% 85%,#fff,transparent),
-    radial-gradient(1px 1px at 36% 39%,#fff,transparent),
-    radial-gradient(1.1px 1.1px at 67% 69%,#fff,transparent),
-    radial-gradient(1px 1px at 6% 49%,#f4e7c0,transparent),
-    radial-gradient(1.2px 1.2px at 94% 33%,#fff,transparent);
-}
-.rm-moon{
-  position:relative;width:clamp(120px,15vw,210px);aspect-ratio:1;border-radius:50%;flex:none;
-  background:#161d3d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);transition:box-shadow .6s ease;
-}
-.rm-moon-lit{
-  position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle at 40% 34%,#fffaf0,#f4e7c0 58%,#d6c184);
-  -webkit-mask:radial-gradient(circle at var(--mx,116%) 50%,transparent 47%,#000 48%);
-          mask:radial-gradient(circle at var(--mx,116%) 50%,transparent 47%,#000 48%);
-}
-.rm-moon.is-qadr{box-shadow:0 0 54px 14px rgba(244,231,192,.5),0 0 110px 44px rgba(199,154,60,.26)}
-.rm-qadr-tag{
-  font-family:var(--font-heading);font-weight:700;color:var(--gold);font-size:clamp(17px,1.9vw,24px);
-  text-shadow:0 0 22px rgba(199,154,60,.75);opacity:0;transition:opacity .5s ease;white-space:nowrap;
-}
-.rm-qadr-tag.is-on{opacity:1}
-
-/* the hands-on "month of the moon" — one screen, drag the moon through the nights */
-.rm-interactive{margin-block:clamp(32px,5vw,60px)}
-.rm-sky{position:relative;display:flex;align-items:center;gap:clamp(18px,3vw,48px);
-  padding:clamp(22px,3.4vw,52px);border-radius:18px;overflow:hidden;min-height:clamp(360px,50vh,500px);
-  background:radial-gradient(150% 120% at 50% -14%,#26325f 0%,#141b3e 52%,#0b1029 100%);
-  box-shadow:0 18px 44px rgba(11,16,41,.4)}
-.rm-moon-col{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:14px;z-index:1;margin-inline-start:clamp(0px,2vw,40px)}
-.rm-beat{flex:1;min-width:0;text-align:start;z-index:2}
-.rm-beat-title{color:#fff;font-family:var(--font-heading);font-weight:700;font-size:clamp(24px,2.6vw,34px);margin:0 0 12px;text-shadow:0 2px 16px rgba(6,10,30,.9)}
-.rm-beat-ar{color:var(--gold);font-size:.58em;font-weight:500}
-.rm-beat p{color:#e9dfc4;font-size:clamp(15px,1.4vw,17.5px);line-height:1.72;margin:9px 0 0;text-shadow:0 2px 12px rgba(6,10,30,.85)}
-.rm-control{margin-top:22px;display:flex;flex-direction:column;align-items:center;gap:11px}
-.rm-daylabel{font-family:var(--font-heading);color:var(--maroon);font-size:19px}
-.rm-daylabel b{font-size:25px;color:var(--maroon-deep)}
-.rm-range{-webkit-appearance:none;appearance:none;width:min(580px,94%);height:7px;border-radius:99px;outline:none;
-  background:linear-gradient(to left,rgba(138,39,51,.16) var(--p,0%),var(--gold) var(--p,0%));cursor:pointer}
-.rm-range::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;border:none;cursor:grab;
-  background:radial-gradient(circle at 38% 34%,#fffaf0,#f4e7c0 60%,#d6c184);box-shadow:0 0 14px rgba(199,154,60,.65),0 2px 6px rgba(0,0,0,.3)}
-.rm-range::-webkit-slider-thumb:active{cursor:grabbing}
-.rm-range::-moz-range-thumb{width:28px;height:28px;border-radius:50%;border:none;cursor:grab;
-  background:radial-gradient(circle at 38% 34%,#fffaf0,#f4e7c0 60%,#d6c184);box-shadow:0 0 14px rgba(199,154,60,.65)}
-.rm-range:focus-visible{outline:2px solid var(--maroon);outline-offset:6px;border-radius:99px}
-.rm-scale{display:flex;justify-content:space-between;width:min(580px,94%);font-size:12px;color:var(--muted)}
-@media (max-width:760px){
-  .rm-sky{flex-direction:column-reverse;text-align:center;gap:22px}
-  .rm-moon-col{margin:0}
-  .rm-beat{text-align:center}
-}
-
-/* ===== ramadan — mature editorial: development timeline · fast-day strip · Laylat al-Qadr ===== */
+/* ===== ramadan — editorial: the development timeline · the fast-day arches · the end-of-month cards ===== */
 /* the Ramadan editorial content is centred and full-width like the mockup, while the main
    section title stays right-aligned like every other section */
 .rm-ed-block{width:100%;margin:clamp(38px,5vw,60px) auto 0}
@@ -1207,6 +786,10 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   background:var(--paper);border:2px solid var(--gold);box-shadow:0 5px 13px rgba(60,35,18,.12);
   transition:transform .22s,background .22s,border-color .22s,box-shadow .22s}
 .rm-tl-med::before{content:"";position:absolute;inset:5px;border-radius:50%;border:1px solid rgba(199,154,60,.5)}
+/* the era's line icon (RamadanIcons) inside the medallion; cream on the active maroon */
+.rm-tl-med{display:grid;place-items:center;color:var(--maroon)}
+.rm-tl-med svg{position:relative;width:26px;height:26px}
+.rm-tl-stop.is-active .rm-tl-med{color:var(--cream)}
 .rm-tl-cap{font-family:var(--font-heading);font-weight:700;color:var(--maroon);
   font-size:15.5px;line-height:1.2;text-align:center;max-width:13ch;transition:color .2s}
 .rm-tl-stop:hover .rm-tl-med{transform:scale(1.12)}
@@ -1228,9 +811,9 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 .rm-tl-card-body p{margin:10px 0 0;font-size:var(--read);line-height:1.75;color:var(--ink);max-width:70ch}
 .rm-tl-card-body p:first-of-type{margin-top:0}
 
-/* the fast day, as a row of large arched scenes on a dotted timeline */
+/* the fast day, as a row of large arched scenes — one column per card (three) */
 .rm-day{--arch-h:clamp(260px,25vw,360px);position:relative;margin-top:30px;
-  display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(18px,2.2vw,32px)}
+  display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.2vw,32px)}
 .rm-day-card{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center}
 .rm-day-arch{width:100%;height:var(--arch-h);overflow:hidden;
   border-radius:clamp(80px,10vw,140px) clamp(80px,10vw,140px) 14px 14px;
@@ -1240,119 +823,25 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 .rm-day-sub{margin:5px 0 0;color:var(--muted);font-size:clamp(15px,1.5vw,17px)}
 .rm-dayline{margin-block-start:clamp(22px,3vw,34px);margin-inline:0 auto;font-size:var(--read);line-height:1.8;
   color:var(--ink);width:min(760px,100%);text-align:start}
-/* Laylat al-Qadr — a light editorial card matching the end-of-month cards */
-.rm-qadr{position:relative;overflow:hidden;border-radius:16px;margin-block-start:clamp(30px,4vw,48px);
-  margin-inline:0 auto;width:min(940px,100%);
-  background:var(--panel);border:1px solid var(--edge);box-shadow:0 10px 26px rgba(60,35,18,.07)}
-.rm-qadr-n,.rm-qadr-moon{display:none}
-.rm-qadr-in{position:relative;z-index:1;padding:clamp(24px,3.2vw,40px)}
-.rm-qadr-k{display:block;font-family:var(--font-body);letter-spacing:.14em;font-size:12.5px;color:var(--gold-text);font-weight:700}
-.rm-qadr-in h3{color:var(--maroon);font-family:var(--font-heading);margin:8px 0 14px;font-size:clamp(24px,2.6vw,32px)}
-.rm-qadr-in p{color:var(--ink);font-size:clamp(16px,1.6vw,19px);line-height:1.75;margin:11px 0 0}
 /* end-of-month cards */
 .rm-two{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-block-start:26px;margin-inline:0 auto;width:100%}
 .rm-card{background:var(--panel);border:1px solid var(--edge);border-radius:16px;padding:clamp(24px,3vw,34px)}
 .rm-card h4{margin:0 0 10px;font-family:var(--font-heading);color:var(--maroon);font-size:clamp(22px,2.2vw,27px)}
 .rm-card p{margin:10px 0 0;font-size:clamp(16px,1.6vw,18px);line-height:1.7;color:var(--ink)}
-.rm-ed-block .explore{margin-top:24px}
 @media (max-width:640px){
   .rm-two{grid-template-columns:1fr}
-  .rm-tl-med{width:46px;height:46px}
+  .rm-tl-med{width:46px;height:46px}.rm-tl-med svg{width:22px;height:22px}
   .rm-tl-axis::before{top:23px}
   .rm-tl-cap{font-size:12px;max-width:9ch}
   .rm-tl-stop{gap:10px}
   .rm-day{grid-template-columns:repeat(2,1fr);--arch-h:clamp(190px,42vw,240px);row-gap:8px}
-  .rm-qadr-in{max-width:none}
+  /* two per row: an odd last card is centred under the pair at the same width */
+  .rm-day-card:last-child:nth-child(odd){grid-column:1 / -1;justify-self:center;width:calc(50% - clamp(18px,2.2vw,32px) / 2)}
 }
 
 /* ---- scene atoms ---- */
 .st{position:absolute;inset:0}
-.st-parchment{background:linear-gradient(180deg,#f0e3c4,#e6d6b4)}
-.st-stars{position:absolute;inset:0;transition:opacity .7s ease}
-.st-stars i{position:absolute;border-radius:50%;background:#e9c979;box-shadow:0 0 6px 1px rgba(233,201,121,.6)}
-.st-sun{
-  position:absolute;width:64px;height:64px;border-radius:50%;translate:-50% -50%;
-  background:#ffedbb;box-shadow:0 0 90px 44px rgba(255,224,150,.5);
-}
-.st-moon{
-  position:absolute;left:16%;top:13%;width:48px;height:48px;border-radius:50%;background:#d9b45b;
-  -webkit-mask:radial-gradient(circle at 66% 38%,transparent 0 55%,#000 57%);
-  mask:radial-gradient(circle at 66% 38%,transparent 0 55%,#000 57%);
-}
-.st-beam{
-  position:absolute;left:50%;bottom:21%;width:7px;translate:-50% 0;border-radius:99px;
-  background:linear-gradient(0deg,#d9b45b,rgba(217,180,91,.05));
-  box-shadow:0 0 30px 8px rgba(217,180,91,.35);transition:opacity .4s ease;
-}
-.st-dots{position:absolute;top:15%;inset-inline:0;display:flex;justify-content:center;gap:30px;transition:opacity .5s ease}
-.st-dots i{width:17px;height:17px;border-radius:50%;background:rgba(217,180,91,.18);transition:background .45s ease,box-shadow .45s ease}
-.st-dots i.on{background:#ffe9ae;box-shadow:0 0 24px 7px rgba(255,224,150,.5)}
-.st-horizon{
-  position:absolute;inset-inline:0;bottom:0;height:21%;background:#1c1320;transition:opacity .7s ease;
-  clip-path:polygon(0 72%,8% 63%,13% 70%,18% 43%,23% 69%,31% 58%,38% 72%,45% 50%,53% 71%,62% 60%,69% 72%,75% 45%,82% 70%,90% 58%,100% 68%,100% 100%,0 100%);
-}
-.st-plate{
-  position:absolute;left:50%;top:45%;width:min(540px,74%);border-radius:14px;
-  border:1px solid rgba(120,70,40,.35);box-shadow:0 24px 64px rgba(28,10,2,.38);
-  transition:opacity .65s ease,transform .65s ease;
-}
-.st-plate-wide{width:min(700px,84%)}
 
-/* ---- charity ---- */
-.st-grid40{
-  position:absolute;left:50%;top:42%;translate:-50% -50%;
-  display:grid;grid-template-columns:repeat(8,clamp(30px,4.4vmin,46px));gap:clamp(6px,1.2vmin,11px);
-  transition:transform .6s ease;
-}
-.st-grid40 b{
-  position:relative;aspect-ratio:1;border-radius:9px;border:2px solid #b98a3c;
-  background:rgba(248,238,214,.65);transition:opacity .5s ease,background .5s ease,border-color .5s ease;
-}
-.st-grid40 b.is-dim{opacity:.32}
-.st-grid40 b.is-pick{background:#8a2733;border-color:#8a2733}
-.st-pulse{position:absolute;inset:-6px;border-radius:13px;border:3px solid #d9b45b;transition:opacity .4s ease,scale .4s ease}
-.st-caption40{
-  position:absolute;left:24%;top:14%;translate:-50% 0;font-family:var(--font-heading);
-  font-size:clamp(24px,3vw,40px);color:var(--maroon-deep);transition:opacity .5s ease;white-space:nowrap;
-  padding:10px 26px;border-radius:999px;background:rgba(250,246,236,.88);box-shadow:0 10px 30px rgba(28,10,2,.18);
-}
-.st-chips{position:absolute;left:50%;bottom:9%;translate:-50% 0;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;transition:opacity .6s ease}
-.st-chips span{padding:8px 18px;border-radius:999px;background:var(--cream);border:1px solid var(--edge);color:var(--maroon-deep);font-weight:600}
-.st-splitlabel{position:absolute;inset-inline:7%;top:15%;display:flex;justify-content:space-between;gap:12px;color:var(--maroon-deep);font-weight:700;transition:opacity .5s ease}
-
-/* ---- ramadan ---- */
-.st-cres{position:absolute;left:13%;top:11%;width:74px;height:74px;transition:opacity .6s ease}
-.st-cres::before{content:"";position:absolute;inset:0;border-radius:50%;background:#d9b45b;box-shadow:0 0 46px 12px rgba(217,180,91,.35)}
-.st-cres i{position:absolute;inset:-2px;border-radius:50%;transition:transform .7s ease}
-.st-qadr{
-  position:absolute;left:24%;top:50%;translate:-50% -50%;
-  display:flex;flex-direction:column;align-items:center;transition:opacity .7s ease;
-}
-.st-qadr b{font-family:var(--font-heading);font-size:clamp(90px,15vmin,170px);line-height:1;color:#ffe9ae;text-shadow:0 0 60px rgba(255,224,150,.85),0 4px 24px rgba(28,10,2,.5)}
-.st-qadr small{margin-top:4px;font-family:var(--font-heading);font-size:clamp(24px,3.4vmin,36px);color:#fff7e5;text-shadow:0 2px 14px rgba(28,10,2,.6)}
-.st-ten{position:absolute;inset:0;transition:opacity .5s ease}
-.st-ten i{position:absolute;width:15px;height:15px;border-radius:50%;background:rgba(217,180,91,.14);transition:background .45s ease,box-shadow .45s ease}
-.st-ten i.on{background:#ffe9ae;box-shadow:0 0 20px 6px rgba(255,224,150,.5)}
-
-/* ---- hajj: the living map ---- */
-.st-map{position:absolute;left:50%;top:50%;translate:-50% -50%;width:min(1120px,94%);max-height:88%;aspect-ratio:16/9}
-.st-map > img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;border-radius:12px;filter:drop-shadow(0 18px 44px rgba(28,10,2,.28))}
-.st-pin{
-  position:absolute;translate:-50% -150%;padding:4px 11px;border-radius:999px;white-space:nowrap;
-  background:rgba(245,236,214,.94);border:1px solid rgba(138,39,51,.45);color:var(--maroon-deep);
-  font-size:13px;font-weight:600;transition:background .45s ease,color .45s ease,scale .45s ease;
-}
-.st-pin.is-active{background:var(--maroon);color:var(--cream);scale:1.12}
-.st-walker{position:absolute;width:0;height:0;transition:left .95s cubic-bezier(.3,.75,.3,1),top .95s cubic-bezier(.3,.75,.3,1),opacity .5s ease}
-.st-walker i{position:absolute;left:-10px;top:-10px;width:20px;height:20px;border-radius:50%;background:var(--maroon);border:3px solid var(--cream);box-shadow:0 5px 16px rgba(28,10,2,.4);display:block}
-.st-count{
-  position:absolute;top:12%;left:24%;translate:-50% 0;padding:10px 26px;border-radius:999px;
-  background:var(--maroon-deep);color:var(--cream);font-family:var(--font-heading);font-size:24px;transition:opacity .5s ease;white-space:nowrap;
-  box-shadow:0 10px 30px rgba(28,10,2,.3);
-}
-
-/* ---- hajj journey map: the sticky plate lives in the (non-full) scrolly art panel; the
-   seven stations are dots that fill as the route is reached, the active one carrying its name ---- */
 /* the hajj reading blocks span the full width and justify so the text reaches the left edge */
 .hajj-intro{margin-top:6px;width:100%;max-width:none}
 .hajj-intro p{margin-top:12px;font-size:var(--read);line-height:1.82;color:var(--ink);text-align:justify}
@@ -1361,7 +850,6 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 /* ===== hajj route map — pins on a painted map, click a pin for an info bubble ===== */
 .hajj-map-block{width:100%;margin:clamp(38px,5vw,60px) 0 0}
 .hjm-head{margin:0 0 6px}
-.hjm-lead{margin:0 0 22px;color:var(--muted);font-size:clamp(15px,1.6vw,18px)}
 .hajj-map{width:min(1140px,100%);margin-inline:auto}
 /* overflow stays visible so the info bubbles are never clipped at the map edges */
 .hjm-plane{position:relative;line-height:0}
@@ -1390,7 +878,6 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 .hjm-close:hover{background:var(--maroon);color:var(--cream)}
 .hjm-bfig{border-radius:11px;overflow:hidden;height:132px;margin-bottom:12px}
 .hjm-bfig img{width:100%;height:100%;object-fit:cover;display:block}
-.hjm-bubble .hjm-step{font-family:var(--font-body);letter-spacing:.09em;font-size:12px;color:var(--gold-text);font-weight:700}
 .hjm-bubble .hjm-title{margin:6px 0 10px;font-family:var(--font-heading);color:var(--maroon);font-size:clamp(20px,2vw,24px)}
 .hjm-bubble p{margin:9px 0 0;font-size:15.5px;line-height:1.66;color:var(--ink)}
 .hjm-bubble p:first-of-type{margin-top:0}
@@ -1400,23 +887,6 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   .hjm-plabel{font-size:11px;padding:1px 6px}
   .hjm-bubble{width:min(300px,86vw)}
   .hjm-bfig{height:120px}
-}
-.hajj-map-art{height:min(56vh,440px);background:#efe6d2}
-.st-hajj{position:absolute;inset:0;background:#efe6d2;display:grid;place-items:center}
-.st-hajj .st-map{position:relative;left:auto;top:auto;translate:none;width:96%;max-height:none;aspect-ratio:1000/560}
-/* the tawaf counter rides at the foot of the map (centred), not floating in empty space */
-.st-hajj .st-count{top:auto;bottom:7%;left:50%;translate:-50% 0;font-size:19px;padding:7px 18px}
-.st-dot{
-  position:absolute;width:11px;height:11px;translate:-50% -50%;border-radius:50%;z-index:1;
-  background:var(--surface);border:2px solid rgba(138,39,51,.55);
-  transition:width .3s ease,height .3s ease,background .3s ease,border-color .3s ease,box-shadow .3s ease;
-}
-.st-dot.is-done{background:var(--maroon);border-color:var(--maroon)}
-.st-dot.is-active{width:16px;height:16px;background:var(--stamp);border-color:var(--stamp);box-shadow:0 0 0 5px rgba(165,50,47,.2)}
-
-@media (max-width:1180px){
-  .summary-cards{grid-template-columns:repeat(2,1fr)}
-  .summary-cards a:last-child{grid-column:1/-1}
 }
 
 @media (max-width:920px){
@@ -1430,7 +900,6 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   .st-veil{background:rgba(250,246,236,.86)}
   .stage-card{width:100%;padding-inline:6px}
   .stage-card p{font-size:19px;line-height:1.8}
-  .st-caption40,.st-qadr,.st-count{left:50%}
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -1443,57 +912,6 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
   .film-wrap{opacity:1!important;transform:none!important}
 }
 
-/* ===================================================================================
-   Per-commandment comprehension check — one closing interaction for every commandment,
-   rendered from data.ts. Click-only, no score. Gives the chapter a consistent last beat.
-   =================================================================================== */
-.check-wrap{width:min(760px,100%);margin:40px 0 6px}
-.check-title{display:flex;align-items:center;gap:10px;font-family:var(--font-heading);font-size:var(--sub);color:var(--maroon);margin-bottom:14px}
-.check-title svg{width:22px;height:22px;flex:none;fill:none;stroke:var(--maroon);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.chk{background:var(--mat);border:1px solid var(--edge);border-radius:14px;padding:clamp(18px,3vw,26px);box-shadow:var(--shadow)}
-.chk-q{font-family:var(--font-heading);font-size:clamp(19px,1.9vw,23px);color:var(--maroon-deep);line-height:1.4}
-.chk-ask{display:block;font-size:14px;color:var(--muted);margin-top:4px}
-.chk-opts{display:flex;gap:10px;margin-top:16px}
-.chk-col{flex-direction:column}
-.chk-opt{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:11px;min-height:48px;padding:12px 16px;border:1px solid var(--edge);border-radius:11px;background:var(--surface);color:var(--ink);font-size:16px;transition:border-color .2s,background .2s,opacity .2s,transform .15s}
-.chk-opt:hover:not(:disabled){border-color:var(--maroon);transform:translateY(-1px)}
-.chk-opt:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-.chk-opt.is-wrong{opacity:.4;cursor:default}
-.chk-opt.is-right{border-color:var(--maroon);background:rgba(165,50,47,.1);font-weight:600}
-.chk-multi .chk-box{width:20px;height:20px;flex:none;border:2px solid var(--edge);border-radius:6px;transition:background .2s,border-color .2s;position:relative}
-.chk-multi.is-sel .chk-box{background:var(--maroon);border-color:var(--maroon)}
-.chk-multi.is-sel .chk-box::after{content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;border:solid var(--cream);border-width:0 2px 2px 0;transform:rotate(45deg)}
-.chk-submit{all:unset;box-sizing:border-box;cursor:pointer;margin-top:14px;padding:10px 26px;border-radius:999px;background:var(--maroon-deep);color:var(--cream);font-weight:600;font-size:15px}
-.chk-submit:disabled{opacity:.4;cursor:default}
-.chk-submit:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-.chk-match{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-top:16px}
-.chk-col-left,.chk-col-right{list-style:none;display:flex;flex-direction:column;gap:10px;margin:0;padding:0}
-.chk-pill{all:unset;box-sizing:border-box;cursor:pointer;display:block;text-align:center;padding:11px 12px;border:1px solid var(--edge);border-radius:10px;background:var(--surface);font-size:15px;transition:border-color .2s,background .2s,opacity .2s}
-.chk-pill:hover:not(:disabled){border-color:var(--maroon)}
-.chk-pill:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-.chk-pill.is-active{border-color:var(--maroon);background:rgba(165,50,47,.12);font-weight:600}
-.chk-pill.is-matched{background:var(--maroon);color:var(--cream);border-color:var(--maroon);cursor:default}
-.chk-pill:disabled:not(.is-matched){opacity:.5;cursor:default}
-.chk-slots{list-style:none;display:flex;flex-direction:column;gap:8px;margin:16px 0 0;padding:0}
-.chk-slot{display:flex;align-items:center;gap:12px;min-height:46px;padding:6px 12px;border:1px dashed var(--edge);border-radius:10px;background:rgba(250,246,236,.5)}
-.chk-slot.is-filled{border-style:solid;background:var(--surface)}
-.chk-slot-n{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--mat);color:var(--maroon-deep);font-size:13px;font-weight:600}
-.chk-slot.is-filled .chk-slot-n{background:var(--maroon);color:var(--cream)}
-.chk-slot-t{font-size:15px}
-.chk-bank{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
-.chk-chip{all:unset;box-sizing:border-box;cursor:pointer;padding:10px 16px;border:1px solid var(--edge);border-radius:999px;background:var(--surface);font-size:15px;transition:border-color .2s,background .2s}
-.chk-chip:hover{border-color:var(--maroon)}
-.chk-chip:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
-.chk-chip.is-bounce{animation:chk-bounce .3s ease}
-@keyframes chk-bounce{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.chk-say{min-height:1.4em;margin-top:14px;font-size:14.5px;font-weight:600;line-height:1.5}
-.chk-say.is-ok{color:#2f7d5c}
-.chk-say.is-try{color:var(--stamp)}
-@media (max-width:680px){
-  .chk-pill{font-size:13.5px;padding:9px 8px}
-  .chk-q{font-size:19px}
-}
-@media (prefers-reduced-motion:reduce){.chk-chip.is-bounce{animation:none}}
 /* ============ a watercolour cutout beside a run of prose =================
    Chapter 6 built this once, for the shahada, hard-wired to that section's
    own class names and to a minaret painting anchored at the bottom. Chapter 4
@@ -1506,11 +924,8 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
    `aria-hidden`. That is also why nothing here is a `<figure>`: a figure takes
    a caption, and a caption here would be a sentence the source never wrote.
 
-   WHY STICKY AND NOT ANCHORED. The shahada's painting sits beside ONE screen
-   of text and is absolutely positioned across it. This runs beside a stretch
-   of several sub-headings, and a single cutout stretched over twelve hundred
-   pixels is a smear. Sticky instead: the painting comes to rest beside the
-   prose and stays there while the reader moves through the run.
+   IT IS NOT STICKY. An earlier build pinned the painting with `sticky`; it now
+   stretches to the prose beside it (see THE PAINTING RUNS THE LENGTH below).
 
    IT BLEEDS OFF THE INLINE-END EDGE — the LEFT, in Hebrew — by pulling the
    grid into the page gutter. Below 900px the painting is removed rather than
@@ -1553,7 +968,7 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
      painting beside it: the figure's mass is in its upper two-thirds and the eye
      pairs the first line of text with the head rather than with the middle of
      the robe. One line-height up is where the two settle; two was too far. */
-  .bleed-aside.is-flipped .bleed-aside-body{translate:0 calc(var(--lh) * -1em)}
+  .bleed-aside.is-flipped .bleed-aside-body{translate:0 calc(var(--lh,1.82) * -1em)}
 
   /* THE PAINTING RUNS THE LENGTH OF THE PROSE, which is what chapter 6 does:
      its minaret is not a picture beside a paragraph, it is a column of paint
@@ -1590,9 +1005,4 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
     -webkit-mask-image:linear-gradient(to top,transparent 0,#000 5%);
             mask-image:linear-gradient(to top,transparent 0,#000 5%);
   }
-}
-@media (prefers-reduced-motion:reduce){
-  /* sticky is not motion, but a reader who asks for stillness gets a painting
-     that stays where the page put it */
-  .bleed-aside-art{position:static}
 }

@@ -1,9 +1,13 @@
 /* שער נאמנות: כל §N חייב להימצא מילה-במילה בטקסט המחולץ מה-PDF */
 import fs from 'node:fs'
+/* בלי ארגומנטים — שני הקבצים שליד הסקריפט, כמו בשני השערים האחרים */
+const here = new URL('.', import.meta.url).pathname
+const mdPath = process.argv[2] ?? here + 'SOURCE-TEXT.md'
+const pdfPath = process.argv[3] ?? here + 'pdf-extract.txt'
 /* התוספת של המרצה (18.9.2026) אינה מה-PDF ומוחרגת כאן במפורש — הקטע נחתך
    לפני הכותרת שלה, וההחרגה מודפסת בכל ריצה כדי שתישאר גלויה. */
 const FIX_HEAD = '## תוספת · סבב התיקונים של המרצה'
-const mdAll = fs.readFileSync(process.argv[2], 'utf8')
+const mdAll = fs.readFileSync(mdPath, 'utf8')
 const cutAt = mdAll.indexOf(FIX_HEAD)
 const md = cutAt >= 0 ? mdAll.slice(0, cutAt) : mdAll
 if (cutAt >= 0) {
@@ -11,7 +15,7 @@ if (cutAt >= 0) {
   console.log(`⚠ מוחרגים מהבדיקה מול ה-PDF (תוספת המרצה): ${extra.join(', ')}`)
 }
 /* הכותרת הרצה של החוברת נתחבת באמצע משפטים שחוצים עמוד — מסירים אותה */
-const raw = fs.readFileSync(process.argv[3], 'utf8').split('\n')
+const raw = fs.readFileSync(pdfPath, 'utf8').split('\n')
   .filter((l) => !/^===== PAGE|^\d+$|^-מוגבל-$|^האסלאם - דת ותרבות$|^גירסת טיוטה - מערך ההדרכה/.test(l.trim()))
   .join('\n')
 const norm = (s) => s.replace(/[֑-ׇً-ْ]/g, '').replace(/[^֐-׿؀-ۿa-zA-Z0-9]/g, '')

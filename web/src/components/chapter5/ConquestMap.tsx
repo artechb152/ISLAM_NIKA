@@ -14,10 +14,9 @@
    above the picture instead of in it.
 
    THE CROP IS DETERMINISTIC, and it has to be, because the pin positions in map.ts are
-   fractions of the SOURCE image. The stage is filled with object-fit:cover from a 4:3
-   source, so the visible window depends on the stage's own aspect and is computed here
-   at run time rather than assumed — a fixed 16:9 assumption was true of the old plate
-   and is false of a viewport. Every pin is remapped through the same window. */
+   fractions of the SOURCE image. The plate is placed by `frameFor(aspect)` — the stage's
+   own aspect, measured at run time — and the image, every pin and every arm are drawn
+   through that one frame, so they cannot drift apart. */
 
 import { useEffect, useRef, useState } from 'react'
 import { CONQUESTS, ORIGIN, type MapPin } from '@/lib/chapter5/map'
@@ -25,19 +24,47 @@ import { clamp01, type ScrollyState } from '@/components/chapter6/scrolly'
 
 const MAP = '/assets/chapter5/umar-map.jpg'
 
-/* The source plate's own aspect. `cover` on a stage of any shape shows a centred window
-   of the source; these two helpers turn a source fraction into a stage fraction for
-   whatever the stage currently is. */
+/* The source plate's own aspect. */
 const SRC = 4 / 3
 
-function windowFor(stageAspect: number) {
-  if (stageAspect >= SRC) {
-    /* stage is wider than the source: width fills, height is cropped */
-    const visible = SRC / stageAspect
-    return { x: (v: number) => v, y: (v: number) => (v - (1 - visible) / 2) / visible }
+/* The stretch of the plate that has to stay on screen: every pin, Medina included,
+   plus room for its whole marker — a pin is centred on dot AND label, so half a label
+   either side (0.05 cut Egypt's dot and Qadisiyya's label at 390). Derived from the
+   pins, so a moved pin moves the window with it. */
+const XS = [ORIGIN, ...CONQUESTS].map((p) => p.x)
+const PAD = 0.11
+const SPAN = { from: Math.max(0, Math.min(...XS) - PAD), to: Math.min(1, Math.max(...XS) + PAD) }
+const SPAN_W = SPAN.to - SPAN.from
+/* the southernmost pin (Medina) — on a phone it is set just above the stage's foot */
+const LOW = Math.max(...[ORIGIN, ...CONQUESTS].map((p) => p.y))
+const FOOT = 0.08
+const SPAN_MID = (SPAN.from + SPAN.to) / 2
+
+/* Where the plate sits on the stage, in fractions of the stage's width (l, w) and
+   height (tp, h).
+     · wider than 4:3 — cover: full width, height cropped around the middle;
+     · narrower, but a cover crop still holds the span — cover, with the window slid
+       onto the pins rather than centred (a centred window cut Egypt off first);
+     · narrower still (a phone: cover showed 37% of the width and Egypt fell off) —
+       the span fills the width and the plate stops short of the stage's height. It is
+       set low, Medina just above the stage's FOOT and the empty south cropped off: the
+       cards read across the middle and rise out of the top, so the lower third is where
+       the pins stay clear of the text while they light. */
+function frameFor(aspect: number) {
+  if (aspect >= SRC) {
+    const h = aspect / SRC
+    return { l: 0, w: 1, tp: (1 - h) / 2, h, narrow: false }
   }
-  const visible = stageAspect / SRC
-  return { x: (v: number) => (v - (1 - visible) / 2) / visible, y: (v: number) => v }
+  const cover = aspect / SRC
+  if (cover >= SPAN_W) {
+    const from = Math.min(Math.max(SPAN_MID - cover / 2, 0), 1 - cover)
+    const w = 1 / cover
+    return { l: -from * w, w, tp: 0, h: 1, narrow: false }
+  }
+  const w = 1 / SPAN_W
+  const h = (w * aspect) / SRC
+  const tp = Math.max(1 - FOOT - LOW * h, 1 - h)
+  return { l: -SPAN.from * w, w, tp, h, narrow: true }
 }
 
 /* The conquests all live inside ONE step, because the source gives all four in one
@@ -124,16 +151,20 @@ export default function ConquestMap({ step, t }: ScrollyState) {
     return () => ro.disconnect()
   }, [])
 
-  const w = windowFor(aspect)
-  const f: Frame = { ...w, aspect }
+  const fr = frameFor(aspect)
+  const f: Frame = { x: (v) => fr.l + v * fr.w, y: (v) => fr.tp + v * fr.h, aspect }
   /* before the conquest step nothing has been taken; after it, nothing goes back */
   const on = (i: number) =>
     step > STEP_CONQUEST || (step === STEP_CONQUEST && clamp01(t) >= AT[i])
 
   return (
-    <div className="ch5-map" ref={ref} dir="ltr">
+    <div className={'ch5-map' + (fr.narrow ? ' is-narrow' : '')} ref={ref} dir="ltr">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={MAP} alt="מפת האזור שבו נעשו הכיבושים — מהנילוס במערב עד הפרת במזרח" />
+      <img
+        src={MAP}
+        alt="מפת האזור שבו נעשו הכיבושים — מהנילוס במערב עד הפרת במזרח"
+        style={{ left: pct(fr.l), top: pct(fr.tp), width: pct(fr.w), height: pct(fr.h) }}
+      />
       <span className="ch5-map-veil" aria-hidden="true" />
       {CONQUESTS.map((c, i) => (
         <Arm key={'arm-' + c.id} pin={c} on={on(i)} f={f} />

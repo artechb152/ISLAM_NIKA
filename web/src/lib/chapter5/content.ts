@@ -1,4 +1,4 @@
-/* Chapter 2 content access.
+/* Chapter 5 content access.
 
    Every word of the chapter lives in passages.json, keyed by the §N of the
    source passage and split into named fragments. The article never writes a
@@ -23,7 +23,8 @@ export interface Fragment {
   list?: string[]
   /** the source's own name for this item (יקטן, הפרט, בערות…) */
   name?: string
-  /** an Arabic term this fragment introduces — the article sets it in maroon */
+  /** the term this fragment introduces, as editorial metadata. The page does not
+      paint it; `tr` is what sets a taught term in gold. */
   term?: string
   /** Phrases inside `text` that the page sets in maroon. They are substrings of the
       sentence, never new words, and verify-chapter5.mjs fails if one drifts out of it. */

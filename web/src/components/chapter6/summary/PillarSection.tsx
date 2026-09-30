@@ -166,10 +166,10 @@ export default function PillarSection({
             {ex.beat.title}
           </h3>
 
-          {/* a beat is EITHER a multiple-choice question or a sentence with gaps. The charity
-              beat is the first: it is `ch-c`, which the source itself writes as a single-choice
-              question, and dressing it as a fill-the-gap sentence with a four-item tray was the
-              same question in a costume. */}
+          {/* a beat is EITHER a multiple-choice question or a sentence with gaps. Every beat in
+              summary-data.ts is currently a sentence — the charity beat was the multiple-choice
+              one (`ch-c`, the 2.5% arithmetic) until it was replaced by ch-2's material — so the
+              Mcq branch waits unused for a beat that sets `mcq`. */}
           {ex.beat.mcq ? (
             <Mcq
               q={ex.beat.mcq}

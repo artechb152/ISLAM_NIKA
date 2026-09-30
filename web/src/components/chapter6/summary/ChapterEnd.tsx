@@ -53,9 +53,9 @@ export default function ChapterEnd({
       </header>
 
       {/* Not gold-framed. `.shahada-quote` is the chapter's ONE illuminated frame and it is
-          already spent twice on this page — the testimony at the centre of the shahada exercise
-          and the pilgrimage clause in the closing. A third would make a rare thing ordinary,
-          which is the mistake this whole page was rebuilt to undo. */}
+          already spent on this page — the pilgrimage clause in the closing, just above. A
+          second would make a rare thing ordinary, which is the mistake this whole page was
+          rebuilt to undo. */}
       <figure className="gv-end-quote">
         <figcaption>{END.quoteLead}</figcaption>
         <blockquote>{END.quote}</blockquote>

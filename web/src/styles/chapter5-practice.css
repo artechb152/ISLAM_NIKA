@@ -1,51 +1,17 @@
 /* Chapter 5's closing practice — the sheet the practice ROUTE loads, and only it.
 
-   These rules are chapter 2's, carried over class for class. That is duplication and it
-   is deliberate: the practice styling lives inside chapter2-article.css, which chapter 2
-   loads on every one of its pages, and lifting it into a shared sheet would mean editing
-   a chapter that is finished and signed off. The project already keeps one article sheet
-   per chapter for the same reason. Nothing below is new; if the two ever disagree,
-   chapter 2 is the original.
+   These rules are chapter 2's `p2-*` practice rules, carried over class for class. That
+   is duplication and it is deliberate: they live inside chapter2-article.css, and lifting
+   them into a shared sheet would mean editing a chapter that is finished. Only the rules
+   this page renders are kept; if the two ever disagree, chapter 2 is the original. The
+   names stay `p2-*` — the two sheets are never loaded on the same page. */
 
-   `.ch2-hero` is renamed `.ch5-hero` because that one IS this chapter's own banner and
-   points at this chapter's own still. Everything else keeps its name — these sheets are
-   never loaded on the same page. */
-
-.ch5-hero{
-/* CHAPTER 6'S BANNER, PART FOR PART — `.ch6-hero`, restated for this chapter.
-   It was a 440px band with the title sitting on the floor of it over a gradient
-   that ran the picture down to nearly black at the bottom; chapter 6's is a
-   370px band with the title held at the middle of the reading edge over an even
-   scrim. Two chapters opening on the same object in two different shapes.
-   The scrim is flat and not a gradient for the same reason: a gradient darkens
-   the ground under the title and leaves the sky bare, which reads as a caption
-   plate rather than as one banner. */
-  position:relative;isolation:isolate;display:flex;align-items:center;
-  height:370px;
-  margin-inline:calc(-1 * var(--content-gutter));margin-block:-42px clamp(28px,4vh,52px);
-  padding:clamp(42px,5vw,76px) var(--content-gutter);
-  background:var(--maroon-deep);overflow:hidden;box-shadow:0 8px 22px rgba(60,35,18,.09);
-}
-.ch5-hero-media{position:absolute;inset:0;background:var(--maroon-deep) url('/assets/chapter5/hero-poster.jpg') center center/cover no-repeat}
-.ch5-hero-media img,.ch5-hero-media video{width:100%;height:100%;object-fit:cover;display:block}
-.ch5-hero-media::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:rgba(30,18,8,.55);
-}
-/* the still is already painted on the media layer, so a film that fails, or a
-   reader who asked for less motion, leaves the banner whole rather than black */
-.ch5-hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;display:block}
-/* `.ch5-hero-media .ch5-hero-video` AND NOT `.ch5-hero-video`, because a media
-   query adds no specificity: the descendant rule above (0,1,1) beat the reduce
-   rule (0,1,0) and the banner went on playing for exactly the readers who asked
-   it to stop. */
-@media (prefers-reduced-motion:reduce){.ch5-hero-media .ch5-hero-video{display:none}}
-.ch5-hero-copy{position:relative;z-index:1;width:min(1200px,94%);min-width:0;margin-inline-end:auto;text-align:right;direction:rtl}
-.ch5-hero-title{
-  font-family:var(--font-heading);font-weight:900;color:var(--paper);margin:0;
-  font-size:clamp(42px,4.5vw,70px);line-height:1.08;letter-spacing:-.015em;text-wrap:balance;
-  text-shadow:0 3px 22px rgba(20,10,4,.55);
-}
+/* The banner is chapter 6's `.ch6-hero`, used as is — it was restated here as
+   `.ch5-hero`, rule for rule. What stays is only what differs: the still (in
+   chapter5-article.css, `.ch5-practice-banner .ch5-hero-media`) and the title's
+   shadow, which chapter 6's practice gives its own banner the same way. */
+/* a shadow ink, which the palette has no token for */
+.ch5-practice-banner .ch6-hero-title{text-shadow:0 3px 22px rgba(20,10,4,.55)}
 
 
 /* ============================ the closing practice ============================
@@ -154,12 +120,6 @@
 .p2-slot:disabled{cursor:default}
 .p2-slot:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(max-width:680px){.p2-match-row{grid-template-columns:1fr}}
-.p2-progress{display:flex;align-items:center;gap:14px;margin:0 0 clamp(28px,3.4vw,44px);width:100%;max-width:var(--measure,880px)}
-.p2-progress-bar{flex:1;height:7px;border-radius:999px;background:rgba(87,24,32,.12);overflow:hidden}
-.p2-progress-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--gold-soft));transition:width .45s ease}
-.p2-progress-n{font-size:15px;color:var(--muted);white-space:nowrap}
-
-.p2-list{list-style:none;margin:0;padding:0;display:grid;gap:clamp(34px,4.4vw,64px)}
 .p2-q{padding-top:clamp(26px,3.4vw,44px);border-top:1px solid var(--rule)}
 .p2-q:first-child{border-top:0;padding-top:0}
 .p2-q h2{
@@ -179,8 +139,8 @@
 }
 .p2-option:hover{border-color:var(--gold)}
 .p2-option:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.p2-option.is-picked{border-color:var(--maroon);background:rgba(138,39,51,.07)}
-.p2-option.is-right{border-color:var(--gold);background:rgba(199,154,60,.14)}
+.p2-option.is-picked{border-color:var(--maroon);background:color-mix(in srgb,var(--maroon) 7%,transparent)}
+.p2-option.is-right{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,transparent)}
 .p2-hint{margin:9px 0 0;font-size:15px;color:var(--muted)}
 
 /* THE OLD MATCHING BLOCK STOOD HERE, and it outranked the new one simply by
@@ -201,7 +161,7 @@
   all:unset;box-sizing:border-box;cursor:pointer;width:34px;height:34px;border-radius:50%;
   border:1px solid var(--edge);display:grid;place-items:center;color:var(--maroon);font-size:16px;
 }
-.p2-order-moves button:hover:not(:disabled){background:rgba(138,39,51,.09)}
+.p2-order-moves button:hover:not(:disabled){background:color-mix(in srgb,var(--maroon) 9%,transparent)}
 .p2-order-moves button:disabled{opacity:.3;cursor:default}
 .p2-order-moves button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
@@ -221,8 +181,6 @@
 .p2-done .title-ornament{margin:0 auto}
 .p2-done p{margin:0;font-family:var(--font-heading);font-size:clamp(26px,2.8vw,36px);color:var(--maroon)}
 
-/* the closing link — chapter 6 ends on exactly one link and nothing else */
-.ch2-end{margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);border-top:1px solid var(--rule);display:grid;justify-items:center}
 /* THE SAME BUTTON AS CHAPTER 6'S, IN THE SAME COLOURS. It was painted
    `--maroon` on `--mat` with a `--stamp` hover — the token set for TITLES — and
    chapter 6's hand-off is `--maroon-deep` on `--cream` with a `--maroon` hover,
@@ -239,48 +197,8 @@
 .ch2-end-link{
   display:inline-flex;align-items:center;text-decoration:none;
   font-family:var(--font-heading);font-weight:700;font-size:clamp(15px,1.3vw,18px);color:var(--cream);
-  background:var(--maroon-deep);padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px rgba(87,24,32,.24);
+  background:var(--maroon-deep);padding:12px 28px;border-radius:999px;box-shadow:0 6px 16px color-mix(in srgb,var(--maroon-deep) 24%,transparent);
   transition:background .2s ease,transform .2s ease;
 }
 .ch2-end-link:hover{background:var(--maroon);transform:translateY(-2px)}
 .ch2-end-link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-
-/* the fork follows the illustrated lead directly. Measured, the tree was sitting
-   153px below the last line of the lead — 97px of it dead space inside the block
-   (the figure is taller than the seven lines beside it) and 56px of flow on top.
-   The figure is smaller now and this closes what is left. */
-.chapter-article .ch2-bleedwrap + .ch2-fork{margin-top:var(--flow)}
-
-/* the line that introduces a list keeps its OWN LINE — the items below belong
-   to it — but carries no rule. The rule was asked for, then asked away twice:
-   under a short sentence it read as a divider cutting the passage rather than
-   as an underline belonging to the words above it. The break is enough. */
-.ch2-intro{display:block;margin-bottom:2px}
-
-/* The dot that marks an item of a list. Small, maroon, and set on the reading
-   side of the line — 6px, which is the size at which it reads as a mark on the
-   line rather than as a bullet the line hangs off. The span is inline, so the
-   dot rides the first line box of the item and nothing about the paragraph's
-   measurement changes. */
-.ch2-item::before{
-  content:'';display:inline-block;width:6px;height:6px;border-radius:50%;
-  background:var(--maroon);vertical-align:0.28em;margin-inline-end:10px;
-}
-
-/* ============ 06 · Mecca — chapter 6's charity hero, part for part ============
-   A watercolour bleeding off the RIGHT edge (`inline-start` in RTL, the reading
-   edge) with the reading column beside it on the left. Copied from
-   `.charity-hero` rather than reinvented: same absolute illustration, same
-   radial-and-linear mask, same soft shadow, same 42%-wide text block pushed off
-   the picture. The mask is the part that matters — the painting has no frame and
-   no edge, it fades into the parchment, which is why it reads as belonging to
-   the page instead of sitting on it. */
-/* THE SECTION'S OWN PADDING IS WHAT MADE „CENTRED" LOOK OFF-CENTRE.
-   Every section in this chapter carries `padding-top:84px` and no bottom
-   padding — the rule sits directly under the previous section's last line.
-   That is right for a section whose content starts at the top and runs down,
-   and wrong for one composed around a picture: centring a block inside a box
-   with 84px of padding at one end and none at the other lands it 42px below
-   the middle of the two rules, no matter what `justify-content` says. This
-   section drops the asymmetric padding and lets the reserved height do the
-   spacing, so the middle of the block IS the middle between the rules. */

@@ -3,8 +3,9 @@
 /* Chapter 3's closing practice.
 
    Same contract as chapter 6's: the chapter is not finished by reading it, only
-   by working through this. `islam:chapter:2 = 'done'` is written here and
-   nowhere else.
+   by working through this. `islam:chapter:3 = 'done'` is written here and
+   nowhere else. Every board is saved as it is worked (practice-progress.ts), so
+   a reload comes back to the same page.
 
    The questions live in practice.json with the §§ each one rests on. Two rules
    they obey: nothing is asked that the article answers by sitting next to it on
@@ -12,7 +13,7 @@
    invents a fact the source does not carry. */
 
 import Link from 'next/link'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Feedback from '@/components/chapter6/summary/Feedback'
 import PracticeNav from '@/components/chapter6/summary/PracticeNav'
 import SlotSurface from '@/components/chapter6/summary/SlotSurface'
@@ -21,14 +22,12 @@ import { usePickPlace } from '@/components/chapter6/summary/usePickPlace'
 import raw from '@/lib/chapter3/practice.json'
 import { CH3 } from '@/lib/chapter3/content'
 import { markChapterComplete } from '@/lib/chapter3/progress'
+import { readPractice, writePractice, type PracticeStore } from '@/lib/chapter3/practice-progress'
 
 /* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED, and that is the whole
-   principle here. The practice does not get a picture set of its own: the four
-   trait figures are the ones that open the cards in section 04, the four desert
-   frames are beats of the stage the reader has just walked, the two camps are
-   the valley the wars happen in, and the arbiter is the man section 04 draws
-   sitting beside the prose. A reader who worked the chapter recognises every one
-   of them, and recognition is the exercise. */
+   principle here: the practice gets no picture set of its own, so a reader who
+   worked the chapter recognises every picture, and recognition is the
+   exercise. */
 type Q =
   | { id: string; label: string; photo?: string; type: 'single' | 'multi'; prompt: string; ok: string; retry: string; options: { text: string; right: boolean }[] }
   | { id: string; label: string; photo?: string; type: 'match'; prompt: string; ok: string; retry: string; pairs: { left: string; right: string; photo?: string }[] }
@@ -39,6 +38,21 @@ type Q =
 const ART = '/assets/chapter3/'
 
 const QUESTIONS = (raw as unknown as { questions: Q[] }).questions
+
+/** THE COUNT ON THE PAGE IS COUNTED, NEVER TYPED. The lead read „שש שאלות" over
+    eight of them: practice.json had grown to eight — its own note says so — and
+    the sentence above them had not. A number printed over the things it counts
+    is the one error a reader spots immediately and does not forgive, so it is
+    derived here and throws if the chapter ever outgrows the list. */
+const NUMBER_WORD: Record<number, string> = {
+  3: 'שלוש', 4: 'ארבע', 5: 'חמש', 6: 'שש',
+  7: 'שבע', 8: 'שמונה', 9: 'תשע', 10: 'עשר',
+}
+const COUNT_WORD =
+  NUMBER_WORD[QUESTIONS.length] ??
+  (() => {
+    throw new Error(`chapter 3 practice: no Hebrew word for ${QUESTIONS.length} questions`)
+  })()
 
 /** deterministic shuffle — the same reader gets the same board on a reload */
 function shuffled<T>(items: T[], seed: number): T[] {
@@ -53,6 +67,21 @@ function shuffled<T>(items: T[], seed: number): T[] {
 }
 
 type State = 'idle' | 'wrong' | 'right'
+
+/** what every exercise is handed: the board it was left in, whether it was
+    already solved, and where to report a change */
+interface Saved {
+  initial?: unknown
+  solved: boolean
+  onSolved: () => void
+  onWork: (v: unknown) => void
+}
+const asStrings = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
+const asMap = (v: unknown): Record<string, string> =>
+  v && typeof v === 'object' && !Array.isArray(v)
+    ? Object.fromEntries(Object.entries(v).filter(([, x]) => typeof x === 'string')) as Record<string, string>
+    : {}
 
 /* CHAPTER 6'S FEEDBACK LINE, the component itself and not a copy of it.
 
@@ -85,10 +114,17 @@ function Answer({ state, q }: { state: State; q: Q }) {
 
 /* ---------------- one question per type ---------------- */
 
-function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; onSolved: () => void }) {
+function Choice({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'single' | 'multi' }> } & Saved) {
   const opts = useMemo(() => shuffled(q.options, q.id.length * 97), [q])
-  const [picked, setPicked] = useState<string[]>([])
-  const [state, setState] = useState<State>('idle')
+  const [picked, setPicked] = useState<string[]>(() =>
+    asStrings(initial).filter((t) => q.options.some((o) => o.text === t)),
+  )
+  const [state, setState] = useState<State>(solved ? 'right' : 'idle')
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) { first.current = false; return }
+    onWork(picked)
+  }, [picked, onWork])
   const multi = q.type === 'multi'
 
   function toggle(text: string) {
@@ -131,18 +167,28 @@ function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; 
   )
 }
 
-function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }>; onSolved: () => void }) {
+function Match({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'match' | 'situations' }> } & Saved) {
   const rows =
     q.type === 'match'
       ? q.pairs.map((p) => ({ left: p.left, right: p.right, photo: p.photo }))
       : q.pairs.map((p) => ({ left: p.key + ' — ' + p.text, right: p.to, photo: p.photo }))
   const withArt = rows.some((r) => r.photo)
   const answers = useMemo(() => shuffled(rows.map((r) => r.right), q.id.length * 53), [q])
-  const [chosen, setChosen] = useState<Record<string, string>>({})
+  const [chosen, setChosen] = useState<Record<string, string>>(() => {
+    const kept = asMap(initial)
+    return Object.fromEntries(
+      Object.entries(kept).filter(([l, a]) => rows.some((r) => r.left === l) && answers.includes(a)),
+    )
+  })
   const [held, setHeld] = useState<string | null>(null)
   const heldRef = useRef<string | null>(null)
-  const [state, setState] = useState<State>('idle')
+  const [state, setState] = useState<State>(solved ? 'right' : 'idle')
   const done = state === 'right'
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) { first.current = false; return }
+    onWork(chosen)
+  }, [chosen, onWork])
   const placed = new Set(Object.values(chosen))
 
   /* hold an answer, then give it to a row — and clicking a filled row hands the
@@ -268,9 +314,19 @@ function Match({ q, onSolved }: { q: Extract<Q, { type: 'match' | 'situations' }
 
 /** Put the steps in order. The board starts shuffled and the reader walks a
     step up or down until the chain reads the way it happened. */
-function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: () => void }) {
-  const [items, setItems] = useState<string[]>(() => shuffled(q.steps, q.id.length * 71))
-  const [state, setState] = useState<State>('idle')
+function Order({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'order' }> } & Saved) {
+  const [items, setItems] = useState<string[]>(() => {
+    /* a kept order is used only if it is exactly this question's steps */
+    const kept = asStrings(initial)
+    const same = kept.length === q.steps.length && q.steps.every((x) => kept.includes(x))
+    return same ? kept : shuffled(q.steps, q.id.length * 71)
+  })
+  const [state, setState] = useState<State>(solved ? 'right' : 'idle')
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) { first.current = false; return }
+    onWork(items)
+  }, [items, onWork])
 
   const move = useCallback((i: number, dir: -1 | 1) => {
     setState('idle')
@@ -337,9 +393,20 @@ function Order({ q, onSolved }: { q: Extract<Q, { type: 'order' }>; onSolved: ()
     board never grades a move as it is made: the check button is the only place
     correctness is spoken, exactly as in the other five questions. Nothing is
     ever deleted — clicking a filled slot hands its label back to the tray. */
-function Place({ q, onSolved }: { q: Extract<Q, { type: 'place' }>; onSolved: () => void }) {
-  const [filled, setFilled] = useState<Record<number, string>>({})
-  const [state, setState] = useState<State>('idle')
+function Place({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'place' }> } & Saved) {
+  const [filled, setFilled] = useState<Record<number, string>>(() => {
+    const out: Record<number, string> = {}
+    for (const [k, v] of Object.entries(asMap(initial))) {
+      if (q.slots.some((x) => x.n === Number(k)) && q.slots.some((x) => x.answer === v)) out[Number(k)] = v
+    }
+    return out
+  })
+  const [state, setState] = useState<State>(solved ? 'right' : 'idle')
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) { first.current = false; return }
+    onWork(filled)
+  }, [filled, onWork])
   const done = state === 'right'
 
   const bank = useMemo(() => shuffled(q.slots.map((x) => x.answer), q.id.length * 61), [q])
@@ -415,20 +482,41 @@ function Place({ q, onSolved }: { q: Extract<Q, { type: 'place' }>; onSolved: ()
 
 /* ---------------- the page ---------------- */
 
+const KNOWN = new Set(QUESTIONS.map((q) => q.id))
+
 export default function Chapter3Practice() {
-  const [solved, setSolved] = useState<Set<string>>(new Set())
-  const [finished, setFinished] = useState(false)
+  const [store, setStore] = useState<PracticeStore>({ done: [], work: {} })
+  /* THE BOARDS REMOUNT ONCE THE STORE IS READ. Each seeds itself in a lazy
+     `useState`, which runs on the first render — before this effect has read
+     localStorage — so without the remount every board came up empty and the
+     restore did nothing (chapter 4 measured it). The store is read in an
+     effect, not at render: the server has no localStorage. */
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    setStore(readPractice(KNOWN))
+    setReady(true)
+  }, [])
+  useEffect(() => {
+    if (ready) writePractice(store)
+  }, [store, ready])
+
+  const solved = useMemo(() => new Set(store.done), [store.done])
+  const finished = solved.size === QUESTIONS.length
+  /* completing is a side effect, so it lives in an effect — it used to run
+     inside the `setSolved` updater, which React may call twice */
+  useEffect(() => {
+    if (ready && finished) markChapterComplete()
+  }, [ready, finished])
 
   const solve = useCallback((id: string) => {
-    setSolved((s) => {
-      if (s.has(id)) return s
-      const next = new Set(s).add(id)
-      if (next.size === QUESTIONS.length) {
-        markChapterComplete()
-        setFinished(true)
-      }
-      return next
-    })
+    setStore((s) => (s.done.includes(id) ? s : { ...s, done: [...s.done, id] }))
+  }, [])
+  const works = useMemo(() => {
+    const out: Record<string, (v: unknown) => void> = {}
+    for (const q of QUESTIONS) {
+      out[q.id] = (v: unknown) => setStore((s) => ({ ...s, work: { ...s.work, [q.id]: v } }))
+    }
+    return out
   }, [])
 
   /* the rail IS the progress display, as it is on chapter 6's practice: a tick
@@ -440,7 +528,7 @@ export default function Chapter3Practice() {
   return (
     <PracticeNav
       stops={stops}
-      back={{ href: '/chapter3', label: 'חזרה לפרק 3' }}
+      back={{ href: '/chapter3#chapter-end', label: 'חזרה לפרק 3' }}
       subtitle="פרק 3 · תרגול מסכם"
     >
       <main className="chapter-article p3-main">
@@ -459,7 +547,7 @@ export default function Chapter3Practice() {
         </div>
 
         <p className="p3-lead" data-reveal>
-          {CH3.title} — שש שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
+          {CH3.title} — {COUNT_WORD} שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
         </p>
 
         {/* EACH EXERCISE IS A SECTION OF THE ARTICLE, not an item of a list.
@@ -501,10 +589,22 @@ export default function Chapter3Practice() {
                   <img src={ART + q.photo} alt="" loading="lazy" decoding="async" />
                 </figure>
               )}
-              {(q.type === 'single' || q.type === 'multi') && <Choice q={q} onSolved={() => solve(q.id)} />}
-              {(q.type === 'match' || q.type === 'situations') && <Match q={q} onSolved={() => solve(q.id)} />}
-              {q.type === 'order' && <Order q={q} onSolved={() => solve(q.id)} />}
-              {q.type === 'place' && <Place q={q} onSolved={() => solve(q.id)} />}
+              {(() => {
+                /* `key` goes on the element itself — React refuses it inside a
+                   spread — and flips once, when the store has been read */
+                const k = ready ? 'r' : 'i'
+                const saved = {
+                  initial: store.work[q.id],
+                  solved: solved.has(q.id),
+                  onSolved: () => solve(q.id),
+                  onWork: works[q.id],
+                }
+                if (q.type === 'single' || q.type === 'multi') return <Choice key={k} q={q} {...saved} />
+                if (q.type === 'match' || q.type === 'situations') return <Match key={k} q={q} {...saved} />
+                if (q.type === 'order') return <Order key={k} q={q} {...saved} />
+                if (q.type === 'place') return <Place key={k} q={q} {...saved} />
+                return null
+              })()}
             </div>
           </section>
         ))}
@@ -513,7 +613,10 @@ export default function Chapter3Practice() {
           <div className="p3-done" role="status">
             <div className="title-ornament" aria-hidden="true"><span /></div>
             <p>הפרק הושלם.</p>
-            <Link className="ch3-end-link" href="/chapters">לכל פרקי הלמידה</Link>
+            {/* chapter 6's button, as on its own practice page (`.gv-out
+                .chapter-end-back`). It was `.ch3-end-link` — this chapter's
+                restatement of that rule — and the restatement is gone. */}
+            <Link className="chapter-end-back" href="/chapters">לכל פרקי הלמידה</Link>
           </div>
         )}
       </main>

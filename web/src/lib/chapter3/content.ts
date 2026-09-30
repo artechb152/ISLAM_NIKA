@@ -23,7 +23,8 @@ export interface Fragment {
   list?: string[]
   /** the source's own name for this item (יקטן, הפרט, בערות…) */
   name?: string
-  /** an Arabic term this fragment introduces — the article sets it in maroon */
+  /** an Arabic term this fragment introduces, as the text prints it — the
+      article sets it in gold (`.ch3-tr`, rule 38) wherever T prints the fragment */
   term?: string
   /** An APPROVED REWORDING, printed instead of `text`.
       The chapter's rule is that every sentence on the page is the source's own.

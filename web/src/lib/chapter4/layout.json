@@ -135,6 +135,8 @@
       },
       "figure": {
         "src": "/assets/chapter4/badr-missile.jpg",
+        "width": 856,
+        "height": 742,
         "caption": "חלק מטיל בליסטי איראני ששוגר לישראל במהלך מבצע „שאגת הארי\" (מרץ 2026) ולא התפוצץ. בתוך העיגול הכחול: הפסוק שכתבו משמרות המהפכה — סורה 8, פסוק 17, המתייחס לקרב בדר.",
         "$note": "תמונה ממסמך התיקונים של המרצה (18.9.2026); הכיתוב הוא תיאורה שלה, בקיצור. עריכה ולא מקור — כמו כל כיתוב (כלל 24)."
       }
@@ -501,8 +503,7 @@
         "polka": {
           "href": "https://youtu.be/Hx75a1VGR8Y",
           "label": "הניתוח המלא של ד\"ר שגיא פולקה",
-          "embed": "https://www.youtube-nocookie.com/embed/Hx75a1VGR8Y",
-          "poster": "/assets/chapter4/polka-video.jpg"
+          "embed": "https://www.youtube-nocookie.com/embed/Hx75a1VGR8Y"
         }
       }
     }

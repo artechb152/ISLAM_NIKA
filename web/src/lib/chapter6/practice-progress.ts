@@ -6,12 +6,12 @@
    The split matters for one reason: resetting this screen must not cost the reader the chapter
    they already read, and a corrupt store here must not take the chapter down with it.
 
-   TWO DEGREES PER COMMANDMENT. The five plates at the top are the whole progress display —
-   there is no separate bar, and no score:
+   TWO DEGREES PER COMMANDMENT. The sidebar (PracticeNav) is the whole progress display —
+   there is no separate bar, and no score. A commandment's row gets its tick at degree 2:
 
-     0  nothing yet           muted name · pale icon · dashed rule
-     1  its exercise complete     the rule and the name turn maroon
-     2  its beat complete         the icon comes up to full colour
+     0  nothing yet
+     1  its exercise complete
+     2  its beat complete too     — the tick
 
    There used to be a third, earned by an opening round that matched five situations onto the
    five commandments. That round is gone, and with it the first rung.

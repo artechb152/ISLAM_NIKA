@@ -4,7 +4,7 @@
     {
       "id": "lineage",
       "title": "ייחוסו של מוחמד וישמעאל",
-      "device": "hero + timeline",
+      "device": "banner + prose beside a framed photograph (Maqam Ibrahim)",
       "$note": "הנושא הפותח של מסמך התוכן. חומר הכעבה (§1–§4) היה ממוזג לתוך מקטע „מכה והכעבה“ בעמדה החמישית; במסמך הוא פותח את הפרק, ולכן הוא מקטע ראשון. §0.a הוא המשפט הפותח שלו („האסלאם מייחס את מוחמד לישמעאל“) והוא היה מחובר ל־§5.a במקטע חצי האי — הוחזר לכאן.",
       "slots": {
         "lead": [
@@ -23,7 +23,7 @@
     {
       "id": "peninsula",
       "title": "חצי האי ערב והשבטים",
-      "device": "layered-chart",
+      "device": "layered map beside prose + centred lead over a name pair",
       "slots": {
         "lead": [
           "§5.a",
@@ -82,7 +82,7 @@
     {
       "id": "culture",
       "title": "התרבות השבטית",
-      "device": "bleed-illustration + quote + vengeance-diagram",
+      "device": "row of four trait cards, each opening a <dialog> (cycle, verse, sayings, vengeance diagram inside)",
       "$note": "מקטע אחד, ארבעה מאפיינים — כמו במקור. המקור מציב את כל הארבעה תחת אותה כותרת רצה, „מאפייני התרבות השבטית · נאמנות שבטית / גבריות / קבורת בנות / נקמת דם“, ולכן „שני מנהגים“ לא היה מקטע ראשי אלא שתי כותרות משנה שנקרעו מהמשפחה שלהן. שני המנהגים הם מה שהערכים עושים כשהם פוגשים רעב ודם, ולא נושא חדש.",
       "$cards-title-note": "הכותרת שמעל שורת הכרטיסיות. זו הכותרת הרצה של המקור עצמו, ולכן היא נתון כאן ולא מחרוזת בקומפוננטה — Chapter2.tsx אינו כותב מילים.",
       "cardsTitle": "מאפייני התרבות השבטית",
@@ -180,7 +180,7 @@
     {
       "id": "jahiliyya",
       "title": "תקופת הג'אהליה",
-      "device": "claim-and-answer",
+      "device": "bleeding watercolour (seated arbiter) + fork into two meanings, claim and answer",
       "slots": {
         "lead": [
           "§27.a",
@@ -208,7 +208,7 @@
     {
       "id": "mecca",
       "title": "מכה לפני האסלאם",
-      "device": "plate beside prose",
+      "device": "framed Kaaba photograph beside prose",
       "$note": "כותרת המסמך עצמו. מקטע זה החזיק גם את חומר הכעבה (§1–§4), שעבר למקטע הפותח „ייחוסו של מוחמד וישמעאל“ כפי שהמסמך מציב אותו; כאן נשאר מה שהמסמך אומר תחת הכותרת הזאת בלבד — §30–§33.",
       "slots": {
         "gathering": [
@@ -226,7 +226,7 @@
       "id": "legacy",
       "title": "השפעת התרבות השבטית על האסלאם",
       "$title-note": "כותרת המסמך עצמו (SOURCE-TEXT.md שורה 157). „מה אומץ ומה נדחה“ שעמדה כאן קודם הייתה כותרת עריכתית שהומצאה לפריסה — נכונה לתוכן, אבל לא מה שהמסמך קורא לחלק הזה.",
-      "device": "ledger",
+      "device": "ledger + closing statement + video",
       "$slots-note": "הסדר על העמוד: §34.b כפרוזה פותחת, שני הפנקסים, ו-§34.a אחרון — ההיגד שהפרק הולך אליו, מעל המעבר לתרגול. בראש המקטע הוא הכריז על המיון לפני שהקורא ראה ממנו דבר.",
       "slots": {
         "opening": [

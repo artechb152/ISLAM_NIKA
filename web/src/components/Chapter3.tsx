@@ -28,6 +28,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
+import ComicPart from '@/components/Chapter3ComicPart'
+import revelationComic from '@/lib/chapter3/revelation-comic.json'
+import nightComic from '@/lib/chapter3/night-comic.json'
+import { useFindHit } from '@/lib/chapter3/useFindHit'
 import { CH3, frag, list, text } from '@/lib/chapter3/content'
 import layoutData from '@/lib/chapter3/layout.json'
 import {
@@ -95,15 +99,19 @@ const bindShort = (phrase: string): string =>
   phrase.split(' ').length <= 3 ? phrase.replace(/ /g, NBSP) : phrase
 
 /** Bold every `em` phrase inside one line, leaving the rest as it is. */
-function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] {
-  if (!em.length) return [s]
+/* TWO REGISTERS, rule 38: maroon `.key` for the idea a sentence turns on, gold
+   `.ch3-tr` for a transliterated term — chapter 5's `.ch5-tr`. A phrase that is
+   in both is a term, and takes the gold. */
+function emphasise(s: string, em: string[], keyBase: string, tr: string[] = []): React.ReactNode[] {
+  if (!em.length && !tr.length) return [s]
+  const all = [...tr, ...em]
   const parts: React.ReactNode[] = []
   let rest = s
   let k = 0
   while (rest.length) {
     let at = -1
     let hit = ''
-    for (const phrase of em) {
+    for (const phrase of all) {
       const i = rest.indexOf(phrase)
       if (i >= 0 && (at < 0 || i < at)) {
         at = i
@@ -116,7 +124,7 @@ function emphasise(s: string, em: string[], keyBase: string): React.ReactNode[] 
     }
     if (at > 0) parts.push(rest.slice(0, at))
     parts.push(
-      <b className="key" key={`${keyBase}-${k++}`}>
+      <b className={tr.includes(hit) ? 'ch3-tr' : 'key'} key={`${keyBase}-${k++}`}>
         {bindShort(hit)}
       </b>,
     )
@@ -140,6 +148,10 @@ function T({
   reveal?: boolean
 }) {
   const refs = Array.isArray(r) ? r : [r]
+  /* each fragment's own `term` — the transliteration the source prints in it */
+  const tr = refs
+    .map((x) => frag((PARENTHETICAL.exec(x) ?? OWN_LINE.exec(x))?.[1] ?? x).term)
+    .filter((t): t is string => !!t)
   const lines: { text: string; intro?: boolean; item?: boolean }[] = []
   let run = ''
   const flush = () => {
@@ -181,6 +193,16 @@ function T({
   }
   flush()
 
+  /* AN EMPHASIS THAT MATCHES NOTHING IS A BUG, NOT A NO-OP. Chapter 4's §57
+     asked for „דת מוחמד" in curly quotes against a text in straight ones, and
+     the word simply never went bold — nobody saw it for weeks. */
+  if (process.env.NODE_ENV !== 'production') {
+    for (const phrase of em) {
+      if (!lines.some((l) => l.text.includes(phrase)))
+        console.error(`T ${refs.join('+')}: emphasis „${phrase}" is not in the text`)
+    }
+  }
+
   const rv = reveal ? { 'data-reveal': true } : {}
   const out: React.ReactNode[] = []
   lines.forEach((line, i) => {
@@ -188,7 +210,7 @@ function T({
       if (i) out.push(' ')
       out.push(
         <span className="ch3-intro" key={`i${i}`}>
-          {emphasise(line.text, em, `l${i}`)}
+          {emphasise(line.text, em, `l${i}`, tr)}
         </span>,
         ' ',
       )
@@ -198,12 +220,12 @@ function T({
     if (line.item) {
       out.push(
         <span className="ch3-item" key={`it${i}`}>
-          {emphasise(line.text, em, `l${i}`)}
+          {emphasise(line.text, em, `l${i}`, tr)}
         </span>,
       )
       return
     }
-    out.push(...emphasise(line.text, em, `l${i}`))
+    out.push(...emphasise(line.text, em, `l${i}`, tr))
   })
   return (
     <p className={className} {...rv}>
@@ -373,6 +395,32 @@ function Plate({ src, size = 'inset' }: { src: string; size?: 'inset' | 'wide' |
   )
 }
 
+/** A DOCUMENT, NOT A PAINTING — and the one object in this chapter that is
+    neither. Every `Plate` above is a commissioned watercolour or oil of a
+    place, and carries `alt=""` because it states no fact. This is a photograph
+    of a real proclamation, it is the evidence for the claim beside it, and so
+    it is the one picture here that is captioned and described.
+
+    THE FRAME IS CHAPTER 2'S `.ch2-photo`, PROPERTY FOR PROPERTY — hairline
+    `--edge`, 14px, the one shadow, and the sepia that marries a photograph to
+    the parchment. Chapter 2 sets its two real photographs (מקאם אברהים, הכעבה)
+    exactly this way and says why in its own comment: a photograph gets a frame
+    precisely so it does not read as one of the paintings that sit on the paper
+    with no frame at all.
+
+    BOTH STRINGS ARE §47 — the component writes no sentence. The caption is the
+    source's, and it is also the alt: the figure and its description say the
+    same thing because the source gave one sentence for both. */
+function Document({ src, r }: { src: string; r: string }) {
+  return (
+    <figure className="ch3-doc" data-reveal>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/assets/chapter3/${src}`} alt={text(r)} loading="lazy" decoding="async" />
+      <figcaption>{text(r)}</figcaption>
+    </figure>
+  )
+}
+
 /* ---------------- a note on the story, not the story ----------------
 
    THE PAGE SHOWED EVERYTHING AT ONCE and read as a wall. Chapter 2 holds 950
@@ -395,14 +443,12 @@ function Note({ id, label, children }: { id: string; label: string; children: Re
   const bodyRef = useRef<HTMLDivElement | null>(null)
 
   /* if the in-chapter search lands inside a closed note, the note opens: a hit
-     the reader cannot see is worse than no hit at all */
-  useEffect(() => {
-    const el = bodyRef.current
-    if (!el || open) return
-    const onFind = () => setOpen(true)
-    el.addEventListener('focusin', onFind)
-    return () => el.removeEventListener('focusin', onFind)
-  }, [open])
+     the reader cannot see is worse than no hit at all.
+     ⚠ THIS USED TO LISTEN FOR `focusin`, AND IT NEVER FIRED — ChapterSearch
+     paints highlights and moves no focus. Measured when section 05's text moved
+     into a note: a search for „טיפת דם קרוש" landed in it and it stayed shut.
+     `useFindHit` reads the highlight registry instead; see its comment. */
+  useFindHit(bodyRef, () => setOpen(true))
 
   /* ⚠ `data-reveal` AND THE OPEN CLASS MUST NOT SHARE AN ELEMENT.
      The reveal observer adds `is-inview` straight to the DOM node. React owns
@@ -431,60 +477,6 @@ function Note({ id, label, children }: { id: string; label: string; children: Re
         </div>
       </div>
     </div>
-  )
-}
-
-/* ---------------- mechanism 1 · the lineage strip ----------------
-
-   Static. No clicks, no focusable elements, nothing hidden from chapter search.
-
-   WHY THIS IS NOT PROSE. §7–§12 asks the reader to hold seven proper names and
-   three transfers of custody in 211 words, and to notice that עבד אלמטלב
-   appears TWICE in two different roles — as the father's patronymic in §8, and
-   as the guardian in §12. In running prose those are two mentions twenty lines
-   apart; here they are one node, which is what they are. It also plants אבו
-   טאלב, so that §31 — twenty paragraphs later — has someone to kill.
-
-   A <dl> per node because every name carries a gloss FROM THE SOURCE. Chapter 2
-   established both halves of that test: a name and a four-word gloss are a
-   definition, and a definition list with nothing to define is markup pretending
-   the text has a structure it does not.
-
-   HTML and CSS, not SVG: Hebrew text in SVG flows right-to-left from its x, and
-   that trap has already cost this project a labelling bug. It does not exist
-   here. */
-function Lineage() {
-  /* THE TWO ROWS ARE NOW ACTUALLY JOINED. For a while this drew two flat
-     definition lists side by side and not one connecting rule — which meant the
-     one thing it exists to show, that עבד אלמטלב stands in both rows in two
-     different roles, was not on the page at all. The rules are drawn in CSS off
-     `.ch3-lin-rail` and `.ch3-lin-drop`; the tie between the two occurrences is
-     marked with `is-tied` on both nodes.
-
-     The sr-only line is a UI string describing the FIGURE, in the same category
-     as alt text and control labels — the figure's shape is information a
-     sighted reader gets from the rules, and it has to reach everyone else. It
-     is not a sentence of the chapter and carries no fact the prose lacks. */
-  const parents: [string, boolean][] = [['§8.father', true], ['§8.mother', false]]
-  const care: [string, boolean][] = [['§12.b', true], ['§12.c', false]]
-  const node = ([r, tied]: [string, boolean]) => (
-    <div className={'ch3-lin-node' + (tied ? ' is-tied' : '')} key={r}>
-      <dt>{nameOf(r)}</dt>
-      <dd>{text(r)}</dd>
-    </div>
-  )
-  return (
-    <figure className="ch3-lineage" data-reveal>
-      <span className="sr-only">
-        תרשים הייחוס: עבד אללה ואאמנה בשורה העליונה, ומתחתיהם שני האפוטרופוסים.
-        עבד אלמטלב מופיע בשתי השורות — פעם כשם האב ופעם כסב שגידל את מוחמד.
-      </span>
-      <dl className="ch3-lin-row is-parents">{parents.map(node)}</dl>
-      <div className="ch3-lin-rail" aria-hidden="true">
-        <span className="ch3-lin-drop" />
-      </div>
-      <dl className="ch3-lin-row is-care">{care.map(node)}</dl>
-    </figure>
   )
 }
 
@@ -585,6 +577,7 @@ function Reuse() {
    a sighted reader still meets Adam first and Abraham last, screen readers read
    the source's own ordinals in order, and chapter search walks the same markup
    it always did. Nothing here is positioned absolutely and nothing overlaps. */
+
 const SKY: { x: number; d: number }[] = [
   { x: 4, d: 1.0 },   // אדם — the first heaven, and the nearest
   { x: 27, d: 0.68 },
@@ -701,54 +694,29 @@ function Ascent() {
    as an editorial claim about a live conflict. A rule, two end points and two
    labels, in the chapter's palette. */
 function TwoReadings() {
-  const [far, setFar] = useState(true)
-  const labels: [string, string] = [pick('§43.a', 'לירושלים'), pick('§44.a', 'דעות מיעוט')]
+  const t = (SECTIONS.find((x) => x.id === 'ascent') as unknown as { readings: { a: string; b: string } }).readings
+  /* TWO EQUAL CARDS, NOT A TOGGLE (30.9). The device that stood here was a pair
+     of buttons over a line that grew or shrank — and both paragraphs were
+     printed under it whichever was pressed, so the press changed nothing the
+     reader read, and its empty box read as broken. Chapter 5's two claims are
+     the precedent for a dispute the source leaves open: two cards of one size,
+     side by side, neither larger, no „pick a side". Same card as section 06
+     (`.ch3-pair` / `.ch3-card`). The titles are editorial and live in
+     layout.json. */
   return (
-    <div className="ch3-readings" data-reveal>
-      <div className="ch3-read-legend" role="group" aria-label="שתי הקריאות של יעד המסע">
-        <button
-          type="button"
-          className="ch3-read-btn"
-          aria-pressed={far}
-          onClick={() => setFar(true)}
-        >
-          {labels[0]}
-        </button>
-        <button
-          type="button"
-          className="ch3-read-btn"
-          aria-pressed={!far}
-          onClick={() => setFar(false)}
-        >
-          {labels[1]}
-        </button>
-      </div>
-      {/* THE FIGURE WAS THREE EMPTY SPANS — a rule and two dots, which was the
-          weakest object on the page and read as an unfinished sketch rather
-          than a diagram. It is still abstract, and must stay that way: §44
-          disputes that the journey left the peninsula at all, and §43 ties the
-          city's sanctity to jihad terror. A building, a photograph, an aerial
-          or a map of the modern city would settle in pictures a question the
-          source deliberately leaves open.
-
-          What it draws now is the ONE thing the two readings actually differ
-          on: how far the line runs. A fixed origin at the reading edge, a
-          measured ground rule, the travelled span drawn solid, the rest of the
-          rule left as a dashed remainder, and the destination marker sitting
-          where that reading puts it. Two unlabelled points on the ground rule
-          mark the peninsula's own extent, so „inside" and „beyond" are legible
-          without naming anything. */}
-      <div className={'ch3-read-fig' + (far ? ' is-far' : ' is-near')} aria-hidden="true">
-        <span className="ch3-read-ground" />
-        <span className="ch3-read-span" />
-        <span className="ch3-read-extent" />
-        <span className="ch3-read-dot is-start" />
-        <span className="ch3-read-dot is-end" />
-      </div>
-      <div className="ch3-body">
-        <T r="§43.a" />
-        <T r="§44.a" />
-      </div>
+    <div className="ch3-pair" data-reveal>
+      <article className="ch3-card">
+        <h3 className="ch3-card-title">{t.a}</h3>
+        <div className="ch3-body">
+          <T r="§43.a" />
+        </div>
+      </article>
+      <article className="ch3-card">
+        <h3 className="ch3-card-title">{t.b}</h3>
+        <div className="ch3-body">
+          <T r="§44.a" />
+        </div>
+      </article>
     </div>
   )
 }
@@ -763,7 +731,6 @@ export default function Chapter3() {
   const [isDesktop, setIsDesktop] = useState(true)
   const [collapsed, setCollapsed] = useState(false)
   const [currentSection, setCurrentSection] = useState(SECTION_ORDER[0])
-  const [currentSub, setCurrentSub] = useState<string | null>(null)
   const [doneSections, setDoneSections] = useState<Set<string>>(new Set())
   const jumpUntil = useRef(0)
 
@@ -819,32 +786,6 @@ export default function Chapter3() {
     }
   }, [])
 
-  /* which MOVEMENT the reader is in — nine sub-headings sit in the rail, and
-     without this they are links that never say where you are */
-  useEffect(() => {
-    const subs = SECTIONS.flatMap((s) => (s.subs ?? []).map((x) => x.id))
-    const nodes = subs.map((id) => document.getElementById(id)).filter((n): n is HTMLElement => !!n)
-    if (!nodes.length) return
-    const read = () => {
-      const line = window.innerHeight * 0.34
-      let active: string | null = null
-      for (const n of nodes) {
-        const r = n.getBoundingClientRect()
-        const sec = n.closest('.article-section')?.getBoundingClientRect()
-        if (r.top <= line && sec && sec.bottom > line) active = n.id
-      }
-      setCurrentSub((cur) => (cur === active ? cur : active))
-    }
-    const io = new IntersectionObserver(read, { rootMargin: '0px', threshold: [0, 0.5, 1] })
-    nodes.forEach((n) => io.observe(n))
-    window.addEventListener('scroll', read, { passive: true })
-    read()
-    return () => {
-      io.disconnect()
-      window.removeEventListener('scroll', read)
-    }
-  }, [])
-
   useEffect(() => {
     const end = endRef.current
     if (!end) return
@@ -881,6 +822,20 @@ export default function Chapter3() {
     }
   }, [])
 
+  /* the closing button carries a quiet „הושלם" once the PRACTICE is finished —
+     and the flag it reads is the one the practice writes, `islam:chapter:3`,
+     never `completed` in this chapter's own store: that one only means the
+     reading reached the end. Read in an effect and not at render, because the
+     server has no localStorage and a chip present in the HTML but absent in the
+     browser is a hydration mismatch. The link works either way; a finished
+     practice must never be blocked from being re-entered. */
+  const [practiceDone, setPracticeDone] = useState(false)
+  useEffect(() => {
+    try {
+      setPracticeDone(localStorage.getItem('islam:chapter:3') === 'done')
+    } catch {}
+  }, [])
+
   useEffect(() => {
     try {
       setCollapsed(localStorage.getItem('ch3:side-collapsed') === '1')
@@ -904,6 +859,12 @@ export default function Chapter3() {
   const onMenuJump = useCallback(() => {
     jumpUntil.current = Date.now() + 1800
   }, [])
+  /* the chapter search scrolls straight to its hit and announces it with
+     `chapter:jump` — the sections it flew past were not read, so no credit */
+  useEffect(() => {
+    window.addEventListener('chapter:jump', onMenuJump)
+    return () => window.removeEventListener('chapter:jump', onMenuJump)
+  }, [onMenuJump])
 
   return (
     <div className="chapter-page">
@@ -983,6 +944,10 @@ export default function Chapter3() {
                     }}
                   >
                     <span className="menu-num">{String(i + 1).padStart(2, '0')}</span>
+                    {/* MAIN SECTIONS ONLY (rule 29) — chapter 6's rail and chapter 5's.
+                        The sub-headings rode here as a nested list for a while;
+                        the shared sheet never styled `.menu-subs`, and nine extra
+                        rows turned a table of contents into an index. */}
                     <span className="menu-label">{titleOf(s.id)}</span>
                     {doneSections.has(s.id) && (
                       <svg className="menu-done" viewBox="0 0 24 24" aria-hidden="true">
@@ -990,29 +955,6 @@ export default function Chapter3() {
                       </svg>
                     )}
                   </a>
-                  {/* the sub-headings ride under their section, as chapter 6's rail
-                      does. Here they are PLAIN ANCHORS — this chapter has no
-                      dialogs, so the fragment jump is the whole behaviour and
-                      nothing has to be prevented. */}
-                  {s.subs && (
-                    <ul className="menu-subs">
-                      {s.subs.map((sb) => (
-                        <li key={sb.id}>
-                          <a
-                            href={`#${sb.id}`}
-                            className={currentSub === sb.id ? 'is-current' : undefined}
-                            aria-current={currentSub === sb.id ? 'true' : undefined}
-                            onClick={() => {
-                              onMenuJump()
-                              setDrawer(false)
-                            }}
-                          >
-                            {sb.title}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
                 </li>
               ))}
             </ol>
@@ -1111,8 +1053,27 @@ export default function Chapter3() {
                     <T r="§2.sura" />
                     <T r={['§3.a', '(§3.aside)']} />
                   </div>
-                  <Plate src="elephant.webp" size="cut" />
+                  {/* ⚠ `elephant-trim.webp`, NOT `elephant.webp`. Measured on
+                      the file: the original is 900×1007 and its TOP 263 ROWS —
+                      26% of its height — hold no pixel above alpha 120. On the
+                      page that became a two-hundred-pixel hole beside the first
+                      two paragraphs, which is most of what „מלא רווחים" was.
+                      This is the same painting with 230 rows taken off the top,
+                      leaving 33px of soft wash above the animal. Nothing was
+                      repainted and the original file is still there. */}
+                  <Plate src="elephant-trim.webp" size="cut" />
                 </div>
+                {/* THE SURA'S OWN WORDS CLOSE THE SECTION. §2.sura names it and
+                    numbers it — „סורת הפיל" (105) — and until the lecturer's
+                    round the chapter stopped there, paraphrasing a passage it
+                    never let the reader hear. It sits AFTER the prose and not
+                    beside it: the plate's column was sized by measurement
+                    against the portrait watercolour, and a blockquote squeezed
+                    into half a column is not how this chapter sets a verse.
+
+                    It also carries the reader into section 02, which is about
+                    phrases taken out of THIS sura. */}
+                <Verse r="§45.verse" />
               </Section>
 
               {/* ============ 02 · „איפה זה פוגש אותנו“? ============
@@ -1131,44 +1092,120 @@ export default function Chapter3() {
                   <T r="§4.ababil" em={['אבאביל']} />
                 </div>
                 <SubHead section="today" id="maakul" />
-                <Reuse />
+                {/* THE LECTURER'S LEAD-IN. It states the pattern — verses of
+                    that sura supplying names for operations and weapons — and
+                    the two rows under it are the pattern happening. Her own
+                    middle sentences are NOT printed: they are צוק איתן, שאגת
+                    הארי and the כטב"ם, and the source PDF says all three at
+                    greater length in §5.a, §6.a and §4.ababil. Printing both
+                    would be the same fact twice, which the gate forbids and a
+                    reader notices first. */}
+                <div className="ch3-body" data-reveal>
+                  <T r="§46.a" em={['שמות של מבצעים ואמצעי לחימה']} />
+                </div>
+                {/* THE TWO ROWS AND THE PROCLAMATION, SIDE BY SIDE. The cards
+                    hold the READING EDGE — first child, which in RTL lands on
+                    the RIGHT — and the document takes the outer edge on the
+                    left. They belong together: the rows say the phrase was
+                    taken, the poster is the phrase in use, and stacked one under
+                    the other they were two full-width blocks with a screen of
+                    scroll between the claim and its evidence. */}
+                <div className="ch3-evidence" data-reveal>
+                  <Reuse />
+                  {/* the comic's own file is `comic/x02.jpg`, and it is 1280×960
+                    because a comic panel is 4:3 — the proclamation is a wide
+                    banner and the file carries 112px of BLACK above it and 112
+                    below to fill the frame. On the parchment those bands read
+                    as two black rules, so this is the same picture with the
+                    letterbox taken off and nothing else: rows 112–847, where
+                    the pure black floor ends. The poster's own dark vignette is
+                    kept — it belongs to the design. x02.jpg is untouched. */}
+                  <Document src="hamas-proclamation.jpg" r="§47.caption" />
+                </div>
+                {/* AND HER REASON, WHICH CLOSES THE SECTION. Everything above it
+                    is what the organisations did; this is why, in her words. */}
+                <div className="ch3-body" data-reveal>
+                  <T r="§46.why" em={['בשם אללה']} />
+                </div>
               </Section>
 
               {/* ============ 03 · הלידה, המשפחה והילדות ============ */}
               <Section id="birth">
                 <Head id="birth" />
                 <SubHead section="birth" id="hashim" />
-                <div className="ch3-body" data-reveal>
-                  {/* §7.name has no full stop — it is the gloss the source prints
-                      in brackets before the verb, so it cannot stand alone */}
-                  <T r={['§7.name', '§7.a']} em={['שבט קריש']} />
-                  <T r="§7.b" />
-                </div>
-                {/* THE STRIP IS THE SECTION'S EVENT, NOT A MARGIN NOTE. It sat
-                    beside the prose for a while and the hierarchy stopped
-                    reading: at .92fr against a column of text it looked like an
-                    aside, when it is what §8 and §12 are actually about. Full
-                    width, on its own ground, with a full step of air either
-                    side — an object in the column, which is what chapter 2's
-                    devices are too. */}
-                <div className="ch3-body" data-reveal>
-                  <T r="§12.a" />
-                </div>
-                <Lineage />
-                <div className="ch3-withplate" data-reveal>
-                  <div className="ch3-body">
-                    <T r="§10.a" />
+                {/* ⚠ THE SENTENCE HAD LOST ITS SUBJECT. §7.name holds the word
+                    „מוחמד" in its `name` field and the source's bracketed gloss
+                    in its `text`; `T` prints text only, so the section opened on
+                    „משמעו המילולי: מהולל, משובח נולד בעיר מכה" — a sentence with
+                    nobody in it, and the brackets gone too. The source reads
+                    „מוחמד (משמעו המילולי: מהולל, משובח) נולד בעיר מכה", and that
+                    is what is set here: the name through `nameOf`, which is the
+                    sanctioned way to print a source name, and the gloss back
+                    inside its own brackets. */}
+                {/* A COLUMN BESIDE ONE PAINTING — the shape of ח'דיג'ה below
+                    and of the elephant above, mirrored. Before, the prose ran
+                    full width in four blocks and the town sat under the last
+                    three sentences as a framed rectangle: the only boxed
+                    painting on a page whose other paintings are cut-outs on the
+                    paper, and it hung beside §12 only, 430px after the rest.
+
+                    THE DEVICE UNMIRRORED puts the painting in grid column 2 —
+                    the LEFT in RTL — so the page alternates: elephant left,
+                    poster left, town left, jars right. `#birth` pulls the art
+                    back out of the gutter (chapter3-article.css) so its outer
+                    edge stands on the same line as every paragraph. */}
+                {/* THE SECTION RUNS IN THE SOURCE'S OWN ORDER — §7 → §12, with
+                    nothing lifted out of it.
+
+                    WHAT STOOD HERE was a four-medallion strip (`Lineage`) plus
+                    two fold-out notes, and between them the page read §7, then
+                    §12.a, then §8 inside the strip, then §10, then §9 and §11
+                    folded shut at the end. The reader met „התייתם עד גיל שש"
+                    before being told who his father and mother were, and the
+                    meaning of the name עבד אללה arrived last, closed.
+
+                    AND THE STRIP MADE A CLAIM THE SOURCE DOES NOT. Its rail drew
+                    a vertical line from עבד אללה down to עבד אלמטלב — and a
+                    vertical line in a family panel says „בנו של" (rule 69),
+                    while עבד אלמטלב is עבד אללה's FATHER; the patronymic inside
+                    the name says so. It also marked two different names with one
+                    gold diamond meaning „the same person". Chapter 5 met the
+                    same thing and did the same thing: the diagrams came out and
+                    the content went back to prose with the terms emphasised. */}
+                <div className="bleed-aside">
+                  <div className="bleed-aside-art" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/chapter3/mecca-cut.webp" alt="" loading="lazy" decoding="async" />
                   </div>
-                  <Plate src="mecca-town.jpg" />
+                  <div className="bleed-aside-body">
+                    <div className="ch3-body" data-reveal>
+                      <p>
+                        <b className="key">{nameOf('§7.name')}</b> ({text('§7.name').trim()}){' '}
+                        {emphasise(text('§7.a').trim(), ['שבט קריש'], 'n7a')}
+                      </p>
+                      <T r="§7.b" em={['שבט אצולה']} />
+                      <T
+                        r={['§8.father', '§8.mother']}
+                        em={['עבד אללה בן עבד אלמטלב', 'אאמנה בנת והב']}
+                      />
+                      {/* §9.a ends on a bracket, §9.b opens with a vav — one sentence */}
+                      <T r={['§9.a', '§9.b']} em={['עבדו של אללה']} />
+                    </div>
+                  </div>
                 </div>
-                <Note id="n-abdallah" label="על השם עבד אללה">
-                  {/* §9.a ends on a bracket, §9.b opens with a vav — one sentence */}
-                  <T r={['§9.a', '§9.b']} />
-                </Note>
-                <Note id="n-heart" label="מה אומרים פרשני המסורות">
-                  <T r="§11.a" />
-                  <T r="§11.verse" />
-                </Note>
+                {/* THE PAINTING TAKES THE BIRTH AND THE FAMILY, NOT THE WHOLE RUN.
+                    All eight paragraphs beside it made a column three times the
+                    painting's height (949px against 311 at 1440), and the town
+                    floated in the middle of bare parchment. The elephant solved
+                    the same thing the same way: the picture beside the part it
+                    belongs to — here Mecca beside „נולד בעיר מכה" — and the rest
+                    runs on at the full measure. */}
+                <div className="ch3-body" data-reveal>
+                  <T r="§10.a" em={['שני אנשים נושאים שלג']} />
+                  <T r={['§11.a', '§11.verse']} em={['גבריאל ועוזרו']} />
+                  <T r="§12.a" em={['התייתם']} />
+                  <T r={['§12.b', '§12.c']} em={['עבד אלמטלב', 'אבו טאלב']} />
+                </div>
               </Section>
 
               {/* ============ 04 · ח'דיג'ה ============
@@ -1176,14 +1213,44 @@ export default function Chapter3() {
                   for a short trait was exactly this: „טקסט רץ. אין מנגנון." */}
               <Section id="khadija">
                 <Head id="khadija" />
-                <div className="ch3-withplate" data-reveal>
-                  <div className="ch3-body">
-                    <T r="§13.a" />
-                    <T r={['§14.a', '§14.daughters']} />
-                    <T r="§15.a" />
-                    <T r="§16.a" />
+                {/* CHAPTER 6'S OWN DEVICE, NOT A ROW INVENTED HERE. `.bleed-aside`
+                    is what the shahada and the charity are built on — a
+                    transparent watercolour cutout with no frame and no caption,
+                    set on the paper beside the words and bleeding off the page
+                    gutter — and it lives in chapter6-article.css, the sheet all
+                    of these chapters load. Chapter 4 already uses it twice.
+
+                    `.is-flipped` is the variant that puts the painting in grid
+                    column 1, which in RTL is the READING EDGE — the right — and
+                    bleeds it into the right-hand gutter, with the prose on the
+                    left. That is the shape asked for here.
+
+                    ⚠ THE ART IS `aria-hidden` AND THERE IS NO <figure>. The
+                    device's own comment says why: a figure takes a caption, and
+                    a caption here would be a sentence the source never wrote.
+                    Every fact stays in the paragraphs.
+
+                    ⚠ BELOW 900px THE PAINTING IS REMOVED, not shrunk — a cutout
+                    at phone width is a smudge. That is the device's behaviour
+                    and it is the reason the prose still reads alone. */}
+                <div className="bleed-aside is-flipped">
+                  <div className="bleed-aside-art" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/assets/chapter3/caravan-cut.png"
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </div>
-                  <Plate src="caravan-load.jpg" />
+                  <div className="bleed-aside-body">
+                    <div className="ch3-body" data-reveal>
+                      <T r="§13.a" em={["ח'דיג'ה"]} />
+                      <T r={['§14.a', '§14.daughters']} em={['ארבע בנות']} />
+                      <T r="§15.a" />
+                      <T r="§16.a" />
+                    </div>
+                  </div>
                 </div>
               </Section>
 
@@ -1195,41 +1262,43 @@ export default function Chapter3() {
                   the most-searched passage in the chapter. */}
               <Section id="revelation">
                 <Head id="revelation" />
-                <SubHead section="revelation" id="tahannuth" />
-                {/* THE PROMISE IS PAID HERE. The banner is a film of the ridge
-                    with the cave mouth in it; this is the cave from the inside,
-                    looking out at the same ranges in the same light. The reader
-                    met it seventeen sections before §17 named it.
+                {/* THIS SECTION IS THE CHAPTER'S COMIC — the book's own pages for
+                    this part, turned by clicking. See Chapter3ComicPart.tsx.
 
-                    It was out for a while, and correctly: the banner was
-                    standing on a placeholder still, so a plate here was the
-                    same file printed twice on one page — a repetition, not a
-                    rhyme. Two different pictures now, one place. */}
-                {/* THE CHAPTER'S CENTRE GETS THE COLUMN. `wide` and not `bleed`:
-                    the painting is a cave interior framed by its own opening,
-                    and a 21:9 band would cut the arch off at both ends. */}
-                <Plate src="cave-mouth.jpg" size="wide" />
-                <div className="ch3-body" data-reveal>
-                  <T r="§17.a" />
-                  <T r="§17.b" em={["אלתחנת'"]} />
-                </div>
-                <div className="ch3-body" data-reveal>
-                  <T r="§18.a" />
-                  <T r="§18.b" />
-                  <T r="§19.a" />
-                </div>
-                <Verse r="§19.verse" />
-                <Note id="n-unlettered" label="על המחלוקת בפירוש „אינני קורא“">
+                    ⚠ TWO BUILDS CAME BEFORE THIS AND BOTH WERE SENT BACK AS „זה
+                    לא קומיקס": a single frame with a caption under it, then a
+                    picture beside a column of words with a counter and buttons.
+                    Both were article devices dressed in the comic's pictures.
+                    What was asked for was the comic — tiers, gutters, lettering
+                    boxes, balloons, a page that turns — and the chapter already
+                    had one, so this is that book, cut to one part. */}
+                <ComicPart script={revelationComic} />
+                {/* THE SOURCE'S OWN WORDS FOR THE SAME STRETCH, whole and in
+                    order. The comic letters §17–§23 condensed; the article's
+                    rule is the verbatim sentence, and this is where it stands —
+                    closed, because the comic has just told it, and open to the
+                    chapter search (a hit inside it opens it). */}
+                <Note id="n-revelation-text" label="הנוסח המלא של המקטע">
+                  <T r={['§17.a', '§17.b']} em={["אלתחנת'"]} />
+                  <T r="§18.a" em={['חיזיון אמת']} />
+                  <T r="§18.b" em={['גבריאל']} />
+                  <T r="§19.a" em={['אינני קורא']} />
+                  <Verse r="§19.verse" />
                   <T r="§20.a" />
                   <T r="§20.b" />
-                </Note>
-                <SubHead section="revelation" id="qadr" />
-                <div className="ch3-body" data-reveal>
+                  {/* §48 IS THE LECTURER'S OWN WORDING, asked for in panel 31 in
+                      place of a sentence the comic had written itself. It joins
+                      §20 rather than replacing it: §20.b is the source PDF's
+                      sentence and may not come off the page without her word.
+                      ⚠ THE TWO OVERLAP — both say the illiteracy magnifies the
+                      miracle and answers those who claim he wrote the Quran.
+                      Flagged to her; whichever she keeps, the other goes. */}
+                  <T r="§48.a" em={['מגדיל את הנס']} />
                   <T r="§21.a" em={['ליל הגורל']} />
                   <T r="§22.a" />
                   <T r={['§22.b', '§22.c']} />
                   <T r="§23.a" />
-                </div>
+                </Note>
               </Section>
 
               {/* ============ 06 · הטפה למונותאיזם ============
@@ -1239,42 +1308,66 @@ export default function Chapter3() {
                   §29 is a comma chain with appositives, not items ending in
                   full stops. */}
               <Section id="preaching">
-                <Head id="preaching" />
-                <div className="ch3-body" data-reveal>
-                  {/* §24.a ends on a colon — the claims are its sentence */}
-                  <T r={['§24.a', '§24.b']} em={['שרכ']} />
-                  <T r="§25.a" />
-                  <T r="§25.b" />
-                </div>
-                <div className="ch3-withplate" data-reveal>
-                  <div className="ch3-body">
+                {/* THE PAINTING IS THE GROUND OF THE OPENING ONLY — the heading,
+                    the claims, Mecca's answer and the fold-out — and stops before
+                    אלצחאבה (the user's call, 30.9: first the whole section, then
+                    „רק של החלק הראשוני"). It is the Mecca the preaching is aimed
+                    at, the Kaaba among the standing stones. Chapter 4's
+                    `.ch4-plainhero` is the recipe. The ground is LAST inside the
+                    wrapper, so the flow rule never counts it. */}
+                <div className="ch3-grounded">
+                  <Head id="preaching" />
+                  <div className="ch3-body" data-reveal>
+                    {/* §24.a ends on a colon — the claims are its sentence */}
+                    <T r={['§24.a', '§24.b']} em={['שיתוף אלילים לאללה']} />
+                    <T r="§25.a" />
+                    <T r="§25.b" />
+                  </div>
+                  <div className="ch3-body" data-reveal>
                     <T r="§26.a" />
                     <T r="§26.b" />
                     <T r="§26.c" />
                   </div>
-                  <Plate src="kaaba-precinct.jpg" />
+                  <Note id="n-counter" label="מה ענו אנשי מכה">
+                    <T r="§27.a" />
+                    <T r="§27.b" />
+                  </Note>
+                  <div className="ch3-ground" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/assets/chapter3/kaaba-precinct.jpg" alt="" loading="lazy" decoding="async" />
+                  </div>
                 </div>
-                <Note id="n-counter" label="מה ענו אנשי מכה">
-                  <T r="§27.a" />
-                  <T r="§27.b" />
-                </Note>
-                <SubHead section="preaching" id="sahaba" />
-                <div className="ch3-body" data-reveal>
-                  <T r="§28.a" />
-                  <T r="§29.a" em={['אלצחאבה']} />
-                </div>
-                <SubHead section="preaching" id="firsthijra" />
-                <div className="ch3-body" data-reveal>
-                  <T r="§30.a" />
-                  <T r="§30.b" />
-                  <T r="§30.c" />
+                {/* TWO CARDS SIDE BY SIDE — אלצחאבה on the right, the first hijra
+                    on the left (the user's call, 30.9). They are the two
+                    outcomes of the preaching, the few who followed and the few
+                    who had to leave, so they sit as a pair of equals. The card
+                    is chapter 5's `.ch5-claim` without its picture: `--paper`,
+                    the hairline, 16px, no shadow. Equal height by the grid, so
+                    neither reads as the larger story. */}
+                <div className="ch3-pair" data-reveal>
+                  <article className="ch3-card">
+                    <SubHead section="preaching" id="sahaba" />
+                    <div className="ch3-body">
+                      <T r="§28.a" />
+                      <T r="§29.a" em={['אלצחאבה']} />
+                    </div>
+                  </article>
+                  <article className="ch3-card">
+                    <SubHead section="preaching" id="firsthijra" />
+                    <div className="ch3-body">
+                      <T r="§30.a" />
+                      <T r="§30.b" />
+                      <T r="§30.c" />
+                    </div>
+                  </article>
                 </div>
               </Section>
 
               {/* ============ 07 · שנת העצב ============
                   152 words about two deaths. No image, no device, no emphasis
                   beyond the ordinary — the same call as ואד אלבנת in chapter 2,
-                  for the same reason. This is also the one section that stays
+                  for the same reason; the plate that was added later came out
+                  again on 30.9. This is also the one section that stays
                   entirely inside the reading column: four sections in and four
                   out is what stops the chapter reading as eight repetitions. */}
               <Section id="sorrow">
@@ -1283,18 +1376,10 @@ export default function Chapter3() {
                   <T r="§31.a" em={['שנת העצב']} />
                   {/* §31.b has no full stop — the bracketed remark closes it */}
                   <T r={['§31.b', '(§31.aside)']} />
-                </div>
-                {/* ONE PLATE, AND IT IS STILL NOT A PICTURE OF GRIEF. The rule
-                    this section was written under was „no image" — but that
-                    rule was aimed at illustrating the deaths, which would need
-                    people, a burial or a mourner, and all three are out. An
-                    empty stony plain at last light names nothing and mourns
-                    nobody; it carries the register the section is already
-                    written in. Without it this was the one section in the
-                    chapter with neither a picture nor a device, in a chapter
-                    whose neighbours all have one. */}
-                <Plate src="dusk-plain.jpg" size="bleed" />
-                <div className="ch3-body" data-reveal>
+                  {/* NO PLATE. `dusk-plain.jpg` stood between §31 and §32 for a
+                      while — an empty plain at last light, argued as carrying the
+                      register rather than illustrating grief. The user took it
+                      out (30.9); the section is prose, as it was first written. */}
                   <T r="§32.a" />
                   <T r="§32.b" />
                   <T r="§33.a" />
@@ -1305,48 +1390,34 @@ export default function Chapter3() {
                 </div>
               </Section>
 
-              {/* ============ 08 · המסע הלילי והעליה לשמים ============
-                  30% of the chapter and it does not split: the source's own head
-                  joins the two halves. Instead it carries four of the nine
-                  sub-headings and two of the three devices — weight in
-                  proportion to content, which is the rule chapter 2 arrived at.
-
-                  §35 IS NOT ILLUSTRATED. The Buraq is described vividly and any
-                  drawing has to settle what the source leaves open. §40 — the
-                  fifty prayers reduced to five — is not a device either: an
+              {/* ============ 08 · המסע הלילי ============
+                  A comic since 30.9 — see the note inside. §35 IS STILL NOT
+                  ILLUSTRATED: the Buraq is described vividly and any drawing has
+                  to settle what the source leaves open, so the panels show the
+                  night and the road, never the mount. §40 — the fifty prayers
+                  reduced to five, in section 09 — is not a device either: an
                   interaction in which the learner PERFORMS the negotiation
                   stages a conversation between a prophet and God as a game. */}
               <Section id="night">
                 <Head id="night" />
-                <SubHead section="night" id="buraq" />
-                {/* NOT THE BURAQ — the road. The mount is described vividly and
-                    any drawing of it has to settle what the source leaves open,
-                    the face above all, which the Persian tradition gives as a
-                    woman's and which many hold to be an illegitimate addition.
-                    What can be shown is the hour and the place: a track leaving
-                    a town at night under stars, empty. */}
-                <Plate src="night-road.jpg" size="wide" />
-                <div className="ch3-body" data-reveal>
+                {/* THE SECTION'S SECOND COMIC, the user's call (30.9): „קומיקס כמו
+                    ההתגלות". The same book, its own script (night-comic.json) —
+                    six stations in the order they happened and one wordless
+                    panel, the road climbing into the stars, that hands the
+                    reader on to העליה לשמים below. No Buraq is drawn and no
+                    figure: the night, the road, the tethering ring, the jars,
+                    the empty rows of prayer. `night-road.jpg`, the plate that
+                    stood here, is left in the assets. */}
+                <ComicPart script={nightComic} />
+                <Note id="n-night-text" label="הנוסח המלא של המקטע">
                   <T r="§35.a" em={['אלבראק']} />
                   <T r="§35.b" />
-                </div>
-                <SubHead section="night" id="aqsa" />
-                <div className="ch3-body" data-reveal>
                   <T r="§36.a" em={['המסגד הקיצון']} />
                   <T r="§36.b" />
                   <T r="§37.a" />
-                </div>
-                {/* NO DEVICE FOR THE TWO JARS. A pair would have to split §37.b
-                    — one sentence naming both — into a half per jar, and the
-                    source does not divide it. Same rule that keeps §29 prose. */}
-                <div className="ch3-body" data-reveal>
                   <T r="§37.b" />
                   <T r="§37.c" />
-                </div>
-                <div className="ch3-body" data-reveal>
                   <T r="§38.a" />
-                </div>
-                <Note id="n-seal" label="מה האסלאם למד מכך">
                   <T r="§38.b" />
                 </Note>
               </Section>
@@ -1396,10 +1467,18 @@ export default function Chapter3() {
                 <Statement r="§43.b" />
               </Section>
 
-              <div className="ch3-end" ref={endRef} data-reveal>
-                <Link className="ch3-end-link" href="/chapter3/practice">
+              {/* THE CLOSING BLOCK IS CHAPTER 6'S, UNCHANGED — the layout, the
+                  button and the „הושלם" chip, all from chapter6-article.css.
+                  It used to be `.ch3-end` with a pair of rules restated in this
+                  chapter's own sheet, twice over, and its own comment admitted
+                  they were `.chapter-end-back`'s property for property. Both
+                  copies are gone; chapter 5 holds the same line and says none
+                  may be added back. */}
+              <div className="chapter-end" id="chapter-end" ref={endRef} data-reveal>
+                <Link className="chapter-end-back" href="/chapter3/practice">
                   לתרגול המסכם
                 </Link>
+                {practiceDone && <span className="chapter-end-done">הושלם</span>}
               </div>
             </main>
           </div>

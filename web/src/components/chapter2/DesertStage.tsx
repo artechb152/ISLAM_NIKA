@@ -9,9 +9,9 @@
    produced. A reader should be able to sit on "קור עז בלילה" for as long as
    they like, which a scroll position cannot offer.
 
-   Five frames of ONE composition (same ridge, same thorn bush, same wash, same
-   range) so moving between them reads as the place changing rather than as a
-   slideshow of different places.
+   Ten beats over seven frames of ONE composition (same ridge, same thorn bush,
+   same wash, same range) so moving between them reads as the place changing
+   rather than as a slideshow of different places.
 
    THE DANGER BEAT. §10.b names two dangers in one sentence — חיות טרף ומשודדים.
    It is held across three clicks: the sentence alone, then the predators walk
@@ -135,7 +135,7 @@ const STEPS: Step[] = [
   },
 ]
 
-/* The three danger beats share desert-4. Stack each frame ONCE: a duplicated
+/* The three danger beats share desert-6. Stack each frame ONCE: a duplicated
    layer both cross-fades against its own twin and — because the copies sat
    `hidden` with loading="lazy" — never decoded at all, which read to the audit
    as an image that failed to load. */
@@ -155,6 +155,8 @@ const FRAMES: string[] = [...new Set(STEPS.map((s) => s.frame))]
 type Kind = 'say' | 'items' | 'note'
 interface Piece {
   kind: Kind
+  /** the refs it carries — what the search's de-duplication compares */
+  key: string
   text?: string
   items?: string[]
 }
@@ -162,29 +164,66 @@ const pieces = (s: Step): Piece[] => {
   const out: Piece[] = []
   for (const r of s.refs) {
     if (frag(r).list) {
-      out.push({ kind: 'items', items: list(r) })
+      out.push({ kind: 'items', key: r, items: list(r) })
       continue
     }
     const kind: Kind = r.endsWith('.gloss') ? 'note' : 'say'
     const prev = out[out.length - 1]
     /* two plain sentences in one beat are one paragraph, as they are in the
        article — „תנאי החיים היו קשים ביותר. האקלים התאפיין ב:" is one thought */
-    if (kind === 'say' && prev?.kind === 'say') prev.text = `${prev.text} ${text(r)}`
-    else out.push({ kind, text: text(r) })
+    if (kind === 'say' && prev?.kind === 'say') {
+      prev.text = `${prev.text} ${text(r)}`
+      prev.key = `${prev.key} ${r}`
+    } else out.push({ kind, key: r, text: text(r) })
   }
   return out
 }
 
+/** what the search compares a beat's parts by. The piece that carries the
+    danger sentence is keyed by how much of it is written, so the half-written
+    beats never stand in for the whole sentence. */
+const leadKey = (s: Step) => `lead ${s.lead}`
+const pieceKey = (s: Step, p: Piece, last: boolean) => (last && s.reveal ? `${p.key}#${s.reveal}` : p.key)
+const keysOf = (s: Step): string[] => {
+  const ps = pieces(s)
+  return [...(s.lead ? [leadKey(s)] : []), ...ps.map((p, n) => pieceKey(s, p, n === ps.length - 1))]
+}
+
+/* THE SEARCH READS THE SIZERS, ONCE PER SENTENCE.
+   The sizers hold every beat, so they are what lets the chapter's search find
+   a beat the reader is not on. But the held lead sits in three beats, the
+   danger sentence in three, and the live paragraph repeats whichever beat is
+   showing — read naively, one sentence would be counted up to four times.
+   So each part is readable in exactly one place: the live paragraph if it
+   shows it, otherwise the first sizer that carries it whole. Everything else
+   is `aria-hidden`, which is what the search skips. (The sizers stay out of
+   the accessibility tree either way: `visibility:hidden` removes them.) */
+function findable(i: number): Set<string>[] {
+  const seen = new Set(keysOf(STEPS[i]))
+  return STEPS.map((s, n) => {
+    const ok = new Set<string>()
+    if (n === i) return ok
+    for (const k of keysOf(s)) {
+      if (/#[12]$/.test(k) || seen.has(k)) continue
+      seen.add(k)
+      ok.add(k)
+    }
+    return ok
+  })
+}
+
 /** the beat's text: its pieces in order, the last of them carrying the danger
-    sentence as far as it has been written on this beat */
-function Said({ step }: { step: Step }) {
+    sentence as far as it has been written on this beat. `readable`, on a
+    sizer, names the parts the search may find there; the rest are hidden. */
+function Said({ step, readable }: { step: Step; readable?: Set<string> }) {
   const ps = pieces(step)
+  const mute = (k: string) => (readable && !readable.has(k) ? true : undefined)
   /* where the items ARE the beat — no sentence beside them, only the held lead
      above — they carry the voice of a sentence rather than of a caption */
   const alone = !ps.some((p) => p.kind === 'say')
   return (
     <>
-      {step.lead ? <span className="ch2-stage-lead">{text(step.lead)} </span> : null}
+      {step.lead ? <span className="ch2-stage-lead" aria-hidden={mute(leadKey(step))}>{text(step.lead)} </span> : null}
       {ps.map((p, n) => {
         if (p.kind === 'items') {
           return (
@@ -193,7 +232,10 @@ function Said({ step }: { step: Step }) {
                as two words rather than one fused token — the chapter's search
                and the audit's counts both read this text, exactly as they do
                the article's own lists */
-            <span className={'ch2-stage-items' + (alone ? ' is-alone' : '')} key={n}>
+            <span className={'ch2-stage-items' + (alone ? ' is-alone' : '')} key={n} aria-hidden={mute(p.key)}>
+              {/* and one before the first item, for the same reason: „מועטים:"
+                  and „מים." fused into one token. A grid drops it unseen. */}
+              {n ? ' ' : null}
               {p.items!.map((item) => (
                 <span className="ch2-stage-item" key={item}>
                   {item}{' '}
@@ -204,7 +246,7 @@ function Said({ step }: { step: Step }) {
         }
         const last = n === ps.length - 1
         return (
-          <span className={p.kind === 'note' ? 'ch2-stage-note' : 'ch2-stage-say'} key={n}>
+          <span className={p.kind === 'note' ? 'ch2-stage-note' : 'ch2-stage-say'} key={n} aria-hidden={mute(pieceKey(step, p, last))}>
             {/* the same separator the items carry, for the same reason: without
                 it „…שהתבטא בצבר." and „אורך רוח…" fuse into one token for every
                 reader of `textContent` — the chapter's search and the gates */}
@@ -268,8 +310,45 @@ export default function DesertStage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [go, move])
 
+  /* A SEARCH HIT IN A SIZER TURNS THE STAGE TO THAT BEAT. The search paints
+     with CSS.highlights and moves no focus, so the hit is read off the
+     registry — on the scroll the search performs (lib/chapter3/useFindHit's
+     signal) and on the `chapter:jump` it fires first, since a hit in the same
+     grid cell as the last one may need no scroll at all. The highlight itself
+     stays on the invisible copy; the beat's own words are what come up. */
+  useEffect(() => {
+    const registry = (CSS as unknown as { highlights?: Map<string, Iterable<Range>> }).highlights
+    if (!registry) return
+    let raf = 0
+    let handled: Range | null = null
+    const look = () => {
+      raf = 0
+      const root = rootRef.current
+      const hit = registry.get('chapter-find-current')
+      if (!root || !hit) return
+      for (const range of hit) {
+        if (range === handled) return
+        handled = range
+        const node = range.startContainer
+        const el = node instanceof Element ? node : node.parentElement
+        const sizer = el && root.contains(el) ? el.closest<HTMLElement>('.ch2-stage-sizer') : null
+        if (sizer) go(Number(sizer.dataset.beat))
+        return
+      }
+    }
+    const onMove = () => { if (!raf) raf = requestAnimationFrame(look) }
+    window.addEventListener('scroll', onMove, { passive: true })
+    window.addEventListener('chapter:jump', onMove)
+    return () => {
+      window.removeEventListener('scroll', onMove)
+      window.removeEventListener('chapter:jump', onMove)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [go])
+
   const last = i === STEPS.length - 1
   const step = STEPS[i]
+  const readable = findable(i)
   const figures = step.figures ?? []
 
   return (
@@ -326,13 +405,15 @@ export default function DesertStage() {
               reader saw as „it moves when you click".
 
               `visibility:hidden` and not `display:none`, because a box that is
-              not laid out reserves nothing. `aria-hidden` because this is a
-              layout device and not text — it also keeps the chapter's search out
-              of it, which rejects any `[aria-hidden]` branch, so the sentences
-              are not found five times over. */}
+              not laid out reserves nothing.
+
+              The sizers are also how the search reaches a beat the reader is
+              not on — see `findable` for why each sentence is readable in one
+              place only, and the effect above for how a hit here turns the
+              stage to its beat. */}
           {STEPS.map((s, n) => (
-            <span className="ch2-stage-sizer" aria-hidden="true" key={n}>
-              <Said step={s} />
+            <span className="ch2-stage-sizer" data-beat={n} key={n}>
+              <Said step={s} readable={readable[n]} />
             </span>
           ))}
           <p className="ch2-stage-said" aria-live="polite">
