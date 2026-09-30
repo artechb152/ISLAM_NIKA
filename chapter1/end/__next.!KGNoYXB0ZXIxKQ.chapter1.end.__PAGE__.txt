@@ -1,9 +1,9 @@
 1:"$Sreact.fragment"
-2:I[2576,["8500","static/chunks/8500-3953cc33eeceb44e.js","7009","static/chunks/7009-e595e387818880ef.js","5675","static/chunks/5675-04f2013027c3d5bd.js","2139","static/chunks/app/(chapter1)/chapter1/end/page-eb822d190858d8fb.js"],"default"]
+2:I[2576,["8500","static/chunks/8500-3953cc33eeceb44e.js","7009","static/chunks/7009-9cd8c5442537d3af.js","5675","static/chunks/5675-a2141c5b32f4a374.js","2139","static/chunks/app/(chapter1)/chapter1/end/page-eb822d190858d8fb.js"],"default"]
 3:I[484,[],"OutletBoundary"]
 4:"$Sreact.suspense"
-:HL["/ISLAM_NIKA/_next/static/css/7255acc5c4330be6.css","style"]
-:HL["/ISLAM_NIKA/_next/static/css/d8d21baaa95b6fd7.css","style"]
-:HL["/ISLAM_NIKA/_next/static/css/e9c9c909af04b241.css","style"]
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/7255acc5c4330be6.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/d8d21baaa95b6fd7.css","precedence":"next"}],["$","link","2",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/e9c9c909af04b241.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"osr5ZxanqohvroCknbskD"}
+:HL["/ISLAM_NIKA/_next/static/css/75ddd0351f47e555.css","style"]
+:HL["/ISLAM_NIKA/_next/static/css/16b937b490bcd974.css","style"]
+:HL["/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","style"]
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/75ddd0351f47e555.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/16b937b490bcd974.css","precedence":"next"}],["$","link","2",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"w9OHdNV_Q0Cyt9IxIcAlL"}
 5:null
