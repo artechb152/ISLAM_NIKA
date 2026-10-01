@@ -6336,12 +6336,31 @@ function SceneReady({ onReady }: { onReady: () => void }) {
        שוב בכל רינדור של המשחק (חזרת מקש היא כ-30 פעם בשנייה). */
     let inner = 0
     let outer = 0
-    /* הלוח יורד כשהעולם כולו עומד, ולא כשהמנה הראשונה נגמרה */
+    /* ── הלוח יורד כשהעולם מפסיק להיבנות ──────────────────────────────
+       לחכות ל-StagedProps בלבד לא הספיק: המדורות, הלפידים, הדמויות,
+       הגמלים וחפצי המשימה נטענים כל אחד בגבול Suspense משלו, ועוד 18%
+       עד 23% מהאובייקטים נכנסו אחרי שהלוח ירד (נמדד בשלוש תחנות).
+       במקום לחווט כל רכיב בנפרד: סופרים את הסצנה בכל פריים, והלוח יורד
+       כשהמספר לא השתנה 12 פריימים ברציפות. תקרה של 300 פריימים כדי
+       שדבר שמוסיף אובייקטים בלולאה לא יחזיק את הלוח לנצח. */
     const stop = onWorldBuilt(() => {
-      outer = requestAnimationFrame(() => {
-        warmUp(gl, scene, camera)
-        inner = requestAnimationFrame(onReady)
-      })
+      let stable = 0
+      let lastN = -1
+      let frames = 0
+      const step = () => {
+        let n = 0
+        scene.traverse(() => n++)
+        stable = n === lastN ? stable + 1 : 0
+        lastN = n
+        frames += 1
+        if (stable >= 12 || frames > 300) {
+          warmUp(gl, scene, camera)
+          inner = requestAnimationFrame(onReady)
+          return
+        }
+        outer = requestAnimationFrame(step)
+      }
+      outer = requestAnimationFrame(step)
     })
     return () => {
       stop()

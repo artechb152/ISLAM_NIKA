@@ -17,18 +17,22 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 export const J = (x) => JSON.stringify(x)
 
 export async function launch() {
+  /* ── בלי חלון, ועם כרטיס המסך האמיתי ────────────────────────────────
+     עד 1.10.2026 הרתמה כפתה כאן SwiftShader (עיבוד תוכנה), ולכן headless
+     רץ בכ-3fps על הסצנה התלת-ממדית ולא יכול היה למדוד חלקות כלל — מה
+     שחייב חלון אמיתי, שהפריע למשתמשת. נמדד: headless *בלי* הדגלים האלה
+     מקבל ANGLE Metal על ה-M5 Pro ורץ ב-60fps. כלומר אפשר למדוד הכול
+     בלי שום חלון. SOFTWARE=1 מחזיר את עיבוד התוכנה אם אין GPU. */
   const headed = !!process.env.HEADED
   if (process.env.WEBKIT) return webkit.launch({ headless: !headed })
-  /* OFFSCREEN=1: חלון אמיתי עם GPU, אבל ממוקם הרחק מחוץ למסך — מדידת
-     חלקות דורשת GPU אמיתי (headless רץ ב-SwiftShader, כ-3fps), ואין
-     סיבה שהחלון יקפוץ על המסך של מי שעובד. */
-  const off = !!process.env.OFFSCREEN
   return chromium.launch({
     executablePath: CHROME,
-    headless: !headed && !off,
-    args: (headed || off)
-      ? [off ? '--window-position=-4000,-4000' : '--window-position=0,0']
-      : ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader'],
+    headless: !headed,
+    args: headed
+      ? ['--window-position=0,0']
+      : process.env.SOFTWARE
+        ? ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader']
+        : ['--use-angle=metal'],
   })
 }
 

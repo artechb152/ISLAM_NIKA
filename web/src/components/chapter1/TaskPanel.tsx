@@ -342,7 +342,9 @@ export function TaskPanel({ task, chosen, pending = {}, results = null, checks =
             </>
           ) : (
             <>
-              {needed.length > 1 && (
+              {/* במיון המונה כבר עומד ליד „בדיקה" — שני מונים שאומרים
+                  אותו דבר נקראים כתקלה */}
+              {needed.length > 1 && !(sorting && onCheck) && (
                 <span className="ch1-task-progress">
                   {chosen.length} מתוך {needed.length}
                 </span>
