@@ -19,10 +19,16 @@ export const J = (x) => JSON.stringify(x)
 export async function launch() {
   const headed = !!process.env.HEADED
   if (process.env.WEBKIT) return webkit.launch({ headless: !headed })
+  /* OFFSCREEN=1: חלון אמיתי עם GPU, אבל ממוקם הרחק מחוץ למסך — מדידת
+     חלקות דורשת GPU אמיתי (headless רץ ב-SwiftShader, כ-3fps), ואין
+     סיבה שהחלון יקפוץ על המסך של מי שעובד. */
+  const off = !!process.env.OFFSCREEN
   return chromium.launch({
     executablePath: CHROME,
-    headless: !headed,
-    args: headed ? ['--window-position=0,0'] : ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader'],
+    headless: !headed && !off,
+    args: (headed || off)
+      ? [off ? '--window-position=-4000,-4000' : '--window-position=0,0']
+      : ['--enable-unsafe-swiftshader', '--use-gl=angle', '--use-angle=swiftshader'],
   })
 }
 

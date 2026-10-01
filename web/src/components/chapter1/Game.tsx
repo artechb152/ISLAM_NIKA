@@ -714,8 +714,10 @@ function StagedProps({ placed, live }: { placed: CampProp[]; live: Live }) {
     loaded.current += 1
     if (warmed.current || loaded.current < placed.length) return
     warmed.current = true
-    requestAnimationFrame(() => warmUp(gl, scene, camera))
+    requestAnimationFrame(() => { warmUp(gl, scene, camera); markWorldBuilt() })
   }, [gl, scene, camera, placed.length])
+  /* אזור בלי פרופים לא יקרא ל-onLoaded לעולם, והלוח היה ממתין לרשת של תשע שניות */
+  useEffect(() => { if (placed.length === 0) markWorldBuilt() }, [placed.length])
   const ordered = useMemo(() => {
     const px = live.player.x
     const pz = live.player.z
@@ -3074,7 +3076,17 @@ function Player({ live }: { live: Live }) {
     const bob = Math.abs(Math.cos(walkT.current)) * 0.06 * ease
     const sway = Math.sin(walkT.current) * 0.035 * ease
     g.position.set(live.player.x, groundYAt(live.player.x, live.player.z) + live.player.y + bob, live.player.z)
-    g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, heading.current, Math.min(1, dt * 10))
+    /* ⚠ `lerp` על זוויות גולמיות אינו יודע לעבור את הקצה: כשהגוף פונה
+       ל-3.0 רדיאן והכיוון החדש הוא ‎-3.0, ההפרש הקצר הוא 0.28 — אבל
+       ה-lerp נגרר דרך האפס, כלומר כמעט סיבוב שלם לאחור. נמדד בהליכה
+       לאחור: שיא של 3,943 מעלות בשנייה. זה „הדמות קופצת" שדווח.
+       עכשיו ההפרש נלקח עטוף, תמיד בדרך הקצרה, ויש תקרת מהירות
+       זוויתית — גם פנייה של 180° נקראת כסיבוב ולא כהיתוך. */
+    const TURN_MAX = 7 // רדיאן לשנייה; פנייה של 180° לוקחת כחצי שנייה
+    const dYaw = wrapPi(heading.current - g.rotation.y)
+    const eased = dYaw * Math.min(1, dt * 10)
+    const cap = TURN_MAX * dt
+    g.rotation.y = wrapPi(g.rotation.y + Math.max(-cap, Math.min(cap, eased)))
     g.rotation.z = THREE.MathUtils.lerp(g.rotation.z, sway, Math.min(1, dt * 8))
     g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, 0.06 * ease, Math.min(1, dt * 6))
 
@@ -6251,6 +6263,26 @@ function DevAudit() {
   return null
 }
 
+/* ── העולם בנוי ───────────────────────────────────────────────────────
+   הפרופים נטענים במנות, ורק המנה הראשונה עיכבה את לוח ההגעה — כלומר
+   הלוח ירד בזמן שרוב העולם עוד נכנס, והלומד ראה אוהלים, גמלים וכדים
+   צצים סביבו. נמדד במחנה הלילה: 730 מתוך 888 האובייקטים נכנסו בשנייה
+   שאחרי שהלוח ירד. עכשיו הלוח מחכה לכולם, ואז לחימום. הרשת של תשע
+   השניות ב-Game נשארת למקרה שנכס אחד אינו נטען. */
+let worldBuilt = false
+const worldSubs = new Set<() => void>()
+function markWorldBuilt() {
+  if (worldBuilt) return
+  worldBuilt = true
+  /* מחוץ לשלב הרינדור, כמו ההודעה על הקרקע */
+  queueMicrotask(() => { for (const cb of worldSubs) cb() })
+}
+function onWorldBuilt(cb: () => void) {
+  if (worldBuilt) { cb(); return () => {} }
+  worldSubs.add(cb)
+  return () => { worldSubs.delete(cb) }
+}
+
 /* חימום הסצנה מאחורי לוח הטעינה.
 
    three.js מהדר שיידר ומעלה טקסטורה וגאומטריה ל-GPU ברגע שהחפץ נכנס
@@ -6303,12 +6335,17 @@ function SceneReady({ onReady }: { onReady: () => void }) {
        ניתן לביטול — מה שמסתדר רק כל עוד האפקט רץ פעם אחת, והוא רץ
        שוב בכל רינדור של המשחק (חזרת מקש היא כ-30 פעם בשנייה). */
     let inner = 0
-    const outer = requestAnimationFrame(() => {
-      warmUp(gl, scene, camera)
-      inner = requestAnimationFrame(onReady)
+    let outer = 0
+    /* הלוח יורד כשהעולם כולו עומד, ולא כשהמנה הראשונה נגמרה */
+    const stop = onWorldBuilt(() => {
+      outer = requestAnimationFrame(() => {
+        warmUp(gl, scene, camera)
+        inner = requestAnimationFrame(onReady)
+      })
     })
     return () => {
-      cancelAnimationFrame(outer)
+      stop()
+      if (outer) cancelAnimationFrame(outer)
       if (inner) cancelAnimationFrame(inner)
     }
   }, [onReady, gl, scene, camera])
