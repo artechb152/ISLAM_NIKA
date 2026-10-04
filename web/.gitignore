@@ -7,3 +7,6 @@ web/scratchpad/committee-r2/chrome-profile/
 
 # מטמון הבנייה של verify-live — נוצר בכל ריצה, 300MB, ואין לו מקום בריפו
 .next-verify
+
+# the GitHub Pages export (NEXT_DIST_DIR=.next-pages) — build output, published to gh-pages, never source
+.next-pages

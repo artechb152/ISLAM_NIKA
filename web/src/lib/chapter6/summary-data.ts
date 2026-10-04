@@ -177,20 +177,22 @@ const EX_PRAYER: ExerciseDef = {
   numbersAreOrder: false,
   layout: 'row',
   slots: [
-    { n: 1, answer: "תפילת השחר (צלאה אלפג'ר)", cue: 'בעלות השחר', photo: 'prayer-day-1.jpg' },
-    { n: 2, answer: "תפילת הצהריים (צלאה אלט'הר)", cue: 'בחצות היום', photo: 'prayer-day-2.jpg' },
+    { n: 1, answer: "תפילת השחר (צַלַאה' אַלְפַגְ'ר)", cue: 'בעלות השחר', photo: 'prayer-day-1.jpg' },
+    /* the author redefined it (4.10.2026): not „חצות היום" any more, but the moment the
+       sun passes its height and begins to lean west */
+    { n: 2, answer: "תפילת הצהריים (צַלַאה' אַלטֻּ'הְר)", cue: 'כשהשמש עוברת את שיא גובהה בשמיים', photo: 'prayer-day-2.jpg' },
     {
       n: 3,
       answer: 'תפילת אחר הצהריים (צלאה אלעצר)',
       cue: 'כשאורכו של צל של עצם שווה לאורך העצם עצמו בתוספת צל השמש',
       photo: 'prayer-day-3.jpg',
     },
-    { n: 4, answer: "תפילת הערב (צלאה אלמע'רב)", cue: 'בשקיעת השמש', photo: 'prayer-day-4.jpg' },
-    { n: 5, answer: "תפילת הלילה (צלאה אלעשאא')", cue: 'בצאת הכוכבים ועד הבוקר', photo: 'prayer-day-5.jpg' },
+    { n: 4, answer: "תפילת הערב (צַלַאה' אַלְמַעְ'רִבּ)", cue: 'בשקיעת השמש', photo: 'prayer-day-4.jpg' },
+    { n: 5, answer: "תפילת הלילה (צַלַאה' אַלְעִשַׁאא)", cue: 'בצאת הכוכבים ועד הבוקר', photo: 'prayer-day-5.jpg' },
   ],
   decoys: [],
-  hint: 'סימני הזמן עצמם מסודרים לפי היום: מן האור הראשון, דרך חצות והצל, אל השקיעה והכוכבים.',
-  done: 'נכון. חמש התפילות פרושות על היום כולו: מעלות השחר, דרך חצות היום והצל המתארך, אל השקיעה וצאת הכוכבים.',
+  hint: 'סימני הזמן עצמם מסודרים לפי היום: מן האור הראשון, דרך השמש בשיא גובהה והצל, אל השקיעה והכוכבים.',
+  done: 'נכון. חמש התפילות פרושות על היום כולו: מעלות השחר, דרך השמש הנוטה מערבה והצל המתארך, אל השקיעה וצאת הכוכבים.',
   sources: ['pr-2', 'pr-c'],
   /* This beat used to be the qibla map — drag „ירושלים“ and „מכה“ onto two pins, with מדינה
      already labelled between them. It taught nothing: the map answers it. Jerusalem is the
@@ -221,14 +223,15 @@ const EX_PRAYER: ExerciseDef = {
   },
 }
 
-/* 3 · הצדקה — ROW. The fifth slot is LOCKED and says so: ch-1 ends „…בתי תמחוי ועוד“, and four
-   slots would close a list the source leaves open. */
+/* 3 · הצדקה — ROW. The last slot is LOCKED and says so: ch-1 ends „…יתומים וכדומה“, and three
+   slots would close a list the source leaves open. (Four recipients until 4.10.2026 — the
+   author's revision dropped „בתי תמחוי“ from the list.) */
 const EX_CHARITY: ExerciseDef = {
   key: 'charity',
   /* „2.5% מן המאזן“ was the  screen's title, and with the eyebrow gone it was the one
      heading on the page that never named its commandment. */
   title: 'הצדקה',
-  ask: 'למי מיועדת הצדקה? הניחו ארבעה מקבלים, בכל סדר שתרצו.',
+  ask: 'למי מיועדת הצדקה? הניחו שלושה מקבלים, בכל סדר שתרצו.',
   numbersAreOrder: false,
   anyOrder: true,
   layout: 'row',
@@ -236,8 +239,7 @@ const EX_CHARITY: ExerciseDef = {
     { n: 1, answer: 'עניים' },
     { n: 2, answer: 'נזקקים' },
     { n: 3, answer: 'יתומים' },
-    { n: 4, answer: 'בתי תמחוי' },
-    { n: 5, answer: '', locked: 'ועוד — ולא רק אלה' },
+    { n: 4, answer: '', locked: 'וכדומה — ולא רק אלה' },
   ],
   /* MISTAKEABLE, not absurd. The decoys used to be „הקפת הכעבה“, „תפילות התראויח“ and
      „דרשה (ח'טבה)“ — rituals, not recipients. Nobody gives charity to a prayer, so they ruled
@@ -245,8 +247,8 @@ const EX_CHARITY: ExerciseDef = {
      who could plausibly receive it and are not on ch-1's list. */
   decoys: ['המואזין', 'האמאם של המסגד'],
   hint: 'שני המסיחים הם בעלי תפקיד במסגד, ולא מי שהצדקה מיועדת לו.',
-  done: 'הצדקה מיועדת בין היתר לעניים, לנזקקים, ליתומים ולבתי תמחוי.',
-  sources: ['ch-1', 'ch-c', 'sh-3', 'pr-4'],
+  done: 'הכסף שהמוסלמי מפריש לצדקה מגיע לעניים, נזקקים, יתומים וכדומה.',
+  sources: ['ch-1', 'sh-3', 'pr-4'],
   /* NOT ARITHMETIC. This beat used to be `ch-c` — „המאזן השנתי של אדם הוא 10,000 שקלים, כמה
      עליו לתת?“ — which is the one question in the chapter that tests a skill the chapter does
      not teach. Everything else on this page asks the reader to remember something they read.
@@ -261,7 +263,7 @@ const EX_CHARITY: ExerciseDef = {
       { n: 1, answer: 'בכפליים' },
       { n: 2, answer: 'חובה' },
     ],
-    bank: ['בכפליים', 'חובה', 'עין יפה', 'צדקה נוספת'],
+    bank: ['בכפליים', 'חובה', '2.5%', 'צדקה נוספת'],
     hint: 'משבצת אחת היא גודל השכר, והשנייה היא מעמדה של המצווה.',
     sources: ['ch-2', 'ch-1', 'rm-6'],
   },
@@ -271,7 +273,7 @@ const EX_CHARITY: ExerciseDef = {
    the number IS the order. Labels are rm-c.steps verbatim. */
 const EX_RAMADAN: ExerciseDef = {
   key: 'ramadan',
-  title: 'מעלות השחר עד התראויח',
+  title: 'מעלות השחר עד הסֻחוּר',
   ask: 'סדרו את שלבי יום הצום לפי הסדר.',
   numbersAreOrder: true,
   layout: 'line',
@@ -281,15 +283,17 @@ const EX_RAMADAN: ExerciseDef = {
      abstention it named is not lost — it is what the whole stretch between the
      first and second slot IS, and rm-4 says so in the sentence the beat quotes. */
   slots: [
+    /* rm-4 as revised 4.10.2026: the night ends on „סֻחוּר“ (the meal before dawn), not on
+       the תראויח prayers, which the new text no longer names */
     { n: 1, answer: 'עלות השחר', photo: 'ramadan-fast-dawn.jpg' },
-    { n: 2, answer: 'שקיעת החמה', photo: 'ramadan-fast-sunset.jpg' },
-    { n: 3, answer: 'אפטאר', photo: 'iftar-real.jpg' },
-    { n: 4, answer: 'תפילות תראויח', photo: 'ramadan-fast-night.jpg' },
+    { n: 2, answer: 'השקיעה', photo: 'ramadan-fast-sunset.jpg' },
+    { n: 3, answer: 'אִפְטַאר', photo: 'iftar-real.jpg' },
+    { n: 4, answer: 'סֻחוּר', photo: 'ramadan-fast-night.jpg' },
   ],
   decoys: [],
-  hint: 'היום מתחיל באור הראשון ונשבר עם השקיעה. כל מה שבא אחרי השקיעה שייך כבר ללילה.',
-  done: 'נכון. הצום מתחיל בעלות השחר, נמשך לאורך היום, נשבר בשקיעה באפטאר, ולאחריו תפילות התראויח.',
-  sources: ['rm-c', 'rm-4'],
+  hint: 'היום מתחיל באור הראשון ונשבר עם השקיעה. הארוחה הגדולה באה מאוחר יותר — לפנות בוקר.',
+  done: 'נכון. הצום מתחיל בעלות השחר, נשבר עם השקיעה באִפְטַאר, ולפנות בוקר אוכלים את הסֻחוּר.',
+  sources: ['rm-c', 'rm-4', 'rm-v'],
   beat: {
     title: 'ראיית הירח',
     ask: 'השלימו את שתי המשבצות במשפט.',
@@ -343,20 +347,21 @@ const EX_HAJJ: ExerciseDef = {
   beat: {
     title: 'מי עולה לרגל, ומתי',
     ask: 'השלימו את שתי המשבצות במשפט.',
+    /* hj-1[2] as revised 4.10.2026, its two clauses as the gaps */
     sentence:
-      'העלייה לרגל, הגם והיא חובה דתית, אינה כמו שאר מצוות היסוד, אלא תלויה [1], והמוסלמי נדרש להתאמץ לשם כך עד גבול מסוים, [2].',
+      'בשל הקושי הגדול הקיים בעליה לרגל למכה (הן הפיזי והן הכלכלי), המצווה לעלות לרגל היא [1], וגם זה [2].',
     slots: [
-      { n: 1, answer: 'ביכולתו של האדם, הן בהיבט הכלכלי והן בהיבט הבריאותי' },
-      { n: 2, answer: 'פעם אחת במהלך חייו' },
+      { n: 1, answer: 'פעם אחת בחייו של המוסלמי' },
+      { n: 2, answer: 'רק אם ביכולתו' },
     ],
     bank: [
-      'ביכולתו של האדם, הן בהיבט הכלכלי והן בהיבט הבריאותי',
-      'פעם אחת במהלך חייו',
-      "בין היום ה־8 ל־13 לחודש ד'ו אלחג'ה",
+      'פעם אחת בחייו של המוסלמי',
+      'רק אם ביכולתו',
+      "בין ה-8 ל-10 לחודש ד'ו אלחג'ה",
       'שבע פעמים',
     ],
     arabic: 'حج مبرور وسعي مشكور وذنب مغفور',
-    hint: 'משבצת אחת אומרת במה זה תלוי, והשנייה כמה פעמים.',
+    hint: 'משבצת אחת אומרת כמה פעמים, והשנייה באיזה תנאי.',
     after: [{ src: 'kaaba-real.jpg', caption: '"חג מקובל, טקס הריצה רצוי ומבורך והחטא נמחל."' }],
     sources: ['hj-1', 'hj-7', 'hj-3'],
   },
@@ -380,7 +385,7 @@ export const QUIZ: McqDef[] = [
     question: 'עם סיום חודש רמדאן ותחילת חודש שוואל מתחיל —',
     options: ['חג שבירת הצום (עיד אלפטר)', 'חג הקורבן (עיד אלאדחא)', 'ליל אלקדר'],
     answer: 'חג שבירת הצום (עיד אלפטר)',
-    ok: 'נכון. חג הקורבן (עיד אלאדחא) הוא של החג\', וליל אלקדר הוא הלילה ה־27 של רמדאן עצמו.',
+    ok: 'נכון. חג הקורבן (עיד אלאדחא) הוא של החג\', וליל אלקדר חל באחד הלילות האי-זוגיים של עשרת הלילות האחרונים של רמדאן עצמו.',
     sources: ['rm-6', 'rm-3', 'hj-7'],
   },
   {
@@ -392,9 +397,11 @@ export const QUIZ: McqDef[] = [
        reworded the only quotable form of it began with ל, so the question read
        „מתי? — לתפילת יום השישי“. Sunset is a real time from pr-2 and starts with
        ב like the other two. */
-    options: ['בלילה ה־27 לחודש', "בין היום ה־8 ל־13 לחודש ד'ו אלחג'ה", 'בשקיעת השמש'],
-    answer: 'בלילה ה־27 לחודש',
-    ok: 'נכון. זהו „ליל אלקדר“. שתי האפשרויות האחרות שייכות לעלייה לרגל ולתפילת הערב.',
+    /* rm-3 no longer dates it to the 27th (4.10.2026): the Qur'an came down IN RAMADAN, on
+       ליל אלקדר. The two decoys keep the „ב…“ shape and are still times the reader met. */
+    options: ['בחודש רמדאן', "בין ה-8 ל-10 לחודש ד'ו אלחג'ה", 'בשקיעת השמש'],
+    answer: 'בחודש רמדאן',
+    ok: 'נכון — בליל אלקדר. שתי האפשרויות האחרות שייכות לעלייה לרגל ולתפילת הערב.',
     sources: ['rm-3', 'hj-1', 'pr-2'],
   },
 ]
@@ -422,8 +429,8 @@ export const CLOSING = {
   /* the reward is the source's own clause, not a verdict — actionDetails[4].quote */
   ok: 'לעלות לרגל פעם בחיים, אם ביכולתך.',
   okNote:
-    'בראשית תקופת האסלאם היה קושי גדול להתנייד לחצי האי ערב, והדבר היה כרוך בהליכה ימים רבים במדבריות תוך סכנה גדולה משודדים, חיות רעות, חום המדבר ועוד.',
-  miss: 'זו חלה על כל מוסלמי. חפשו את זו שתלויה ביכולתו הכלכלית והבריאותית של האדם.',
+    'בשל הקושי הגדול הקיים בעליה לרגל למכה (הן הפיזי והן הכלכלי), המצווה לעלות לרגל היא פעם אחת בחייו של המוסלמי, וגם זה רק אם ביכולתו.',
+  miss: 'זו חלה על כל מוסלמי. חפשו את זו שתלויה ביכולתו של המוסלמי.',
 }
 
 /* ------------------------------------------------------------------ the end ---- */

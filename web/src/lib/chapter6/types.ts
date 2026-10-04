@@ -62,6 +62,19 @@ export interface Screen {
   drawerContent?: string[]
   actionDetails?: ActionDetail[]
   check?: Check
+  /** „להרחבה" — a fold-out under this screen's text (author's revision, 4.10.2026).
+      `content` lines wrapped in quotation marks are set as quotations. */
+  more?: { title: string; content: string[]; figure?: Figure }
+  /** a photograph of a real thing, framed and captioned */
+  figure?: Figure
+  /** a video — embedded, with its link as the fallback */
+  video?: { lead: string; youtube: string }
+}
+
+export interface Figure {
+  src: string
+  caption: string
+  note?: string
 }
 
 export interface ChapterData {

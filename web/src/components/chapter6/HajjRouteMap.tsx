@@ -7,7 +7,7 @@
    A pin is a plain button that discloses a dialog (aria-haspopup/aria-expanded); opening moves
    focus into the bubble, Escape closes it, and focus returns to the pin that opened it. */
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 export interface HajjStop {
   label: string
@@ -28,6 +28,45 @@ export function HajjRouteMap({ stops }: { stops: HajjStop[] }) {
   const oy = s ? (s.y > 50 ? 'up' : 'down') : 'down'
   const tx = ox === 'left' ? 'calc(-100% - 16px)' : '16px'
   const ty = oy === 'up' ? 'calc(-100% - 16px)' : '16px'
+
+  /* ⚠ THE BUBBLE STAYS INSIDE THE MAP. Opened up or down from its pin, a bubble
+     taller than the room left on that side spilled past the map's edge and lay
+     over whatever followed it — the author's „נפתח על הברכה הרווחת" (4.10.2026).
+     After it opens, measure it against the map and slide it back inside; its
+     text scrolls within (`max-height` in the sheet) when the map is shorter
+     than the bubble. Below 820px it is not over the map at all — the sheet sets
+     it in the flow under the map — so there is nothing to nudge. */
+  const [nudge, setNudge] = useState(0)
+  useLayoutEffect(() => {
+    setNudge(0)
+    if (active === null) return
+    const raf = requestAnimationFrame(() => {
+      const b = bubbleRef.current
+      const plane = b?.parentElement
+      const st = stops[active]
+      if (!b || !plane || !st || getComputedStyle(b).position !== 'absolute') return
+      /* layout sizes, not getBoundingClientRect: the opening animation scales the
+         bubble, and a measurement taken mid-scale came out ~6% short */
+      const H = plane.clientHeight
+      const h = b.offsetHeight
+      const pin = (st.y / 100) * H
+      const top = st.y > 50 ? pin - h - 16 : pin + 16
+      const pad = 8
+      const clamped = Math.min(Math.max(top, pad), Math.max(pad, H - h - pad))
+      setNudge(clamped - top)
+    })
+    return () => cancelAnimationFrame(raf)
+    /* `stops` is a fresh array on every render of the chapter; depending on it
+       would re-run this after every nudge, forever */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active])
+
+  /* on a narrow screen the panel opens under the map: bring it into view */
+  useEffect(() => {
+    if (active === null) return
+    const b = bubbleRef.current
+    if (b && getComputedStyle(b).position !== 'absolute') b.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [active])
 
   function close(): void {
     const i = active
@@ -77,7 +116,7 @@ export function HajjRouteMap({ stops }: { stops: HajjStop[] }) {
           <div
             ref={bubbleRef}
             className={`hjm-bubble o-${ox} o-${oy}`}
-            style={{ left: `${s.x}%`, top: `${s.y}%`, transform: `translate(${tx}, ${ty})` }}
+            style={{ left: `${s.x}%`, top: `${s.y}%`, transform: `translate(${tx}, calc(${ty} + ${nudge}px))` }}
             role="dialog"
             aria-label={s.title}
           >

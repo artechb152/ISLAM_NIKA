@@ -548,8 +548,13 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   /* the PNG is already flipped (dome on the LEFT), so no transform-flip is needed — the
      painting is anchored to the bottom-LEFT corner and stretched wider than tall from there,
      keeping it clear of the reading column on the right */
+  /* ⚠ A FIXED HEIGHT, ANCHORED AT THE FOOT — not stretched from top to bottom.
+     Stretched, the painting grew with the section, and the section grows when
+     the author's „להרחבה" fold-out opens (4.10.2026): measured, the minaret went
+     from 1027px to 1315px tall and its dome slid under the reading column. */
   .shahada-minaret{
-    display:block;position:absolute;top:40px;bottom:-95px;inset-inline-start:auto;inset-inline-end:calc(-1 * var(--content-gutter));
+    display:block;position:absolute;top:auto;bottom:-95px;height:clamp(760px,96vh,940px);
+    inset-inline-start:auto;inset-inline-end:calc(-1 * var(--content-gutter));
     width:clamp(660px,68%,1080px);z-index:0;pointer-events:none;user-select:none;
   }
   .shahada-minaret img{
@@ -871,7 +876,11 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 /* the info bubble */
 .hjm-bubble{position:absolute;z-index:5;width:min(340px,80vw);background:var(--panel);border:1px solid var(--edge);
   border-radius:16px;padding:16px 18px 18px;box-shadow:0 18px 44px rgba(60,35,18,.28);line-height:normal;
-  animation:hjmpop .18s ease}
+  animation:hjmpop .18s ease;
+  /* never taller than the map it sits on (see HajjRouteMap's nudge); the text scrolls */
+  max-height:calc(100% - 16px);display:flex;flex-direction:column}
+.hjm-bubble .hjm-bscroll{overflow:auto;min-height:0;overscroll-behavior:contain}
+.hjm-bubble .hjm-bfig{flex:none}
 @keyframes hjmpop{from{opacity:0;transform-origin:center;scale:.94}to{opacity:1;scale:1}}
 .hjm-close{position:absolute;top:8px;inset-inline-end:10px;width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;
   background:rgba(138,39,51,.1);color:var(--maroon);font-size:20px;line-height:1;display:grid;place-items:center;padding:0}
@@ -885,8 +894,14 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 @media (max-width:820px){
   .hjm-dot{width:30px;height:30px;font-size:13px}
   .hjm-plabel{font-size:11px;padding:1px 6px}
-  .hjm-bubble{width:min(300px,86vw)}
-  .hjm-bfig{height:120px}
+  /* NOT OVER THE MAP: at this width the map is ~260px tall and a bubble twice
+     that covered the blessing below it. The station opens as a panel under the
+     map, in the flow — it pushes what follows down instead of lying on it. */
+  .hjm-bubble{
+    position:relative;left:auto!important;top:auto!important;transform:none!important;
+    width:auto;max-height:none;margin-top:14px;line-height:normal;
+  }
+  .hjm-bfig{height:150px}
 }
 
 @media (max-width:920px){
@@ -1006,3 +1021,70 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
             mask-image:linear-gradient(to top,transparent 0,#000 5%);
   }
 }
+
+/* ===================== the author's additions, 4.10.2026 =====================
+   Four small voices the revised document asked for. None is new language: each
+   is a part the site already speaks, restated for chapter 6. */
+
+/* „להרחבה" — a native <details>. The summary is the story pill (`.story-toggle`)
+   so a fold-out looks like the one fold-out the chapter already had; the body is
+   prose on the paper, behind a hairline, with no box of its own. */
+.ch6-more{margin-top:18px}
+.ch6-more > summary{
+  list-style:none;cursor:pointer;width:fit-content;
+  display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:9px 20px;
+  border:1px solid var(--edge);border-radius:999px;background:var(--mat);color:var(--maroon);
+  font-weight:600;font-size:16px;transition:background .2s ease,border-color .2s ease;
+}
+.ch6-more > summary::-webkit-details-marker{display:none}
+.ch6-more > summary:hover{background:rgba(165,50,47,.1);border-color:var(--maroon)}
+.ch6-more > summary:focus-visible{outline:2px solid var(--maroon-deep);outline-offset:3px}
+.ch6-more-mark{font-family:var(--font-heading);font-weight:900;font-size:19px;line-height:1;transition:transform .25s ease}
+.ch6-more[open] .ch6-more-mark{transform:rotate(45deg)}
+.ch6-more-body{
+  margin-top:16px;padding-inline-start:18px;border-inline-start:2px solid var(--gold-soft);
+  display:grid;gap:12px;
+}
+.ch6-more-body p{margin:0}
+.ch6-more-quote{
+  margin:0;font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(18px,1.7vw,22px);line-height:1.5;
+}
+@media (prefers-reduced-motion:reduce){.ch6-more > summary,.ch6-more-mark{transition:none}}
+
+/* a photograph of a real thing — chapter 2's `.ch2-photo`: framed, sepia-settled,
+   captioned in muted type; the note sits under the caption at its own size */
+.ch6-photo{margin:22px 0 0;max-width:min(520px,100%)}
+.ch6-photo img{
+  display:block;width:100%;height:auto;border-radius:14px;
+  border:1px solid var(--edge);box-shadow:var(--shadow);
+  filter:sepia(.12) saturate(1.05) contrast(.98);
+}
+@media (prefers-contrast:more){.ch6-photo img{filter:none}}
+.ch6-photo figcaption{margin-top:10px;font-size:15px;line-height:1.6;color:var(--muted)}
+.ch6-photo-note{display:block;margin-top:6px;font-size:14px}
+
+/* a quoted verse — the reference line, then the words, centred between two gold
+   rules (chapters 2 and 3's verse voice; the illuminated frame stays the shahada's) */
+.ch6-verse{
+  margin:22px auto 0;width:min(680px,100%);text-align:center;
+  padding:16px 8px;border-block:1px solid var(--gold-soft);
+}
+.ch6-verse figcaption{font-size:15px;color:var(--gold-text);font-weight:600}
+.ch6-verse blockquote{
+  margin:8px 0 0;font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
+  font-size:clamp(19px,1.9vw,24px);line-height:1.5;text-wrap:balance;
+}
+
+/* a video: chapter 4's embed — 16:9 in a framed box, the link beneath it. A
+   YouTube Short is upright, so `.is-tall` sets it 9:16 and narrow. */
+.ch6-video{margin:24px 0 0;width:min(760px,100%)}
+.ch6-video.is-tall{width:min(340px,100%)}
+.ch6-video figcaption{font-family:var(--font-heading);font-weight:700;color:var(--maroon);font-size:var(--sub);margin-bottom:12px}
+.ch6-video-frame{
+  position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;
+  border:1px solid var(--edge);box-shadow:var(--shadow);background:var(--panel);
+}
+.ch6-video.is-tall .ch6-video-frame{aspect-ratio:9/16}
+.ch6-video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.ch6-video-link{display:inline-block;margin-top:10px;font-size:15px;color:var(--maroon);text-decoration:underline;text-underline-offset:3px}
