@@ -60,10 +60,11 @@ export default function Entrance() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    /* Direction: scrolling UP enters (winds the film forward, deeper into the building,
-       to the "לכניסה"); scrolling DOWN exits. So the page loads at the BOTTOM of the
-       runway — the exterior — and progress runs as the learner scrolls up toward the top.
-       Manual restoration keeps the browser from fighting the initial jump. */
+    /* Direction: scrolling DOWN enters (winds the film forward, deeper into the building,
+       to the "לכניסה"); scrolling up backs out. It used to be the other way round — the
+       page loaded pinned to the BOTTOM and only scrolling UP went in — and in the 7.10
+       meeting that read as broken: every reader's first move on a page is down
+       („גלילה למטה בכניסה"). Manual restoration keeps a reload from landing mid-film. */
     try {
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
     } catch {
@@ -130,8 +131,8 @@ export default function Entrance() {
     }
     function frame(): void {
       running = true
-      /* inverted: top of the page (scrollY 0) is fully ENTERED, bottom is the exterior */
-      const p = clamp01(1 - window.scrollY / maxScroll())
+      /* top of the page (scrollY 0) is the exterior, the bottom is fully ENTERED */
+      const p = clamp01(window.scrollY / maxScroll())
       const target = p * (FRAME_COUNT - 1)
 
       curr += (target - curr) * 0.24
@@ -160,10 +161,10 @@ export default function Entrance() {
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', resize)
 
-    /* skip for keyboard / the corner button: glide to the TOP so the film enters fully and
-       the opening composes, then hand focus to the entrance link */
+    /* skip for keyboard / the corner button: glide to the BOTTOM so the film enters fully
+       and the opening composes, then hand focus to the entrance link */
     function skipToEnd(): void {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      window.scrollTo({ top: maxScroll(), behavior: 'smooth' })
       window.setTimeout(() => {
         try {
           enterRef.current?.focus({ preventScroll: true })
@@ -182,12 +183,11 @@ export default function Entrance() {
     const skipBtn = stage.querySelector<HTMLButtonElement>('#skip')
     skipBtn?.addEventListener('click', skipToEnd)
 
-    /* start at the exterior: pin the scroll to the bottom of the runway, so the only way
-       forward is up. Done now (pre-paint the canvas is still blank, so no flash) and again
-       on the next frame in case the runway's height was not yet settled. */
+    /* start at the exterior — the top of the runway. Done now and again on the next frame,
+       in case the browser restored a scroll position from an earlier visit. */
     function toStart(): void {
       const el = document.scrollingElement || document.documentElement
-      el.scrollTop = maxScroll()
+      el.scrollTop = 0
       kickFrame()
     }
     toStart()
@@ -231,14 +231,14 @@ export default function Entrance() {
           </div>
         </div>
 
-        {/* a quiet scroll cue while the opening is still winding in — up = enter */}
+        {/* a quiet scroll cue while the opening is still winding in — down = enter */}
         <div id="scroll-cue" aria-hidden="true">
           <span className="cue-arrow">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 19V5M6 11l6-6 6 6" />
+              <path d="M12 5v14M6 13l6 6 6-6" />
             </svg>
           </span>
-          <span className="cue-text">גללו למעלה כדי להיכנס</span>
+          <span className="cue-text">גללו למטה כדי להיכנס</span>
         </div>
 
         {/* skip for those who would rather not scroll (keyboard-reachable) */}
