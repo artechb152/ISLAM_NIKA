@@ -1181,7 +1181,7 @@ export default function Chapter3() {
                     <div className="ch3-body" data-reveal>
                       <p>
                         <b className="key">{nameOf('§7.name')}</b> ({text('§7.name').trim()}){' '}
-                        {emphasise(text('§7.a').trim(), ['שבט קריש'], 'n7a')}
+                        {emphasise(text('§7.a').trim(), ['שבט קורייש'], 'n7a')}
                       </p>
                       <T r="§7.b" em={['שבט אצולה']} />
                       <T

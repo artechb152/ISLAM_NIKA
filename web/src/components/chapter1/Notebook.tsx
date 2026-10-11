@@ -108,18 +108,20 @@ function Recap({ regionId, seen, solved }: { regionId: string; seen: string[]; s
   const task = TASKS.find((t) => t.region === regionId) ?? null
   const notes = boardNotes(region, buildScript(region, task, { revealFirst: false, isMecca: false }), seen).filter((n) => n.heard)
   const earned = linkState(seen, solved).filter((l) => l.region === regionId && l.done)
+  /* מספר הסעיף במקור (§) הוא סימון של הכותבים, לא של הלומד — הוא נשאר
+     בנתונים בשביל שער הנאמנות ואינו מוצג, כמו בשיחות ובסוף הדרך. */
   return (
     <section className="nb-recap" aria-label={`סיכום התחנה · ${region.name}`}>
       <h4 className="nb-recap-title">סיכום התחנה</h4>
       <ul className="nb-recap-list">
         {notes.map((n) => (
-          <li key={n.id}>{n.text} <i dir="ltr">{n.source}</i></li>
+          <li key={n.id}>{n.text}</li>
         ))}
-        {task && solved.includes(task.id) && <li className="is-task">{task.done} <i dir="ltr">{task.source}</i></li>}
+        {task && solved.includes(task.id) && <li className="is-task">{task.done}</li>}
       </ul>
       {earned.map((l) => (
         <p key={l.id} className="nb-recap-link">
-          <b>נוספה חוליה: {l.label}</b> {l.key.text} <i dir="ltr">{l.key.source}</i>
+          <b>נוספה חוליה: {l.label}</b> {l.key.text}
         </p>
       ))}
     </section>

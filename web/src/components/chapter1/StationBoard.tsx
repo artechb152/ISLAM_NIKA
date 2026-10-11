@@ -115,7 +115,6 @@ export function StationBoard({ region, script, seen, links, review = false, rais
                     <li key={n.id} className="is-heard">
                       <span className="ch1-board-who">{n.who}</span>
                       <p>{n.text}</p>
-                      <i className="ch1-board-src" dir="ltr">{n.source}</i>
                     </li>
                   ) : (
                     <li key={n.id} className="is-pending">
@@ -149,6 +148,7 @@ export function StationSummary({ region, script, seen, links, task, solved, revi
   review?: boolean
   onClose: () => void
 }) {
+  /* מספר הסעיף (§) נשאר בנתונים ואינו מוצג ללומד — כמו בשיחות ובמחברת. */
   const notes = boardNotes(region, script, seen).filter((n) => n.heard)
   const earned = links.filter((l) => l.region === region.id && l.done)
   const taskDone = task && solved.includes(task.id) ? task : null
@@ -162,7 +162,7 @@ export function StationSummary({ region, script, seen, links, task, solved, revi
         <p className="ch1-summary-eyebrow">{review ? 'סיכום · תחנת חזרה' : 'סיכום התחנה'} · {region.name}</p>
         {region.ask && (
           <h2 id="ch1-summary-title" className="ch1-summary-ask">
-            {region.ask.text} <i className="ch1-board-src" dir="ltr">{region.ask.source}</i>
+            {region.ask.text}
           </h2>
         )}
         {notes.length > 0 && (
@@ -173,7 +173,6 @@ export function StationSummary({ region, script, seen, links, task, solved, revi
                 <li key={n.id}>
                   <span className="ch1-board-who">{n.who}</span>
                   <p>{n.text}</p>
-                  <i className="ch1-board-src" dir="ltr">{n.source}</i>
                 </li>
               ))}
             </ul>
@@ -183,7 +182,7 @@ export function StationSummary({ region, script, seen, links, task, solved, revi
           <section className="ch1-summary-block">
             <h3>מה עלה במשימה</h3>
             <p className="ch1-summary-done">
-              {taskDone.done} <i className="ch1-board-src" dir="ltr">{taskDone.source}</i>
+              {taskDone.done}
             </p>
           </section>
         )}
@@ -191,7 +190,7 @@ export function StationSummary({ region, script, seen, links, task, solved, revi
           <section key={l.id} className="ch1-summary-block ch1-summary-link">
             <h3>נוספה חוליה: {l.label}</h3>
             <p>
-              {l.key.text} <i className="ch1-board-src" dir="ltr">{l.key.source}</i>
+              {l.key.text}
             </p>
           </section>
         ))}

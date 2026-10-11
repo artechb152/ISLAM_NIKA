@@ -43,7 +43,8 @@ if (cutAt >= 0) {
 const raw = fs.readFileSync(pdfPath, 'utf8').split('\n')
   .filter((l) => !/^===== PAGE|^\d+$|^-מוגבל-$|^האסלאם - דת ותרבות$|^גירסת טיוטה - מערך ההדרכה/.test(l.trim()))
   .join('\n')
-const norm = (s) => s.replace(/[֑-ׇً-ْ]/g, '').replace(/[^֐-׿؀-ۿa-zA-Z0-9]/g, '')
+/* „קריש“/„קוריש“ בחוברת, „קורייש“ באתר (החלטת המשתמשת, 11.10.2026) — צורה אחת לפני ההשוואה */
+const norm = (s) => s.replace(/[֑-ׇً-ْ]/g, '').replace(/[^֐-׿؀-ۿa-zA-Z0-9]/g, '').replace(/קו?ריי?ש/g, 'קריש')
 const body = norm(raw)
 const secs = [...md.matchAll(/^### (§\d+)\n([\s\S]*?)(?=\n### |\n## |\n---)/gm)]
 let bad = 0

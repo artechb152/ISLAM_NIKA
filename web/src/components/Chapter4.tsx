@@ -1305,7 +1305,7 @@ export default function Chapter4() {
               <Section id="uhud">
                 <Head id="uhud" />
                 <Block>
-                  <T r="§17.a" className="ch4-body" em={['שבט קוריש']} reveal />
+                  <T r="§17.a" className="ch4-body" em={['שבט קורייש']} reveal />
                   <T r="§17.muslims" className="ch4-body" reveal em={['כ-1000 לוחמים']} />
                   <T r="§17.quraysh" className="ch4-body" reveal em={['כ-3000 לוחמים']} />
                   <T r="§19.b" className="ch4-body" reveal em={['ללא הכרעה ברורה']} />
@@ -1561,7 +1561,7 @@ export default function Chapter4() {
                 </Mufti>
                 <Mufti name={nameOf('§38.lead')}>
                   <T r="§38.lead" className="ch4-body" reveal em={['השווה ערפאת את הסכמי אוסלו להסכם חודיביה']} />
-                  <T r="§38.quote" className="ch4-body ch4-mufti-quote" reveal em={['בין נביאנו מוחמד לקוריש']} />
+                  <T r="§38.quote" className="ch4-body ch4-mufti-quote" reveal em={['בין נביאנו מוחמד לקורייש']} />
                 </Mufti>
                 <Mufti name={pick('§39.a', 'יוסף אלקרדאוי')}>
                   <T r="§39.a" className="ch4-body" reveal em={['מנגד', 'תוקפנית ואינה נוטה לשלום']} />

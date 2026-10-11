@@ -17,7 +17,7 @@
    side of it. Press a face and that block is about that group.
 
    THE FOUR STAND AT ONE DISTANCE. The one group the source puts somewhere else
-   — „ובמכה התגוררו הכופרים משבט קריש" — is marked in gold and a broken ring
+   — „ובמכה התגוררו הכופרים משבט קורייש" — is marked in gold and a broken ring
    rather than moved further out, so no face reads as more important than
    another.
 
@@ -254,7 +254,7 @@ export default function Groups({
   const on = shown || still
 
   /* THE LIST'S OWN SEPARATOR, DROPPED WHEN THE ITEM STANDS ALONE. §3 prints its
-     four groups as one sentence — „…שהגיעו ממכה; …בעירם; …במדינה, ו…קריש." —
+     four groups as one sentence — „…שהגיעו ממכה; …בעירם; …במדינה, ו…קורייש." —
      so each fragment carries the mark that joined it to the next one. Here each
      one is read by itself and that mark is a comma hanging in mid-air.
 

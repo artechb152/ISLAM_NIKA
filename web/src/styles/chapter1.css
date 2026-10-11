@@ -443,15 +443,13 @@ body{
 }
 .ch1-board-notes{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .ch1-board-notes li{
-  position:relative;padding:8px 10px 8px 34px;border-radius:9px;
+  position:relative;padding:8px 10px;border-radius:9px;
   background:rgba(245,236,214,.06);border:1px solid rgba(245,236,214,.1);
   font-size:13.5px;line-height:1.5;color:rgba(245,236,214,.92);
 }
 .ch1-board-notes li.is-heard{animation:ch1-board-in .45s ease both}
 .ch1-board-notes li p{margin:2px 0 0}
 .ch1-board-who{font-size:11.5px;color:var(--gold-soft)}
-/* left ולא inset-inline-end: ה-§ נושא dir=ltr, ואז ה-end שלו הוא ימין — מעל שם הדובר */
-.ch1-board-src{position:absolute;left:9px;top:8px;font-style:normal;font-size:10.5px;color:rgba(245,236,214,.45)}
 .ch1-board-notes li.is-pending{
   background:none;border-style:dashed;color:rgba(245,236,214,.5);font-size:12.5px;padding-inline-end:10px;
 }
@@ -1572,13 +1570,11 @@ body{
   margin:0 0 14px;font-family:var(--font-heading);font-weight:400;
   font-size:22px;line-height:1.35;color:var(--cream);
 }
-.ch1-summary-ask .ch1-board-src{position:static;font-size:11px;vertical-align:middle}
 .ch1-summary-block{margin:0 0 14px}
 .ch1-summary-block h3{
   margin:0 0 7px;font-family:var(--font-heading);font-weight:400;font-size:15px;color:var(--gold-soft);
 }
 .ch1-summary-done,.ch1-summary-link p{margin:0;font-size:14.5px;line-height:1.6;color:rgba(245,236,214,.92)}
-.ch1-summary-done .ch1-board-src,.ch1-summary-link .ch1-board-src{position:static;font-size:11px}
 .ch1-summary-link{
   padding:10px 12px;border-radius:10px;border:1px solid rgba(198,160,74,.45);background:rgba(198,160,74,.1);
 }
@@ -1594,7 +1590,6 @@ body{
 .nb-recap-title{margin:0 0 6px;font-family:var(--font-heading);font-weight:400;font-size:15.5px;color:#7a5a1c}
 .nb-recap-list{margin:0;padding-inline-start:18px;display:grid;gap:5px;font-size:14px;line-height:1.55;color:#3f2a14}
 .nb-recap-list li.is-task{color:#5d3b18}
-.nb-recap i,.nb-recap-link i{font-style:normal;font-size:11px;color:#8a6a2a}
 .nb-recap-link{margin:8px 0 0;font-size:14px;line-height:1.55;color:#3f2a14}
 .nb-recap-link b{display:block;font-weight:600;color:#7a5a1c;font-size:13px}
 
