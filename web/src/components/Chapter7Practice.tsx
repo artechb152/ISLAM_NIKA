@@ -372,7 +372,7 @@ export default function Chapter7Practice() {
   const stops = QUESTIONS.map((q) => ({ id: `p2-${q.id}`, label: q.label, done: solved.has(q.id) }))
 
   return (
-    <PracticeNav stops={stops} back={{ href: '/chapter7#chapter-end', label: 'חזרה לפרק 7' }}
+    <PracticeNav stops={stops} back={{ href: '/chapter7', label: 'חזרה לפרק 7' }}
       subtitle="פרק 7 · תרגול מסכם">
       <main className="chapter-article p2-main">
         {/* THE CHAPTER'S OWN BANNER, and this is the largest thing that was

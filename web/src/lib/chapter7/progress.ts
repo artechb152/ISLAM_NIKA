@@ -100,10 +100,9 @@ export function completedSections(): string[] {
   return readStore().sections
 }
 
-/* Has the closing practice been finished? Chapter 6 answers this from its own
-   practice store (`ch6:practice:v1`); this chapter's practice keeps no per-answer
-   store, so the honest signal is the flag it writes when the last question is
-   solved — `markChapterComplete()` above, and nowhere else.
+/* Has the closing practice been finished? The practice keeps its boards in
+   `ch7:practice:v1`, but the signal read here is the flag it writes when the last
+   question is solved — `markChapterComplete()` above, and nowhere else.
 
    `readStore().completed` is NOT that signal and must never be used for it: it is
    set by reaching the closing block, i.e. by finishing the READING.

@@ -41,8 +41,10 @@
 }
 
 /* the question that opens the 30th night — the source asks it, so it is set as one */
-.ch7-ask{font-family:var(--font-heading);font-weight:700;font-size:var(--sub);color:var(--maroon)}
-.ch7-coda{margin-top:var(--flow-lead)!important;padding-top:14px;border-top:1px solid var(--rule);color:var(--muted)}
+/* written under `.chapter-article` because `.chapter-article p` (above) sets size and
+   colour on every paragraph and two classes beat one — the line printed at body size in ink */
+.chapter-article .ch7-ask{font-family:var(--font-heading);font-weight:700;font-size:var(--sub);color:var(--maroon)}
+.chapter-article .ch7-coda{color:var(--muted)}
 
 /* ================================ devices ================================
    Narrower than the prose and centred (rule 48). Each device is a <figure> or a
@@ -62,12 +64,17 @@
 .ch7-days-nums b{font-weight:900;font-size:clamp(32px,3.6vw,48px);line-height:1;color:var(--maroon);font-variant-numeric:tabular-nums}
 .ch7-days-nums .is-gap b{color:var(--stamp)}
 .ch7-days-grid{display:grid;grid-template-columns:repeat(37,1fr);gap:clamp(2px,.4vw,5px)}
-.ch7-days-grid i{aspect-ratio:1;border-radius:50%;background:var(--gold-soft);border:1px solid var(--gold);opacity:.16;transform:scale(.6)}
+.ch7-days-grid i{aspect-ratio:1;border-radius:50%;background:var(--gold-soft);border:1px solid var(--gold)}
 .ch7-days-grid i.is-gap{background:transparent;border:1.5px dashed var(--stamp)}
-.ch7-days-nums .is-gap{opacity:0}
-.ch7-days-in.is-on .ch7-days-grid i{animation:ch7dot .35s ease forwards;animation-delay:calc(var(--i) * 3.4ms)}
-.ch7-days-in.is-on .ch7-days-grid i.is-gap{animation-delay:calc(354 * 3.4ms + (var(--i) - 354) * 95ms + .35s)}
-.ch7-days-in.is-on .ch7-days-nums .is-gap{animation:ch7dot .6s ease forwards;animation-delay:calc(354 * 3.4ms + 1.5s)}
+/* THE EMPTY START BELONGS TO JS ONLY. `.js-reveal` is set on the article by the same
+   effect that arms the reveal — only with JS, and never under reduced motion — so a
+   reader without either sees the full year at once. Unscoped, the grid sat at 16%
+   opacity with JS off and never filled (found 11.10). */
+.js-reveal .ch7-days-grid i{opacity:.16;transform:scale(.6)}
+.js-reveal .ch7-days-nums .is-gap{opacity:0}
+.js-reveal .ch7-days-in.is-on .ch7-days-grid i{animation:ch7dot .35s ease forwards;animation-delay:calc(var(--i) * 3.4ms)}
+.js-reveal .ch7-days-in.is-on .ch7-days-grid i.is-gap{animation-delay:calc(354 * 3.4ms + (var(--i) - 354) * 95ms + .35s)}
+.js-reveal .ch7-days-in.is-on .ch7-days-nums .is-gap{animation:ch7dot .6s ease forwards;animation-delay:calc(354 * 3.4ms + 1.5s)}
 @keyframes ch7dot{to{opacity:1;transform:none}}
 @media (max-width:640px){ .ch7-days-grid{grid-template-columns:repeat(25,1fr)} }
 
@@ -138,7 +145,9 @@
 .ch7-verses-in{border-block:1px solid var(--edge);padding:26px clamp(8px,2vw,28px);text-align:center}
 .ch7-verse{margin:0}
 .ch7-verse-he{font-family:var(--font-heading);font-weight:700;font-size:var(--emph)!important;line-height:1.45!important;color:var(--maroon-deep)!important}
-.ch7-verse-ar{margin-top:10px;font-family:"Amiri","Noto Naskh Arabic","Geeza Pro",serif;font-size:22px!important;line-height:2!important;color:var(--gold-text)!important}
+/* the site's own Arabic face — the stack `.section-term` uses — so the verse and the term
+   beside the section title render in one hand on every platform */
+.ch7-verse-ar{margin-top:10px;font-family:"Segoe UI",Tahoma,sans-serif;font-size:22px!important;line-height:2!important;color:var(--gold-text)!important}
 .ch7-verses-join{margin:22px auto 16px!important;width:fit-content;padding:2px 16px;border-radius:999px;border:1px solid var(--edge);font-size:16px!important;color:var(--muted)!important}
 
 /* ---- 04 · the two schools: two equal cards (rules 36, 51) ---- */
@@ -150,12 +159,18 @@
 /* ---- 05 · the wheel of the year ---- */
 .ch7-wheel{width:min(880px,100%)}
 .ch7-wheel-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,3vw,36px);align-items:center}
-.ch7-wheel-plate{position:relative;aspect-ratio:1;width:100%;max-width:560px;justify-self:center}
+.ch7-wheel-plate{position:relative;aspect-ratio:1;width:100%;max-width:560px;justify-self:center;container-type:inline-size}
 .ch7-wheel-plate img{position:absolute;inset:0;width:100%;height:100%;border-radius:14px;box-shadow:var(--shadow)}
-.ch7-md{all:unset;box-sizing:border-box;cursor:pointer;position:absolute;width:15.5%;aspect-ratio:1;transform:translate(-50%,-50%);
-  border-radius:50%;background:var(--paper);border:2px solid var(--gold);display:grid;place-items:center;text-align:center;padding:3px;
-  font-family:var(--font-heading);font-weight:700;font-size:clamp(9px,.95vw,13px);line-height:1.1;color:var(--maroon-deep);
+.ch7-md{all:unset;box-sizing:border-box;cursor:pointer;position:absolute;width:16.6%;aspect-ratio:1;transform:translate(-50%,-50%);
+  border-radius:50%;background:var(--paper);border:2px solid var(--gold);display:grid;place-items:center;text-align:center;padding:2px;
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(11px,3.1cqi,15px);line-height:1.1;color:var(--maroon-deep);
   transition:transform .2s ease,background .25s ease,color .25s ease}
+/* SIZED TO THE WHEEL, NOT THE WINDOW. In vw the names came out 9px at 390, 820 and 1024
+   (11.10). Below a 420px wheel a medallion is ~55px across and no month name fits it at a
+   readable size, so it carries the month's number; the name is in the hub and the list. */
+.ch7-md.is-long .ch7-md-name{font-size:.8em;letter-spacing:-.01em}
+.ch7-md-n{display:none;font-size:clamp(14px,4.6cqi,18px);font-variant-numeric:tabular-nums}
+@container (max-width:420px){ .ch7-md-name{display:none} .ch7-md-n{display:block} }
 .ch7-md:hover{transform:translate(-50%,-50%) scale(1.08)}
 .ch7-md:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
 .ch7-md.is-holy{border-width:3px;box-shadow:0 0 0 3px var(--paper),0 0 0 6px var(--gold)}
@@ -163,12 +178,12 @@
 .ch7-wheel-hub{position:absolute;left:50%;top:50%;width:27%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;
   background:var(--paper);border:1px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:8px;gap:2px}
-.ch7-wheel-hub b{font-family:var(--font-heading);font-weight:900;font-size:clamp(14px,1.6vw,22px);line-height:1.1;color:var(--maroon)}
-.ch7-wheel-hub span{font-size:clamp(10px,.95vw,13px);line-height:1.25;color:var(--gold-text)}
+.ch7-wheel-hub b{font-family:var(--font-heading);font-weight:900;font-size:clamp(15px,4.2cqi,24px);line-height:1.1;color:var(--maroon)}
+.ch7-wheel-hub span{font-size:clamp(12px,3cqi,14px);line-height:1.25;color:var(--gold-text)}
 .ch7-wheel-hub .ch7-wheel-num{font-family:var(--font-heading);font-weight:700;color:var(--stamp)}
 .ch7-months ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
 .ch7-months li button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:block;line-height:1.5;
-  padding:6px 12px;border-radius:9px;transition:background .2s ease}
+  padding:6px 12px;border-radius:14px;transition:background .2s ease}
 .ch7-months li button > * + *{margin-inline-start:8px}
 .ch7-months li button:hover{background:color-mix(in srgb,var(--stamp) 9%,transparent)}
 .ch7-months li button:focus-visible{outline:2px solid var(--maroon);outline-offset:1px}
@@ -184,5 +199,6 @@
 
 @media (prefers-reduced-motion:reduce){
   .ch7-days-grid i,.ch7-days-nums .is-gap{animation:none!important;opacity:1;transform:none}
-  .ch7-feb-pin,.ch7-night-moon,.ch7-night-cloud,.ch7-feb-cells li{transition:none}
+  .ch7-feb-pin,.ch7-night-moon,.ch7-night-cloud,.ch7-feb-cells li,.ch7-md{transition:none}
+  .ch7-md:hover{transform:translate(-50%,-50%)}
 }

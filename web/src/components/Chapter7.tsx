@@ -185,9 +185,9 @@ function February() {
   return (
     <figure className="ch7-feb" data-reveal>
       <div className="ch7-feb-in">
-        <div className="ch7-feb-years" role="radiogroup" aria-label="שנה">
+        <div className="ch7-feb-years" role="group" aria-label="שנה">
           {D.stops.map((s, i) => (
-            <button key={s.year} type="button" role="radio" aria-checked={i === at}
+            <button key={s.year} type="button" aria-pressed={i === at}
               className={'ch7-feb-year' + (i === at ? ' is-on' : '')} onClick={() => setAt(i)}>
               {s.year}
             </button>
@@ -218,8 +218,8 @@ function February() {
 }
 
 /* ---------------- 04 · the 30th night ----------------
-   The night painting, the watcher on his hill, a veil of cloud. Look — tap or
-   drag across the sky — and the crescent comes out. Two states, each with its own
+   The night painting, the watcher on his hill, a veil of cloud. Look — tap the sky,
+   or drag across it with the mouse — and the crescent comes out. Two states, each with its own
    label, both cut from §5.c: before, the moon „not seen well enough"; after, „to
    pass to the next month". */
 function ThirtiethNight() {
@@ -228,9 +228,11 @@ function ThirtiethNight() {
   return (
     <figure className="ch7-night" data-reveal>
       <div className={'ch7-night-in' + (seen ? ' is-seen' : '')}>
+        {/* a plain button: one act, not a toggle. A drag with the mouse held reveals
+            it too; a finger merely scrolling past on a phone does not. */}
         <button type="button" className="ch7-night-sky" onClick={() => setSeen(true)}
-          onPointerMove={(e) => { if (e.buttons || e.pointerType === 'touch') setSeen(true) }}
-          aria-label={S.hint} aria-pressed={seen}>
+          onPointerMove={(e) => { if (e.buttons && e.pointerType === 'mouse') setSeen(true) }}
+          aria-label={S.hint}>
           <span className="ch7-night-cloud" aria-hidden="true" />
           <span className="ch7-night-moon" aria-hidden="true" />
         </button>
@@ -264,11 +266,12 @@ function WheelOfTheYear() {
             const a = -Math.PI / 2 + (i * Math.PI) / 6
             return (
               <button key={m.ref} type="button" dir="rtl"
-                className={'ch7-md' + (HOLY.has(m.ref) ? ' is-holy' : '') + (i === at ? ' is-on' : '')}
+                className={'ch7-md' + (HOLY.has(m.ref) ? ' is-holy' : '') + (i === at ? ' is-on' : '') + ((m.name ?? '').length > 9 ? ' is-long' : '')}
                 style={{ left: `${(50 + 35.6 * Math.cos(a)).toFixed(4)}%`, top: `${(50 + 35.6 * Math.sin(a)).toFixed(4)}%` }}
                 aria-pressed={i === at} aria-label={m.name}
                 onClick={() => setAt(i)}>
-                <span aria-hidden="true">{m.name}</span>
+                <span className="ch7-md-name" aria-hidden="true">{m.name}</span>
+                <span className="ch7-md-n" aria-hidden="true">{m.num}</span>
               </button>
             )
           })}
