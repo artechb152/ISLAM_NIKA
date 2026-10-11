@@ -1,7 +1,7 @@
 1:"$Sreact.fragment"
-2:I[3927,["8500","static/chunks/8500-3953cc33eeceb44e.js","5875","static/chunks/5875-18d02576e0d8ffc3.js","4135","static/chunks/4135-4d7be860497bea1d.js","5636","static/chunks/5636-6fb34c5f1d6cf681.js","3543","static/chunks/app/(chapter6)/chapter6/practice/page-532003ae9a13a47f.js"],"default"]
-3:I[484,[],"OutletBoundary"]
+2:I[2713,["1889","static/chunks/1889-83f92ed16ba1c263.js","6764","static/chunks/6764-c98a054ab7c5b638.js","3415","static/chunks/3415-5bcdf76fda5cc301.js","3598","static/chunks/3598-b88a8676e4a360d2.js","3543","static/chunks/app/(chapter6)/chapter6/practice/page-d37e2f46e577b1c3.js"],"default"]
+3:I[4093,[],"OutletBoundary"]
 4:"$Sreact.suspense"
 :HL["/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","style"]
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"FtW40P2QEMnk7aihsXd05"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"sX2JFKJ5U88FZ2SWvQQZB"}
 5:null
