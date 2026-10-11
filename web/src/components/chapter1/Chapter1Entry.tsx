@@ -20,6 +20,19 @@ function go(search: string): void {
   window.location.assign(`${base}/play/${search}`)
 }
 
+/* מושכים את צ׳אנק המשחק כשהלומד מתכוון לשחק — לא בטעינת המסך.
+   ⚠ ייבוא המודול מריץ את ה-useGLTF.preload שבראשו, כלומר מוריד את כל
+   מודלי העולם: נמדד באתר החי, ~29MB עוד לפני שמישהו לחץ „התחילו",
+   ומי שרק הציץ בפרק ויצא שילם את כולם (פגישה 7.10: „פרק 1 כבד מאוד").
+   מעבר עכבר, פוקוס או מגע ראשון על הכפתורים — הורדה מתחילה רגע לפני
+   הלחיצה, והמטמון של הדפדפן מגיש אותה לעמוד המשחק. פעם אחת בלבד. */
+let warmed = false
+function warmGame(): void {
+  if (warmed) return
+  warmed = true
+  void import('@/components/chapter1/Game')
+}
+
 export default function Chapter1Entry() {
   const [know, setKnow] = useState(false)
   const [resumeAt, setResumeAt] = useState<string | null>(null)
@@ -34,9 +47,6 @@ export default function Chapter1Entry() {
     const store = readNotebook()
     if (store.seen.length > 0 || store.entries.length > 0) setResumeAt(store.region || 'night-camp')
     setKnow(true)
-    /* מושכים את צ׳אנק המשחק בזמן שקוראים את המסך — כדי ש„טוען את
-       המסע…" לא יהיה המסך הראשון אחרי הלחיצה */
-    void import('@/components/chapter1/Game')
   }, [])
 
   return (
@@ -63,7 +73,13 @@ export default function Chapter1Entry() {
         <div className="p1-open-media" aria-hidden="true" />
         <div className="p1-open-copy">
           <h1 id="p1-open-title">ערב טרום האסלאם</h1>
-          <div className="p1-open-actions" aria-busy={!know}>
+          <div
+            className="p1-open-actions"
+            aria-busy={!know}
+            onPointerEnter={warmGame}
+            onFocus={warmGame}
+            onTouchStart={warmGame}
+          >
             {know && resumeAt ? (
               <>
                 <button type="button" className="ch2-end-link" onClick={() => go(`?region=${resumeAt}&from=resume`)}>
