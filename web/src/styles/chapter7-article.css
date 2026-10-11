@@ -24,18 +24,36 @@
 /* the paintings beside the prose: chapter 6's `.bleed-aside` with chapter 3's lower
    floor — these runs are three paragraphs, not a long sequence, and at the shared
    floor (520–880) the row stood two hundred pixels taller than its words */
+/* THE ROW IS AS TALL AS ITS WORDS. The shared device gives the painting a height floor
+   and centres the words in it; here that floor (360px against runs of 200–300) put empty
+   paper above and below every run — measured 39–102px under the sub-heading instead of
+   14, and 141–160 before the next one instead of 86. So: no floor, the words start at
+   the top, and the painting is fitted to the height they set. */
+.ch7-aside{margin-top:var(--flow-part)}
+.chapter-article .ch7-aside .bleed-aside-body > .scrolly-env:first-child{margin-top:0}
+/* the text column is a flex column, where margins do not collapse: the heading's own
+   bottom margin was adding to the paragraph's 14 and measured 26 */
+.chapter-article .ch7-aside .bleed-aside-body > .scrolly-env{margin-bottom:0}
+.chapter-article .ch7-aside .bleed-aside-body > .scrolly-env + p{margin-top:var(--flow-tight)!important}
 @media (min-width:900px){
-  .ch7-aside .bleed-aside-art{min-height:clamp(320px,40vh,440px)}
+  .ch7-aside .bleed-aside-art{min-height:0}
+  .ch7-aside .bleed-aside-body{justify-content:flex-start}
 }
 
 /* the question that opens the 30th night — the source asks it, so it is set as one */
 .ch7-ask{font-family:var(--font-heading);font-weight:700;font-size:var(--sub);color:var(--maroon)}
-.ch7-coda{margin-top:var(--flow-part)!important;padding-top:18px;border-top:1px solid var(--rule);color:var(--muted)}
+.ch7-coda{margin-top:var(--flow-lead)!important;padding-top:14px;border-top:1px solid var(--rule);color:var(--muted)}
 
 /* ================================ devices ================================
    Narrower than the prose and centred (rule 48). Each device is a <figure> or a
    <div> that carries `data-reveal`; every state class sits on its `-in` child. */
-.ch7-days,.ch7-feb,.ch7-night,.ch7-verses,.ch7-wheel{margin:var(--flow-lead) auto 0}
+.ch7-days,.ch7-feb,.ch7-night,.ch7-verses,.ch7-wheel,.ch7-pair{margin:var(--flow-dev) auto 0}
+/* ONE GAP AROUND A DEVICE, THE SAME ABOVE AND BELOW. It was 56 above and 14 below — a
+   figure that floated off the sentence that introduces it and then pressed into the one
+   that follows. Chapter 5 sets 14–26 around its devices and chapter 6 about 30. */
+:root{--flow-dev:32px}
+.chapter-article :is(.ch7-days,.ch7-feb,.ch7-night,.ch7-pair,.ch7-wheel) + p{margin-top:var(--flow-dev)!important}
+.chapter-article .scrolly-env + :is(.ch7-days,.ch7-feb,.ch7-night,.ch7-pair,.ch7-wheel){margin-top:26px}
 
 /* ---- 01 · the year in days ---- */
 .ch7-days{width:min(880px,100%)}
@@ -112,11 +130,11 @@
 }
 
 /* ---- 03 · the farewell sermon: the verses, and the pilgrims beside them ---- */
-.ch7-farewell{display:grid;grid-template-columns:minmax(0,1fr) clamp(240px,32%,380px);gap:clamp(20px,3vw,44px);align-items:center;margin-top:var(--flow-lead)}
+.ch7-farewell{display:grid;grid-template-columns:minmax(0,1fr) clamp(240px,32%,380px);gap:clamp(20px,3vw,44px);align-items:center;margin-top:var(--flow-dev)}
 .ch7-farewell .ch7-verses{margin-top:0}
 .ch7-farewell-art img{display:block;width:100%;height:auto}
 @media (max-width:900px){ .ch7-farewell{grid-template-columns:1fr} .ch7-farewell-art{display:none} }
-.ch7-verses{width:100%;margin-top:var(--flow-lead)}
+.ch7-verses{width:100%}
 .ch7-verses-in{border-block:1px solid var(--edge);padding:26px clamp(8px,2vw,28px);text-align:center}
 .ch7-verse{margin:0}
 .ch7-verse-he{font-family:var(--font-heading);font-weight:700;font-size:var(--emph)!important;line-height:1.45!important;color:var(--maroon-deep)!important}
@@ -124,7 +142,7 @@
 .ch7-verses-join{margin:22px auto 16px!important;width:fit-content;padding:2px 16px;border-radius:999px;border:1px solid var(--edge);font-size:16px!important;color:var(--muted)!important}
 
 /* ---- 04 · the two schools: two equal cards (rules 36, 51) ---- */
-.ch7-pair{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:16px;width:min(880px,100%);margin:var(--flow-lead) auto 0}
+.ch7-pair{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:16px;width:min(880px,100%)}
 .ch7-card{background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:20px 24px}
 .ch7-card h4{font-family:var(--font-heading);font-weight:700;font-size:var(--sub);color:var(--maroon);margin:0 0 8px}
 @media (max-width:760px){ .ch7-pair{grid-template-columns:1fr} }

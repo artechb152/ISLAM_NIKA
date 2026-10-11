@@ -109,7 +109,11 @@ function Section({ id, className = '', children }: { id: string; className?: str
   )
 }
 
-/** A painting beside the prose — chapter 6's `.bleed-aside`, as chapter 3 uses it. */
+/** A painting beside the prose — chapter 6's `.bleed-aside`, as chapter 3 uses it.
+    The sub-heading goes INSIDE, at the top of the text column, so the painting stands
+    beside the whole movement and the words start under their heading at the chapter's
+    own 14px. With the heading outside and the words centred in a taller painting's row,
+    the gaps measured 39–102 under the heading and 141–160 after the run (11.10). */
 function Aside({ art, children }: { art: string; children: ReactNode }) {
   return (
     <div className="bleed-aside ch7-aside">
@@ -547,18 +551,18 @@ export default function Chapter7() {
               {/* ============ 02 · the sacred months and the nasi' ============ */}
               <Section id="sacred">
                 <Head id="sacred" />
-                <Env id="truce" sectionId="sacred" />
                 <Aside art="cut-rajab">
+                  <Env id="truce" sectionId="sacred" />
                   <T refs={['§1.a', '§1.b']} />
                   <T refs={['§1.c']} />
                 </Aside>
-                <Env id="nasi" sectionId="sacred" />
                 {/* NOT FLIPPED. The mirrored aside put this run on the outer (left) edge while
                     its sub-heading stayed on the reading edge — the words began 456px away
                     from their own heading, and the flip's one-line lift pressed the first line
                     to 3px under it. Measured 11.10; every run in the chapter now starts on the
                     reading edge, under its heading. */}
                 <Aside art="cut-herald">
+                  <Env id="nasi" sectionId="sacred" />
                   <T refs={['§2.a']} />
                   <T refs={['§2.b']} />
                   <T refs={['§2.c']} />
@@ -603,8 +607,8 @@ export default function Chapter7() {
               {/* ============ 05 · the hijri year ============ */}
               <Section id="hijri">
                 <Head id="hijri" />
-                <Env id="year1" sectionId="hijri" />
                 <Aside art="cut-hijra">
+                  <Env id="year1" sectionId="hijri" />
                   <T refs={['§7.a']} />
                   <T refs={['§7.b']} />
                 </Aside>
