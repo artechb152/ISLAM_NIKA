@@ -123,7 +123,7 @@ function Choice({ q, solved, onSolved, onMissed, initial, onWork }: Ex<'single' 
           </li>
         ))}
       </ul>
-      {multi && <p className="p2-hint">אפשר לסמן יותר מאחת.</p>}
+      {multi && <p className="p2-hint">אפשר לסמן יותר מתשובה אחת.</p>}
       <div className="p2-actions">
         <button type="button" className="p2-check" disabled={!picked.length || state === 'right'} onClick={check}>
           בדיקה

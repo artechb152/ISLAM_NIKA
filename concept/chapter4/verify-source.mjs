@@ -7,7 +7,32 @@ const pdfPath = process.argv[3] ?? here + 'pdf-extract.txt'
 /* התוספת של המרצה (18.9.2026) אינה מה-PDF ומוחרגת כאן במפורש — הקטע נחתך
    לפני הכותרת שלה, וההחרגה מודפסת בכל ריצה כדי שתישאר גלויה. */
 const FIX_HEAD = '## תוספת · סבב התיקונים של המרצה'
-const mdAll = fs.readFileSync(mdPath, 'utf8')
+/* SOURCE TYPOS CORRECTED ON 11.10.2026, approved by the owner (wording round):
+   SOURCE-TEXT.md now carries the corrected spelling, the PDF still has the slip.
+   Each pair is [corrected, as printed]; the check undoes them before comparing,
+   so everything else still has to match the PDF letter for letter. Printed on
+   every run so the deviation stays visible. */
+const TYPO_FIXES = [
+  [
+    "וכך פתח צבאו של מוחמד בסדרה של קרבות, שמטרתם הייתה לבזוז את השלל של הכופרים ולהרוג אותם.",
+    "וכך פתח צבאו של מוחמד בסדרה של קרבות, שמטרתם היו לבזוז את השלל של הכופרים ולהרוג אותם."
+  ],
+  [
+    "מסורות רבות קיימות על קרב זה, ביניהן זו שהלוחמים המוסלמים לא רצו לצאת למלחמה מפחד פן יפסידו במלחמה.",
+    "מסורות רבות קיימות על קרב זה, ביניהם זה שהלוחמים המוסלמים לא רצו לצאת למלחמה מפחד פן יפסידו במלחמה."
+  ],
+  [
+    "מותר למוסלמי ליזום הסכם שלום בתנאי שתצמח לו ממנו תועלת (מצלחה) או ימנע ממנו נזק (מפסדה);",
+    "מותר למוסלמי ליזום הסכם שלום בתנאי שתצמח לו ממנו תועלת (מצלחה) או ימנע ממנה נזק (מפסדה);"
+  ],
+  [
+    "לאחר כיבוש מכה התאסלמו רבים מתושבי העיר, ביניהם אבו סופיאן, מי שנלחם עם מוחמד בקרבות בדר ואחד, ומוחמד טיהר את הכעבה מעבודת האלילים שהייתה בה, על ידי ניתוץ הפסילים.",
+    "לאחר כיבוש מכה התאסלמו רבים מתושבי העיר, ביניהם אבו סופיאן, מי שנלחם עם מוחמד בקרבות בדר ואחד, ומוחמד טיהר את הכעבה מעבודת האלילים שהייתה בו, על ידי ניתוץ הפסילים."
+  ]
+]
+const undoFixes = (s) => TYPO_FIXES.reduce((t, [fixed, printed]) => t.split(fixed).join(printed), s)
+console.log(`⚠ ${TYPO_FIXES.length} תיקוני הקלדה מאושרים בנוסח המקור מוחזרים לנוסח ה-PDF לפני ההשוואה`)
+const mdAll = undoFixes(fs.readFileSync(mdPath, 'utf8'))
 const cutAt = mdAll.indexOf(FIX_HEAD)
 const md = cutAt >= 0 ? mdAll.slice(0, cutAt) : mdAll
 if (cutAt >= 0) {

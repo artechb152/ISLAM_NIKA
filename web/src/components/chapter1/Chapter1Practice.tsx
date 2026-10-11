@@ -121,7 +121,7 @@ function Choice({ q, onSolved }: { q: Extract<Q, { type: 'single' | 'multi' }>; 
           </li>
         ))}
       </ul>
-      {multi && <p className="p2-hint">אפשר לסמן יותר מאחת.</p>}
+      {multi && <p className="p2-hint">אפשר לסמן יותר מתשובה אחת.</p>}
       <div className="p2-actions">
         <button type="button" className="p2-check" disabled={!picked.length || state === 'right'} onClick={check}>
           בדיקה

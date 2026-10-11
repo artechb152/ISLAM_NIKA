@@ -104,7 +104,7 @@ export const chapterCategories: CategoryDef[] = [
     title: 'ג׳האד וסמלים',
     icon: 'shield',
     chapters: [
-      ch(12, 'ג׳האד, ריבאט, ואסתשהאד'),
+      ch(12, 'ג׳האד, ריבאט ואסתשהאד'),
       ch(13, 'דגלים וסמלים'),
       ch(14, 'מוטיבים אסלאמיים בחומר המודיעין הגלוי'),
     ],
@@ -116,7 +116,7 @@ export const chapterCategories: CategoryDef[] = [
     icon: 'cap',
     chapters: [
       ch(15, 'ציר הזמן בראשית האסלאם'),
-      ch(16, 'ימי ציון אזכור'),
+      ch(16, 'ימי ציון ואזכור'),
     ],
   },
 ]

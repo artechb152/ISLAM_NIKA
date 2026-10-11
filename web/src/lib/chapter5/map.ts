@@ -36,7 +36,7 @@ export const CONQUESTS: MapPin[] = [
      dates neither Iraq nor Syria, so those two carry the province instead of a year I
      would have had to supply. */
   { id: 'qadisiyya', label: 'אלקאדסיה', note: 'עיראק', x: 0.677, y: 0.267 },
-  { id: 'yarmouk', label: 'הירמוכ', note: 'סוריה', x: 0.343, y: 0.207 },
+  { id: 'yarmouk', label: 'הירמוך', note: 'סוריה', x: 0.343, y: 0.207 },
   { id: 'jerusalem', label: 'ירושלים', note: '638', x: 0.318, y: 0.270 },
   { id: 'egypt', label: 'מצרים', note: '640 · פוסטאט', x: 0.174, y: 0.386 },
 ]

@@ -30,7 +30,7 @@ export default function TopicFilter({
   onPick,
   options,
   allCount,
-  allLabel = 'הכל',
+  allLabel = 'הכול',
   label = 'סינון לפי נושא',
 }: {
   active: string | null

@@ -194,7 +194,7 @@ export default function ComicPart({ script }: { script: { pages: unknown[] } }) 
         <button type="button" className="ch3-book-go is-prev" onClick={() => turn(-1)}
                 disabled={at === 0}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
-          הקודם
+          לדף הקודם
         </button>
         <span className="ch3-book-where" aria-hidden="true">
           כפולה {at + 1} מתוך {spreads}

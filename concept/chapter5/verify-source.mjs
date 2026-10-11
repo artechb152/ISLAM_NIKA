@@ -15,7 +15,28 @@
 import { readFile } from 'node:fs/promises'
 
 const here = new URL('.', import.meta.url)
-const mdFull = await readFile(new URL('SOURCE-TEXT.md', here), 'utf8')
+/* SOURCE TYPOS CORRECTED ON 11.10.2026, approved by the owner (wording round):
+   SOURCE-TEXT.md now carries the corrected spelling, the PDF still has the slip.
+   Each pair is [corrected, as printed]; the check undoes them before comparing,
+   so everything else still has to match the PDF letter for letter. Printed on
+   every run so the deviation stays visible. */
+const TYPO_FIXES = [
+  [
+    "במהלך שנות כהונתו נאלץ להתמודד עם קבוצות באסלאם שביקשו לחזור בהן מדת האסלאם, ונקראו מורתדון (مرتدون), והמלחמות שניהל נגדן נקראו \"מלחמות הרִדַּה\".",
+    "במהלך שנות כהונתו נאלץ להתמודד עם קבוצות באסלאם שביקשו לחזור בהם מדת האסלאם, ונקראו מורתדון (مرتدون), והמלחמות שניהל נגדם נקראו \"מלחמות הרִדַּה\"."
+  ],
+  [
+    "עמר התחיל לבצע כיבושים, מה שהתחיל אבו בכר ולא השלים, ותוך מספר שנים כבש את עיראק בקרב אלקאדסיה, את סוריה בקרב הירמוך, את ירושלים בשנת 638 ולאחר מכן כבש גם את מצרים בשנת 640 וקבע את העיר פוסטאט כעיר מבצר.",
+    "עמר התחיל לבצע כיבושים, מה שהתחיל אבו בכר ולא השלים, ותוך מספר שנים כבש את עיראק בקרב אלקאדסיה, את סוריה בקרב הירמוכ, את ירושלים בשנת 638 ולאחר מכן כבש גם את מצרים בשנת 640 וקבע את העיר פוסטאט כעיר מבצר."
+  ],
+  [
+    "עלי נרצח ע\"י הכת שפרשה מהזרם המרכזי של האסלאם, עוד טרם הפיצול עם השיעה.",
+    "עלי נרצח ע\"י הכת שפרשו מהזרם המרכזי של האסלאם, עוד טרם הפיצול עם השיעה."
+  ]
+]
+const undoFixes = (s) => TYPO_FIXES.reduce((t, [fixed, printed]) => t.split(fixed).join(printed), s)
+console.log(`⚠ ${TYPO_FIXES.length} תיקוני הקלדה מאושרים בנוסח המקור מוחזרים לנוסח ה-PDF לפני ההשוואה`)
+const mdFull = undoFixes(await readFile(new URL('SOURCE-TEXT.md', here), 'utf8'))
 
 /* סבב התיקונים של המרצה אינו מה-PDF ואינו נבדק מולו — הוא נוסף אחרי שהחוברת
    נכתבה, בנוסח שלה. החיתוך כאן מפורש ומודפס בכל ריצה: המקטע הזה הוא החריגה

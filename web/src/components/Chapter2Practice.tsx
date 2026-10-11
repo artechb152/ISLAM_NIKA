@@ -165,7 +165,7 @@ function Choice({ q, initial, wasSolved, onSolved, onMissed, onWork }: Ex<'singl
           </li>
         ))}
       </ul>
-      {multi && <p className="p2-hint">אפשר לסמן יותר מאחת.</p>}
+      {multi && <p className="p2-hint">אפשר לסמן יותר מתשובה אחת.</p>}
       <div className="p2-actions">
         <button type="button" className="p2-check" disabled={!picked.length || state === 'right'} onClick={check}>
           בדיקה
@@ -442,7 +442,7 @@ export default function Chapter2Practice() {
         </div>
 
         <p className="p2-lead" data-reveal>
-          {CH2.title} — {COUNT_WORD} שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
+          {CH2.title} — {COUNT_WORD} שאלות. אין ציון ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
         </p>
 
         {/* EACH EXERCISE IS A SECTION OF THE ARTICLE, not an item of a list.

@@ -49,7 +49,7 @@ export default function Chapter1Guide() {
 
         <p className="p2-lead">
           עמוד אחד שמסכם את המסע: השאלה שהפרק נפתח בה, חמשת הנושאים שהחוברת פורשת כתשובה,
-          והמשפט שכל אחד מהם תורם. אפשר לקרוא לפני המסע, אחריו, או במקום מחברת.
+          והמשפט שכל אחד מהם תורם. אפשר לקרוא אותו לפני המסע, אחריו, או במקום מחברת המסע.
         </p>
 
         <section className="article-section" id="g-question" aria-labelledby="g-question-t">

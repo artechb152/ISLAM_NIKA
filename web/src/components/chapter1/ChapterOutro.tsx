@@ -85,7 +85,7 @@ export default function ChapterOutro() {
         </div>
 
         <p className="p2-lead">
-          המסע נגמר במכה. הסרט סיכם את הדרך; כאן דברי ראאווי במבט לאחור, והאבן שעל המשקיף.
+          המסע נגמר במכה. הסרט סיכם את הדרך; כאן דברי רָאוִי במבט לאחור, והאבן שעל המשקיף.
         </p>
         <div className="p1-entry-actions p1-end-lead">
           <button type="button" className="hud-card-btn" onClick={() => setCinema(true)}>

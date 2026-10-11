@@ -28,9 +28,9 @@ export interface QProps {
 }
 
 const GRADE_LABEL: Record<SelfGrade, string> = {
-  full: 'עניתי',
-  partial: 'עניתי חלקית',
-  miss: 'פספסתי',
+  full: 'את כולן',
+  partial: 'חלק מהן',
+  miss: 'אף אחת',
 }
 
 function Tick() {
@@ -91,7 +91,7 @@ function Choice({ q, ans, onAnswer, mode }: Pick<QProps, 'q' | 'ans' | 'onAnswer
           )
         })}
       </ul>
-      {multi && mode === 'answer' && <p className="xq-ask">אפשר לסמן יותר מאחת.</p>}
+      {multi && mode === 'answer' && <p className="xq-ask">אפשר לסמן יותר מתשובה אחת.</p>}
     </>
   )
 }

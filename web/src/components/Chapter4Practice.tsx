@@ -142,7 +142,7 @@ function Choice({ q, onSolved, onMissed, initial, onWork, solved }: Ex<'single' 
           </li>
         ))}
       </ul>
-      {multi && <p className="p4-hint">אפשר לסמן יותר מאחת.</p>}
+      {multi && <p className="p4-hint">אפשר לסמן יותר מתשובה אחת.</p>}
       <div className="p4-actions">
         <button type="button" className="p4-check" disabled={!picked.length || state === 'right'} onClick={check}>
           בדיקה
@@ -447,7 +447,7 @@ export default function Chapter4Practice() {
             seven of them is the kind of thing a reader notices at once and
             does not forgive. */}
         <p className="p4-lead" data-reveal>
-          {CH4.title} — {QUESTIONS.length} שאלות. אין ניקוד ואין כישלון: שאלה נשארת פתוחה עד שהיא נפתרת.
+          (ללא שינוי בטקסט; לאחד עם פרק 5 — מספר במילים: 'שמונה שאלות')
         </p>
 
         {/* EACH EXERCISE IS A SECTION OF THE ARTICLE, not an item of a list.

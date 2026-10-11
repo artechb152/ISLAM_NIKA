@@ -5279,7 +5279,7 @@ const RAWI_ARRIVALS: Record<string, Arrival> = {
   },
   'loading-road': {
     gesture: 'talk',
-    text: 'דרך העמסה. כאן מעבירים סחורה מגב לגב — והשאלה של התחנה היא מה עוד עבר בדרכים האלה, חוץ מסחורה. לך, ואספר תוך כדי.',
+    text: 'דרך ההעמסה. כאן מעבירים סחורה מגב לגב — והשאלה של התחנה היא מה עוד עבר בדרכים האלה, חוץ מסחורה. לך, ואספר תוך כדי.',
   },
   yathrib: {
     gesture: 'talk-happy',
@@ -5291,11 +5291,11 @@ const RAWI_ARRIVALS: Record<string, Arrival> = {
   },
   mecca: {
     gesture: 'talk',
-    text: 'ירדנו דרומה בחזרה, ומכה לפנינו. זו התחנה של עבודת האלילים — הכעבה, האבן, הפסלים — ושל סיפור אברהה. הסתובב לאט: הכל בעיר הזאת עומד במקומו מסיבה.',
+    text: 'ירדנו דרומה בחזרה, ומכה לפנינו. זו התחנה של עבודת האלילים — הכעבה, האבן, הפסלים — ושל סיפור אברהה. הסתובב לאט: הכול בעיר הזאת עומד במקומו מסיבה.',
   },
   exit: {
     gesture: 'talk-nod',
-    text: 'זה המקום להביט אחורה. עברנו את כל הדרך — בוא נסכם אותה, תחנה אחר תחנה, ונראה מה זה אומר על העולם שערב האסלאם.',
+    text: 'זה המקום להביט אחורה. עברנו את כל הדרך — בוא נסכם אותה, תחנה אחר תחנה, ונראה מה זה אומר על העולם שלפני עליית האסלאם.',
   },
 }
 
@@ -5803,7 +5803,7 @@ function ControlsPanel({ pressed, notebookDone }: { pressed: Set<string>; notebo
   return (
     <section className="hud-panel hud-controls" aria-labelledby="ch1-keys-title">
       <h2 className="hud-title" id="ch1-keys-title">מקשים
-        <button className="hud-controls-close" onClick={() => setOpenSticky(false)} aria-label="לסגור">×</button>
+        <button className="hud-controls-close" onClick={() => setOpenSticky(false)} aria-label="סגירה">×</button>
       </h2>
       <div className="hud-keys">
         <span>{key('w', 'W')} קדימה</span>
@@ -6749,7 +6749,7 @@ export default function Game() {
   const objective = sortReady && next.kind === 'act'
     ? `הכול מונח — לחצו E ליד ${REGION_TASK?.landmark ?? 'התחנה'} ובדקו`
     : tableReady && next.kind === 'act' && next.mode === 'table'
-      ? 'שלושת המקורות על השולחן — לחצו „בדיקה" או F'
+      ? 'שלושת המקורות על השולחן — לחצו „בדיקה“ או F'
       : instructionFor(next, SCRIPT, scriptState, CTX, REGION_TASK)
   const objectiveRef = useRef('')
   objectiveRef.current = objective

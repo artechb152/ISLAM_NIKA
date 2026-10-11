@@ -113,12 +113,12 @@ function FilmFrame({ file, once }: { file: string; once: boolean }) {
           מקדמת את השיחה — הלחיצה על החלונית היא ההתקדמות. */}
       <div className="hud-film-controls" onClick={(ev) => ev.stopPropagation()}>
         <button type="button" className="hud-film-btn" onClick={toggle}
-                aria-label={playing ? 'להשהות את הסרטון' : 'להפעיל את הסרטון'}>
+                aria-label={playing ? 'השהיית הסרטון' : 'הפעלת הסרטון'}>
           {playing ? '❚❚ השהו' : '▶ הפעילו'}
         </button>
         <button type="button" className="hud-film-btn" onClick={toggleSound}
-                aria-label={muted ? 'להפעיל קול' : 'להשתיק'}>
-          {muted ? '🔇 קול' : '🔊 קול'}
+                aria-label={muted ? 'הפעלת הקול' : 'השתקת הקול'}>
+          {muted ? '🔇 הפעילו קול' : '🔊 השתיקו'}
         </button>
       </div>
     </div>
@@ -361,7 +361,7 @@ export function DialogueHud({
               setRevealed(Number.MAX_SAFE_INTEGER)
             }}
           >
-            דלגו על הסרט ‹
+            דלגו על הסרט ←
           </button>
         )}
         {/* מספר הסעיף במקור (§) הוא סימון של הכותבים, לא של הלומד — הוא

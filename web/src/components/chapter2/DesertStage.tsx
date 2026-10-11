@@ -386,7 +386,7 @@ export default function DesertStage() {
         className="ch2-stage-advance"
         onClick={() => move(1)}
         aria-disabled={last || undefined}
-        aria-label={last ? 'סוף' : `הבא: ${STEPS[i + 1].scene}`}
+        aria-label={last ? 'סוף הרצף' : `הבא: ${STEPS[i + 1].scene}`}
       />
 
       <div className="ch2-stage-copy">

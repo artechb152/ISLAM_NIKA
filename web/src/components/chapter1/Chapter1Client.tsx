@@ -14,7 +14,7 @@ const Game = dynamic(() => import('@/components/chapter1/Game'), {
   ssr: false,
   loading: () => (
     <div className="ch1-loading">
-      <p>טוען את המסע…</p>
+      <p>המסע נטען…</p>
     </div>
   ),
 })

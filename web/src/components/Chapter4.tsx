@@ -1012,7 +1012,7 @@ export default function Chapter4() {
                   <T
                     r={['§3.a', '§3.b']}
                     className="ch4-body"
-                    em={['ארבע גורמים ראשיים']}
+                    em={['ארבעה גורמים ראשיים']}
                     emClass="ch4-points"
                     reveal
                   />
@@ -1182,7 +1182,7 @@ export default function Chapter4() {
                         reveal
                       />
                     </Block>
-                    <More id="hijra-echo" title="איפה זה פוגש אותנו">
+                    <More id="hijra-echo" title="להרחבה: ההגירה בג'האד של ימינו">
                       <T
                         r="§6.echo1"
                         className="ch4-body"
@@ -1270,7 +1270,7 @@ export default function Chapter4() {
                       <T r="§13.b" className="ch4-body" em={['יום הישועה']} />
                       <T r={['§14.a', '|§14.verse']} className="ch4-body" em={['תופעה חריגה למבנה הקוראן']} />
                       <T r={['§15.a', '|§15.verse']} className="ch4-body" em={['סורת השלל']} />
-                      <T r="§15.echo" className="ch4-body" em={['משתמשים במוטיב הפסוק הזה']} />
+                      <T r="§15.echo" className="ch4-body" em={['משתמשות במוטיב הפסוק הזה']} />
                       <T r="§16.a" className="ch4-body" em={['משמעות סמלית']} />
                       <T r="§16.echo" className="ch4-body" em={['מערכת בדר']} />
                     </article>
@@ -1346,10 +1346,10 @@ export default function Chapter4() {
                   <T r="§21.a" className="ch4-body" reveal em={['שכר גדול בגן עדן']} />
                   <T r="§21.b" className="ch4-body" em={['השהידים']} reveal />
                 </Block>
-                <Verse r="§21.verse" cite="סורת בית עמרם, פסוק 169" />
+                <Verse r="§21.verse" cite="סורה 3 (בית עמרם), פסוק 169" />
                 <Block>
                   {/* the page's rewording dropped „אבטאל", so the emphasis is on what it kept */}
-                  <T r="§22.echo" className="ch4-body" em={['בכל הלווה ואזכרה של שהידים']} reveal />
+                  <T r="§22.echo" className="ch4-body" em={['בכל הלוויה ואזכרה של שהידים']} reveal />
                 </Block>
               </Section>
 
@@ -1584,7 +1584,7 @@ export default function Chapter4() {
                     argument is fought on and the only voice here that is not a
                     living political actor, which makes it the one thing that
                     can close a section whose own note says it does not close. */}
-                <Verse r="§39.verse" cite="קוראן 8:61" mid />
+                <Verse r="§39.verse" cite="סורה 8, פסוק 61" mid />
                 {/* סבב התיקונים של המרצה (18.9.2026): „להוסיף בסוף" — ההפניה
                     לניתוח של ד"ר פולקה, ואחריה הפסקה שהיא ביקשה להוסיף. */}
                 <Block>

@@ -306,11 +306,11 @@ export function instructionFor(step: Step, script: Script, st: ScriptState, ctx:
 export function whereFor(step: Step, ctx: ScriptCtx, task: Task | null): string | null {
   switch (step.kind) {
     case 'arrive':
-      return 'ראאווי צועד לצידכם — עצרו לרגע והוא ידבר'
+      return 'רָאוִי צועד לצידכם — עצרו לרגע והוא ידבר'
     case 'summary':
       return 'הסיכום נפתח מעצמו, או לחצו R'
     case 'talk':
-      if (step.speaker === 'rawi') return 'ראאווי צועד לצידכם — עצרו לרגע, או לחצו R'
+      if (step.speaker === 'rawi') return 'רָאוִי צועד לצידכם — עצרו לרגע, או לחצו R'
       if (step.speaker === 'narrator') return null
       return `${hostName(step.speaker, ctx)} עומד כאן ומחכה — התקרבו ולחצו E`
     case 'look':

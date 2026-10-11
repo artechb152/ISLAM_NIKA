@@ -304,7 +304,7 @@ export default function ExamRoom() {
             <div className="xr-lead">
               <h1>המבחן</h1>
               <p>
-                {items.length} שאלות מתוך {attempt?.chapters.length} פרקים. אפשר לדלג ולחזור, והכל בעמוד אחד.
+                {items.length} שאלות מ-{attempt?.chapters.length} פרקים. אפשר לדלג ולחזור — הכול בעמוד אחד.
                 {timed ? ' השעון רץ — בסופו המבחן ייבדק מעצמו.' : ' אין הגבלת זמן.'}
               </p>
             </div>
@@ -406,7 +406,7 @@ export default function ExamRoom() {
           <>
             <div className="xr-lead">
               <h1>המבחנים שלי</h1>
-              <p>הכל נשמר בדפדפן הזה בלבד — לא נשלח לשום מקום ולא עובר בין מכשירים.</p>
+              <p>הכול נשמר בדפדפן הזה בלבד — לא נשלח לשום מקום ולא עובר בין מכשירים.</p>
             </div>
             {history.length === 0 ? (
               <p className="xr-empty">עדיין לא נעשה כאן מבחן.</p>
@@ -439,7 +439,8 @@ export default function ExamRoom() {
                       {confirmDel === a.id ? (
                         <span className="xr-confirm">
                           <button type="button" className="xr-secondary" onClick={() => { deleteAttempt(a.id); setConfirmDel(null) }}>
-                            למחוק
+                            כן, למחוק
+
                           </button>
                           <button type="button" className="xr-secondary" onClick={() => setConfirmDel(null)}>
                             ביטול
@@ -517,7 +518,7 @@ function Build({
     <>
       <div className="xr-lead">
         <h1>חדר המבחנים</h1>
-        <p>בחרו את הפרקים שתרצו להיבחן עליהם, את אורך המבחן, והאם לרוץ מול שעון. המבחן ייבנה מהמאגרים בחלוקה מאוזנת בין הפרקים, ויכלול גם שאלות סגורות וגם שאלות פתוחות.</p>
+        <p>בחרו את הפרקים שתרצו להיבחן עליהם, את אורך המבחן, והאם להיבחן מול שעון. המבחן ייבנה מהמאגרים בחלוקה מאוזנת בין הפרקים, ויכלול גם שאלות סגורות וגם שאלות פתוחות.</p>
       </div>
 
       <section className="xr-step" id="xr-s1" aria-labelledby="xr-s1-t">
@@ -563,7 +564,7 @@ function Build({
                   setPicked(allVisiblePicked ? picked.filter((n) => !visible.includes(n)) : [...new Set([...picked, ...visible])])
                 }
               >
-                {allVisiblePicked ? 'ניקוי הבחירה' : topic ? 'בחירת כל הנושא' : 'בחירת הכל'}
+                {allVisiblePicked ? 'ניקוי הבחירה' : topic ? 'בחירת כל הנושא' : 'בחירת הכול'}
               </button>
             )
           })()}

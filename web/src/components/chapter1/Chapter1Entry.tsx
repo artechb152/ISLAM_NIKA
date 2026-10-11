@@ -95,7 +95,7 @@ export default function Chapter1Entry() {
               בתוך המשחק, וזו התזכורת ולא התחליף. השורה קטנה ושקטה
               בכוונה: המסך נשאר מסך אחד עם כותרת ולחצן. */}
           <p className="p1-open-keys">
-            שמונה תחנות בדרך אל מכה
+            מתימן ועד מכה, תחנה אחר תחנה
             <span aria-hidden="true"> · </span>
             הליכה <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
             <span aria-hidden="true"> · </span>

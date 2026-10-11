@@ -982,7 +982,7 @@ export default function Chapter2() {
                     <img src="/assets/chapter2/maqam-ibrahim.png"
                          alt={'מַקַּאם אִבְּרָאהִים — „מקומו של אברהם“, האבן שצמודה לכעבה במכה'}
                          loading="lazy" decoding="async" />
-                    <figcaption>{'מַקַּאם אִבְּרָאהִים — „מקומו של אברהם“, צמודה לכעבה במכה.'}</figcaption>
+                    <figcaption>{'מַקַּאם אִבְּרָאהִים — „מקומו של אברהם“, האבן הצמודה לכעבה במכה.'}</figcaption>
                   </figure>
                 </div>
               </Section>
@@ -1036,7 +1036,7 @@ export default function Chapter2() {
               <Section id="culture">
                 <Head id="culture" />
                 <div className="ch2-body" data-reveal>
-                  <T r={['§13.a', '§14.a']} em={['אתגר לקיומם של חוקי מדינה', 'קודם כול לחוקי השבט']} />
+                  <T r={['§13.a', '§14.a']} em={['אתגר לחוקי המדינה', 'קודם כול לחוקי השבט']} />
                   {/* §14.b is the word „לדוגמה:" and a colon — it introduces the
                       two lines under it. Fused into the paragraph above, the
                       example ran straight on from the claim, and §14.no ("לא

@@ -147,7 +147,7 @@ export default function SiteNotebook() {
                 <section className="article-section nb-empty">
                   <p>אין סימונים בנושא הזה.</p>
                   <button type="button" className="nb-btn" onClick={() => setTopic(null)}>
-                    הצגת הכל
+                    הצגת הכול
                   </button>
                 </section>
               )}
@@ -183,7 +183,7 @@ export default function SiteNotebook() {
                     מסוננת סותרת את מה שרואים מתחתיה. */}
                 <p className="opening-subtitle">
                   {ready && marks.length > 0
-                    ? `${sections.reduce((n, s) => n + s.marks.length, 0)} סימונים מתוך ${sections.length} פרקים` +
+                    ? `${sections.reduce((n, s) => n + s.marks.length, 0)} סימונים ב-${sections.length} פרקים` +
                       (topic ? ' · מסונן לפי נושא' : '')
                     : 'כאן נאסף מה שסימנתם בפרקים'}
                 </p>
@@ -284,7 +284,7 @@ export default function SiteNotebook() {
                                   className="nb-link is-danger"
                                   onClick={() => { deleteMark(m.id); setConfirmDel(null) }}
                                 >
-                                  למחוק את הסימון?
+                                  כן, למחוק את הסימון
                                 </button>
                               ) : (
                                 <button type="button" className="nb-link" onClick={() => setConfirmDel(m.id)}>

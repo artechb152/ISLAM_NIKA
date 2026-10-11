@@ -62,7 +62,7 @@ export default function Lineage() {
           frame holds exactly the picture. */}
       <span className="ch5-lin-frame">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={PLATE} alt="לוח ייחוס מצויר — ארבע מדליות, והפנים אינן נראות באף אחת" loading="lazy" decoding="async" />
+      <img src={PLATE} alt="לוח ייחוס מצויר: מוחמד וחדיג'ה, בתם פאטמה, ועלי בעלה" loading="lazy" decoding="async" />
       {/* the overlay is mounted LTR and every position is `left`/`top`: a plate is a
           picture and its geometry is not reading direction. Only the labels run RTL,
           because they are text. Same rule as the conquest map, and the same bug avoided. */}

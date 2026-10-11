@@ -1278,7 +1278,7 @@ export default function Chapter3() {
                     rule is the verbatim sentence, and this is where it stands —
                     closed, because the comic has just told it, and open to the
                     chapter search (a hit inside it opens it). */}
-                <Note id="n-revelation-text" label="הנוסח המלא של המקטע">
+                <Note id="n-revelation-text" label="הנוסח המלא של הסיפור">
                   <T r={['§17.a', '§17.b']} em={["אלתחנת'"]} />
                   <T r="§18.a" em={['חיזיון אמת']} />
                   <T r="§18.b" em={['גבריאל']} />
@@ -1409,7 +1409,7 @@ export default function Chapter3() {
                     the empty rows of prayer. `night-road.jpg`, the plate that
                     stood here, is left in the assets. */}
                 <ComicPart script={nightComic} />
-                <Note id="n-night-text" label="הנוסח המלא של המקטע">
+                <Note id="n-night-text" label="הנוסח המלא של הסיפור">
                   <T r="§35.a" em={['אלבראק']} />
                   <T r="§35.b" />
                   <T r="§36.a" em={['המסגד הקיצון']} />
