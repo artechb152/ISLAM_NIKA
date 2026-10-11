@@ -112,8 +112,8 @@
 }
 
 /* ---- 03 · the farewell sermon: the verses, and the pilgrims beside them ---- */
-.ch7-farewell{display:grid;grid-template-columns:minmax(0,1fr) clamp(260px,34%,420px);gap:clamp(20px,3vw,44px);align-items:center}
-.ch7-farewell-copy > .ch7-lead{margin-top:var(--flow-lead)!important}
+.ch7-farewell{display:grid;grid-template-columns:minmax(0,1fr) clamp(240px,32%,380px);gap:clamp(20px,3vw,44px);align-items:center;margin-top:var(--flow-lead)}
+.ch7-farewell .ch7-verses{margin-top:0}
 .ch7-farewell-art img{display:block;width:100%;height:auto}
 @media (max-width:900px){ .ch7-farewell{grid-template-columns:1fr} .ch7-farewell-art{display:none} }
 .ch7-verses{width:100%;margin-top:var(--flow-lead)}
@@ -124,14 +124,14 @@
 .ch7-verses-join{margin:22px auto 16px!important;width:fit-content;padding:2px 16px;border-radius:999px;border:1px solid var(--edge);font-size:16px!important;color:var(--muted)!important}
 
 /* ---- 04 · the two schools: two equal cards (rules 36, 51) ---- */
-.ch7-pair{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:16px;margin-top:var(--flow-lead)}
+.ch7-pair{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;gap:16px;width:min(880px,100%);margin:var(--flow-lead) auto 0}
 .ch7-card{background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:20px 24px}
 .ch7-card h4{font-family:var(--font-heading);font-weight:700;font-size:var(--sub);color:var(--maroon);margin:0 0 8px}
 @media (max-width:760px){ .ch7-pair{grid-template-columns:1fr} }
 
 /* ---- 05 · the wheel of the year ---- */
-.ch7-wheel{width:100%}
-.ch7-wheel-in{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(20px,3vw,44px);align-items:center}
+.ch7-wheel{width:min(880px,100%)}
+.ch7-wheel-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,3vw,36px);align-items:center}
 .ch7-wheel-plate{position:relative;aspect-ratio:1;width:100%;max-width:560px;justify-self:center}
 .ch7-wheel-plate img{position:absolute;inset:0;width:100%;height:100%;border-radius:14px;box-shadow:var(--shadow)}
 .ch7-md{all:unset;box-sizing:border-box;cursor:pointer;position:absolute;width:15.5%;aspect-ratio:1;transform:translate(-50%,-50%);
@@ -149,19 +149,20 @@
 .ch7-wheel-hub span{font-size:clamp(10px,.95vw,13px);line-height:1.25;color:var(--gold-text)}
 .ch7-wheel-hub .ch7-wheel-num{font-family:var(--font-heading);font-weight:700;color:var(--stamp)}
 .ch7-months ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-.ch7-months li button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+.ch7-months li button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:block;line-height:1.5;
   padding:6px 12px;border-radius:9px;transition:background .2s ease}
+.ch7-months li button > * + *{margin-inline-start:8px}
 .ch7-months li button:hover{background:color-mix(in srgb,var(--stamp) 9%,transparent)}
 .ch7-months li button:focus-visible{outline:2px solid var(--maroon);outline-offset:1px}
 .ch7-months li.is-on button{background:color-mix(in srgb,var(--gold-soft) 32%,transparent)}
-.ch7-months-n{min-width:24px;font-family:var(--font-heading);font-weight:700;color:var(--stamp);font-variant-numeric:tabular-nums}
-.ch7-months b{font-family:var(--font-heading);font-weight:700;font-size:19px;color:var(--maroon-deep)}
-.ch7-months-m{font-size:16px;color:var(--muted)}
+.ch7-months-n{display:inline-block;min-width:24px;font-family:var(--font-heading);font-weight:700;color:var(--stamp);font-variant-numeric:tabular-nums}
+.ch7-months b{font-family:var(--font-heading);font-weight:700;font-size:18px;color:var(--maroon-deep)}
+.ch7-months-m{font-size:15px;color:var(--muted)}
 .ch7-months li.is-holy b::after{content:"";display:inline-block;width:9px;height:9px;margin-inline-start:8px;border-radius:50%;
   background:var(--gold);box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--gold);vertical-align:middle}
 .ch7-legend{display:flex;align-items:center;gap:10px;margin-top:14px!important;font-size:15px!important;color:var(--muted)!important}
 .ch7-legend i{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--gold)}
-@media (max-width:1100px){ .ch7-wheel-in{grid-template-columns:1fr} }
+@media (max-width:1240px){ .ch7-wheel-in{grid-template-columns:1fr} .ch7-wheel-plate{max-width:520px} }
 
 @media (prefers-reduced-motion:reduce){
   .ch7-days-grid i,.ch7-days-nums .is-gap{animation:none!important;opacity:1;transform:none}

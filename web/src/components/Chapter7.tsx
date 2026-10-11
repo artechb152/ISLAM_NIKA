@@ -110,9 +110,9 @@ function Section({ id, className = '', children }: { id: string; className?: str
 }
 
 /** A painting beside the prose — chapter 6's `.bleed-aside`, as chapter 3 uses it. */
-function Aside({ art, flipped, children }: { art: string; flipped?: boolean; children: ReactNode }) {
+function Aside({ art, children }: { art: string; children: ReactNode }) {
   return (
-    <div className={'bleed-aside ch7-aside' + (flipped ? ' is-flipped' : '')}>
+    <div className="bleed-aside ch7-aside">
       <div className="bleed-aside-art" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`${A}${art}.webp`} alt="" loading="lazy" decoding="async" />
@@ -553,7 +553,12 @@ export default function Chapter7() {
                   <T refs={['§1.c']} />
                 </Aside>
                 <Env id="nasi" sectionId="sacred" />
-                <Aside art="cut-herald" flipped>
+                {/* NOT FLIPPED. The mirrored aside put this run on the outer (left) edge while
+                    its sub-heading stayed on the reading edge — the words began 456px away
+                    from their own heading, and the flip's one-line lift pressed the first line
+                    to 3px under it. Measured 11.10; every run in the chapter now starts on the
+                    reading edge, under its heading. */}
+                <Aside art="cut-herald">
                   <T refs={['§2.a']} />
                   <T refs={['§2.b']} />
                   <T refs={['§2.c']} />
@@ -563,9 +568,11 @@ export default function Chapter7() {
               {/* ============ 03 · the farewell sermon ============ */}
               <Section id="farewell">
                 <Head id="farewell" />
+                {/* the lead runs the full column like every section's first paragraph; only the
+                    verses share a row with the pilgrims */}
+                <T refs={['§3.a']} className="ch7-lead" />
                 <div className="ch7-farewell">
                   <div className="ch7-farewell-copy">
-                    <T refs={['§3.a']} className="ch7-lead" />
                     <Verses />
                   </div>
                   <figure className="ch7-farewell-art" aria-hidden="true" data-reveal>
