@@ -83,7 +83,10 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter6',
         available: true,
       }),
-      ch(7, 'לוח השנה ההג׳רי'),
+      ch(7, 'לוח השנה ההג׳רי', {
+        href: '/chapter7',
+        available: true,
+      }),
       ch(8, 'מקורות האסלאם — הקוראן והסונה'),
     ],
   },

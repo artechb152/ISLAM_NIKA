@@ -13,9 +13,10 @@ import ch3 from './banks/ch3.json'
 import ch4 from './banks/ch4.json'
 import ch5 from './banks/ch5.json'
 import ch6 from './banks/ch6.json'
+import ch7 from './banks/ch7.json'
 
 /* לפי סדר הפרקים, לא לפי סדר הכתיבה — הסדר הזה הוא מה שמסך הבנייה מצייר. */
-export const BANKS: Bank[] = [ch1, ch2, ch3, ch4, ch5, ch6] as unknown as Bank[]
+export const BANKS: Bank[] = [ch1, ch2, ch3, ch4, ch5, ch6, ch7] as unknown as Bank[]
 
 /* `as const` על הצמד ולא בלעדיו: בלי זה `.map` מסיק `(number | Bank)[][]`,
    ו-`new Map` אינו מקבל את זה. */

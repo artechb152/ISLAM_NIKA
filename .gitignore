@@ -45,3 +45,6 @@ web/scratchpad/committee-*/video/
 **/pdf-extract.txt
 **/chapter6-source*.pdf
 **/source.pdf
+
+# chapter 7: the Higgsfield source PNGs (75MB). The site ships the webp; the PNGs stay local.
+concept/chapter7/source-art/
