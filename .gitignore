@@ -48,3 +48,8 @@ web/scratchpad/committee-*/video/
 
 # chapter 7: the Higgsfield source PNGs (75MB). The site ships the webp; the PNGs stay local.
 concept/chapter7/source-art/
+.chatgpt-profile/
+
+# chapter 8: generated source images (86MB). The site ships the cut webp/jpg; the sources stay local.
+concept/chapter8/gen/
+.chatgpt-profile.lock

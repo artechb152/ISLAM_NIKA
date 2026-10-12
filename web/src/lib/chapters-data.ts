@@ -87,7 +87,10 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter7',
         available: true,
       }),
-      ch(8, 'מקורות האסלאם — הקוראן והסונה'),
+      ch(8, 'מקורות האסלאם — הקוראן והסונה', {
+        href: '/chapter8',
+        available: true,
+      }),
     ],
   },
   {

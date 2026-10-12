@@ -25,6 +25,7 @@ import { SECTION_ORDER as CH3_SECTIONS, STORE_KEY as CH3_STORE_KEY } from '@/lib
 import { SECTION_ORDER as CH4_SECTIONS, STORE_KEY as CH4_STORE_KEY } from '@/lib/chapter4/progress'
 import { SECTION_ORDER as CH5_SECTIONS, STORE_KEY as CH5_STORE_KEY } from '@/lib/chapter5/progress'
 import { SECTION_ORDER as CH7_SECTIONS, STORE_KEY as CH7_STORE_KEY } from '@/lib/chapter7/progress'
+import { SECTION_ORDER as CH8_SECTIONS, STORE_KEY as CH8_STORE_KEY } from '@/lib/chapter8/progress'
 /* the number of chapter-6 screens progress is measured against (derived, not hardcoded) */
 const CH6_SCREEN_COUNT = CH6.screens.length
 
@@ -199,6 +200,16 @@ export default function ChaptersScreen() {
             const p = JSON.parse(raw) as { sections?: string[] } | null
             const n = Array.isArray(p?.sections) ? p.sections.length : 0
             if (n > 0) progress = Math.min(99, Math.round((n / CH7_SECTIONS.length) * 100))
+          }
+        }
+        /* chapter 8 is a reading chapter like 2–5. Its branch is written WITH the
+           chapter, not after it ships — rule 74, missed twice before. */
+        if (chp.number === 8 && !done) {
+          const raw = localStorage.getItem(CH8_STORE_KEY)
+          if (raw) {
+            const p = JSON.parse(raw) as { sections?: string[] } | null
+            const n = Array.isArray(p?.sections) ? p.sections.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH8_SECTIONS.length) * 100))
           }
         }
         /* chapter 1 is the open world: progress is how full the notebook is */

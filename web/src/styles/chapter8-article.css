@@ -1,0 +1,355 @@
+/* Chapter 8 — מקורות האסלאם — הקוראן והסונה.
+
+   Loads ON TOP of chapter6-article.css and adds only what this chapter asks for. No
+   colour, font or radius of its own: every value is a chapter-6 token or derived from
+   one. A hex code here is a bug.
+
+   The rhythm is chapter 5's, which was measured against chapter 6 at 1440: 12px between
+   paragraphs, 56 under a section heading, 60 above a sub-heading (BUILD-RULES §5). */
+
+:root{
+  --flow-tight:14px;
+  --flow:14px;
+  --flow-lead:56px;
+  --flow-part:86px;
+}
+
+.chapter-article p{font-size:var(--read);line-height:1.85;color:var(--ink)}
+.chapter-article > section > p{width:100%;margin-top:var(--flow)}
+.ch8-lead{margin-top:var(--flow-lead)!important}
+.chapter-article .scrolly-env{margin-top:var(--flow-part)}
+.chapter-article .scrolly-env + p{margin-top:var(--flow-tight)!important}
+
+/* gold for a transliteration the chapter teaches, maroon (`.key`, chapter 6's) for the
+   idea a sentence turns on — rule 38 */
+.chapter-article .ch8-tr{font-weight:700;color:var(--gold-text)}
+/* §9: the source sets the charter's quotation in italics, and so does the page */
+.chapter-article .ch8-q{font-style:italic}
+
+/* THE BANNER: chapter 6's hero with this chapter's own poster behind the video (the
+   default background is chapter 6's poster, and a chapter never borrows another's
+   picture). The subject sits in the left third so the title has the bright wall. */
+.ch8-hero-media{background-image:url('/assets/chapter8/hero-poster.jpg');background-position:center 60%}
+.ch8-hero-media .ch6-hero-video{object-position:center 60%}
+
+/* ---------- 01 · the two realms ---------- */
+.chapter-article * + .ch8-realms{margin-top:28px}
+.chapter-article .ch8-realms + p{margin-top:28px}
+.ch8-realms{width:min(820px,100%);margin-inline:auto}
+.ch8-realms > img{display:block;width:100%;height:auto}
+.ch8-realms-labels{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+.ch8-realm{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.ch8-realm b{font-family:var(--font-heading);font-size:var(--sub);font-weight:700;color:var(--maroon);line-height:1.2}
+.ch8-realm i{font-style:normal;font-weight:700;font-size:var(--read)}
+
+/* ---------- 02 · Medinan and Meccan ---------- */
+/* Two equal cards in the page's own tone (rule 36), a hairline and no shadow, capped at
+   chapter 5's 880 and centred (rules 48, 52). Side by side wherever the COLUMN is wide
+   enough: the rail takes 300px from 1024 up, so the breakpoints follow chapter 3's. */
+.chapter-article * + .ch8-pair{margin-top:26px}
+.ch8-pair{
+  display:grid;grid-template-columns:1fr;gap:clamp(16px,2vw,24px);
+  width:min(880px,100%);margin-inline:auto;align-items:stretch;
+}
+@media (min-width:1180px), (min-width:760px) and (max-width:1023px){
+  .ch8-pair{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.ch8-card{
+  min-width:0;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--paper);border:1px solid var(--edge);border-radius:16px;
+}
+.ch8-card-art{display:block;background:var(--paper)}
+.ch8-card-art{padding:14px 14px 0}
+/* watercolour vignettes (12.10): contained, never cropped — cover cut their soft edges */
+.ch8-card-art img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}
+.ch8-card-text{border-top:0!important}
+.ch8-card-text{flex:1;padding:clamp(18px,2.2vw,28px);border-top:1px solid var(--edge)}
+.ch8-card-title{
+  margin:0;font-family:var(--font-heading);font-size:var(--sub);font-weight:700;
+  color:var(--maroon);line-height:1.2;width:fit-content;max-width:100%;
+  padding-bottom:8px;border-bottom:2px solid rgba(138,39,51,.3);
+}
+.ch8-card p{margin:var(--flow-tight) 0 0;line-height:1.8}
+
+/* ---------- 04 · the painting beside the opening ---------- */
+/* chapter 6's `.bleed-aside`, unchanged but for three things local to this use: the
+   paragraphs inside keep the article's rhythm (its own rule reaches only paragraphs that
+   are direct children of a section), the painting's floor comes down to its own height
+   (the device floors at clamp(520px,72vh,880px) for long runs — chapter 3's ח'דיג'ה, same
+   fix), and it does not bleed: pulled into the gutter, the red shawl met x=0 and read as
+   cut off by the screen (measured at 1440 and 1100), as chapter 3 found with its town. */
+.chapter-article .section-heading + .bleed-aside{margin-top:var(--flow-lead)}
+.chapter-article .bleed-aside + p{margin-top:var(--flow)}
+.ch8-isnad .bleed-aside-body > p + p{margin-top:var(--flow)}
+@media (min-width:900px){
+  .ch8-isnad .bleed-aside-art{min-height:clamp(340px,44vh,470px)}
+  .ch8-isnad.bleed-aside{margin-inline-end:0}
+}
+
+/* ---------- 04 · the arcade, as a still plate ---------- */
+/* a painting of a real-looking place, framed like the chapter's other plates (radius 14,
+   one hairline); cropped wide so it reads as a band across the column, not a poster */
+.chapter-article .scrolly-env + .ch8-plate{margin-top:var(--flow-tight)}
+.ch8-plate{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--edge)}
+.ch8-plate img{display:block;width:100%;aspect-ratio:21/9;object-fit:cover;object-position:30% 62%}
+.chapter-article .ch8-plate + p{margin-top:var(--flow-lead)}
+
+/* ---------- 04 · the anatomy of a hadith ---------- */
+/* One sentence across the column, split into two parts under two brackets. The grid is
+   one row of two columns — the chain wide on the reading side, the content narrow at the
+   sentence's end — so the words read on as one line from the first column into the
+   second. No card, no click: the bracket is the drawing. */
+.chapter-article * + .ch8-anatomy{margin-top:30px}
+.chapter-article .ch8-anatomy + p{margin-top:30px}
+.ch8-anatomy{
+  width:min(880px,100%);margin-inline:auto;padding:clamp(18px,2.4vw,30px);
+  background:var(--paper);border:1px solid var(--edge);border-radius:16px;
+}
+.ch8-anatomy-cap{margin:0 0 18px;text-align:center;font-size:15px;color:var(--muted)}
+.ch8-anatomy-row{display:grid;grid-template-columns:minmax(0,2.3fr) minmax(0,1fr);column-gap:clamp(10px,1.6vw,18px)}
+.ch8-part{display:flex;flex-direction:column;min-width:0}
+.ch8-part-name{
+  font-family:var(--font-heading);font-weight:700;font-size:var(--sub);line-height:1.2;
+  color:var(--maroon);text-align:center;
+}
+.ch8-part.is-matn .ch8-part-name{color:var(--gold-text)}
+/* the bracket: a line with a tick down at each end, over exactly the words it names */
+.ch8-part-bracket{
+  display:block;height:12px;margin:8px 4px 10px;border:2px solid var(--maroon);border-bottom:0;
+  border-radius:6px 6px 0 0;
+}
+.ch8-part.is-matn .ch8-part-bracket{border-color:var(--gold)}
+.chapter-article .ch8-part-words{
+  margin:0;font-family:var(--font-heading);font-weight:700;font-size:var(--emph);line-height:1.35;
+  color:var(--ink);text-align:center;
+}
+.chapter-article .ch8-part.is-matn .ch8-part-words{color:var(--maroon-deep)}
+.ch8-part-check{
+  margin-top:18px;padding:12px 14px;border-radius:12px;flex:1;
+  background:color-mix(in srgb,var(--maroon) 6%,var(--paper));
+}
+.ch8-part.is-matn .ch8-part-check{background:color-mix(in srgb,var(--gold) 12%,var(--paper))}
+.ch8-part-check-title{display:block;margin-bottom:6px;font-size:14px;font-weight:700;color:var(--muted)}
+.ch8-part-check ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.ch8-part-check li{position:relative;padding-inline-start:16px;font-size:17px;line-height:1.5;color:var(--ink)}
+.ch8-part-check li::before{content:"";position:absolute;inset-inline-start:0;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--maroon)}
+.ch8-part.is-matn .ch8-part-check li::before{background:var(--gold)}
+@media (max-width:680px){
+  .ch8-anatomy-row{grid-template-columns:1fr;row-gap:24px}
+}
+
+/* ---------- 06 · the relative time axis ---------- */
+/* Narrower than the prose and centred (rule 48). A segment is its duration (rule 60):
+   no empty rail behind it; its number sits on it. Proportion comes from flex-grow
+   130 : 70, set inline from the data. */
+.chapter-article * + .ch8-axis{margin-top:30px}
+.ch8-axis{width:min(760px,100%);margin-inline:auto;padding:0}
+.ch8-axis-track{display:flex;align-items:flex-start}
+.ch8-axis-seg{
+  flex-shrink:1;flex-basis:0;min-width:0;position:relative;height:6px;margin-top:13px;
+  border-radius:999px;background:var(--gold);
+}
+.ch8-axis-seg em{
+  position:absolute;inset-inline:0;bottom:12px;text-align:center;font-style:normal;
+  font-size:15px;font-weight:700;color:var(--gold-text);white-space:nowrap;
+}
+.ch8-axis-node{
+  display:flex;flex-direction:column;align-items:center;gap:2px;width:clamp(96px,14vw,150px);
+  margin-inline:-28px;text-align:center;flex-shrink:0;position:relative;z-index:1;
+}
+.ch8-axis-node::before{
+  content:"";width:16px;height:16px;border-radius:999px;background:var(--maroon);
+  border:3px solid var(--panel);box-shadow:0 0 0 1.5px var(--maroon);margin-bottom:6px;margin-top:4px;
+}
+.ch8-axis-node.is-start::before{background:var(--panel)}
+/* the books stand ABOVE the line, so every name sits on one row under its node */
+.ch8-axis{padding-top:clamp(84px,9vw,118px)}
+.ch8-axis-art{position:absolute;bottom:calc(100% - 2px);left:50%;translate:-50% 0;display:block;width:clamp(70px,9vw,110px);height:auto}
+.ch8-axis-art.is-lost{opacity:.85}
+.ch8-axis-node b{font-family:var(--font-heading);font-size:clamp(17px,1.5vw,20px);font-weight:700;color:var(--maroon);line-height:1.2}
+.ch8-axis-book{font-size:15px;color:var(--ink);line-height:1.35}
+.ch8-axis-book.is-lost{color:var(--muted);opacity:.7}
+.ch8-axis-fate{font-size:13px;color:var(--muted);font-style:italic}
+@media (max-width:680px){
+  .ch8-axis-node{width:84px}
+  .ch8-axis-node b{font-size:15px}
+  .ch8-axis-book{font-size:13px}
+  .ch8-axis-seg em{font-size:13px}
+}
+
+/* ---------- 04 · the arcade beside the chain paragraphs ---------- */
+.chapter-article .scrolly-env + .bleed-aside{margin-top:var(--flow-tight)}
+.ch8-arcade .bleed-aside-body > p + p{margin-top:var(--flow)}
+@media (min-width:900px){
+  .ch8-arcade.bleed-aside{margin-inline-end:0}
+  .ch8-arcade .bleed-aside-art{min-height:clamp(280px,32vh,360px)}
+}
+
+/* ---------- 03 · the reed pen, mirrored ---------- */
+.ch8-qalam .bleed-aside-body > p + p{margin-top:var(--flow)}
+@media (min-width:900px){
+  .ch8-qalam .bleed-aside-art{min-height:clamp(260px,30vh,340px)}
+  /* no bleed, as in 04: it stops on the text's own edge */
+  .ch8-qalam.bleed-aside{margin-inline-start:0}
+  .ch8-qalam.bleed-aside.is-flipped .bleed-aside-body{translate:none}
+}
+
+/* ---------- 05 · the shelf of six books ---------- */
+.chapter-article * + .ch8-shelf{margin-top:28px}
+.chapter-article .ch8-shelf + p{margin-top:28px}
+.ch8-shelf{width:min(760px,100%);margin-inline:auto;margin-bottom:0}
+.ch8-shelf-plate{position:relative;margin-bottom:46px}
+/* the plate box IS the picture (no padding), so the four spines on it and the two in the
+   lifted layer measure their `top` against the same height */
+.ch8-shelf-plate > img{display:block;width:100%;height:auto}
+/* the tied pair: the same picture clipped at the seam, a layer of its own that lifts */
+.ch8-shelf-pair{position:absolute;inset:0;pointer-events:none;transition:scale .45s cubic-bezier(.2,.8,.2,1),filter .45s ease}
+.ch8-shelf-pair > img{display:block;width:100%;height:auto}
+.ch8-shelf.is-open .ch8-shelf-pair{scale:1.07;filter:drop-shadow(0 10px 14px rgba(60,35,18,.28))}
+.ch8-shelf-hit{all:unset;position:absolute;top:8%;bottom:10%;cursor:pointer;border-radius:12px}
+.ch8-shelf-hit:hover{background:color-mix(in srgb,var(--gold-soft) 10%,transparent)}
+.ch8-shelf-hit:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+/* the numbers, under the bracket: always in the DOM, opened with the pair */
+.ch8-shelf-numbers{
+  display:flex;justify-content:center;gap:clamp(14px,3vw,40px);flex-wrap:wrap;
+  max-height:0;overflow:hidden;opacity:0;transition:max-height .45s ease,opacity .35s ease,margin .45s ease;
+}
+.ch8-shelf.is-open .ch8-shelf-numbers{max-height:200px;opacity:1;margin-top:0}
+.chapter-article .ch8-shelf-numbers p{
+  margin:0;padding:10px 20px;border:1px solid var(--gold);border-radius:999px;background:var(--paper);
+  font-size:var(--read);line-height:1.4;color:var(--ink);
+}
+.ch8-shelf-numbers b{font-family:var(--font-heading);color:var(--maroon)}
+.ch8-shelf-numbers span{font-weight:700;color:var(--maroon-deep)}
+.chapter-article .ch8-shelf-hint{margin:0;text-align:center;font-size:14px;color:var(--muted)}
+.ch8-shelf.is-open .ch8-shelf-hint{margin-top:12px}
+@media (prefers-reduced-motion:reduce){.ch8-shelf-pair,.ch8-shelf-numbers{transition:none}}
+/* a name on its spine: set top-to-bottom, as a spine is lettered, on a parchment chip so
+   it reads over the leather (rule 68) */
+.ch8-spine{
+  position:absolute;top:14%;translate:-50% 0;writing-mode:vertical-rl;
+  padding:10px 4px;border-radius:999px;background:color-mix(in srgb,var(--paper) 88%,transparent);
+  border:1px solid var(--edge);font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(13px,1.3vw,17px);line-height:1;color:var(--maroon-deep);white-space:nowrap;
+}
+.ch8-spine.is-pair{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-soft)}
+/* the gold bracket under the two the source names together */
+.ch8-pair-bracket{
+  position:absolute;top:calc(100% - 8px);height:34px;border:2px solid var(--gold);border-top:0;
+  border-radius:0 0 12px 12px;display:flex;align-items:flex-end;justify-content:center;
+}
+.ch8-pair-bracket b{
+  translate:0 50%;padding:2px 12px;background:var(--panel);border-radius:999px;
+  font-family:var(--font-heading);font-size:clamp(15px,1.3vw,18px);color:var(--gold-text);
+}
+@media (max-width:680px){
+  .ch8-spine{font-size:11px;padding:6px 2px;top:10%}
+}
+/* Four steps, narrower than the prose and centred (rule 48). A gold rail runs down the
+   reading edge with one node per step. ONLY THE NAMES STEP IN, each a little further
+   than the one above, while every sentence starts on one shared line: the first build
+   stepped whole rows, so the text column shrank step by step and its edge read as a
+   crooked margin, not as a descent — and „חדית'ים כוזבים" broke over two lines.
+   The name column is one SUBGRID track sized to the longest name plus its step, so the
+   four rows share it and no name wraps.
+   The nodes thin out from a filled maroon disc to an empty ring — ORDER only, never a
+   measure (the source gives none). No card and no shadow. */
+.chapter-article * + .ch8-ladder{margin-top:30px}
+.ch8-ladder{
+  --step:clamp(14px,1.8vw,26px);
+  position:relative;list-style:none;margin-inline:auto;padding:0;
+  /* the full column: at 880 the sentences ran in a 496px track and the ladder stood 747px
+     tall — the tallest block in the chapter after the map (measured 12.10) */
+  width:100%;
+  display:grid;grid-template-columns:max-content minmax(0,1fr);
+  column-gap:clamp(18px,2.6vw,36px);
+}
+.ch8-ladder::before{
+  content:"";position:absolute;inset-block:14px 14px;inset-inline-start:7px;
+  width:2px;background:var(--gold-soft);border-radius:999px;
+}
+.ch8-step{
+  position:relative;grid-column:1 / -1;
+  display:grid;grid-template-columns:subgrid;align-items:baseline;
+  padding-block:clamp(14px,1.6vw,20px);
+  padding-inline-start:34px;
+}
+.ch8-step + .ch8-step{border-top:1px solid var(--edge)}
+.ch8-step-dot{
+  position:absolute;inset-inline-start:0;top:calc(clamp(14px,1.6vw,20px) + 10px);
+  width:16px;height:16px;border-radius:999px;box-sizing:border-box;
+  border:2px solid var(--maroon);background:var(--panel);
+}
+.ch8-step:nth-child(1) .ch8-step-dot{background:var(--maroon)}
+.ch8-step:nth-child(2) .ch8-step-dot{background:color-mix(in srgb,var(--maroon) 55%,var(--panel))}
+.ch8-step:nth-child(3) .ch8-step-dot{background:color-mix(in srgb,var(--maroon) 18%,var(--panel))}
+.ch8-step-name{
+  margin:0;padding-inline-start:calc(var(--i) * var(--step));white-space:nowrap;
+  font-family:var(--font-heading);font-size:var(--sub);font-weight:700;
+  color:var(--maroon);line-height:1.25;
+}
+.chapter-article .ch8-step p{margin:0;line-height:1.8}
+/* narrow: the name sits above its sentence; the step stays, smaller */
+@media (max-width:680px){
+  .ch8-ladder{grid-template-columns:minmax(0,1fr)}
+  .ch8-step{grid-template-columns:minmax(0,1fr);row-gap:4px;padding-inline-start:30px}
+  .ch8-step-name{--step:10px;white-space:normal}
+}
+
+/* ---------- 06 · where the sources were written (click) ---------- */
+.chapter-article .scrolly-env + .ch8-map{margin-top:var(--flow-tight)}
+.ch8-map{margin:0;width:100%}
+.ch8-map-plate{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--edge)}
+.ch8-map-plate > img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ch8-place{position:absolute;translate:-50% -50%;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;transition:opacity .3s ease}
+.ch8-place:not(.is-lit){opacity:.32}
+.ch8-place b{
+  padding:3px 12px;border-radius:999px;white-space:nowrap;
+  background:color-mix(in srgb,var(--paper) 90%,transparent);border:1px solid var(--edge);
+  font-family:var(--font-heading);font-weight:700;font-size:clamp(13px,1.3vw,18px);line-height:1.3;color:var(--maroon-deep);
+}
+.ch8-place.is-area b{background:transparent;border:0;font-size:clamp(15px,1.7vw,24px);color:var(--maroon);text-shadow:0 0 6px var(--paper),0 0 2px var(--paper);letter-spacing:.02em}
+.ch8-place.is-lit.is-city b{border-color:var(--maroon)}
+.ch8-place-dot{width:14px;height:14px;border-radius:50%;background:var(--maroon);border:3px solid var(--paper);box-shadow:0 0 0 1.5px var(--maroon)}
+.ch8-place.is-city{translate:-50% -9px}
+.ch8-map-arrow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.ch8-map-arrow path{fill:none;stroke:var(--maroon);stroke-width:2.5;stroke-dasharray:7 6;vector-effect:non-scaling-stroke}
+.ch8-map-arrow marker path{fill:var(--maroon);stroke:none}
+.ch8-map-legend{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:16px}
+.ch8-map-who{
+  all:unset;cursor:pointer;padding:8px 20px;border-radius:999px;background:var(--panel);border:1px solid var(--edge);
+  font-family:var(--font-heading);font-weight:700;font-size:var(--read);color:var(--maroon);
+}
+.ch8-map-who:hover:not([aria-pressed="true"]){border-color:var(--maroon)}
+.ch8-map-who[aria-pressed="true"]{background:var(--maroon-deep);border-color:var(--maroon-deep);color:var(--cream)}
+.ch8-map-who:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+.ch8-map-says{display:grid;margin-top:12px;min-height:3.4em}
+.chapter-article .ch8-map-says p{grid-area:1/1;margin:0;text-align:center;opacity:0;visibility:hidden;transition:opacity .25s ease}
+.chapter-article .ch8-map-says p.is-on{opacity:1;visibility:visible}
+.chapter-article .ch8-map-hint{font-size:14px;color:var(--muted)}
+.ch8-map-say b{font-family:var(--font-heading);color:var(--maroon)}
+@media (max-width:680px){
+  .ch8-place b{font-size:11px;padding:1px 7px}
+  .ch8-place.is-area b{font-size:13px}
+  .ch8-place-dot{width:10px;height:10px;border-width:2px}
+}
+
+/* ---------- 06 · the close ---------- */
+/* the source's last sentence — the Quran and the Sunna named together. Set exactly as
+   chapter 5's verdict RENDERS, measured at 1440: Kedem, centred in 700, at the reading
+   size — `.chapter-article p` outranks the --emph that rule declares, so chapter 5 shows
+   20px, not 31. The first build here forced --emph with !important and the 172-character
+   sentence stood 279px tall in display type, against chapter 5's 111. */
+.ch8-verdict{
+  width:min(700px,100%)!important;margin:var(--flow-lead) auto 0!important;text-align:center;
+  font-family:var(--font-heading);font-size:var(--emph);line-height:1.5;color:var(--maroon-deep);
+}
+
+/* NO `.chapter-end` RULES HERE (rule 33): the closing block is chapter 6's, unchanged. */
+
+/* on a phone the banner is nearly square and a centred crop cut the stand in half at
+   the left edge; the frame slides left so the stand and its ribbon stay whole */
+@media (max-width:680px){
+  .ch8-hero-media{background-position:24% 60%}
+  .ch8-hero-media .ch6-hero-video{object-position:24% 60%}
+}
