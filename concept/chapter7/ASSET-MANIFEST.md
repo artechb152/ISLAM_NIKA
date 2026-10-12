@@ -99,3 +99,5 @@
 `cut-rajab` (אותו רגיסטר). אחרי ההורדה: `scripts/ch8-cutout.mjs` (מילוי מהשוליים על
 כמעט-לבן, כמו בפרקים 2/3/8) ← `cut-ramadan.webp`. מקום בפרק: ליד „אחד עשר ימים מוקדם
 יותר" (§4.a–b), לפני רצועת פברואר.
+
+| 12 | רמדאן — שולחן איפטאר (ChatGPT, צ'אט „Create Iftar Still Life") | — | ✔ 1448×1086 → `cut-ramadan.webp` 1091×766, 194KB | `source-art/cut-ramadan-chatgpt.png` |

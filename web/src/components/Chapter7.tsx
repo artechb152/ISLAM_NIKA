@@ -593,9 +593,14 @@ export default function Chapter7() {
               {/* ============ 04 · Ramadan, drifting ============ */}
               <Section id="ramadan">
                 <Head id="ramadan" />
-                <Env id="drift" sectionId="ramadan" />
-                <T refs={['§4.a']} />
-                <T refs={['§4.b']} />
+                {/* the iftar still life (ChatGPT, 12.10 — replaces the Higgsfield one rejected for
+                    the shrouded figure behind the cloth). On the right, so the chapter's paintings
+                    alternate: pilgrims left (03), this right, the caravan left (05). */}
+                <Aside art="cut-ramadan" flip>
+                  <Env id="drift" sectionId="ramadan" />
+                  <T refs={['§4.a']} />
+                  <T refs={['§4.b']} />
+                </Aside>
                 <February />
                 <T refs={['§4.c']} />
                 <Env id="sighting" sectionId="ramadan" />
