@@ -99,7 +99,12 @@ export const chapterCategories: CategoryDef[] = [
     title: 'זרמים והלכה',
     icon: 'arch',
     chapters: [
-      ch(9, 'האסלאם השיעי'),
+      ch(9, 'האסלאם השיעי', {
+        href: '/chapter9',
+        /* the old card carried machine-written Arabic (rule 40); the chapter's own banner frame */
+        image: '/assets/chapter9/hero-1.jpg',
+        available: true,
+      }),
       ch(10, 'זרמים שונים באסלאם'),
       ch(11, 'מקורות ואסכולות ההלכה'),
     ],

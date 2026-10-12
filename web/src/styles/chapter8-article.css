@@ -353,3 +353,12 @@
   .ch8-hero-media{background-position:24% 60%}
   .ch8-hero-media .ch6-hero-video{object-position:24% 60%}
 }
+
+/* ===== review pass 12.10.2026 (the chapter 9 session, at the user's request) =====
+   1 · the banner was dark under the shared 55% veil (rule 42) — lifted.
+   2 · on a phone the map's place names were 11px; 13px is the floor. */
+.ch8-hero-media,.ch8-hero-media .ch6-hero-video{filter:brightness(1.3) saturate(1.06)}
+@media (max-width:680px){
+  .ch8-place b{font-size:13px;padding:1px 8px}
+  .ch8-place.is-area b{font-size:14px}
+}

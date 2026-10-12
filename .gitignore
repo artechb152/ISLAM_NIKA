@@ -53,3 +53,11 @@ concept/chapter7/source-art/
 # chapter 8: generated source images (86MB). The site ships the cut webp/jpg; the sources stay local.
 concept/chapter8/gen/
 .chatgpt-profile.lock
+
+# chapter 9 raw generation files (the site uses web/public/assets/chapter9)
+concept/chapter9/assets/**/*.png
+concept/chapter9/assets/**/*.mp4
+concept/chapter9/assets/**/*.mp3
+concept/chapter9/assets/*.png
+concept/chapter9/assets/*.mp4
+concept/chapter9/mockup/assets/

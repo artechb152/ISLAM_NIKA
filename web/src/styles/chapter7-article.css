@@ -207,3 +207,16 @@
   .ch7-feb-pin,.ch7-night-moon,.ch7-night-cloud,.ch7-feb-cells li,.ch7-md{transition:none}
   .ch7-md:hover{transform:translate(-50%,-50%)}
 }
+
+/* ===== review pass 12.10.2026 (the chapter 9 session, at the user's request) =====
+   1 · the banner was dark and muddy under chapter 6's 55% veil (rule 42: a banner asset
+       must be bright) — lifted, not replaced.
+   2 · on a phone the February strip printed every other day at 10px. Now every fifth day
+       and the start day, at a readable 12px. */
+.ch7-hero-media,.ch7-hero-media .ch6-hero-video{filter:brightness(1.32) saturate(1.08)}
+@media (max-width:640px){
+  .ch7-feb-cells span{font-size:12px}
+  .ch7-feb-cells li span{visibility:hidden}
+  /* outranks the original odd-day rule above (three pseudo-classes) */
+  .ch7-feb .ch7-feb-cells li:is(:nth-child(5n),:first-child,.is-start):nth-child(n):nth-child(n) span{visibility:visible}
+}

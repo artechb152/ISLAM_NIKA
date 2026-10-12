@@ -163,8 +163,22 @@ const sentences = (refs: string[]) =>
   refs.flatMap((r, i) => [...(i ? [' '] : []), ...mark(nb(text(r)), marks(r), r)])
 
 /** One paragraph carrying one slot's fragments, joined by a space. */
+/* A slot as paragraphs of at most ~45 words (review pass 12.10.2026): one slot joined into
+   ONE paragraph ran to 77 words — chapter 6's longest is 42. Fragments are gathered only
+   while the paragraph stays short; a long fragment stands alone. Words and order untouched. */
+const PARA_WORDS = 45
+const wordsOf = (r: string) => text(r).split(/\s+/).length
+function paras(refs: string[]): string[][] {
+  const out: string[][] = []
+  for (const r of refs) {
+    const cur = out[out.length - 1]
+    if (cur && cur.reduce((k, x) => k + wordsOf(x), 0) + wordsOf(r) <= PARA_WORDS) cur.push(r)
+    else out.push([r])
+  }
+  return out
+}
 function T({ s, n, className }: { s: string; n: string; className?: string }) {
-  return <p className={className} data-reveal>{sentences(slot(s, n))}</p>
+  return <>{paras(slot(s, n)).map((g) => <p className={className} data-reveal key={g[0]}>{sentences(g)}</p>)}</>
 }
 
 /** The section heading, part for part as chapter 6 sets it: the title, the Arabic

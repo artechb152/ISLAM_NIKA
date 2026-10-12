@@ -1,0 +1,4 @@
+/* Chapter 9's practice — only what differs from chapter 5's practice sheet: the banner
+   still (the chapter's own hero frame, without the video) and the title's shadow. */
+.ch9-practice-banner .ch9-practice-media{background:var(--panel) url('/assets/chapter9/hero-1.jpg') center 40%/cover no-repeat}
+.ch9-practice-banner .ch6-hero-title{text-shadow:0 3px 22px rgba(20,10,4,.55)}

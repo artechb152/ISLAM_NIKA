@@ -1,0 +1,661 @@
+{
+  "$note": "הפריסה של פרק 9: אילו קטעים בכל מקטע ובאיזה תפקיד. הקומפוננטה קוראת מכאן ולא כותבת טקסט. כל תווית {from,cut} חתוכה מהמשפט שלה (כלל 27) והשער בודק. המבנה והמנגנונים אושרו בהדגמה (concept/chapter9/mockup, 11.10.2026); שלושה מנגנונים נפסלו כמשחקיים — ראו DECISIONS.md.",
+  "sections": [
+    {
+      "id": "shia",
+      "title": "סיעת עלי",
+      "term": "شيعة",
+      "share": {
+        "pct": 15,
+        "label": {
+          "from": "§0.stats",
+          "cut": [
+            "כ-15% מהאסלאם הכללי"
+          ]
+        }
+      },
+      "lands": [
+        {
+          "name": {
+            "from": "§0.stats",
+            "cut": [
+              "איראן"
+            ]
+          }
+        },
+        {
+          "name": {
+            "from": "§0.stats",
+            "cut": [
+              "אזרבייג'ן"
+            ]
+          }
+        },
+        {
+          "name": {
+            "from": "§0.stats",
+            "cut": [
+              "עיראק"
+            ]
+          },
+          "pct": 60,
+          "label": {
+            "from": "§0.stats",
+            "cut": [
+              "כ-60%"
+            ]
+          }
+        },
+        {
+          "name": {
+            "from": "§0.stats",
+            "cut": [
+              "בחריין"
+            ]
+          },
+          "pct": 70,
+          "label": {
+            "from": "§0.stats",
+            "cut": [
+              "כ-70%"
+            ]
+          }
+        },
+        {
+          "name": {
+            "from": "§0.stats",
+            "cut": [
+              "לבנון"
+            ]
+          },
+          "pct": 30,
+          "label": {
+            "from": "§0.stats",
+            "cut": [
+              "כ-30%"
+            ]
+          }
+        }
+      ],
+      "majority": {
+        "from": "§0.stats",
+        "cut": [
+          "רוב מובהק"
+        ]
+      },
+      "slots": {
+        "lead": [
+          "§0.stats"
+        ],
+        "meaning": [
+          "§0.meaning",
+          "§0.view"
+        ]
+      }
+    },
+    {
+      "id": "ghadir",
+      "title": "ע'דיר ח'ם",
+      "term": "632",
+      "subs": [
+        {
+          "id": "feast",
+          "title": "יום אלע'דיר"
+        }
+      ],
+      "calendar": {
+        "day": {
+          "from": "§1.feast",
+          "cut": [
+            "18"
+          ]
+        },
+        "month": {
+          "from": "§1.feast",
+          "cut": [
+            "ד'ו אלחג'ה"
+          ]
+        }
+      },
+      "slots": {
+        "lead": [
+          "§1.hajj",
+          "§1.stop"
+        ],
+        "saying": [
+          "§1.saying"
+        ],
+        "verse": [
+          "§1.verse",
+          "§1.fraud"
+        ],
+        "feast": [
+          "§1.feast"
+        ]
+      }
+    },
+    {
+      "id": "ali",
+      "title": "עלי ובית אומיה",
+      "term": "656–661",
+      "sides": {
+        "ali": {
+          "from": "§2.a",
+          "cut": [
+            "עלי"
+          ]
+        },
+        "umayya": {
+          "from": "§2.a",
+          "cut": [
+            "בית אומיה"
+          ]
+        }
+      },
+      "stations": [
+        {
+          "year": {
+            "from": "§2.first",
+            "cut": [
+              "656"
+            ]
+          },
+          "title": {
+            "from": "§2.name",
+            "cut": [
+              "קרב הגמל"
+            ]
+          },
+          "winner": "ali",
+          "art": "camel"
+        },
+        {
+          "year": {
+            "from": "§3.a",
+            "cut": [
+              "657"
+            ]
+          },
+          "title": {
+            "from": "§3.a",
+            "cut": [
+              "קרב צפין"
+            ]
+          },
+          "winner": "umayya",
+          "art": "siffin"
+        },
+        {
+          "year": {
+            "from": "§4.murder",
+            "cut": [
+              "661"
+            ]
+          },
+          "title": {
+            "from": "§4.murder",
+            "cut": [
+              "עלי נרצח"
+            ]
+          },
+          "winner": null,
+          "art": "night"
+        }
+      ],
+      "slots": {
+        "lead": [
+          "§2.a",
+          "§2.first",
+          "§2.muawiya",
+          "§2.kufa"
+        ],
+        "stations": [
+          [
+            "§2.camel",
+            "§2.name",
+            "§2.won"
+          ],
+          [
+            "§3.a",
+            "§3.won"
+          ],
+          [
+            "§4.murder"
+          ]
+        ],
+        "after": [
+          "§4.voices",
+          "§4.abbas"
+        ]
+      }
+    },
+    {
+      "id": "karbala",
+      "title": "כרבלאא'",
+      "term": "680",
+      "subs": [
+        {
+          "id": "ashura",
+          "title": "יום העאשוראא'"
+        },
+        {
+          "id": "cities",
+          "title": "הערים הקדושות"
+        }
+      ],
+      "pins": [
+        {
+          "name": {
+            "from": "§6.cities",
+            "cut": [
+              "כרבלאא'"
+            ]
+          },
+          "at": [
+            0.41,
+            0.5
+          ]
+        },
+        {
+          "name": {
+            "from": "§6.cities",
+            "cut": [
+              "נג'ף"
+            ]
+          },
+          "at": [
+            0.52,
+            0.6
+          ]
+        }
+      ],
+      "slots": {
+        "red": [
+          "§5.a"
+        ],
+        "sequence": [
+          [
+            "§5.bg"
+          ],
+          [
+            "§5.yazid"
+          ],
+          [
+            "§5.lost"
+          ],
+          [
+            "§5.massacre"
+          ]
+        ],
+        "ashura": [
+          "§5.ashura",
+          "§5.mourn"
+        ],
+        "saying": [
+          "§5.saying"
+        ],
+        "after": [
+          "§5.hezbollah",
+          "§5.zayn"
+        ],
+        "cities": [
+          "§6.a",
+          "§6.cities",
+          "§6.see"
+        ]
+      }
+    },
+    {
+      "id": "growth",
+      "title": "התפתחות השיעה",
+      "term": "632–1979",
+      "subs": [
+        {
+          "id": "taqiyya",
+          "title": "התַּקִיַּה"
+        }
+      ],
+      "pair": [
+        {
+          "name": {
+            "from": "§7.a",
+            "cut": [
+              "הנאמנות"
+            ]
+          },
+          "tr": {
+            "from": "§7.a",
+            "cut": [
+              "אלוַלַאא'"
+            ]
+          },
+          "say": {
+            "from": "§7.a",
+            "cut": [
+              "למי שהינו שיעי"
+            ]
+          }
+        },
+        {
+          "name": {
+            "from": "§7.a",
+            "cut": [
+              "ההתנערות"
+            ]
+          },
+          "tr": {
+            "from": "§7.a",
+            "cut": [
+              "אַלְבַּרַאא'"
+            ]
+          },
+          "say": {
+            "from": "§7.a",
+            "cut": [
+              "ממי שאינו שיעי"
+            ]
+          }
+        }
+      ],
+      "slots": {
+        "lead": [
+          "§7.a"
+        ],
+        "curse": [
+          "§7.curse",
+          "§7.critique"
+        ],
+        "notes": [
+          "§8.a",
+          "§8.mahdi",
+          "§8.buyids",
+          "§8.fatimids",
+          "§8.azhar"
+        ],
+        "sequence": [
+          [
+            "§9.a",
+            "§9.quran"
+          ],
+          [
+            "§9.sixties"
+          ],
+          [
+            "§9.global",
+            "§9.enough"
+          ]
+        ]
+      },
+      "steps": [
+        {
+          "from": "§8.a",
+          "cut": [
+            "632"
+          ]
+        },
+        {
+          "from": "§8.mahdi",
+          "cut": [
+            "האמאם השנים עשר"
+          ]
+        },
+        {
+          "from": "§8.buyids",
+          "cut": [
+            "במאה העשירית"
+          ]
+        },
+        {
+          "from": "§8.fatimids",
+          "cut": [
+            "בהמשך המאה העשירית"
+          ]
+        },
+        {
+          "from": "§8.azhar",
+          "cut": [
+            "לימים"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customs",
+      "title": "המנהגים",
+      "term": "وضوء · أذان",
+      "subs": [
+        {
+          "id": "wudu",
+          "title": "ההיטהרות"
+        },
+        {
+          "id": "adhan",
+          "title": "הקריאה לתפילה"
+        },
+        {
+          "id": "prayer",
+          "title": "בתפילה עצמה"
+        }
+      ],
+      "choose": [
+        {
+          "to": "wash",
+          "label": {
+            "from": "§10.dispute",
+            "cut": [
+              "לפעולת הרחיצה"
+            ]
+          }
+        },
+        {
+          "to": "wipe",
+          "label": {
+            "from": "§10.dispute",
+            "cut": [
+              "לפעולת הניגוב"
+            ]
+          }
+        }
+      ],
+      "adhan": [
+        {
+          "line": {
+            "from": "§11.a",
+            "cut": [
+              "\"אני מעיד כי אין אל מבלעדי אללה ומוחמד הוא שליחו\""
+            ]
+          }
+        },
+        {
+          "line": {
+            "from": "§11.a",
+            "cut": [
+              "\"ועלי הוא נאמנו\""
+            ]
+          },
+          "ar": {
+            "from": "§11.a",
+            "cut": [
+              "وعليٌ وليُّ الله"
+            ]
+          },
+          "shia": true
+        },
+        {
+          "line": {
+            "from": "§11.more",
+            "cut": [
+              "\"בואו לתפילה, בואו להצלחה\""
+            ]
+          }
+        },
+        {
+          "line": {
+            "from": "§11.more",
+            "cut": [
+              "\"בואו למעשים הטובים\""
+            ]
+          },
+          "ar": {
+            "from": "§11.more",
+            "cut": [
+              "حي على خير العمل"
+            ]
+          },
+          "shia": true
+        }
+      ],
+      "shiaTag": {
+        "from": "§11.a",
+        "cut": [
+          "השיעים"
+        ]
+      },
+      "slots": {
+        "lead": [
+          "§10.a",
+          "§10.few",
+          "§10.wudu"
+        ],
+        "feet": [
+          "§10.sunni",
+          "§10.shia"
+        ],
+        "verse": [
+          "§10.verse"
+        ],
+        "dispute": [
+          "§10.dispute"
+        ],
+        "adhan": [
+          "§11.a",
+          "§11.more"
+        ],
+        "hands": [
+          "§12.a"
+        ],
+        "turba": [
+          "§13.a",
+          "§13.duty",
+          "§13.virtue"
+        ]
+      }
+    },
+    {
+      "id": "twelvers",
+      "title": "השיעה התרי-עשרית",
+      "term": "632–874",
+      "subs": [
+        {
+          "id": "roots",
+          "title": "שורשי הדת"
+        },
+        {
+          "id": "mahdi",
+          "title": "המהדי"
+        }
+      ],
+      "occult": [
+        {
+          "name": {
+            "from": "§17.periods",
+            "cut": [
+              "היעלמות הקטנה"
+            ]
+          },
+          "span": {
+            "from": "§17.periods",
+            "cut": [
+              "כשבעים שנה"
+            ]
+          }
+        },
+        {
+          "name": {
+            "from": "§17.periods",
+            "cut": [
+              "ההיעלמות הגדולה"
+            ]
+          },
+          "span": {
+            "from": "§17.periods",
+            "cut": [
+              "הנמשכת עד היום"
+            ]
+          },
+          "open": true
+        }
+      ],
+      "slots": {
+        "lead": [
+          "§14.a",
+          "§14.twelve",
+          "§14.era"
+        ],
+        "masum": [
+          "§14.masum",
+          "§14.hadith",
+          "§14.prophets"
+        ],
+        "rootsLead": [
+          "§15.a"
+        ],
+        "roots": [
+          [
+            "§16.tawhid"
+          ],
+          [
+            "§16.adl"
+          ],
+          [
+            "§16.nubuwwa"
+          ],
+          [
+            "§16.imama"
+          ],
+          [
+            "§16.qiyama"
+          ]
+        ],
+        "mahdi": [
+          "§17.a",
+          "§17.hidden"
+        ],
+        "periods": [
+          "§17.periods"
+        ],
+        "names": [
+          "§18.a"
+        ],
+        "close": [
+          "§19.a"
+        ],
+        "after": [
+          "§17.heresy",
+          "§17.note",
+          "§17.end"
+        ]
+      },
+      "facts": [
+        {
+          "from": "§14.a",
+          "cut": [
+            "כ-80%"
+          ]
+        },
+        {
+          "from": "§14.twelve",
+          "cut": [
+            "שנים עשר"
+          ]
+        },
+        {
+          "from": "§14.era",
+          "cut": [
+            "קרוב ל-250 שנה"
+          ]
+        }
+      ]
+    }
+  ]
+}

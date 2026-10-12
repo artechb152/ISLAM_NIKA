@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>פרק 9 · הדגמת מנגנונים</title>
+<style>
+@font-face{font-family:Kedem;src:url(../../../web/public/assets/fonts/kedem-bold-aaa.otf);font-weight:700}
+@font-face{font-family:Kedem;src:url(../../../web/public/assets/fonts/kedem-black-aaa.otf);font-weight:900}
+@font-face{font-family:Kedem;src:url(../../../web/public/assets/fonts/kedem-regular-aaa.otf);font-weight:400}
+@font-face{font-family:Ploni;src:url(../../../web/public/assets/fonts/ploni-regular-aaa.otf);font-weight:400}
+@font-face{font-family:Ploni;src:url(../../../web/public/assets/fonts/ploni-medium-aaa.otf);font-weight:500}
+:root{
+  --paper:#EDE4D0;--panel:#f3ead6;--mat:#f5ecd6;--edge:#d8c7a3;--rule:rgba(87,24,32,.14);
+  --maroon:#8a2733;--maroon-deep:#571820;--stamp:#a5322f;--cream:#f5ecd6;--ink:#3c2c1d;--muted:#6f5c43;
+  --gold:#c79a3c;--gold-soft:#d9b45b;--gold-text:#856016;--shadow:0 8px 22px rgba(60,35,18,.10);
+  --read:clamp(18px,1.55vw,20px);--sub:clamp(21px,2vw,27px);--emph:clamp(23px,2.4vw,31px);
+  --h:"Kedem",serif;--b:"Ploni",Arial,sans-serif;--ar:"Segoe UI",Tahoma,"Geeza Pro",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{overflow-x:clip}
+body{background:var(--panel);color:var(--ink);font-family:var(--b);font-size:var(--read);line-height:1.85;overflow-x:clip}
+button{font:inherit;cursor:pointer}
+:is(button,input):focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+.key{font-weight:700;color:var(--maroon-deep)}
+.tr{color:var(--gold-text);font-weight:500}
+.ar{font-family:var(--ar);direction:rtl}
+
+/* ---- masthead + note bar ---- */
+.mast{position:sticky;top:0;z-index:60;height:56px;background:var(--maroon-deep);color:var(--cream);display:flex;align-items:center;gap:18px;padding:0 24px;font-family:var(--h);font-weight:700}
+.mast small{font-family:var(--b);font-weight:400;opacity:.8}
+.memo{background:var(--paper);border-bottom:1px solid var(--edge);padding:18px clamp(16px,4vw,64px);font-size:16px;color:var(--muted)}
+.memo b{color:var(--maroon-deep)}
+
+/* ---- banner ---- */
+.banner{position:relative;height:370px;display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(120% 90% at 70% 20%,#e9c98d,#b9844a 45%,#6d3a22)}
+.banner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.banner::after{content:"";position:absolute;inset:0;background:rgba(30,18,8,.55);z-index:1}
+.banner h1{position:relative;z-index:2;color:var(--cream);font-family:var(--h);font-weight:900;font-size:clamp(42px,4.5vw,70px)}
+.banner .eyebrow{display:block;font-size:20px;font-weight:400;opacity:.85;text-align:center}
+
+/* ---- video slot: what the reel will show ---- */
+.vslot{position:relative;border-radius:14px;overflow:hidden;background:#3a2416;color:var(--cream);min-height:260px;display:grid;align-content:end}
+.vslot .frames{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr)}
+.vslot .frames i{display:block;border-inline-start:1px solid rgba(245,236,214,.12);animation:pan 9s ease-in-out infinite alternate}
+.vslot .cap{position:relative;z-index:2;padding:18px 22px;background:linear-gradient(transparent,rgba(30,18,8,.85) 40%);font-size:16px;line-height:1.6}
+.vslot .cap b{display:inline-block;background:var(--stamp);color:var(--cream);border-radius:999px;padding:0 10px;font-size:13px;margin-inline-end:8px;font-weight:500}
+@keyframes pan{to{filter:brightness(1.25)}}
+
+/* ---- article ---- */
+main{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,64px) 120px}
+.sec{margin-top:clamp(46px,6vw,84px);padding-top:clamp(46px,6vw,84px);border-top:1px solid var(--rule)}
+.sec:first-child{border-top:0}
+.head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.head .n{font-family:var(--h);font-weight:700;color:var(--stamp);font-size:22px}
+.head h2{font-family:var(--h);font-weight:900;color:var(--maroon);font-size:clamp(34px,4vw,56px);line-height:1.1}
+.head .term{font-family:var(--ar);color:var(--gold-text);font-size:26px}
+.head .term.num{font-family:var(--h);direction:ltr;font-variant-numeric:tabular-nums}
+.orn{display:flex;align-items:center;gap:10px;width:150px;margin:14px 0 56px}
+.orn::before,.orn::after{content:"";flex:1;height:1px;background:var(--gold)}
+.orn i{width:9px;height:9px;transform:rotate(45deg);border:1px solid var(--gold)}
+.sec p+p{margin-top:12px}
+.newtag{display:inline-flex;gap:8px;align-items:center;margin:28px 0 12px;font-size:14px;color:var(--maroon-deep);background:var(--paper);border:1px dashed var(--maroon);border-radius:999px;padding:2px 12px}
+.newtag::before{content:"מנגנון חדש";font-weight:700}
+.howto{font-size:15px;color:var(--muted);margin-bottom:14px}
+.src{display:inline-block;direction:ltr;unicode-bidi:isolate;font-size:12px;color:var(--muted);font-family:var(--b);letter-spacing:.02em}
+.narrow{max-width:880px;margin-inline:auto}
+
+.film{margin-inline:calc(50% - 50vw);height:72vh;overflow:hidden;position:relative}
+.film video{width:100%;height:100%;object-fit:cover;display:block}
+.film::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--panel),transparent 12%,transparent 88%,var(--panel))}
+.still{margin-inline:calc(50% - 50vw);height:62vh;overflow:hidden;position:relative;margin-bottom:40px}
+.still img{width:100%;height:100%;object-fit:cover;display:block;animation:drift 24s ease-in-out infinite alternate}
+.still::after,.film::after{content:"";position:absolute;inset:0;background:linear-gradient(var(--panel),transparent 12%,transparent 88%,var(--panel))}
+@keyframes drift{to{transform:scale(1.06) translateX(-1.5%)}}
+.seq{height:300vh;position:relative;margin-inline:calc(50% - 50vw)}
+.seq .stage{position:sticky;top:56px;height:calc(100vh - 56px);overflow:hidden;background:#2a170c}
+.seq video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity 1.2s}
+.seq video.off{opacity:0}
+.seq .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(30,18,8,.75),rgba(30,18,8,.1) 60%)}
+.seq .caps{position:absolute;inset-inline:0;bottom:11vh;display:grid;justify-items:center}
+.seq .caps p{grid-area:1/1;max-width:780px;margin:0 24px;text-align:center;color:var(--cream);font-size:clamp(20px,1.9vw,26px);line-height:1.7;opacity:0;transform:translateY(14px);transition:.8s}
+.seq .caps p.on{opacity:1;transform:none}
+.seq .caps .key{color:#f1d58f}
+.seq .statement{position:absolute;inset:0;display:grid;place-content:center;text-align:center;padding:0 24px;background:rgba(30,18,8,.28)}
+.seq .statement q{quotes:none;font-family:var(--h);font-weight:900;color:var(--cream);font-size:clamp(34px,4.6vw,68px);line-height:1.25;max-width:1000px;text-shadow:0 2px 18px rgba(30,18,8,.55)}
+.seq .statement q span{opacity:.12;transition:opacity .6s}
+.seq .statement q span.on{opacity:1}
+.seq .statement .tr{display:block;margin-top:18px;color:#f1d58f;font-size:var(--sub);opacity:0;transition:opacity .8s}
+.seq .statement .tr.on{opacity:1}
+.bal .media{aspect-ratio:16/9;border-radius:14px;overflow:hidden;margin-bottom:16px;background:var(--paper)}
+.bal .media video,.bal .media img{width:100%;height:100%;object-fit:cover;display:block}
+.bal .card{min-height:520px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center;max-width:1080px;margin:56px auto 0}
+.duo>img{width:100%;border-radius:14px;display:block}
+.duo .adhan{margin:0}
+.lamps-fig{max-width:1080px;margin:10px auto 0;border-radius:14px;overflow:hidden}
+.lamps-fig video{width:100%;aspect-ratio:16/9;display:block}
+.cut-img{max-width:880px;margin:20px auto 24px;border-radius:14px;overflow:hidden}
+.cut-img img{width:100%;display:block;aspect-ratio:21/9;object-fit:cover;object-position:center 60%}
+@media (max-width:820px){.duo{grid-template-columns:1fr}}
+/* ======= 01 · the word that opens ======= */
+.word{height:260vh;position:relative}
+.word .stick{position:sticky;top:76px;height:calc(100vh - 96px);display:grid;place-items:center;text-align:center}
+.word .big{font-family:var(--ar);font-size:clamp(90px,14vw,190px);color:var(--maroon);line-height:1}
+.word .steps{position:relative;height:3.2em;width:min(720px,90vw);margin-top:18px}
+.word .steps div{position:absolute;inset:0;opacity:0;transform:translateY(14px);transition:.6s;font-family:var(--h);font-weight:700;font-size:var(--emph)}
+.word .steps div.on{opacity:1;transform:none}
+.word .steps small{display:block;font-family:var(--b);font-weight:400;font-size:var(--read);color:var(--muted)}
+.dots{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;margin-top:30px}
+.grid100{display:grid;grid-template-columns:repeat(20,14px);gap:6px;direction:ltr}
+.grid100 i{width:14px;height:14px;border-radius:50%;border:1px solid var(--edge);transition:background .4s}
+.grid100 i.f{background:var(--maroon);border-color:var(--maroon)}
+.lands{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:26px}
+.land{background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:14px;text-align:center}
+.land h4{font-family:var(--h);font-weight:700;color:var(--maroon-deep)}
+.land .g10{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;direction:ltr;margin:10px auto 6px;width:110px}
+.land .g10 i{aspect-ratio:1;border-radius:50%;background:rgba(87,24,32,.12)}
+.land .g10 i.f{background:var(--maroon)}
+.land .pc{font-family:var(--h);font-weight:700;color:var(--stamp)}
+.land .maj{height:110px;display:grid;place-items:center;font-family:var(--h);font-weight:700;color:var(--maroon);font-size:20px;border:1px dashed var(--edge);border-radius:12px;margin:10px 0 6px}
+
+/* ======= 02 · two halves meet ======= */
+.meet{height:220vh;position:relative}
+.meet .stick{position:sticky;top:76px;height:calc(100vh - 96px);display:grid;align-content:center;justify-items:center;gap:18px;overflow:hidden}
+.meet .line{display:flex;gap:.5em;font-family:var(--h);font-weight:900;font-size:clamp(30px,4.4vw,60px);color:var(--maroon-deep);white-space:nowrap}
+.meet .a,.meet .b{display:inline-block;will-change:transform}
+.meet .b{color:var(--stamp)}
+.meet .tl{font-size:var(--sub);opacity:0;transition:opacity .6s}
+.meet .tl.on{opacity:1}
+.leaf{display:flex;gap:22px;align-items:center;justify-content:center;margin-top:20px}
+.cal{width:190px;height:200px;position:relative;perspective:800px}
+.cal .pg{position:absolute;inset:0;border:1px solid var(--edge);border-radius:14px;background:var(--paper);display:grid;place-items:center;text-align:center;transform-origin:top;transition:transform .9s cubic-bezier(.6,.1,.3,1),opacity .9s;backface-visibility:hidden}
+.cal .pg.top{z-index:2}
+.cal.torn .pg.top{transform:rotateX(-110deg);opacity:0}
+.cal .d{font-family:var(--h);font-weight:900;font-size:64px;color:var(--maroon);line-height:1}
+.cal .m{font-family:var(--h);font-weight:700}
+.cal .rings{position:absolute;top:-8px;inset-inline:40px;display:flex;justify-content:space-between;z-index:3}
+.cal .rings i{width:10px;height:18px;border-radius:6px;background:var(--gold)}
+.pill{background:var(--maroon-deep);color:var(--cream);border:0;border-radius:999px;padding:8px 20px}
+.pill.ghost{background:transparent;color:var(--maroon-deep);border:1px solid var(--maroon-deep)}
+
+/* ======= 03 · the balance ======= */
+.bal{height:330vh;position:relative}
+.bal .stick{position:sticky;top:76px;height:calc(100vh - 96px);display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.bal svg{width:100%;max-height:62vh;direction:ltr}
+.beam{transition:transform 1.1s cubic-bezier(.5,1.6,.4,1);transform-origin:300px 120px}
+.pan{transition:transform 1.1s cubic-bezier(.5,1.6,.4,1)}
+.bal .card{min-height:250px;position:relative}
+.bal .st{position:absolute;inset:0;opacity:0;transform:translateY(16px);transition:.5s}
+.bal .st.on{opacity:1;transform:none}
+.bal .yr{font-family:var(--h);font-weight:900;color:var(--stamp);font-size:44px;direction:ltr;display:inline-block}
+.bal h3{font-family:var(--h);font-weight:700;color:var(--maroon);font-size:var(--sub)}
+.ticks{display:flex;gap:10px;margin-top:16px}
+.ticks i{flex:1;height:4px;border-radius:999px;background:var(--edge)}
+.ticks i.on{background:var(--maroon)}
+
+/* ======= 04 · Karbala ======= */
+.kb{height:420vh;position:relative;margin-inline:calc(50% - 50vw)}
+.kb-stage{position:sticky;top:56px;height:calc(100vh - 56px);overflow:hidden;background:#2a170c}
+.kb-stage video,.kb-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.03)}
+.kb-stage .k2{opacity:0;transition:opacity .6s}
+.kb-stage .k2.on{opacity:1}
+.kb-veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(30,18,8,.72),rgba(30,18,8,.15) 55%,transparent)}
+.kb-caps{position:absolute;inset-inline:0;bottom:12vh;display:grid;justify-items:center}
+.kb-caps p{grid-area:1/1;max-width:760px;margin:0 24px;text-align:center;color:var(--cream);font-size:clamp(20px,1.9vw,26px);line-height:1.7;opacity:0;transform:translateY(16px);transition:.7s}
+.kb-caps p.on{opacity:1;transform:none}
+.kb-caps .key{color:#f1d58f}
+.kb-cue{position:absolute;bottom:3vh;inset-inline-start:50%;transform:translateX(50%);color:var(--cream);opacity:.75;font-size:15px}
+.full{margin-inline:calc(50% - 50vw);min-height:88vh;border-radius:0}
+.redline{font-family:var(--h);font-weight:900;color:var(--stamp);font-size:var(--emph);margin:36px auto 18px;max-width:880px}
+.refuse{max-width:880px;margin:40px auto 0;background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:34px 30px;text-align:center}
+.refuse .ends{display:flex;justify-content:space-between;font-family:var(--h);font-weight:900;font-size:clamp(22px,2.6vw,34px)}
+.refuse .ends .s{color:var(--maroon-deep)}
+.refuse .ends .h{color:var(--muted);transition:color .4s,letter-spacing .4s}
+.track{position:relative;height:64px;margin:16px 0 8px;direction:rtl;touch-action:none}
+.track::before{content:"";position:absolute;inset-inline:0;top:31px;height:2px;background:linear-gradient(to left,var(--maroon) 0 50%,var(--edge) 50%)}
+.knob{position:absolute;top:10px;width:44px;height:44px;margin-inline-start:-22px;border-radius:50%;background:var(--maroon-deep);border:3px solid var(--gold-soft);box-shadow:var(--shadow);inset-inline-start:0;cursor:grab}
+.knob.back{transition:inset-inline-start .7s cubic-bezier(.3,1.6,.5,1)}
+.wall{position:absolute;top:0;bottom:0;inset-inline-start:50%;width:2px;background:repeating-linear-gradient(var(--stamp) 0 6px,transparent 6px 12px);opacity:0;transition:opacity .4s}
+.track.hit .wall{opacity:1}
+.refuse .say{min-height:2.2em;font-family:var(--h);font-weight:700;font-size:var(--sub);color:var(--maroon);opacity:0;transition:opacity .5s}
+.refuse .say.on{opacity:1}
+.flipwrap{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center;max-width:980px;margin:56px auto 0}
+.flip{perspective:1200px;height:300px}
+.flip .in{position:relative;height:100%;transition:transform 1s cubic-bezier(.6,.1,.3,1);transform-style:preserve-3d}
+.flip.over .in{transform:rotateY(180deg)}
+.flip .face{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--edge);border-radius:16px;background:var(--paper);padding:24px;display:grid;align-content:center;text-align:center;gap:8px}
+.flip .face.back{transform:rotateY(180deg)}
+.flip .date{font-family:var(--h);font-weight:900;color:var(--maroon);font-size:56px;line-height:1}
+.flip .who{font-family:var(--h);font-weight:700;color:var(--stamp)}
+.mini-map{margin:56px auto 0;max-width:880px;display:grid;grid-template-columns:1.1fr 1fr;gap:30px;align-items:center}
+.mapbox{position:relative;aspect-ratio:4/3;border-radius:14px;background:radial-gradient(circle at 60% 40%,#ead6ad,#d7bd8a);border:1px solid var(--edge);direction:ltr;overflow:hidden}
+.mapbox::after{content:"";position:absolute;bottom:8px;left:10px;font-size:12px;color:var(--muted);direction:rtl}
+.pin{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;direction:rtl}
+.pin i{width:16px;height:16px;border-radius:50%;background:var(--stamp);border:2px solid var(--paper);box-shadow:0 0 0 0 rgba(165,50,47,.5);animation:pulse 2.4s infinite}
+.pin span{background:var(--paper);border:1px solid var(--edge);border-radius:999px;padding:0 10px;font-family:var(--h);font-weight:700;font-size:16px}
+@keyframes pulse{70%{box-shadow:0 0 0 14px rgba(165,50,47,0)}100%{box-shadow:0 0 0 0 rgba(165,50,47,0)}}
+
+/* ======= 05 · lantern ======= */
+.lant{position:relative;max-width:880px;margin:20px auto 0;border-radius:16px;overflow:hidden;cursor:none;background:var(--paper);border:1px solid var(--edge)}
+.lant .txt{padding:34px 34px 70px}
+.lant .veil{position:absolute;inset:0;background:#2b1a10;transition:opacity 1.2s;
+  -webkit-mask:radial-gradient(circle 120px at var(--x,50%) var(--y,40%),transparent 0 70%,#000 100%);
+          mask:radial-gradient(circle 120px at var(--x,50%) var(--y,40%),transparent 0 70%,#000 100%)}
+.lant.lit .veil{opacity:0;pointer-events:none}
+.lant .lift{position:absolute;bottom:16px;inset-inline-start:50%;transform:translateX(50%);z-index:3}
+.ribbon{margin:56px 0 0;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:10px}
+.ribbon ol{list-style:none;display:flex;gap:0;min-width:max-content;position:relative;padding-top:34px}
+.ribbon ol::before{content:"";position:absolute;top:44px;inset-inline:0;height:2px;background:var(--gold)}
+.ribbon li{width:250px;padding:0 18px;scroll-snap-align:start;position:relative}
+.ribbon li::before{content:"";position:absolute;top:4px;inset-inline-start:18px;width:18px;height:18px;transform:rotate(45deg);background:var(--panel);border:2px solid var(--gold)}
+.ribbon .y{display:block;margin-top:30px;font-family:var(--h);font-weight:900;color:var(--stamp);font-size:24px;white-space:nowrap}
+.ribbon p{font-size:16px;line-height:1.6}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:880px;margin:30px auto 0}
+.pair .c{background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:24px}
+.pair h4{font-family:var(--h);font-weight:700;color:var(--maroon);font-size:var(--sub)}
+
+/* ======= 06 · customs ======= */
+.verse{max-width:980px;margin:10px auto 0;text-align:center}
+.verse .arl{font-family:var(--ar);font-size:clamp(24px,2.6vw,34px);line-height:2.1;color:var(--ink);position:relative}
+.verse .w{border-radius:8px;padding:0 4px;transition:background .4s,color .4s}
+.verse .w.hot{background:var(--maroon-deep);color:var(--cream);cursor:pointer}
+.verse .w.tgt{box-shadow:inset 0 -3px 0 var(--gold)}
+.verse .w.tgt.lit{background:rgba(199,154,60,.25)}
+.verse svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.verse path{fill:none;stroke:var(--stamp);stroke-width:2.5;stroke-dasharray:6 6;transition:opacity .4s}
+.verse .he{margin-top:12px;font-size:var(--read)}
+.choose{display:flex;gap:12px;justify-content:center;margin-top:16px}
+.choose .pill[aria-pressed=true]{background:var(--maroon-deep);color:var(--cream)}
+.adhan{max-width:760px;margin:56px auto 0;background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:26px 30px}
+.adhan .row{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule)}
+.adhan .row:last-of-type{border-bottom:0}
+.adhan .row .q{font-family:var(--h);font-weight:700;font-size:var(--sub)}
+.adhan .add{display:grid;grid-template-rows:0fr;transition:grid-template-rows .8s cubic-bezier(.6,.1,.3,1),opacity .8s;opacity:0;border-bottom:0}
+.adhan .add>div{overflow:hidden}
+.adhan.shia .add{grid-template-rows:1fr;opacity:1;border-bottom:1px solid var(--rule)}
+.adhan .add .q{color:var(--gold-text)}
+.adhan .tag{font-size:13px;border-radius:999px;padding:0 10px;background:var(--gold-soft);color:var(--ink)}
+.cards4{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:56px}
+.cards4 .c{background:var(--paper);border:1px solid var(--edge);border-radius:16px;overflow:hidden}
+.cards4 .cv{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.cards4 .c .t{padding:20px 22px}
+.cards4 h4{font-family:var(--h);font-weight:700;color:var(--maroon);font-size:var(--sub)}
+
+/* ======= 07 · twelve + roots + occultation ======= */
+.ring{position:relative;width:min(560px,90vw);aspect-ratio:1;margin:20px auto 0;direction:ltr}
+.ring .seat{position:absolute;width:86px;height:86px;margin:-43px;border-radius:50%;background:var(--paper);border:1px solid var(--gold);display:grid;place-items:center;text-align:center;font-size:12px;line-height:1.2;padding:6px;direction:rtl;transition:.5s}
+.ring .seat b{display:block;font-family:var(--h);font-size:22px;color:var(--maroon)}
+.ring .seat.named{border-width:2px;background:var(--mat)}
+.ring .seat.hidden{border-style:dashed;background:transparent;animation:fade 3.5s ease-in-out infinite}
+@keyframes fade{50%{opacity:.25}}
+.ring .core{position:absolute;inset:30%;border-radius:50%;display:grid;place-items:center;text-align:center;font-family:var(--h);font-weight:700;color:var(--maroon-deep);direction:rtl;padding:10px}
+.roots{position:relative;height:240vh}
+.roots .stick{position:sticky;top:76px;height:calc(100vh - 96px);display:flex;flex-direction:column;justify-content:center}
+.roots svg{width:100%;height:42vh;display:block}
+.roots path{fill:none;stroke:var(--maroon);stroke-width:3;stroke-linecap:round}
+.roots .lbls{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.roots .lbl{opacity:0;transform:translateY(-10px);transition:.6s;text-align:center;font-size:15px;line-height:1.5}
+.roots .lbl.on{opacity:1;transform:none}
+.roots .lbl b{display:block;font-family:var(--h);color:var(--maroon-deep);font-size:20px}
+.occ{max-width:980px;margin:56px auto 0;overflow:hidden}
+.occ .bar{position:relative;height:48px;border-radius:999px 0 0 999px;margin-top:14px;display:flex;align-items:center;padding-inline:18px;color:var(--cream);font-family:var(--h);font-weight:700}
+.occ .bar.small{background:var(--gold);color:var(--ink);width:max-content;padding-inline:22px 40px;border-radius:999px}
+.occ .bar.great{background:linear-gradient(to left,var(--maroon-deep) 70%,rgba(87,24,32,0));width:130%;border-radius:999px 0 0 999px}
+.occ .lab{font-size:16px;color:var(--muted);margin-top:4px}
+.names{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:880px;margin:56px auto 0}
+.names .c{background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:22px;text-align:center}
+.names .arw{font-family:var(--ar);font-size:40px;color:var(--maroon)}
+.close{max-width:880px;margin:56px auto 0;font-family:var(--h);font-weight:700;font-size:var(--emph);text-align:center;color:var(--maroon-deep)}
+
+@media (max-width:820px){
+  .bal .stick{grid-template-columns:1fr;align-content:center}
+  .lands{grid-template-columns:repeat(2,1fr)}
+  .flipwrap,.mini-map,.pair,.cards4,.names{grid-template-columns:1fr}
+  .dots{grid-template-columns:1fr}
+  .grid100{grid-template-columns:repeat(20,10px);gap:4px}.grid100 i{width:10px;height:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="mast">האסלאם — דת ותרבות <small>· פרק 9 · עמוד הדגמה, לא העמוד הסופי</small></div>
+<div class="memo">
+  <b>מה זה:</b> הדגמה של המבנה והמנגנונים, עם הנכסים מ-Higgsfield. כל מנגנון עובד. הטקסט הוא טקסט המקור; בעמוד הסופי יופיע <b>כולו</b>, כאן רק מה שהמנגנון צריך.
+  התגית <b>„מנגנון חדש"</b> מסמנת דבר שאין עדיין באתר.
+</div>
+
+<header class="banner"><video src="assets/hero.mp4" poster="assets/hero-1.jpg" autoplay muted loop playsinline></video>
+  <h1><span class="eyebrow">פרק 9</span>האסלאם השיעי</h1>
+</header>
+
+
+<main>
+
+<!-- ================= 01 ================= -->
+<section class="sec">
+  <div class="head"><span class="n">01</span><h2>סיעת עלי</h2><span class="term" lang="ar">شيعة</span></div>
+  <div class="orn"><i></i></div>
+  <figure class="still"><img src="assets/street-2.jpg" alt=""></figure>
+  <span class="newtag">המילה נפתחת</span>
+  <p class="howto">גוללים — המילה הערבית נשארת במרכז, ומתחתיה היא מתפרקת למה שהיא אומרת, שלב אחרי שלב.</p>
+  <div class="word" id="word">
+    <div class="stick">
+      <div>
+        <div class="big" lang="ar">شيعة</div>
+        <div class="steps">
+          <div data-i="0">שיעה<small>הזרם השני בגודלו באסלאם</small></div>
+          <div data-i="1">פירושה „סיעה"<small>שיעה פירושה "סיעה"</small></div>
+          <div data-i="2">סייעתו של עלי<small>שטענה לקדימות בירושה של מוחמד</small></div>
+          <div data-i="3">ממשפחת הבית · <span class="tr">אַהְל אַלְבַּית</span><small>בשל היותו ממשפחת הבית של מוחמד</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="newtag">מאה נקודות</span>
+  <p class="howto">מאה נקודות הן האסלאם כולו. הנקודות מתמלאות כשהמנגנון מגיע למרכז המסך. מדינה בלי מספר במקור — בלי נקודות.</p>
+  <div class="dots" id="dots">
+    <div class="grid100" id="g100"></div>
+    <p>האסלאם השיעי זהו הזרם השני בגודלו באסלאם, ומהווה <span class="key">כ-15% מהאסלאם הכללי</span>. <span class="src">§0</span></p>
+  </div>
+  <div class="lands" id="lands"></div>
+</section>
+
+<!-- ================= 02 ================= -->
+<section class="sec">
+  <div class="head"><span class="n">02</span><h2>ע'דיר ח'ם</h2><span class="term num">632</span></div>
+  <div class="orn"><i></i></div>
+  <figure class="film"><video src="assets/ghadir.mp4" poster="assets/ghadir-1.jpg" autoplay muted loop playsinline></video></figure>
+  <p style="margin-top:30px">במסורת השיעית מסופר כי בחג' האחרון שביצע מוחמד בשנת 632, עלה לרגל עם עלי בן דודו וחתנו. … שם, במעמד <span class="key">"דרשת הפרידה"</span> פנה מוחמד למאמיניו שהיו איתו, ואמר להם, בין היתר, את המשפט הבא: <span class="src">§1</span></p>
+  <span class="newtag">שני חצאים נפגשים</span>
+  <p class="howto">גוללים — שני חלקי המשפט נכנסים משני צדי המסך ונפגשים באמצע. כשהם נוגעים, מופיע התעתיק בזהב.</p>
+  <div class="meet" id="meet">
+    <div class="stick">
+      <div class="line"><span class="a">מי שאני מנהיגו,</span><span class="b">עלי מנהיכו.</span></div>
+      <div class="tl tr">מַן אַנַא מַוְלַהֻ פַ-עַלִי מַוְלַהֻ</div>
+    </div>
+  </div>
+  <span class="newtag">דף הלוח</span>
+  <p class="howto">לוחצים — דף הלוח נתלש, ומאחוריו שם החג.</p>
+  <div class="leaf">
+    <div class="cal" id="cal">
+      <div class="rings"><i></i><i></i></div>
+      <div class="pg top"><div><div class="d">18</div><div class="m">ד'ו אלחג'ה</div></div></div>
+      <div class="pg"><div><div class="m" style="color:var(--maroon);font-size:22px">יום אלע'דיר</div><div>או „עיד אלולאיה"</div><div class="tr">חג הנאמנות לעלי</div></div></div>
+    </div>
+    <button class="pill" id="calb">לתלוש את הדף</button>
+  </div>
+</section>
+
+<!-- ================= 03 ================= -->
+<section class="sec">
+  <div class="head"><span class="n">03</span><h2>עלי ובית אומיה</h2><span class="term num">656–661</span></div>
+  <div class="orn"><i></i></div>
+  <span class="newtag">המאזניים</span>
+  <p class="howto">גוללים — כל קרב מטה את המאזניים לצד שהמקור אומר שניצח, וציור של הקרב עולה לצד הטקסט.</p>
+  <div class="bal" id="bal">
+    <div class="stick">
+      <svg viewBox="0 0 600 420" aria-hidden="true">
+        <rect x="292" y="120" width="16" height="250" fill="#8a6a3c"/>
+        <path d="M230 390h140l-20-22H250z" fill="#8a6a3c"/>
+        <g class="beam" id="beam">
+          <rect x="70" y="112" width="460" height="14" rx="7" fill="#571820"/>
+          <circle cx="300" cy="119" r="14" fill="#c79a3c"/>
+          <g class="pan" id="panL">
+            <line x1="90" y1="119" x2="60" y2="240" stroke="#856016" stroke-width="2"/><line x1="90" y1="119" x2="120" y2="240" stroke="#856016" stroke-width="2"/>
+            <path d="M40 240h100q-6 34-50 34t-50-34z" fill="#EDE4D0" stroke="#c79a3c" stroke-width="2"/>
+            <text x="90" y="300" text-anchor="middle" font-family="Kedem" font-weight="700" font-size="22" fill="#571820">בית אומיה</text>
+          </g>
+          <g class="pan" id="panR">
+            <line x1="510" y1="119" x2="480" y2="240" stroke="#856016" stroke-width="2"/><line x1="510" y1="119" x2="540" y2="240" stroke="#856016" stroke-width="2"/>
+            <path d="M460 240h100q-6 34-50 34t-50-34z" fill="#EDE4D0" stroke="#c79a3c" stroke-width="2"/>
+            <circle id="aliW" cx="510" cy="232" r="14" fill="#a5322f" style="transition:opacity .8s"/>
+            <text x="510" y="300" text-anchor="middle" font-family="Kedem" font-weight="700" font-size="22" fill="#571820">עלי</text>
+          </g>
+        </g>
+      </svg>
+      <div>
+        <div class="card">
+          <div class="st" data-i="0"><div class="media"><video src="assets/camel.mp4" poster="assets/camel-1.jpg" autoplay muted loop playsinline></video></div><span class="yr">656</span><h3>קרב הגמל</h3><p>התגרות זו במעאויה הביא את עאא'שה … לצאת להילחם נגד עלי. … <span class="key">עלי ניצח במלחמה</span> והצליח לנטרל את השפעתה של עאא'שה על האימפריה האסלאמית. <span class="src">§2</span></p></div>
+          <div class="st" data-i="1"><div class="media"><img src="assets/siffin-1.jpg" alt=""></div><span class="yr">657</span><h3>קרב צפין</h3><p>נהוג לומר כי <span class="key">הניצחון היה של בית אומיה</span>, שעה שאלה הצליחו להחליש את השפעתו של עלי על מצרים והחלק המערבי של אימפריית האסלאם. <span class="src">§3</span></p></div>
+          <div class="st" data-i="2"><div class="media"><img src="assets/karbala-4.jpg" alt="" style="filter:saturate(.6)"></div><span class="yr">661</span><h3>הרצח</h3><p>בשנת 661 <span class="key">עלי נרצח</span> ע"י קבוצות שמרדו בסמכות שלו להיות ח'ליף (הח'וארג'). <span class="src">§4</span></p></div>
+        </div>
+        <div class="ticks"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 ================= -->
+<section class="sec">
+  <div class="head"><span class="n">04</span><h2>כרבלאא'</h2><span class="term num">680</span></div>
+  <div class="orn"><i></i></div>
+  <p class="redline">האירוע המכונן ביותר באסלאם השיעי הינו קרב כרבלאא' בשנת 680.</p>
+  <p class="howto" style="text-align:center">(המשפט היחיד בחוברת שמודפס באדום — לכן הוא פותח את המקטע לבד)</p>
+  <div class="kb" id="kb">
+    <div class="kb-stage">
+      <video id="kbv" src="assets/karbala-a.mp4" muted playsinline preload="auto" poster="assets/karbala-1.jpg"></video>
+      <video id="kbv2" src="assets/karbala-b.mp4" muted playsinline preload="auto" poster="assets/karbala-3.jpg" class="k2"></video>
+      <div class="kb-veil"></div>
+      <div class="kb-caps">
+        <p data-i="0">הרקע לקרב היה <span class="key">ניסיונם של משפחתו של מוחמד, וחוסיין בראשם</span>, להשתלט על עיראק …</p>
+        <p data-i="1">… שלח יזיד, שהיה בנו של מעאויה, את צבאו להילחם בחוסיין <span class="key">ומצא אותו בכרבלאא'</span> כשהיה בדרך לגייס לוחמים לשורותיו.</p>
+        <p data-i="2">הקרב היה אבוד מראש, מפני שהלוחמים מבית אומיה מנו <span class="key">כ-4000 איש</span>, ומשפחתו של חוסיין מנו <span class="key">כמה עשרות בלבד</span>.</p>
+        <p data-i="3">יזיד ביקש מחוסיין להיכנע וכשזה האחרון לא נכנע, <span class="key">טבח בו וב-72 מבני משפחתו</span>.</p>
+      </div>
+      <span class="kb-cue">גללו ↓</span>
+    </div>
+  </div>
+  <span class="newtag">המשפט על השמיים</span>
+  <p class="howto" style="text-align:center">גוללים — המשפט של חוסיין עולה מילה אחרי מילה מעל הדגל ברוח. בלי לחיצה.</p>
+  <div class="seq" id="say9" style="height:220vh">
+    <div class="stage">
+      <video src="assets/bannersky.mp4" poster="assets/banner-sky.jpg" autoplay muted loop playsinline></video>
+      <div class="statement"><div>
+        <q id="sayq">"בין הנפת החרב להשפלה - מה רחוקה מאיתנו ההשפלה"</q>
+        <span class="tr" id="saytr">בַּין אַלסִּלַּה וַאלד'ִלַּה וַהַיְהַאתּ מִנַּא אַלד'ִלַּה</span>
+      </div></div>
+    </div>
+  </div>
+  <p class="src" style="text-align:center">§5</p>
+  <span class="newtag" style="margin-top:56px">יום אחד, שני פנים</span>
+  <div class="flipwrap">
+    <div class="flip" id="flip"><div class="in">
+      <div class="face"><div class="date">10</div><div class="who">מוחרם · יום העאשוראא'</div><p>השיעים עד היום נוהגים <span class="key">להתאבל ביום זה</span> … ולהלקות את עצמם, לעיתים - עד זוב דם, כאות הזדהות עם סבלו של חוסיין.</p></div>
+      <div class="face back"><div class="date">10</div><div class="who">אותו התאריך</div><p>אין לבלבל זאת עם יום העאשוראא', שהינו <span class="key">צום רשות באסלאם הסוני</span>, למרות שזה באותו התאריך.</p></div>
+    </div></div>
+    <div><p>המסורת השיעית מספרת כי אירוע זה היה בתאריך העשירי לחודש מוחרם. <span class="src">§5</span></p><button class="pill" id="flipb" style="margin-top:16px">להפוך את הדף</button></div>
+  </div>
+  <div class="mini-map">
+    <div class="mapbox"><img src="assets/map-1.jpg" alt="מפת קלף של הארץ שבין שני הנהרות" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+      <div class="pin" style="left:41%;top:50%"><i></i><span>כרבלאא'</span></div>
+      <div class="pin" style="left:52%;top:60%"><i></i><span>נג'ף</span></div>
+    </div>
+    <p>חוסיין נקבר בכרבלאא' וקברו מהווה מוקד עליה לרגל … ובפרט ביום הארבעים למותו (<span class="tr">יַוֹם אַלְאַרְבַּעִין</span>). <span class="key">נג'ף (שם קבור עלי) וכרבלאא' נחשבות לערים קדושות</span> באסלאם השיעי. <span class="src">§6</span></p>
+  </div>
+</section>
+
+<!-- ================= 05 ================= -->
+<section class="sec">
+  <div class="head"><span class="n">05</span><h2>התפתחות השיעה</h2><span class="term num">632–1979</span></div>
+  <div class="orn"><i></i></div>
+  <div class="pair">
+    <div class="c"><h4>הנאמנות · <span class="tr">אלוַלַאא'</span></h4><p>למי שהינו שיעי</p></div>
+    <div class="c"><h4>ההתנערות · <span class="tr">אַלְבַּרַאא'</span></h4><p>ממי שאינו שיעי ואינו מאמין בכך שעלי הוא האמאם הראשון</p></div>
+  </div>
+  <p class="src" style="text-align:center;margin-top:8px">§7 — שתי כרטיסיות שוות, בלי „בחרו צד"</p>
+  <span class="newtag">סרט השנים</span>
+  <p class="howto">גוררים לרוחב. רק שנים שכתובות במקור.</p>
+  <div class="ribbon"><ol>
+    <li><span class="y">632</span><p>מותו של מוחמד — המחלוקת על היורש מתחילה</p></li>
+    <li><span class="y">656</span><p>עלייתו של עלי</p></li>
+    <li><span class="y">680</span><p>קרב כרבלאא'</p></li>
+    <li><span class="y">המאה העשירית</span><p>עדנה תחת הבואהיים · עליית השושלת הפאטמית</p></li>
+    <li><span class="y">שנות השישים</span><p>השיעים מנסים להיות שווי זכויות</p></li>
+    <li><span class="y">1979</span><p>המהפכה השיעית באיראן</p></li>
+  </ol></div>
+  <span class="newtag" style="margin-top:56px">מן המחבוא אל הרחוב</span>
+  <p class="howto">גוללים — מחדר נעול לאור מנורה, אל רחוב מלא. התמונה מתחלפת כשהטקסט מגיע ל-1979.</p>
+  <div class="seq" id="tq">
+    <div class="stage">
+      <video src="assets/hidden.mp4" poster="assets/hidden-1.jpg" autoplay muted loop playsinline></video>
+      <video src="assets/open.mp4" poster="assets/open-2.jpg" autoplay muted loop playsinline class="off" id="tqopen"></video>
+      <div class="veil"></div>
+      <div class="caps">
+        <p data-i="0">הערה נוספת ומהותה בנושא <span class="key">התַּקִיַּה (הסתתרות)</span> של השיעה - במשך מאות שנים השיעים הצניעו את סממניהם כדי לא להפוך לטרף קל של הסונים שרדפו אותם כל העת.</p>
+        <p data-i="1">השיעים הביאו סימוכין מהקוראן להצדקת התַּקִיַּה. בשנות השישים של המאה העשרים החלו השיעים בניסיון להיות שווי זכויות,</p>
+        <p data-i="2">ומאז <span class="key">המהפכה השיעית באיראן ב-1979</span>, במסגרת ייצוא המהפכה הפך ח'ומייני את קרב כרבלאא' מכישלון צורב ובושה, לסמל של אי-כניעה …</p>
+      </div>
+    </div>
+  </div>
+  <p class="src" style="text-align:center">§9</p>
+</section>
+
+<!-- ================= 06 ================= -->
+<section class="sec">
+  <div class="head"><span class="n">06</span><h2>המנהגים</h2></div>
+  <div class="orn"><i></i></div>
+  <p>לשיעים מסורות שונות מהסונים … <span class="key">בעיקר סביב התפילה</span>. הראשונה, היא ההיטהרות (<span class="tr">וד'וא</span>). <span class="src">§10</span></p>
+  <span class="newtag">המילה במחלוקת</span>
+  <p class="howto" style="text-align:center">המילה המסומנת היא „ורגליכם". לחצו על אחת האפשרויות — קו יימתח ממנה אל הפועל שהיא נשענת עליו.</p>
+  <figure class="cut-img"><img src="assets/wudu-1.jpg" alt=""></figure>
+  <div class="verse" id="verse">
+    <div class="arl" lang="ar" dir="rtl" id="arl">يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا قُمْتُمْ إِلَى الصَّلَاةِ <span class="w tgt" id="wash">فَاغْسِلُوا</span> وُجُوهَكُمْ وَأَيْدِيَكُمْ إِلَى الْمَرَافِقِ <span class="w tgt" id="wipe">وَامْسَحُوا</span> بِرُءُوسِكُمْ <span class="w hot" id="legs">وَأَرْجُلَكُمْ</span><svg><path id="arc" d="" opacity="0"/></svg></div>
+    <p class="he">"הוי המאמינים כאשר אתם קמים לתפילה, <span id="heW">רחצו</span> את פניכם וידיכם, <span id="heP">ונגבו</span> בראשכם ואת <span class="key">רגליכם</span>" <span class="src">§10</span></p>
+    <div class="choose"><button class="pill ghost" data-to="wash" aria-pressed="false">לפעולת הרחיצה</button><button class="pill ghost" data-to="wipe" aria-pressed="false">לפעולת הניגוב</button></div>
+  </div>
+  <span class="newtag" style="margin-top:56px">השורות שנכנסות</span>
+  <div class="duo"><div class="adhan" id="adhan">
+    <p class="howto">הקריאה לתפילה (<span class="tr">האד'אן</span>). לחצו — והשורות שהשיעים מוסיפים נכנסות למקומן.</p>
+    <div class="row"><span class="q">"אני מעיד כי אין אל מבלעדי אללה ומוחמד הוא שליחו"</span></div>
+    <div class="row add"><div><span class="q">"ועלי הוא נאמנו"</span> <span class="ar">("وعليٌ وليُّ الله")</span></div><span class="tag">שיעים</span></div>
+    <div class="row"><span class="q">"בואו לתפילה, בואו להצלחה"</span></div>
+    <div class="row add"><div><span class="q">"בואו למעשים הטובים"</span> <span class="ar">("حي على خير العمل")</span></div><span class="tag">שיעים</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px"><span class="src">§11</span><button class="pill" id="adhb">להשמיע את הקריאה השיעית</button></div>
+  </div><img src="assets/adhan-1.jpg" alt=""></div>
+  <div class="cards4">
+    <div class="c">
+      <video class="cv" src="assets/hands.mp4" poster="assets/hands-1.jpg" autoplay muted loop playsinline></video>
+      <div class="t"><h4>הידיים בתפילה</h4><p>השיעים לא מסתירים את יד שמאל ביד ימין בין המותן ללב … <span class="src">§12</span></p></div>
+    </div>
+    <div class="c">
+      <video class="cv" src="assets/turba.mp4" poster="assets/turba-1.jpg" autoplay muted loop playsinline></video>
+      <div class="t"><h4><span class="tr">תֻּרְבַּה</span></h4><p>הם נוהגים להניח מתחת למצח <span class="key">עפר מקברו של חוסיין</span> … <span class="src">§13</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 07 ================= -->
+<section class="sec">
+  <div class="head"><span class="n">07</span><h2>השיעה התרי-עשרית</h2><span class="term num">632–874</span></div>
+  <div class="orn"><i></i></div>
+  <figure class="lamps-fig"><video src="assets/lamps.mp4" poster="assets/lamps-1.jpg" autoplay muted loop playsinline></video></figure>
+  <p class="narrow" style="margin-top:24px">התרי עשרים מאמינים באמיתותם ובגדולתם של <span class="key">שנים עשר האמאמים</span> מצאצאי מוחמד, המתחילים מעלי, חתנו ובן דודו, שהוא האמאם הראשון. תקופת האמאמים החלה עם מותו של מוחמד בשנת 632, ונמשכה עד לידתו והיעלמותו של האמאם השנים עשר בשנת 874, בסה"כ קרוב ל-250 שנה. <span class="src">§14</span></p>
+  <p class="howto narrow" style="margin-top:8px">(בציור: שתים-עשרה גומחות, אחת-עשרה דולקות; האחרונה בשורה — כבויה.)</p>
+  <span class="newtag" style="margin-top:56px">חמשת השורשים</span>
+  <p class="howto">גוללים — חמישה שורשים יורדים מגזע אחד, וכל אחד נושא את שמו ואת ההגדרה שלו.</p>
+  <div class="roots" id="roots">
+    <div class="stick">
+      <svg viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true" style="direction:ltr">
+        <rect x="485" y="0" width="30" height="70" rx="6" fill="#571820"/>
+        <path d="M500 70 C 500 160, 900 170, 900 300"/><path d="M500 70 C 500 170, 700 190, 700 300"/><path d="M500 70 L 500 300"/><path d="M500 70 C 500 170, 300 190, 300 300"/><path d="M500 70 C 500 160, 100 170, 100 300"/>
+      </svg>
+      <div class="lbls">
+        <div class="lbl"><b>ייחוד האל</b>מונותאיזם מושלם בו אללה הוא האל היחיד ומוחמד נביאו</div>
+        <div class="lbl"><b>הצדק האלוהי</b>אללה תמיד צודק ואינו מעניש אדם אלא אם חטא</div>
+        <div class="lbl"><b>הנבואה</b>נביאים שאינם טועים לעולם</div>
+        <div class="lbl"><b>האמאמות</b>שנים עשר האמאמים המובילים את האנושות כולה לתיקון העולם</div>
+        <div class="lbl"><b>יום הדין</b>בו יבוא אללה חשבון עם עוברי רצונו</div>
+      </div>
+    </div>
+  </div>
+  <p class="src">§15–§16</p>
+  <span class="newtag" style="margin-top:56px">שתי ההיעלמויות</span>
+  <div class="occ">
+    <p>המסורת מחלקת את תקופת היעלמותו … <span class="src">§17</span></p>
+    <div class="bar small">ההיעלמות הקטנה</div><p class="lab">כשבעים שנה · באמצעות שליחים ומתווכים</p>
+    <div class="bar great">ההיעלמות הגדולה</div><p class="lab">הנמשכת עד היום — הפס יוצא מהעמוד, כי אין לו סוף</p>
+  </div>
+  <div class="names">
+    <div class="c"><div class="arw" lang="ar">الغائب</div><p>הנעלם</p></div>
+    <div class="c"><div class="arw" lang="ar">المهدي</div><p>המונחה ע"י אללה</p></div>
+    <div class="c"><div class="arw" lang="ar">صاحب الزمان</div><p>אדון/בעל הזמן</p></div>
+  </div>
+  <p class="src" style="text-align:center">§18</p>
+  <p class="close">איראן השיעית ותנועת ההתנגדות חזבאללה שייכות לזרם התרי-עשרי באסלאם השיעי. <span class="src">§19</span></p>
+</section>
+
+</main>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)]
+/* progress 0..1 of a tall sticky block */
+const prog=el=>{const r=el.getBoundingClientRect();return Math.min(1,Math.max(0,-r.top/(r.height-innerHeight)))}
+
+/* 01 word */
+const wsteps=$$('#word .steps div')
+/* 01 dots */
+const g=$('#g100');for(let i=0;i<100;i++)g.append(document.createElement('i'))
+const LANDS=[['איראן',null],['אזרבייג\'ן',null],['עיראק',60],['בחריין',70],['לבנון',30]]
+$('#lands').innerHTML=LANDS.map(([n,p])=>`<div class="land"><h4>${n}</h4>${p==null?'<div class="maj">רוב מובהק</div><div class="pc">&nbsp;</div>':`<div class="g10">${'<i></i>'.repeat(100)}</div><div class="pc">כ-${p}%</div>`}</div>`).join('')
+const filled=new Set()
+function fillWhenSeen(){for(const id of ['dots','lands']){if(filled.has(id))continue;const r=document.getElementById(id).getBoundingClientRect();if(r.top<innerHeight*.6&&r.bottom>0){filled.add(id);fill(id)}}}
+function fill(id){if(id==='dots')[...g.children].forEach((d,i)=>setTimeout(()=>d.classList.toggle('f',i<15),i*25))
+  else $$('.land').forEach((l,k)=>{const p=LANDS[k][1];if(p==null)return;[...l.querySelectorAll('.g10 i')].forEach((d,i)=>setTimeout(()=>d.classList.toggle('f',i<p),i*12))})}
+
+/* 02 calendar */
+$('#calb').onclick=()=>{const c=$('#cal');c.classList.toggle('torn');$('#calb').textContent=c.classList.contains('torn')?'להחזיר את הדף':'לתלוש את הדף'}
+
+/* 03 balance */
+const beam=$('#beam'),panL=$('#panL'),panR=$('#panR'),sts=$$('#bal .st'),tks=$$('#bal .ticks i')
+const ANG=[12,-12,-12]  /* + = Ali's pan (right) goes down: the heavier pan is the winner */
+function setBal(i){
+  const a=ANG[i];beam.style.transform=`rotate(${a}deg)`
+  panL.style.transform=`rotate(${-a}deg)`;panL.style.transformOrigin='90px 119px'
+  panR.style.transform=`rotate(${-a}deg)`;panR.style.transformOrigin='510px 119px'
+  $('#aliW').style.opacity=i===2?0:1
+  sts.forEach((s,k)=>s.classList.toggle('on',k===i));tks.forEach((t,k)=>t.classList.toggle('on',k<=i))
+}
+
+$('#flipb').onclick=()=>$('#flip').classList.toggle('over')
+
+/* 06 disputed word */
+const arl=$('#arl'),arc=$('#arc')
+$$('.choose button').forEach(b=>b.onclick=()=>{
+  $$('.choose button').forEach(x=>x.setAttribute('aria-pressed',x===b))
+  const to=$('#'+b.dataset.to),from=$('#legs'),R=arl.getBoundingClientRect(),a=from.getBoundingClientRect(),c=to.getBoundingClientRect()
+  const x1=a.left+a.width/2-R.left,y1=a.top-R.top,x2=c.left+c.width/2-R.left,y2=c.top-R.top,top=Math.min(y1,y2)-46
+  arc.setAttribute('d',`M${x1} ${y1} C ${x1} ${top}, ${x2} ${top}, ${x2} ${y2}`);arc.setAttribute('opacity',1)
+  $$('.verse .tgt').forEach(t=>t.classList.toggle('lit',t===to))
+  $('#heW').className=b.dataset.to==='wash'?'key':'';$('#heP').className=b.dataset.to==='wipe'?'key':''
+})
+$('#adhb').onclick=()=>{const a=$('#adhan');a.classList.toggle('shia');$('#adhb').textContent=a.classList.contains('shia')?'לחזור לקריאה הסונית':'להשמיע את הקריאה השיעית'}
+
+/* 07 roots */
+const rpaths=$$('#roots path'),rl=$$('#roots .lbl')
+rpaths.forEach(p=>{const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.dataset.l=L})
+
+/* 04 karbala — the video is scrubbed by scroll over the first half, then two stills */
+const kb=$('#kb'),kbv=$('#kbv'),kbv2=$('#kbv2'),kcaps=$$('.kb-caps p')
+/* 04 statement — words rise with scroll */
+const sayq=$('#sayq');sayq.innerHTML=sayq.textContent.split(' ').map(w=>`<span>${w}</span>`).join(' ');const sayw=[...sayq.children]
+/* 05 hidden → open */
+const tq=$('#tq'),tqo=$('#tqopen'),tqc=$$('#tq .caps p')
+/* scroll loop */
+let tick=false
+function frame(){tick=false;fillWhenSeen()
+  const sp=prog($('#say9'));sayw.forEach((w,i)=>w.classList.toggle('on',sp*1.25>i/sayw.length));$('#saytr').classList.toggle('on',sp>.82)
+  const tp=prog(tq),ti=tp<.33?0:tp<.6?1:2;tqc.forEach((c,i)=>c.classList.toggle('on',i===ti));tqo.classList.toggle('off',ti<2)
+  const k=prog(kb),ki=k<.25?0:k<.5?1:k<.66?2:3  /* 3 = the night arrives in karbala-b */
+  const scrub=(v,f)=>{if(!v.duration)return;const t=Math.min(1,Math.max(0,f))*(v.duration-0.05);if(Math.abs(v.currentTime-t)>0.04)v.currentTime=t}
+  scrub(kbv,k/0.48);scrub(kbv2,(k-0.5)/0.48);kbv2.classList.toggle('on',k>=0.5)
+  kcaps.forEach((c,i)=>c.classList.toggle('on',i===ki))
+  const w=prog($('#word'));wsteps.forEach((s,k)=>s.classList.toggle('on',k===Math.min(3,Math.floor(w*4.2))))
+  const m=prog($('#meet')),d=Math.max(0,1-m*1.6)
+  $('#meet .a').style.transform=`translateX(${(d*60).toFixed(2)}vw)`;$('#meet .b').style.transform=`translateX(${(-d*60).toFixed(2)}vw)`;$('#meet .tl').classList.toggle('on',d===0)
+  setBal(Math.min(2,Math.floor(prog($('#bal'))*3.2)))
+  const r=prog($('#roots'));rpaths.forEach((p,k)=>{const f=Math.min(1,Math.max(0,r*1.4-k*.12));p.style.strokeDashoffset=(p.dataset.l*(1-f)).toFixed(2);rl[k].classList.toggle('on',f>.95)})
+}
+addEventListener('scroll',()=>{if(!tick){tick=true;requestAnimationFrame(frame)}},{passive:true});frame()
+</script>
+</body>
+</html>
