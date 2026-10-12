@@ -38,6 +38,11 @@
 @media (min-width:900px){
   .ch7-aside .bleed-aside-art{min-height:0}
   .ch7-aside .bleed-aside-body{justify-content:flex-start}
+  /* mirrored: the painting on the reading edge. It does not bleed into the gutter (the rail
+     is on that side), and the device's one-line lift is off — it would press the heading
+     against the run above */
+  .ch7-aside.is-flipped{margin-inline-start:0}
+  .ch7-aside.is-flipped .bleed-aside-body{translate:none}
 }
 
 /* the question that opens the 30th night — the source asks it, so it is set as one */

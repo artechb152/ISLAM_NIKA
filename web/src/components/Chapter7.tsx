@@ -114,9 +114,9 @@ function Section({ id, className = '', children }: { id: string; className?: str
     beside the whole movement and the words start under their heading at the chapter's
     own 14px. With the heading outside and the words centred in a taller painting's row,
     the gaps measured 39–102 under the heading and 141–160 after the run (11.10). */
-function Aside({ art, children }: { art: string; children: ReactNode }) {
+function Aside({ art, flip = false, children }: { art: string; flip?: boolean; children: ReactNode }) {
   return (
-    <div className="bleed-aside ch7-aside">
+    <div className={'bleed-aside ch7-aside' + (flip ? ' is-flipped' : '')}>
       <div className="bleed-aside-art" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`${A}${art}.webp`} alt="" loading="lazy" decoding="async" />
@@ -559,12 +559,13 @@ export default function Chapter7() {
                   <T refs={['§1.a', '§1.b']} />
                   <T refs={['§1.c']} />
                 </Aside>
-                {/* NOT FLIPPED. The mirrored aside put this run on the outer (left) edge while
-                    its sub-heading stayed on the reading edge — the words began 456px away
-                    from their own heading, and the flip's one-line lift pressed the first line
-                    to 3px under it. Measured 11.10; every run in the chapter now starts on the
-                    reading edge, under its heading. */}
-                <Aside art="cut-herald">
+                {/* FLIPPED (the user, 11.10: „תמונה ימין טקסט שמאל"), so the two paintings
+                    of this section alternate sides. Safe now because the sub-heading sits
+                    INSIDE the text column: heading and words move together and the run still
+                    starts directly under its heading. The earlier refusal was measured when
+                    the heading stood outside, on the reading edge, 456px from its words. The
+                    device's one-line lift is cancelled in chapter7-article.css. */}
+                <Aside art="cut-herald" flip>
                   <Env id="nasi" sectionId="sacred" />
                   <T refs={['§2.a']} />
                   <T refs={['§2.b']} />
