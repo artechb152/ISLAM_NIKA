@@ -421,7 +421,7 @@ export default function Chapter7Practice() {
               {/* a question whose subject the chapter painted gets that painting
                   beside it — never a picture the chapter does not show */}
               {q.photo && (
-                <figure className="p2-plate" aria-hidden="true">
+                <figure className={'p2-plate' + (q.photo.startsWith('cut-') ? ' is-cut' : '')} aria-hidden="true">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={ART + q.photo} alt="" loading="lazy" decoding="async" />
                 </figure>

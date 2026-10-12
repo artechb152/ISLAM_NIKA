@@ -208,3 +208,9 @@
 
 /* the still behind the practice banner — the dusk painting, no film */
 .ch7-practice-banner .ch7-hero-media{background:var(--panel) url('/assets/chapter7/hero-poster.jpg') center 62%/cover no-repeat}
+
+/* the chapter's paintings are cut-outs, and a cut-out sits on the page bare (rule 45) —
+   the plate's frame and rounded corners are for photographs. Centred in its column so a
+   wide painting and a tall one sit on the same axis. */
+.p2-plate.is-cut{border:0;border-radius:0;overflow:visible;align-self:center}
+.p2-plate.is-cut img{max-height:300px;width:auto;max-width:100%;margin-inline:auto}
