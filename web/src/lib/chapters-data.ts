@@ -140,13 +140,16 @@ export const chapterCategories: CategoryDef[] = [
 
    "חדר המבחנים" is the one item that is not reference material: it is where a learner
    picks the chapters they want to be examined on and the site composes an exam from those
-   chapters' question banks. It is BUILT — /exams, banks in lib/exams/banks — and it is the
-   only entry here that renders as a link; the four beside it are still locked. */
-export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' | 'sources' | 'map' | 'exam' }> = [
-  { id: 'glossary', title: 'מילון מונחים', icon: 'book' },
-  { id: 'recommended-reading', title: 'ספרות מומלצת', icon: 'books' },
-  { id: 'sources', title: 'מקורות', icon: 'sources' },
-  { id: 'maps', title: 'מפות', icon: 'map' },
+   chapters' question banks. It is BUILT — /exams, banks in lib/exams/banks.
+   The four beside it are the booklet's back matter (pp. 120–139: maps, the glossary, the
+   sources, the reading list), built as reference pages under app/(reference) and checked
+   against the booklet by concept/reference/verify-reference.mjs. An item with an `href` is
+   live; one without is drawn locked. */
+export const secondaryItems: Array<{ id: string; title: string; icon: 'book' | 'books' | 'sources' | 'map' | 'exam'; href?: string }> = [
+  { id: 'glossary', title: 'מילון מונחים', icon: 'book', href: '/glossary' },
+  { id: 'recommended-reading', title: 'ספרות מומלצת', icon: 'books', href: '/recommended-reading' },
+  { id: 'sources', title: 'מקורות', icon: 'sources', href: '/sources' },
+  { id: 'maps', title: 'מפות', icon: 'map', href: '/maps' },
   { id: 'exams', title: 'חדר המבחנים', icon: 'exam' },
 ]
 

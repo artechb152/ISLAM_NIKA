@@ -394,7 +394,16 @@ export default function ChaptersScreen() {
   const tools = secondaryItems.filter((s) => s.id !== 'exams')
   const examItem = secondaryItems.find((s) => s.id === 'exams')
 
-  function toolRow(s: { id: string; title: string; icon: string }) {
+  function toolRow(s: { id: string; title: string; icon: string; href?: string }) {
+    if (s.href)
+      return (
+        <Link className="m-item x-item" key={s.id} href={s.href} onClick={() => setDrawer(false)}>
+          <span className="x-ico" aria-hidden="true">
+            {CAT_ICON[s.icon]}
+          </span>
+          <span className="m-name">{s.title}</span>
+        </Link>
+      )
     return (
       <span className="m-item x-item is-locked" key={s.id} title="יעלה בקרוב">
         <span className="x-ico" aria-hidden="true">
@@ -417,8 +426,7 @@ export default function ChaptersScreen() {
         <nav className="menu-extra menu-tools" aria-label="כלי עזר והעמקה">
           {tools.map((s) => toolRow(s))}
         </nav>
-        {/* חדר המבחנים — חי. שאר הכלים בבלוק שמעל עדיין נעולים, ולכן הוא נכתב
-            כאן כקישור מלא ולא דרך `toolRow`, שכל תפקידו הוא לצייר שורה נעולה. */}
+        {/* חדר המבחנים — בבלוק משלו, מתחת לכלי העזר: הוא לא חומר עיון אלא מבחן. */}
         {examItem && (
           <nav className="menu-extra menu-exam" aria-label="מבחנים">
             <Link className="m-item x-item" href="/exams" onClick={() => setDrawer(false)}>

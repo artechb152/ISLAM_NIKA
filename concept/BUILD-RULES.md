@@ -349,3 +349,9 @@
     והחלון המתין בלי סוף. הבדיקה: `chatgpt-image.mjs status` → `SIGNED_IN`.
 80. ⚠ **Git Bash ב-Windows הופך ארגומנט שמתחיל ב-`/` לנתיב** (`/chapter10/practice` →
     `C:/Program Files/Git/chapter10/practice`). להריץ סקריפטי צילום עם `MSYS_NO_PATHCONV=1`.
+82. ⚠ **`pdftotext` שומר ריצות LTR (פיסוק, מספרים) בסדר חזותי** בתוך ‎U+202A…U+202C‎. מחיקת סימני
+    הכיווניות בלבד מדפיסה „מוחמד .באסלאם" ו-„(מ' ,)1966". להפוך את סדר האסימונים בתוך כל ריצה,
+    ורק אז למחוק (`concept/reference/extract.mjs`). מה שנשאר — תיקון בשמו ב-SOURCE-TEXT.
+83. ⚠ **עוגן `#id` במעטפת הפרק גולל עוטף חתוך, לא את החלון** — ה-masthead ירד 74px והקפיצה נחתה
+    יעד אחד לפני. קפיצה פנימית = `window.scrollTo` עם היסט נמדד של הבאנר ושל כל פס דביק.
+    ו-**`<dialog>` מאבד את המרכוז שלו לאיפוס הגלובלי** — `position:fixed; inset:0; margin:auto`.

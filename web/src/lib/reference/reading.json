@@ -1,0 +1,39 @@
+{
+  "source": "פרק שמונה עשר: המלצה לספרות ולקריאה נוספת (חלקי) · עמ' 137–139",
+  "columns": { "title": "שם הספר / פודקאסט", "author": "מחבר", "topic": "נושא", "link": "קישור", "focus": "מיקוד" },
+  "categories": [
+    {
+      "id": "culture",
+      "title": "תרבות, שבטיות, חברה ערבית",
+      "items": [
+        { "id": "r1", "title": "בעקבות הנביא מוחמד", "author": "לבנת הולצמן", "topic": "חיי מוחמד כפי שהובאו בביוגרפיה שלו", "link": "https://youtu.be/a7_2bq32QXo?si=hkHGC13MRuy5_eng", "focus": "פרקים 1-6" },
+        { "id": "r2", "title": "הבוררים", "author": "כאן 11", "topic": "סדרה על תרבות שבטית של סולחה, נקמת דם ועוד", "link": "https://www.kan.org.il/content/kan/kan-11/p-908699/", "focus": null }
+      ]
+    },
+    {
+      "id": "history",
+      "title": "היסטוריה, דת",
+      "items": [
+        { "id": "r3", "title": "קנאי האסלאם", "author": "עמנואל סיון", "topic": null, "link": null, "focus": "מומלץ" },
+        { "id": "r4", "title": "לחשוב אסלאמית", "author": "שגיא פולקה", "topic": null, "link": null, "focus": "ספר חובה" },
+        { "id": "r5", "title": "האסלאם והמערב", "author": "אוריה שביט", "topic": "פודקאסט בנושאים מגוונים על המפגש של האסלאם והמערב", "link": "https://youtu.be/0IG0EZ-WDOA?si=_Cl0nRgbkC3sqOp8", "focus": null }
+      ]
+    },
+    {
+      "id": "jihad",
+      "title": "ג'האד, אסלאם רדיקאלי",
+      "items": [
+        { "id": "r6", "title": "האסלאם הוא בשורתנו והג'האד הוא דרכנו: חסן אלבנא, מייסד האחים המוסלמים", "author": "אפרים ברק", "topic": "תרגום לעברית של כתביו של מייסד האחים המוסלמים", "link": "https://www.maarachot.idf.il/2021/%d7%92%d7%99%d7%9c%d7%99%d7%95%d7%a0%d7%95%d7%aa/%d7%a1%d7%a4%d7%a8-%d7%93%d7%99%d7%92%d7%99%d7%98%d7%9c%d7%99-%d7%94%d7%90%d7%a1%d7%9c%d7%90%d7%9d-%d7%94%d7%95%d7%90-%d7%91%d7%a9%d7%95%d7%a8%d7%aa%d7%a0%d7%95-%d7%95%d7%94%d7%92%d7%94%d7%90%d7%93-%d7%93%d7%a8%d7%9b%d7%a0%d7%95/", "focus": "הקדמה של דוב דל על מושגי היסוד" },
+        { "id": "r7", "title": "בשם אללה", "author": "אופיר וינטר", "topic": "מלחמה ושלום בקוראן", "link": "https://www.inss.org.il/he/wp-content/uploads/sites/2/2024/03/Peace-in-the-Name-of-Allah_digital-2.pdf", "focus": "פרק ההקדמה על מושגי היסוד" },
+        { "id": "r8", "title": "\"למאבק פנים אחרות משידענו\"", "author": "אופיר וינטר", "topic": "ניתוח ספרו של יחיא סנואר \"הקוצים והציפורן\"", "link": "https://www.inss.org.il/he/strategic_assessment/sinwar/", "focus": "מומלץ" }
+      ]
+    },
+    {
+      "id": "mideast",
+      "title": "מזה\"ת, אסלאם ומערב ועוד",
+      "items": [
+        { "id": "r9", "title": "אסכת - סדרת הפודקאסטים של נעם בנעט", "author": "נעם בנעט", "topic": "פוסקאסטים בשלל נושאים במזרח התיכון והאסלאם", "link": "https://open.spotify.com/show/3Jq2EHA8l57kNeg7uCWS81", "focus": "פרקים 96, 90, 85, 79, 78, 59, 47 (א-ג), 44, 35, 25, 17, 16, 1" }
+      ]
+    }
+  ]
+}
