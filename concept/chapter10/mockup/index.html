@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>הדגמה — פרק 10 · תיק חסוי</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== DEMO ONLY — not wired into web/. Real text from web/src/lib/chapter10/passages.json,
+   real paintings from web/public/assets/chapter10/. Standalone file, no build step. ===== */
+:root{
+  --paper:#EDE4D0; --panel:#f3ead6; --ink:#201508; --cream:#f5ecd6;
+  --maroon:#8a2733; --maroon-deep:#571820; --gold:#c79a3c; --gold-soft:#d9b45b;
+  --accent:var(--maroon-deep); --accent-soft:var(--maroon);
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0b0603;overflow:hidden}
+body{font-family:'Assistant',system-ui,sans-serif;color:var(--cream)}
+h1,h2,h3,.disp{font-family:'Frank Ruhl Libre',serif}
+
+/* ---------- cover ---------- */
+#cover{position:fixed;inset:0;display:grid;place-items:center;background:
+  radial-gradient(ellipse at 50% 20%,#2a1810,#0b0603 70%);z-index:50;
+  transition:opacity .7s, visibility .7s}
+#cover.is-gone{opacity:0;visibility:hidden;pointer-events:none}
+.cover-card{width:min(440px,86vw);aspect-ratio:3/4;border:2px solid var(--gold-soft);
+  border-radius:4px;background:
+  linear-gradient(170deg,#241208,#160b05 60%);
+  display:grid;place-items:center;text-align:center;padding:40px 28px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6);position:relative;cursor:pointer}
+.cover-card::before{content:"";position:absolute;inset:14px;border:1px solid rgba(217,180,91,.35)}
+.cover-stamp{width:86px;height:86px;border-radius:50%;border:3px solid var(--maroon);
+  display:grid;place-items:center;margin-bottom:22px;transform:rotate(-8deg);
+  box-shadow:0 0 0 3px rgba(138,39,51,.25)}
+.cover-stamp svg{width:46px;height:46px}
+.cover-card h1{font-size:clamp(26px,4vw,34px);margin:0 0 10px;color:var(--cream);font-weight:700;line-height:1.3}
+.cover-card p{font-size:15px;color:#d8c7a3;margin:0 0 26px;line-height:1.6}
+.cover-open{border:1px solid var(--gold-soft);color:var(--gold-soft);background:none;
+  padding:10px 30px;border-radius:999px;font:600 15px 'Assistant';letter-spacing:.03em;cursor:pointer}
+.cover-open:hover{background:rgba(217,180,91,.12)}
+
+/* ---------- folders / tabs ---------- */
+#tabs{position:fixed;top:0;inset-inline:0;z-index:20;display:flex;justify-content:center;
+  gap:2px;padding-top:0}
+.tab{flex:0 1 220px;text-align:center;padding:14px 10px 12px;cursor:pointer;
+  font:700 15px 'Frank Ruhl Libre';color:#c9b89a;background:rgba(10,6,3,.55);
+  border-bottom:3px solid transparent;transition:color .3s,border-color .3s,background .3s;
+  backdrop-filter:blur(6px)}
+.tab small{display:block;font:400 11px 'Assistant';color:#8d7a5e;margin-top:2px;letter-spacing:.04em}
+.tab.is-on{color:var(--cream);border-color:var(--accent-soft);background:rgba(87,24,32,.45)}
+.tab[data-sect="druze"].is-on{border-color:var(--gold-soft);background:rgba(90,66,16,.4)}
+
+/* ---------- deck ---------- */
+#deck{position:fixed;inset:0;overflow:hidden}
+.card{position:absolute;inset:0;display:flex;align-items:flex-end;opacity:0;
+  transition:opacity .55s ease, transform .55s ease; transform:scale(1.02);pointer-events:none}
+.card.is-on{opacity:1;transform:scale(1);pointer-events:auto;z-index:5}
+.card.is-prev{opacity:0;transform:scale(.98) translateX(-14px)}
+.card-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.card-bg::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(8,4,2,.92) 0%,rgba(8,4,2,.55) 42%,rgba(8,4,2,.08) 72%,transparent 100%)}
+.card-body{position:relative;z-index:2;max-width:760px;margin-inline:auto;padding:0 32px 92px;width:100%}
+.card-tag{display:inline-flex;align-items:center;gap:8px;font:700 13px 'Assistant';
+  color:var(--gold-soft);letter-spacing:.05em;margin-bottom:14px;opacity:.9}
+.card-tag .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  border:1px solid var(--gold-soft);font:700 12px 'Frank Ruhl Libre'}
+.card-tag .ref{opacity:.55;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:0}
+.card h2{font-size:clamp(22px,3vw,30px);margin:0 0 14px;color:var(--cream);line-height:1.35;font-weight:700}
+.card p{font-size:clamp(16px,1.7vw,19px);line-height:1.85;color:#ece2cc;margin:0 0 12px;max-width:62ch}
+.card .key{color:var(--gold-soft);font-weight:700}
+.card .three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.card .three > div{border-top:1px solid var(--gold-soft);padding-top:10px}
+.card .three b{display:block;color:var(--gold-soft);font-family:'Frank Ruhl Libre';font-size:17px;margin-bottom:5px}
+.card .three p{font-size:14px;line-height:1.6;color:#d8cbae}
+@media (max-width:760px){.card .three{grid-template-columns:1fr}}
+
+/* the quoted fatwa, set apart */
+.card.is-quote .card-body{max-width:640px}
+.card.is-quote p.quote{font-family:'Frank Ruhl Libre';font-weight:700;font-size:clamp(19px,2.4vw,24px);
+  line-height:1.6;color:var(--cream);border-top:1px solid var(--gold-soft);border-bottom:1px solid var(--gold-soft);
+  padding:18px 0;margin:6px 0 0}
+
+/* ---------- the seal (1021 -> 1037, gates close) ---------- */
+.seal-wrap{display:flex;align-items:center;gap:26px;margin:22px 0 16px}
+.seal{width:92px;height:92px;flex:none;position:relative}
+.seal svg{width:100%;height:100%;display:block}
+.seal .crack{stroke:#0b0603;stroke-width:3;fill:none;stroke-dasharray:140;stroke-dashoffset:140;
+  transition:stroke-dashoffset .9s ease}
+.card.is-on .seal .crack{stroke-dashoffset:0;transition-delay:.35s}
+.seal-years{display:flex;align-items:center;gap:14px;direction:ltr;font-family:'Frank Ruhl Libre';
+  font-weight:900;font-size:clamp(28px,3.4vw,40px);color:var(--cream)}
+.seal-years i{display:block;width:46px;height:1px;background:var(--gold-soft)}
+
+/* ---------- nav ---------- */
+.zone{position:fixed;top:60px;bottom:0;width:30%;z-index:10;cursor:pointer}
+.zone.prev{inset-inline-start:0}
+.zone.next{inset-inline-end:0}
+#dots{position:fixed;bottom:22px;inset-inline:0;z-index:15;display:flex;justify-content:center;
+  gap:6px;flex-wrap:wrap;padding:0 20px;pointer-events:none}
+#dots i{width:7px;height:7px;border-radius:50%;background:rgba(237,228,208,.28);transition:background .3s,transform .3s}
+#dots i.is-on{background:var(--gold-soft);transform:scale(1.5)}
+#dots i.is-done{background:rgba(217,180,91,.55)}
+#arrows{position:fixed;bottom:40px;inset-inline:0;z-index:16;display:flex;justify-content:space-between;
+  padding:0 26px;pointer-events:none}
+.arrow{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:1px solid rgba(237,228,208,.35);
+  background:rgba(10,6,3,.4);color:var(--cream);display:grid;place-items:center;cursor:pointer;font-size:18px}
+.arrow:hover{border-color:var(--gold-soft);color:var(--gold-soft)}
+.arrow[disabled]{opacity:.25;pointer-events:none}
+
+#note{position:fixed;top:66px;inset-inline-end:18px;z-index:16;font-size:12px;color:#c9b89a;
+  background:rgba(10,6,3,.5);border:1px solid rgba(217,180,91,.3);padding:6px 12px;border-radius:999px}
+</style>
+</head>
+<body>
+
+<div id="cover">
+  <div class="cover-card" id="open-btn">
+    <div class="cover-stamp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#c79a3c" stroke-width="1.4"><path d="M12 2 2 7v6c0 5.2 3.8 9 10 11 6.2-2 10-5.8 10-11V7l-10-5Z"/><path d="M9 12l2 2 4-4" stroke="#d9b45b"/></svg>
+    </div>
+    <h1>זרמים שונים<br>באסלאם</h1>
+    <p>שני תיקים, שתי עדות סודיות —<br>העלאוים והדרוזים</p>
+    <button class="cover-open">פתיחת התיק</button>
+  </div>
+</div>
+
+<div id="tabs">
+  <div class="tab" data-sect="alawite">העלאוים<small>תיק א׳</small></div>
+  <div class="tab" data-sect="druze">הדרוזים<small>תיק ב׳</small></div>
+</div>
+
+<div id="deck"></div>
+
+<div class="zone prev" id="zone-prev" title="הקודם"></div>
+<div class="zone next" id="zone-next" title="הבא"></div>
+<div id="arrows">
+  <button class="arrow" id="btn-next">›</button>
+  <button class="arrow" id="btn-prev">‹</button>
+</div>
+<div id="dots"></div>
+<div id="note">הדגמה · לא הפרק הסופי</div>
+
+<script>
+const ART = '../../../web/public/assets/chapter10/';
+
+/* every sentence below is copied verbatim from web/src/lib/chapter10/passages.json —
+   the §ref stamp in the corner of each card names its fragment, so this demo can be
+   checked against the source exactly like the real chapter is. */
+const CARDS = [
+  // ---------------- ALAWITE TRACK ----------------
+  { sect:'alawite', bg:'hero-1', ref:'§0.name · §0.origin',
+    h:'כינוי לזרם, לא לדת חדשה',
+    p:['<span class="key">העלאוים זה כינוי לזרם באסלאם, שיסודו באסלאם השיעי</span> והתפתח לכדי תערובת של מסורות מדתות שונות.',
+       'השם עלאוים מקורו <span class="key">באמאם עלי</span>, בן דודו וחתנו של מוחמד — מי שלימים יהיה מייסד הזרם השיעי.'] },
+
+  { sect:'alawite', bg:'hero-1', ref:'§0.nusayri · §0.christ · §0.place · §0.founder',
+    h:'„נצירים" — שלושה מקורות אפשריים לשם',
+    p:['במשך מאות שנים כונו בני העדה <span class="key">„נצירים"</span>. מקור השם אינו ודאי — ואלה שלוש ההשערות שהפרק מביא, במילותיו שלו:'],
+    three:[
+      ['יתכן','על שם היסודות הנוצריים של הדת.'],
+      ['ויתכן','שזה על שם המקום ממנו התפתחו — הרי אנצריה שבקרבת לאטקיה בסוריה.'],
+      ['ככל הנראה','(מעוז ובר אשר) — על שם מייסד הכת, אבו שעיב מחמד אבן נציר, חכם דת שיעי מהמאה התשיעית.']
+    ]},
+
+  { sect:'alawite', bg:'village-1', ref:'§1.a · §1.sky · §1.christ',
+    h:'אמונה שאוגדת כמה יסודות',
+    p:['האמונה העלאוית מאגדת כמה יסודות והשפעות, הלקוחות מהדתות האחרות: <span class="key">פולחן לגרמי השמים</span>, יסוד נוצרי-פיניקי מובהק.',
+       'טקסי הפולחן והחגים שלהם נושאים יסודות נוצריים, וגם <span class="key">לוח השנה שלהם שמשי</span> — ולא ירחי כמו האסלאם המרכזי.'] },
+
+  { sect:'alawite', bg:'village-1', ref:'§1.ali · §1.salman',
+    h:'עלי כהתגלמות הא-ל',
+    p:['כל היסודות האלה התעטפו בנאמנות לעלי, <span class="key">עד כדי היותו התגלמות הא-ל באדם</span>.',
+       'העלאוים מאמינים גם בסלמאן אלפרסי, יועצו המיוחד הפרסי של הנביא מוחמד.'] },
+
+  { sect:'alawite', bg:'village-1', ref:'§2.secret · §2.qiddas',
+    h:'דת סודית, טקס אחד בבית',
+    p:['כמו הדת הדרוזית, גם העלאוית היא <span class="key">דת סודית</span> — המיוחסים בה קרויים חאצה, פשוטי העם עאמה.',
+       'לנצירים-עלאוים יש טקס יחיד הנקרא <span class="key">קדאס</span>, והוא מתקיים בבית הפרטי של המאמין ולא במסגד.'] },
+
+  { sect:'alawite', bg:'village-1', ref:'§3.poor · §3.hate',
+    h:'„חריגים בנוף הדתי"',
+    p:['בסוריה, במשך מאות שנים היו כפריים עובדי אדמה, <span class="key">עניים ומדוכאים</span>, מנוצלים בידי אדוניהם.',
+       'השנאה כלפיהם נבעה בעיקר בשל היותם „חריגים בנוף הדתי".'] },
+
+  { sect:'alawite', bg:'village-1', ref:'§3.taymiyya', quote:true,
+    h:'פסק ההלכה של אבן תימיה',
+    p:['הגדיל לעשות תקי א-דין אבן תימיה, שהוציא פסק הלכה (פתוה) בו קבע ש<span class="key">הנצירים הינם כופרים גרועים מן הנוצרים ומן היהודים</span>, והמלחמה בהם היא מצווה.'] },
+
+  { sect:'alawite', bg:'village-1', ref:'§3.forced · §3.sold · §3.france · §4.revolt · §4.politics',
+    h:'מכפייה להתבססות',
+    p:['באימפריה העות\'מאנית נאלצו לקבל עליהם את האסלאם בכפיה כדי להישאר בחיים, ולעיתים מכרו את בנותיהם כדי להתפרנס.',
+       'לאחר שצרפת קיבלה את סוריה (1920), גייסה עלאוים כשכירי חרב בצבא המנדט — ובתמורה נתנה להם לפתח את זהותם.',
+       '<span class="key">הם ראו בעדה משענת</span>, ולא ביקשו להתנתק מזהותם הדתית.'] },
+
+  // ---------------- DRUZE TRACK ----------------
+  { sect:'druze', bg:'cairo-1', ref:'§5.a · §5.hakim · §5.hamza',
+    h:'דת סודית, שצמחה מתוך השיעה האסמאעילית',
+    p:['<span class="key">הדת הדרוזית היא דת סודית</span>, שצמחה מתוך השיעה האסמאעילית במאה האחת עשרה במצרים.',
+       'המנהיג הראשון שלה היה הח\'ליף השישי של השושלת הפאטמית, <span class="key">אלחאכם באמר אללה</span>. האישיות שעיצבה את הדת אחריו היה חמזה אבן עלי, מחבר „אגרות החכמה".'] },
+
+  { sect:'druze', bg:'cairo-1', ref:'§6.god · §6.adwar',
+    h:'א-ל שלא נתפס, ומתגלם בתקופות',
+    p:['עיקרי הדת, שהינה מונותאיסטית, בנויים על ההבנה שהא-ל <span class="key">לא נתפס בשכל האנושי</span>, ונגלה רק במקרים נדירים.',
+       'העולם התחלק לתקופות (אדואר), ובראשית כל תקופה הא-ל מתגלם בדמות בשר ודם של אישיות נבחרת.'] },
+
+  { sect:'druze', bg:'cairo-1', ref:'§6.shuayb · §6.quran',
+    h:'הנביא שעיב',
+    p:['דמות מזוהה עם הדת הדרוזית הינו <span class="key">הנביא שעיב</span>, ויש המיחסים אותו עם יתרו המקראי.',
+       'שעיב מוזכר בקוראן כנביא שאללה שלח לבני עמו, שנהגו לרמות ולהונות — אך לא שעו לאזהרותיו.'] },
+
+  { sect:'druze', bg:'horse-1', ref:'§7.vanish · §7.clothes · §7.mahdi',
+    h:'ההיעלמות, 1021',
+    p:['אלחאכם באמר אללה <span class="key">נעלם בשנת 1021</span>, עת רכב על הסוס שלו.',
+       'לפי אמונתם, האנשים שיצאו לחפשו מצאו את בגדיו זקופים — <span class="key">אך ללא שהוא עצמו היה בהם</span>. הוא נחשב לע\'אאב, ויחזור כמהדי באחרית הימים.'] },
+
+  { sect:'druze', bg:'horse-1', ref:'§7.closed · §7.tanukh', seal:true,
+    h:'שערי ההטפה ננעלים, 1037',
+    p:['כשש עשרה שנה אחרי ההיעלמות, <span class="key">ננעלו שערי ההטפה הדרוזית</span> — ואין עוד אפשרות להצטרף לדת.',
+       'האחרונים שהצטרפו היו שבט תנוח\', אליהם מיוחסים אמירי הדרוזים בסוריה עד היום.'] },
+
+  { sect:'druze', bg:'cairo-1', ref:'§8.a · §8.traces',
+    h:'ריחוק מהאסלאם',
+    p:['ברבות השנים התרחקה הדת הדרוזית מהאסלאם, ומאמיניה אינם רואים עצמם שייכים לזרם המרכזי.',
+       'עם זאת, <span class="key">עקבותיה של דת האסלאם ניכרים</span> בכתבי חכמי הדרוזים — אם כי הדת הדרוזית בהגדרה אינה דת הלכה.'] },
+
+  { sect:'druze', bg:'lebanon-1', ref:'§9.maan · §9.y1860',
+    h:'הר הלבנון, מהמאה ה-17',
+    p:['תולדות הדרוזים בלבנט מוכרים יותר מהמאה ה-17, עת שלטה בהר הלבנון שושלת בית מען.',
+       'בשנת <span class="key">1860</span> אירע הטבח הגדול של הדרוזים במרונים בהר הלבנון, והדרוזים הפכו לרוב על ההר.'] },
+
+  { sect:'druze', bg:'lebanon-1', ref:'§9.y1925 · §9.shishakli',
+    h:'שחרור ההר, ודיכוי שישכלי',
+    p:['בשנת <span class="key">1925</span> שחררו הדרוזים את הר הדרוזים בסוריה מהשלטון הצרפתי.',
+       'מאז 1946 המנהיג המזוהה ביותר עם דיכוי הדרוזים היה שישכלי, שכינה אותם „ראש הנחש" וטבח בהמוניהם.'] },
+
+  { sect:'druze', bg:'lebanon-1', ref:'§10.a',
+    h:'נאמנות למשטר, ופגיעות 2015',
+    p:['הדרוזים נשארו ברובם נאמנים למשטרו של אסד ולא התקוממו במלחמת האזרחים.',
+       'בשנת <span class="key">2015</span> טבח ארגון ג\'בהת א-נצרה בדרוזים סמוך לאדליב, וזה הפך אותם למיעוט פגיע מול הג\'האדיסטים.'] },
+
+  { sect:'druze', bg:'lebanon-1', ref:'§11.sharaa · §11.damascus · §11.israel',
+    h:'דצמבר 2024',
+    p:['עם עלייתו לשלטון של אחמד א-שרע החלו עימותים בין המועצה הצבאית של א-סווידא לכוחות המשטר.',
+       'כוחותיו כבשו את פרוורי דמשק בשליטת הדרוזים ופירקו את מיליציותיהם; <span class="key">בחלק מהעימותים התערבה מדינת ישראל</span> לטובת המיעוט הדרוזי.'] },
+];
+
+const deck = document.getElementById('deck');
+CARDS.forEach((c,i)=>{
+  const el = document.createElement('div');
+  el.className = 'card' + (c.quote?' is-quote':'');
+  el.dataset.sect = c.sect;
+  el.dataset.i = i;
+  const paras = c.p.map(t=>`<p>${t}</p>`).join('');
+  let extra = '';
+  if (c.three) extra = `<div class="three">${c.three.map(([b,t])=>`<div><b>${b}</b><p>${t}</p></div>`).join('')}</div>`;
+  if (c.seal) extra = `<div class="seal-wrap">
+      <div class="seal"><svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="#7a1f29" stroke="#d9b45b" stroke-width="2"/>
+        <path class="crack" d="M20 40 L45 55 L35 80 M45 55 L70 48 M45 55 L58 25"/>
+      </svg></div>
+      <div class="seal-years">1021<i></i>1037</div>
+    </div>`;
+  el.innerHTML = `
+    <div class="card-bg" style="background-image:url('${ART}${c.bg}.jpg')"></div>
+    <div class="card-body">
+      <div class="card-tag"><span class="n">${String(i+1).padStart(2,'0')}</span>${c.sect==='alawite'?'תיק העלאוים':'תיק הדרוזים'} <span class="ref">${c.ref}</span></div>
+      <h2>${c.h}</h2>
+      ${c.quote? `<p class="quote">${c.p[0]}</p>` : paras}
+      ${extra}
+    </div>`;
+  deck.appendChild(el);
+});
+
+const dotsEl = document.getElementById('dots');
+CARDS.forEach((c,i)=>{
+  const d = document.createElement('i');
+  d.dataset.i = i;
+  dotsEl.appendChild(d);
+});
+
+let cur = 0;
+const cardEls = [...deck.children];
+const dotEls = [...dotsEl.children];
+const tabs = [...document.querySelectorAll('.tab')];
+
+function render(){
+  cardEls.forEach((el,i)=>el.classList.toggle('is-on', i===cur));
+  dotEls.forEach((d,i)=>{
+    d.classList.toggle('is-on', i===cur);
+    d.classList.toggle('is-done', i<cur);
+  });
+  const sect = CARDS[cur].sect;
+  tabs.forEach(t=>t.classList.toggle('is-on', t.dataset.sect===sect));
+  document.documentElement.style.setProperty('--accent', sect==='druze' ? 'var(--gold)' : 'var(--maroon-deep)');
+  document.getElementById('btn-prev').disabled = cur===0;
+  document.getElementById('btn-next').disabled = cur===CARDS.length-1;
+}
+function go(d){ cur = Math.max(0, Math.min(CARDS.length-1, cur+d)); render(); }
+function goSect(sect){
+  const idx = CARDS.findIndex(c=>c.sect===sect);
+  if (idx>=0){ cur = idx; render(); }
+}
+
+document.getElementById('zone-prev').onclick = ()=>go(-1);
+document.getElementById('zone-next').onclick = ()=>go(1);
+document.getElementById('btn-prev').onclick = ()=>go(-1);
+document.getElementById('btn-next').onclick = ()=>go(1);
+tabs.forEach(t=>t.onclick = ()=>goSect(t.dataset.sect));
+window.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight') go(document.dir==='rtl'? -1: 1);
+  if(e.key==='ArrowLeft') go(document.dir==='rtl'? 1: -1);
+});
+document.getElementById('open-btn').onclick = ()=>{
+  document.getElementById('cover').classList.add('is-gone');
+  render();
+};
+render();
+</script>
+</body>
+</html>

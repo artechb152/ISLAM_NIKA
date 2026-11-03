@@ -105,7 +105,11 @@ export const chapterCategories: CategoryDef[] = [
         image: '/assets/chapter9/hero-1.jpg',
         available: true,
       }),
-      ch(10, 'זרמים שונים באסלאם'),
+      ch(10, 'זרמים שונים באסלאם', {
+        href: '/chapter10',
+        image: '/assets/chapter10/hero-1.jpg',
+        available: true,
+      }),
       ch(11, 'מקורות ואסכולות ההלכה'),
     ],
   },

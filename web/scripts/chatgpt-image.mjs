@@ -24,11 +24,14 @@
 import { chromium } from 'playwright-core'
 import { mkdir, writeFile, open, unlink, stat } from 'node:fs/promises'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..')
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const PROFILE = path.join(ROOT, '.chatgpt-profile')
 const LOCK = path.join(ROOT, '.chatgpt-profile.lock')
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+const CHROME = process.platform === 'win32'
+  ? 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+  : '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 const [mode, prompt, out, ...refs] = process.argv.slice(2)
 const OFFSCREEN = ['--window-position=-3000,-3000', '--window-size=1280,900']
 

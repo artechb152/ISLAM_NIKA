@@ -61,3 +61,6 @@ concept/chapter9/assets/**/*.mp3
 concept/chapter9/assets/*.png
 concept/chapter9/assets/*.mp4
 concept/chapter9/mockup/assets/
+
+# chapter 10: generated source PNGs (ChatGPT). The site ships the 1920 JPGs; the sources stay local.
+concept/chapter10/gen/

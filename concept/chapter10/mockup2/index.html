@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>פרק עשירי · זרמים שונים באסלאם</title>
+<style>
+  @font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-regular-aaa.otf");font-weight:400}
+  @font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-bold-aaa.otf");font-weight:700}
+  @font-face{font-family:"Kedem";src:url("../../../web/public/assets/fonts/kedem-black-aaa.otf");font-weight:900}
+  @font-face{font-family:"Ploni";src:url("../../../web/public/assets/fonts/ploni-regular-aaa.otf");font-weight:400}
+  @font-face{font-family:"Ploni";src:url("../../../web/public/assets/fonts/ploni-demibold-aaa.otf");font-weight:600}
+
+  :root{
+    --paper:#EDE4D0; --panel:#f3ead6; --maroon:#8a2733; --maroon-deep:#571820;
+    --cream:#f5ecd6; --ink:#3c2c1d; --muted:#6f5c43;
+    --gold:#c79a3c; --gold-soft:#d9b45b; --gold-text:#856016; --gold-deep:#6e4f12;
+    --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.32'/%3E%3C/svg%3E");
+    --mid:200px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;color:var(--ink);background:var(--paper) var(--tex);font-family:"Ploni",Arial,sans-serif;font-size:19px;line-height:1.78}
+  h1,h2{font-family:"Kedem",serif;margin:0;line-height:1.15}
+  .key{font-weight:600;color:var(--maroon-deep)}
+  .tr{font-weight:600;color:var(--gold-text)}
+
+  .bar{position:sticky;top:0;z-index:20;height:54px;background:var(--maroon-deep);color:var(--cream);
+    display:flex;align-items:center;padding:0 22px;font-family:"Kedem";font-size:16px;box-shadow:0 2px 10px rgba(28,10,2,.22)}
+  .bar span{opacity:.75;margin-inline-start:10px;font-family:"Ploni";font-size:14px}
+
+  .hero{position:relative;height:420px;overflow:hidden;display:flex;align-items:flex-end;isolation:isolate}
+  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+  .hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top, rgba(40,12,16,.78), rgba(40,12,16,.2) 60%, rgba(40,12,16,.05))}
+  .hero-in{width:100%;padding:0 0 44px;text-align:center;color:var(--paper)}
+  .hero .eb{display:block;font-size:14px;font-weight:600;letter-spacing:2.5px;color:var(--gold-soft);margin-bottom:6px}
+  .hero h1{font-weight:900;font-size:clamp(42px,5vw,72px);color:var(--paper)}
+  .hero p{margin:10px auto 0;font-size:clamp(18px,1.8vw,23px);max-width:640px;color:rgba(245,236,214,.9)}
+
+  /* two equal heads, mirrored around the spine */
+  .heads{position:sticky;top:54px;z-index:10;display:grid;grid-template-columns:1fr var(--mid) 1fr;background:var(--paper) var(--tex);border-bottom:1px solid rgba(199,154,60,.45)}
+  .heads div{display:flex;align-items:center;justify-content:center;gap:12px;height:64px;font-family:"Kedem";font-weight:700;font-size:26px}
+  .heads .a{color:var(--maroon)}
+  .heads .d{color:var(--gold-deep)}
+  .heads .m{justify-content:center}
+  .heads .m i{width:12px;height:12px;transform:rotate(45deg);background:var(--gold)}
+  .heads small{font-family:"Segoe UI",Tahoma,sans-serif;font-weight:400;font-size:19px;opacity:.7}
+
+  .wrap{position:relative;width:min(1400px,100%);margin:0 auto;padding-bottom:90px}
+  .wrap::before{content:"";position:absolute;top:0;bottom:0;right:50%;width:2px;transform:translateX(50%);background:var(--gold);opacity:.6}
+
+  .row{display:grid;grid-template-columns:1fr var(--mid) 1fr;align-items:start;padding-top:64px}
+  .col{min-width:0;padding-inline:clamp(24px,3.5vw,64px)}
+  .col > *{max-width:560px;margin-inline:auto}
+  .eb{display:block;text-align:center;font-size:13px;font-weight:600;letter-spacing:1.8px;margin-bottom:4px}
+  .col h2{text-align:center;font-size:clamp(28px,2.4vw,34px);margin-bottom:18px}
+  .col.a .eb,.col.a h2{color:var(--maroon)}
+  .col.d .eb,.col.d h2{color:var(--gold-deep)}
+  .col p{margin-top:0;margin-bottom:14px}
+
+  /* the small picture — one per row, on the spine */
+  .mid{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .mid img{width:136px;height:136px;border-radius:50%;object-fit:cover;display:block;
+    border:3px solid var(--gold);box-shadow:0 0 0 7px var(--paper),0 10px 22px rgba(60,35,18,.2)}
+  .mid b{font-family:"Kedem";font-weight:700;font-size:15px;color:var(--gold-text);background:var(--paper);
+    padding:3px 12px;border-radius:999px;border:1px solid rgba(199,154,60,.5);white-space:nowrap}
+  .mid i{width:16px;height:16px;transform:rotate(45deg);background:var(--gold);box-shadow:0 0 0 6px var(--paper)}
+
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px auto 6px}
+  .three div{border-top:2px solid var(--maroon);padding-top:10px;font-size:15.5px;line-height:1.5;text-align:center}
+  .three b{display:block;font-family:"Kedem";font-size:21px;color:var(--maroon);margin-bottom:4px}
+
+  blockquote{margin:20px auto;padding:18px 22px;border-inline-start:3px solid var(--maroon);background:rgba(138,39,51,.06);
+    font-family:"Kedem";font-size:22px;line-height:1.45;color:var(--maroon-deep)}
+  blockquote cite{display:block;margin-top:8px;font-family:"Ploni";font-style:normal;font-size:14px;color:var(--muted)}
+
+  .years{display:flex;align-items:center;gap:16px;margin:20px auto 12px;font-family:"Kedem";font-weight:900;color:var(--gold-deep);text-align:center}
+  .years span{font-size:44px;font-variant-numeric:tabular-nums}
+  .years i{flex:1;height:2px;background:var(--gold);opacity:.6}
+  .years small{display:block;font-family:"Ploni";font-weight:400;font-size:13px;color:var(--muted)}
+
+  /* a beat that belongs to both — sits on the spine */
+  .meet{position:relative;z-index:3;margin:56px auto 0;max-width:720px;text-align:center;
+    padding:26px 30px;background:var(--panel);border:1px solid rgba(199,154,60,.55);border-radius:14px;box-shadow:0 8px 22px rgba(60,35,18,.09)}
+  .meet b{display:block;font-family:"Kedem";font-size:22px;color:var(--gold-text);margin-bottom:8px}
+  .meet p{margin:0;font-size:18px;line-height:1.7}
+
+  /* only one side has this chapter — centred on the spine, so neither half is left empty */
+  .solo{position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;padding-top:64px}
+  .solo .card{margin-top:22px;max-width:680px;padding:28px 34px;background:var(--panel);border-top:3px solid var(--gold);border-radius:4px;box-shadow:0 8px 22px rgba(60,35,18,.09)}
+  .solo .card h2{text-align:center;font-size:32px;color:var(--gold-deep);margin-bottom:16px}
+  .solo .card .eb{color:var(--gold-deep)}
+  .solo .card p{margin:0 0 12px}
+
+  .ref{display:block;margin-top:4px;font-size:11px;color:var(--muted);opacity:.5;text-align:center}
+
+  @media (max-width:900px){
+    :root{--mid:0px}
+    .heads{display:none}
+    .wrap::before{display:none}
+    .row{grid-template-columns:1fr;padding-top:44px}
+    .mid{order:-1;margin-bottom:26px}
+    .col.d{margin-top:40px;padding-top:30px;border-top:1px solid rgba(199,154,60,.45)}
+    .col::before{display:block;text-align:center;font-family:"Kedem";font-weight:700;font-size:15px;margin-bottom:8px}
+    .col.a::before{content:"העלאוים";color:var(--maroon)}
+    .col.d::before{content:"הדרוזים";color:var(--gold-deep)}
+    .three{grid-template-columns:1fr}
+    .meet,.solo .card{margin-inline:16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="bar">פרק 10 <span>זרמים שונים באסלאם</span></div>
+
+<section class="hero">
+  <video autoplay muted loop playsinline poster="../../../web/public/assets/chapter10/hero-1.jpg">
+    <source src="../../../web/public/assets/chapter10/hero.mp4" type="video/mp4">
+  </video>
+  <div class="hero-in">
+    <span class="eb">פרק עשירי</span>
+    <h1>זרמים שונים באסלאם</h1>
+    <p>שתי עדות שצמחו מן השיעה — העלאוים והדרוזים — זו לצד זו</p>
+  </div>
+</section>
+
+<div class="heads">
+  <div class="a">העלאוים <small>علويون</small></div>
+  <div class="m"><i></i></div>
+  <div class="d">הדרוזים <small>دروز</small></div>
+</div>
+
+<main class="wrap">
+
+  <!-- 1 · origins -->
+  <div class="row">
+    <div class="col a">
+      <span class="eb">שם ומוצא</span>
+      <h2>על שם עלי</h2>
+      <p>העלאוים זה כינוי לזרם באסלאם, <span class="key">שיסודו באסלאם השיעי</span> והתפתח לכדי <span class="key">תערובת של מסורות מדתות שונות</span>. השם עלאוים, החדש באופן יחסי, <span class="key">מקורו באמאם עלי</span>.</p>
+      <p>במשך מאות שנים כונו בני העדה <span class="key">"נצירים"</span>,</p>
+      <div class="three">
+        <div><b>יתכן</b>על שם היסודות הנוצריים של הדת</div>
+        <div><b>ויתכן</b>על שם הרי אנצריה שבקרבת <span class="key">לאטקיה בסוריה</span></div>
+        <div><b>ככל הנראה</b>על שם מייסד הכת, אבו שעיב מחמד אבן נציר</div>
+      </div>
+      <span class="ref">§0</span>
+    </div>
+    <div class="mid"><img src="../../../web/public/assets/chapter10/cairo-1.jpg" alt=""><b>השורש</b></div>
+    <div class="col d">
+      <span class="eb">הולדת הדת</span>
+      <h2>מצרים, המאה ה-11</h2>
+      <p>הדת הדרוזית היא דת סודית, שצמחה מתוך <span class="key">השיעה האסמאעילית</span> <span class="key">במאה האחד עשר במצרים</span>.</p>
+      <p>המנהיג הראשון שלה היה <span class="key">הח'ליף השישי של השושלת הפאטמית</span>, אלחאכם באמר אללה. האישיות שעיצבה את הדת אחריו היה חמזה אבן עלי, אשר לו מיוחסים <span class="key">"אגרות החכמה"</span> (<span class="tr">רסאאל אלחכמה</span>).</p>
+      <span class="ref">§5</span>
+    </div>
+  </div>
+
+  <!-- 2 · belief -->
+  <div class="row">
+    <div class="col a">
+      <span class="eb">אמונה וטקס</span>
+      <h2>טקס אחד, בבית</h2>
+      <p>ביסודה <span class="key">פולחן לגרמי השמים</span>, יסודות נוצריים בחגים, ו<span class="key">לוח השנה השמשי</span>. כל אלה התעטפו בנאמנות לעלי, עד כדי היותו <span class="key">התגלמות הא-ל באדם</span>.</p>
+      <p>גם העלאוית היא <span class="key">דת סודית</span>: <span class="tr">חאצה</span> (המיוחדים) ו<span class="tr">עאמה</span> (העממיים). ולה <span class="key">טקס יחיד</span> — <span class="tr">קדאס</span> — <span class="key">בבית הפרטי של המאמין ולא במסגד</span>.</p>
+      <span class="ref">§1 · §2</span>
+    </div>
+    <div class="mid"><img src="../../../web/public/assets/chapter10/village-1.jpg" alt=""><b>האמונה</b></div>
+    <div class="col d">
+      <span class="eb">עיקרי הדת</span>
+      <h2>א-ל שלא נתפס</h2>
+      <p>הדת <span class="key">מונותאיסטית</span>, והא-ל <span class="key">לא נתפס בשכל האנושי</span>. העולם מתחלק לתקופות (<span class="tr">אדואר</span>), ובראשיתה של כל תקופה הא-ל <span class="key">מתגלם בדמות בשר ודם</span>.</p>
+      <p>דמות מזוהה עם הדת היא <span class="key">הנביא שעיב</span>, ויש המייחסים אותו עם <span class="key">יתרו המקראי</span>.</p>
+      <span class="ref">§6</span>
+    </div>
+  </div>
+
+  <!-- 3 · the turn -->
+  <div class="row">
+    <div class="col a">
+      <span class="eb">בסוריה</span>
+      <h2>עניים ומדוכאים</h2>
+      <p>במשך מאות שנים היו כפריים <span class="key">עניים ומדוכאים</span>, והשנאה כלפיהם נבעה מהיותם <span class="key">"חריגים בנוף הדתי"</span>. אבן תימיה הוציא <span class="tr">פתוה</span>:</p>
+      <blockquote>הנצירים הינם כופרים גרועים מן הנוצרים ומן היהודים, והמלחמה בהם היא מצווה.<cite>תקי א-דין אבן תימיה</cite></blockquote>
+      <span class="ref">§3</span>
+    </div>
+    <div class="mid"><img src="../../../web/public/assets/chapter10/horse-1.jpg" alt=""><b>הסף</b></div>
+    <div class="col d">
+      <span class="eb">ההיעלמות והנעילה</span>
+      <h2>השערים ננעלו</h2>
+      <div class="years"><div><span>1021</span><small>אלחאכם נעלם</small></div><i></i><div><span>1037</span><small>השערים ננעלו</small></div></div>
+      <p>המחפשים <span class="key">מצאו את בגדיו זקופים</span> — בלי שהוא עצמו בהם. הוא נחשב ל<span class="tr">ע'אאב</span>, <span class="key">ויחזור כמהדי</span>.</p>
+      <p>ב-1037 <span class="key">ננעלו שערי ההטפה הדרוזית</span>. האחרונים שהצטרפו: <span class="key">שבט תנוח'</span>.</p>
+      <span class="ref">§7</span>
+    </div>
+  </div>
+
+  <!-- 4 · the 20th century -->
+  <div class="row">
+    <div class="col a">
+      <span class="eb">המנדט</span>
+      <h2>שכירי חרב, ואז משענת</h2>
+      <p>לאחר שצרפת קיבלה את סוריה (1920) גייסה עלאוים <span class="key">כשכירי חרב בצבא המנדט</span>, ובתמורה נתנה להם לפתח את זהותם.</p>
+      <p>עם השנים השתלבו בפוליטיקה הסורית, ונראה שלא ביקשו להתנתק מזהותם הדתית. להיפך, <span class="key">הם ראו בעדה משענת</span>.</p>
+      <span class="ref">§3 · §4</span>
+    </div>
+    <div class="mid"><img src="../../../web/public/assets/chapter10/lebanon-1.jpg" alt=""><b>המאה ה-20</b></div>
+    <div class="col d">
+      <span class="eb">בלבנט</span>
+      <h2>ההר</h2>
+      <p>מהמאה ה-17 שלטה בהר הלבנון <span class="key">שושלת בית מען</span>. ב-1860 אירע <span class="key">הטבח הגדול של הדרוזים במרונים</span>, ומאז היוסדה של סוריה (1946) המנהיג המזוהה ביותר עם דיכויים היה שישכלי, שתיאר אותם כ<span class="key">'ראש הנחש'</span>.</p>
+      <span class="ref">§9</span>
+    </div>
+  </div>
+
+  <div class="meet">
+    <b>1925</b>
+    <p>„בהמשך, יילחמו העלאוים יחד עם הצרפתים <span class="key">במרד הדרוזי</span> בשנת 1925.”<br>„בשנת 1925 <span class="key">שחררו הדרוזים את הר הדרוזים</span> בסוריה מהשלטון צרפתי.”</p>
+    <span class="ref">§4.revolt · §9.y1925</span>
+  </div>
+
+  <!-- 5 · today — druze only, centred -->
+  <div class="solo">
+    <div class="mid"><i></i><b>היום</b></div>
+    <div class="card">
+      <span class="eb">הדרוזים · 2015–2024</span>
+      <h2>מיעוט פגיע</h2>
+      <p>הדרוזים, שלרוב נשארים <span class="key">נאמנים למשטר</span>, נשארו נאמנים לאסד. ב-2015 טבחה בהם ג'בהת א-נצרה סמוך לאדליב, וזה הפך אותם <span class="key">למיעוט פגיע</span>.</p>
+      <p>עם עלייתו של אחמד א-שרע (דצמבר 2024) החלו עימותים עם <span class="key">א-סווידא</span>, ובחלקם <span class="key">מדינת ישראל התערבה</span> לטובת המיעוט הדרוזי.</p>
+      <span class="ref">§10 · §11</span>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,123 @@
+{
+  "$note": "הפריסה של פרק 10: שני טורים סימטריים — העלאוים (a) והדרוזים (d) — זה לצד זה, ותמונה קטנה עגולה על קו האמצע. אושר על ידי המשתמשת (3.11.2026) אחרי שלוש הדגמות; ראו concept/chapter10/DECISIONS.md. הקומפוננטה קוראת מכאן ולא כותבת טקסט. כל תווית {from,cut} חתוכה מהמשפט שלה (כלל 27) והשער בודק.",
+  "sections": [
+    {
+      "id": "roots",
+      "title": "השם והמוצא",
+      "term": "النشأة",
+      "a": {
+        "title": "על שם עלי",
+        "img": "hero-1",
+        "slots": {
+          "lead": ["§0.name", "§0.origin", "§0.nusayri"],
+          "origins": ["§0.christ", "§0.place", "§0.founder"]
+        },
+        "origins": [
+          { "from": "§0.christ", "cut": ["יתכן"] },
+          { "from": "§0.place", "cut": ["ויתכן"] },
+          { "from": "§0.founder", "cut": ["ככל הנראה"] }
+        ]
+      },
+      "d": {
+        "title": "מצרים, המאה האחת עשרה",
+        "img": "cairo-1",
+        "slots": { "lead": ["§5.a", "§5.hakim", "§5.hamza"] }
+      }
+    },
+    {
+      "id": "faith",
+      "title": "אמונה וטקס",
+      "term": "العقيدة",
+      "a": {
+        "title": "טקס אחד, בבית",
+        "img": "village-1",
+        "slots": {
+          "lead": ["§1.a", "§1.sky", "§1.christ", "§1.ali", "§1.salman"],
+          "secret": ["§2.secret"],
+          "qiddas": ["§2.qiddas"]
+        },
+        "pair": [
+          { "name": { "from": "§2.secret", "cut": ["חאצה"] }, "say": { "from": "§2.secret", "cut": ["המיוחדים"] } },
+          { "name": { "from": "§2.secret", "cut": ["עאמה"] }, "say": { "from": "§2.secret", "cut": ["העממיים, הרגילים"] } }
+        ]
+      },
+      "d": {
+        "title": "א-ל שלא נתפס",
+        "img": "midian-1",
+        "slots": {
+          "lead": ["§6.god", "§6.adwar"],
+          "shuayb": ["§6.shuayb", "§6.quran"]
+        }
+      }
+    },
+    {
+      "id": "ordeal",
+      "title": "רדיפה והיעלמות",
+      "term": "المحنة",
+      "a": {
+        "title": "חריגים בנוף הדתי",
+        "img": "fields-1",
+        "slots": {
+          "lead": ["§3.poor", "§3.hate"],
+          "fatwa": ["§3.taymiyya"]
+        }
+      },
+      "d": {
+        "title": "השערים ננעלו",
+        "img": "horse-1",
+        "slots": {
+          "vanish": ["§7.vanish", "§7.clothes", "§7.mahdi"],
+          "closed": ["§7.closed", "§7.tanukh"]
+        },
+        "years": [
+          { "from": "§7.vanish", "cut": ["1021"] },
+          { "from": "§7.closed", "cut": ["1037"] }
+        ]
+      }
+    },
+    {
+      "id": "empire",
+      "title": "העות'מאנים והמנדט",
+      "term": "الانتداب",
+      "a": {
+        "title": "שכירי חרב בצבא המנדט",
+        "img": "port-1",
+        "slots": { "lead": ["§3.forced", "§3.sold", "§3.france"] }
+      },
+      "d": {
+        "title": "הר הלבנון",
+        "img": "lebanon-1",
+        "slots": {
+          "apart": ["§8.a", "§8.traces"],
+          "lead": ["§9.maan", "§9.y1860"]
+        }
+      },
+      "meet": {
+        "cut": { "from": "§9.y1925", "cut": ["1925"] },
+        "slots": { "a": ["§4.revolt"], "d": ["§9.y1925"] }
+      }
+    },
+    {
+      "id": "modern",
+      "title": "מדינת סוריה",
+      "term": "سوريا",
+      "a": {
+        "title": "העדה כמשענת",
+        "img": "damascus-1",
+        "slots": { "lead": ["§4.politics"] }
+      },
+      "d": {
+        "title": "מיעוט פגיע",
+        "img": "suwayda-1",
+        "slots": { "lead": ["§9.shishakli"] }
+      },
+      "solo": {
+        "side": "d",
+        "rows": [
+          { "cut": { "from": "§10.a", "cut": ["2015"] }, "refs": ["§10.a"] },
+          { "cut": { "from": "§11.sharaa", "cut": ["דצמבר 2024"] }, "refs": ["§11.sharaa", "§11.damascus", "§11.israel"] }
+        ]
+      }
+    }
+  ]
+}

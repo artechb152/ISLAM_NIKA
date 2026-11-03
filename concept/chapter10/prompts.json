@@ -1,0 +1,50 @@
+{
+  "$note": "פרומפטים לתמונות פרק 10 — ChatGPT דרך web/scripts/chatgpt-image.mjs (בחירת המשתמשת, 1.11.2026). כל תמונה עם web/public/assets/chapter9/karbala-1.jpg כרפרנס סגנון. כללים: 37 (אדום), 39 (שמן), 40 (בלי אותיות), 42 (באנר בהיר), 43 (בלי פנים). הפיילוט ראשון: horse-1.",
+  "style": "Use the attached painting ONLY as a style reference: the same realistic oil painting with thick visible brushstrokes, warm bright golden light, the same palette. Do not copy its content. Wide 16:9 landscape. Absolutely no text, no letters, no writing, no signature, no watermark, no flags with symbols, no religious symbols. Any people must be small and seen from behind or in silhouette, faces never visible.",
+  "images": [
+    {
+      "name": "horse-1",
+      "prompt": "Paint: a wide empty plain at early dawn on the edge of hills near a city; a single saddled horse stands alone without its rider, its saddle covered with a deep red woven cloth; a little behind it, a set of pale robes lies on the ground, folded upright as if still holding a shape; long soft morning shadows, mist on the ground, a sense of quiet mystery. No people at all."
+    },
+    {
+      "name": "hero-1",
+      "prompt": "Paint: green coastal mountains rising above a Mediterranean shore in bright clear morning light; a small stone village with flat roofs terraced on the slopes; olive trees; red woven cloths drying on a line on a rooftop in the foreground; the sea glimmering in the distance. Very bright, airy, sunlit — this is a banner and will be darkened later, so keep it luminous. Leave the centre calm and uncluttered."
+    },
+    {
+      "name": "village-1",
+      "prompt": "Paint: a lone stone house on a mountain slope at dusk; warm lamplight glows in one small window; a red curtain is visible inside the window; a narrow path leads to a wooden door; quiet hills behind under a soft purple-gold sky. No people visible."
+    },
+    {
+      "name": "cairo-1",
+      "prompt": "Paint: a medieval Islamic city on the Nile in bright morning light — domes and slender minarets, sandstone walls, palm trees, a busy distant market street with tiny figures seen from far away, a red fabric awning over a stall in the foreground. Warm, bright, majestic."
+    },
+    {
+      "name": "lebanon-1",
+      "prompt": "Paint: Mount Lebanon — steep green terraced slopes, a stone mountain village with one house roofed in red clay tiles in the foreground, cedar and pine trees, a snow-capped ridge far in the distance, bright clear midday light."
+    },
+    {
+      "name": "midian-1",
+      "prompt": "Paint: an ancient stone well in a wide desert valley of Midian at golden afternoon, red sandstone cliffs behind, a few sheep resting by stone troughs, a deep red woven cloth draped over the edge of the well; one small shepherd far away, seen from behind."
+    },
+    {
+      "name": "fields-1",
+      "prompt": "Paint: poor terraced farm fields on the slopes of coastal mountains in Syria in early morning, a humble stone-and-mud farmhouse, a wooden plough left in a furrow, a red cloth bundle on a low stone wall; one small farmer far away bent over the soil, seen from behind."
+    },
+    {
+      "name": "port-1",
+      "prompt": "Paint: the small old harbour of a Levantine coastal town in the early twentieth century, bright morning, an anchored steamship and wooden fishing boats, stone warehouses with red-tiled roofs and a red awning; tiny distant figures on the quay seen from behind; no flags."
+    },
+    {
+      "name": "damascus-1",
+      "prompt": "Paint: the old city of Damascus seen from a hillside in warm late afternoon, a dense sea of flat roofs, domes and minarets, a bare mountain behind; a red carpet hung over a rooftop rail in the foreground. No people."
+    },
+    {
+      "name": "suwayda-1",
+      "prompt": "Paint: a village of dark basalt stone houses on a volcanic hill in southern Syria, bright clear morning, stone walls between small orchards and vineyards, a red wooden door and a red cloth drying on a flat roof, wide sky. No people."
+    }
+  ],
+  "banner_video": {
+    "tool": "higgsfield seedance_2_0, start_image = hero-1, 720p, 5s, no audio",
+    "prompt": "Locked-off static camera, absolutely no camera movement, no zoom, no pan. The painting stays exactly as it is in oil-paint style. Only one small thing moves: the red cloths on the rooftop line sway gently in a light breeze, in a calm seamless loop. Everything else is still."
+  }
+}
