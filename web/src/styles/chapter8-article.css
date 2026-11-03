@@ -205,7 +205,7 @@
 /* the tied pair: the same picture clipped at the seam, a layer of its own that lifts */
 .ch8-shelf-pair{position:absolute;inset:0;pointer-events:none;transition:scale .45s cubic-bezier(.2,.8,.2,1),filter .45s ease}
 .ch8-shelf-pair > img{display:block;width:100%;height:auto}
-.ch8-shelf.is-open .ch8-shelf-pair{scale:1.07;filter:drop-shadow(0 10px 14px rgba(60,35,18,.28))}
+.ch8-shelf[data-open="true"] .ch8-shelf-pair{scale:1.07;filter:drop-shadow(0 10px 14px rgba(60,35,18,.28))}
 .ch8-shelf-hit{all:unset;position:absolute;top:8%;bottom:10%;cursor:pointer;border-radius:12px}
 .ch8-shelf-hit:hover{background:color-mix(in srgb,var(--gold-soft) 10%,transparent)}
 .ch8-shelf-hit:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
@@ -214,7 +214,7 @@
   display:flex;justify-content:center;gap:clamp(14px,3vw,40px);flex-wrap:wrap;
   max-height:0;overflow:hidden;opacity:0;transition:max-height .45s ease,opacity .35s ease,margin .45s ease;
 }
-.ch8-shelf.is-open .ch8-shelf-numbers{max-height:200px;opacity:1;margin-top:0}
+.ch8-shelf[data-open="true"] .ch8-shelf-numbers{max-height:200px;opacity:1;margin-top:0}
 .chapter-article .ch8-shelf-numbers p{
   margin:0;padding:10px 20px;border:1px solid var(--gold);border-radius:999px;background:var(--paper);
   font-size:var(--read);line-height:1.4;color:var(--ink);
@@ -222,7 +222,7 @@
 .ch8-shelf-numbers b{font-family:var(--font-heading);color:var(--maroon)}
 .ch8-shelf-numbers span{font-weight:700;color:var(--maroon-deep)}
 .chapter-article .ch8-shelf-hint{margin:0;text-align:center;font-size:14px;color:var(--muted)}
-.ch8-shelf.is-open .ch8-shelf-hint{margin-top:12px}
+.ch8-shelf[data-open="true"] .ch8-shelf-hint{margin-top:12px}
 @media (prefers-reduced-motion:reduce){.ch8-shelf-pair,.ch8-shelf-numbers{transition:none}}
 /* a name on its spine: set top-to-bottom, as a spine is lettered, on a parchment chip so
    it reads over the leather (rule 68) */

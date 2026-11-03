@@ -365,7 +365,9 @@ function Shelf() {
     <b key={names[i]} className={'ch8-spine' + (i < 2 ? ' is-pair' : '')} style={{ left: pctf(sh.x[i]) }} dir="rtl">{names[i]}</b>
   )
   return (
-    <figure className={'ch8-shelf' + (open ? ' is-open' : '')} data-reveal>
+    // open rides on data-open, not className: a re-rendered className wipes the
+    // `is-inview` the reveal observer added, and the whole figure faded out on click
+    <figure className="ch8-shelf" data-open={open} data-reveal>
       <div className="ch8-shelf-plate" dir="ltr">
         {/* the plate is drawn TWICE, clipped at the seam: the four on the left stay on the
             shelf, the two tied on the right are their own layer, and that layer is what
