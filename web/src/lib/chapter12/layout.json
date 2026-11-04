@@ -22,7 +22,8 @@
                 "§0.quran",
                 "§0.v1",
                 "§0.v2"
-              ]
+              ],
+              "img": "c1-effort"
             },
             {
               "label": {
@@ -34,7 +35,8 @@
               "refs": [
                 "§1.a",
                 "§1.verse"
-              ]
+              ],
+              "img": "c2-drum"
             }
           ]
         },
@@ -87,7 +89,8 @@
               },
               "refs": [
                 "§7.kifaya"
-              ]
+              ],
+              "img": "c3-jars"
             },
             {
               "label": {
@@ -98,7 +101,8 @@
               },
               "refs": [
                 "§7.ayn"
-              ]
+              ],
+              "img": "c4-jar"
             }
           ]
         },
@@ -140,7 +144,8 @@
                 "§8.banna",
                 "§8.bannaAns",
                 "§8.bannaRuler"
-              ]
+              ],
+              "img": "c5-lane"
             },
             {
               "label": {
@@ -153,7 +158,8 @@
                 "§8.qutb",
                 "§8.qutbBook",
                 "§8.qutbNow"
-              ]
+              ],
+              "img": "c6-window"
             }
           ]
         },
@@ -363,7 +369,8 @@
               },
               "refs": [
                 "§20.akhira"
-              ]
+              ],
+              "img": "c7-boat"
             },
             {
               "label": {
@@ -374,7 +381,8 @@
               },
               "refs": [
                 "§20.dunya"
-              ]
+              ],
+              "img": "c8-shield"
             }
           ]
         },

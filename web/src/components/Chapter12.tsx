@@ -163,6 +163,8 @@ function Blocks({ blocks }: { blocks: Block[] }) {
             <div className="ch12-pair" data-reveal key={`pair-${i}`}>
               {b.pair.map((c) => (
                 <article className="ch12-card" key={c.refs[0]}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {c.img && <img className="ch12-card-art" src={`${ART}${c.img}.webp`} alt="" loading="lazy" />}
                   <b className="ch12-card-m">{one(c.label)}</b>
                   {paras(c.refs).map((g) => <p key={g[0]}>{sentences(g)}</p>)}
                 </article>
