@@ -1,0 +1,14 @@
+{
+  "$note": "פרומפטים לתמונות טבלת רבאט (תיק 03) — ChatGPT דרך web/scripts/chatgpt-image.mjs (הכרעת המשתמשת, 4.11.2026: תמונה לכל שורה בטבלה, שמונה שורות). כללים: 37 (אדום בכל תמונה), 40 (בלי אותיות), 43 (בלי דמויות). פיילוט ראשון: r3-fort. התמונות הן אווירה בלבד — לא טוענות דבר שהמקור לא אומר.",
+  "style": "Use the attached painting ONLY as a style reference: the same soft realistic watercolor with visible paper texture, the same warm palette, the subject as a vignette that fades into a plain pure white background at its edges. Do not copy its content. Absolutely no text, no letters, no Arabic calligraphy, no inscriptions, no writing on any surface, no signature, no watermark, no flags, no logos, no emblems. No people at all.",
+  "images": [
+    { "name": "r1-horses", "row": "הכנת כוח צבאי", "prompt": "Paint: a few saddled horses tied to a long wooden rail at the edge of a dry plain at dawn, empty saddles with red woven blankets, soft morning light. No riders, no people." },
+    { "name": "r2-watchtower", "row": "עמידה על המשמר", "prompt": "Paint: a lone stone watchtower on a rocky ridge overlooking a wide valley at first light, a small red cloth tied to the railing of its top platform. No people." },
+    { "name": "r3-fort", "row": "מבצרים וצריחים", "prompt": "Paint: an old sandy-stone fortress with square towers on a rocky coast, the sea behind it, a heavy wooden gate with red painted iron bands. Warm morning light. No people, no flags, no inscriptions." },
+    { "name": "r4-wall", "row": "יום אחד של רבאט", "prompt": "Paint: a stone path running along the top of an old fortress wall in early morning light, with a small clay lamp and a red cushion resting on the parapet. No people." },
+    { "name": "r5-mosque", "row": "המתנה במסגד", "prompt": "Paint: a quiet empty mosque courtyard before prayer, an arcade of arches, a stone fountain in the middle, a red prayer carpet rolled out under the arches. Soft light. Wall surfaces plain or with geometric patterns only. No people." },
+    { "name": "r6-training", "row": "הכנה ללחימה", "prompt": "Paint: old wooden practice targets and straw bales at the edge of a dusty field, a worn red cloth hanging from a post. Calm, quiet, no weapons shown, no people." },
+    { "name": "r7-hills", "row": "הקשר לאדמה", "prompt": "Paint: terraced stone hills with old olive trees under a pale sky, a small stone shelter, red poppies in the grass. No people, no buildings with domes, no inscriptions." },
+    { "name": "r8-horizon", "row": "אדמת הרבאט והג'האד", "prompt": "Paint: a wide open land with a low horizon, a path of pale earth leading into the distance, a few red wildflowers in the foreground. Calm morning light. No people." }
+  ]
+}

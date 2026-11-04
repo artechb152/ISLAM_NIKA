@@ -1,0 +1,4 @@
+/* Chapter 12's practice — only what differs from chapter 5's practice sheet: the banner
+   still (the desk itself, from the article's head) and the title's shadow. */
+.ch12-practice-banner .ch12-practice-media{background:var(--panel) url('/assets/chapter12/desk-hero.webp') center 30%/cover no-repeat}
+.ch12-practice-banner .ch6-hero-title{text-shadow:0 3px 22px rgba(20,10,4,.55)}

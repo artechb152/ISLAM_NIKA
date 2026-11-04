@@ -1,0 +1,161 @@
+/* Chapter 12 — ג'האד, רבאט ואסתשהאד.
+
+   Loaded AFTER chapter6-article.css. Declares no colour, font or radius of its own: every
+   colour is a token from the shared sheet. The chapter (the user, 3.11.2026): a desk built in
+   Blender with five folders; a press on a folder dives into it, and each unit opens on that
+   folder lying open. */
+
+/* THE RHYTHM — rule 78: a new sheet starts from this block. */
+:root{
+  --flow-tight:14px;   /* sub-heading → its first line */
+  --flow:14px;         /* paragraph → paragraph */
+  --flow-block:34px;   /* prose ↔ a device */
+  --flow-lead:44px;    /* under a section heading */
+}
+.chapter-article p{font-size:var(--read);line-height:1.85;color:var(--ink)}
+.ch12-tr{font-weight:700;color:var(--gold-text)}
+/* Arabic inside a Hebrew sentence — isolated by the component, set as the site sets Arabic */
+.ch12-ar{font-family:"Segoe UI",Tahoma,sans-serif;font-size:1.06em;color:var(--maroon)}
+
+.ch12-body > * + *{margin-top:var(--flow)}
+.ch12-body > :is(.ch12-pair,.ch12-quote,.ch12-chain,.ch12-cards,.ch12-fig),
+.ch12-body > :is(.ch12-pair,.ch12-quote,.ch12-chain,.ch12-cards,.ch12-fig) + *{margin-top:var(--flow-block)}
+
+/* a mood picture between paragraphs: a vignette on the page, never framed */
+.ch12-fig{display:block;width:100%;max-width:560px;height:auto;max-height:clamp(240px,32vw,380px);object-fit:contain;margin-inline:auto}
+
+/* ---------- the desk: the head of the page ---------- */
+/* full bleed, like chapter 6's banner; the render fills it edge to edge (it is all wood) */
+.ch12-desk{position:relative;isolation:isolate;overflow:hidden;margin-inline:calc(-1 * var(--content-gutter));
+  margin-block:-42px clamp(36px,5vh,64px);background:var(--maroon-deep);box-shadow:0 8px 22px rgba(60,35,18,.09)}
+.ch12-desk-img{display:block;width:100%;height:auto;aspect-ratio:2400/1500}
+.ch12-desk-head{position:absolute;top:clamp(14px,3.2%,40px);inset-inline:var(--content-gutter);z-index:1;pointer-events:none}
+.ch12-title{font-family:var(--font-heading);font-weight:900;font-size:clamp(30px,4.2vw,66px);line-height:1.08;
+  letter-spacing:-.015em;color:var(--paper);margin:0;text-shadow:0 2px 14px rgba(30,18,8,.55)}
+/* the folders: the outline measured in Blender is the button */
+.ch12-desk-hit{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+.ch12-desk-hit a{cursor:pointer;outline:none}
+.ch12-desk-hit polygon{fill:transparent;stroke:transparent;stroke-width:2.5px;stroke-linejoin:round;
+  transition:fill .25s,stroke .25s}
+.ch12-desk-hit a:hover polygon{fill:rgba(245,236,214,.12);stroke:var(--gold-soft)}
+.ch12-desk-hit a:focus-visible polygon{fill:rgba(245,236,214,.12);stroke:var(--cream);stroke-width:3px}
+
+/* THE ENTRY (4.11: the first dive — a 3.4× zoom into a flat picture — was struck as "GOOFY").
+   Now a short, quiet push toward the pressed folder while the page settles to paper; the
+   folder's screen then fades in (ch12-arrive). The transition lives only on the leaving state. */
+.ch12-desk::after{content:"";position:absolute;inset:0;z-index:3;background:var(--paper);opacity:0;pointer-events:none}
+.is-diving .ch12-desk-img,.is-diving .ch12-desk-hit{transform-origin:var(--dive-x) var(--dive-y);transform:scale(1.1);
+  transition:transform .38s ease-out}
+.is-diving .ch12-desk::after{opacity:1;transition:opacity .3s ease-in}
+.is-diving .ch12-desk-head{opacity:0;transition:opacity .2s}
+
+/* ---------- the head of a unit: the same folder, open ---------- */
+/* The render is physical — sheets on the left, the cover turned to the right like a Hebrew
+   book. The heading is a box of 1000 sheet-units laid onto the top sheet by Chapter12.tsx
+   (matrix3d from the sheet's four corners in open.json), so it is set in those units and
+   takes the paper's perspective. Its box is placed physically (left/top), never inline. */
+/* ONE FOLDER, ONE SCREEN (4.11). The desk and the five units are all in the DOM; the away ones
+   are display:none — never [hidden], which the search skips. A unit opens flush under the
+   masthead, like the desk, and fades in over the paper wash the dive left behind. */
+.ch12-desk.is-away,.ch12-unit.is-away{display:none}
+.ch12-unit{scroll-margin-top:var(--header-height)}
+.article-section.ch12-unit + .ch12-unit{border-top:0;padding-top:0;margin-top:0}
+.ch12-unit:not(.is-away){animation:ch12-arrive .45s ease-out}
+@keyframes ch12-arrive{from{opacity:0}to{opacity:1}}
+.ch12-open{position:relative;overflow:hidden;margin-inline:calc(-1 * var(--content-gutter));
+  margin-top:-42px;margin-bottom:var(--flow-lead);background:var(--maroon-deep)}
+.ch12-open-img{display:block;width:100%;height:auto;aspect-ratio:2400/1100;object-fit:cover}
+.ch12-open-page{position:absolute;left:0;top:0;transform-origin:0 0;direction:rtl;padding:60px 90px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
+.ch12-open-n{font-family:var(--font-heading);font-weight:900;font-size:96px;line-height:1;color:var(--stamp)}
+.ch12-open-page h2{font-family:var(--font-heading);font-weight:900;font-size:128px;line-height:1.05;
+  color:var(--maroon-deep);text-wrap:balance;margin:0}
+.ch12-open-page h2:where(.is-long){font-size:96px}
+.ch12-open-term{font-family:"Segoe UI",Tahoma,sans-serif;font-size:92px;line-height:1.2;color:var(--gold-text)}
+.ch12-open-year{font-family:var(--font-heading);font-weight:400;font-size:72px;color:var(--gold-text);
+  direction:ltr;font-variant-numeric:tabular-nums}
+
+/* the foot of a unit: the folder before (right — the reading side), the desk, the folder after (left) */
+.ch12-unit-nav{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:18px;
+  margin-top:clamp(48px,6vw,72px);padding-top:22px;border-top:1px solid var(--rule)}
+.ch12-step{display:flex;flex-direction:column;gap:4px;text-decoration:none;color:var(--maroon-deep);
+  padding:10px 14px;border-radius:10px;transition:background .2s}
+.ch12-step.is-prev{justify-self:start;text-align:start}
+.ch12-step.is-next{justify-self:end;text-align:end}
+.ch12-step:hover{background:var(--panel)}
+.ch12-step:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
+.ch12-step-dir{font-family:var(--font-heading);font-weight:700;font-size:13px;color:var(--gold-text)}
+.is-prev .ch12-step-dir::before{content:"→ "}
+.is-next .ch12-step-dir::after{content:" ←"}
+.ch12-step-t{font-family:var(--font-heading);font-weight:900;font-size:clamp(16px,1.35vw,19px);line-height:1.3;max-width:24ch;text-wrap:balance}
+.ch12-step-t b{color:var(--stamp);margin-inline-end:4px}
+.ch12-to-desk{all:unset;box-sizing:border-box;display:table;margin:0;cursor:pointer;
+  padding:7px 18px;border-radius:999px;border:1px solid var(--edge);color:var(--maroon-deep);background:var(--panel);
+  font-family:var(--font-heading);font-weight:700;font-size:15px;line-height:1.3}
+.ch12-to-desk:hover{background:var(--maroon-deep);border-color:var(--maroon-deep);color:var(--cream)}
+.ch12-to-desk:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+
+/* ---------- devices ---------- */
+/* two equal cards (chapter 10's device: no box, a gold hairline) */
+.ch12-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,2.4vw,34px);max-width:940px;margin-inline:auto}
+.ch12-card{border-top:1px solid var(--gold-soft);padding:14px 2px 0}
+.ch12-card > * + *{margin-top:10px}
+.chapter-article .ch12-card-m{display:block;text-align:center;font-family:var(--font-heading);font-weight:900;
+  color:var(--gold-text);font-size:clamp(22px,1.9vw,28px);line-height:1.15;margin-bottom:8px}
+.chapter-article .ch12-card p{font-size:17px;line-height:1.75;margin:0}
+
+/* a quoted verse */
+.chapter-article .ch12-quote{text-align:center;font-family:var(--font-heading);font-weight:700;max-width:820px;margin-inline:auto;
+  font-size:clamp(18px,1.4vw,21px);line-height:1.75;color:var(--maroon-deep);border-block:1px solid var(--gold-soft);padding-block:18px}
+
+/* a chain of stations: the label on the reading edge, the text beside it, a line through the
+   labels. 02 — years in red on a line of time; 03 — the senses of one word, each a folder tab. */
+.ch12-chain{list-style:none;position:relative;display:grid;gap:0;max-width:940px;margin-inline:auto}
+.ch12-stop{display:grid;grid-template-columns:clamp(120px,15vw,190px) minmax(0,1fr);gap:clamp(16px,2.4vw,34px);
+  position:relative;padding-block:16px}
+.ch12-stop + .ch12-stop{border-top:1px solid var(--rule)}
+/* THE LADDER FILLS THE COLUMN (4.11: "שזה יקח את המקום בכל המסך" — the table sat in 940px with an
+   empty label column and a thumbnail). A row with its own picture is the label as a tab on top,
+   then the text on the reading side (right) and the watercolour as the other half (left),
+   cut off its white ground so it floats on the paper (rule 44). */
+.ch12-chain.is-senses{max-width:none}
+.ch12-stop.has-art{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"m m" "t a";
+  column-gap:clamp(24px,3.2vw,52px);row-gap:14px;align-items:center;padding-block:26px}
+.ch12-stop.has-art .ch12-stop-m{grid-area:m;margin-top:0}
+.ch12-stop.has-art .ch12-stop-t{grid-area:t}
+.ch12-stop-art{grid-area:a;display:block;width:100%;height:auto;max-height:clamp(260px,34vw,420px);object-fit:contain}
+.ch12-stop-t > * + *{margin-top:var(--flow)}
+.chapter-article .ch12-stop-m{align-self:start;font-family:var(--font-heading);font-weight:900;line-height:1.15}
+.is-years .ch12-stop-m{color:var(--stamp);font-size:clamp(26px,2.4vw,36px);font-variant-numeric:tabular-nums;padding-top:2px}
+.is-senses .ch12-stop-m{justify-self:start;padding:6px 14px 7px;border-radius:9px 9px 0 0;border:1px solid var(--edge);
+  border-bottom:2px solid var(--stamp);background:color-mix(in srgb,var(--gold) 16%,var(--panel));color:var(--maroon-deep);
+  font-size:clamp(16px,1.3vw,19px);margin-top:4px}
+
+/* 05 — the charter's three points, as three sheets */
+.ch12-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,1.8vw,24px)}
+.ch12-sheet{background:var(--panel);border:1px solid var(--edge);border-top:3px solid var(--stamp);border-radius:4px;
+  padding:16px 18px 18px;box-shadow:var(--shadow)}
+.chapter-article .ch12-sheet p{font-size:17px;line-height:1.75}
+
+@media (max-width:899px){
+  .ch12-pair,.ch12-cards{grid-template-columns:minmax(0,1fr)}
+  .ch12-stop,.ch12-stop.has-art{grid-template-columns:minmax(0,1fr);grid-template-areas:none;gap:8px}
+  .ch12-stop.has-art .ch12-stop-m,.ch12-stop.has-art .ch12-stop-t,.ch12-stop-art{grid-area:auto}
+  .ch12-stop-art{order:1;max-height:none}
+  .ch12-stop.has-art .ch12-stop-t{order:2}
+}
+/* a narrow screen: crop the open folder to its sheets, so the heading stays readable —
+   the page box follows the crop by itself (it reads object-position) */
+@media (max-width:699px){
+  .ch12-desk,.ch12-open{margin-block-start:-18px}
+  /* one link a row — half a phone is too narrow for a folder's title */
+  .ch12-unit-nav{grid-template-columns:minmax(0,1fr);gap:8px}
+  .ch12-unit-nav > span:empty{display:none}
+  .ch12-step-t{max-width:none}
+  .ch12-to-desk{order:3;justify-self:center;margin-top:10px}
+  .ch12-open-img{aspect-ratio:5/4;object-position:12% 50%}
+}
+@media (prefers-reduced-motion:reduce){
+  .ch12-desk-hit polygon{transition:none}
+  .ch12-unit:not(.is-away){animation:none}
+}
