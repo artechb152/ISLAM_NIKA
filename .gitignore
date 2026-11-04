@@ -66,3 +66,8 @@ concept/chapter9/mockup/assets/
 
 # chapter 10: generated source PNGs (ChatGPT). The site ships the 1920 JPGs; the sources stay local.
 concept/chapter10/gen/
+
+# chapter 11: the Blender relief scene (96MB each) and the ChatGPT source PNGs stay local
+concept/chapter11/blender/*.blend
+concept/chapter11/blender/*.blend1
+concept/chapter11/gen/

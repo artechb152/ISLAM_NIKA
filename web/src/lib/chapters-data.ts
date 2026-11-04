@@ -101,16 +101,16 @@ export const chapterCategories: CategoryDef[] = [
     chapters: [
       ch(9, 'האסלאם השיעי', {
         href: '/chapter9',
-        /* the old card carried machine-written Arabic (rule 40); the chapter's own banner frame */
-        image: '/assets/chapter9/hero-1.jpg',
         available: true,
       }),
       ch(10, 'זרמים שונים באסלאם', {
         href: '/chapter10',
-        image: '/assets/chapter10/hero-1.jpg',
         available: true,
       }),
-      ch(11, 'מקורות ואסכולות ההלכה'),
+      ch(11, 'מקורות ואסכולות ההלכה', {
+        href: '/chapter11',
+        available: true,
+      }),
     ],
   },
   {
