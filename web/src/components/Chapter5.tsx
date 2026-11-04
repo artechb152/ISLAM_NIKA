@@ -29,6 +29,7 @@
    printed twice or dropped. Section titles, sub-headings and the years in the
    headings are editorial and live in layout.json — as chapter 2's do. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -632,6 +633,7 @@ export default function Chapter5() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

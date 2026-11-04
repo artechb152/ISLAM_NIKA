@@ -7,6 +7,7 @@
    The header search, the off-canvas category drawer (hamburger), navigation and completion
    marks all carry over unchanged; one data source (lib/chapters-data) still feeds everything. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -664,6 +665,7 @@ export default function ChaptersScreen() {
               </div>
             )}
           </section>
+          <SiteFooter />
         </main>
       </div>
     </div>

@@ -24,6 +24,7 @@
    Section titles, the Arabic terms and the sub-headings are editorial and live in
    layout.json. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -836,6 +837,7 @@ export default function Chapter8() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

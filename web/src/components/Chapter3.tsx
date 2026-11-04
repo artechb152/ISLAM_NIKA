@@ -24,6 +24,7 @@
    concept/chapter3/verify-chapter3.mjs fails if a fragment is printed twice or
    dropped. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -1482,6 +1483,7 @@ export default function Chapter3() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

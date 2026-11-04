@@ -28,6 +28,7 @@
    here without layout.json knowing. Titles, sub-headings and device labels are
    editorial and live in layout.json. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
@@ -633,6 +634,7 @@ export default function Chapter7() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

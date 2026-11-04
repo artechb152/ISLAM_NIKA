@@ -11,6 +11,7 @@
    עמוד יכול להעביר `rail` — ואז הוא יושב בסרגל במקום רשימת העמודים (במילון: החיפוש
    והאותיות). הפונקציה מקבלת `close`, כדי שלחיצה בתוך המגירה בנייד תסגור אותה. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, type ReactNode } from 'react'
@@ -125,6 +126,7 @@ export default function ReferenceShell({
               {children}
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

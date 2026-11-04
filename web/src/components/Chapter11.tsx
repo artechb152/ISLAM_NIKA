@@ -21,6 +21,7 @@
    text(), addressed by its §N.fragment. Map labels, place buttons and card titles are cut out of
    a fragment's own sentence ({from, cut}, rule 27) and checked by the same gate. */
 
+import SiteFooter from '@/components/SiteFooter'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -521,6 +522,7 @@ export default function Chapter11() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

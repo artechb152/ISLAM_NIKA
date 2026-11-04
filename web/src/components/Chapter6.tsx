@@ -1,5 +1,6 @@
 'use client'
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
@@ -940,6 +941,7 @@ export default function Chapter6() {
 
         </main>
       </div>
+      <SiteFooter />
       </div>
       </div>
     </div>

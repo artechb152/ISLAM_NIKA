@@ -1,0 +1,29 @@
+/* The site footer (components/SiteFooter.tsx). Loaded by every page that shows it, in the
+   chapter sheets' tokens with fallbacks — the chapters screen runs on chapters.css, which does
+   not declare them. No white: the band is the parchment, a gold hairline above it. */
+.site-footer{
+  margin-top:0;   /* the page above already ends on its own bottom padding */
+  border-top:1px solid var(--gold-soft,#d9b45b);
+  background:var(--panel,#f3ead6);
+  color:var(--maroon-deep,#571820);
+  font-family:var(--font-body,"Ploni",Arial,sans-serif);
+}
+.site-footer-inner{
+  display:flex;align-items:center;justify-content:space-between;gap:16px 28px;flex-wrap:wrap;
+  padding:22px var(--content-gutter,clamp(28px,4vw,64px)) calc(22px + env(safe-area-inset-bottom));
+}
+.site-footer-contact{margin:0;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  font-size:clamp(15px,1.15vw,17px);font-weight:700;color:var(--ink,#3c2c1d)}
+.site-footer-contact a{color:var(--maroon-deep,#571820);text-decoration:none;font-variant-numeric:tabular-nums;
+  border-bottom:1px solid var(--gold-soft,#d9b45b);padding-bottom:1px}
+.site-footer-contact a:hover{color:var(--stamp,#a5322f);border-bottom-color:currentColor}
+.site-footer-contact a:focus-visible{outline:2px solid var(--maroon,#8a2733);outline-offset:3px;border-radius:2px}
+.site-footer-mark{display:block;height:clamp(20px,1.8vw,26px);width:auto;fill:currentColor;flex:none}
+@media (max-width:599px){
+  .site-footer-inner{justify-content:center;text-align:center}
+  .site-footer-contact{justify-content:center}
+}
+/* the chapters screen: the grid panel ends on a hairline and a margin, and <main> pads below —
+   with the footer last in <main> that drew a second line over it and left a gap under it */
+.content:has(> .site-footer){padding-bottom:0}
+.content > .chapters-panel:has(+ .site-footer){border-bottom:0;margin-bottom:0}

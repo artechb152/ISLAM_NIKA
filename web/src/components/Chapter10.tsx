@@ -19,6 +19,7 @@
    fails if a fragment is printed twice or dropped. Device labels are cut out of a
    fragment's own sentence ({from, cut}, rule 27) and checked by the same gate. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
@@ -579,6 +580,7 @@ export default function Chapter10() {
             <Viewer src={pic} onClose={() => setPic(null)} />
             </SplitCtx.Provider>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

@@ -42,6 +42,7 @@
    file. concept/chapter2/audit.mjs is the one that reads the rendered page:
    every fragment present, and the shape still chapter 6's. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -1366,6 +1367,7 @@ export default function Chapter2() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

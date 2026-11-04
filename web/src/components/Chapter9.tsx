@@ -23,6 +23,7 @@
    fragment's own sentence ({from, cut}, rule 27) and checked by the same gate. The only
    words here that are not the source's are the controls („גללו", „עם התוספות של השיעים"). */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -1030,6 +1031,7 @@ export default function Chapter9() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>
