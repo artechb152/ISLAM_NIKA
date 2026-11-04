@@ -142,7 +142,10 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter15',
         available: true,
       }),
-      ch(16, 'ימי ציון ואזכור'),
+      ch(16, 'ימי ציון ואזכור', {
+        href: '/chapter16',
+        available: true,
+      }),
     ],
   },
 ]
