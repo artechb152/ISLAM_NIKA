@@ -138,7 +138,10 @@ export const chapterCategories: CategoryDef[] = [
     title: 'זמן',
     icon: 'cap',
     chapters: [
-      ch(15, 'ציר הזמן בראשית האסלאם'),
+      ch(15, 'ציר הזמן בראשית האסלאם', {
+        href: '/chapter15',
+        available: true,
+      }),
       ch(16, 'ימי ציון ואזכור'),
     ],
   },
