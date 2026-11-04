@@ -18,11 +18,14 @@
 .ch12-ar{font-family:"Segoe UI",Tahoma,sans-serif;font-size:1.06em;color:var(--maroon)}
 
 .ch12-body > * + *{margin-top:var(--flow)}
-.ch12-body > :is(.ch12-pair,.ch12-quote,.ch12-chain,.ch12-cards,.ch12-fig),
-.ch12-body > :is(.ch12-pair,.ch12-quote,.ch12-chain,.ch12-cards,.ch12-fig) + *{margin-top:var(--flow-block)}
+.ch12-body > :is(.ch12-pair,.ch12-quote,.ch12-chain,.ch12-cards,.ch12-aside),
+.ch12-body > :is(.ch12-pair,.ch12-quote,.ch12-chain,.ch12-cards,.ch12-aside) + *{margin-top:var(--flow-block)}
 
-/* a mood picture between paragraphs: a vignette on the page, never framed */
-.ch12-fig{display:block;width:100%;max-width:560px;height:auto;max-height:clamp(240px,32vw,380px);object-fit:contain;margin-inline:auto}
+/* a picture beside the paragraphs it belongs to: text on the reading side (right), picture left */
+.ch12-aside{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(24px,3.2vw,52px);align-items:center}
+.ch12-aside-t > * + *{margin-top:var(--flow)}
+.ch12-aside-art{display:block;width:100%;height:auto;max-height:clamp(260px,32vw,400px);object-fit:contain}
+@media (max-width:899px){.ch12-aside{grid-template-columns:minmax(0,1fr)}.ch12-aside-art{order:-1;max-height:300px}}
 
 /* ---------- the desk: the head of the page ---------- */
 /* full bleed, like chapter 6's banner; the render fills it edge to edge (it is all wood) */

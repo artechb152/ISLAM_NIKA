@@ -59,7 +59,7 @@ type Block =
   | { pair: Stop[] }
   | { chain: { kind: 'years' | 'senses'; stops: Stop[] } }
   | { cards: string[] }
-  | { fig: string }
+  | { aside: { img: string; p: string[] } }
 interface LayoutSection { id: string; n: string; title: string; term: string; blocks: Block[] }
 const SECTIONS = (layoutData as unknown as { sections: LayoutSection[] }).sections
 
@@ -148,10 +148,15 @@ function Blocks({ blocks }: { blocks: Block[] }) {
     <>
       {blocks.map((b, i) => {
         if ('p' in b) return paras(b.p).map((g) => <p data-reveal key={g[0]}>{sentences(g)}</p>)
-        if ('fig' in b) return (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img className="ch12-fig" data-reveal src={`${ART}${b.fig}.webp`} alt="" loading="lazy" key={`fig-${i}`} />
-        )
+        if ('aside' in b) {
+          return (
+            <div className="ch12-aside" data-reveal key={`aside-${i}`}>
+              <div className="ch12-aside-t">{paras(b.aside.p).map((g) => <p key={g[0]}>{sentences(g)}</p>)}</div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="ch12-aside-art" src={`${ART}${b.aside.img}.webp`} alt="" loading="lazy" />
+            </div>
+          )
+        }
         if ('quote' in b) return <p className="ch12-quote" data-reveal key={b.quote[0]}>{sentences(b.quote)}</p>
         if ('pair' in b) {
           return (

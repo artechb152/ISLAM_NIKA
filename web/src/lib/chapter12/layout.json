@@ -39,14 +39,14 @@
           ]
         },
         {
-          "p": [
-            "§2.a",
-            "§2.sufi",
-            "§2.weak"
-          ]
-        },
-        {
-          "fig": "f1-path"
+          "aside": {
+            "img": "f1-path",
+            "p": [
+              "§2.a",
+              "§2.sufi",
+              "§2.weak"
+            ]
+          }
         },
         {
           "p": [
@@ -70,9 +70,6 @@
             "§6.ramadan",
             "§6.rule"
           ]
-        },
-        {
-          "fig": "f2-fork"
         },
         {
           "p": [
@@ -106,10 +103,13 @@
           ]
         },
         {
-          "p": [
-            "§7.meaning",
-            "§7.new"
-          ]
+          "aside": {
+            "img": "f2-fork",
+            "p": [
+              "§7.meaning",
+              "§7.new"
+            ]
+          }
         }
       ]
     },
@@ -120,12 +120,12 @@
       "term": "1918–1989",
       "blocks": [
         {
-          "p": [
-            "§8.fall"
-          ]
-        },
-        {
-          "fig": "f3-roots"
+          "aside": {
+            "img": "f3-roots",
+            "p": [
+              "§8.fall"
+            ]
+          }
         },
         {
           "pair": [
@@ -338,19 +338,19 @@
       "term": "استشهاد",
       "blocks": [
         {
-          "p": [
-            "§19.a",
-            "§19.witness",
-            "§19.cf"
-          ]
+          "aside": {
+            "img": "f4-lamp",
+            "p": [
+              "§19.a",
+              "§19.witness",
+              "§19.cf"
+            ]
+          }
         },
         {
           "p": [
             "§20.a"
           ]
-        },
-        {
-          "fig": "f4-lamp"
         },
         {
           "pair": [
@@ -403,14 +403,14 @@
       "term": "1988",
       "blocks": [
         {
-          "p": [
-            "§23.a",
-            "§23.yasin",
-            "§23.charter"
-          ]
-        },
-        {
-          "fig": "f5-olives"
+          "aside": {
+            "img": "f5-olives",
+            "p": [
+              "§23.a",
+              "§23.yasin",
+              "§23.charter"
+            ]
+          }
         },
         {
           "p": [
