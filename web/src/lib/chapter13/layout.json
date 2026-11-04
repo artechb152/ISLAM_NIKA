@@ -1,0 +1,21 @@
+{
+  "$note": "הפריסה של פרק 13: אולם תרנים שהולכים בו בחופשיות (הכרעות המשתמשת 3–4.11.2026, concept/chapter13/DECISIONS.md). כל תחנה היא כרטיס אחד מהחוברת, בסדר המקור, מדורגות בזיגזג — הראשונה בימין. kind נגזר מכותרת הכרטיס ('דגל …' = flag על תורן, 'סמל …' = emblem על לוח עומד) והשער בודק שהוא תואם. tex = החיתוך מהחוברת (public/assets/chapter13/flags) — הדגלים אינם נכס מחולל (כלל 40). crop = חיתוך UV לצילום של §5 (u0,v0,u1,v1). הקומפוננטה קוראת מכאן ולא כותבת טקסט.",
+  "stations": [
+    { "sec": "§1", "kind": "flag", "tex": "s01.png" },
+    { "sec": "§2", "kind": "flag", "tex": "s02.png" },
+    { "sec": "§3", "kind": "flag", "tex": "s03.png" },
+    { "sec": "§4", "kind": "flag", "tex": "s04.png" },
+    { "sec": "§5", "kind": "flag", "tex": "s05.png", "crop": [0.15, 0.135, 0.86, 0.98] },
+    { "sec": "§6", "kind": "emblem", "tex": "s06.png" },
+    { "sec": "§7", "kind": "emblem", "tex": "s07.png" },
+    { "sec": "§8", "kind": "flag", "tex": "s08.png" },
+    { "sec": "§9", "kind": "emblem", "tex": "s09.png" },
+    { "sec": "§10", "kind": "emblem", "tex": "s10.png" },
+    { "sec": "§11", "kind": "flag", "tex": "s11.png" },
+    { "sec": "§12", "kind": "flag", "tex": "s12.png" },
+    { "sec": "§13", "kind": "emblem", "tex": "s13.png" },
+    { "sec": "§14", "kind": "flag", "tex": "s14.png" },
+    { "sec": "§15", "kind": "flag", "tex": "s15.png" },
+    { "sec": "§16", "kind": "flag", "tex": "s16.png" }
+  ]
+}

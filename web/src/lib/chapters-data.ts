@@ -120,7 +120,11 @@ export const chapterCategories: CategoryDef[] = [
     icon: 'shield',
     chapters: [
       ch(12, 'ג׳האד, ריבאט ואסתשהאד'),
-      ch(13, 'דגלים וסמלים'),
+      /* a hall the reader walks through (concept/chapter13/DECISIONS.md) */
+      ch(13, 'דגלים וסמלים', {
+        href: '/chapter13',
+        available: true,
+      }),
       ch(14, 'מוטיבים אסלאמיים בחומר המודיעין הגלוי'),
     ],
   },
