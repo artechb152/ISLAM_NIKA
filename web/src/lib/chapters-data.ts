@@ -125,7 +125,11 @@ export const chapterCategories: CategoryDef[] = [
         href: '/chapter13',
         available: true,
       }),
-      ch(14, 'מוטיבים אסלאמיים בחומר המודיעין הגלוי'),
+      /* the title as the booklet prints it („מתוך", not „בחומר") — the chapter's own h1 */
+      ch(14, 'מוטיבים אסלאמיים מתוך המודיעין הגלוי', {
+        href: '/chapter14',
+        available: true,
+      }),
     ],
   },
   {

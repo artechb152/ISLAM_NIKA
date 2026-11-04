@@ -1,0 +1,62 @@
+{
+  "$note": "פרומפטים לתמונות פרק 14 — ChatGPT דרך web/scripts/chatgpt-image.mjs (בחירת המשתמשת, 3.11.2026). רפרנס סגנון: web/public/assets/chapter7/cut-herald.webp. כללים: 37 (אדום), 40 (בלי אותיות), 42 (באנר בהיר), 43 (אין דמויות בכלל בפרק הזה). הפיילוט ראשון: minbar-cut.",
+  "style": "Use the attached painting ONLY as a style reference: the same soft realistic watercolor with visible paper texture, the same warm palette, the subject as a vignette that fades into a plain pure white background at its edges. Do not copy its content. Absolutely no text, no letters, no Arabic calligraphy, no inscriptions, no writing on any surface, no signature, no watermark, no flags, no logos, no emblems. No people at all.",
+  "images": [
+    {
+      "name": "minbar-cut",
+      "prompt": "Paint: the empty prayer hall of the great Umayyad Mosque in Damascus at first light of dawn. A tall carved wooden minbar with a long straight staircase rising to a small canopy stands against the wall; rows of slender stone columns and round arches recede behind it; soft pale morning light falls through high windows. The floor is covered with deep red prayer carpets. Completely empty — no people. All wall surfaces plain or with simple geometric and floral patterns only, never any calligraphy or letters. Square-ish composition, the minbar the clear subject, edges dissolving into white."
+    },
+    {
+      "name": "lectern-cut",
+      "prompt": "Paint: a single empty speaker's lectern of dark wood with a cluster of microphones on it, standing before a heavy deep red curtain in a dim hall; a soft spotlight falls on the lectern. Completely plain — no emblem, no logo, no flag, no picture, no writing anywhere. No people. Edges dissolving into white."
+    },
+    {
+      "name": "hero",
+      "prompt": "Paint: the rooftops of old Damascus on a very bright clear morning, seen from a high roof: flat roofs, domes, satellite dishes and TV antennas on many roofs, and in the distance the minarets of the great Umayyad Mosque against a pale luminous sky. In the foreground a red cloth hangs on a washing line. Wide 16:9 landscape that fills the whole frame (no white vignette for this one). Very bright, airy and sunlit — this is a banner and will be darkened later. Leave the centre calm. No people."
+    },
+    {
+      "name": "osint-media",
+      "prompt": "An old wooden table-top radio with a red fabric speaker grille, a folded newspaper lying beside it with its pages blank or only soft grey smudges (absolutely no letters or headlines), and a modern smartphone lying on top of the newspaper with a dark blank screen. Warm morning light."
+    },
+    {
+      "name": "syria-wide",
+      "prompt": "The great courtyard of the Umayyad Mosque in Damascus at first light of dawn: a vast polished marble floor reflecting the pale sky, long arcades on the sides, the facade with golden mosaics of trees and buildings (no letters), a tall minaret, a few pigeons. Through one open arch, red prayer carpets are visible. Wide 21:9 panorama that FILLS THE WHOLE FRAME edge to edge (no white vignette for this one). Bright, airy, luminous. No people."
+    },
+    {
+      "name": "m-badr",
+      "prompt": "A wide desert valley at dawn with a few old stone wells and a small grove of date palms, low hills behind, long soft shadows; a red woven cloth hangs over the rim of the nearest well. No people, no animals."
+    },
+    {
+      "name": "m-fajr",
+      "prompt": "Rows of deep red prayer rugs laid in straight lines across the floor of an empty stone mosque hall at dawn; pale blue-gold light falls through high arched windows in long beams. No people."
+    },
+    {
+      "name": "m-umayyad",
+      "prompt": "The exterior of the Umayyad Mosque in Damascus seen from its courtyard: the central transept facade with arches and shimmering golden-green mosaics of trees and palaces (no letters), a slender minaret beside it, morning light; a red carpet lies in the shade of one arch. No people."
+    },
+    {
+      "name": "m-saladin",
+      "prompt": "The small domed mausoleum of Saladin in Damascus: a modest stone building with a ribbed RED dome, set in a quiet garden with a few trees, beside the high wall of the great mosque; soft afternoon light. No people."
+    },
+    {
+      "name": "m-kiswa",
+      "prompt": "A folded piece of heavy black silk cloth richly embroidered in gold thread with geometric and floral patterns only (absolutely no calligraphy, no letters), resting on a deep red velvet cushion. Close still life."
+    },
+    {
+      "name": "m-uniform",
+      "prompt": "A plain olive military field jacket with no insignia, no badges, no patches and no flags, hanging on a wooden peg on a pale stone wall; below it on the floor a folded red prayer rug. Still life, soft light. No people."
+    },
+    {
+      "name": "karbala-wc",
+      "prompt": "A flat desert plain beside a river at sunset, a grove of date palms along the water, a small cluster of tents with red cloth panels in the middle distance, a vast glowing sky. Calm and solemn, no battle, no weapons, no people visible."
+    },
+    {
+      "name": "m-agreement",
+      "prompt": "An empty negotiating table with a red tablecloth, two empty chairs facing each other, two glasses of water and two closed folders (no writing, no flags, no emblems); soft light from a tall window. No people."
+    },
+    {
+      "name": "m-faith",
+      "prompt": "A narrow stony path climbing a bare hillside toward a bright dawn sky, small red wildflowers along the path, the light breaking over the ridge. No people."
+    }
+  ]
+}
