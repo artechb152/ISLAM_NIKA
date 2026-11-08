@@ -13,7 +13,7 @@
 | Visual language, shell, shared devices, rhythm of a page | **Chapter 6** | `chapter6-article.css` is the design system. Every chapter loads it first. |
 | Article rules: text pipeline, gates, one sentence = one source, section shape | **Chapter 2** (and 5) | They built the passages → layout → gate pipeline. Chapter 6 predates it. |
 | A lean, recent, rule-abiding article | **Chapter 5** | Newest; written against BUILD-RULES; removed devices rather than add them. |
-| Anything | **Not chapter 4** | CLAUDE.md: "לא גמור, לא לסמוך ולא להעתיק". BUILD-RULES §0 says the same. Describe it; don't copy it. |
+| Anything | **Not chapter 4** | Finished (the user, 8.11) but never the model: it was built before the rules settled. Describe it; don't copy it. |
 
 When two chapters disagree, chapter 6 wins on look and chapter 2/5 win on content handling. Chapter 4 is never the tiebreaker.
 
@@ -62,7 +62,7 @@ It sits inside section 01, not above it. It is the only `<h1>`.
 - The media box has the poster as a CSS background, with `video` (autoplay/muted/loop/playsInline, `tabIndex -1`) on top.
 - Veil: a flat scrim, `::after rgba(30,18,8,.55)`.
 - Title: cream, Kedem 900, `clamp(42px,4.5vw,70px)`. No eyebrow line such as "פרק חמישי"; chapter 6 has none.
-- Reduced motion hides the video. The poster must still show. ⚠ Chapter 4's banner turns solid maroon because it has no fallback.
+- Reduced motion hides the video. The poster must still show. (Chapter 4's banner once went solid maroon for lack of one; it now has the still under the video.)
 - ⚠ The `-42px` is tuned to desktop padding. At ≤680 the banner slides about 24px under the header (seen in chapter 6).
 - The banner asset must be bright, because it sits under a 55% veil. Chapter 5 adds `sepia(.16) saturate(1.12)`.
 
@@ -168,7 +168,7 @@ Each chapter declares its own on `.chapter-article` or `:root`, and the numbers 
 - Transliteration uses `--gold-text` (chapter 5 `.ch5-tr`, chapter 4 `.ch4-tr`). Rule 38: gold for transliteration, maroon for emphasis. Chapter 2 breaks it by giving terms maroon.
 - The phrases come from data (`em[]`, `tr[]`), must be substrings of the text, and are checked by the gate: emphasis is a claim.
 - Phrases of three words or fewer are bound with NBSP so a name never breaks across a line.
-- ⚠ `emphasise()` fails silently when a phrase doesn't match (chapter 4 §57 has straight vs curly quotes). `pick` and `mapLabel` throw instead, which is the better pattern.
+- ⚠ `emphasise()` fails silently when a phrase doesn't match (chapter 4 §57 once missed on straight vs curly quotes; fixed). `pick` and `mapLabel` throw instead, which is the better pattern.
 - Scroll-lit `mark.wmark` (gold background, maroon underline) is used only inside Scrolly cards.
 
 ### Images: the registers and how each is set
@@ -302,7 +302,7 @@ A Fragment is:
   - The art is `position:relative`, with an absolute `object-fit:contain` image and a height floor `clamp(520px,72vh,880px)`.
   - The body is centred; `.is-flipped` swaps the sides. Alternate sides between uses.
   - Below 900 the art is removed, so nothing that must survive on mobile can go in it (chapter 4 deed).
-  - ⚠ The **reduced-motion bug** is still in the shared sheet: `.bleed-aside-art{position:static}` makes the image cover the section. Chapter 3 patches it locally; chapter 4 is broken (verified 1024×4566).
+  - The old reduced-motion bug (`.bleed-aside-art{position:static}` in the shared sheet, the image covering the section) is gone from `chapter6-article.css`; the local patches in chapters 3, 14 and 16 are now harmless.
 - **Chapter 6 shahada / charity heroes:** cutout plus body, `min-height:clamp(560px,72vh,700px)`, centred, with `scroll-snap-align:center`. Snap is `proximity` only, never `mandatory`.
 - **Chapter 6 pillars path:** a 5-column grid on a hairline, with icon, name and a hover-peek verb (its space reserved). ⚠ On a 390px phone it is a sideways scroller showing two of five, with no cue that more exist.
 - **Chapter 5 Claims:** two **equal** `--paper` cards. There is no "pick a side": unequal space would itself be an argument.
