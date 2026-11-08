@@ -17,7 +17,7 @@ import * as THREE from 'three'
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import passages from '@/lib/chapter13/passages.json'
 import layout from '@/lib/chapter13/layout.json'
-import { markStationRead, readStore, STATION_ORDER } from '@/lib/chapter13/progress'
+import { markStationRead, practiceComplete, readStore, STATION_ORDER } from '@/lib/chapter13/progress'
 
 const ART = '/assets/chapter13/'
 
@@ -545,17 +545,33 @@ export default function FlagHall() {
   const [near, setNear] = useState<number | null>(null)
   const [open, setOpen] = useState<number | null>(null)
   const [read, setRead] = useState<string[]>([])
+  /* the practice opens once all sixteen cards were read (the user, 8.11.2026). Reading the
+     last one THIS visit raises the closing card when it is shut; a reader who comes back
+     with all sixteen read finds the way in the HUD instead, without the ceremony again. */
+  const [finale, setFinale] = useState(false)
+  const [practiced, setPracticed] = useState(false)
 
-  useEffect(() => setRead(readStore().stations), [])
+  useEffect(() => {
+    setRead(readStore().stations)
+    setPracticed(practiceComplete())
+  }, [])
   const openCard = useCallback((i: number) => {
     keys.current.clear()
     setOpen(i)
-    setRead(markStationRead(STATIONS[i].sec).stations)
+    const before = readStore().stations.length
+    const now = markStationRead(STATIONS[i].sec).stations
+    setRead(now)
+    if (before < STATION_ORDER.length && now.length === STATION_ORDER.length) setFinale(true)
   }, [])
+  const showFinale = finale && open === null
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (!started) return
+      if (showFinale) {
+        if (e.code === 'Escape') setFinale(false)
+        return
+      }
       if (open !== null) {
         if (e.code === 'Escape' || e.code === 'KeyE') {
           e.preventDefault()
@@ -587,7 +603,7 @@ export default function FlagHall() {
       window.removeEventListener('keyup', up)
       window.removeEventListener('blur', blur)
     }
-  }, [started, open, near, openCard])
+  }, [started, open, near, openCard, showFinale])
 
   /* העכבר לא מזיז כלום (המשתמשת, 4.11) — רק המקלדת. במגע: ארבעה כפתורים, לוחצים ומחזיקים */
   const hold = (k: string) => ({
@@ -619,7 +635,7 @@ export default function FlagHall() {
               <StationView key={i} i={i} />
             ))}
           </Suspense>
-          <Player keys={keys} frozen={!started || open !== null} look={look} onNear={setNear} />
+          <Player keys={keys} frozen={!started || open !== null || showFinale} look={look} onNear={setNear} />
         </Canvas>
       </div>
 
@@ -631,15 +647,21 @@ export default function FlagHall() {
         <p className="ch13-count" aria-live="polite">
           נקראו {done} מתוך {all}
         </p>
+        {done === all && (
+          <Link href="/chapter13/practice" className="ch13-practice">
+            לתרגול המסכם
+            {practiced && <span className="ch13-done">הושלם</span>}
+          </Link>
+        )}
       </header>
 
-      {started && open === null && near !== null && (
+      {started && open === null && !showFinale && near !== null && (
         <button type="button" className="ch13-prompt" onClick={() => openCard(near)}>
           <kbd>E</kbd> {CARDS[STATIONS[near].sec].title.name}
         </button>
       )}
 
-      {started && open === null && (
+      {started && open === null && !showFinale && (
         <div className="ch13-touch" aria-hidden="true">
           <button type="button" className="is-up" {...hold('w')}>▲</button>
           <button type="button" className="is-left" {...hold('left')}>◀</button>
@@ -649,6 +671,24 @@ export default function FlagHall() {
       )}
 
       {open !== null && <CardView i={open} onClose={() => setOpen(null)} />}
+
+      {showFinale && (
+        <div className="ch13-veil" onClick={() => setFinale(false)}>
+          <section className="ch13-card ch13-intro" role="dialog" aria-modal="true" aria-labelledby="ch13-finale-title" onClick={(e) => e.stopPropagation()}>
+            <p className="ch13-kicker">נקראו {done} מתוך {all}</p>
+            <h2 id="ch13-finale-title">קראתם את כל הדגלים והסמלים</h2>
+            <p className="ch13-sub">עכשיו — התרגול המסכם של הפרק.</p>
+            <div className="ch13-finale-go">
+              <Link href="/chapter13/practice" className="ch13-go" autoFocus>
+                לתרגול המסכם
+              </Link>
+              <button type="button" className="ch13-stay" onClick={() => setFinale(false)}>
+                להמשיך באולם
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {!started && (
         <div className="ch13-veil">

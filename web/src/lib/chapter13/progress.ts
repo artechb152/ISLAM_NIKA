@@ -44,3 +44,24 @@ export function markStationRead(sec: string): Ch13Store {
   }
   return store
 }
+
+/* THE ONLY PLACE `islam:chapter:13` IS WRITTEN — by the practice, once every question is
+   solved (Chapter13Practice). Reading all sixteen cards opens the practice; it does not
+   finish the chapter. */
+export function markChapterComplete(): void {
+  try {
+    window.localStorage.setItem('islam:chapter:13', 'done')
+  } catch {
+    /* blocked storage must never break the chapter */
+  }
+}
+
+/** the practice's flag, for the hall's „הושלם" chip — read in an effect, never in render */
+export function practiceComplete(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem('islam:chapter:13') === 'done'
+  } catch {
+    return false
+  }
+}

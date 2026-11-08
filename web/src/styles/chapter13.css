@@ -106,3 +106,20 @@ kbd {
   background: var(--maroon-deep); color: var(--cream);
 }
 .ch13-go:hover, .ch13-go:focus-visible { background: var(--maroon); }
+
+/* ── הדרך לתרגול — אחרי שכל 16 הכרטיסים נקראו ── */
+.ch13-practice {
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 15px;
+  background: var(--panel); color: var(--maroon-deep); border: 1px solid var(--edge);
+  padding: 6px 14px; border-radius: 999px; font-weight: 700;
+}
+.ch13-practice:hover, .ch13-practice:focus-visible { background: var(--paper); color: var(--maroon); }
+.ch13-done { font-weight: 400; font-size: 13px; color: var(--gold-text); }
+.ch13-finale-go { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 20px; margin-top: 22px; }
+a.ch13-go { display: inline-block; text-decoration: none; }
+.ch13-stay {
+  font: inherit; font-size: 16px; border: 0; background: transparent; color: var(--muted);
+  cursor: pointer; text-decoration: underline; text-underline-offset: 4px;
+}
+.ch13-stay:hover, .ch13-stay:focus-visible { color: var(--maroon); }
+@media (max-width: 599px) { .ch13-hud:has(.ch13-practice) .ch13-chapter { display: none; } }
