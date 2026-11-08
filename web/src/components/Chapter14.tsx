@@ -25,6 +25,7 @@
    fails if a fragment is printed twice or dropped. Labels are cut out of a fragment's own
    sentence ({from, cut}, rule 27) or are editorial (layout.json, rule 24). */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
@@ -556,6 +557,7 @@ export default function Chapter14() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

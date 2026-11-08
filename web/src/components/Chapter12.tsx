@@ -29,6 +29,7 @@
    labels on the desk are typeset by us into the render (blender/labels.mjs) and carry only
    the source's headings, its Arabic terms and its years. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -602,6 +603,7 @@ export default function Chapter12() {
               ))}
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@
    by its §N; layout.json says which rows each section prints, and
    concept/chapter15/verify-chapter15.mjs fails if a row is printed twice or dropped. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -372,6 +373,7 @@ export default function Chapter15() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>

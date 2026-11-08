@@ -20,6 +20,7 @@
    fails if a fragment is printed twice or dropped. Every label (a date, a blessing, a link)
    is cut out of a fragment's own sentence ({from, cut}, rule 27) and checked by the same gate. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -618,6 +619,7 @@ export default function Chapter16() {
               </div>
             </main>
           </div>
+          <SiteFooter />
         </div>
       </div>
     </div>
