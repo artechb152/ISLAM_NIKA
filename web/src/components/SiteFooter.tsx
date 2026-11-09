@@ -1,20 +1,21 @@
 /* The site's footer — the studio that built it, and how to reach it for more work (the user,
-   4.11.2026: „לעוד פרויקטים תיצרו קשר עם 0526732911").
+   4.11.2026; the contact changed 9.11.2026 to רס״ן צביקה פרנקל, 0522901205).
 
    The logo is ARTECH's own mark, its paths copied from the studio's SVG — drawn in currentColor
    so it takes the site's maroon: its blue is a palette the site never uses, and the white
    version is a white the site never shows (rule: no white anywhere). */
 import '@/styles/site-footer.css'
 
-const PHONE = '052-6732911'
-const TEL = 'tel:+972526732911'
+const CONTACT = 'רס״ן צביקה פרנקל'
+const PHONE = '052-2901205'
+const TEL = 'tel:+972522901205'
 
 export default function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer-inner">
         <p className="site-footer-contact">
-          לעוד פרויקטים צרו קשר
+          לעוד פרויקטים צרו קשר עם {CONTACT}
           <a href={TEL} dir="ltr">{PHONE}</a>
         </p>
         <svg className="site-footer-mark" viewBox="0 0 360.14 84.24" role="img" aria-label="ARTECH">
