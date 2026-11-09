@@ -114,3 +114,9 @@
 @media (prefers-reduced-motion:reduce){
   .ch11-point i{animation:none}
 }
+
+/* the elevation data's credit, under each map (9.11.2026) — small and muted, an editorial line.
+   The stage's bottom margin collapses into the negative top so the line sits just under the frame. */
+.chapter-article .ch11-credit{margin:calc(8px - var(--flow-block)) 0 var(--flow-block);
+  font-size:12px;line-height:1.5;color:var(--muted)}
+.ch11-credit bdi{unicode-bidi:isolate}

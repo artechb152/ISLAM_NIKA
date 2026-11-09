@@ -271,12 +271,23 @@ function MapSection({ id }: { id: string }) {
             </div>
             <nav className="ch11-pop-nav" aria-label="מעבר בין הנקודות במפה">
               <button type="button" disabled={i === 0} aria-label="הקודם" onClick={() => open(i)}>→</button>
-              <span>{i + 1} / {pts.length}</span>
+              <span>{i + 1} מתוך {pts.length}</span>
               <button type="button" disabled={i === pts.length - 1} aria-label="הבא" onClick={() => open(i + 2)}>←</button>
             </nav>
           </details>
         ))}
       </div>
+      {/* THE RELIEF'S ELEVATION DATA IS NOT OURS. build-relief.py builds the surface from AWS
+          Terrain Tiles (Terrarium, elevation-tiles-prod, z5), and their attribution page
+          (tilezen/joerd docs/attribution.md) asks for the sources to be credited. At this
+          extent and zoom those are the global ETOPO1, GMTED2010 and SRTM, and EU-DEM for
+          Europe — each in its own required wording. An editorial line, not a learning string. */}
+      <p className="ch11-credit">
+        נתוני גובה:{' '}
+        <bdi dir="ltr" lang="en">
+          Terrain Tiles (Mapzen, AWS Open Data) · GMTED2010 and SRTM data courtesy of the U.S. Geological Survey · Global ETOPO1 terrain data U.S. National Oceanic and Atmospheric Administration · Produced using Copernicus data and information funded by the European Union - EU-DEM layers
+        </bdi>
+      </p>
       <div className="ch11-flow">
         {stops.slice(last + 1).map((st, k) => <Blocks key={k} blocks={st.blocks} />)}
       </div>

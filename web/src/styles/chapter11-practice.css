@@ -1,0 +1,5 @@
+/* Chapter 11's practice — only what differs from chapter 5's practice sheet: the banner
+   still (the chapter's own hero frame, the relief low over the Mediterranean) and the
+   title's shadow. Same two lines as chapter 14's. */
+.ch11-practice-banner .ch11-practice-media{background:var(--panel) url('/assets/chapter11/hero-1.jpg') center 50%/cover no-repeat}
+.ch11-practice-banner .ch6-hero-title{text-shadow:0 3px 22px rgba(20,10,4,.55)}
