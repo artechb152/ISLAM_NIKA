@@ -248,6 +248,59 @@ const Hall = memo(function Hall() {
   )
 })
 
+/* ── הבד מתנוסס (המשתמשת, 9.11.2026: „שהדגלים יתנוססו") ──
+   גל שנע מהתורן אל הקצה החופשי, בשיידר: התורן (u=0) נעול, המשרעת גדלה לאורך הבד וקטנה ליד
+   הזרוע העליונה. הנורמל מחושב מהנגזרת של אותו גל, כך שהקפלים נקראים באור של הספוט.
+   משרעת של 10 ס"מ בקצה — הכתב על הדגל נשאר קריא מקרוב. שעון אחד לכל הדגלים (uniform משותף),
+   ותוכנית אחת לכולם (customProgramCacheKey). prefers-reduced-motion: השעון עומד — קפלים בלי תנועה. */
+const CLOTH_TIME = { value: 0 }
+
+const CLOTH_VERT = /* glsl */ `
+  float cu = uv.x;
+  float cd = 1.0 - uv.y;
+  float cA = 0.1 * cu * (0.3 + 0.7 * cd);
+  float cAu = 0.1 * (0.3 + 0.7 * cd);
+  float cAd = 0.1 * cu * 0.7;
+  float cp1 = 6.0 * cu - 1.7 * uTime + uPhase + 0.9 * cd;
+  float cp2 = 13.0 * cu - 2.9 * uTime + 2.1 * cd + 1.3 * uPhase;
+  float cs = sin(cp1) + 0.3 * sin(cp2);
+  float csu = 6.0 * cos(cp1) + 3.9 * cos(cp2);
+  float csd = 0.9 * cos(cp1) + 0.63 * cos(cp2);
+  float cz = cA * cs;
+  float cdx = (cAu * cs + cA * csu) / uW;
+  float cdy = -(cAd * cs + cA * csd) / uH;
+`
+
+function ClothClock() {
+  const still = useRef(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const set = () => { still.current = mq.matches }
+    set()
+    mq.addEventListener('change', set)
+    return () => mq.removeEventListener('change', set)
+  }, [])
+  useFrame((_, dt) => {
+    if (!still.current) CLOTH_TIME.value += Math.min(dt, 0.05)
+  })
+  return null
+}
+
+function clothMaterial(map: THREE.Texture, W: number, H: number, phase: number) {
+  const m = new THREE.MeshPhysicalMaterial({ map, side: THREE.DoubleSide, roughness: 0.8, sheen: 0.35, sheenRoughness: 0.6, sheenColor: new THREE.Color('#ffffff') })
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = CLOTH_TIME
+    sh.uniforms.uW = { value: W }
+    sh.uniforms.uH = { value: H }
+    sh.uniforms.uPhase = { value: phase }
+    sh.vertexShader = 'uniform float uTime;\nuniform float uW;\nuniform float uH;\nuniform float uPhase;\n' + sh.vertexShader
+      .replace('#include <beginnormal_vertex>', `${CLOTH_VERT}\n  vec3 objectNormal = normalize(vec3(-cdx, -cdy, 1.0));`)
+      .replace('#include <begin_vertex>', 'vec3 transformed = vec3(position.xy, cz);')
+  }
+  m.customProgramCacheKey = () => 'ch13-cloth'
+  return m
+}
+
 /* ── תחנה ── */
 function FlagCloth({ st }: { st: Station }) {
   const { tex, aspect: imgAspect } = useBookletTexture(st.tex, st.sec === '§5' ? 'revive' : 'plain')
@@ -255,19 +308,7 @@ function FlagCloth({ st }: { st: Station }) {
   const aspect = imgAspect * ((crop[2] - crop[0]) / (crop[3] - crop[1]))
   const W = FLAG_W
   const H = W / aspect
-  const geo = useMemo(() => {
-    const g = new THREE.PlaneGeometry(W, H, 48, 48)
-    const p = g.attributes.position as THREE.BufferAttribute
-    for (let i = 0; i < p.count; i++) {
-      const u = p.getX(i) / W + 0.5
-      const d = 0.5 - p.getY(i) / H
-      /* קפלים אנכיים: גל רחב + גל צר, מתרחבים כלפי מטה — בד שתלוי מזרוע */
-      const z = (0.012 + 0.05 * d) * Math.sin(u * Math.PI * 3.5 + 0.6) + (0.004 + 0.012 * d) * Math.sin(u * Math.PI * 11 + 1.3)
-      p.setZ(i, z)
-    }
-    g.computeVertexNormals()
-    return g
-  }, [W, H])
+  const geo = useMemo(() => new THREE.PlaneGeometry(W, H, 56, 32), [W, H])
   const map = useMemo(() => {
     const t = tex.clone()
     t.repeat.set(crop[2] - crop[0], crop[3] - crop[1])
@@ -275,6 +316,9 @@ function FlagCloth({ st }: { st: Station }) {
     t.needsUpdate = true
     return t
   }, [tex, crop])
+  /* כל דגל בשלב אחר של הגל — שישה-עשר בדים שזזים יחד נראים כמו מכונה */
+  const mat = useMemo(() => clothMaterial(map, W, H, parseInt(st.sec.slice(1), 10) * 2.39), [map, W, H, st.sec])
+  useEffect(() => () => mat.dispose(), [mat])
   return (
     <group>
       <mesh position={[0, FLAG_TOP / 2 + 0.03, 0]}>
@@ -289,9 +333,7 @@ function FlagCloth({ st }: { st: Station }) {
         <cylinderGeometry args={[0.018, 0.018, W + 0.12, 12]} />
         <meshStandardMaterial color={C.brass} roughness={0.32} metalness={1} />
       </mesh>
-      <mesh geometry={geo} position={[W / 2 + 0.03, FLAG_TOP - H / 2, -0.06]}>
-        <meshPhysicalMaterial map={map} side={THREE.DoubleSide} roughness={0.8} sheen={0.35} sheenRoughness={0.6} sheenColor="#ffffff" />
-      </mesh>
+      <mesh geometry={geo} material={mat} position={[W / 2 + 0.03, FLAG_TOP - H / 2, -0.06]} />
     </group>
   )
 }
@@ -605,7 +647,42 @@ export default function FlagHall() {
     }
   }, [started, open, near, openCard, showFinale])
 
-  /* העכבר לא מזיז כלום (המשתמשת, 4.11) — רק המקלדת. במגע: ארבעה כפתורים, לוחצים ומחזיקים */
+  /* מבט בגרירה (המשתמשת, 9.11.2026 — הופך את „העכבר לא ישנה כלום" של 4.11): לוחצים על האולם
+     וגוררים — ימינה/שמאלה פונה, למעלה/למטה מטה את המבט עד ‎±35°. גרירה ולא נעילת סמן, כדי שהסמן
+     לא נלכד ושה-HUD נשאר לחיץ. במגע: אצבע אחת על האולם עושה אותו דבר, ולוח החצים נשאר.
+     לא פועל כשכרטיס או כרטיס הסיום פתוחים. המבט רודף אחרי היעד (Player), כך שהגרירה חלקה. */
+  const drag = useRef<{ id: number; x: number; y: number } | null>(null)
+  const lookLive = started && open === null && !showFinale
+  const PITCH = 35 * DEG
+  const stageDrag = {
+    onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!lookLive || drag.current || (e.pointerType === 'mouse' && e.button !== 0)) return
+      drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY }
+      e.currentTarget.setPointerCapture(e.pointerId)
+      e.currentTarget.classList.add('is-dragging')
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
+      const d = drag.current
+      if (!d || d.id !== e.pointerId) return
+      if (!lookLive) return
+      const k = e.pointerType === 'touch' ? 0.0045 : 0.0032
+      /* כמו במשחק גוף ראשון: גרירה ימינה פונה ימינה, גרירה למעלה מרימה את המבט */
+      look.current.yaw -= (e.clientX - d.x) * k
+      look.current.pitch = Math.max(-PITCH, Math.min(PITCH, look.current.pitch - (e.clientY - d.y) * k))
+      d.x = e.clientX
+      d.y = e.clientY
+    },
+    onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => {
+      if (drag.current?.id !== e.pointerId) return
+      drag.current = null
+      e.currentTarget.classList.remove('is-dragging')
+    },
+  }
+  useEffect(() => {
+    if (!lookLive) drag.current = null
+  }, [lookLive])
+
+  /* מקלדת: W/S הליכה, A/D וחצים פנייה. במגע: ארבעה כפתורים, לוחצים ומחזיקים */
   const hold = (k: string) => ({
     onPointerDown: (e: React.PointerEvent) => { e.stopPropagation(); keys.current.add(k) },
     onPointerUp: () => keys.current.delete(k),
@@ -618,7 +695,7 @@ export default function FlagHall() {
 
   return (
     <div className="ch13-root">
-      <div className="ch13-stage">
+      <div className={`ch13-stage${lookLive ? ' is-look' : ''}`} {...stageDrag} onPointerCancel={stageDrag.onPointerUp} onLostPointerCapture={stageDrag.onPointerUp}>
         <Canvas
           dpr={[1, 1.75]}
           gl={{ antialias: true, toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.1 }}
@@ -629,6 +706,7 @@ export default function FlagHall() {
           {Array.from({ length: 8 }, (_, k) => (
             <pointLight key={k} position={[0, HALL_H - 0.8, -(Y0 + 3 + k * 7.5)]} intensity={9} distance={16} decay={2} color="#f2e2c8" />
           ))}
+          <ClothClock />
           <Suspense fallback={null}>
             <Hall />
             {STATIONS.map((_, i) => (
@@ -698,6 +776,7 @@ export default function FlagHall() {
             <ul className="ch13-keys">
               <li><kbd>W</kbd> <kbd>S</kbd> או <kbd>↑</kbd> <kbd>↓</kbd> — הליכה</li>
               <li><kbd>A</kbd> <kbd>D</kbd> או <kbd>←</kbd> <kbd>→</kbd> — פנייה</li>
+              <li>גרירה בעכבר על האולם — הסתכלות לצדדים ולמעלה ולמטה</li>
               <li><kbd>E</kbd> ליד דגל — הכרטיס שלו</li>
             </ul>
             <button type="button" className="ch13-go" onClick={() => setStarted(true)} autoFocus>
