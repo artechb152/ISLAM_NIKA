@@ -87,7 +87,8 @@
               },
               "refs": [
                 "§0.ibadat"
-              ]
+              ],
+              "art": "sec-ibadat"
             },
             {
               "label": {
@@ -98,7 +99,8 @@
               },
               "refs": [
                 "§0.muamalat"
-              ]
+              ],
+              "art": "sec-muamalat"
             }
           ]
         },
