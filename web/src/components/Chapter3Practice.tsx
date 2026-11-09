@@ -23,6 +23,7 @@ import raw from '@/lib/chapter3/practice.json'
 import { CH3 } from '@/lib/chapter3/content'
 import { markChapterComplete } from '@/lib/chapter3/progress'
 import { readPractice, writePractice, type PracticeStore } from '@/lib/chapter3/practice-progress'
+import PracticeScore from '@/components/PracticeScore'
 
 /* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED, and that is the whole
    principle here: the practice gets no picture set of its own, so a reader who
@@ -74,6 +75,7 @@ interface Saved {
   initial?: unknown
   solved: boolean
   onSolved: () => void
+  onMissed: () => void
   onWork: (v: unknown) => void
 }
 const asStrings = (v: unknown): string[] =>
@@ -114,7 +116,7 @@ function Answer({ state, q }: { state: State; q: Q }) {
 
 /* ---------------- one question per type ---------------- */
 
-function Choice({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'single' | 'multi' }> } & Saved) {
+function Choice({ q, initial, solved, onSolved, onMissed, onWork }: { q: Extract<Q, { type: 'single' | 'multi' }> } & Saved) {
   const opts = useMemo(() => shuffled(q.options, q.id.length * 97), [q])
   const [picked, setPicked] = useState<string[]>(() =>
     asStrings(initial).filter((t) => q.options.some((o) => o.text === t)),
@@ -138,6 +140,7 @@ function Choice({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type
     const ok = want.size === got.size && [...want].every((w) => got.has(w))
     setState(ok ? 'right' : 'wrong')
     if (ok) onSolved()
+    else onMissed()
   }
 
   return (
@@ -167,7 +170,7 @@ function Choice({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type
   )
 }
 
-function Match({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'match' | 'situations' }> } & Saved) {
+function Match({ q, initial, solved, onSolved, onMissed, onWork }: { q: Extract<Q, { type: 'match' | 'situations' }> } & Saved) {
   const rows =
     q.type === 'match'
       ? q.pairs.map((p) => ({ left: p.left, right: p.right, photo: p.photo }))
@@ -233,6 +236,7 @@ function Match({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type:
     const ok = rows.every((r) => chosen[r.left] === r.right)
     setState(ok ? 'right' : 'wrong')
     if (ok) onSolved()
+    else onMissed()
   }
 
   return (
@@ -314,7 +318,7 @@ function Match({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type:
 
 /** Put the steps in order. The board starts shuffled and the reader walks a
     step up or down until the chain reads the way it happened. */
-function Order({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'order' }> } & Saved) {
+function Order({ q, initial, solved, onSolved, onMissed, onWork }: { q: Extract<Q, { type: 'order' }> } & Saved) {
   const [items, setItems] = useState<string[]>(() => {
     /* a kept order is used only if it is exactly this question's steps */
     const kept = asStrings(initial)
@@ -343,6 +347,7 @@ function Order({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type:
     const ok = items.every((s, i) => s === q.steps[i])
     setState(ok ? 'right' : 'wrong')
     if (ok) onSolved()
+    else onMissed()
   }
 
   return (
@@ -393,7 +398,7 @@ function Order({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type:
     board never grades a move as it is made: the check button is the only place
     correctness is spoken, exactly as in the other five questions. Nothing is
     ever deleted — clicking a filled slot hands its label back to the tray. */
-function Place({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type: 'place' }> } & Saved) {
+function Place({ q, initial, solved, onSolved, onMissed, onWork }: { q: Extract<Q, { type: 'place' }> } & Saved) {
   const [filled, setFilled] = useState<Record<number, string>>(() => {
     const out: Record<number, string> = {}
     for (const [k, v] of Object.entries(asMap(initial))) {
@@ -445,6 +450,7 @@ function Place({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type:
     const ok = q.slots.every((x) => filled[x.n] === x.answer)
     setState(ok ? 'right' : 'wrong')
     if (ok) onSolved()
+    else onMissed()
   }
 
   return (
@@ -485,7 +491,7 @@ function Place({ q, initial, solved, onSolved, onWork }: { q: Extract<Q, { type:
 const KNOWN = new Set(QUESTIONS.map((q) => q.id))
 
 export default function Chapter3Practice() {
-  const [store, setStore] = useState<PracticeStore>({ done: [], work: {} })
+  const [store, setStore] = useState<PracticeStore>({ done: [], missed: [], work: {} })
   /* THE BOARDS REMOUNT ONCE THE STORE IS READ. Each seeds itself in a lazy
      `useState`, which runs on the first render — before this effect has read
      localStorage — so without the remount every board came up empty and the
@@ -508,6 +514,9 @@ export default function Chapter3Practice() {
     if (ready && finished) markChapterComplete()
   }, [ready, finished])
 
+  const miss = useCallback((id: string) => {
+    setStore((s) => ((s.missed ?? []).includes(id) ? s : { ...s, missed: [...(s.missed ?? []), id] }))
+  }, [])
   const solve = useCallback((id: string) => {
     setStore((s) => (s.done.includes(id) ? s : { ...s, done: [...s.done, id] }))
   }, [])
@@ -597,6 +606,7 @@ export default function Chapter3Practice() {
                   initial: store.work[q.id],
                   solved: solved.has(q.id),
                   onSolved: () => solve(q.id),
+                  onMissed: () => miss(q.id),
                   onWork: works[q.id],
                 }
                 if (q.type === 'single' || q.type === 'multi') return <Choice key={k} q={q} {...saved} />
@@ -613,6 +623,7 @@ export default function Chapter3Practice() {
           <div className="p3-done" role="status">
             <div className="title-ornament" aria-hidden="true"><span /></div>
             <p>הפרק הושלם.</p>
+            {store.missed && <PracticeScore chapter={3} questions={QUESTIONS} missed={store.missed} idPrefix="p3-" />}
             {/* chapter 6's button, as on its own practice page (`.gv-out
                 .chapter-end-back`). It was `.ch3-end-link` — this chapter's
                 restatement of that rule — and the restatement is gone. */}

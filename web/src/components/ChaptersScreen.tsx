@@ -116,6 +116,8 @@ function chapterHit(chp: ChapterDef, q: string): boolean {
 interface ChapterStatus {
   completed: boolean
   progress: number
+  /** the closing practice's score (first-try %), written by PracticeScore as islam:score:N */
+  score: number | null
 }
 
 export default function ChaptersScreen() {
@@ -295,7 +297,9 @@ export default function ChaptersScreen() {
             if (n > 0) progress = Math.min(99, Math.round((n / CH1_SECTIONS.length) * 100))
           }
         }
-        st[chp.number] = { completed: done, progress }
+        const rawScore = done ? localStorage.getItem('islam:score:' + chp.number) : null
+        const sc = rawScore === null ? NaN : Number(rawScore)
+        st[chp.number] = { completed: done, progress, score: Number.isFinite(sc) ? sc : null }
       }
       setStatus(st)
     } catch {}
@@ -534,7 +538,7 @@ export default function ChaptersScreen() {
     const progress = st?.progress ?? 0
     const label =
       `פרק ${chp.number} — ${chp.title}` +
-      (st?.completed ? ' — הושלם' : progress > 0 ? ` — ${progress}% הושלמו` : '') +
+      (st?.completed ? ' — הושלם' + (st.score !== null ? ` — ציון ${st.score}` : '') : progress > 0 ? ` — ${progress}% הושלמו` : '') +
       (chp.available ? '' : ' — יעלה בקרוב')
     const inner = (
       <>
@@ -552,6 +556,7 @@ export default function ChaptersScreen() {
           </span>
           <span className="card-num">
             פרק {chp.number}
+            {st?.completed && st.score !== null && <span className="card-score"> · ציון {st.score}</span>}
           </span>
           {progress > 0 && (
             <span className="card-progress" aria-hidden="true">

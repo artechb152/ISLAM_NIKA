@@ -302,3 +302,6 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
 .tour-next:focus-visible,.tour-prev:focus-visible,.tour-skip:focus-visible{outline:2px solid var(--maroon);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.tour-hole{transition:none}}
 @media (max-width:600px){.hdr-help{width:32px;height:32px;font-size:17px}}
+
+/* ציון התרגול על הכרטיס, ליד מספר הפרק */
+.card-score{color:var(--maroon);font-weight:700}

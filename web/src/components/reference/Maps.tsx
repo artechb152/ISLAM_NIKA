@@ -12,12 +12,12 @@ import { useEffect, useRef, useState } from 'react'
 import ReferenceShell from '@/components/reference/ReferenceShell'
 import MAPS from '@/lib/reference/maps.json'
 
-type MapDef = { id: string; page: number; src: string; w: number; h: number; caption: string; credit: string; captionInImage?: boolean }
+type MapDef = { id: string; page: number; src: string; w: number; dw: number; h: number; caption: string; credit: string; captionInImage?: boolean }
 const LIST = MAPS.maps as MapDef[]
 
 function Figure({ m, onOpen }: { m: MapDef; onOpen: (m: MapDef) => void }) {
   return (
-    <figure className="ref-map" style={{ ['--map-w' as string]: `${m.w}px` }}>
+    <figure className="ref-map" style={{ ['--map-w' as string]: `${m.dw}px` }}>
       <button type="button" className="ref-map-btn" onClick={() => onOpen(m)} aria-label={`הגדלת המפה: ${m.caption}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={m.src} width={m.w} height={m.h} alt={m.caption} loading="lazy" />
@@ -69,7 +69,7 @@ export default function Maps() {
         }}
       >
         {open && (
-          <figure style={{ ['--map-w' as string]: `${open.w * 2}px` }}>
+          <figure style={{ ['--map-w' as string]: `${open.dw * 2}px` }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={open.src} width={open.w} height={open.h} alt={open.caption} />
             <figcaption>

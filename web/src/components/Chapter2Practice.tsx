@@ -18,6 +18,7 @@ import raw from '@/lib/chapter2/practice.json'
 import { CH2 } from '@/lib/chapter2/content'
 import { markChapterComplete } from '@/lib/chapter2/progress'
 import { readPractice, writePractice, type PracticeStore } from '@/lib/chapter2/practice-progress'
+import PracticeScore from '@/components/PracticeScore'
 
 /* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED, and that is the whole
    principle here. The practice does not get a picture set of its own: the four
@@ -496,6 +497,7 @@ export default function Chapter2Practice() {
           <div className="p2-done" role="status">
             <div className="title-ornament" aria-hidden="true"><span /></div>
             <p>הפרק הושלם.</p>
+            <PracticeScore chapter={2} questions={QUESTIONS} missed={store.missed} />
             <Link className="ch2-end-link" href="/chapters">לכל פרקי הלמידה</Link>
           </div>
         )}

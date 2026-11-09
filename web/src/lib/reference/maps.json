@@ -1,10 +1,10 @@
 {
   "source": "מפות · עמ' 120–124",
   "maps": [
-    { "id": "m1", "page": 121, "src": "/assets/reference/map-jewish-presence.webp", "w": 456, "h": 360, "caption": "נוכחות יהודית בחצי האי ערב טרם עליית האסלאם", "credit": "סגולה, מגזין ישראלי להיסטוריה" },
-    { "id": "m2", "page": 121, "src": "/assets/reference/map-empires-trade.webp", "w": 478, "h": 404, "caption": "האימפריות, הערבים בחצי-האי, נתיבי הסחר", "credit": "אתר מטח" },
-    { "id": "m3", "page": 122, "src": "/assets/reference/map-expansion.webp", "w": 919, "h": 420, "caption": "התפשטות האסלאם עד אמצע המאה ה-8", "captionInImage": true, "credit": "אתר משרד החינוך, מקור ויקיפדיה" },
-    { "id": "m4", "page": 123, "src": "/assets/reference/map-middle-east.webp", "w": 539, "h": 556, "caption": "מפת המזרח התיכון", "credit": "אתר אולטק" },
-    { "id": "m5", "page": 124, "src": "/assets/reference/map-sunni-shia.webp", "w": 680, "h": 426, "caption": "העולם המוסלמי - סונים ושיעים", "credit": "אתר ויקיפדיה" }
+    { "id": "m1", "page": 121, "src": "/assets/reference/map-jewish-presence.webp", "dw": 456, "w": 1368, "h": 1080, "caption": "נוכחות יהודית בחצי האי ערב טרם עליית האסלאם", "credit": "סגולה, מגזין ישראלי להיסטוריה" },
+    { "id": "m2", "page": 121, "src": "/assets/reference/map-empires-trade.webp", "dw": 478, "w": 1434, "h": 1212, "caption": "האימפריות, הערבים בחצי-האי, נתיבי הסחר", "credit": "אתר מטח" },
+    { "id": "m3", "page": 122, "src": "/assets/reference/map-expansion.webp", "dw": 919, "w": 1838, "h": 840, "caption": "התפשטות האסלאם עד אמצע המאה ה-8", "captionInImage": true, "credit": "אתר משרד החינוך, מקור ויקיפדיה" },
+    { "id": "m4", "page": 123, "src": "/assets/reference/map-middle-east.webp", "dw": 539, "w": 1617, "h": 1668, "caption": "מפת המזרח התיכון", "credit": "אתר אולטק" },
+    { "id": "m5", "page": 124, "src": "/assets/reference/map-sunni-shia.webp", "dw": 680, "w": 2040, "h": 1278, "caption": "העולם המוסלמי - סונים ושיעים", "credit": "אתר ויקיפדיה" }
   ]
 }

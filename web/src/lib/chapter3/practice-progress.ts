@@ -18,11 +18,14 @@ export const PRACTICE_KEY = 'ch3:practice:v1'
 export interface PracticeStore {
   /** questions answered correctly */
   done: string[]
+  /** questions that took a wrong attempt on the way — the closing score counts the others.
+      Absent in a store written before the score existed: such a store has no honest score. */
+  missed?: string[]
   /** the half-finished board of every question, by question id */
   work: Record<string, unknown>
 }
 
-const EMPTY: PracticeStore = { done: [], work: {} }
+const EMPTY: PracticeStore = { done: [], missed: [], work: {} }
 
 const sane = (v: unknown): boolean => Array.isArray(v) || (typeof v === 'object' && v !== null)
 
@@ -40,7 +43,10 @@ export function readPractice(known: Set<string>): PracticeStore {
     if (p.work && typeof p.work === 'object') {
       for (const [k, v] of Object.entries(p.work)) if (known.has(k) && sane(v)) work[k] = v
     }
-    return { done, work }
+    const missed = Array.isArray(p.missed)
+      ? p.missed.filter((x): x is string => typeof x === 'string' && known.has(x))
+      : undefined
+    return { done, missed, work }
   } catch {
     return EMPTY
   }

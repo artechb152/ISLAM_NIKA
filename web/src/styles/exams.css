@@ -442,3 +442,12 @@ button.xq-slot:focus-visible { outline: 2px solid var(--maroon); outline-offset:
 }
 .gv-back:hover{background:rgba(245,236,214,.18);border-color:var(--cream,#f5ecd6)}
 .gv-back svg{width:16px;height:16px}
+
+/* הציון כאחוז (המשתמשת, 9.11.2026: „ציונים … לכל מבחן"): „ציון 85", מתחתיו הנקודות, ובמבחן על כמה
+   פרקים — שורת ציונים לפי פרק */
+.xr-score-points { margin: 4px 0 0; text-align: center; font-size: 17px; color: var(--muted) }
+.xr-bychapter { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px }
+.xr-bychapter li { display: inline-flex; align-items: baseline; gap: 8px; padding: 5px 14px; border-radius: 999px;
+  background: var(--paper, #EDE4D0); border: 1px solid var(--edge, #d8c7a3); font-size: 14.5px; color: var(--muted) }
+.xr-bychapter b { font-family: var(--font-heading); font-weight: 800; font-size: 18px; color: var(--maroon); font-variant-numeric: tabular-nums }
+.xr-bychapter b::after { content: "%"; font-size: 12px; margin-inline-start: 1px }

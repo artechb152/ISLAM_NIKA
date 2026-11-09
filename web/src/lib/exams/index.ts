@@ -232,6 +232,23 @@ export function scoreExam(
   }
 }
 
+/** הציון לפי פרק — אותה הגדרה של scoreExam, על השאלות של כל פרק בנפרד (המשתמשת, 9.11.2026:
+    „ציונים … לכל מבחן"). מבחן בפרק אחד לא צריך אותו; מבחן על כמה פרקים מראה איפה חזק ואיפה לא. */
+export function scoreByChapter(
+  items: DrawnItem[],
+  answers: Record<string, Answer>,
+  grades: Record<string, SelfGrade>
+): { chapter: number; total: number; points: number; percent: number }[] {
+  const by = new Map<number, DrawnItem[]>()
+  for (const it of items) by.set(it.chapter, [...(by.get(it.chapter) ?? []), it])
+  return [...by.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([chapter, its]) => {
+      const sc = scoreExam(its, answers, grades)
+      return { chapter, total: sc.total, points: sc.points, percent: sc.percent }
+    })
+}
+
 /* -------------------------------------------------------------------- זמן ---- */
 
 /** הזמן לשאלה שהלומדת בוחרת מתוכו, בשניות. הזמן הכולל הוא הבחירה כפול מספר

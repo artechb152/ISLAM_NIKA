@@ -20,6 +20,7 @@ import raw from '@/lib/chapter11/practice.json'
 import { CH11 } from '@/lib/chapter11/content'
 import { markChapterComplete } from '@/lib/chapter11/progress'
 import { readPractice, writePractice, type PracticeStore } from '@/lib/chapter11/practice-progress'
+import PracticeScore from '@/components/PracticeScore'
 
 /* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED: the practice gets no picture
    set of its own, so a reader who worked the chapter recognises the plate. */
@@ -438,6 +439,7 @@ export default function Chapter11Practice() {
           <div className="p2-done" role="status">
             <div className="title-ornament" aria-hidden="true"><span /></div>
             <p>הפרק הושלם.</p>
+            <PracticeScore chapter={11} questions={QUESTIONS} missed={store.missed} />
             <Link className="ch2-end-link" href="/chapters">לכל פרקי הלמידה</Link>
           </div>
         )}

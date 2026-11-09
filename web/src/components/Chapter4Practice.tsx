@@ -18,6 +18,7 @@ import raw from '@/lib/chapter4/practice.json'
 import { CH4 } from '@/lib/chapter4/content'
 import { markChapterComplete } from '@/lib/chapter4/progress'
 import layout from '@/lib/chapter4/layout.json'
+import PracticeScore from '@/components/PracticeScore'
 import {
   readPractice,
   resetPractice,
@@ -500,8 +501,9 @@ export default function Chapter4Practice() {
             block, the way BACK into the chapter as a row of its sections, the
             focused return to whatever took a wrong attempt, and one row holding
             the way out beside the offer to work the questions again. No score —
-            the spec is explicit that a completion status and focused feedback
-            take its place. */}
+            the spec was explicit that a completion status and focused feedback
+            take its place — until the user asked for scores on every closing practice
+            (9.11.2026): first-try correctness, from the same `missed`. */}
         {finished && (
           <section className="p4-end" aria-labelledby="p4-end-t" data-reveal>
             <header className="section-heading" role="status">
@@ -511,6 +513,8 @@ export default function Chapter4Practice() {
               <div className="title-ornament section-ornament" aria-hidden="true"><span /></div>
               <p>{QUESTIONS.length} שאלות, וכולן נפתרו. הפרק מסומן כהושלם במסך הפרקים.</p>
             </header>
+
+            <PracticeScore chapter={4} questions={QUESTIONS} missed={store.missed} idPrefix="p4-" />
 
             <p className="p4-end-nav">חזרה לפרק:</p>
             <ul className="p4-end-frieze">

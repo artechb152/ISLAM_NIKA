@@ -55,6 +55,7 @@ import {
   isRight,
   perQuestionLabel,
   scoreExam,
+  scoreByChapter,
   type Answer,
   type DrawnItem,
   type SelfGrade,
@@ -127,6 +128,7 @@ export default function ExamRoom() {
   const limit = attempt?.timed ? (attempt.perQ ?? PER_QUESTION_DEFAULT) * items.length : 0
   const remaining = limit - elapsed
   const score = useMemo(() => scoreExam(items, answers, grades), [items, answers, grades])
+  const byChapter = useMemo(() => scoreByChapter(items, answers, grades), [items, answers, grades])
 
   /* ------------------------------------------------------------- השעון ---- */
   /* `startedAt` ברֶף ולא ב-state: הוא נקרא בתוך ה-interval, ומ-state הוא היה
@@ -501,14 +503,27 @@ export default function ExamRoom() {
           <>
             <div className="xr-score">
               <p className="xr-score-n">
-                <b>{Number.isInteger(score.points) ? score.points : score.points.toFixed(1)}</b>
-                <span>מתוך {score.total}</span>
+                <span>ציון</span>
+                <b>{score.percent}</b>
+              </p>
+              <p className="xr-score-points">
+                {Number.isInteger(score.points) ? score.points : score.points.toFixed(1)} מתוך {score.total} נקודות
               </p>
               <div className="title-ornament" aria-hidden="true"><span /></div>
               <p className="xr-score-line">
                 {score.closedRight} מתוך {score.closedTotal} השאלות הסגורות נענו נכון
                 {score.openTotal > 0 && ` · ${score.openTotal} שאלות פתוחות בהערכה עצמית`}
               </p>
+              {byChapter.length > 1 && (
+                <ul className="xr-bychapter" aria-label="הציון לפי פרק">
+                  {byChapter.map((c) => (
+                    <li key={c.chapter}>
+                      <span>פרק {c.chapter}</span>
+                      <b>{c.percent}</b>
+                    </li>
+                  ))}
+                </ul>
+              )}
               <p className="xr-score-meta">
                 {fmtDate(attempt.at)} · פרקים {attempt.chapters.join(', ')} · משך {fmtClock(Math.floor(attempt.elapsedMs / 1000))}
               </p>
