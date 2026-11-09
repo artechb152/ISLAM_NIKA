@@ -23,3 +23,62 @@
 .site-tip.is-above::after{top:100%;border-top-color:#571820}
 @keyframes site-tip-in{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){.site-tip{animation:none}}
+
+/* the veil — only for a page that is slow to arrive (see SiteChrome). Maroon with the cream
+   logo and a turning gold ring: the site's own masthead, not a generic spinner. */
+.site-veil{position:fixed;inset:0;z-index:2147482990;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+  background:#571820;pointer-events:none;opacity:0;visibility:hidden}
+.site-veil img{width:min(210px,52vw);height:auto}
+.site-veil i{width:34px;height:34px;border-radius:50%;border:3px solid rgba(245,236,214,.22);border-top-color:#c9a24a;animation:site-spin .9s linear infinite}
+.site-veil.is-run{visibility:visible;pointer-events:auto;animation:site-veil-in .25s ease .35s forwards,site-veil-out .4s ease 10s forwards}
+html.nav-in .site-veil.is-run{opacity:1;animation:site-veil-out .4s ease 10s forwards}
+.site-veil.is-done{visibility:visible;opacity:0;transition:opacity .35s ease}
+html.nav-in .site-veil.is-done{opacity:0}
+.site-veil.is-idle{display:none}
+@keyframes site-veil-in{to{opacity:1}}
+@keyframes site-veil-out{to{opacity:0;visibility:hidden}}
+@keyframes site-spin{to{rotate:360deg}}
+@media (prefers-reduced-motion:reduce){.site-veil i{animation:none;border-top-color:rgba(245,236,214,.22)}}
+
+/* skip link — first thing a keyboard reaches, invisible until it is reached */
+.site-skip{position:fixed;top:10px;inset-inline-start:10px;z-index:2147483002;padding:10px 16px;border-radius:8px;
+  background:#571820;color:#f5ecd6;font-family:"Ploni",Arial,sans-serif;font-weight:600;font-size:15px;text-decoration:none;
+  transform:translateY(-200%);transition:transform .15s}
+.site-skip:focus{transform:none;outline:2px solid #c9a24a;outline-offset:2px}
+
+/* a focus ring for every control that does not draw its own — :where() keeps it at zero
+   specificity, so any page's own :focus-visible style wins */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:2px solid #8a2733;outline-offset:2px}
+
+/* ---------------- accessibility panel ---------------- */
+.a11y-btn{position:fixed;inset-inline-end:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:2147482995;
+  width:46px;height:46px;border-radius:50%;border:2px solid #c9a24a;background:#571820;color:#f5ecd6;cursor:pointer;
+  display:grid;place-items:center;box-shadow:0 6px 18px rgba(28,10,2,.3)}
+.a11y-btn svg{width:26px;height:26px}
+.a11y-btn:hover{background:#6b1e28}
+.a11y-btn.is-on::after{content:"";position:absolute;top:2px;inset-inline-end:2px;width:10px;height:10px;border-radius:50%;background:#c9a24a;border:2px solid #571820}
+.a11y-panel{position:fixed;inset-inline-end:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:2147482996;
+  width:min(300px,calc(100vw - 32px));padding:18px;border-radius:14px;background:#f3ead6;color:#3c2c1d;direction:rtl;
+  border:1px solid #d8c7a3;box-shadow:0 14px 40px rgba(28,10,2,.3);font-family:"Ploni",Arial,sans-serif;display:flex;flex-direction:column;gap:10px}
+.a11y-title{margin:0 0 4px;font-family:"Kedem",serif;font-weight:700;font-size:20px;color:#8a2733}
+.a11y-row{display:flex;flex-direction:column;gap:6px;font-size:14.5px;font-weight:600}
+.a11y-seg{display:flex;gap:6px}
+.a11y-seg button,.a11y-toggle,.a11y-reset{font:inherit;font-size:14.5px;font-weight:600;cursor:pointer;border-radius:9px;border:1px solid #d8c7a3;background:#ede4d0;color:#3c2c1d;padding:9px 10px}
+.a11y-seg button{flex:1;padding-inline:4px}
+.a11y-toggle{text-align:start;display:flex;justify-content:space-between;align-items:center}
+.a11y-toggle::after{content:"";width:34px;height:18px;border-radius:99px;background:#d8c7a3;box-shadow:inset 0 0 0 2px #d8c7a3;transition:background .15s}
+.a11y-toggle[aria-pressed="true"]::after{background:#8a2733;box-shadow:inset 18px 0 0 2px #8a2733,inset 0 0 0 2px #8a2733}
+.a11y-seg button[aria-pressed="true"]{background:#571820;border-color:#571820;color:#f5ecd6}
+.a11y-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:14px}
+.a11y-foot a{color:#8a2733;font-weight:600}
+.a11y-reset:disabled{opacity:.45;cursor:default}
+
+/* what the panel turns on — classes on <html>, so they reach every page */
+html.a11y-zoom-1 body{zoom:1.15}
+html.a11y-zoom-2 body{zoom:1.3}
+/* not a filter: contrast() pushed the parchment toward white (the rule: no white anywhere)
+   and changed every painting. Instead the text tokens every sheet uses get darker — the
+   paper and the art stay as they are, only what is read gets stronger. */
+html.a11y-contrast body{--ink:#160b04;--muted:#2a1a0d;--ink-soft:#2a1a0d;--maroon:#5e0f1a;--maroon-deep:#3d0811;--stamp:#7a1715;--gold-ink:#5a3d08}
+html.a11y-still *,html.a11y-still *::before,html.a11y-still *::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important;scroll-behavior:auto!important}
+html.a11y-links a{text-decoration:underline!important;text-underline-offset:3px}

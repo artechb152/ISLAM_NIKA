@@ -10,7 +10,7 @@
    ומשבצת היא קו ולא קופסה. */
 
 import type { BankQuestion } from '@/lib/exams/types'
-import { isRight, type Answer, type SelfGrade } from '@/lib/exams'
+import { isFilled, isRight, type Answer, type SelfGrade } from '@/lib/exams'
 
 export interface QProps {
   q: BankQuestion
@@ -204,21 +204,13 @@ function Match({ q, ans, onAnswer, mode, held, setHeld }: Pick<QProps, 'q' | 'an
 
 /* ------------------------------------------------------------------ פתוחה ---- */
 
-function Open({ q, ans, onAnswer, mode, grade, onGrade }: Pick<QProps, 'q' | 'ans' | 'onAnswer' | 'mode' | 'grade' | 'onGrade'>) {
-  if (q.type !== 'open') return null
+/* ⚠ סקירה בלבד. מבחן אינו מגריל עוד שאלות פתוחות (`examPool`), ולכן שדה
+   הכתיבה שהיה כאן במצב מענה הוסר — אין מבחן שמגיע אליו. מה שנשאר הוא הסקירה
+   וההערכה העצמית, כי מבחנים ישנים בהיסטוריה נושאים פתוחות, והם נפתחים לסקירה
+   ומוערכים גם עכשיו. */
+function Open({ q, ans, mode, grade, onGrade }: Pick<QProps, 'q' | 'ans' | 'mode' | 'grade' | 'onGrade'>) {
+  if (q.type !== 'open' || mode !== 'review') return null
   const text = typeof ans === 'string' ? ans : ''
-
-  if (mode === 'answer') {
-    return (
-      <textarea
-        className="xq-write"
-        rows={5}
-        value={text}
-        placeholder="כתבו כאן את תשובתכם"
-        onChange={(e) => onAnswer(e.target.value)}
-      />
-    )
-  }
 
   /* בסקירה: מה שנכתב, ואז תשובת המופת עם נקודות המפתח, ואז ההערכה העצמית.
      הסדר הזה הוא הבדיקה עצמה — קודם מה שזכרת, אחר כך מה שהיה צריך, ורק אז
@@ -263,12 +255,7 @@ function Open({ q, ans, onAnswer, mode, grade, onGrade }: Pick<QProps, 'q' | 'an
 
 export default function ExamQuestion(p: QProps) {
   const { q, chapter, n, mode } = p
-  const answered =
-    q.type === 'open'
-      ? typeof p.ans === 'string' && p.ans.trim().length > 0
-      : q.type === 'match'
-        ? p.ans !== undefined && Object.keys(p.ans as Record<string, string>).length === q.pairs.length
-        : Array.isArray(p.ans) && p.ans.length > 0
+  const answered = isFilled(q, p.ans)
 
   const right = mode === 'review' && q.type !== 'open' ? isRight(q, p.ans) : undefined
 
@@ -301,7 +288,7 @@ export default function ExamQuestion(p: QProps) {
       <div className="xq-work">
         <Choice q={q} ans={p.ans} onAnswer={p.onAnswer} mode={mode} />
         <Match q={q} ans={p.ans} onAnswer={p.onAnswer} mode={mode} held={p.held} setHeld={p.setHeld} />
-        <Open q={q} ans={p.ans} onAnswer={p.onAnswer} mode={mode} grade={p.grade} onGrade={p.onGrade} />
+        <Open q={q} ans={p.ans} mode={mode} grade={p.grade} onGrade={p.onGrade} />
       </div>
 
       {/* שורת המקור נפתחת רק בסקירה. במהלך המבחן היא הייתה רומזת על התשובה,

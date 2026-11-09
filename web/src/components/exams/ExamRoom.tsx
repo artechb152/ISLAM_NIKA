@@ -19,12 +19,19 @@
    השלבים, במבחן ובסקירה שאלה לכל שורה עם וי כשהיא נענתה או נכונה, ובהיסטוריה
    מבחן לכל שורה. זה מה שהופך אותו לניווט אמיתי בין שישים שאלות ולא לקישוט.
 
-   שתי החלטות שמגיעות מהאילוץ שהאתר סטטי, ולא מהעדפה:
+   ⚠ המבחן הוא שאלה אחת בכל פעם, לא דף אחד ארוך.
 
-   1. שאלה פתוחה נבדקת בהערכה עצמית. אין שרת, ולכן אין בדיקה אוטומטית; בדיקת
-      מילות מפתח בעברית הייתה מסמנת תשובות טובות כשגויות בגלל נטייה או כתיב.
-      אז נחשפת תשובת המופת עם נקודות המפתח שלה, והלומדת מסמנת מולן. הציון
-      אומר במפורש איזה חלק ממנו נבדק כך.
+   עד עכשיו כל השאלות עמדו ב-`<ol>` אחד, ובודקים לא הבינו שצריך לגלול — הם
+   ענו על מה שעל המסך והגישו. עכשיו על המסך שאלה אחת, עם „הקודם“ / „הבא“,
+   „שאלה 4 מתוך 15“, ורצועת מספרים שאפשר לקפוץ ממנה ושמראה מה נענה. ההגשה
+   מופיעה רק בשאלה האחרונה. הסקירה שאחרי ההגשה נשארה רשימה אחת: שם קוראים
+   ברצף, והקו בקצה כל שאלה הוא מה שסורקים במורד העמוד.
+
+   ההחלטות שמגיעות מהאילוץ שהאתר סטטי, ולא מהעדפה:
+
+   1. מבחן הוא שאלות סגורות בלבד (ראו `examPool`). הפתוחות, שנבדקו בהערכה
+      עצמית, ירדו מהמבחנים; הן נשארו במאגרים, ומבחן ישן בהיסטוריה שנושא אותן
+      עדיין נפתח לסקירה עם ההערכה העצמית שלו.
 
    2. ההיסטוריה יושבת ב-localStorage של הדפדפן. היא לא נשלחת לשום מקום, וגם
       לא עוברת בין מכשירים. */
@@ -37,12 +44,17 @@ import { categoryOfChapter } from '@/lib/chapters-data'
 import {
   BANKS,
   LENGTHS,
+  PER_QUESTION,
+  PER_QUESTION_DEFAULT,
   QUESTION_BY_ID,
   drawExam,
+  examPool,
   fmtClock,
+  fmtSpan,
+  isFilled,
   isRight,
+  perQuestionLabel,
   scoreExam,
-  timeLimitFor,
   type Answer,
   type DrawnItem,
   type SelfGrade,
@@ -75,9 +87,12 @@ export default function ExamRoom() {
   const [picked, setPicked] = useState<number[]>([])
   const [length, setLength] = useState<number>(20)
   const [timed, setTimed] = useState(false)
+  const [perQ, setPerQ] = useState<number>(PER_QUESTION_DEFAULT)
 
   /* -------- המבחן החי -------- */
   const [items, setItems] = useState<DrawnItem[]>([])
+  /** השאלה שעל המסך — אינדקס ב-items */
+  const [cur, setCur] = useState(0)
   const [answers, setAnswers] = useState<Record<string, Answer>>({})
   const [grades, setGrades] = useState<Record<string, SelfGrade>>({})
   const [held, setHeld] = useState<string | null>(null)
@@ -102,12 +117,14 @@ export default function ExamRoom() {
     }
   }, [load])
 
-  /* כמה שאלות בכלל אפשר לשאול על הפרקים שנבחרו — התקרה שהאורך נחתך אליה */
+  /* כמה שאלות בכלל אפשר לשאול על הפרקים שנבחרו — התקרה שהאורך נחתך אליה.
+     סגורות בלבד, כמו ההגרלה: ספירה של כל המאגר הייתה מבטיחה מבחן שאין לו שאלות. */
   const poolSize = useMemo(
-    () => BANKS.filter((b) => picked.includes(b.chapter)).reduce((s, b) => s + b.questions.length, 0),
+    () => BANKS.filter((b) => picked.includes(b.chapter)).reduce((s, b) => s + examPool(b).length, 0),
     [picked]
   )
-  const limit = timed ? timeLimitFor(items) : 0
+  /* הזמן נקרא מהרשומה ולא מהבחירה במסך הבנייה — הבחירה שייכת למבחן הבא */
+  const limit = attempt?.timed ? (attempt.perQ ?? PER_QUESTION_DEFAULT) * items.length : 0
   const remaining = limit - elapsed
   const score = useMemo(() => scoreExam(items, answers, grades), [items, answers, grades])
 
@@ -135,13 +152,23 @@ export default function ExamRoom() {
     setAnswers({})
     setGrades({})
     setHeld(null)
-    setAttempt({ id: newId(), at: Date.now(), chapters: [...picked].sort((a, b) => a - b), seed, timed, elapsedMs: 0, items: [] })
+    setCur(0)
+    setAttempt({
+      id: newId(),
+      at: Date.now(),
+      chapters: [...picked].sort((a, b) => a - b),
+      seed,
+      timed,
+      ...(timed ? { perQ } : {}),
+      elapsedMs: 0,
+      items: [],
+    })
     startedAt.current = Date.now()
     setElapsed(0)
     setConfirmLeave(false)
     setView('sit')
     window.scrollTo({ top: 0, behavior: 'auto' })
-  }, [picked, length, poolSize, timed])
+  }, [picked, length, poolSize, timed, perQ])
 
   const submit = useCallback(() => {
     if (!attempt) return
@@ -160,8 +187,80 @@ export default function ExamRoom() {
   /* השעון נגמר — מגישים. ההגשה עצמה היא הפעולה, לא הודעה שמבקשת להגיש: מבחן
      מתוזמן שנעצר וממתין ללחיצה נותן זמן שאין לו. */
   useEffect(() => {
-    if (view === 'sit' && timed && limit > 0 && remaining <= 0) submit()
-  }, [view, timed, limit, remaining, submit])
+    if (view === 'sit' && limit > 0 && remaining <= 0) submit()
+  }, [view, limit, remaining, submit])
+
+  /* ------------------------------------------------- שאלה אחת בכל פעם ---- */
+
+  /* `progressRef` הוא השורה „שאלה 4 מתוך 15“ שמעל השאלה — הראש של מה שהתחלף. */
+  const progressRef = useRef<HTMLParagraphElement | null>(null)
+  const stripRef = useRef<HTMLOListElement | null>(null)
+  const firstSit = useRef(true)
+
+  const go = useCallback(
+    (i: number) => {
+      setHeld(null)
+      setCur(Math.max(0, Math.min(items.length - 1, i)))
+    },
+    [items.length]
+  )
+
+  /* במעבר שאלה: גוללים אל ראש השאלה רק אם הוא כבר מעל המסך. מי שעומד בראש
+     העמוד ולוחץ „הבא“ לא צריך שהעמוד יקפוץ מתחתיו; מי שגלל עד הכפתורים
+     שבתחתית שאלה ארוכה — צריך. */
+  useEffect(() => {
+    if (view !== 'sit') {
+      firstSit.current = true
+      return
+    }
+    if (firstSit.current) {
+      firstSit.current = false
+      return
+    }
+    /* היעד הוא הרצועה ולא שורת ההתקדמות: כך המספרים נשארים על המסך מעל השאלה */
+    const head = progressRef.current
+    const land = stripRef.current?.parentElement ?? head
+    if (head && land) {
+      const top = head.getBoundingClientRect().top
+      const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 56
+      if (top < header + 8) {
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        land.scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' })
+      }
+    }
+    /* בטלפון הרצועה היא שורה אחת שנגללת לרוחב — המספר הנוכחי נמשך לתוכה.
+       לא `scrollIntoView`: הוא היה מזיז גם את העמוד עצמו. */
+    const strip = stripRef.current
+    const btn = strip?.querySelector<HTMLElement>('[aria-current="step"]')
+    if (strip && btn && strip.scrollWidth > strip.clientWidth) {
+      const s = strip.getBoundingClientRect()
+      const b = btn.getBoundingClientRect()
+      strip.scrollLeft += b.left + b.width / 2 - (s.left + s.width / 2)
+    }
+    /* הכפתור שנלחץ התחלף (הבא ← הגשה) — הפוקוס עובר לשאלה ולא נופל ל-body */
+    if (!document.activeElement || document.activeElement === document.body) {
+      progressRef.current?.focus({ preventScroll: true })
+    }
+  }, [view, cur])
+
+  /* סרגל הצד הוא ניווט גם במבחן: כל שורה בו קישור `#xq-…`. כשעל המסך שאלה
+     אחת, היעד של שורה אחרת אינו קיים בעמוד — ולכן הלחיצה נתפסת כאן ומחליפה
+     שאלה במקום לחפש עוגן. */
+  useEffect(() => {
+    if (view !== 'sit') return
+    const byHash = new Map(items.map(({ q }, i) => [q.id, i] as const))
+    const onClick = (e: MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.('.chapter-menu-nav a[href^="#xq-"]')
+      if (!a) return
+      const id = (a.getAttribute('href') ?? '').slice(4).replace(/-go$/, '')
+      const i = byHash.get(id)
+      if (i === undefined) return
+      e.preventDefault()
+      go(i)
+    }
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [view, items, go])
 
   /* הערכה עצמית של שאלה פתוחה מתעדכנת גם ברשומה השמורה, אחרת ציון שנקבע
      אחרי ההגשה לא היה חוזר בסקירה של מחר. */
@@ -213,13 +312,7 @@ export default function ExamRoom() {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [])
 
-  const answeredCount = items.filter(({ q }) => {
-    const a = answers[q.id]
-    if (a === undefined) return false
-    if (q.type === 'open') return typeof a === 'string' && a.trim().length > 0
-    if (q.type === 'match') return Object.keys(a as Record<string, string>).length === q.pairs.length
-    return Array.isArray(a) && a.length > 0
-  }).length
+  const answeredCount = items.filter(({ q }) => isFilled(q, answers[q.id])).length
 
   /* =============================================================== המעטפת ==== */
 
@@ -232,28 +325,25 @@ export default function ExamRoom() {
       return [
         { id: 'xr-s1', label: 'הפרקים', done: on },
         { id: 'xr-s2', label: 'אורך המבחן', done: on },
-        { id: 'xr-s3', label: 'שעון', done: on },
+        { id: 'xr-s3', label: 'זמן', done: on },
       ]
     }
     if (view === 'history') {
       return history.map((a) => ({ id: `xh-${a.id}`, label: fmtDate(a.at), done: true }))
     }
-    return items.map(({ q, chapter }) => {
+    return items.map(({ q, chapter }, i) => {
       const a = answers[q.id]
-      const filled =
-        a !== undefined &&
-        (q.type === 'open'
-          ? typeof a === 'string' && a.trim().length > 0
-          : q.type === 'match'
-            ? Object.keys(a as Record<string, string>).length === q.pairs.length
-            : Array.isArray(a) && a.length > 0)
       return {
-        id: `xq-${q.id}`,
+        /* ⚠ במבחן, רק השאלה שעל המסך נושאת את המזהה האמיתי. הסרגל מסמן את
+           השורה הנוכחית לפי IntersectionObserver על המזהים האלה, והוא נדרך מחדש
+           רק כשרשימת המזהים משתנה — אז היא משתנה עם כל מעבר שאלה, והשאלה שעל
+           המסך היא היחידה שנמצאת. בלי זה השורה הראשונה נשארת מסומנת לכל המבחן. */
+        id: view === 'sit' && i !== cur ? `xq-${q.id}-go` : `xq-${q.id}`,
         label: `פרק ${chapter}` + (q.type === 'open' ? ' · פתוחה' : ''),
-        done: view === 'result' ? (q.type === 'open' ? !!grades[q.id] : isRight(q, a)) : filled,
+        done: view === 'result' ? (q.type === 'open' ? !!grades[q.id] : isRight(q, a)) : isFilled(q, a),
       }
     })
-  }, [view, picked, history, items, answers, grades])
+  }, [view, picked, history, items, answers, grades, cur])
 
   /* השעון והמונה יושבים בסלוט הסופי של המסטהד במקום קישור החזרה — במהלך מבחן
      הם צריכים להיות גלויים תמיד, והחזרה צריכה לעבור דרך אישור. */
@@ -263,7 +353,7 @@ export default function ExamRoom() {
         <span className="xr-count">
           {answeredCount} / {items.length}
         </span>
-        {timed ? (
+        {limit > 0 ? (
           <span className={'xr-clock' + (remaining <= 60 ? ' is-low' : '')} role="timer" aria-live="off">
             {fmtClock(remaining)}
           </span>
@@ -291,6 +381,8 @@ export default function ExamRoom() {
             setLength={setLength}
             timed={timed}
             setTimed={setTimed}
+            perQ={perQ}
+            setPerQ={setPerQ}
             poolSize={poolSize}
             onStart={start}
             history={history}
@@ -299,38 +391,92 @@ export default function ExamRoom() {
           />
         )}
 
-        {view === 'sit' && (
+        {view === 'sit' && items[cur] && (() => {
+          const { q, chapter } = items[cur]
+          const last = cur === items.length - 1
+          return (
           <>
             <div className="xr-lead">
               <h1>המבחן</h1>
               <p>
-                {items.length} שאלות מ-{attempt?.chapters.length} פרקים. אפשר לדלג ולחזור — הכול בעמוד אחד.
-                {timed ? ' השעון רץ — בסופו המבחן ייבדק מעצמו.' : ' אין הגבלת זמן.'}
+                {items.length} שאלות מ-{attempt?.chapters.length} פרקים, שאלה אחת בכל פעם. אפשר לדלג ולחזור
+                דרך המספרים, וההגשה בשאלה האחרונה.
+                {limit > 0
+                  ? ` הזמן: ${fmtSpan(limit)} (${perQuestionLabel(attempt?.perQ ?? PER_QUESTION_DEFAULT)}). בסופו המבחן ייבדק מעצמו.`
+                  : ' אין הגבלת זמן.'}
               </p>
             </div>
-            <ol className="xr-sheet">
-              {items.map(({ q, chapter }, i) => (
-                <li key={q.id}>
-                  <ExamQuestion
-                    q={q}
-                    chapter={chapter}
-                    n={i + 1}
-                    ans={answers[q.id]}
-                    onAnswer={(a) => setAnswers((cur) => ({ ...cur, [q.id]: a }))}
-                    mode="answer"
-                    held={held}
-                    setHeld={setHeld}
-                  />
-                </li>
-              ))}
-            </ol>
-            <div className="xr-submit">
-              {answeredCount < items.length && (
+
+            {/* רצועת המספרים: מעבר ישיר, ומה נענה ומה לא — במבט אחד */}
+            <nav className="xr-strip" aria-label="מעבר בין השאלות">
+              <ol ref={stripRef}>
+                {items.map((it, i) => {
+                  const done = isFilled(it.q, answers[it.q.id])
+                  return (
+                    <li key={it.q.id}>
+                      <button
+                        type="button"
+                        className={'xr-num' + (done ? ' is-done' : '') + (i === cur ? ' is-current' : '')}
+                        aria-current={i === cur ? 'step' : undefined}
+                        aria-label={`שאלה ${i + 1}, ${done ? 'נענתה' : 'טרם נענתה'}`}
+                        onClick={() => go(i)}
+                      >
+                        {i + 1}
+                      </button>
+                    </li>
+                  )
+                })}
+              </ol>
+              <p className="xr-strip-key" aria-hidden="true">
+                <span className="xr-key-done" /> נענתה
+                <span className="xr-key-open" /> טרם נענתה
+              </p>
+            </nav>
+
+            <p className="xr-progress" ref={progressRef} tabIndex={-1} aria-live="polite">
+              <b>שאלה {cur + 1} מתוך {items.length}</b>
+              <span>נענו {answeredCount}</span>
+            </p>
+
+            <ExamQuestion
+              key={q.id}
+              q={q}
+              chapter={chapter}
+              n={cur + 1}
+              ans={answers[q.id]}
+              onAnswer={(a) => setAnswers((prev) => ({ ...prev, [q.id]: a }))}
+              mode="answer"
+              held={held}
+              setHeld={setHeld}
+            />
+
+            {/* „הבא“ ו„הגשה“ הם שני כפתורים ולא כפתור אחד שמחליף תווית — אחרת
+                לחיצה כפולה על „הבא“ בשאלה הלפני-אחרונה הייתה מגישה את המבחן */}
+            <div className="xr-pager">
+              <button type="button" className="xr-secondary xr-step-btn" disabled={cur === 0} onClick={() => go(cur - 1)}>
+                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+                הקודם
+              </button>
+              {last ? (
+                <button key="submit" type="button" className="xr-go" onClick={submit}>
+                  הגשה ובדיקה
+                </button>
+              ) : (
+                <button key="next" type="button" className="xr-go xr-step-btn" onClick={() => go(cur + 1)}>
+                  הבא
+                  <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 6l-6 6 6 6" />
+                  </svg>
+                </button>
+              )}
+              {last && answeredCount < items.length && (
                 <p className="xr-note">נותרו {items.length - answeredCount} שאלות ללא מענה. אפשר להגיש גם כך.</p>
               )}
-              <button type="button" className="xr-go" onClick={submit}>
-                הגשה ובדיקה
-              </button>
+            </div>
+
+            <div className="xr-submit xr-leave">
               {confirmLeave ? (
                 <span className="xr-confirm">
                   <span>לצאת בלי להגיש? המבחן יימחק.</span>
@@ -348,7 +494,8 @@ export default function ExamRoom() {
               )}
             </div>
           </>
-        )}
+          )
+        })()}
 
         {view === 'result' && attempt && (
           <>
@@ -431,7 +578,7 @@ export default function ExamRoom() {
                           <b>{fmtDate(a.at)}</b>
                           <span>
                             פרקים {a.chapters.join(', ')} · {a.items.length} שאלות · {fmtClock(Math.floor(a.elapsedMs / 1000))}
-                            {a.timed && ' · עם שעון'}
+                            {a.timed && (a.perQ ? ` · ${perQuestionLabel(a.perQ)}` : ' · עם שעון')}
                             {s.openUngraded > 0 && ` · ${s.openUngraded} פתוחות לא הוערכו`}
                           </span>
                         </span>
@@ -473,7 +620,7 @@ export default function ExamRoom() {
 /* =================================================================== בנייה ==== */
 
 function Build({
-  picked, setPicked, length, setLength, timed, setTimed, poolSize, onStart, history, ready, onHistory,
+  picked, setPicked, length, setLength, timed, setTimed, perQ, setPerQ, poolSize, onStart, history, ready, onHistory,
 }: {
   picked: number[]
   setPicked: (n: number[]) => void
@@ -481,6 +628,8 @@ function Build({
   setLength: (n: number) => void
   timed: boolean
   setTimed: (b: boolean) => void
+  perQ: number
+  setPerQ: (n: number) => void
   poolSize: number
   onStart: () => void
   history: Attempt[]
@@ -513,12 +662,14 @@ function Build({
   /* אורך שאין לו מספיק שאלות אינו מוסתר אלא מסומן — כדי שיהיה ברור למה הוא
      אינו זמין, ומה צריך לעשות כדי שיהיה */
   const usable = (n: number) => picked.length > 0 && n <= poolSize
+  /* האורך שהמבחן יקבל בפועל — הוא מה שהזמן הכולל מוכפל בו */
+  const willAsk = picked.length ? Math.min(length, poolSize) : length
 
   return (
     <>
       <div className="xr-lead">
         <h1>חדר המבחנים</h1>
-        <p>בחרו את הפרקים שתרצו להיבחן עליהם, את אורך המבחן, והאם להיבחן מול שעון. המבחן ייבנה מהמאגרים בחלוקה מאוזנת בין הפרקים, ויכלול גם שאלות סגורות וגם שאלות פתוחות.</p>
+        <p>בחרו את הפרקים שתרצו להיבחן עליהם, את אורך המבחן, והאם להיבחן עם הגבלת זמן. המבחן ייבנה מהמאגרים בחלוקה מאוזנת בין הפרקים, ויוצג שאלה אחת בכל פעם.</p>
       </div>
 
       <section className="xr-step" id="xr-s1" aria-labelledby="xr-s1-t">
@@ -544,7 +695,7 @@ function Build({
                 <button type="button" className={'xr-ch' + (on ? ' is-on' : '')} aria-pressed={on} onClick={() => toggle(b.chapter)}>
                   <span className="xr-ch-n">{b.chapter}</span>
                   <span className="xr-ch-name">{b.title}</span>
-                  <span className="xr-ch-count">{b.questions.length} שאלות במאגר</span>
+                  <span className="xr-ch-count">{examPool(b).length} שאלות במאגר</span>
                 </button>
               </li>
             )
@@ -582,7 +733,7 @@ function Build({
           <span className="xr-n">2</span>
           <div>
             <h2 id="xr-s2-t">כמה שאלות</h2>
-            <p>כחמישית מהן יהיו שאלות פתוחות.</p>
+            <p>כל השאלות סגורות: בחירה של תשובה אחת, של כמה תשובות, והתאמה.</p>
           </div>
         </header>
         <div className="xr-lengths">
@@ -608,18 +759,38 @@ function Build({
         <header className="xr-step-head">
           <span className="xr-n">3</span>
           <div>
-            <h2 id="xr-s3-t">עם שעון או בלי</h2>
-            <p>עם שעון: דקה לשאלה סגורה ושלוש לפתוחה, ובסופו המבחן ייבדק מעצמו.</p>
+            <h2 id="xr-s3-t">הגבלת זמן</h2>
+            <p>עם הגבלת זמן בוחרים כמה זמן לשאלה, והשעון סופר את הסך הכולל. כשהוא נגמר המבחן ייבדק מעצמו.</p>
           </div>
         </header>
         <div className="xr-lengths">
+          <button type="button" className={'xr-pick' + (timed ? ' is-on' : '')} aria-pressed={timed} onClick={() => setTimed(true)}>
+            עם הגבלת זמן
+          </button>
           <button type="button" className={'xr-pick' + (!timed ? ' is-on' : '')} aria-pressed={!timed} onClick={() => setTimed(false)}>
             בלי הגבלת זמן
           </button>
-          <button type="button" className={'xr-pick' + (timed ? ' is-on' : '')} aria-pressed={timed} onClick={() => setTimed(true)}>
-            עם שעון
-          </button>
         </div>
+        {timed && (
+          <div className="xr-time">
+            <div className="xr-lengths xr-perq" role="group" aria-label="זמן לשאלה">
+              {PER_QUESTION.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  className={'xr-pick' + (perQ === s ? ' is-on' : '')}
+                  aria-pressed={perQ === s}
+                  onClick={() => setPerQ(s)}
+                >
+                  {perQuestionLabel(s)}
+                </button>
+              ))}
+            </div>
+            <p className="xr-total" aria-live="polite">
+              סך הכול <b>{fmtSpan(perQ * willAsk)}</b> ל-{willAsk} שאלות
+            </p>
+          </div>
+        )}
       </section>
 
       <div className="xr-submit">

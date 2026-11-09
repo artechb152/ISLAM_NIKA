@@ -71,7 +71,7 @@
 .chapter-article .ch9-share-label{font-family:var(--font-heading);font-weight:700;font-size:var(--emph);color:var(--maroon-deep)}
 .ch9-lands{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
 .ch9-land{background:var(--paper);border:1px solid var(--edge);border-radius:16px;padding:14px;text-align:center}
-.ch9-land h4{font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);font-size:20px}
+.ch9-land h3{font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);font-size:20px;margin:0;line-height:1.17}
 .ch9-g10{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;direction:ltr;width:110px;margin:10px auto 6px}
 .ch9-g10 i{aspect-ratio:1;border-radius:999px;background:var(--rule);transition:background-color .3s}
 .ch9-g10 i.is-f{background:var(--maroon)}

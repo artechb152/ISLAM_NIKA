@@ -13,13 +13,29 @@
    the tag reads aria-label (or data-tip), and appears only when the control has no visible
    text of its own. Not on touch — there is no hover, and a tap must stay a tap.
 
+   „טעינה גם לפני כניסה לפרקים" (the user, same day) — the bar alone was not enough: a page
+   that takes more than a moment gets a veil over it, the site's maroon with the logo and a
+   turning ring, until it has loaded. It only appears after 350ms, so a quick page never
+   flashes it, and it lifts by itself after ten seconds whatever happens (pure CSS — even if
+   the page's script never runs, the reader is not left behind a curtain).
+
+   Accessibility (the user: „לחשוב על דרך הנגשה" — „כן תעשה את זה"): a skip link to the
+   content for keyboard readers, and the accessibility panel (A11yPanel).
+
    The chapters screen's collapsed rail has its own side-pointing tag (.rail-tip) and is
    skipped here. Chapter 1 does not load this (the user: not touching chapter 1 for now). */
 import '@/styles/site-chrome.css'
+import A11yPanel, { A11Y_BOOT } from '@/components/A11yPanel'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 type Tip = { label: string; x: number; y: number; below: boolean }
+
+/* a page reached from inside the site shows its veil at once — the reader just watched the
+   previous page's veil come up, and 350ms of the new page before it would be a flicker */
+const NAV_KEY = 'site:nav'
+const NAV_BOOT = `try{if(sessionStorage.getItem('${NAV_KEY}')){sessionStorage.removeItem('${NAV_KEY}');document.documentElement.classList.add('nav-in')}}catch(e){}`
+const leaving = () => { try { sessionStorage.setItem(NAV_KEY, '1') } catch {} }
 
 const TIP_TARGET = 'button, a, [role="button"], [role="tab"], summary'
 
@@ -72,10 +88,14 @@ export default function SiteChrome() {
       const url = new URL(a.href, location.href)
       if (url.origin !== location.origin) return
       if (url.pathname === location.pathname && url.search === location.search) return // a hash jump
+      leaving()
       setBar('run')
     }
+    /* navigations that are not a link click (router.push after an animation) */
+    const onLeave = () => { leaving(); setBar('run') }
     document.addEventListener('click', onClick)
-    return () => document.removeEventListener('click', onClick)
+    window.addEventListener('beforeunload', onLeave)
+    return () => { document.removeEventListener('click', onClick); window.removeEventListener('beforeunload', onLeave) }
   }, [])
 
   /* hover / focus labels */
@@ -124,11 +144,31 @@ export default function SiteChrome() {
     }
   }, [])
 
+  const skip = (e: React.MouseEvent) => {
+    const main = document.querySelector<HTMLElement>('main, [role="main"]')
+    if (!main) return
+    e.preventDefault()
+    if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1')
+    main.focus()
+    main.scrollIntoView({ block: 'start' })
+  }
+
   return (
     <>
+      {/* applies saved accessibility preferences before the first paint */}
+      <script dangerouslySetInnerHTML={{ __html: A11Y_BOOT + NAV_BOOT }} />
+      <a className="site-skip" href="#main" onClick={skip}>
+        דילוג לתוכן
+      </a>
       <div className={'site-load is-' + bar} aria-hidden="true">
         <span />
       </div>
+      <div className={'site-veil is-' + bar} aria-hidden="true">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/assets/logo-cream.png" alt="" />
+        <i />
+      </div>
+      <A11yPanel />
       {tip && (
         <span
           className={'site-tip' + (tip.below ? ' is-below' : ' is-above')}

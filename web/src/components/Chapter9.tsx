@@ -403,7 +403,7 @@ function Share() {
       <div className="ch9-lands">
         {s.lands!.map((l) => (
           <div className="ch9-land" key={one(l.name)}>
-            <h4>{one(l.name)}</h4>
+            <h3>{one(l.name)}</h3>
             {l.pct == null ? (
               <div className="ch9-land-maj">{one(s.majority!)}</div>
             ) : (

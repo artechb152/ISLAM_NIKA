@@ -21,7 +21,7 @@ export default function Reading() {
       <section className="article-section ref-reading" aria-label="הרשימה">
         {cats.map((c) => (
           <div className="ref-cat" key={c.id}>
-            <h3 className="scrolly-env">{c.title}</h3>
+            <h2 className="scrolly-env">{c.title}</h2>
             <ul className="ref-rows">
               {c.items.map((it) => (
                 <li className="ref-row" key={it.id}>

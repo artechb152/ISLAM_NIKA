@@ -33,7 +33,8 @@ export default function ReferenceShell({
   rail,
   children,
 }: {
-  current: ReferenceId
+  /* בלי current — עמוד שאינו אחד מארבעת עמודי העזר (הצהרת הנגישות) */
+  current?: ReferenceId
   eyebrow: string
   title: string
   subtitle?: ReactNode

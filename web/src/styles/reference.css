@@ -209,3 +209,9 @@
 @media (prefers-reduced-motion:reduce){
   .ref-map-zoom{transition:none}
 }
+
+/* הצהרת הנגישות — פרוזה עם כותרות משנה ורשימות, בלי מנגנון */
+.ref-page .ref-a11y h2{font-size:clamp(24px,2.2vw,30px);margin:34px 0 12px}
+.ref-page .ref-a11y ul{margin:0;padding-inline-start:22px;display:flex;flex-direction:column;gap:8px}
+.ref-page .ref-a11y li,.ref-page .ref-a11y p{font-size:17px;line-height:1.75}
+.ref-page .ref-a11y a{color:var(--maroon);font-weight:600}

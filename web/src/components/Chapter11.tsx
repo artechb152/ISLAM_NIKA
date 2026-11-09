@@ -269,7 +269,7 @@ function MapSection({ id }: { id: string }) {
             <div className="ch11-pop-body">
               {p.stops.map((k) => <Blocks key={k} blocks={stops[k].blocks} />)}
             </div>
-            <nav className="ch11-pop-nav">
+            <nav className="ch11-pop-nav" aria-label="מעבר בין הנקודות במפה">
               <button type="button" disabled={i === 0} aria-label="הקודם" onClick={() => open(i)}>→</button>
               <span>{i + 1} / {pts.length}</span>
               <button type="button" disabled={i === pts.length - 1} aria-label="הבא" onClick={() => open(i + 2)}>←</button>

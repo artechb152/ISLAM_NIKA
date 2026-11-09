@@ -585,7 +585,7 @@ export default function Chapter6() {
       <div className="chapter-layout">
         <main className="chapter-article" ref={articleRef}>
           {/* ===================== area 1 — the opening ===================== */}
-          <section className="opening-section article-section" id="opening" aria-labelledby="chapter-title">
+          <section className="opening-section article-section" id="opening" aria-label="פתיחת הפרק">
             {/* cinematic banner like the chapters page — video background + title over it */}
             <div className="ch6-hero">
               <div className="ch6-hero-media" aria-hidden="true">

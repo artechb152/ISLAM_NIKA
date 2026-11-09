@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 
 export default function Chapter13Layout({ children }: { children: ReactNode }) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="he" dir="rtl" suppressHydrationWarning>
       <body>
         <SiteChrome />
         {children}

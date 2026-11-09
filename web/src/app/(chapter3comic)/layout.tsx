@@ -38,7 +38,7 @@ export const viewport: Viewport = {
 
 export default function Chapter3ComicPreviewLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="he" dir="rtl" suppressHydrationWarning>
       <body>
         <SiteChrome />
         {children}

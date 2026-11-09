@@ -31,6 +31,9 @@ export interface Attempt {
   chapters: number[]
   seed: number
   timed: boolean
+  /** שניות לשאלה, כשהמבחן היה מתוזמן. רשומות מלפני בחירת הזמן אינן נושאות
+   *  אותו — הן נעשו בדקה לשאלה (`PER_QUESTION_DEFAULT`). */
+  perQ?: number
   /** משך המבחן בפועל, במילישניות */
   elapsedMs: number
   items: AttemptItem[]

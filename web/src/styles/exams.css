@@ -167,6 +167,65 @@
 .xr-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; font-size: 15px; color: var(--muted) }
 .xr-empty { font-size: var(--read); color: var(--muted) }
 
+/* ---- זמן לשאלה ----
+   נפתח מתחת לבחירה „עם הגבלת זמן“, באותן גלולות. התוויות הן משפט קצר ולא
+   מספר, ולכן לא בגופן הכותרת הגדול של `.xr-pick` — בגודל של גלולת `.xq-pick`. */
+.xr-time { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--rule) }
+.xr-perq .xr-pick { font-family: var(--font-body); font-size: 16px; font-weight: 600; min-width: 0 }
+.xr-total { margin: 14px 0 0; font-size: clamp(15px, 1.6vw, 18px); color: var(--muted) }
+.xr-total b { font-weight: 700; color: var(--maroon-deep) }
+
+/* ======================================================= שאלה אחת בכל פעם ==== */
+
+/* רצועת המספרים. כל מספר הוא המדליון של השאלה בקטן: נייר וטבעת זהב כשלא
+   נענתה, מילוי מרון כשנענתה — אותה שפה של `.xq-n.is-full` בראש השאלה עצמה,
+   כך שהמספר ברצועה והמספר בשאלה אומרים אותו דבר באותו צבע. הנוכחית מסומנת
+   בטבעת מרון חיצונית, לא במילוי — מילוי כבר אומר „נענתה“. */
+.xr-strip { margin-bottom: clamp(22px, 3vw, 32px); scroll-margin-top: calc(var(--header-height) + 14px) }
+.xr-strip ol { list-style: none; margin: 0; padding: 4px; display: flex; flex-wrap: wrap; gap: 8px }
+.xr-num {
+  all: unset; box-sizing: border-box; cursor: pointer;
+  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--paper); border: 1.5px solid var(--gold);
+  font-family: var(--font-heading); font-weight: 800; font-size: 14px; color: var(--maroon);
+  font-variant-numeric: tabular-nums;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
+}
+.xr-num:hover:not(.is-done) { background: rgba(165, 50, 47, .1); border-color: var(--maroon) }
+.xr-num.is-done { background: var(--maroon); border-color: var(--maroon); color: var(--cream) }
+.xr-num.is-current { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--maroon-deep) }
+.xr-num:focus-visible { outline: 2px solid var(--maroon); outline-offset: 5px }
+.xr-strip-key { display: flex; align-items: center; gap: 7px; margin: 10px 0 0; font-size: 13.5px; color: var(--muted) }
+.xr-strip-key span { width: 12px; height: 12px; border-radius: 50% }
+.xr-key-open { margin-inline-start: 10px }
+.xr-key-done { background: var(--maroon) }
+.xr-key-open { background: var(--paper); border: 1.5px solid var(--gold); box-sizing: border-box }
+
+/* „שאלה 4 מתוך 15“ — הראש של מה שמתחלף. גוללים אליו ומעבירים אליו פוקוס,
+   ולכן הוא נושא את ה-scroll-margin של המסטהד הנצמד. */
+.xr-progress {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px;
+  margin: 0 0 clamp(16px, 2.2vw, 22px); padding-top: clamp(18px, 2.6vw, 26px);
+  border-top: 1px solid var(--rule);
+  scroll-margin-top: calc(var(--header-height) + 14px);
+}
+.xr-progress:focus { outline: none }
+.xr-progress:focus-visible { outline: 2px solid var(--maroon); outline-offset: 3px }
+.xr-progress b { font-family: var(--font-heading); font-weight: 800; font-size: clamp(17px, 1.7vw, 20px); color: var(--gold-text); letter-spacing: .02em }
+.xr-progress span { font-size: 14px; color: var(--muted) }
+
+/* הקודם · הבא. בעברית הקודם בימין והבא בשמאל — סדר ה-DOM עושה את זה לבד. */
+.xr-pager {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  margin-top: clamp(30px, 4.4vw, 48px);
+}
+.xr-step-btn { gap: 6px }
+.xr-step-btn svg { width: 18px; height: 18px; flex: none }
+.xr-pager .xr-secondary:disabled { opacity: .35; cursor: default; background: var(--mat); border-color: var(--edge) }
+.xr-pager .xr-note { flex-basis: 100% }
+/* היציאה היא פעולה משנית ורחוקה מ„הבא“ — שורה משלה, מעבר לקו */
+.xr-leave { margin-top: clamp(28px, 4vw, 44px); padding-top: clamp(20px, 3vw, 30px) }
+
 /* ================================================================ השאלה ==== */
 /* אין מיכל. שיער אחד בין שאלה לשאלה, והרבה אוויר. */
 .xr-sheet { list-style: none; margin: 0; padding: 0 }
@@ -273,14 +332,7 @@ button.xq-slot:focus-visible { outline: 2px solid var(--maroon); outline-offset:
 .xq-fix { font-style: normal; font-weight: 700; color: var(--maroon-deep) }
 .xq-fix::before { content: "← "; color: var(--muted); font-weight: 400 }
 
-/* ---- פתוחה ---- */
-.xq-write {
-  box-sizing: border-box; width: min(760px, 100%); display: block;
-  padding: 14px 16px; border: 1px solid var(--edge); border-radius: 14px; background: var(--mat);
-  font-family: var(--font-body); font-size: var(--read); line-height: 1.75; color: var(--ink);
-  resize: vertical;
-}
-.xq-write:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px; border-color: var(--maroon) }
+/* ---- פתוחה — סקירה של מבחנים ישנים בלבד; מבחן חדש אינו נושא פתוחות ---- */
 /* התווית הקטנה בזהב מרווח — `.gv-hint-label` של פרק 6 */
 .xq-label {
   display: block; font-size: 12.5px; letter-spacing: .16em; font-weight: 700;
@@ -364,10 +416,29 @@ button.xq-slot:focus-visible { outline: 2px solid var(--maroon); outline-offset:
   .xr-ch { grid-template-columns: auto minmax(0, 1fr) }
   .xr-ch-count { grid-column: 2 }
   .xr-history > li { flex-wrap: wrap }
+  /* שישים מספרים בשורות עוטפות הם שמונה שורות מעל השאלה. בטלפון הרצועה היא
+     שורה אחת שנגללת לרוחב בתוך עצמה — העמוד עצמו לא זז הצידה. */
+  .xr-strip ol { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding-block: 6px }
+  .xr-strip li { flex: none }
+  /* „הגשה ובדיקה“ ארוך מ„הבא“ — רוחב לפי התוכן ולא חצי-חצי, אחרת הוא נשבר לשתי שורות ב-390 */
+  .xr-pager .xr-go, .xr-pager .xr-secondary { flex: 1 1 auto; padding-inline: 18px; white-space: nowrap }
 }
 
 /* ------------------------------------------------------- תנועה מופחתת ---- */
 @media (prefers-reduced-motion: reduce) {
   .xr-n, .xq-n, .xr-ch, .xr-pick, .xq-pick, .xr-secondary, .xr-go,
-  .xq-opt, .xq-chip, .xq-slot, .xr-hrow, .xr-del { transition: none }
+  .xq-opt, .xq-chip, .xq-slot, .xr-hrow, .xr-del, .xr-num { transition: none }
 }
+
+/* „חזרה לפרקים" במסטהד (מסכי הבנייה, התוצאה וההיסטוריה). הכללים שלו יושבים ב-
+   chapter6-practice.css, שה-layout של חדר המבחנים לא טוען — ולכן הקישור עמד בלי
+   עיצוב מתחת למסטהד, מעל התוכן. הועתקו לכאן במקום לטעון גיליון שלם של תרגול. */
+.gv-back{
+  display:inline-flex;align-items:center;gap:7px;min-height:44px;text-decoration:none;
+  color:var(--cream,#f5ecd6);font-weight:600;font-size:15px;
+  padding-inline:16px;border-radius:999px;border:1px solid rgba(245,236,214,.26);
+  background:rgba(245,236,214,.1);
+  transition:background .2s ease,border-color .2s ease;
+}
+.gv-back:hover{background:rgba(245,236,214,.18);border-color:var(--cream,#f5ecd6)}
+.gv-back svg{width:16px;height:16px}
