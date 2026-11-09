@@ -33,6 +33,7 @@ import ComicPart from '@/components/Chapter3ComicPart'
 import revelationComic from '@/lib/chapter3/revelation-comic.json'
 import nightComic from '@/lib/chapter3/night-comic.json'
 import { useFindHit } from '@/lib/chapter3/useFindHit'
+import MarkToNotebook from '@/components/MarkToNotebook'
 import { CH3, frag, list, text } from '@/lib/chapter3/content'
 import layoutData from '@/lib/chapter3/layout.json'
 import {
@@ -869,6 +870,8 @@ export default function Chapter3() {
 
   return (
     <div className="chapter-page">
+      {/* סימון משפט → "הוספה למחברת" (במאמר ובשני הקומיקסים שבתוכו) */}
+      <MarkToNotebook ch={3} />
       <header className="chapter-site-header">
         <div className="chapter-site-header-inner">
           <div className="chapter-hdr-start">

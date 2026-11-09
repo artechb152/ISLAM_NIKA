@@ -44,7 +44,7 @@ type Card = {
   items?: Line[]
   quotes?: (Line & { ref?: string })[]
 }
-type Station = { sec: string; kind: 'flag' | 'emblem'; tex: string; crop?: number[] }
+type Station = { sec: string; kind: 'flag' | 'emblem'; tex: string; crop?: number[]; hall?: string }
 
 const STATIONS = layout.stations as Station[]
 const CARDS = passages.passages as Record<string, Card>
@@ -304,8 +304,11 @@ function clothMaterial(map: THREE.Texture, W: number, H: number, phase: number) 
 
 /* ── תחנה ── */
 function FlagCloth({ st }: { st: Station }) {
-  const { tex, aspect: imgAspect } = useBookletTexture(st.tex, st.sec === '§5' ? 'revive' : 'plain')
-  const crop = st.crop ?? [0.012, 0.012, 0.988, 0.988]
+  /* hall: a clean image for the cloth on the pole only — the card that opens keeps the
+     booklet crop (§5: the pole carries the Wikimedia flag, the card the booklet photo with the
+     two motto lines its text translates; the user, 9.11.2026) */
+  const { tex, aspect: imgAspect } = useBookletTexture(st.hall ?? st.tex, st.hall ? 'plain' : st.sec === '§5' ? 'revive' : 'plain')
+  const crop = (!st.hall && st.crop) || [0.012, 0.012, 0.988, 0.988]
   const aspect = imgAspect * ((crop[2] - crop[0]) / (crop[3] - crop[1]))
   const W = FLAG_W
   const H = W / aspect

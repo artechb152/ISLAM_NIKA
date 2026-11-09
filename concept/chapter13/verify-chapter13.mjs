@@ -60,6 +60,7 @@ for (const st of layout.stations) {
   if (st.kind !== want) errors.push(`${st.sec}: kind=${st.kind} אבל הכותרת „${name}"`)
   try { await access(new URL(`../../web/public/assets/chapter13/flags/${st.tex}`, here)) }
   catch { errors.push(`${st.sec}: טקסטורה חסרה — ${st.tex}`) }
+  if (st.hall) { try { await access(new URL(`../../web/public/assets/chapter13/flags/${st.hall}`, here)) } catch { errors.push(`${st.sec}: תמונת התורן חסרה — ${st.hall}`) } }
 }
 
 const cards = Object.values(data.passages)

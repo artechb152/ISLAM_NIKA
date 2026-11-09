@@ -14,6 +14,9 @@ export interface Mark {
   text: string
   /** כותרת הסעיף שבו עמד הסימון, אם נמצאה — כדי למצוא אותו שוב */
   where?: string
+  /** איזה מופע של אותו נוסח בפרק סומן (0 = הראשון) — משפט שחוזר בפרק
+      מודגש במקום שבו סומן, לא במופע הראשון. ראו site-notebook-find.ts */
+  occ?: number
   /** נסמן (epoch ms) */
   at: number
   /** ההערה האישית שנתלתה עליו במחברת */
@@ -64,14 +67,14 @@ function write(store: MarksStore): MarksStore {
 /** אורך מקסימלי לסימון בודד — בחירה ענקית בטעות לא תשתלט על המחברת */
 const MAX_LEN = 1200
 
-export function addMark(ch: number, text: string, where?: string): Mark | null {
+export function addMark(ch: number, text: string, where?: string, occ?: number): Mark | null {
   const clean = text.replace(/\s+/g, ' ').trim().slice(0, MAX_LEN)
   if (!clean) return null
   const s = readMarks()
-  /* אותו משפט מאותו פרק לא נשמר פעמיים */
-  const dup = s.marks.find((m) => m.ch === ch && m.text === clean)
+  /* אותו משפט מאותו מקום בפרק לא נשמר פעמיים */
+  const dup = s.marks.find((m) => m.ch === ch && m.text === clean && (m.occ ?? 0) === (occ ?? 0))
   if (dup) return dup
-  const mark: Mark = { id: Math.random().toString(36).slice(2, 9) + Date.now().toString(36), ch, text: clean, where, at: Date.now() }
+  const mark: Mark = { id: Math.random().toString(36).slice(2, 9) + Date.now().toString(36), ch, text: clean, where, occ, at: Date.now() }
   write({ ...s, marks: [...s.marks, mark] })
   return mark
 }
@@ -89,6 +92,10 @@ export function deleteMark(id: string): MarksStore {
   const s = readMarks()
   return write({ ...s, marks: s.marks.filter((m) => m.id !== id) })
 }
+
+/* "לקטע בפרק" — הפרק נפתח עם ?nb=<id>, גולל אל הסימון ומאיר אותו רגע.
+   פרמטר ולא hash: פרק 12 מחזיק ב-hash את התיק הפתוח, ופרקים אחרים את הסעיף. */
+export const GOTO_PARAM = 'nb'
 
 export function marksInChapter(ch: number): Mark[] {
   return readMarks().marks.filter((m) => m.ch === ch)

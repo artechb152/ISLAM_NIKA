@@ -30,7 +30,7 @@
   background:#571820;pointer-events:none;opacity:0;visibility:hidden}
 .site-veil img{width:min(210px,52vw);height:auto}
 .site-veil i{width:34px;height:34px;border-radius:50%;border:3px solid rgba(245,236,214,.22);border-top-color:#c9a24a;animation:site-spin .9s linear infinite}
-.site-veil.is-run{visibility:visible;pointer-events:auto;animation:site-veil-in .25s ease .35s forwards,site-veil-out .4s ease 10s forwards}
+.site-veil.is-run{visibility:visible;animation:site-veil-in .25s ease .35s forwards,site-veil-out .4s ease 10s forwards}
 html.nav-in .site-veil.is-run{opacity:1;animation:site-veil-out .4s ease 10s forwards}
 .site-veil.is-done{visibility:visible;opacity:0;transition:opacity .35s ease}
 html.nav-in .site-veil.is-done{opacity:0}

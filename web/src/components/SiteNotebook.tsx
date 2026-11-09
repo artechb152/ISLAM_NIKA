@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import TopicFilter from '@/components/TopicFilter'
 import { allChapters, categoryOfChapter } from '@/lib/chapters-data'
-import { deleteMark, MARKS_EVENT, readMarks, setMarkNote, type Mark } from '@/lib/site-notebook'
+import { deleteMark, GOTO_PARAM, MARKS_EVENT, readMarks, setMarkNote, type Mark } from '@/lib/site-notebook'
 
 function fmt(ms: number): string {
   return new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -79,9 +79,12 @@ export default function SiteNotebook() {
 
   /* הסינון חל על `sections` עצמו, ולכן גם הסרגל וגם המאמר עוקבים אחריו בלי
      שאף אחד מהם יצטרך לדעת שיש סינון. */
+  /* נמחק הסימון האחרון של הנושא שבו מסננים — חוזרים להכול. אחרת נשארים מול
+     רשימה ריקה, ואם נשאר רק נושא אחד המסנן מסתיר את עצמו ואין דרך חזרה. */
+  const active = topic && topics.some((t) => t.id === topic) ? topic : null
   const sections = useMemo(
-    () => (topic ? allSections.filter((s) => categoryOfChapter.get(s.num)?.id === topic) : allSections),
-    [allSections, topic]
+    () => (active ? allSections.filter((s) => categoryOfChapter.get(s.num)?.id === active) : allSections),
+    [allSections, active]
   )
 
   /* איזה סעיף נקרא עכשיו — מסמן אותו בסרגל, בדיוק כמו בפרק */
@@ -144,15 +147,6 @@ export default function SiteNotebook() {
           </div>
           <nav className="chapter-menu-nav" aria-label="ניווט במחברת">
             <ol>
-              {ready && allSections.length > 0 && sections.length === 0 && (
-                <section className="article-section nb-empty">
-                  <p>אין סימונים בנושא הזה.</p>
-                  <button type="button" className="nb-btn" onClick={() => setTopic(null)}>
-                    הצגת הכול
-                  </button>
-                </section>
-              )}
-
               {sections.map((s) => (
                 <li key={s.id}>
                   <a
@@ -191,14 +185,15 @@ export default function SiteNotebook() {
                 <p className="opening-subtitle">
                   {ready && marks.length > 0
                     ? `${sections.reduce((n, s) => n + s.marks.length, 0)} סימונים ב-${sections.length} פרקים` +
-                      (topic ? ' · מסונן לפי נושא' : '')
+                      (active ? ' · מסונן לפי נושא' : '')
                     : 'כאן נאסף מה שסימנתם בפרקים'}
                 </p>
                 <div className="nb-lede">
                   <p>
-                    במהלך הקריאה בפרק אפשר לסמן משפט בעכבר — ומעליו יופיע כפתור קטן,
-                    <b> „הוספה למחברת“</b>. מה שנוסף מופיע כאן, מסודר לפי הפרק שממנו בא,
-                    ואפשר לתלות על כל סימון הערה אישית משלכם.
+                    במהלך הקריאה בפרק אפשר לסמן משפט — בעכבר, או בלחיצה ארוכה בטלפון —
+                    ולידו יופיע כפתור קטן, <b>„הוספה למחברת“</b>. מה שנוסף מופיע כאן, מסודר
+                    לפי הפרק שממנו בא, נשאר מודגש בפרק עצמו, ואפשר לתלות על כל סימון הערה
+                    אישית משלכם.
                   </p>
                   <p className="nb-lede-quiet">
                     המחברת נשמרת בדפדפן הזה בלבד — היא לא עולה לשום שרת.
@@ -210,7 +205,7 @@ export default function SiteNotebook() {
                   ולא לכותרת. הרכיב מסתיר את עצמו כשיש פחות משני נושאים. */}
               {ready && allSections.length > 0 && (
                 <TopicFilter
-                  active={topic}
+                  active={active}
                   onPick={setTopic}
                   options={topics}
                   allCount={marks.length}
@@ -234,9 +229,11 @@ export default function SiteNotebook() {
                     <div>
                       <h2>{s.title}</h2>
                     </div>
+                    {/* Link ולא <a>: באתר שב-GitHub Pages כל נתיב יושב תחת basePath,
+                        ו-<a href="/chapter2"> כתוב ביד הוביל ל-404 */}
                     {s.href && (
                       <p className="nb-sec-link">
-                        <a href={s.href}>חזרה אל הפרק ←</a>
+                        <Link href={s.href}>חזרה אל הפרק ←</Link>
                       </p>
                     )}
                   </header>
@@ -278,6 +275,11 @@ export default function SiteNotebook() {
                           <div className="nb-mark-foot">
                             <span className="nb-mark-date">סומן {fmt(m.at)}</span>
                             <span className="nb-mark-tools">
+                              {s.href && (
+                                <Link className="nb-link" href={`${s.href}?${GOTO_PARAM}=${encodeURIComponent(m.id)}`}>
+                                  לקטע בפרק
+                                </Link>
+                              )}
                               <button
                                 type="button"
                                 className="nb-link"
