@@ -22,11 +22,43 @@ body { font-family: var(--font-body); color: var(--ink); }
 
 .ch13-root { position: fixed; inset: 0; }
 .ch13-stage { position: absolute; inset: 0; touch-action: none; }
-/* מבט בגרירה (9.11): הסמן אומר שאפשר לאחוז באולם */
-.ch13-stage.is-look { cursor: grab; }
-.ch13-stage.is-look.is-dragging { cursor: grabbing; }
+/* מבט בעכבר בתזוזה (9.11): לחיצה על האולם נועלת את הסמן (Pointer Lock) */
+.ch13-stage.is-look { cursor: pointer; }
+.ch13-crosshair {
+  position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%;
+  background: rgba(245, 236, 214, .9); box-shadow: 0 0 0 1.5px rgba(42, 32, 24, .55); pointer-events: none;
+}
+.ch13-lookhint {
+  /* ממורכז לרוחב ומעל כפתור ה-E — באמצע המסך הוא כיסה את הדגל שעומדים מולו */
+  position: absolute; left: 50%; bottom: calc(clamp(24px, 6vh, 56px) + 64px); transform: translateX(-50%); margin: 0; pointer-events: none;
+  padding: 8px 16px; border-radius: 999px; background: rgba(42, 32, 24, .62); color: var(--cream);
+  font-size: 15px; white-space: nowrap;
+}
+.ch13-lookhint kbd { font-size: 12px; }
+@media (pointer: coarse) { .ch13-lookhint, .ch13-crosshair { display: none; } }
 
-.ch13-loading { position: fixed; inset: 0; display: grid; place-items: center; background: #2a2018; color: var(--cream); font-family: var(--font-heading); font-size: 22px; }
+/* ── מסך הטעינה (9.11) — מהצבע הראשון ועד שהפריים הראשון של האולם צויר, ואז דועך ── */
+.ch13-loading {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px;
+  background: radial-gradient(ellipse at 50% 40%, #3a2b1f 0%, #2a2018 60%, #1e1610 100%); color: var(--cream);
+  transition: opacity .6s ease;
+}
+.ch13-loading.is-leaving { opacity: 0; pointer-events: none; }
+/* הכיתוב יורד מהר מהרקע — אחרת הוא נדרס על כרטיס הפתיחה באמצע הדעיכה */
+.ch13-loading-box { transition: opacity .18s ease; }
+.ch13-loading.is-leaving .ch13-loading-box { opacity: 0; }
+.ch13-loading-box { width: min(360px, 100%); text-align: center; }
+.ch13-loading-kicker { margin: 0 0 4px; color: var(--gold); font-size: 15px; letter-spacing: .04em; }
+.ch13-loading-title { margin: 0 0 22px; font-family: var(--font-heading); font-size: clamp(26px, 4vw, 34px); }
+.ch13-loading-bar { height: 6px; border-radius: 999px; background: rgba(245, 236, 214, .16); overflow: hidden; }
+.ch13-loading-bar > span {
+  display: block; height: 100%; background: linear-gradient(90deg, var(--gold), #e2c27a);
+  transform-origin: right; transform: scaleX(0); transition: transform .35s ease;
+}
+.ch13-loading-pct { margin: 10px 0 0; font-size: 15px; color: rgba(245, 236, 214, .8); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce) {
+  .ch13-loading, .ch13-loading-box, .ch13-loading-bar > span { transition: none; }
+}
 
 /* ── HUD ── */
 .ch13-hud {
@@ -36,10 +68,23 @@ body { font-family: var(--font-body); color: var(--ink); }
   color: var(--cream);
 }
 .ch13-hud > * { pointer-events: auto; margin: 0; }
-.ch13-back { color: var(--cream); text-decoration: none; font-size: 15px; opacity: .85; }
-.ch13-back:hover, .ch13-back:focus-visible { opacity: 1; text-decoration: underline; }
+/* „לכל הפרקים" (9.11: „לא רואים אותו") — כפתור מלא, בורדו וקרם, עם בית */
+.ch13-back {
+  display: inline-flex; align-items: center; gap: 8px; flex: none;
+  padding: 8px 16px 8px 14px; border-radius: 999px; border: 1.5px solid var(--gold);
+  background: var(--maroon-deep); color: var(--cream); text-decoration: none;
+  font-size: 16px; font-weight: 600; line-height: 1.2; box-shadow: 0 4px 14px rgba(0, 0, 0, .35);
+}
+.ch13-back svg { flex: none; }
+.ch13-back:hover { background: var(--maroon); }
+.ch13-back:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .ch13-chapter { font-family: var(--font-heading); font-size: clamp(18px, 1.8vw, 22px); flex: 1; }
 .ch13-count { font-size: 15px; background: rgba(87, 24, 32, .82); padding: 6px 12px; border-radius: 999px; }
+@media (max-width: 600px) {
+  .ch13-hud { flex-wrap: wrap; gap: 8px 10px; }
+  .ch13-chapter { order: 3; flex-basis: 100%; font-size: 16px; }
+  .ch13-count { margin-inline-start: auto; font-size: 14px; }
+}
 
 .ch13-prompt {
   position: absolute; bottom: clamp(24px, 6vh, 56px); left: 50%; transform: translateX(-50%);

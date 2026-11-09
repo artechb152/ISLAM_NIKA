@@ -11,7 +11,8 @@
    החיתוכים מהחוברת. הטקסט היחיד שנכתב כאן הוא הוראות התנועה. */
 
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
-import { useTexture } from '@react-three/drei'
+import { useProgress, useTexture } from '@react-three/drei'
+import HallLoading from './HallLoading'
 import Link from 'next/link'
 import * as THREE from 'three'
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -610,6 +611,11 @@ export default function FlagHall() {
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (!started) return
+      /* Esc משחרר את הסמן גם אם הדפדפן לא עשה זאת בעצמו (ב-Chrome הוא כן; כאן ליתר ביטחון) */
+      if (e.code === 'Escape' && document.pointerLockElement) {
+        document.exitPointerLock()
+        if (open === null && !showFinale) return
+      }
       if (showFinale) {
         if (e.code === 'Escape') setFinale(false)
         return
@@ -647,40 +653,88 @@ export default function FlagHall() {
     }
   }, [started, open, near, openCard, showFinale])
 
-  /* מבט בגרירה (המשתמשת, 9.11.2026 — הופך את „העכבר לא ישנה כלום" של 4.11): לוחצים על האולם
-     וגוררים — ימינה/שמאלה פונה, למעלה/למטה מטה את המבט עד ‎±35°. גרירה ולא נעילת סמן, כדי שהסמן
-     לא נלכד ושה-HUD נשאר לחיץ. במגע: אצבע אחת על האולם עושה אותו דבר, ולוח החצים נשאר.
-     לא פועל כשכרטיס או כרטיס הסיום פתוחים. המבט רודף אחרי היעד (Player), כך שהגרירה חלקה. */
+  /* מבט בעכבר בתזוזה (המשתמשת, 9.11.2026: „העכבר לא בגרירה אלא בתזוזה"; הופך את „העכבר לא
+     ישנה כלום" של 4.11). Pointer Lock: לחיצה על האולם (או „כניסה לאולם") נועלת את הסמן, ומשם כל
+     תזוזה פונה ומטה את המבט עד ‎±35°. Esc משחרר (ברירת המחדל של הדפדפן). פתיחת כרטיס או כרטיס
+     הסיום משחררת את הנעילה — הסמן צריך את הכפתורים שבהם. המבט רודף אחרי היעד (Player), כך שהתנועה
+     חלקה. במגע אין נעילת סמן: אצבע אחת על האולם גוררת את המבט, ולוח החצים נשאר. */
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [locked, setLocked] = useState(false)
   const drag = useRef<{ id: number; x: number; y: number } | null>(null)
   const lookLive = started && open === null && !showFinale
-  const PITCH = 35 * DEG
-  const stageDrag = {
+  const turnBy = useCallback((dx: number, dy: number, k: number) => {
+    /* כמו במשחק גוף ראשון: ימינה פונה ימינה, למעלה מרים את המבט */
+    const PITCH = 35 * DEG
+    look.current.yaw -= dx * k
+    look.current.pitch = Math.max(-PITCH, Math.min(PITCH, look.current.pitch - dy * k))
+  }, [])
+  const requestLock = useCallback(() => {
+    const el = stageRef.current
+    if (!el || document.pointerLockElement === el || !el.requestPointerLock) return
+    try {
+      const r = el.requestPointerLock() as unknown as Promise<void> | undefined
+      r?.catch?.(() => {})
+    } catch {}
+  }, [])
+  useEffect(() => {
+    const change = () => setLocked(document.pointerLockElement === stageRef.current && !!stageRef.current)
+    const move = (e: MouseEvent) => {
+      if (document.pointerLockElement === stageRef.current && stageRef.current) turnBy(e.movementX, e.movementY, 0.0022)
+    }
+    document.addEventListener('pointerlockchange', change)
+    document.addEventListener('mousemove', move)
+    if (process.env.NODE_ENV !== 'production') {
+      /* פיתוח בלבד: Playwright לא נועל סמן ב-headless — הסקריפט מזין תזוזה דרך אותו מסלול */
+      ;(window as unknown as Record<string, unknown>).__ch13Mouse = (dx: number, dy: number) => turnBy(dx, dy, 0.0022)
+    }
+    return () => {
+      document.removeEventListener('pointerlockchange', change)
+      document.removeEventListener('mousemove', move)
+    }
+  }, [turnBy])
+  /* כרטיס, כרטיס סיום או יציאה — הסמן חוזר */
+  useEffect(() => {
+    if (!lookLive && document.pointerLockElement === stageRef.current && stageRef.current) document.exitPointerLock()
+  }, [lookLive])
+  const stageInput = {
     onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!lookLive || drag.current || (e.pointerType === 'mouse' && e.button !== 0)) return
+      if (!lookLive) return
+      if (e.pointerType === 'mouse') {
+        if (e.button === 0) requestLock()
+        return
+      }
+      if (drag.current) return
       drag.current = { id: e.pointerId, x: e.clientX, y: e.clientY }
       e.currentTarget.setPointerCapture(e.pointerId)
-      e.currentTarget.classList.add('is-dragging')
     },
     onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => {
       const d = drag.current
-      if (!d || d.id !== e.pointerId) return
-      if (!lookLive) return
-      const k = e.pointerType === 'touch' ? 0.0045 : 0.0032
-      /* כמו במשחק גוף ראשון: גרירה ימינה פונה ימינה, גרירה למעלה מרימה את המבט */
-      look.current.yaw -= (e.clientX - d.x) * k
-      look.current.pitch = Math.max(-PITCH, Math.min(PITCH, look.current.pitch - (e.clientY - d.y) * k))
+      if (!d || d.id !== e.pointerId || !lookLive) return
+      turnBy(e.clientX - d.x, e.clientY - d.y, 0.0045)
       d.x = e.clientX
       d.y = e.clientY
     },
     onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => {
-      if (drag.current?.id !== e.pointerId) return
-      drag.current = null
-      e.currentTarget.classList.remove('is-dragging')
+      if (drag.current?.id === e.pointerId) drag.current = null
     },
   }
   useEffect(() => {
     if (!lookLive) drag.current = null
   }, [lookLive])
+
+  /* מסך הטעינה: האחוז של three (useProgress — מנהל הטעינה של כל הטקסטורות), והוא יורד רק אחרי
+     שהפריים הראשון עם האולם צויר. האחוז לא חוזר אחורה כשנכנסים עוד פריטים לתור. */
+  const { progress } = useProgress()
+  const [maxPct, setMaxPct] = useState(0)
+  useEffect(() => setMaxPct((m) => Math.max(m, progress)), [progress])
+  const [drawn, setDrawn] = useState(false)
+  const [loaderGone, setLoaderGone] = useState(false)
+  useEffect(() => {
+    if (!drawn) return
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const t = window.setTimeout(() => setLoaderGone(true), still ? 0 : 650)
+    return () => window.clearTimeout(t)
+  }, [drawn])
 
   /* מקלדת: W/S הליכה, A/D וחצים פנייה. במגע: ארבעה כפתורים, לוחצים ומחזיקים */
   const hold = (k: string) => ({
@@ -695,7 +749,7 @@ export default function FlagHall() {
 
   return (
     <div className="ch13-root">
-      <div className={`ch13-stage${lookLive ? ' is-look' : ''}`} {...stageDrag} onPointerCancel={stageDrag.onPointerUp} onLostPointerCapture={stageDrag.onPointerUp}>
+      <div ref={stageRef} className={`ch13-stage${lookLive ? ' is-look' : ''}`} {...stageInput} onPointerCancel={stageInput.onPointerUp} onLostPointerCapture={stageInput.onPointerUp}>
         <Canvas
           dpr={[1, 1.75]}
           gl={{ antialias: true, toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.1 }}
@@ -712,14 +766,27 @@ export default function FlagHall() {
             {STATIONS.map((_, i) => (
               <StationView key={i} i={i} />
             ))}
+            <FirstFrame onDrawn={setDrawn} />
           </Suspense>
           <Player keys={keys} frozen={!started || open !== null || showFinale} look={look} onNear={setNear} />
         </Canvas>
       </div>
 
+      {/* הכוונת והרמז — רק עם עכבר (במגע אין נעילה), ורק כשהאולם פעיל */}
+      {lookLive && locked && <div className="ch13-crosshair" aria-hidden="true" />}
+      {lookLive && !locked && (
+        <p className="ch13-lookhint" aria-hidden="true">
+          לחצו על האולם כדי להסתכל סביב עם העכבר · <kbd>Esc</kbd> לשחרור
+        </p>
+      )}
+
       <header className="ch13-hud">
-        <Link href="/chapters" className="ch13-back" aria-label="חזרה לעמוד הפרקים">
-          → הפרקים
+        {/* „לחזרה לפרקים" (המשתמשת, 9.11: „לא רואים אותו") — כפתור מלא עם בית, לא קישור קטן */}
+        <Link href="/chapters" className="ch13-back">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+            <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z" fill="currentColor" />
+          </svg>
+          <span>לכל הפרקים</span>
         </Link>
         <p className="ch13-chapter">פרק 13 · {passages.title}</p>
         <p className="ch13-count" aria-live="polite">
@@ -776,15 +843,36 @@ export default function FlagHall() {
             <ul className="ch13-keys">
               <li><kbd>W</kbd> <kbd>S</kbd> או <kbd>↑</kbd> <kbd>↓</kbd> — הליכה</li>
               <li><kbd>A</kbd> <kbd>D</kbd> או <kbd>←</kbd> <kbd>→</kbd> — פנייה</li>
-              <li>גרירה בעכבר על האולם — הסתכלות לצדדים ולמעלה ולמטה</li>
+              <li>תזוזת העכבר — הסתכלות סביב (<kbd>Esc</kbd> משחרר את הסמן)</li>
               <li><kbd>E</kbd> ליד דגל — הכרטיס שלו</li>
             </ul>
-            <button type="button" className="ch13-go" onClick={() => setStarted(true)} autoFocus>
+            <button
+              type="button"
+              className="ch13-go"
+              onClick={(e) => {
+                setStarted(true)
+                /* כניסה בעכבר נועלת את הסמן מיד — הלחיצה הזו היא מחוות המשתמש שהדפדפן דורש */
+                if (e.detail > 0 && window.matchMedia('(pointer: fine)').matches) requestLock()
+              }}
+              autoFocus
+            >
               כניסה לאולם
             </button>
           </section>
         </div>
       )}
+
+      {!loaderGone && <HallLoading pct={drawn ? 100 : maxPct} leaving={drawn} />}
     </div>
   )
+}
+
+/** קורא ל-onDrawn אחרי הפריים הראשון שבו האולם (בתוך ה-Suspense) כבר צויר */
+function FirstFrame({ onDrawn }: { onDrawn: (v: boolean) => void }) {
+  const n = useRef(0)
+  useFrame(() => {
+    n.current++
+    if (n.current === 2) onDrawn(true)
+  })
+  return null
 }
