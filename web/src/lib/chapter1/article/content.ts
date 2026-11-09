@@ -47,7 +47,6 @@ export const tr = (ref: string): string[] => frag(ref).tr ?? []
 
 export interface Sub { id: string; title: string }
 export interface LayoutSection { id: string; title: string; subs?: Sub[]; uses: string[] }
-export interface CrateItem { id: string; label: string; from: string; loads: boolean }
 export interface Cut { label: string; from: string }
 export interface Empire extends Cut { side: 'nw' | 'ne'; x: number; y: number; tribe: string }
 export interface Layout {
@@ -60,12 +59,6 @@ export interface Layout {
     start: Cut
     goods: Cut[]
     empires: Empire[]
-  }
-  crate: {
-    items: CrateItem[]
-    loaded: { label: string; from: string }
-    seeped: { label: string; from: string }
-    editorial: { hint: string; zone: string; reset: string }
   }
 }
 

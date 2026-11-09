@@ -40,11 +40,6 @@ for (const [id, frags] of Object.entries(P)) {
 
 /* 2 · תוויות הארגז — חתוכות מהקטע שלהן */
 const textOf = (ref) => { const [s, f] = ref.split('.'); return P[s]?.find((x) => x.id === f)?.text ?? '' }
-const cut = (where, label, ref) => { if (!textOf(ref).includes(label)) errors.push(`crate/${where}: „${label}" אינו ב-${ref}`) }
-for (const it of L.crate.items) cut(it.id, it.label, it.from)
-cut('loaded', L.crate.loaded.label, L.crate.loaded.from)
-cut('seeped', L.crate.seeped.label, L.crate.seeped.from)
-if (!L.crate.items.some((x) => x.loads === false)) errors.push('crate: אין פריט שלא נכנס — המנגנון מאבד את §9')
 
 /* 2 · תוויות המפה — חתוכות מ-§7/§8, ואין על המפה שם שהמקור לא נותן */
 const R = L.route
@@ -54,7 +49,7 @@ for (const g of R.goods) cutR('goods', g.label, g.from)
 for (const e of R.empires) { cutR(e.side, e.label, e.from); cutR(e.side + '/tribe', e.tribe, e.from) }
 if (R.points.length < 2) errors.push('route: אין דרך')
 for (const [x, y] of R.points) if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1)) errors.push(`route: נקודה מחוץ לציור ${x},${y}`)
-const EDITORIAL = { ...L.crate.editorial, ...Object.fromEntries(L.sections.map((s) => [s.id, s.title])) }
+const EDITORIAL = { ...Object.fromEntries(L.sections.map((s) => [s.id, s.title])) }
 
 /* 3 · פעם אחת — ב-layout ובקוד */
 const used = new Map()
@@ -70,7 +65,7 @@ const literal = (r) => code.split(`'${r}'`).length - 1
 for (const s of L.sections) for (const r of s.uses) { const n = literal(r); if (n !== 1) errors.push(`Chapter1Article.tsx כותב את '${r}' ${n} פעמים (צריך 1)`) }
 for (const r of [...code.matchAll(/'(§\d+\.[\w]+)'/g)].map((m) => m[1])) if (!used.has(r)) errors.push(`Chapter1Article.tsx מפנה ל-'${r}' שאינו ב-layout`)
 
-console.log(`היקף: ${SCOPE.join(' ')} · קטעים: ${all.length} · תוויות ארגז: ${L.crate.items.length + 2}`)
+console.log(`היקף: ${SCOPE.join(' ')} · קטעים: ${all.length}`)
 console.log(`עורכי (מוצהר): ${Object.values(EDITORIAL).map((x) => `„${x}"`).join(' · ')}`)
 if (errors.length) { console.log('❌ ' + errors.length + ' שגיאות:'); for (const e of errors) console.log('  · ' + e); process.exit(1) }
 console.log('✅ נאמנות · כיסוי · פעם אחת בדיוק')

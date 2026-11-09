@@ -8,15 +8,11 @@
    chapters that are finished. If it holds, the rest of the chapter follows the same
    pattern; see concept/chapter1/DECISIONS.md, 3.11.2026.
 
-   THE CRATE is the game's task-loading, kept as a mechanism and not as a task: there
-   is no question and nothing is marked right or wrong. Silk and spices load. The
-   monotheistic ideas do not — they slip back, and drift out across the painting while
-   the source's own phrase for how they travelled stays on the plate. The refusal is
-   §9, not the reader's mistake. §9 is still printed in full under it.
+   THE CRATE (the game's task-loading as a drag-the-goods scene) was cut on 9.11.2026 —
+   the user: „את המה עבר בדרכים תעיף, לא אהבתי”. §9 stays, as prose after the map.
 
    WHAT THIS FILE MAY NOT DO: write a sentence. Every string comes from passages.json
-   through `text()`, by reference, and every label on the crate is cut from its own
-   sentence in layout.json. concept/chapter1/verify-article.mjs checks both. */
+   through `text()`, by reference. concept/chapter1/verify-article.mjs checks it. */
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -24,7 +20,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import { Scrolly } from '@/components/chapter6/scrolly'
 import RouteMap from '@/components/chapter1/RouteMap'
-import { CH1, LAYOUT, SECTIONS, em, meta, sub, text, tr, type CrateItem } from '@/lib/chapter1/article/content'
+import { CH1, LAYOUT, SECTIONS, em, meta, sub, text, tr } from '@/lib/chapter1/article/content'
 
 const A = '/assets/chapter1/article/'
 
@@ -82,151 +78,6 @@ function Head({ id }: { id: string }) {
 }
 function Env({ id, sectionId }: { id: string; sectionId: string }) {
   return <h3 className="scrolly-env" id={id}>{sub(sectionId, id)}</h3>
-}
-
-/* ---------------- the crate ----------------
-   Each good is a real <button>: a tap, Enter or a drag onto the load all do the same
-   thing. A drag that ends anywhere but the load returns the chip. The state classes
-   sit on `.ch1-crate-in`, never on the `[data-reveal]` figure (the reveal trap). */
-const C = LAYOUT.crate
-const GOODS = C.items.filter((i) => i.loads)
-/* the game's own props, rendered from its models by concept/chapter1/render-props.py */
-const ART: Record<string, string> = { silk: 'prop-silk', spice: 'prop-spice' }
-
-function Crate() {
-  const zoneRef = useRef<HTMLDivElement | null>(null)
-  const [loaded, setLoaded] = useState<string[]>([])
-  const [seeped, setSeeped] = useState(false)
-  const [shake, setShake] = useState<string | null>(null)
-  const [drag, setDrag] = useState<{ id: string; x: number; y: number } | null>(null)
-  const [over, setOver] = useState(false)
-  const start = useRef<{ id: string; x: number; y: number; moved: boolean } | null>(null)
-  /* a pointer sequence that was a drag is followed by a click event; that click must
-     not count a second time (or count at all when the drag ended off the load) */
-  const dragged = useRef(false)
-
-  const attempt = useCallback((item: CrateItem) => {
-    if (item.loads) {
-      setLoaded((cur) => (cur.includes(item.id) ? cur : [...cur, item.id]))
-      return
-    }
-    /* the one that does not go in: it shakes back to the tray, then leaves on its own */
-    setShake(item.id)
-    window.setTimeout(() => { setShake(null); setSeeped(true) }, 560)
-  }, [])
-
-  const inZone = (x: number, y: number) => {
-    const r = zoneRef.current?.getBoundingClientRect()
-    return !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
-  }
-
-  const onDown = (item: CrateItem) => (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (e.button !== 0) return
-    /* every press starts clean. A chip that was dragged INTO the load leaves the tray, so
-       its trailing click never arrives — without this the flag stayed armed and swallowed
-       the next real tap on another chip (caught in the first screenshot run) */
-    dragged.current = false
-    start.current = { id: item.id, x: e.clientX, y: e.clientY, moved: false }
-    e.currentTarget.setPointerCapture(e.pointerId)
-  }
-  const onMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const s = start.current
-    if (!s) return
-    if (!s.moved && Math.hypot(e.clientX - s.x, e.clientY - s.y) < 6) return
-    s.moved = true
-    setDrag({ id: s.id, x: e.clientX - s.x, y: e.clientY - s.y })
-    setOver(inZone(e.clientX, e.clientY))
-  }
-  const onUp = (item: CrateItem) => (e: React.PointerEvent<HTMLButtonElement>) => {
-    const s = start.current
-    start.current = null
-    setDrag(null)
-    setOver(false)
-    /* a drag counts only if it ends on the load; a tap (no movement) always counts —
-       the click handler below is suppressed after a real drag so it never fires twice */
-    if (s?.moved) {
-      dragged.current = true
-      if (inZone(e.clientX, e.clientY)) attempt(item)
-    }
-  }
-  const onClick = (item: CrateItem) => () => {
-    if (dragged.current) { dragged.current = false; return }
-    attempt(item)
-  }
-
-  const allIn = GOODS.every((g) => loaded.includes(g.id))
-  const touched = loaded.length > 0 || seeped
-  const reset = () => { setLoaded([]); setSeeped(false); dragged.current = false }
-  const tray = C.items.filter((i) => !loaded.includes(i.id) && !(seeped && !i.loads))
-
-  /* ONE SCENE, NOT BUTTONS BESIDE A PICTURE. The loading yard runs the full column; the
-     game's own props (silk, the spice sack — rendered from its models) lie on the ground
-     over the left of the painting, and the camel's load is the target. That left side is
-     under a strong parchment wash on purpose: the traders there show their faces (rule 43).
-     The painting is a place, so it is laid out physically (rule 61). */
-  return (
-    <figure className="ch1-crate" data-reveal>
-      <div className={'ch1-yard' + (allIn ? ' is-full' : '') + (seeped ? ' is-seeped' : '') + (over ? ' is-over' : '')} dir="ltr">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className="ch1-yard-art" src={`${A}load-wide.webp`} alt="" loading="lazy" decoding="async" />
-        <span className="ch1-yard-veil" aria-hidden="true" />
-
-        <div ref={zoneRef} className="ch1-yard-zone" aria-hidden="true">
-          <span className="ch1-yard-zone-name" dir="rtl">{C.editorial.zone}</span>
-          <span className="ch1-yard-stack">
-            {GOODS.filter((g) => loaded.includes(g.id)).map((g) => (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img key={g.id} className="ch1-yard-loaded" src={`${A}${ART[g.id]}.webp`} alt="" />
-            ))}
-          </span>
-        </div>
-        {allIn && <span className="ch1-yard-full" dir="rtl">{C.loaded.label}</span>}
-
-        {seeped && (
-          <span className="ch1-yard-drift" dir="rtl" aria-hidden="true">
-            <span className="ch1-thing-scroll" />
-            {C.items.find((i) => !i.loads)?.label}
-          </span>
-        )}
-
-        <div className="ch1-yard-ground" dir="rtl">
-          <p className="ch1-yard-hint" aria-hidden={touched}>{C.editorial.hint}</p>
-          <div className="ch1-yard-tray" role="group" aria-label={C.editorial.hint}>
-            {tray.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={
-                  'ch1-thing' +
-                  (item.loads ? '' : ' is-idea') +
-                  (shake === item.id ? ' is-refused' : '') +
-                  (drag?.id === item.id ? ' is-dragging' : '')
-                }
-                style={drag?.id === item.id ? { translate: `${drag.x.toFixed(1)}px ${drag.y.toFixed(1)}px` } : undefined}
-                onPointerDown={onDown(item)}
-                onPointerMove={onMove}
-                onPointerUp={onUp(item)}
-                onPointerCancel={() => { start.current = null; setDrag(null); setOver(false) }}
-                onClick={onClick(item)}
-              >
-                {ART[item.id] ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img className="ch1-thing-art" src={`${A}${ART[item.id]}.webp`} alt="" draggable={false} />
-                ) : (
-                  <span className="ch1-thing-scroll" aria-hidden="true" />
-                )}
-                <span className="ch1-thing-name">{item.label}</span>
-              </button>
-            ))}
-          </div>
-          <p className="ch1-yard-state" aria-live="polite">
-            {seeped && <span className="ch1-yard-seep">{C.seeped.label}</span>}
-          </p>
-          {touched && <button type="button" className="ch1-yard-reset" onClick={reset}>{C.editorial.reset}</button>}
-        </div>
-      </div>
-    </figure>
-  )
 }
 
 /* ---------------- the page ---------------- */
@@ -332,10 +183,16 @@ export default function Chapter1Article() {
             <main className="chapter-article ch1" ref={articleRef}>
               {/* ============ the tribes and the trade routes ============ */}
               <section className="article-section opening-section" id="tribes" aria-labelledby="tribes-title">
-                {/* the banner: the caravan walking into the sunrise. A still poster for the
-                    pilot — the chapter's opening film can take its place later. */}
+                {/* the banner is a film (the user, 9.11.2026: „והבאנר שיהיה סרטון"): the game's
+                    own opening — the camels resting by the village, then the caravan on the
+                    road through the terraces. Cut from anim-video/opening.mp4 around the
+                    close-up between 5.5s and 11s, which shows a face (rule 43). */}
                 <div className="ch6-hero">
-                  <div className="ch6-hero-media ch1-hero-media" aria-hidden="true" />
+                  <div className="ch6-hero-media ch1-hero-media" aria-hidden="true">
+                    <video className="ch6-hero-video" autoPlay muted loop playsInline preload="auto" poster="/assets/chapter1/article/hero-1.jpg" tabIndex={-1} onError={(e) => { e.currentTarget.hidden = true }}>
+                      <source src="/assets/chapter1/article/hero.mp4" type="video/mp4" />
+                    </video>
+                  </div>
                   <div className="ch6-hero-copy">
                     <h1 id="chapter-title" className="ch6-hero-title">{CH1.title}</h1>
                   </div>
@@ -350,8 +207,6 @@ export default function Chapter1Article() {
                     <StageP refs={['§8.a']} />
                   </Scrolly>
                 </div>
-                <Env id="roads" sectionId="tribes" />
-                <Crate />
                 <T refs={['§9.a', '§9.b', '§9.c']} />
               </section>
             </main>
