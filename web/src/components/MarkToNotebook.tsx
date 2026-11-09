@@ -20,10 +20,20 @@
    ההדגשה: כל מה שסומן בפרק הזה מודגש בטקסט (CSS Custom Highlight API —
    טווחים שמצוירים בלי לגעת ב-DOM ש-React מחזיק). מתעדכנת מיד אחרי סימון,
    כשמוחקים במחברת (גם בלשונית אחרת, וגם כשחוזרים ב"אחורה" מה-bfcache),
-   וכשהפרק מחליף תוכן. דפדפן בלי ה-API פשוט לא מדגיש — הסימון עצמו עובד. */
+   וכשהפרק מחליף תוכן. דפדפן בלי ה-API פשוט לא מדגיש — הסימון עצמו עובד.
+
+   הסרה (המשתמשת, 9.11.2026: „שיהיה אופציה גם להוציא מהמחברת ע"י סימון של אותו
+   המשפט"): בחירה שנוגעת בקטע שכבר מודגש מציגה „הסרה מהמחברת" במקום „הוספה" —
+   ולחיצה מוציאה את כל הסימונים שהבחירה נוגעת בהם. סימון שיש לו הערה אומר זאת על
+   הכפתור, כי ההערה יוצאת יחד איתו.
+
+   הערה מיד (המשתמשת, אותו יום: „שיהיה אופציה להוסיף הערה ישר אחרי סימון"): אחרי
+   „נוסף למחברת" הכפתור נשאר עוד רגע עם „הוספת הערה"; לחיצה פותחת תיבה קטנה במקום,
+   וההערה נשמרת על הסימון — אותה הערה שרואים ועורכים במחברת. מי שמתעלם — הכפתור יורד
+   לבד כמו קודם. */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { addMark, GOTO_PARAM, marksInChapter, MARKS_EVENT, SITE_NOTEBOOK_KEY } from '@/lib/site-notebook'
+import { addMark, deleteMark, setMarkNote, GOTO_PARAM, marksInChapter, MARKS_EVENT, SITE_NOTEBOOK_KEY } from '@/lib/site-notebook'
 import { buildIndex, highlightApi, MARK_ROOT, MARK_SKIP, occurrenceOf, rangeOfMark } from '@/lib/site-notebook-find'
 
 const HL = 'nb-mark'
@@ -31,11 +41,36 @@ const HL_FOCUS = 'nb-mark-focus'
 
 type At = { x: number; top: number; bottom: number }
 
+/* a < b בסדר המסמך */
+function before(aNode: Node, aOff: number, bNode: Node, bOff: number): boolean {
+  const r = document.createRange()
+  r.setStart(aNode, aOff)
+  return r.comparePoint(bNode, bOff) === 1
+}
+/* שני טווחים חופפים: כל אחד מתחיל לפני שהשני נגמר */
+function overlaps(a: Range, b: Range): boolean {
+  try {
+    return before(a.startContainer, a.startOffset, b.endContainer, b.endOffset) && before(b.startContainer, b.startOffset, a.endContainer, a.endOffset)
+  } catch {
+    return false
+  }
+}
+
 /* ברירת המחדל מכסה את שני מבני הפרקים: המאמר (.chapter-article) והקומיקס
    של פרק 3 (.c3-page). אפשר לדרוס עם prop לפרק בעל מבנה משלו. */
 export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; root?: string }) {
   const [at, setAt] = useState<At | null>(null)
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved] = useState<'' | 'added' | 'removed'>('')
+  /* הסימונים שהבחירה הנוכחית נוגעת בהם — אם יש, הכפתור מסיר */
+  const [hits, setHits] = useState<{ ids: string[]; noted: boolean }>({ ids: [], noted: false })
+  /* הטווחים של מה שמודגש עכשיו, מה-paint — כדי לדעת אם בחירה נופלת על סימון */
+  const painted = useRef<Map<string, Range>>(new Map())
+  /* הסימון שנוסף עכשיו, והתיבה של ההערה עליו */
+  const [addedId, setAddedId] = useState<string | null>(null)
+  const [noting, setNoting] = useState(false)
+  const [note, setNote] = useState('')
+  const [noted, setNoted] = useState(false)
+  const closeTimer = useRef(0)
   const [touch, setTouch] = useState(false)
   const pending = useRef<{ text: string; where?: string; occ: number; range: Range } | null>(null)
   const fab = useRef<HTMLDivElement | null>(null)
@@ -45,7 +80,12 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
   const hide = useCallback(() => {
     if (Date.now() < holdUntil.current) return
     setAt(null)
-    setSaved(false)
+    setSaved('')
+    setHits({ ids: [], noted: false })
+    setAddedId(null)
+    setNoting(false)
+    setNote('')
+    setNoted(false)
     pending.current = null
   }, [])
 
@@ -76,7 +116,10 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
       }
       holdUntil.current = 0
       pending.current = { text, where: head?.textContent?.trim() || undefined, occ, range }
-      setSaved(false)
+      const ids = [...painted.current].filter(([, r]) => overlaps(range, r)).map(([id]) => id)
+      const notes = new Set(marksInChapter(ch).filter((m) => m.note).map((m) => m.id))
+      setHits({ ids, noted: ids.some((id) => notes.has(id)) })
+      setSaved('')
       setAt({ x: rect.left + rect.width / 2, top: rect.top, bottom: rect.bottom })
     }
     const schedule = (ms: number) => {
@@ -132,7 +175,7 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
       window.removeEventListener('scroll', follow, true)
       window.removeEventListener('resize', follow)
     }
-  }, [root, hide])
+  }, [root, hide, ch])
 
   /* ---------- ההדגשה של מה שכבר סומן ---------- */
   useEffect(() => {
@@ -160,6 +203,7 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
           }
         }
       }
+      painted.current = new Map(found)
       if (api) {
         if (found.size) {
           const h = new api.Highlight(...found.values())
@@ -264,17 +308,46 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
     }
   }, [ch, root])
 
+  /* הכפתור יורד אחרי ms — אלא אם בינתיים פתחו את תיבת ההערה */
+  const closeIn = (ms: number) => {
+    holdUntil.current = Date.now() + ms
+    window.clearTimeout(closeTimer.current)
+    closeTimer.current = window.setTimeout(() => {
+      holdUntil.current = 0
+      hide()
+    }, ms)
+  }
+
   const save = () => {
     const p = pending.current
     if (!p) return
-    addMark(ch, p.text, p.where, p.occ)
-    setSaved(true)
-    holdUntil.current = Date.now() + 1250
     window.getSelection()?.removeAllRanges()
-    window.setTimeout(() => {
-      holdUntil.current = 0
-      hide()
-    }, 1250)
+    if (hits.ids.length) {
+      for (const id of hits.ids) deleteMark(id)
+      setSaved('removed')
+      closeIn(1250)
+      return
+    }
+    const m = addMark(ch, p.text, p.where, p.occ)
+    setSaved('added')
+    setAddedId(m?.id ?? null)
+    /* זמן לראות את „הוספת הערה" וללחוץ עליו */
+    closeIn(m ? 4500 : 1250)
+  }
+
+  const openNote = () => {
+    window.clearTimeout(closeTimer.current)
+    /* בזמן הקלדה הבחירה בעמוד משתנה — היא לא סיבה לסגור את התיבה */
+    holdUntil.current = Number.MAX_SAFE_INTEGER
+    setNoting(true)
+  }
+  const saveNote = () => {
+    if (addedId && note.trim()) {
+      setMarkNote(addedId, note)
+      setNoted(true)
+    }
+    setNoting(false)
+    closeIn(note.trim() ? 1250 : 1)
   }
 
   if (!at) return null
@@ -293,18 +366,56 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
   return (
     <div
       ref={fab}
-      className={`nb-mark-fab${saved ? ' is-saved' : ''}`}
+      className={`nb-mark-fab${saved ? ' is-saved' : ''}${hits.ids.length && !saved ? ' is-remove' : ''}`}
       style={{ left: x, top }}
       role="status"
-      onMouseDown={(e) => e.preventDefault()}
+      onMouseDown={(e) => {
+        /* שומר על הבחירה בעמוד — אבל לא בתוך תיבת ההערה, שצריכה סמן */
+        if (!(e.target instanceof HTMLTextAreaElement)) e.preventDefault()
+      }}
     >
-      {saved ? (
+      {noting ? (
+        <div className="nb-mark-note">
+          <textarea
+            autoFocus
+            rows={3}
+            value={note}
+            placeholder="ההערה שלי על המשפט…"
+            aria-label="הערה על המשפט שסומן"
+            onChange={(e) => setNote(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') { setNote(''); saveNote() }
+              if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveNote()
+            }}
+          />
+          <div className="nb-mark-note-actions">
+            <button type="button" className="is-primary" onClick={saveNote}>
+              שמירת ההערה
+            </button>
+            <button type="button" onClick={() => { setNote(''); setNoting(false); closeIn(1) }}>
+              בלי הערה
+            </button>
+          </div>
+        </div>
+      ) : saved ? (
         <span className="nb-mark-done">
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
             <path d="M5 12.5 10 17.5 19 7" />
           </svg>
-          נוסף למחברת
+          {saved === 'removed' ? 'הוסר מהמחברת' : noted ? 'ההערה נשמרה' : 'נוסף למחברת'}
+          {saved === 'added' && addedId && !noted && (
+            <button type="button" className="nb-mark-addnote" onClick={openNote}>
+              הוספת הערה
+            </button>
+          )}
         </span>
+      ) : hits.ids.length ? (
+        <button type="button" onClick={save}>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1ZM9.5 10.5h5" />
+          </svg>
+          {hits.noted ? 'הסרה מהמחברת (גם ההערה)' : 'הסרה מהמחברת'}
+        </button>
       ) : (
         <button type="button" onClick={save}>
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">

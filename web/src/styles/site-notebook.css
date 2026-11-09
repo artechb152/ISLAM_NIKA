@@ -96,6 +96,10 @@
 .nb-mark-fab button:hover{background:#8a2733}
 .nb-mark-fab svg{width:16px;height:16px;flex:none}
 .nb-mark-fab.is-saved .nb-mark-done{background:#3f6b45;cursor:default}
+/* the same button, removing: the selection lies on a passage already in the notebook —
+   inverted (parchment, maroon edge) so it never reads as one more "add" */
+.nb-mark-fab.is-remove button{background:#f5ecd6;color:#8a2733;border:1.5px solid #8a2733}
+.nb-mark-fab.is-remove button:hover{background:#ede4d0}
 
 @media (prefers-reduced-motion:reduce){
   .nb-mark-fab{animation:none}
@@ -111,3 +115,17 @@
 }
 /* הקפיצה מהמחברת ("לקטע בפרק") — רגע של הדגשה חזקה יותר, ואז חוזר למרקר */
 ::highlight(nb-mark-focus){background-color:rgba(214,158,60,.55);color:inherit}
+
+/* „הוספת הערה" מיד אחרי הסימון — כפתור משני בתוך האישור, ותיבה קטנה במקום הכפתור */
+.nb-mark-fab .nb-mark-done .nb-mark-addnote{all:unset;cursor:pointer;margin-inline-start:6px;padding:3px 11px;border-radius:999px;
+  background:rgba(245,236,214,.16);border:1px solid rgba(245,236,214,.45);font-size:12.5px;font-weight:700;color:#f5ecd6}
+.nb-mark-fab .nb-mark-done .nb-mark-addnote:hover{background:rgba(245,236,214,.28)}
+.nb-mark-fab .nb-mark-done .nb-mark-addnote:focus-visible{outline:2px solid #f5ecd6;outline-offset:2px}
+.nb-mark-note{width:min(320px,calc(100vw - 32px));box-sizing:border-box;padding:12px;border-radius:14px;background:#f3ead6;
+  border:1px solid #d8c7a3;box-shadow:0 10px 28px rgba(20,9,3,.3);display:flex;flex-direction:column;gap:8px}
+.nb-mark-note textarea{font:inherit;font-size:14.5px;line-height:1.5;color:#3c2c1d;background:#f5ecd6;border:1px solid #d8c7a3;border-radius:9px;
+  padding:8px 10px;resize:vertical;min-height:64px;direction:rtl}
+.nb-mark-note textarea:focus{outline:2px solid #8a2733;outline-offset:1px}
+.nb-mark-note-actions{display:flex;gap:8px}
+.nb-mark-fab .nb-mark-note-actions button{box-shadow:none;padding:7px 14px;font-size:13px}
+.nb-mark-fab .nb-mark-note-actions button:not(.is-primary){background:transparent;color:#8a2733;border:1px solid #d8c7a3}
