@@ -12,6 +12,7 @@ import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter2-article.css'
 import '@/styles/site-notebook.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק שני · השבטיות בחצי האי ערב טרום עליית האסלאם',
@@ -26,7 +27,10 @@ export const viewport: Viewport = {
 export default function Chapter2Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

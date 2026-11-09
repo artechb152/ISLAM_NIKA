@@ -13,6 +13,7 @@ import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter14-article.css'
 import '@/styles/site-notebook.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק ארבעה עשר · מוטיבים אסלאמיים מתוך המודיעין הגלוי',
@@ -27,7 +28,10 @@ export const viewport: Viewport = {
 export default function Chapter14Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

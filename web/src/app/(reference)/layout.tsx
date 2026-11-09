@@ -7,6 +7,7 @@ import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/reference.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'כלי עזר · אסלאם',
@@ -21,7 +22,10 @@ export const viewport: Viewport = {
 export default function ReferenceLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

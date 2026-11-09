@@ -13,6 +13,7 @@ import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter11-article.css'
 import '@/styles/site-notebook.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק אחד עשר · מקורות ואסכולות ההלכה',
@@ -27,7 +28,10 @@ export const viewport: Viewport = {
 export default function Chapter11Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

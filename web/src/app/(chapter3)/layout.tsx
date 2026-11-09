@@ -29,6 +29,7 @@ import '@/styles/chapter3-motion.css'
    two chapters' closing screens no part in common. */
 import '@/styles/chapter3-practice.css'
 import '@/styles/site-notebook.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק שלישי · ראשית חיי מוחמד',
@@ -43,7 +44,10 @@ export const viewport: Viewport = {
 export default function Chapter3Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

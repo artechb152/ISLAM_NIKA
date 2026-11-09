@@ -509,12 +509,12 @@ export default function Chapter3Comic() {
         <div className="menu-extra">
           <Link className="menu-x-item" href="/chapter3/practice" onClick={() => setDrawer(false)}>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
-                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 11.2 12 4.5l8 6.7M6.3 9.5v9.7h4.4v-5.4h2.6v5.4h4.4V9.5" /></svg>
             לתרגול המסכם
           </Link>
           <Link className="menu-x-item" href="/chapters" onClick={() => setDrawer(false)}>
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor"
-                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+                 strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 11.2 12 4.5l8 6.7M6.3 9.5v9.7h4.4v-5.4h2.6v5.4h4.4V9.5" /></svg>
             לכל פרקי הלמידה
           </Link>
         </div>

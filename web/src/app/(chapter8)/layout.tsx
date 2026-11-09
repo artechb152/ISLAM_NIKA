@@ -13,6 +13,7 @@ import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter8-article.css'
 import '@/styles/site-notebook.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק שמיני · הקוראן והסונה',
@@ -27,7 +28,10 @@ export const viewport: Viewport = {
 export default function Chapter8Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

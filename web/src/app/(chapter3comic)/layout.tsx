@@ -23,6 +23,7 @@ import '@/styles/chapter3-article.css'
 import '@/styles/chapter3-comic.css'
 import '@/styles/chapter3-motion.css'
 import '@/styles/site-notebook.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק שלישי · הקומיקס (תצוגה)',
@@ -38,7 +39,10 @@ export const viewport: Viewport = {
 export default function Chapter3ComicPreviewLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

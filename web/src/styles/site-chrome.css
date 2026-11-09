@@ -1,0 +1,25 @@
+/* SiteChrome — the loading bar and the hover labels. Every page loads this sheet, and every
+   page has its own tokens, so the colours are written with fallbacks rather than assumed. */
+
+/* the bar: runs toward 85% while waiting (it cannot know the real progress of a page load,
+   only that one is happening), jumps to the end when the page is in, then fades */
+.site-load{position:fixed;inset-inline:0;top:0;height:3px;z-index:2147483000;pointer-events:none}
+.site-load span{position:absolute;inset-block:0;inset-inline-start:0;width:0;background:#c9a24a;box-shadow:0 0 8px rgba(201,162,74,.7)}
+.site-load.is-run span{animation:site-load-run 9s cubic-bezier(.1,.7,.2,1) forwards}
+.site-load.is-done span{width:100%;opacity:0;transition:width .2s ease-out,opacity .35s ease .15s}
+.site-load.is-idle{display:none}
+@keyframes site-load-run{from{width:0}to{width:85%}}
+@media (prefers-reduced-motion:reduce){.site-load.is-run span{animation-duration:.01s}}
+
+/* the label: a dark tag with a pointer aimed at the control */
+.site-tip{position:fixed;z-index:2147483001;pointer-events:none;max-width:220px;white-space:nowrap;
+  font-family:"Ploni",Arial,sans-serif;font-weight:500;font-size:13.5px;line-height:1;direction:rtl;
+  color:#f5ecd6;background:#571820;padding:8px 12px;border-radius:7px;box-shadow:0 6px 16px rgba(28,10,2,.25);
+  animation:site-tip-in .14s ease-out}
+.site-tip::after{content:"";position:absolute;left:50%;margin-left:-6px;border:6px solid transparent}
+.site-tip.is-below{transform:translate(-50%,0)}
+.site-tip.is-below::after{bottom:100%;border-bottom-color:#571820}
+.site-tip.is-above{transform:translate(-50%,-100%)}
+.site-tip.is-above::after{top:100%;border-top-color:#571820}
+@keyframes site-tip-in{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.site-tip{animation:none}}

@@ -5,6 +5,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import '@/styles/fonts.css'
 import '@/styles/chapter13.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק שלושה-עשר · דגלים וסמלים',
@@ -19,7 +20,10 @@ export const viewport: Viewport = {
 export default function Chapter13Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

@@ -12,6 +12,7 @@ import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/topic-filter.css'
 import '@/styles/exams.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'חדר המבחנים · אסלאם',
@@ -25,7 +26,10 @@ export const viewport: Viewport = {
 export default function ExamsLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body>{children}</body>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }
