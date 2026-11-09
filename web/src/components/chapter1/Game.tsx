@@ -6679,9 +6679,8 @@ export default function Game() {
     if (!finaleEligible || finale !== 'none') return
     live.riseAt = performance.now()
     cue('gate')
-    try {
-      localStorage.setItem('islam:chapter:1', 'done')
-    } catch {}
+    /* the chapter is the article now (9.11.2026): only its practice marks chapter 1 done —
+       the game, kept unlinked at /chapter1-game, no longer writes islam:chapter:1 */
     setFinale('rising')
     /* מסע → מכה → סרטון סיכום → תרגול מסכם → סיום הפרק */
     window.setTimeout(() => setFinale('film'), 2400)
@@ -7673,7 +7672,7 @@ export default function Game() {
             onNotebook={() => setOverlay('notebook')}
             onMap={() => setOverlay('map')}
             onLeave={() => router.push('/chapters')}
-            onPractice={() => router.push('/chapter1/practice')}
+            onPractice={() => router.push('/chapter1-game/practice')}
             onClose={() => {
               live.riseAt = 0
               setFinale('closed')

@@ -20,8 +20,7 @@ import {
   type ChapterDef,
 } from '@/lib/chapters-data'
 import { CH6 } from '@/lib/chapter6/data'
-import { NOTEBOOK_KEY as CH1_STORE_KEY } from '@/lib/chapter1/notebook'
-import { NOTEBOOK_TOTAL as CH1_NOTEBOOK_TOTAL } from '@/lib/chapter1/dialogue'
+import { SECTION_ORDER as CH1_SECTIONS, STORE_KEY as CH1_STORE_KEY } from '@/lib/chapter1/article/progress'
 import { SECTION_ORDER as CH2_SECTIONS, STORE_KEY as CH2_STORE_KEY } from '@/lib/chapter2/progress'
 import { SECTION_ORDER as CH3_SECTIONS, STORE_KEY as CH3_STORE_KEY } from '@/lib/chapter3/progress'
 import { SECTION_ORDER as CH4_SECTIONS, STORE_KEY as CH4_STORE_KEY } from '@/lib/chapter4/progress'
@@ -286,13 +285,14 @@ export default function ChaptersScreen() {
             if (n > 0) progress = Math.min(99, Math.round((n / CH16_SECTIONS.length) * 100))
           }
         }
-        /* chapter 1 is the open world: progress is how full the notebook is */
+        /* chapter 1 — the article since 9.11.2026 (the game, at /chapter1-game, is unlinked);
+           its branch reads the article's own store like every reading chapter (rule 74) */
         if (chp.number === 1 && !done) {
           const raw = localStorage.getItem(CH1_STORE_KEY)
           if (raw) {
-            const p = JSON.parse(raw) as { entries?: number[] } | null
-            const n = Array.isArray(p?.entries) ? p.entries.length : 0
-            if (n > 0) progress = Math.min(99, Math.round((n / CH1_NOTEBOOK_TOTAL) * 100))
+            const p = JSON.parse(raw) as { sections?: string[] } | null
+            const n = Array.isArray(p?.sections) ? p.sections.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH1_SECTIONS.length) * 100))
           }
         }
         st[chp.number] = { completed: done, progress }

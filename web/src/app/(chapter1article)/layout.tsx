@@ -1,8 +1,10 @@
-/* Root layout for the chapter-1 article PILOT (3.11.2026).
+/* Root layout for chapter 1 — the article (9.11.2026; the pilot of 3.11 grown to the
+   whole chapter).
 
-   Its own route group, like /chapter3-comic: unlinked and not indexed, so the pilot
-   can be looked at beside the finished chapters without touching the game at
-   /chapter1. Chapter 6's sheet loads FIRST and the chapter's own on top. */
+   Its own route group, like every chapter, so nothing here leaks out — and apart from the
+   game, which keeps its own group, (chapter1), at /chapter1-game. Chapter 6's sheet loads
+   FIRST (masthead, rail, tokens, type scale), then this chapter's own, exactly as chapters
+   7 and 14 do. */
 
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
@@ -10,10 +12,10 @@ import '@/styles/fonts.css'
 import '@/styles/chapter6-article.css'
 import '@/styles/chapter1-article.css'
 import '@/styles/site-notebook.css'
+import SiteChrome from '@/components/SiteChrome'
 
 export const metadata: Metadata = {
   title: 'פרק ראשון · ההיסטוריה של חצי האי ערב טרום תקופת האסלאם',
-  robots: { index: false, follow: false },
 }
 
 export const viewport: Viewport = {
@@ -24,8 +26,11 @@ export const viewport: Viewport = {
 
 export default function Chapter1ArticleLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="he" dir="rtl">
-      <body>{children}</body>
+    <html lang="he" dir="rtl" suppressHydrationWarning>
+      <body>
+        <SiteChrome />
+        {children}
+      </body>
     </html>
   )
 }

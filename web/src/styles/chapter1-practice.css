@@ -1,0 +1,5 @@
+/* Chapter 1's practice — only what differs from chapter 5's practice sheet: the banner
+   still (the first frame of the chapter's banner film, without the film) and the title's
+   shadow. Chapter 14's, part for part. */
+.ch1-practice-banner .ch1-practice-media{background:var(--panel) url('/assets/chapter1/article/hero-1.jpg') center 58%/cover no-repeat}
+.ch1-practice-banner .ch6-hero-title{text-shadow:0 3px 22px rgba(20,10,4,.55)}

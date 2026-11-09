@@ -1,17 +1,28 @@
-/* Chapter 1 — the article (pilot, 3.11.2026).
-   Loads ON TOP of chapter6-article.css, like chapters 5, 7 and 10, and adds only what
+/* Chapter 1 — the article (pilot 3.11.2026; the whole chapter 9.11.2026).
+   Loads ON TOP of chapter6-article.css, like chapters 5, 7, 10 and 14, and adds only what
    this chapter's devices need. It declares no colour, font or radius of its own: every
    value is a chapter-6 token, a size derived from one, or a mix of two tokens. A hex
    code here is a bug.
 
-   THE RHYTHM IS CHAPTER 5'S (rule 78), measured against chapter 6: 14px between
-   paragraphs, 56 under a heading, 86 above a sub-heading, 32 around a device. */
-:root{--flow-tight:14px;--flow:14px;--flow-lead:56px;--flow-part:86px;--flow-dev:32px}
+   THE RHYTHM — rule 78: a new sheet starts from chapter 14's block, measured against
+   chapter 6: 14px between paragraphs, 56 under a heading and around a device, 86 above a
+   sub-heading. */
+:root{
+  --flow-tight:14px;   /* sub-heading → its first line */
+  --flow:14px;         /* paragraph → paragraph */
+  --flow-block:56px;   /* prose ↔ a device or a picture */
+  --flow-lead:56px;    /* under a section heading */
+  --flow-part:86px;    /* above a sub-heading: a new movement */
+}
 .chapter-article p{font-size:var(--read);line-height:1.85;color:var(--ink)}
 .chapter-article .ch1-tr{font-weight:700;color:var(--gold-text)}
-.chapter-article > section > p{width:100%;margin-top:var(--flow)}
-.chapter-article .ch1-lead{margin-top:var(--flow-lead)}
-.chapter-article .scrolly-env{margin-top:var(--flow-part)}
+.chapter-article > section > * + *{margin-top:var(--flow-block)}
+.chapter-article > section > p + p{margin-top:var(--flow)}
+.chapter-article > section > .section-heading + *,
+.chapter-article > section > .ch6-hero + .section-heading + *,
+.chapter-article > section > .ch1-cover + *{margin-top:var(--flow-lead)}
+.chapter-article > section > .scrolly-env{margin-top:var(--flow-part)}
+.chapter-article > section > .scrolly-env + *{margin-top:calc(var(--flow-tight) * 2)}
 
 /* the banner: chapter 6's hero, a film of the caravan (its first frame is the poster) */
 .ch1-hero-media{background-image:url('/assets/chapter1/article/hero-1.jpg');background-position:center 58%}
@@ -112,3 +123,83 @@
 .ch1-map.is-narrow .ch1-empire.is-nw.is-on{translate:0 0}
 .ch1-map.is-narrow .ch1-empire.is-ne{right:10px;left:auto}
 .ch1-map.is-narrow .ch1-empire-arrow{display:none}
+
+/* ============================ 02 · the two empires ============================
+   Chapter 5's Claims: two EQUAL cards, centred and narrower than the prose (rule 48), on
+   the page's own paper (rule 36) with one hairline and no shadow. The board is dir=ltr so
+   the north-west empire sits on the left (rule 61); each card runs RTL inside. */
+.ch1-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,2.4vw,30px);
+  max-width:880px;margin-inline:auto;align-items:stretch}
+.ch1-card{background:var(--paper);border:1px solid var(--edge);border-radius:16px;
+  padding:clamp(20px,2.4vw,28px) clamp(20px,2.4vw,30px) clamp(22px,2.6vw,30px);text-align:start}
+.chapter-article .ch1-card-title{font-family:var(--font-heading);font-weight:900;font-size:var(--sub);
+  line-height:1.25;color:var(--maroon);margin:0 0 12px;padding-bottom:12px;border-bottom:1px solid var(--gold-soft)}
+.chapter-article .ch1-card p{margin:0}
+.chapter-article .ch1-card p + p{margin-top:var(--flow)}
+@media (max-width:760px){
+  .ch1-pair{grid-template-columns:1fr}
+}
+
+/* ====================== the heading ON a painting (05, 08) ======================
+   Chapter 9's Cover: the painting fills the width of the window, a dark foot under the
+   cream title, and a paper wash at its top so it rises out of the page. */
+.ch1-cover{position:relative;margin-inline:calc(-1 * var(--content-gutter));min-height:clamp(340px,56vh,560px);
+  display:flex;align-items:flex-end;padding:0 var(--content-gutter) clamp(28px,4vw,48px);overflow:hidden;background:var(--panel)}
+.ch1-cover-art{position:absolute;inset:0}
+.ch1-cover-art img{width:100%;height:100%;object-fit:cover;display:block}
+.ch1-cover-art::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(30,18,8,.72),rgba(30,18,8,.18) 55%,transparent),linear-gradient(var(--panel),transparent 14%)}
+.ch1-cover .section-heading{position:relative;z-index:1;margin:0;width:100%}
+.chapter-article .ch1-cover .section-heading h2{color:var(--cream)}
+.ch1-cover .title-ornament{filter:brightness(1.6)}
+/* the monastery stands at the right of its painting; the ridge's town in its lower half */
+#christianity .ch1-cover-art img{object-position:70% 40%}
+#eve .ch1-cover-art img{object-position:center 62%}
+
+/* ===================== a painting beside the prose (04, 07) =====================
+   Chapter 6's .bleed-aside as chapter 9 set it for rectangular paintings (12.10.2026):
+   the painting on the RIGHT, inside the column, a clean 14px edge and no fade; the floor
+   lowered for a passage of three paragraphs. */
+@media (min-width:900px){
+  .ch1-aside.is-flipped{margin-inline-start:0}
+  .ch1-aside.is-flipped .bleed-aside-body{translate:none}
+  .ch1-aside .bleed-aside-art{min-height:clamp(300px,36vh,420px)}
+  .ch1-aside .bleed-aside-art img{object-fit:cover;height:100%;border-radius:14px;
+    -webkit-mask-image:none;mask-image:none}
+  .ch1-aside .bleed-aside-body > p + p{margin-top:var(--flow)}
+}
+/* reduced motion: keep the art box positioned so the image cannot climb to the section
+   (chapter 3's note; harmless now that the shared sheet is fixed) */
+@media (prefers-reduced-motion:reduce) and (min-width:900px){.ch1-aside .bleed-aside-art{position:relative}}
+/* a phone: the shared device removes the art; here it stays, above its words, whole */
+@media (max-width:899px){
+  .ch1-aside .bleed-aside-art{display:block;position:relative;aspect-ratio:16/9;margin-bottom:var(--flow-block)}
+  .ch1-aside .bleed-aside-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px}
+  .ch1-aside .bleed-aside-body > p + p{margin-top:var(--flow)}
+}
+
+/* ============================ 05 · §23, the statement ============================
+   Chapter 14's: smaller than a section heading (rule 77), larger than prose, centred
+   between two gold hairlines. Used once. */
+.chapter-article > section > .ch1-statement{max-width:820px;margin-inline:auto;text-align:center;
+  font-family:var(--font-heading);font-weight:700;font-size:var(--sub);line-height:1.6;color:var(--maroon-deep);
+  padding-block:26px;border-block:1px solid var(--gold-soft);margin-top:var(--flow-block)}
+.chapter-article > section > .ch1-statement + p{margin-top:var(--flow-block)}
+.chapter-article .ch1-statement .key{color:var(--maroon)}
+
+/* ============================ 06 · Abraha's scene ============================
+   Chapter 14's motif scene (chapter 6's prayer day): the paintings are meant to be seen,
+   so no blur; a paper wash on the reading edge (right) where the cards ride, and the last
+   painting melts into the paper below. */
+.ch1-scene .st-photo{background:var(--panel)}
+.ch1-scene .st-photo > img{filter:none;transform:scale(1.02)}
+.ch1-scene .st-veil{background:linear-gradient(to left,rgba(237,228,208,.5) 0%,rgba(237,228,208,.18) 40%,transparent 62%)}
+.ch1-scene .scrolly-fullstage .scrolly-step{min-height:88vh}
+.ch1-scene .stage-card{width:min(520px,90%);background:var(--paper);border:1px solid var(--edge);border-radius:16px;
+  box-shadow:var(--shadow);padding:22px 28px 24px}
+.chapter-article .ch1-scene .stage-card p{font-size:var(--read);line-height:1.85;color:var(--ink);text-shadow:none;margin:0}
+.ch1-scene .scrolly-fullstage::after{content:"";position:absolute;inset-inline:0;bottom:0;height:clamp(150px,24vh,320px);z-index:4;pointer-events:none;
+  background:linear-gradient(to top,var(--panel) 0%,rgba(243,234,214,.82) 20%,rgba(243,234,214,.5) 46%,rgba(243,234,214,.2) 72%,transparent 100%)}
+@media (max-width:899px){
+  .ch1-scene .stage-card{width:100%;padding:18px 20px 20px}
+}

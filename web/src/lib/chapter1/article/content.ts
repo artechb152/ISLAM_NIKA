@@ -3,8 +3,8 @@
    Every word lives in passages.json, keyed by the §N of concept/chapter1/SOURCE-TEXT.md.
    The article never writes a sentence; it asks for a fragment by reference ("§9.b").
    concept/chapter1/verify-article.mjs proves that the fragments of each § ARE that §,
-   that layout.json places each one exactly once, and that every label the crate shows
-   is cut out of its own sentence. To change wording: SOURCE-TEXT.md first. */
+   that layout.json places each one exactly once, and that every label a device shows
+   (the route map, the two empire cards) is cut out of its own sentence. To change wording: SOURCE-TEXT.md first. */
 
 import raw from './passages.json'
 import layoutRaw from './layout.json'
@@ -49,8 +49,13 @@ export interface Sub { id: string; title: string }
 export interface LayoutSection { id: string; title: string; subs?: Sub[]; uses: string[] }
 export interface Cut { label: string; from: string }
 export interface Empire extends Cut { side: 'nw' | 'ne'; x: number; y: number; tribe: string }
+export interface PairCard { side: 'nw' | 'ne'; name: Cut }
 export interface Layout {
   sections: LayoutSection[]
+  /** 02 — the two empires as two equal cards; every label cut from its card's sentence */
+  pair: { cards: PairCard[] }
+  /** 06 — the painting under each step of Abraha's scene (editorial, like a heading) */
+  scene: { frames: string[] }
   route: {
     width: number
     height: number
@@ -75,4 +80,12 @@ export function sub(sectionId: string, subId: string): string {
   const s = meta(sectionId).subs?.find((x) => x.id === subId)
   if (!s) throw new Error(`chapter 1: unknown sub ${sectionId}/${subId}`)
   return s.title
+}
+
+/** A device label: the words are checked against the sentence they are cut from (rule 27) —
+    a label that drifted from its sentence throws instead of printing something the source
+    does not say. */
+export function cut(c: Cut): string {
+  if (!text(c.from).includes(c.label)) throw new Error(`chapter 1: label "${c.label}" is not in ${c.from}`)
+  return c.label
 }

@@ -35,7 +35,7 @@ export default function Chapter1Guide() {
       stops={stops}
       title="דף מלווה"
       subtitle="פרק 1 · ערב טרום האסלאם"
-      back={{ href: '/chapter1', label: 'חזרה לפרק 1' }}
+      back={{ href: '/chapter1-game', label: 'חזרה למשחק' }}
     >
       <main className="chapter-article p2-main">
         <div className="ch2-hero p1-banner">
@@ -106,8 +106,8 @@ export default function Chapter1Guide() {
           <div className="title-ornament" aria-hidden="true"><span /></div>
           <p>עכשיו אפשר לבדוק את זה.</p>
           <nav className="p1-entry-actions" aria-label="הלאה מכאן">
-            <Link className="ch2-end-link" href="/chapter1/practice">לתרגול המסכם</Link>
-            <Link className="hud-card-btn" href="/chapter1">חזרה למסע</Link>
+            <Link className="ch2-end-link" href="/chapter1-game/practice">לתרגול המסכם</Link>
+            <Link className="hud-card-btn" href="/chapter1-game">חזרה למסע</Link>
           </nav>
         </div>
       </main>

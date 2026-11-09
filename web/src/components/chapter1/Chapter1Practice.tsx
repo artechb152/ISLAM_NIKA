@@ -346,7 +346,7 @@ export default function Chapter1Practice() {
      reachable from anywhere on the page. No bar, no percentage, no score. */
   const stops = QUESTIONS.map((q) => ({ id: `p1-${q.id}`, label: q.label, done: solved.has(q.id) }))
   return (
-    <PracticeNav stops={stops} subtitle="פרק 1 · תרגול מסכם" back={{ href: '/chapter1', label: 'חזרה לפרק 1' }}>
+    <PracticeNav stops={stops} subtitle="פרק 1 · תרגול מסכם" back={{ href: '/chapter1-game', label: 'חזרה למשחק' }}>
       <main className="chapter-article p2-main">
         {/* THE CHAPTER'S OWN BANNER — the article shell's band, carrying the
             still the journey opens on rather than chapter 2's desert. */}

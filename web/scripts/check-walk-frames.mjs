@@ -45,7 +45,7 @@ try {
       last = t
     })
   })
-  await page.goto(`${BASE}/chapter1/play/?region=${REGION}`, { waitUntil: 'domcontentloaded' })
+  await page.goto(`${BASE}/chapter1-game/play/?region=${REGION}`, { waitUntil: 'domcontentloaded' })
   const start = page.getByRole('button', { name: /התחילו|המשיכו/ })
   for (let t = 0; t < 40; t++) {
     if (await page.evaluate(() => !!document.querySelector('canvas'))) break

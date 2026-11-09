@@ -48,7 +48,7 @@ export default function ChapterOutro() {
     if (STONE) recordFind(STONE.id)
     try {
       setAssembled(readNotebook().solved.includes('task-links'))
-      localStorage.setItem('islam:chapter:1', 'done')
+      /* no islam:chapter:1 here — only the article's practice completes the chapter (9.11.2026) */
     } catch {}
   }, [])
 
@@ -72,7 +72,7 @@ export default function ChapterOutro() {
       stops={stops}
       title="סוף הדרך"
       subtitle="פרק 1 · ערב טרום האסלאם"
-      back={{ href: '/chapter1', label: 'חזרה לפרק 1' }}
+      back={{ href: '/chapter1-game', label: 'חזרה למשחק' }}
     >
       <main className="chapter-article p2-main">
         <div className="ch2-hero p1-banner p1-end-banner">
@@ -158,10 +158,10 @@ export default function ChapterOutro() {
           </div>
           <p>הפרק הושלם.</p>
           <nav className="p1-entry-actions p1-end-nav" aria-label="הלאה מכאן">
-            <Link className="ch2-end-link" href="/chapter1/practice">
+            <Link className="ch2-end-link" href="/chapter1-game/practice">
               לתרגול המסכם
             </Link>
-            <Link className="hud-card-btn" href="/chapter1/guide">
+            <Link className="hud-card-btn" href="/chapter1-game/guide">
               דף מלווה
             </Link>
             <Link className="hud-card-btn" href="/notebook">

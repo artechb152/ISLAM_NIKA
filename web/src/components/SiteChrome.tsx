@@ -23,7 +23,7 @@
    content for keyboard readers, and the accessibility panel (A11yPanel).
 
    The chapters screen's collapsed rail has its own side-pointing tag (.rail-tip) and is
-   skipped here. Chapter 1 does not load this (the user: not touching chapter 1 for now). */
+   skipped here. Chapter 1's article loads it like every chapter; the old game at /chapter1-game does not. */
 import '@/styles/site-chrome.css'
 import A11yPanel, { A11Y_BOOT } from '@/components/A11yPanel'
 import { usePathname } from 'next/navigation'
