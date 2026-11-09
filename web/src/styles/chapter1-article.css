@@ -134,7 +134,9 @@
    the page's own paper (rule 36) with one hairline and no shadow. The board is dir=ltr so
    the north-west empire sits on the left (rule 61); each card runs RTL inside. */
 .ch1-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,2.4vw,30px);
-  max-width:880px;margin-inline:auto;align-items:stretch}
+  max-width:880px;margin-inline:auto;align-items:start}
+/* equal WIDTH, each card its own height: stretched, the one-sentence Byzantine card ended in
+   an empty paper block under its text (the user, 9.11.2026) */
 .ch1-card{background:var(--paper);border:1px solid var(--edge);border-radius:16px;
   padding:clamp(20px,2.4vw,28px) clamp(20px,2.4vw,30px) clamp(22px,2.6vw,30px);text-align:start}
 .chapter-article .ch1-card-title{font-family:var(--font-heading);font-weight:900;font-size:var(--sub);

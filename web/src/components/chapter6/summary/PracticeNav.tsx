@@ -21,6 +21,7 @@
    `ch6:side-collapsed` is deliberately the article's key: collapse the rail on the chapter and
    it is collapsed here too. */
 
+import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -220,6 +221,8 @@ export default function PracticeNav({
 
         <div className="chapter-content">
           <div className="chapter-layout">{children}</div>
+          {/* the site's footer, as under every article — the practices and the exam room had none */}
+          <SiteFooter />
         </div>
       </div>
     </div>
