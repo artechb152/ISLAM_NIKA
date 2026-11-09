@@ -25,7 +25,10 @@
 .chapter-article > section > .scrolly-env + *{margin-top:calc(var(--flow-tight) * 2)}
 
 /* the banner: chapter 6's hero, a film of the caravan (its first frame is the poster) */
-.ch1-hero-media{background-image:url('/assets/chapter1/article/hero-1.jpg');background-position:center 58%}
+/* the camels and the fire are in the lower third of the loop — the shared hero aims at the top
+   (`object-position:center top`), which showed only sky and roofs at 1440 (9.11.2026) */
+.ch1-hero-media{background-image:url('/assets/chapter1/article/hero-1.jpg');background-position:center 78%}
+.ch1-hero-media .ch6-hero-video{object-position:center 78%}
 
 /* ================================ the road ================================
    Chapter 5's full-screen map stage, on the game's painted map. */
