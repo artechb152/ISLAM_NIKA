@@ -1,8 +1,8 @@
 1:"$Sreact.fragment"
-2:I[99955,["2684","static/chunks/2684-7fc4043c22c24c4e.js","2235","static/chunks/2235-72b31fa251d08ac2.js","6923","static/chunks/app/(chapter8)/chapter8/practice/page-bad21c56c55007e5.js"],"default"]
+2:I[99955,["2684","static/chunks/2684-7fc4043c22c24c4e.js","2235","static/chunks/2235-72b31fa251d08ac2.js","6923","static/chunks/app/(chapter8)/chapter8/practice/page-79951e0e3fbdddd8.js"],"default"]
 3:I[17820,[],"OutletBoundary"]
 4:"$Sreact.suspense"
 :HL["/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","style"]
 :HL["/ISLAM_NIKA/_next/static/css/18167e6c8d9cfc11.css","style"]
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/18167e6c8d9cfc11.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"q4DGXLOaFRstYUHajQP98"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","link","0",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/83401346faeb61d5.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/ISLAM_NIKA/_next/static/css/18167e6c8d9cfc11.css","precedence":"next"}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"TcemoNIPp1wS0ZPUD4bF3"}
 5:null

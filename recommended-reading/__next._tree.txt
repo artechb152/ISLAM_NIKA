@@ -2,4 +2,4 @@
 :HL["/ISLAM_NIKA/_next/static/css/112a1340e8af9056.css","style"]
 :HL["/ISLAM_NIKA/_next/static/css/49711e461a12096a.css","style"]
 :HL["/ISLAM_NIKA/_next/static/css/6a1464f97b5b391e.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":0,"slots":{"children":{"name":"(reference)","param":null,"prefetchHints":16,"slots":{"children":{"name":"recommended-reading","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"q4DGXLOaFRstYUHajQP98"}
+0:{"tree":{"name":"","param":null,"prefetchHints":0,"slots":{"children":{"name":"(reference)","param":null,"prefetchHints":16,"slots":{"children":{"name":"recommended-reading","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"TcemoNIPp1wS0ZPUD4bF3"}
