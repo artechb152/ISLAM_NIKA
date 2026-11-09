@@ -17,10 +17,14 @@
      03  the route map, full screen (the pilot, unchanged)
      04  a painting beside the prose (Yathrib)
      05  the heading on a painting (the monastery)
-     06  Abraha as a full-screen scene — one painting per step, crossfading with the scroll
-     07  a painting beside the prose (the idols' chamber, the arrows on its floor)
-     08  the heading on a painting (the morning after)
+     06  the Abraha film — chapter 6's player, pressed and never scrolled (round 2)
+     07  a painting beside the prose (the idols' chamber), and the named idols as tablets
+         that light up (round 2)
+     08  the heading on a painting (the morning after), and §47's three words as cards
+         that turn over (round 2)
    The crate (drag-the-goods) was cut on 9.11 („לא אהבתי") and nothing game-like came back.
+   Round 2 also tried, and the user took back: a living map in 02/04/05/08 („למה שינית את
+   מקטע 2?", „לא אהבתי את השינוי עם המפות") and arrows cast at Hubal's feet („מיותר").
 
    AND NO CHECKS. Every question lives at /chapter1/practice.
 
@@ -33,11 +37,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
-import { clamp01, Scrolly, seg, type ScrollyState } from '@/components/chapter6/scrolly'
+import { Scrolly } from '@/components/chapter6/scrolly'
+import StoryFilm from '@/components/chapter6/StoryFilm'
 import MarkToNotebook from '@/components/MarkToNotebook'
 import SiteFooter from '@/components/SiteFooter'
 import RouteMap from '@/components/chapter1/RouteMap'
-import { CH1, LAYOUT, SECTIONS, cut, em, meta, sub, text, tr } from '@/lib/chapter1/article/content'
+import { CH1, LAYOUT, SECTIONS, cut, cutOf, em, meta, sub, text, tr, wordIn } from '@/lib/chapter1/article/content'
 import {
   completedSections,
   markContentComplete,
@@ -170,33 +175,161 @@ function Empires({ nwBody, neBody }: { nwBody: ReactNode; neBody: ReactNode }) {
   )
 }
 
-/* ---------------- 06 · Abraha — the full-screen scene ---------------- */
+/* ---------------- 06 · Abraha — the film ---------------- */
 
-/** One painting per step (layout.json `scene.frames`), each laid over the one before it and
-    fading in through the second half of the step that precedes it — so the picture changes
-    while the reader is finishing the sentence that leads into it, and rewinds with the
-    scroll. A frame that repeats holds. Decorative: every fact is in the cards. */
-function AbrahaStage({ step, t }: ScrollyState) {
-  const p = step + t
-  const frames = LAYOUT.scene.frames
-  const layers = frames
-    .map((img, i) => ({ img, from: i }))
-    .filter((l, i) => i === 0 || frames[i - 1] !== l.img)
+/** Chapter 6's player, started only by the reader (the user: „בלחיצה ולא בגלילה"). The
+    captions are cut from §27–§30 and live in ONE place, layout.json `film.cues`, keyed by
+    time: the styled captions and the VTT track for assistive tech are both built from it,
+    so a new film needs only a new file and new times. No sound yet: the clip's track is the
+    game's narration, which is not the source.
+
+    VOICE-OVER (the user wants narration — none is generated here). Two ways in, no code
+    change for either:
+      1. a film with the narration baked in: encode it to abraha-film.mp4 WITH its audio
+         (drop ffmpeg's -an) — StoryFilm's own mute/volume control drives it;
+      2. a separate narration file: put it in article/ and name it in layout.json
+         film.narration — AbrahaFilm then plays it in step with the picture (play, pause,
+         seek, volume and mute follow the video). */
+const FILM_CUES: Array<[number, number, string]> = LAYOUT.film.cues.map((c) => [c.start, c.end, cutOf(c)])
+const vttTime = (s: number) => `00:${String(Math.floor(s / 60)).padStart(2, '0')}:${(s % 60).toFixed(3).padStart(6, '0')}`
+const FILM_VTT = 'data:text/vtt;charset=utf-8,' + encodeURIComponent(
+  'WEBVTT\n\n' + FILM_CUES.map(([a, b, t], i) => `${i + 1}\n${vttTime(a)} --> ${vttTime(b)}\n${t}\n`).join('\n'),
+)
+function AbrahaFilm() {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const narration = LAYOUT.film.narration
+  /* the narration hook (2. above): the audio follows the video — nothing runs without a file */
+  useEffect(() => {
+    const video = ref.current?.querySelector('video')
+    const audio = audioRef.current
+    if (!narration || !video || !audio) return
+    const sync = () => { if (Math.abs(audio.currentTime - video.currentTime) > 0.25) audio.currentTime = video.currentTime }
+    const play = () => { sync(); void audio.play().catch(() => {}) }
+    const pause = () => audio.pause()
+    const vol = () => { audio.volume = video.volume; audio.muted = video.muted }
+    video.addEventListener('play', play)
+    video.addEventListener('pause', pause)
+    video.addEventListener('ended', pause)
+    video.addEventListener('seeked', sync)
+    video.addEventListener('volumechange', vol)
+    return () => {
+      video.removeEventListener('play', play)
+      video.removeEventListener('pause', pause)
+      video.removeEventListener('ended', pause)
+      video.removeEventListener('seeked', sync)
+      video.removeEventListener('volumechange', vol)
+    }
+  }, [narration])
   return (
-    <div className="st st-photo ch1-scene-stage">
-      {layers.map(({ img, from }, k) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={img}
-          src={`${A}${img}.jpg`}
-          alt=""
-          loading={k === 0 ? 'eager' : 'lazy'}
-          decoding="async"
-          style={{ opacity: Number((from === 0 ? 1 : clamp01(seg(p, from - 0.5, from + 0.04))).toFixed(4)) }}
-        />
-      ))}
-      <span className="st-veil" />
+    <div className="ch1-film" data-reveal ref={ref}>
+      <StoryFilm
+        src={`${A}${LAYOUT.film.src}`}
+        poster={`${A}${LAYOUT.film.poster}`}
+        captions={FILM_VTT}
+        cues={FILM_CUES}
+        title=""
+        reveal=""
+        label="סרטון: סיפור אברהה"
+      />
+      {narration && <audio ref={audioRef} src={`${A}${narration}`} preload="auto" hidden />}
     </div>
+  )
+}
+
+/* ---------------- 07 · the idols by name ---------------- */
+
+/** The three goddesses of §43 and the five of 71:23 (§44) as tablets in a row each. They
+    light one after another when the row reaches the middle of the screen (all at once
+    under reduced motion); a tablet pressed marks its name in the sentence printed under
+    the row. Reading, not a quiz: nothing is asked and nothing is hidden. */
+function IdolNames({ refs }: { refs: string[] }) {
+  const rows = LAYOUT.idols.rows
+  if (rows.map((r) => r.from).join() !== refs.join()) throw new Error('chapter 1: idol rows and their sentences disagree')
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [lit, setLit] = useState(0)
+  const [focus, setFocus] = useState<string | null>(null)
+  const total = rows.reduce((n, r) => n + r.names.length, 0)
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) { setLit(total); return }
+    let timer: number | undefined
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      io.disconnect()
+      let n = 0
+      timer = window.setInterval(() => { n += 1; setLit(n); if (n >= total) window.clearInterval(timer) }, 260)
+    }, { rootMargin: '-35% 0px -35% 0px' })
+    io.observe(node)
+    return () => { io.disconnect(); if (timer) window.clearInterval(timer) }
+  }, [total])
+  let k = 0
+  return (
+    <div className="ch1-idols" ref={ref}>
+      {rows.map((row) => (
+        <div className="ch1-idols-row" key={row.from}>
+          <div className="ch1-idols-tablets" style={{ ['--n' as string]: String(row.names.length) }}>
+            {row.names.map((name) => {
+              const on = k++ < lit
+              const id = `${row.from}:${name}`
+              return (
+                <button
+                  type="button"
+                  key={name}
+                  className={'ch1-tablet' + (on ? ' is-lit' : '') + (focus === id ? ' is-focus' : '')}
+                  aria-pressed={focus === id}
+                  onClick={() => { setLit(total); setFocus((f) => (f === id ? null : id)) }}
+                >
+                  <span>{wordIn(row.from, name)}</span>
+                </button>
+              )
+            })}
+          </div>
+          <p className="ch1-idols-caption">{cutOf({ from: row.from, cut: row.caption })}</p>
+          <p className="ch1-idols-text">
+            {mark(text(row.from), [
+              { phrases: row.names, paint: (ph, key) => <b key={key} className={'ch1-tr ch1-idol-name' + (focus === `${row.from}:${ph}` ? ' is-focus' : '')}>{ph}</b> },
+              { phrases: em(row.from), paint: bold('key') },
+              { phrases: tr(row.from).filter((x) => !row.names.includes(x)), paint: bold('ch1-tr') },
+            ], row.from)}
+          </p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/* ---------------- 08 · §47's three words ---------------- */
+
+/** Three cards that turn over: the Hebrew meaning on the front, the Arabic word on the
+    back — only what §47 says (no Latin or Greek source words: they are not in it). Both
+    faces stay in the DOM, so search finds either. */
+function Words({ refs }: { refs: string[] }) {
+  const [r] = refs
+  const w = LAYOUT.words
+  const [open, setOpen] = useState<Set<string>>(new Set())
+  const flip = (k: string) => setOpen((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n })
+  return (
+    <>
+    <T refs={refs} />
+    <div className="ch1-words" data-reveal>
+      <ul className="ch1-words-cards">
+        {w.cards.map((c) => (
+          <li key={c.front}>
+            <button type="button" className={'ch1-word' + (open.has(c.front) ? ' is-flipped' : '')} aria-pressed={open.has(c.front)} onClick={() => flip(c.front)}>
+              <span className="ch1-word-face is-front"><b>{wordIn(r, c.front)}</b></span>
+              <span className="ch1-word-face is-back">
+                <b lang="he">{wordIn(r, c.back)}</b>
+                {c.note && <small>{wordIn(r, c.note)}</small>}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p className="ch1-words-caption">{cutOf({ ...w.caption, from: r })}</p>
+    </div>
+    </>
   )
 }
 
@@ -463,16 +596,11 @@ export default function Chapter1Article() {
               {/* ============ 06 · Abraha ============ */}
               <Section id="abraha">
                 <Head id="abraha" />
-                {/* a story told in order — so it scrolls (rule 54): the Christian kingdom in
-                    Yemen, the march north, the elephant, the birds at the gates */}
-                <div className="ch1-scene">
-                  <Scrolly full art={(s) => <AbrahaStage {...s} />}>
-                    <StageP refs={['§26.a']} />
-                    <StageP refs={['§27.a']} />
-                    <StageP refs={['§28.a']} />
-                    <StageP refs={['§29.a']} />
-                  </Scrolly>
-                </div>
+                <T refs={['§26.a']} />
+                {/* the film — pressed, never scrolled (the user: „בלחיצה ולא בגלילה") */}
+                <AbrahaFilm />
+                <T refs={['§27.a']} />
+                <T refs={['§28.a', '§29.a']} />
                 <T refs={['§30.a']} />
                 <T refs={['§31.a']} />
               </Section>
@@ -491,15 +619,15 @@ export default function Chapter1Article() {
                 <T refs={['§40.a', '§41.a']} />
                 <T refs={['§42.a']} />
                 <Env id="more" sectionId="idols" />
-                <T refs={['§43.a']} />
-                <T refs={['§44.a']} />
+                <IdolNames refs={['§43.a', '§44.a']} />
               </Section>
 
               {/* ============ 08 · on the eve of Islam ============ */}
               <Section id="eve">
                 <Cover id="eve" img="ridge" />
                 <T refs={['§45.a', '§46.a']} />
-                <T refs={['§47.a']} />
+                {/* §47 and its three words, turned over by the reader */}
+                <Words refs={['§47.a']} />
                 <T refs={['§48.a']} />
               </Section>
 

@@ -50,12 +50,18 @@ export interface LayoutSection { id: string; title: string; subs?: Sub[]; uses: 
 export interface Cut { label: string; from: string }
 export interface Empire extends Cut { side: 'nw' | 'ne'; x: number; y: number; tribe: string }
 export interface PairCard { side: 'nw' | 'ne'; name: Cut }
+/** a label cut from a sentence by its words (the chapter-14 form) */
+export interface CutRef { from: string; cut: string }
 export interface Layout {
   sections: LayoutSection[]
   /** 02 — the two empires as two equal cards; every label cut from its card's sentence */
   pair: { cards: PairCard[] }
-  /** 06 — the painting under each step of Abraha's scene (editorial, like a heading) */
-  scene: { frames: string[] }
+  /** 06 — the Abraha film: the file, an optional narration file, and its captions — one data place */
+  film: { src: string; poster: string; narration: string | null; cues: (CutRef & { start: number; end: number })[] }
+  /** 07 — the named idols, a row per sentence */
+  idols: { rows: { from: string; caption: string; names: string[] }[] }
+  /** 08 — §47's three words */
+  words: { caption: CutRef; cards: { front: string; back: string; note?: string }[] }
   route: {
     width: number
     height: number
@@ -88,4 +94,15 @@ export function sub(sectionId: string, subId: string): string {
 export function cut(c: Cut): string {
   if (!text(c.from).includes(c.label)) throw new Error(`chapter 1: label "${c.label}" is not in ${c.from}`)
   return c.label
+}
+
+/** The words of a label cut from its fragment (the chapter-14 form): throws on drift. */
+export function cutOf(c: CutRef): string {
+  if (!text(c.from).includes(c.cut)) throw new Error(`chapter 1: label "${c.cut}" is not in ${c.from}`)
+  return c.cut
+}
+/** A word that must stand in its sentence once — the idols' names and §47's words. */
+export function wordIn(ref: string, word: string): string {
+  if (text(ref).split(word).length !== 2) throw new Error(`chapter 1: "${word}" is not in ${ref} exactly once`)
+  return word
 }

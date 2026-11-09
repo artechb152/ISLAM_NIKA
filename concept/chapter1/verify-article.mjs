@@ -2,12 +2,12 @@
 
    1. רצף    — לכל § שב-passages.json, הקטעים שלו יחד זהים לסעיף ב-SOURCE-TEXT.md
                אחרי הסרת רווחים ופיסוק: לא „כל קטע נמצא במקור" אלא „הקטעים הם הסעיף".
-   2. תוויות — em/tr תת-מחרוזת של המשפט שלהם; כל תווית במפת הדרך ובכרטיסי האימפריות
+   2. תוויות — em/tr תת-מחרוזת של המשפט שלהם; כל תווית במפת הדרך, בכרטיסי האימפריות, בכתוביות הסרטון, בלוחות האלילים ובכרטיסי המילים
                תת-מחרוזת של הקטע שממנו נחתכה. העורכי (כותרות מקטעים ומשנה) מוצהר בשמו.
    3. פעם אחת — כל קטע נצרך ב-layout.json בדיוק פעם אחת, ו-Chapter1Article.tsx כותב
                כל ref של `uses` פעם אחת בדיוק — ולא מפנה לשום ref אחר.
    4. היקף   — לכל § של המקור (§0–§48) יש קטעים, ואין § שאינו במקור.
-   5. נכסים  — כל ציור שהמאמר מפנה אליו (img="…", scene.frames) קיים בדיסק.
+   5. נכסים  — כל ציור שהמאמר מפנה אליו (img="…", הסרטון והפוסטר שלו) קיים בדיסק.
 
    ריצה: node concept/chapter1/verify-article.mjs */
 import { access, readFile } from 'node:fs/promises'
@@ -50,9 +50,26 @@ for (const e of R.empires) { cutR(e.side, e.label, e.from); cutR(e.side + '/trib
 if (R.points.length < 2) errors.push('route: אין דרך')
 for (const [x, y] of R.points) if (!(x >= 0 && x <= 1 && y >= 0 && y <= 1)) errors.push(`route: נקודה מחוץ לציור ${x},${y}`)
 
-/* 2 · כרטיסי האימפריות — כותרת כל כרטיס חתוכה מהמשפט שלו */
+/* 2 · כרטיסי האימפריות (02) — כותרת כל כרטיס חתוכה מהמשפט שלו */
 if (L.pair.cards.length !== 2) errors.push('pair: צריך שני כרטיסים')
 for (const c of L.pair.cards) if (!textOf(c.name.from).includes(c.name.label)) errors.push(`pair/${c.side}: „${c.name.label}" אינו ב-${c.name.from}`)
+
+/* 2 · הסרטון — כל כתובית חתוכה מהמשפט שלה, בזמנים עולים ובתוך הסרטון */
+let prev = 0
+for (const c of L.film.cues) {
+  if (!textOf(c.from).includes(c.cut)) errors.push(`film: „${c.cut}" אינו ב-${c.from}`)
+  if (!(c.start >= prev && c.end > c.start)) errors.push(`film: זמנים לא עולים ב-„${c.cut}"`)
+  prev = c.end
+}
+
+/* 2 · האלילים בשמם, שלוש המילים */
+for (const c of [L.words.caption]) if (!textOf(c.from).includes(c.cut)) errors.push(`„${c.cut}" אינו ב-${c.from}`)
+const once = (ref, w, where) => { if (textOf(ref).split(w).length !== 2) errors.push(`${where}: „${w}" אינו ב-${ref} פעם אחת בדיוק`) }
+for (const row of L.idols.rows) {
+  if (!textOf(row.from).includes(row.caption)) errors.push(`idols: „${row.caption}" אינו ב-${row.from}`)
+  for (const n of row.names) once(row.from, n, 'idols')
+}
+for (const c of L.words.cards) for (const w of [c.front, c.back, c.note].filter(Boolean)) once(L.words.caption.from, w, 'words')
 
 const EDITORIAL = {
   ...Object.fromEntries(L.sections.map((s) => [s.id, s.title])),
@@ -87,9 +104,8 @@ if (SCOPE.length) {
 
 /* 5 · נכסים */
 const art = new URL('../../web/public/assets/chapter1/article/', here)
-const imgs = new Set([...[...code.matchAll(/img="([\w-]+)"/g)].map((m) => m[1]), ...L.scene.frames])
-for (const f of imgs) { try { await access(new URL(`${f}.jpg`, art)) } catch { errors.push(`נכס חסר: ${f}.jpg`) } }
-if (L.scene.frames.length < 2) errors.push('scene: פחות משני ציורים')
+const imgs = new Set([...[...code.matchAll(/img="([\w-]+)"/g)].map((m) => `${m[1]}.jpg`), L.film.src, L.film.poster, ...(L.film.narration ? [L.film.narration] : [])])
+for (const f of imgs) { try { await access(new URL(f, art)) } catch { errors.push(`נכס חסר: ${f}`) } }
 
 console.log(`היקף: ${SCOPE[0]}–${SCOPE[SCOPE.length - 1]} (${SCOPE.length} סעיפים) · קטעים: ${all.length} · מקטעים: ${L.sections.length} · ציורים: ${imgs.size}`)
 console.log(`עורכי (מוצהר): ${Object.values(EDITORIAL).map((x) => `„${x}"`).join(' · ')}`)

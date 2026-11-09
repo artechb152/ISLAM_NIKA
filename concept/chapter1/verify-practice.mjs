@@ -37,7 +37,7 @@ for (const q of Q) {
   }
   if (q.photo) {
     try { await access(new URL('../../web/public/assets/chapter1/article/' + q.photo, here)) } catch { errors.push(`${q.id}: אין נכס ${q.photo}`) }
-    if (!article.includes(`img="${q.photo.replace(/\.jpg$/, '')}"`)) errors.push(`${q.id}: ${q.photo} אינו ציור שהמאמר מציג`)
+    if (!article.includes(`img="${q.photo.replace(/\.jpg$/, '')}"`) && !article.includes(`}${q.photo}\``)) errors.push(`${q.id}: ${q.photo} אינו ציור שהמאמר מציג`)
   }
 }
 const used = Object.keys(PARAPHRASE).filter((k) => Q.some((q) => phrasesOf(q).some((ph) => flat(ph) === flat(k))))

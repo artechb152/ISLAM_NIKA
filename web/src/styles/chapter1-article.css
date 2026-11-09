@@ -14,7 +14,9 @@
   --flow-lead:56px;    /* under a section heading */
   --flow-part:86px;    /* above a sub-heading: a new movement */
 }
-.chapter-article p{font-size:var(--read);line-height:1.85;color:var(--ink)}
+/* :where() — a bare `.chapter-article p` (0,1,1) beat chapter 6's `.story-film-caption` (0,1,0) and
+   printed the film's captions in ink on the dark plate: invisible (round 2, „לא רואים את הכתוביות"). */
+:where(.chapter-article) p{font-size:var(--read);line-height:1.85;color:var(--ink)}
 .chapter-article .ch1-tr{font-weight:700;color:var(--gold-text)}
 .chapter-article > section > * + *{margin-top:var(--flow-block)}
 .chapter-article > section > p + p{margin-top:var(--flow)}
@@ -190,19 +192,45 @@
 .chapter-article > section > .ch1-statement + p{margin-top:var(--flow-block)}
 .chapter-article .ch1-statement .key{color:var(--maroon)}
 
-/* ============================ 06 · Abraha's scene ============================
-   Chapter 14's motif scene (chapter 6's prayer day): the paintings are meant to be seen,
-   so no blur; a paper wash on the reading edge (right) where the cards ride, and the last
-   painting melts into the paper below. */
-.ch1-scene .st-photo{background:var(--panel)}
-.ch1-scene .st-photo > img{filter:none;transform:scale(1.02)}
-.ch1-scene .st-veil{background:linear-gradient(to left,rgba(237,228,208,.5) 0%,rgba(237,228,208,.18) 40%,transparent 62%)}
-.ch1-scene .scrolly-fullstage .scrolly-step{min-height:88vh}
-.ch1-scene .stage-card{width:min(520px,90%);background:var(--paper);border:1px solid var(--edge);border-radius:16px;
-  box-shadow:var(--shadow);padding:22px 28px 24px}
-.chapter-article .ch1-scene .stage-card p{font-size:var(--read);line-height:1.85;color:var(--ink);text-shadow:none;margin:0}
-.ch1-scene .scrolly-fullstage::after{content:"";position:absolute;inset-inline:0;bottom:0;height:clamp(150px,24vh,320px);z-index:4;pointer-events:none;
-  background:linear-gradient(to top,var(--panel) 0%,rgba(243,234,214,.82) 20%,rgba(243,234,214,.5) 46%,rgba(243,234,214,.2) 72%,transparent 100%)}
-@media (max-width:899px){
-  .ch1-scene .stage-card{width:100%;padding:18px 20px 20px}
-}
+
+/* ============================ 07 · the idols by name ============================
+   Two rows of stone tablets, centred and narrower than the prose (rule 48); a tablet
+   lights gold when reached, and the one pressed marks its name in the sentence below. */
+.ch1-tablet:focus-visible,.ch1-word:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+.ch1-idols{display:grid;gap:clamp(34px,4vw,52px)}
+.ch1-idols-row{display:grid;gap:12px}
+.ch1-idols-tablets{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:clamp(8px,1.4vw,16px);
+  max-width:calc(var(--n) * 150px);width:100%;margin-inline:auto}
+.ch1-tablet{all:unset;box-sizing:border-box;cursor:pointer;display:grid;place-items:center;aspect-ratio:3/4;
+  border-radius:999px 999px 10px 10px;background:var(--paper);border:1px solid var(--edge);
+  transition:background .4s ease,border-color .4s ease,box-shadow .4s ease}
+.ch1-tablet span{font:700 clamp(17px,1.7vw,22px)/1.1 var(--font-heading);color:var(--muted);opacity:.45;transition:opacity .4s ease,color .4s ease;
+  padding:0 6px;text-align:center}
+.ch1-tablet.is-lit{border-color:var(--gold);box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--gold-soft) 45%,transparent)}
+.ch1-tablet.is-lit span{opacity:1;color:var(--gold-text)}
+.ch1-tablet.is-focus{background:var(--maroon-deep);border-color:var(--maroon-deep)}
+.ch1-tablet.is-focus span{color:var(--cream)}
+.chapter-article .ch1-idols-caption{text-align:center;font:700 var(--sub)/1.3 var(--font-heading);color:var(--maroon);margin:4px 0 0}
+.chapter-article .ch1-idols-text{margin-top:6px}
+.ch1-idol-name.is-focus{background:var(--maroon-deep);color:var(--cream);border-radius:5px;padding:0 4px}
+@media (max-width:560px){.ch1-tablet span{font-size:15px;padding:0 2px}}
+@media (prefers-reduced-motion:reduce){.ch1-tablet,.ch1-tablet span{transition:none}}
+
+/* ============================ 08 · §47's three words ============================
+   Three cards that turn over, on the page's paper (rule 36), centred and narrower than
+   the prose. */
+.ch1-words{max-width:760px;margin-inline:auto}
+.ch1-words-cards{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,22px)}
+.ch1-word{all:unset;box-sizing:border-box;cursor:pointer;display:grid;width:100%;aspect-ratio:4/3;perspective:900px}
+.ch1-word-face{grid-area:1/1;display:grid;place-content:center;justify-items:center;gap:6px;border-radius:16px;
+  border:1px solid var(--edge);backface-visibility:hidden;transition:transform .6s ease}
+.ch1-word-face.is-front{background:var(--paper)}
+.ch1-word-face.is-front b{font:900 clamp(24px,2.6vw,34px)/1 var(--font-heading);color:var(--maroon)}
+.ch1-word-face.is-back{background:var(--maroon-deep);transform:rotateY(180deg)}
+.ch1-word-face.is-back b{font:900 clamp(26px,2.8vw,38px)/1 var(--font-heading);color:var(--gold-soft)}
+.ch1-word-face.is-back small{font:500 15px/1.2 var(--font-body);color:var(--cream)}
+.ch1-word.is-flipped .is-front{transform:rotateY(-180deg)}
+.ch1-word.is-flipped .is-back{transform:rotateY(0)}
+.chapter-article .ch1-words-caption{text-align:center;margin-top:14px;font:500 16px/1.5 var(--font-body);color:var(--muted)}
+@media (max-width:560px){.ch1-word{aspect-ratio:1}.ch1-word-face.is-back small{font-size:13px}}
+@media (prefers-reduced-motion:reduce){.ch1-word-face{transition:none}}
