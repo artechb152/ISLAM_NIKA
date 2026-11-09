@@ -4,4 +4,4 @@
 :HL["/ISLAM_NIKA/_next/static/css/03bfbb5533d6ba7c.css","style"]
 :HL["/ISLAM_NIKA/_next/static/css/cd6f3f44cf346433.css","style"]
 :HL["/ISLAM_NIKA/_next/static/css/01f2085d4959ac53.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":0,"slots":{"children":{"name":"(chapter3comic)","param":null,"prefetchHints":16,"slots":{"children":{"name":"chapter3-comic","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"NU4yO1oOc8sLwqnQNwoqp"}
+0:{"tree":{"name":"","param":null,"prefetchHints":0,"slots":{"children":{"name":"(chapter3comic)","param":null,"prefetchHints":16,"slots":{"children":{"name":"chapter3-comic","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"QykSYf7Ttz40V4udRDXCm"}
