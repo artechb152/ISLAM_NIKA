@@ -7,6 +7,7 @@
    The header search, the off-canvas category drawer (hamburger), navigation and completion
    marks all carry over unchanged; one data source (lib/chapters-data) still feeds everything. */
 
+import ChaptersTour, { TOUR_EVENT } from '@/components/ChaptersTour'
 import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -435,6 +436,23 @@ export default function ChaptersScreen() {
      its own: it is not something to read but something to sit down and do. It is LIVE now —
      every built chapter has a question bank under lib/exams/banks — so unlike the four study
      tools beside it, it renders as a link rather than as a locked row. */
+  /* מה כל פריט — שורה אחת מתחת לשם, בתפריט הפתוח (המשתמשת, 9.11.2026: מי שנכנס לבד לא
+     יבין מה זה המחברת שלי וחדר המבחנים, וההסבר צריך להיות מחוץ לדפים עצמם) */
+  const DESC: Record<string, string> = {
+    glossary: 'הסבר קצר לכל מושג שמופיע בפרקים',
+    'recommended-reading': 'ספרים, סדרות ואתרים להעמקה',
+    sources: 'הספרות שעליה מבוסס חומר הלימוד',
+    maps: 'המפות של החוברת במקום אחד',
+    exams: 'מבחן תרגול על הפרקים שתבחרו, עם ציון בסוף',
+    notebook: 'משפטים שסימנתם בזמן הקריאה, לפי פרקים',
+  }
+  const named = (id: string, title: string) => (
+    <span className="m-text">
+      <span className="m-name">{title}</span>
+      {DESC[id] && <span className="m-desc">{DESC[id]}</span>}
+    </span>
+  )
+
   const tools = secondaryItems.filter((s) => s.id !== 'exams')
   const examItem = secondaryItems.find((s) => s.id === 'exams')
 
@@ -445,7 +463,7 @@ export default function ChaptersScreen() {
           <span className="x-ico" aria-hidden="true">
             {CAT_ICON[s.icon]}
           </span>
-          <span className="m-name">{s.title}</span>
+          {named(s.id, s.title)}
         </Link>
       )
     return (
@@ -453,7 +471,7 @@ export default function ChaptersScreen() {
         <span className="x-ico" aria-hidden="true">
           {CAT_ICON[s.icon]}
         </span>
-        <span className="m-name">{s.title}</span>
+        {named(s.id, s.title)}
       </span>
     )
   }
@@ -484,7 +502,7 @@ export default function ChaptersScreen() {
               <span className="x-ico" aria-hidden="true">
                 {CAT_ICON[examItem.icon]}
               </span>
-              <span className="m-name">{examItem.title}</span>
+              {named('exams', examItem.title)}
             </Link>
           </nav>
         )}
@@ -494,7 +512,7 @@ export default function ChaptersScreen() {
             <span className="x-ico" aria-hidden="true">
               <FIcon d={IF_NOTEBOOK} />
             </span>
-            <span className="m-name">המחברת שלי</span>
+            {named('notebook', 'המחברת שלי')}
           </Link>
         </nav>
       </>
@@ -569,7 +587,17 @@ export default function ChaptersScreen() {
               <img className="logo" src="/assets/logo-cream.png" alt="אסלאם" />
             </button>
           </div>
-          {searchField('hdr-search', 'חיפוש...', true)}
+          <div className="hdr-end">
+            <button
+              type="button"
+              className="hdr-help"
+              aria-label="איך משתמשים באתר — סיור קצר"
+              onClick={() => window.dispatchEvent(new Event(TOUR_EVENT))}
+            >
+              ?
+            </button>
+            {searchField('hdr-search', 'חיפוש...', true)}
+          </div>
         </div>
       </header>
 
@@ -688,6 +716,7 @@ export default function ChaptersScreen() {
           </section>
           <SiteFooter />
         </main>
+        <ChaptersTour isDesktop={isDesktop} />
       </div>
     </div>
   )
