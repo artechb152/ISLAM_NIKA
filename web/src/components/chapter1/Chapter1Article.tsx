@@ -585,7 +585,7 @@ export default function Chapter1Article() {
 
               {/* ============ 05 · Christianity in the peninsula ============ */}
               <Section id="christianity">
-                <Cover id="christianity" img="monastery" />
+                <Cover id="christianity" img="monastery-warm" />
                 <T refs={['§18.a', '§19.a']} />
                 <T refs={['§20.a', '§21.a', '§22.a']} />
                 {/* §23 — the chapter's one statement: the claim the whole chapter leans on */}
@@ -624,7 +624,7 @@ export default function Chapter1Article() {
 
               {/* ============ 08 · on the eve of Islam ============ */}
               <Section id="eve">
-                <Cover id="eve" img="ridge" />
+                <Cover id="eve" img="ridge-warm" />
                 <T refs={['§45.a', '§46.a']} />
                 {/* §47 and its three words, turned over by the reader */}
                 <Words refs={['§47.a']} />
