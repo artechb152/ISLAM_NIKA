@@ -248,8 +248,8 @@ export default function ChaptersScreen() {
             if (n > 0) progress = Math.min(99, Math.round((n / CH11_SECTIONS.length) * 100))
           }
         }
-        /* chapter 12 — the desk of folders; five units, credited as they are read (rule 74) */
-       .number === 14 && !done) {
+        /* chapter 14 — a reading chapter; branch written with the chapter (rule 74) */
+        if (chp.number === 14 && !done) {
           const raw = localStorage.getItem(CH14_STORE_KEY)
           if (raw) {
             const p = JSON.parse(raw) as { sections?: string[] } | null
