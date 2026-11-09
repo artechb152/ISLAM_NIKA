@@ -126,6 +126,8 @@ export default function ChaptersScreen() {
   const [collapsed, setCollapsed] = useState(false)
   const [playHeroVideo, setPlayHeroVideo] = useState(false)
   const [heroReady, setHeroReady] = useState(false)
+  /* the collapsed rail shows icons only — hovering one pins its name beside it */
+  const [tip, setTip] = useState<{ label: string; x: number; y: number } | null>(null)
   const asideRef = useRef<HTMLElement | null>(null)
   const hamburgerRef = useRef<HTMLButtonElement | null>(null)
   const router = useRouter()
@@ -246,8 +248,8 @@ export default function ChaptersScreen() {
             if (n > 0) progress = Math.min(99, Math.round((n / CH11_SECTIONS.length) * 100))
           }
         }
-        /* chapter 14 — a reading chapter; branch written with the chapter (rule 74) */
-        if (chp.number === 14 && !done) {
+        /* chapter 12 — the desk of folders; five units, credited as they are read (rule 74) */
+       .number === 14 && !done) {
           const raw = localStorage.getItem(CH14_STORE_KEY)
           if (raw) {
             const p = JSON.parse(raw) as { sections?: string[] } | null
@@ -317,6 +319,7 @@ export default function ChaptersScreen() {
 
   /* the header hamburger is the only control: it collapses to / expands from the icon rail */
   function toggleCollapse(): void {
+    setTip(null)
     setCollapsed((c) => {
       const next = !c
       try {
@@ -438,7 +441,7 @@ export default function ChaptersScreen() {
   function toolRow(s: { id: string; title: string; icon: string; href?: string }) {
     if (s.href)
       return (
-        <Link className="m-item x-item" key={s.id} href={s.href} onClick={() => setDrawer(false)}>
+        <Link className="m-item x-item" key={s.id} href={s.href} data-tip={s.title} onClick={() => setDrawer(false)}>
           <span className="x-ico" aria-hidden="true">
             {CAT_ICON[s.icon]}
           </span>
@@ -446,13 +449,20 @@ export default function ChaptersScreen() {
         </Link>
       )
     return (
-      <span className="m-item x-item is-locked" key={s.id} title="יעלה בקרוב">
+      <span className="m-item x-item is-locked" key={s.id} data-tip={s.title + ' · יעלה בקרוב'}>
         <span className="x-ico" aria-hidden="true">
           {CAT_ICON[s.icon]}
         </span>
         <span className="m-name">{s.title}</span>
       </span>
     )
+  }
+
+  function showTip(target: EventTarget): void {
+    const item = target instanceof Element ? target.closest<HTMLElement>('.x-item[data-tip]') : null
+    if (!item || !isDesktop || !collapsed) return setTip(null)
+    const r = item.getBoundingClientRect()
+    setTip({ label: item.dataset.tip ?? '', x: r.left - 10, y: r.top + r.height / 2 })
   }
 
   function menuBody() {
@@ -470,7 +480,7 @@ export default function ChaptersScreen() {
         {/* חדר המבחנים — בבלוק משלו, מתחת לכלי העזר: הוא לא חומר עיון אלא מבחן. */}
         {examItem && (
           <nav className="menu-extra menu-exam" aria-label="מבחנים">
-            <Link className="m-item x-item" href="/exams" onClick={() => setDrawer(false)}>
+            <Link className="m-item x-item" href="/exams" data-tip={examItem.title} onClick={() => setDrawer(false)}>
               <span className="x-ico" aria-hidden="true">
                 {CAT_ICON[examItem.icon]}
               </span>
@@ -480,7 +490,7 @@ export default function ChaptersScreen() {
         )}
         {/* המחברת שלי — היחידה בבלוק שכבר חיה: הערות אישיות לפי פרקים */}
         <nav className="menu-extra menu-exam menu-notebook" aria-label="המחברת שלי">
-          <Link className="m-item x-item" href="/notebook" onClick={() => setDrawer(false)}>
+          <Link className="m-item x-item" href="/notebook" data-tip="המחברת שלי" onClick={() => setDrawer(false)}>
             <span className="x-ico" aria-hidden="true">
               <FIcon d={IF_NOTEBOOK} />
             </span>
@@ -571,9 +581,20 @@ export default function ChaptersScreen() {
           aria-label="כלי עזר"
           aria-hidden={!isDesktop && !drawer ? true : undefined}
           inert={!isDesktop && !drawer}
+          onMouseOver={(e) => showTip(e.target)}
+          onFocus={(e) => showTip(e.target)}
+          onMouseLeave={() => setTip(null)}
+          onBlur={() => setTip(null)}
+          onScroll={() => setTip(null)}
         >
           {menuBody()}
         </aside>
+        {/* rendered outside the aside — its overflow-y:auto would clip anything that sticks out */}
+        {tip && (
+          <span className="rail-tip" role="tooltip" style={{ left: tip.x, top: tip.y }}>
+            {tip.label}
+          </span>
+        )}
         {drawer && <div className="scrim" onClick={() => setDrawer(false)} aria-hidden="true" />}
 
         <main className="content">

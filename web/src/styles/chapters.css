@@ -259,3 +259,10 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
 /* המחברת שלי — צמודה לחדר המבחנים בתחתית המגירה; הוא מצמיד את הבלוק
    למטה (margin auto), והיא נשענת עליו בלי רווח כפול */
 .menu-extra.menu-notebook{margin-block-start:0;border-top:none;padding-top:0}
+
+/* collapsed rail: hovering (or tabbing to) an icon pins its name beside it — a dark tag with a
+   pointer aimed at the icon. Fixed and rendered outside the aside, whose scroll would clip it. */
+.rail-tip{position:fixed;z-index:70;transform:translate(-100%,-50%);pointer-events:none;white-space:nowrap;font-family:var(--font-body);font-weight:500;font-size:14px;line-height:1;color:var(--mat);background:var(--header);padding:9px 13px;border-radius:7px;box-shadow:0 6px 16px rgba(28,10,2,.22);animation:rail-tip-in .14s ease-out}
+.rail-tip::after{content:"";position:absolute;top:50%;left:100%;margin-top:-6px;border:6px solid transparent;border-left-color:var(--header)}
+@keyframes rail-tip-in{from{opacity:0;transform:translate(calc(-100% + 6px),-50%)}}
+@media (prefers-reduced-motion:reduce){.rail-tip{animation:none}}
