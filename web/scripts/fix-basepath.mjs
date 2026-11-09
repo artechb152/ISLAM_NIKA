@@ -10,7 +10,7 @@
  * basePath. Runs only when GH_PAGES=true; a normal local build is untouched. Idempotent: a
  * negative lookbehind skips paths that are already prefixed.
  */
-import { existsSync, readdirSync, statSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, statSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 if (process.env.GH_PAGES !== 'true') {
@@ -89,3 +89,30 @@ if (leftovers.length) {
   process.exit(1)
 }
 console.log('[fix-basepath] ✅ no unprefixed /assets/ left in the export.')
+
+/* PREFETCH SEGMENTS. The export writes each route's RSC segments NESTED —
+     chapters/__next.!KGNoYXB0ZXJzKQ/chapters/__PAGE__.txt
+   but the client router asks for them FLAT, the slashes turned into dots —
+     chapters/__next.!KGNoYXB0ZXJzKQ.chapters.__PAGE__.txt
+   On a static host that is a 404 for every <Link> prefetch (measured 9.11.2026: two to nine per
+   page), and every click then falls back to a full page reload. Copy each nested segment to
+   the flat name beside its folder. Runs after the /assets/ pass, so the copies are prefixed. */
+let flat = 0
+function flatten(dir) {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name)
+    if (!statSync(p).isDirectory()) continue
+    if (name.startsWith('__next.')) copySegments(dir, p, name)
+    else flatten(p)
+  }
+}
+function copySegments(parent, dir, prefix) {
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name)
+    if (statSync(p).isDirectory()) { copySegments(parent, p, `${prefix}.${name}`); continue }
+    const target = join(parent, `${prefix}.${name}`)
+    if (!existsSync(target)) { copyFileSync(p, target); flat++ }
+  }
+}
+flatten(OUT)
+console.log(`[fix-basepath] copied ${flat} nested prefetch segment(s) to the flat names the router requests.`)
