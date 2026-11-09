@@ -316,23 +316,40 @@ function useSeen(ref: React.RefObject<HTMLElement | null>): boolean {
 }
 
 /** a looping painted clip. Decorative (alt-less, aria-hidden): the sentence beside it
-    carries the meaning. Under reduced motion it stays on its poster. */
+    carries the meaning. Under reduced motion it stays on its poster.
+    It loads only when it comes within a screen of the reader, and plays only while it is
+    on screen: with autoPlay and a src from the start, all ten clips (~40MB) were fetched
+    the moment the chapter opened (measured 9.11.2026). */
 function Loop({ name, poster, className }: { name: string; poster?: string; className?: string }) {
   const ref = useRef<HTMLVideoElement | null>(null)
+  const [near, setNear] = useState(false)
+  const inView = useRef(false)
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion:reduce)').matches) ref.current?.pause()
+    const v = ref.current
+    if (!v) return
+    const still = window.matchMedia('(prefers-reduced-motion:reduce)').matches
+    const load = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); load.disconnect() } }, { rootMargin: '100% 0px' })
+    const play = new IntersectionObserver(([e]) => {
+      inView.current = e.isIntersecting
+      if (still) return
+      if (e.isIntersecting) v.play().catch(() => {})
+      else v.pause()
+    })
+    load.observe(v)
+    play.observe(v)
+    return () => { load.disconnect(); play.disconnect() }
   }, [])
   return (
     <video
       ref={ref}
       className={className}
-      src={`${ART}${name}.mp4`}
+      src={near ? `${ART}${name}.mp4` : undefined}
       poster={`${ART}${poster ?? name + '-1'}.jpg`}
-      autoPlay
       muted
       loop
       playsInline
-      preload="metadata"
+      preload={near ? 'auto' : 'none'}
+      onCanPlay={(e) => { if (inView.current && !window.matchMedia('(prefers-reduced-motion:reduce)').matches) e.currentTarget.play().catch(() => {}) }}
       aria-hidden="true"
       tabIndex={-1}
     />
