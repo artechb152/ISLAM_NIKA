@@ -349,6 +349,10 @@
     והחלון המתין בלי סוף. הבדיקה: `chatgpt-image.mjs status` → `SIGNED_IN`.
 80. ⚠ **Git Bash ב-Windows הופך ארגומנט שמתחיל ב-`/` לנתיב** (`/chapter10/practice` →
     `C:/Program Files/Git/chapter10/practice`). להריץ סקריפטי צילום עם `MSYS_NO_PATHCONV=1`.
+81. ⚠ **שמות מעל סצנת three.js מוקרנים על ידינו, באותה פריים שבה המצלמה זזה** — לא drei `<Html>`.
+    בפרק 11 המצלמה נושאת `setViewOffset` (המפה מוסטת מתחת ללוח הטקסט), ו-`<Html>` הניח כל שם
+    ~90px מהמקום שלו: „ישראל" ישב על הים. שכבת DOM אחת מעל הקנבס, `vector.project(camera)`
+    ב-`useFrame` בעדיפות −1 אחרי `updateMatrixWorld`. הבדיקה: סיכה ושמה באותה נקודה בצילום.
 82. ⚠ **`pdftotext` שומר ריצות LTR (פיסוק, מספרים) בסדר חזותי** בתוך ‎U+202A…U+202C‎. מחיקת סימני
     הכיווניות בלבד מדפיסה „מוחמד .באסלאם" ו-„(מ' ,)1966". להפוך את סדר האסימונים בתוך כל ריצה,
     ורק אז למחוק (`concept/reference/extract.mjs`). מה שנשאר — תיקון בשמו ב-SOURCE-TEXT.

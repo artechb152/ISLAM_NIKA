@@ -31,6 +31,7 @@ import { SECTION_ORDER as CH8_SECTIONS, STORE_KEY as CH8_STORE_KEY } from '@/lib
 import { SECTION_ORDER as CH9_SECTIONS, STORE_KEY as CH9_STORE_KEY } from '@/lib/chapter9/progress'
 import { SECTION_ORDER as CH10_SECTIONS, STORE_KEY as CH10_STORE_KEY } from '@/lib/chapter10/progress'
 import { SECTION_ORDER as CH11_SECTIONS, STORE_KEY as CH11_STORE_KEY } from '@/lib/chapter11/progress'
+import { SECTION_ORDER as CH12_SECTIONS, STORE_KEY as CH12_STORE_KEY } from '@/lib/chapter12/progress'
 import { SECTION_ORDER as CH14_SECTIONS, STORE_KEY as CH14_STORE_KEY } from '@/lib/chapter14/progress'
 import { SECTION_ORDER as CH15_SECTIONS, STORE_KEY as CH15_STORE_KEY } from '@/lib/chapter15/progress'
 import { SECTION_ORDER as CH16_SECTIONS, STORE_KEY as CH16_STORE_KEY } from '@/lib/chapter16/progress'
@@ -247,6 +248,15 @@ export default function ChaptersScreen() {
             const p = JSON.parse(raw) as { sections?: string[] } | null
             const n = Array.isArray(p?.sections) ? p.sections.length : 0
             if (n > 0) progress = Math.min(99, Math.round((n / CH11_SECTIONS.length) * 100))
+          }
+        }
+        /* chapter 12 — the desk of folders; five units, credited as they are read (rule 74) */
+        if (chp.number === 12 && !done) {
+          const raw = localStorage.getItem(CH12_STORE_KEY)
+          if (raw) {
+            const p = JSON.parse(raw) as { sections?: string[] } | null
+            const n = Array.isArray(p?.sections) ? p.sections.length : 0
+            if (n > 0) progress = Math.min(99, Math.round((n / CH12_SECTIONS.length) * 100))
           }
         }
         /* chapter 14 — a reading chapter; branch written with the chapter (rule 74) */

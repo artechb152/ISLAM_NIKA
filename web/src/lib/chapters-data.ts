@@ -119,7 +119,11 @@ export const chapterCategories: CategoryDef[] = [
     title: 'ג׳האד וסמלים',
     icon: 'shield',
     chapters: [
-      ch(12, 'ג׳האד, ריבאט ואסתשהאד'),
+      /* the title as the booklet prints it — „רבאט", not „ריבאט" (concept/chapter12/DECISIONS.md) */
+      ch(12, 'ג׳האד, רבאט ואסתשהאד', {
+        href: '/chapter12',
+        available: true,
+      }),
       /* a hall the reader walks through (concept/chapter13/DECISIONS.md) */
       ch(13, 'דגלים וסמלים', {
         href: '/chapter13',
