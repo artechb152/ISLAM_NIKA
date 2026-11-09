@@ -6,16 +6,17 @@
    version is a white the site never shows (rule: no white anywhere). */
 import '@/styles/site-footer.css'
 
-const CONTACT = 'רס״ן צביקה פרנקל'
-const PHONE = '052-2901205'
-const TEL = 'tel:+972522901205'
+export const CONTACT_LEAD = 'לעוד פרויקטים צרו קשר עם'
+export const CONTACT = 'רס״ן צביקה פרנקל'
+export const PHONE = '052-2901205'
+export const TEL = 'tel:+972522901205'
 
 export default function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="site-footer-inner">
         <p className="site-footer-contact">
-          לעוד פרויקטים צרו קשר עם {CONTACT}
+          {CONTACT_LEAD} {CONTACT}
           <a href={TEL} dir="ltr">{PHONE}</a>
         </p>
         <svg className="site-footer-mark" viewBox="0 0 360.14 84.24" role="img" aria-label="ARTECH">

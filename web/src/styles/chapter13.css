@@ -82,7 +82,8 @@ body { font-family: var(--font-body); color: var(--ink); }
 .ch13-count { font-size: 15px; background: rgba(87, 24, 32, .82); padding: 6px 12px; border-radius: 999px; }
 @media (max-width: 600px) {
   .ch13-hud { flex-wrap: wrap; gap: 8px 10px; }
-  .ch13-chapter { order: 3; flex-basis: 100%; font-size: 16px; }
+  /* שורה שנייה: שם הפרק וגרסת הטקסט — 50% דוחף אותם מתחת לכפתור והמונה */
+  .ch13-chapter { order: 3; flex: 1 1 50%; font-size: 16px; }
   .ch13-count { margin-inline-start: auto; font-size: 14px; }
 }
 
@@ -171,3 +172,52 @@ a.ch13-go { display: inline-block; text-decoration: none; }
 }
 .ch13-stay:hover, .ch13-stay:focus-visible { color: var(--maroon); }
 @media (max-width: 599px) { .ch13-hud:has(.ch13-practice) .ch13-chapter { display: none; } }
+
+/* ── כל הכרטיסים כטקסט (9.11) — 16 הכרטיסים בלי ללכת: לקורא מסך, למקלדת ולמי שלא רוצה ── */
+.ch13-textbtn {
+  font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; flex: none;
+  background: rgba(42, 32, 24, .55); color: var(--cream); border: 1.5px solid rgba(245, 236, 214, .55);
+  padding: 6px 14px; border-radius: 999px;
+}
+.ch13-textbtn:hover { background: rgba(42, 32, 24, .8); border-color: var(--cream); }
+.ch13-textbtn:focus-visible, .ch13-practice:focus-visible, .ch13-go:focus-visible, .ch13-stay:focus-visible,
+.ch13-prompt:focus-visible, .ch13-close:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.ch13-or { margin: 14px 0 0; }
+.ch13-contact { margin: 22px 0 0; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.ch13-contact a {
+  color: var(--maroon-deep); text-decoration: none; font-weight: 700; font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--gold); white-space: nowrap;
+}
+.ch13-contact a:hover { color: var(--maroon); }
+.ch13-contact a:focus-visible { outline: 2px solid var(--maroon); outline-offset: 3px; border-radius: 2px; }
+
+.ch13-textbox {
+  position: relative; width: min(720px, 100%); max-height: calc(100dvh - 32px); box-sizing: border-box;
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--panel); border: 1px solid var(--edge); border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .4); font-size: var(--read); line-height: 1.6;
+}
+.ch13-texthead {
+  flex: none; padding: 18px clamp(20px, 4vw, 36px) 14px; padding-inline-end: 64px;
+  border-bottom: 1px solid var(--edge); background: var(--panel);
+}
+.ch13-texthead h2 {
+  margin: 0; font-family: var(--font-heading); color: var(--maroon); font-weight: 400;
+  font-size: clamp(24px, 2.6vw, 30px); line-height: 1.2;
+}
+.ch13-textcount { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
+.ch13-textlist { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 0 clamp(20px, 4vw, 36px) 28px; }
+.ch13-textlist:focus-visible { outline: 3px solid var(--gold); outline-offset: -3px; }
+.ch13-textcard { padding: 24px 0 18px; border-bottom: 1px solid var(--edge); }
+.ch13-textcard h3 {
+  margin: 0; font-family: var(--font-heading); color: var(--maroon); font-weight: 400;
+  font-size: clamp(22px, 2.4vw, 28px); line-height: 1.2;
+}
+.ch13-seen { color: var(--muted); }
+.ch13-textfoot { padding-top: 24px; text-align: center; }
+.ch13-textfoot .ch13-contact { margin-top: 18px; }
+@media (max-width: 600px) {
+  .ch13-textbtn { order: 4; font-size: 14px; padding: 5px 12px; }
+  .ch13-textveil { padding: 8px; }
+  .ch13-textbox { max-height: calc(100dvh - 16px); }
+}

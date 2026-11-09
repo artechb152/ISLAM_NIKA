@@ -8,7 +8,10 @@
    ההבחנה של כותרת הכרטיס, והשער בודק אותה.
 
    הקומפוננטה לא כותבת משפט לימודי. כל מה שבכרטיס בא מ-passages.json (§N), והטקסטורות הן
-   החיתוכים מהחוברת. הטקסט היחיד שנכתב כאן הוא הוראות התנועה. */
+   החיתוכים מהחוברת. הטקסט היחיד שנכתב כאן הוא הוראות התנועה.
+
+   „כל הכרטיסים כטקסט" (HallText, 9.11.2026) — אותם 16 כרטיסים בלי ללכת, לקורא מסך ולמקלדת.
+   קריאה שם נספרת כמו פתיחת כרטיס כאן (markRead), כך שה-16/16 והתרגול פתוחים גם בדרך הזו. */
 
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber'
 import { useProgress, useTexture } from '@react-three/drei'
@@ -17,10 +20,9 @@ import Link from 'next/link'
 import * as THREE from 'three'
 import { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import passages from '@/lib/chapter13/passages.json'
-import layout from '@/lib/chapter13/layout.json'
+import { ART, CARDS, CardContent, STATIONS, type Station } from './HallCard'
+import HallText, { HallContact } from './HallText'
 import { markStationRead, practiceComplete, readStore, STATION_ORDER } from '@/lib/chapter13/progress'
-
-const ART = '/assets/chapter13/'
 
 /* ── מידות — זהות ל-build-hall.py ── */
 const HALL_W = 13
@@ -36,18 +38,6 @@ const EYE = 1.65
 const LEN = HALL_L - Y0
 const MIDZ = -(HALL_L + Y0) / 2
 const DEG = Math.PI / 180
-
-type Line = { text: string; b?: string[] }
-type Card = {
-  title: { text: string; name: string }
-  label?: string
-  items?: Line[]
-  quotes?: (Line & { ref?: string })[]
-}
-type Station = { sec: string; kind: 'flag' | 'emblem'; tex: string; crop?: number[]; hall?: string }
-
-const STATIONS = layout.stations as Station[]
-const CARDS = passages.passages as Record<string, Card>
 
 /* ── גיאומטריית התחנה ── */
 interface Pose {
@@ -517,25 +507,8 @@ function collide(p: THREE.Vector3) {
   p.z = Math.max(-HALL_L + 0.5, Math.min(-Y0 - 0.5, p.z))
 }
 
-/* ── הכרטיס ── */
-function Bolded({ line }: { line: Line }) {
-  const out: React.ReactNode[] = []
-  let at = 0
-  for (const b of line.b ?? []) {
-    const i = line.text.indexOf(b, at)
-    if (i < 0) continue
-    if (i > at) out.push(line.text.slice(at, i))
-    out.push(<b key={i}>{b}</b>)
-    at = i + b.length
-  }
-  if (at < line.text.length) out.push(line.text.slice(at))
-  return <>{out}</>
-}
-
+/* ── הכרטיס ── התוכן ב-HallCard, משותף לגרסת הטקסט */
 function CardView({ i, onClose }: { i: number; onClose: () => void }) {
-  const st = STATIONS[i]
-  const c = CARDS[st.sec]
-  const rest = c.title.text.slice(c.title.name.length).trim()
   const closeRef = useRef<HTMLButtonElement>(null)
   useEffect(() => closeRef.current?.focus(), [])
   return (
@@ -544,33 +517,7 @@ function CardView({ i, onClose }: { i: number; onClose: () => void }) {
         <button ref={closeRef} type="button" className="ch13-close" onClick={onClose} aria-label="סגירה">
           ×
         </button>
-        <p className="ch13-kicker">
-          תחנה {i + 1} מתוך {STATIONS.length}
-        </p>
-        <h2 id="ch13-card-title">{c.title.name}</h2>
-        {rest && <p className="ch13-sub">{rest}</p>}
-        <figure className={`ch13-art is-${st.kind}`}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`${ART}flags/${st.tex}`} alt="" />
-        </figure>
-        {c.label && <p className="ch13-label">{c.label}</p>}
-        {c.items && (
-          <ul className="ch13-items">
-            {c.items.map((it, k) => (
-              <li key={k}>
-                <Bolded line={it} />
-              </li>
-            ))}
-          </ul>
-        )}
-        {c.quotes?.map((q, k) => (
-          <blockquote key={k} className="ch13-quote">
-            <p>
-              <Bolded line={q} />
-            </p>
-            {q.ref && <cite>{q.ref}</cite>}
-          </blockquote>
-        ))}
+        <CardContent i={i} level="h2" headingId="ch13-card-title" />
       </article>
     </div>
   )
@@ -601,27 +548,64 @@ export default function FlagHall() {
     setRead(readStore().stations)
     setPracticed(practiceComplete())
   }, [])
-  const openCard = useCallback((i: number) => {
-    keys.current.clear()
-    setOpen(i)
+  const markRead = useCallback((i: number) => {
     const before = readStore().stations.length
     const now = markStationRead(STATIONS[i].sec).stations
     setRead(now)
     if (before < STATION_ORDER.length && now.length === STATION_ORDER.length) setFinale(true)
   }, [])
-  const showFinale = finale && open === null
+  const openCard = useCallback(
+    (i: number) => {
+      keys.current.clear()
+      setOpen(i)
+      markRead(i)
+    },
+    [markRead],
+  )
+
+  /* גרסת הטקסט. הפוקוס חוזר לכפתור שפתח אותה — אלא אם ה-16 נקרא בה: אז כרטיס הסיום עולה
+     ולוקח את הפוקוס, והוא זה שמחזיר אותו לכפתור כשהוא נסגר */
+  const [text, setText] = useState(false)
+  const textFrom = useRef<HTMLElement | null>(null)
+  const openText = (e: React.MouseEvent<HTMLElement>) => {
+    textFrom.current = e.currentTarget
+    keys.current.clear()
+    setText(true)
+  }
+  const closeText = () => {
+    const back = textFrom.current
+    setText(false)
+    if (finale) return
+    textFrom.current = null
+    requestAnimationFrame(() => back?.focus())
+  }
+  const closeFinale = useCallback(() => {
+    const back = textFrom.current
+    textFrom.current = null
+    setFinale(false)
+    requestAnimationFrame(() => back?.focus())
+  }, [])
+  /* autoFocus של React לא חל על <a> — כרטיס הסיום עלה בלי פוקוס, ו-Esc לא הגיע אליו */
+  const finaleGo = useRef<HTMLAnchorElement>(null)
+
+  const showFinale = finale && open === null && !text
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      if (text) return
+      /* כרטיס הסיום יכול לעלות גם לפני הכניסה לאולם — מגרסת הטקסט שנפתחה מהפתיחה */
+      if (showFinale) {
+        if (e.code === 'Escape') closeFinale()
+        return
+      }
       if (!started) return
+      /* Enter ורווח על כפתור או קישור (ב-HUD) הם שלו — לא פתיחת הכרטיס של התחנה הקרובה */
+      const onControl = (e.target as HTMLElement | null)?.closest?.('a[href], button, input, select, textarea')
+      if (onControl && (e.code === 'Enter' || e.code === 'Space' || e.code === 'NumpadEnter')) return
       /* Esc משחרר את הסמן גם אם הדפדפן לא עשה זאת בעצמו (ב-Chrome הוא כן; כאן ליתר ביטחון) */
       if (e.code === 'Escape' && document.pointerLockElement) {
         document.exitPointerLock()
-        if (open === null && !showFinale) return
-      }
-      if (showFinale) {
-        if (e.code === 'Escape') setFinale(false)
-        return
+        if (open === null) return
       }
       if (open !== null) {
         if (e.code === 'Escape' || e.code === 'KeyE') {
@@ -654,7 +638,10 @@ export default function FlagHall() {
       window.removeEventListener('keyup', up)
       window.removeEventListener('blur', blur)
     }
-  }, [started, open, near, openCard, showFinale])
+  }, [started, text, open, near, openCard, showFinale, closeFinale])
+  useEffect(() => {
+    if (showFinale) finaleGo.current?.focus()
+  }, [showFinale])
 
   /* מבט בעכבר בתזוזה (המשתמשת, 9.11.2026: „העכבר לא בגרירה אלא בתזוזה"; הופך את „העכבר לא
      ישנה כלום" של 4.11). Pointer Lock: לחיצה על האולם (או „כניסה לאולם") נועלת את הסמן, ומשם כל
@@ -664,7 +651,7 @@ export default function FlagHall() {
   const stageRef = useRef<HTMLDivElement>(null)
   const [locked, setLocked] = useState(false)
   const drag = useRef<{ id: number; x: number; y: number } | null>(null)
-  const lookLive = started && open === null && !showFinale
+  const lookLive = started && open === null && !showFinale && !text
   const turnBy = useCallback((dx: number, dy: number, k: number) => {
     /* כמו במשחק גוף ראשון: ימינה פונה ימינה, למעלה מרים את המבט */
     const PITCH = 35 * DEG
@@ -751,8 +738,9 @@ export default function FlagHall() {
   const all = STATION_ORDER.length
 
   return (
-    <div className="ch13-root">
-      <div ref={stageRef} className={`ch13-stage${lookLive ? ' is-look' : ''}`} {...stageInput} onPointerCancel={stageInput.onPointerUp} onLostPointerCapture={stageInput.onPointerUp}>
+    /* <main> — היעד של „דילוג לתוכן" (SiteChrome) */
+    <main id="main" className="ch13-root">
+      <div ref={stageRef} inert={text || showFinale} className={`ch13-stage${lookLive ? ' is-look' : ''}`} {...stageInput} onPointerCancel={stageInput.onPointerUp} onLostPointerCapture={stageInput.onPointerUp}>
         <Canvas
           dpr={[1, 1.75]}
           gl={{ antialias: true, toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.1 }}
@@ -771,7 +759,7 @@ export default function FlagHall() {
             ))}
             <FirstFrame onDrawn={setDrawn} />
           </Suspense>
-          <Player keys={keys} frozen={!started || open !== null || showFinale} look={look} onNear={setNear} />
+          <Player keys={keys} frozen={!started || open !== null || showFinale || text} look={look} onNear={setNear} />
         </Canvas>
       </div>
 
@@ -783,7 +771,7 @@ export default function FlagHall() {
         </p>
       )}
 
-      <header className="ch13-hud">
+      <header className="ch13-hud" inert={text || showFinale}>
         {/* „לחזרה לפרקים" (המשתמשת, 9.11: „לא רואים אותו") — כפתור מלא עם בית, לא קישור קטן */}
         <Link href="/chapters" className="ch13-back">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
@@ -792,6 +780,10 @@ export default function FlagHall() {
           <span>לכל הפרקים</span>
         </Link>
         <p className="ch13-chapter">פרק 13 · {passages.title}</p>
+        {/* גרסת הטקסט — לקורא מסך, למקלדת, ולמי שלא רוצה ללכת */}
+        <button type="button" className="ch13-textbtn" onClick={openText} aria-haspopup="dialog">
+          כל הכרטיסים כטקסט
+        </button>
         <p className="ch13-count" aria-live="polite">
           נקראו {done} מתוך {all}
         </p>
@@ -803,13 +795,13 @@ export default function FlagHall() {
         )}
       </header>
 
-      {started && open === null && !showFinale && near !== null && (
+      {started && open === null && !showFinale && !text && near !== null && (
         <button type="button" className="ch13-prompt" onClick={() => openCard(near)}>
           <kbd>E</kbd> {CARDS[STATIONS[near].sec].title.name}
         </button>
       )}
 
-      {started && open === null && !showFinale && (
+      {started && open === null && !showFinale && !text && (
         <div className="ch13-touch" aria-hidden="true">
           <button type="button" className="is-up" {...hold('w')}>▲</button>
           <button type="button" className="is-left" {...hold('left')}>◀</button>
@@ -820,26 +812,8 @@ export default function FlagHall() {
 
       {open !== null && <CardView i={open} onClose={() => setOpen(null)} />}
 
-      {showFinale && (
-        <div className="ch13-veil" onClick={() => setFinale(false)}>
-          <section className="ch13-card ch13-intro" role="dialog" aria-modal="true" aria-labelledby="ch13-finale-title" onClick={(e) => e.stopPropagation()}>
-            <p className="ch13-kicker">נקראו {done} מתוך {all}</p>
-            <h2 id="ch13-finale-title">קראתם את כל הדגלים והסמלים</h2>
-            <p className="ch13-sub">עכשיו — התרגול המסכם של הפרק.</p>
-            <div className="ch13-finale-go">
-              <Link href="/chapter13/practice" className="ch13-go" autoFocus>
-                לתרגול המסכם
-              </Link>
-              <button type="button" className="ch13-stay" onClick={() => setFinale(false)}>
-                להמשיך באולם
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
-
       {!started && (
-        <div className="ch13-veil">
+        <div className="ch13-veil" inert={text || showFinale}>
           <section className="ch13-card ch13-intro">
             <p className="ch13-kicker">פרק 13</p>
             <h1>{passages.sourceTitle}</h1>
@@ -861,12 +835,39 @@ export default function FlagHall() {
             >
               כניסה לאולם
             </button>
+            <p className="ch13-or">
+              <button type="button" className="ch13-stay" onClick={openText} aria-haspopup="dialog">
+                או: כל הכרטיסים כטקסט, בלי ללכת
+              </button>
+            </p>
+            <HallContact />
           </section>
         </div>
       )}
 
+      {/* אחרי הפתיחה ב-DOM: ה-16 יכול להיקרא בגרסת הטקסט עוד לפני הכניסה לאולם */}
+      {showFinale && (
+        <div className="ch13-veil" onClick={closeFinale}>
+          <section className="ch13-card ch13-intro" role="dialog" aria-modal="true" aria-labelledby="ch13-finale-title" onClick={(e) => e.stopPropagation()}>
+            <p className="ch13-kicker">נקראו {done} מתוך {all}</p>
+            <h2 id="ch13-finale-title">קראתם את כל הדגלים והסמלים</h2>
+            <p className="ch13-sub">עכשיו — התרגול המסכם של הפרק.</p>
+            <div className="ch13-finale-go">
+              <Link ref={finaleGo} href="/chapter13/practice" className="ch13-go">
+                לתרגול המסכם
+              </Link>
+              <button type="button" className="ch13-stay" onClick={closeFinale}>
+                להמשיך באולם
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {text && <HallText read={read} onRead={markRead} onClose={closeText} />}
+
       {!loaderGone && <HallLoading pct={drawn ? 100 : maxPct} leaving={drawn} />}
-    </div>
+    </main>
   )
 }
 
