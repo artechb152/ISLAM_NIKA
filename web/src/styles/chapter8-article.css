@@ -362,3 +362,23 @@
   .ch8-place b{font-size:13px;padding:1px 8px}
   .ch8-place.is-area b{font-size:14px}
 }
+
+/* ===== LINE LENGTH (11.11.2026 — the user: „תקצר את השורות") =====
+   Overrides rule 48 („prose on the full column"): at 1440 a paragraph ran the whole 1025px
+   column, 105–128 characters a line. Running prose now stops at chapter 6's own reading
+   measure, min(760px,100%), on the reading edge (right) — ~85 characters, the line chapter 6's
+   `.rm-dayline` sets. Zero specificity, so every device or centred line that names its own
+   width keeps it; mechanisms, maps, scenes, pictures and bleeds stay wide. */
+:where(.chapter-article > section) > p{max-width:760px}
+/* ===== UX pass 11.11.2026 — 14px floor for text in a device =====
+   the spine names (11px on a phone), the map's place names (13) and the axis's fates (13px
+   italic), books and spans (13 on a phone). */
+.ch8-axis-fate{font-size:14px}
+@media (max-width:680px){
+  .ch8-spine{font-size:14px;padding:6px 3px}
+  .ch8-place b{font-size:14px}
+  .ch8-axis-book,.ch8-axis-seg em{font-size:14px}
+}
+/* בוכרה sits 8% from the plate's east edge: on a phone its pill ran 6px past the frame and was
+   clipped. The label steps in (west); the dot stays on the town. */
+@media (max-width:680px){ .ch8-place[data-place="bukhara"] b{translate:-16px 0} }

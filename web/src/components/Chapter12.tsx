@@ -207,14 +207,24 @@ function Blocks({ blocks }: { blocks: Block[] }) {
 /** The desk, as rendered (desk-hero.webp), and over it one outline per folder, measured in
     Blender from the folder's own geometry (build-desk3.py → desk.json). The outline is the
     button — a press on the folder itself, nothing beside it. */
+/* UX pass 11.11.2026: the desk said nothing about what to do with it, the folder names are
+   baked into the render (~8px on a phone), and the site's hover tag sat under the outline's
+   bounding box — folder 01's name landed on folder 04's label. Now: one editorial line under
+   the title; on hover/focus the folder's name sits ON that folder (the site tag is switched
+   off with an empty data-tip); and at ≤900px the five folders are also a list of real links. */
+const DESK_HINT = 'בחרו תיק כדי לפתוח אותו'
 function Desk({ onOpen, away }: { onOpen: (id: string, at: [number, number]) => void; away: boolean }) {
   const [w, h] = DESK.image
+  const [hot, setHot] = useState<Folder | null>(null)
+  const hotS = hot ? SECTIONS[hot.n - 1] : null
   return (
     <div className={'ch12-desk' + (away ? ' is-away' : '')} id="desk" data-screen="desk">
+      <div className="ch12-desk-stage">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img className="ch12-desk-img" src={`${ART}desk-hero.webp`} alt="" width={w} height={h} />
       <div className="ch12-desk-head">
         <h1 id="chapter-title" className="ch12-title">{CH12.title}</h1>
+        <p className="ch12-desk-hint">{DESK_HINT}</p>
       </div>
       <svg className="ch12-desk-hit" viewBox="0 0 1 1" preserveAspectRatio="none" aria-label="תיקי הפרק">
         {DESK.folders.map((f) => {
@@ -224,6 +234,11 @@ function Desk({ onOpen, away }: { onOpen: (id: string, at: [number, number]) => 
               key={s.id}
               href={`#${s.id}`}
               aria-label={`${s.n} · ${s.title}`}
+              data-tip=""
+              onMouseEnter={() => setHot(f)}
+              onMouseLeave={() => setHot(null)}
+              onFocus={() => setHot(f)}
+              onBlur={() => setHot(null)}
               onClick={(e) => { e.preventDefault(); onOpen(s.id, f.center) }}
             >
               <polygon points={f.poly.map((p) => p.join(',')).join(' ')} vectorEffect="non-scaling-stroke" />
@@ -231,6 +246,28 @@ function Desk({ onOpen, away }: { onOpen: (id: string, at: [number, number]) => 
           )
         })}
       </svg>
+      {hot && hotS && (
+        <span className="ch12-desk-tag" aria-hidden="true"
+          style={{ left: `${(hot.center[0] * 100).toFixed(2)}%`, top: `${(hot.center[1] * 100).toFixed(2)}%` }}>
+          <b>{hotS.n}</b> {hotS.title}
+        </span>
+      )}
+      </div>
+      <nav className="ch12-desk-list" aria-label="תיקי הפרק — רשימה">
+        <p className="ch12-desk-list-hint">{DESK_HINT}</p>
+        <ol>
+          {SECTIONS.map((s, i) => {
+            const f = DESK.folders.find((x) => x.n === i + 1)
+            return (
+              <li key={s.id}>
+                <a href={`#${s.id}`} onClick={(e) => { e.preventDefault(); onOpen(s.id, f ? f.center : [0.5, 0.5]) }}>
+                  <b>{s.n}</b> {s.title}
+                </a>
+              </li>
+            )
+          })}
+        </ol>
+      </nav>
     </div>
   )
 }

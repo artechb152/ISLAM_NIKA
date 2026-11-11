@@ -19,6 +19,11 @@
 .site-footer-contact a:hover{color:var(--stamp,#a5322f);border-bottom-color:currentColor}
 .site-footer-contact a:focus-visible{outline:2px solid var(--maroon,#8a2733);outline-offset:3px;border-radius:2px}
 .site-footer-mark{display:block;height:clamp(20px,1.8vw,26px);width:auto;fill:currentColor;flex:none}
+/* below 900px the floating accessibility button (46px, 16px from the bottom corner) covers
+   whatever is last on the page — the footer keeps a strip clear for it to sit in */
+@media (max-width:899px){
+  .site-footer-inner{padding-bottom:calc(22px + 62px + env(safe-area-inset-bottom))}
+}
 @media (max-width:599px){
   .site-footer-inner{justify-content:center;text-align:center}
   .site-footer-contact{justify-content:center}

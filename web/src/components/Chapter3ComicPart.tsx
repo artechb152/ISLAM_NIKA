@@ -192,16 +192,18 @@ export default function ComicPart({ script }: { script: { pages: unknown[] } }) 
           screen that is only a book and wrong for one block of an article. */}
       <div className="ch3-book-nav">
         <button type="button" className="ch3-book-go is-prev" onClick={() => turn(-1)}
-                disabled={at === 0}>
+                disabled={at === 0} aria-label="לדף הקודם">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
-          לדף הקודם
+          {/* the full wording above 500px, one word on a phone, where it wrapped to two
+              lines (108×58, audit 11.11); the aria-label carries the full wording */}
+          <span className="ch3-book-go-long">לדף הקודם</span><span className="ch3-book-go-short">הקודם</span>
         </button>
         <span className="ch3-book-where" aria-hidden="true">
           כפולה {at + 1} מתוך {spreads}
         </span>
         <button type="button" className="ch3-book-go is-next" onClick={() => turn(1)}
-                disabled={at === last}>
-          לדף הבא
+                disabled={at === last} aria-label="לדף הבא">
+          <span className="ch3-book-go-long">לדף הבא</span><span className="ch3-book-go-short">הבא</span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7" /></svg>
         </button>
       </div>

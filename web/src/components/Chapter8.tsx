@@ -449,6 +449,7 @@ function SourcesMap() {
           <span
             key={id}
             className={'ch8-place is-' + pl.kind + (lit.has(id) ? ' is-lit' : '')}
+            data-place={id}
             style={{ left: pctf(pl.x), top: pctf(pl.y) }}
           >
             {pl.kind === 'city' && <i className="ch8-place-dot" />}

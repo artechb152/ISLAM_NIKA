@@ -23,7 +23,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ChapterEnd from './ChapterEnd'
 import { type FeedbackKind } from './Feedback'
-import Mcq from './Mcq'
+import Mcq, { WrongMark } from './Mcq'
 import PracticeNav, { type NavStop } from './PracticeNav'
 import PillarSection, { beatSlotId, exSlotId, type SectionState } from './PillarSection'
 import { usePickPlace } from './usePickPlace'
@@ -32,7 +32,6 @@ import {
   END,
   EXERCISES,
   FEEDBACK,
-  HERO,
   PILLARS,
   QUIZ,
   QUIZ_BLOCK,
@@ -46,12 +45,30 @@ import {
   labelIn,
   readPractice,
   recordDone,
+  recordMiss,
   resetPractice,
   type PracticeProgress,
 } from '@/lib/chapter6/practice-progress'
 import { markChapterComplete } from '@/lib/chapter6/progress'
+import { allChapters } from '@/lib/chapters-data'
+import PracticeScore, { PracticeLead } from '@/components/PracticeScore'
 
 type Fb = { kind: FeedbackKind; text: string }
+
+/* THE SCORE (11.11.2026 — every closing practice shows one, and says so up front). It counts
+   what it can count without changing what the page asks: eight units, each answered right the
+   first time or not — a commandment (its exercise and its beat together), each of the two
+   questions, and the closing question. A wrong placement, a ruled-out option or a wrong pick
+   marks its unit in the store (`missed`, practice-progress.ts); nothing else changes. */
+const TITLE = allChapters.find((c) => c.number === 6)?.title ?? ''
+const SCORE_UNITS = [
+  ...EXERCISES.map((ex) => ({ id: ex.key as string, label: PILLAR_NAME[ex.key], href: `#gv-${ex.key}` })),
+  ...QUIZ.map((q, i) => ({ id: q.id, label: `${QUIZ_BLOCK.title} · ${i + 1}`, href: '#gv-quiz' })),
+  { id: CLOSING_ID, label: CLOSING.title, href: '#gv-closing' },
+]
+/* which unit a multiple-choice question counts against: a beat's question is its commandment's */
+const unitOfMcq = (id: string): string =>
+  EXERCISES.find((ex) => ex.beat.mcq?.id === id)?.key ?? id
 
 const byKey = new Map(EXERCISES.map((ex) => [ex.key, ex]))
 
@@ -68,7 +85,7 @@ export default function SummaryPage() {
 
   /* per EXERCISE, not per page: five sections each need their own miss count and their own
      hint, and one page-level hint would have been shown in the wrong four of them */
-  const [misses, setMisses] = useState<Record<string, number>>({})
+  const [, setMisses] = useState<Record<string, number>>({})
   const [hints, setHints] = useState<Record<string, boolean>>({})
   const [fbs, setFbs] = useState<Record<string, Fb>>({})
   /* There is no „which slot just filled“ state any more. It existed to drive a settle
@@ -117,6 +134,7 @@ export default function SummaryPage() {
       setProgress(recordDone(id))
       return
     }
+    setProgress(recordMiss(unitOfMcq(id)))
     setMcqWrong((w) => ({ ...w, [id]: [...(w[id] ?? []), option] }))
   }, [])
 
@@ -133,6 +151,8 @@ export default function SummaryPage() {
   }, [])
 
   const registerMiss = useCallback((card: string, override?: string) => {
+    /* card is „x:key" / „b:key" — both count against the commandment */
+    if (card) setProgress(recordMiss(card.slice(2)))
     setMisses((m) => {
       const n = (m[card] ?? 0) + 1
       if (n >= 2) setHints((h) => ({ ...h, [card]: true }))
@@ -249,6 +269,7 @@ export default function SummaryPage() {
       setClosingMiss(null)
       setProgress(recordDone(CLOSING_ID))
     } else {
+      setProgress(recordMiss(CLOSING_ID))
       setClosingMiss(key)
     }
   }
@@ -265,14 +286,6 @@ export default function SummaryPage() {
     setConfirmReset(false)
     window.scrollTo({ top: 0, behavior: 'auto' })
   }
-
-  const missedPillars = useMemo(
-    () =>
-      EXERCISES.map((ex) => ex.key).filter(
-        (k) => (misses[`x:${k}`] ?? 0) + (misses[`b:${k}`] ?? 0) > 0
-      ),
-    [misses]
-  )
 
   /* the sidebar's seven stops, and the one place „what is left“ is answered */
   const stops: NavStop[] = useMemo(() => {
@@ -331,11 +344,15 @@ export default function SummaryPage() {
               which named the screen, named the chapter, and sat over an h1 that named neither.
               The h1 says it now; the masthead's „חזרה לפרק 6“ and the sidebar say the rest. */}
           <div className="ch6-hero-copy">
+            {/* „התרגול המסכם", the one h1 every closing practice carries — HERO.title
+                („תרגול מסכם") was this page's alone */}
             <h1 id="gv-title" className="ch6-hero-title">
-              {HERO.title}
+              התרגול המסכם
             </h1>
           </div>
         </div>
+
+        <PracticeLead title={TITLE} count={SCORE_UNITS.length} />
 
         {/* ---------------- the five commandments, all of them ---------------- */}
         {EXERCISES.map((ex) => (
@@ -416,11 +433,22 @@ export default function SummaryPage() {
                     className={'gv-pick' + (closingMiss === p.key ? ' is-wrong' : '')}
                     onClick={() => answerClosing(p.key)}
                   >
+                    {closingMiss === p.key && <WrongMark />}
                     {p.name}
                   </button>
                 ))}
               </div>
-              <p className="gv-closing-miss">{closingMiss ? CLOSING.miss : ''}</p>
+              {/* the miss line carries the return arrow every other wrong answer here carries */}
+              <p className={'gv-closing-miss' + (closingMiss ? ' gv-feedback is-miss' : '')}>
+                {closingMiss && (
+                  <span className="gv-fb-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 14H17a4 4 0 0 0 0-8h-6M9 14l3-3M9 14l3 3" />
+                    </svg>
+                  </span>
+                )}
+                {closingMiss ? <span className="gv-fb-text">{CLOSING.miss}</span> : ''}
+              </p>
             </>
           )}
         </section>
@@ -433,7 +461,7 @@ export default function SummaryPage() {
             id="gv-end"
           >
             <ChapterEnd
-              missed={missedPillars}
+              score={<PracticeScore chapter={6} questions={SCORE_UNITS} missed={progress.missed} />}
               onReset={handleReset}
               confirmReset={confirmReset}
               onAskReset={() => setConfirmReset(true)}

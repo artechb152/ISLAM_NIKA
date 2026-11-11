@@ -351,6 +351,13 @@
 .ch3-book-go.is-next:hover:not(:disabled){filter:brightness(1.12)}
 .ch3-book-go:disabled{opacity:.3;cursor:default}
 @media (prefers-reduced-motion:reduce){.ch3-book-go{transition:none}}
+/* one word on a phone: „לדף הבא" wrapped to two lines at 390 (audit 11.11) */
+.ch3-book-go-short{display:none}
+.ch3-book-go{white-space:nowrap}
+@media (max-width:500px){
+  .ch3-book-go-long{display:none}
+  .ch3-book-go-short{display:inline}
+}
 
 /* ============================ the two set-apart voices ============================
    Two costumes, two uses each, and the audit fails at three. See
@@ -1005,13 +1012,19 @@
 }
 .ch3-note-btn:hover{color:var(--maroon)}
 .ch3-note-in.is-open .ch3-note-btn{color:var(--maroon)}
-/* a small maroon diamond, turned when the note is open. The chapter's own mark,
-   at the size of a control rather than of a heading's ornament. */
+/* a plus that becomes a minus when the note is open. It was a gold diamond — the mark
+   BUILD-RULES §5 reserves for section headings — and it said nothing about open or
+   shut (audit 11.11). The state is also aria-expanded on the button. */
 .ch3-note-mark{
-  width:7px;height:7px;flex:none;background:var(--gold);
-  transform:rotate(45deg);transition:transform .2s ease,background .18s ease;
+  position:relative;width:20px;height:20px;flex:none;border-radius:50%;
+  border:1.5px solid currentColor;box-sizing:border-box;
 }
-.ch3-note-in.is-open .ch3-note-mark{background:var(--maroon);transform:rotate(135deg)}
+.ch3-note-mark::before,.ch3-note-mark::after{
+  content:"";position:absolute;inset:50% auto auto 50%;width:9px;height:1.5px;
+  background:currentColor;translate:-50% -50%;transition:rotate .2s ease;
+}
+.ch3-note-mark::after{rotate:90deg}
+.ch3-note-in.is-open .ch3-note-mark::after{rotate:0deg}
 .ch3-note-body{
   display:grid;grid-template-rows:0fr;
   transition:grid-template-rows .26s ease;
@@ -1027,7 +1040,7 @@
 }
 .chapter-article .ch3-note-in.is-open .ch3-body{padding-bottom:18px}
 @media (prefers-reduced-motion:reduce){
-  .ch3-note-body,.ch3-note-mark{transition:none}
+  .ch3-note-body,.ch3-note-mark::after{transition:none}
 }
 
 /* ============================ a plate beside the prose ============================
@@ -1183,3 +1196,11 @@
 }
 .chapter-article .ch3-card-title + *{margin-top:var(--flow-tight)}
 
+
+/* ============================ the line ============================
+   11.11.2026, the user: „תקצר את השורות" — which overrides the „full column, ~115
+   characters" note at --measure above. Prose ran the whole 1025px column at 1440 (up to
+   126 characters in the folded full texts). It now stops at chapter 6's reading measure,
+   760px, on the reading edge. The prose beside a plate and inside a card keeps its
+   `max-width:none` (more specific), and every device keeps its own width. */
+.chapter-article .ch3-body{max-width:760px}

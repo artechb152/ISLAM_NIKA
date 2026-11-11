@@ -399,7 +399,7 @@ html{scrollbar-gutter:stable}
 
 .ch2-modal-close{
   position:absolute;inset-block-start:14px;inset-inline-end:14px;
-  width:40px;height:40px;display:grid;place-items:center;
+  width:44px;height:44px;display:grid;place-items:center;   /* 40 → 44, audit 11.11 */
   font-size:26px;line-height:1;color:var(--maroon);
   background:none;border:1px solid var(--edge);border-radius:50%;cursor:pointer;
 }
@@ -1626,9 +1626,10 @@ html{scrollbar-gutter:stable}
   margin:0 0 10px;font-family:var(--font-heading);font-weight:700;
   font-size:clamp(19px,1.7vw,22px);color:var(--maroon);
 }
-.ch2-watch ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ch2-watch ul{list-style:none;margin:0;padding:0;display:grid;gap:0}
+/* 44px tall: the X link was a 32px target on a phone (audit 11.11) */
 .ch2-watch a{
-  display:inline-flex;align-items:center;gap:8px;font-size:var(--read,18px);
+  display:inline-flex;align-items:center;gap:8px;font-size:var(--read,18px);min-height:44px;
   color:var(--maroon-deep);text-decoration:underline;text-underline-offset:4px;
   text-decoration-color:rgba(87,24,32,.35);
 }
@@ -1747,3 +1748,10 @@ html{scrollbar-gutter:stable}
    the banner 16–24px under the masthead (measured 29.9). */
 @media (max-width:920px){.ch2-hero{margin-block-start:-26px}}
 @media (max-width:680px){.ch2-hero{margin-block-start:-18px}}
+
+/* ============================ the line ============================
+   11.11.2026, the user: „תקצר את השורות" — which overrides the ~115-character note above.
+   The prose ceiling drops from --measure (880px, up to 101 characters at 1440) to chapter
+   6's reading measure, 760px. Only the prose: the diagram, the cycle, the meanings, the
+   verdicts and the photographs keep --measure. */
+.chapter-article .ch2-body{max-width:760px}

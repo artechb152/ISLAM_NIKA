@@ -267,6 +267,8 @@ function Aside({ img, flipped, children }: { img: string; flipped?: boolean; chi
 interface CalItem { id: string; track: 'all' | 'shia'; name: Cut; date: Cut; at: [number, number][]; to: string }
 const CAL = (meta('memory') as LayoutSection & { calendar: { legend: { all: string; shia: string }; items: CalItem[] } }).calendar
 const RING = { all: 25.6, shia: 19.6 }
+/** a UI label (rule 24), the short form of the legend's „המועדים השיעיים" — on each row of that track */
+const SHIA_TAG = 'שיעי'
 const angle = (m: number, d: number) => -Math.PI / 2 + ((m - 1 + (d - 0.5) / 30 - 0.5) * Math.PI) / 6
 const pos = (r: number, a: number) => ({ left: `${(50 + r * Math.cos(a)).toFixed(3)}%`, top: `${(50 + r * Math.sin(a)).toFixed(3)}%` })
 function Calendar() {
@@ -303,6 +305,9 @@ function Calendar() {
               <button type="button" aria-pressed={it.id === on} onClick={() => setOn(it.id)}>
                 <i aria-hidden="true" />
                 <b>{one(it.name)}</b>
+                {/* the track in words, not only in the dot's colour (UX pass 11.11.2026) — beside
+                    the name, so it stays on the name's line when the date wraps */}
+                {it.track === 'shia' && <em className="ch16-cal-tag">{SHIA_TAG}</em>}
                 <span>{one(it.date)}</span>
               </button>
               {it.id === on && <a className="ch16-cal-go" href={`#${it.to}`} onClick={jump}>למקטע</a>}

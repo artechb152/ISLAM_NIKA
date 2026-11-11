@@ -196,19 +196,24 @@
   margin:14px 0 0;color:var(--muted);
   font-size:clamp(15px,1.6vw,18px);line-height:1.7;
 }
-.p4-end-nav{
-  margin:clamp(30px,4vw,48px) 0 12px;
+/* 11.11.2026: the close is the shared engine's `.p2-done` now (shared-practice.css). Of the
+   rules in this block only `.p4-end-nav`, `.p4-end-frieze` and `.p4-end-sec` still render — the
+   chapter's sections as the way back in, passed to the engine as `doneExtra`. The rest, and
+   every `.p4-*` exercise rule above, are left in place unused. `.chapter-article` on the <p>:
+   rule 77. */
+.chapter-article .p4-end-nav{
+  margin:clamp(22px,3vw,36px) 0 12px;
   font-family:var(--font-body);font-weight:700;
   font-size:12.5px;letter-spacing:.15em;color:var(--gold-text);
 }
 .p4-end-frieze{
   margin:0;padding:0;list-style:none;
-  display:flex;flex-wrap:wrap;gap:9px;
+  display:flex;flex-wrap:wrap;gap:9px;justify-content:center;
 }
 /* the chapter's pill, in its quiet state: a section name is a way back, not a
    call to action, and eight filled buttons in a row would read as eight */
 .p4-end-sec{
-  display:inline-flex;align-items:center;text-decoration:none;
+  display:inline-flex;align-items:center;text-decoration:none;min-height:44px;box-sizing:border-box;
   padding:8px 15px;border-radius:999px;
   border:1px solid var(--edge);background:var(--paper);
   font-family:var(--font-heading);font-weight:700;

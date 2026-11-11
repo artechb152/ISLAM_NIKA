@@ -777,7 +777,7 @@ export default function FlagHall() {
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
             <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z" fill="currentColor" />
           </svg>
-          <span>לכל הפרקים</span>
+          <span>לכל פרקי הלמידה</span>
         </Link>
         <p className="ch13-chapter">פרק 13 · {passages.title}</p>
         {/* גרסת הטקסט — לקורא מסך, למקלדת, ולמי שלא רוצה ללכת */}
@@ -818,10 +818,16 @@ export default function FlagHall() {
             <p className="ch13-kicker">פרק 13</p>
             <h1>{passages.sourceTitle}</h1>
             <ul className="ch13-keys">
-              <li><kbd>W</kbd> <kbd>S</kbd> או <kbd>↑</kbd> <kbd>↓</kbd> — הליכה</li>
-              <li><kbd>A</kbd> <kbd>D</kbd> או <kbd>←</kbd> <kbd>→</kbd> — פנייה</li>
-              <li>תזוזת העכבר — הסתכלות סביב (<kbd>Esc</kbd> משחרר את הסמן)</li>
-              <li><kbd>E</kbd> ליד דגל — הכרטיס שלו</li>
+              {/* מקלדת ועכבר — ובמגע (pointer:coarse) ההוראות של לוח החצים והגרירה במקומן (סבב UX, 11.11.2026:
+                  כרטיס הפתיחה לא הזכיר את לוח החצים ואת הגרירה, והם הדרך היחידה ללכת בטלפון) */}
+              <li className="is-key"><kbd>W</kbd> <kbd>S</kbd> או <kbd>↑</kbd> <kbd>↓</kbd> — הליכה</li>
+              <li className="is-key"><kbd>A</kbd> <kbd>D</kbd> או <kbd>←</kbd> <kbd>→</kbd> — פנייה</li>
+              <li className="is-key">תזוזת העכבר — הסתכלות סביב (<kbd>Esc</kbd> משחרר את הסמן)</li>
+              <li className="is-key"><kbd>E</kbd> ליד דגל — הכרטיס שלו</li>
+              <li className="is-touch"><kbd>▲</kbd> <kbd>▼</kbd> בלוח החצים — הליכה (לוחצים ומחזיקים)</li>
+              <li className="is-touch"><kbd>◀</kbd> <kbd>▶</kbd> — פנייה</li>
+              <li className="is-touch">גרירת אצבע על האולם — הסתכלות סביב</li>
+              <li className="is-touch">ליד דגל — הקשה על השם שלו פותחת את הכרטיס</li>
             </ul>
             <button
               type="button"

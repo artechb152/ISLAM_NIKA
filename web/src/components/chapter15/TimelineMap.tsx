@@ -110,7 +110,6 @@ export default function TimelineMap({ rows, step }: ScrollyState & { rows: strin
   const activeAt = ROW_ORDER.indexOf(active)
   const cell = regionOf(active)
   const lit = new Set(LAYOUT.regions[cell.id].shapes)
-  const place = LAYOUT.places[active]
   /* the region labels this stage owns — each cell lives in exactly one section, so each
      label is printed on exactly one stage (verify-chapter15.mjs checks the cells) */
   const own = REGIONS.filter((g) => g.rows.some((r) => rows.includes(r)))

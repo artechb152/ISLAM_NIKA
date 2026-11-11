@@ -24,7 +24,8 @@
   --flow-tight:clamp(14px,1.8vw,20px);/* a sub-heading to its own first line */
 
   --measure:880px;   /* the reading column's ceiling            */
-  --lh:1.7;          /* leading — see the note below on why it is not 1.82 */
+  --lh:1.85;         /* leading — chapter 6's 1.85 (rule §5). It was 1.7 (34px), the
+                        one chapter off the shared leading; the audit of 11.11 set it back */
 }
 
 
@@ -560,7 +561,8 @@
 .ch4-more{
   all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;
   font-family:var(--font-body);font-weight:600;font-size:15px;color:var(--maroon);
-  padding:7px 15px;border:1px solid var(--edge);border-radius:99px;
+  box-sizing:border-box;min-height:44px;max-width:100%;
+  padding:7px 16px;border:1px solid var(--edge);border-radius:99px;
   background:var(--panel);
   transition:border-color .2s ease,background .2s ease;
 }
@@ -585,13 +587,18 @@
 .ch4-sheet-title::after{content:"";display:block;width:44px;height:2px;
   background:var(--gold);margin-top:9px;opacity:.85}
 .ch4-sheet-panel .ch4-body{margin-top:16px}
+/* chapter 2's circled close (.ch2-modal-close) at 44px — it was a bare 34px „×“ with no
+   ring, and its position:absolute sat BEFORE all:unset, which wiped it (audit 11.11) */
 .ch4-sheet-close{
-  position:absolute;top:10px;inset-inline-start:12px;
-  all:unset;cursor:pointer;width:34px;height:34px;border-radius:50%;
-  display:grid;place-items:center;font-size:23px;color:var(--muted);
+  all:unset;box-sizing:border-box;cursor:pointer;
+  position:absolute;inset-block-start:14px;inset-inline-end:14px;
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  font-size:26px;line-height:1;color:var(--maroon);border:1px solid var(--edge);
 }
-.ch4-sheet-close:hover{background:rgba(138,39,51,.1);color:var(--maroon)}
-.ch4-sheet-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ch4-sheet-close:hover{color:var(--maroon-deep);border-color:var(--maroon)}
+.ch4-sheet-close:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+/* the title must clear the ring */
+.ch4-sheet-title{padding-inline-end:52px}
 @media (prefers-reduced-motion:reduce){.ch4-more{transition:none}}
 
 
@@ -627,7 +634,9 @@
    at 1100. */
 .ch4-deed-row{
   display:grid;
-  grid-template-columns:minmax(0,1fr) 42%;
+  /* the sheet never drops under 490px: its clauses are 3.26cqw, and 490 is where that
+     reaches the 16px floor (audit 11.11). Narrower than that, the row stacks (below). */
+  grid-template-columns:minmax(0,1fr) max(42%,490px);
   gap:0 clamp(20px,2.8vw,40px);
   /* CENTRED ON THE USER'S INSTRUCTION. It was briefly top-aligned: the sheet
      is some two hundred pixels shorter than the prose, and aligning the tops
@@ -667,7 +676,7 @@
 .ch4-deed-label{
   margin:0 0 3.3cqw;
   font-family:var(--font-heading);font-weight:700;
-  font-size:2.56cqw;letter-spacing:.24em;
+  font-size:max(13px,2.56cqw);letter-spacing:.24em;
   color:var(--gold-text);text-align:center;
 }
 
@@ -683,7 +692,7 @@
   border-bottom:1px solid var(--gold);
 }
 .chapter-article .ch4-deed-term{
-  margin:0;font-size:3.26cqw;line-height:1.62;color:var(--ink);
+  margin:0;font-size:max(16px,3.26cqw);line-height:1.62;color:var(--ink);
 }
 
 /* THE SIGNATURE. A rule with the title struck through above it — the one thing
@@ -699,7 +708,7 @@
 }
 .ch4-deed-signlabel{
   font-family:var(--font-heading);font-weight:700;
-  font-size:2.5cqw;letter-spacing:.18em;color:var(--gold-text);
+  font-size:max(13px,2.5cqw);letter-spacing:.18em;color:var(--gold-text);
 }
 /* MAROON ON MAROON IS AN INVISIBLE STRIKE. Painted first in the chapter's own
    emphasis colour with a line of the same colour, the rule vanished into the
@@ -720,22 +729,26 @@
    dropped and the same markup becomes a plain ruled panel — the clauses and
    the struck signature survive; only the picture does not. This is why the
    sheet is not `.bleed-aside`: that mechanism would have hidden §29 outright. */
-@media (max-width:900px){
+.article-section:has(> .ch4-deed-row){container:ch4deed / inline-size}
+/* A CONTAINER QUERY, NOT THE WINDOW (11.11): with the rail open at 1200 the row is 800px,
+   and a 490px sheet would have left the prose 270. The section measures itself; under 940px
+   the two stack, the sheet first, as they did below a 900px window. */
+@container ch4deed (max-width:940px){
   .ch4-deed-row{display:block}
   .chapter-article .ch4-deed-aside{margin-top:var(--flow-part)}
   .ch4-deed{
-    aspect-ratio:auto;container-type:normal;background:none;
+    aspect-ratio:auto;container-type:normal;background:none;max-width:760px;
     background-color:var(--panel);
     border:1px solid var(--gold);border-radius:14px;
   }
   .ch4-deed-inner{display:block;padding:clamp(22px,5vw,34px)}
-  .ch4-deed-label{font-size:12px;margin-bottom:18px}
+  .ch4-deed-label{font-size:13px;margin-bottom:18px}
   .ch4-deed-terms{gap:14px}
   .ch4-deed-terms > li{grid-template-columns:26px minmax(0,1fr);gap:0 11px}
   .ch4-deed-num{font-size:16px}
   .chapter-article .ch4-deed-term{font-size:16px;line-height:1.62}
   .ch4-deed-sign{margin-top:24px;gap:12px;padding-bottom:8px;padding-inline-end:0}
-  .ch4-deed-signlabel{font-size:12px}
+  .ch4-deed-signlabel{font-size:13px}
   .ch4-deed-struck{font-size:21px;text-decoration-thickness:1.5px}
 }
 
@@ -1033,3 +1046,18 @@
    the banner 16–24px under the masthead (measured 29.9). */
 @media (max-width:920px){.ch4-hero{margin-block-start:-26px}}
 @media (max-width:680px){.ch4-hero{margin-block-start:-18px}}
+
+/* ============================ the line ============================
+   11.11.2026, the user: „תקצר את השורות". Prose ran the whole 1025px column at 1440 — up
+   to 118 characters a line. Every running paragraph now stops at chapter 6's reading
+   measure, 760px, on the reading edge; the devices keep their own widths. */
+.chapter-article .ch4-body{max-width:760px}
+
+/* FLOORS (audit 11.11). On the painted deed the clauses were 14px and the two rubrics
+   11 and 10.8px at 1440 (cqw-scaled); the clauses now floor at 16px and the rubrics at
+   13. On a phone the Uhud tradition cards and the chant's Hebrew line were 15px — the
+   reading size there is --read. */
+@media (max-width:680px){
+  .ch4-card .ch4-body{font-size:var(--read);line-height:1.7}
+  .ch4-chant-he{font-size:var(--read)}
+}

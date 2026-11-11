@@ -2,12 +2,12 @@
    שפת קלף וטיפוגרפיה). כאן רק מה שהמחברת מוסיפה: הציטוט שסומן, ההערה
    האישית שנתלית עליו, והכפתור הצף שמופיע בפרקים בזמן סימון. */
 
-.nb-h1{
-  margin:0 0 10px;font-family:var(--font-heading);font-weight:900;
-  font-size:clamp(30px,3.6vw,50px);line-height:1.12;color:var(--maroon-deep,var(--maroon));
-}
-.nb-lede{max-width:640px;margin-top:22px}
-.nb-lede p{margin:0 0 8px;font-size:16.5px;line-height:1.75;color:var(--ink)}
+/* the design system's h1 (chapter6-article.css: clamp(42,5vw,72), 900) — no local size */
+.nb-h1{margin:0 0 10px}
+/* a Hebrew eyebrow is not letter-spaced (scoped to the notebook — this sheet loads in chapters too) */
+.nb-page .chapter-number{letter-spacing:0}
+.nb-lede{max-width:760px;margin-top:22px}
+.nb-lede p{margin:0 0 8px;font-size:var(--read);line-height:1.85;color:var(--ink)}
 .nb-lede b{font-weight:700;color:var(--maroon)}
 .nb-lede-quiet{font-size:14px;color:var(--ink-soft)}
 
@@ -17,7 +17,7 @@
   font-size:12px;font-weight:700;padding-inline:6px;flex:none;
 }
 .chapter-drawer.is-collapsed .nb-rail-count{display:none}
-.nb-rail-empty{margin:10px 14px;font-size:13.5px;color:var(--ink-soft)}
+.nb-rail-empty{margin:10px 14px;font-size:15px;color:var(--muted)}
 
 .nb-sec-link{margin:10px 0 0}
 .nb-sec-link a{color:var(--maroon);font-size:14px;text-decoration:none;border-bottom:1px solid rgba(138,39,51,.35)}
@@ -67,8 +67,8 @@
 .nb-mark-tools .nb-link{white-space:nowrap}
 
 .nb-btn{
-  background:var(--header,#571820);color:#f3ead6;border:none;border-radius:9px;
-  padding:9px 20px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;
+  background:var(--header,#571820);color:#f3ead6;border:none;border-radius:999px;
+  min-height:44px;padding:9px 22px;font:inherit;font-size:15px;font-weight:700;cursor:pointer;
 }
 .nb-btn:hover{background:var(--maroon)}
 .nb-link{

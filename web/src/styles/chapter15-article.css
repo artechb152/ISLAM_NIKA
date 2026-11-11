@@ -177,3 +177,11 @@
 @media (prefers-reduced-motion:reduce){
   .ch15-map > img,.ch15-wash,.ch15-wash polygon,.ch15-region,.ch15-pin,.ch15-tick{transition:none}
 }
+
+/* ===== UX pass 11.11.2026 — floors =====
+   1 · the ruler's two end years were 12px; 14 is the floor for text in a device;
+   2 · the 23 „פרק N · …" links on the cards were 29px high — an invisible hit area takes them
+       to 45 without moving the underline off the words. */
+.ch15-ruler-end{font-size:14px}
+.ch15-link{position:relative}
+.ch15-link::before{content:"";position:absolute;inset:-8px -6px}

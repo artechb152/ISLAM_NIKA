@@ -25,7 +25,7 @@ import SiteFooter from '@/components/SiteFooter'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import ChapterSearch from '@/components/chapter6/ChapterSearch'
 import MarkToNotebook from '@/components/MarkToNotebook'
 import type { MapStop, Region } from '@/components/chapter11/Relief'
@@ -201,10 +201,10 @@ function MapSection({ id }: { id: string }) {
   const stageRef = useRef<HTMLDivElement | null>(null)
 
   /* a phone stacks the card under the map: bring the map back to the top so both are in view */
-  const open = useCallback((view: number) => {
+  const open = (view: number) => {
     setActive(view)
     if (view && innerWidth < 900) stageRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-  }, [])
+  }
 
   const inPts = pts.flatMap((p) => p.stops)
   const first = Math.min(...inPts); const last = Math.max(...inPts)
@@ -212,7 +212,7 @@ function MapSection({ id }: { id: string }) {
     console.error(`chapter 11 · ${id}: the points must take the middle stops in order`, inPts)
   }
 
-  const { views, points, arc } = useMemo(() => {
+  const { views, points, arc } = (() => {
     const toView = (sts: LayoutStop[]): MapStop => {
       const wash: Record<string, number> = {}
       for (const st of sts) for (const [k, v] of Object.entries(st.wash ?? {})) wash[k] = Math.max(wash[k] ?? 0, v)
@@ -234,7 +234,7 @@ function MapSection({ id }: { id: string }) {
     const points = pts.map((p, i) => ({ at: p.at, name: one(p.name), sub: (p.sub ?? []).map(one).join(' · '), view: i + 1 }))
     const arcStop = stops.find((st) => st.arc && st.pins?.length === 2)
     return { views, points, arc: arcStop?.pins as [[number, number], [number, number]] | undefined }
-  }, [stops, pts, s.overview])
+  })()
 
   /* ← → walk the stations while focus is inside this map (three maps on the page: not on window) */
   const onKey = (e: KeyboardEvent<HTMLDivElement>) => {

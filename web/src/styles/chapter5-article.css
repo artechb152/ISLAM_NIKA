@@ -225,16 +225,16 @@
 .ch5-lin-name{
   position:absolute;translate:-50% -50%;white-space:nowrap;
   font-family:var(--font-heading);font-weight:700;color:var(--maroon-deep);
-  font-size:clamp(10px,1.05vw,15px);
+  font-size:clamp(14px,1.05vw,15px);  /* floor 10 → 14 (audit 11.11: 10px on a phone) */
 }
-.ch5-lin-name.is-subject{color:var(--maroon);font-size:clamp(11px,1.2vw,17px)}
+.ch5-lin-name.is-subject{color:var(--maroon);font-size:clamp(15px,1.2vw,17px)}
 /* The marriage that makes him a son-in-law, sitting just above the horizontal rule that
    joins Fatima to Ali. On the first plate it was placed inside a medallion — gold
    lettering on a dark painting, which is to say invisible — so it goes on parchment. */
 .ch5-lin-rel{
   position:absolute;left:56.6%;top:73.5%;translate:-50% -50%;
   font-style:normal;font-weight:700;color:var(--gold-text);white-space:nowrap;
-  font-size:clamp(9px,.92vw,12px);
+  font-size:13px;  /* was clamp(9px,…,12px): 9px on a phone (audit 11.11) */
   /* a parchment chip behind it: the label has to be legible wherever the painting is
      dark under it, and the two lower medallions crowd the rule it belongs to */
   background:color-mix(in srgb,var(--paper) 88%,transparent);padding:1px 6px;border-radius:5px;
@@ -248,7 +248,7 @@
    is overlaid for it; only its name, under the plate on that side */
 .ch5-lin-cap{
   margin-top:10px;text-align:start;line-height:1.4;
-  font-weight:700;color:var(--gold-text);font-size:clamp(12px,1.15vw,15px);
+  font-weight:700;color:var(--gold-text);font-size:clamp(14px,1.15vw,15px);
 }
 .ch5-lin-cap::before{
   content:"";display:inline-block;vertical-align:middle;
@@ -324,3 +324,12 @@
 /* the practice screen wears the chapter's own banner still, without the film — a
    practice page has no business autoplaying the chapter's video a second time */
 .ch5-practice-banner .ch5-hero-media{background:var(--panel) url('/assets/chapter5/hero-poster.jpg') center 38%/cover no-repeat}
+
+/* ============================ the line ============================
+   11.11.2026, the user: „תקצר את השורות". Prose ran the full 1025px column at 1440 — up
+   to 122 characters a line. It now stops at chapter 6's reading measure, 760px, on the
+   reading edge; the quote, the plate, the lineage, the axis and the verdict keep their
+   own widths and stay centred. */
+.chapter-article > section > p,
+.chapter-article > section > :is(ul,ol),
+.ch5-figrow-copy > p,.ch5-split-copy > p{max-width:760px}

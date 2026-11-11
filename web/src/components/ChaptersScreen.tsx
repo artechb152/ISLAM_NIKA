@@ -20,6 +20,7 @@ import {
   type ChapterDef,
 } from '@/lib/chapters-data'
 import { CH6 } from '@/lib/chapter6/data'
+import CHAPTER_TOPICS from '@/lib/chapter-topics.json'
 import { SECTION_ORDER as CH1_SECTIONS, STORE_KEY as CH1_STORE_KEY } from '@/lib/chapter1/article/progress'
 import { SECTION_ORDER as CH2_SECTIONS, STORE_KEY as CH2_STORE_KEY } from '@/lib/chapter2/progress'
 import { SECTION_ORDER as CH3_SECTIONS, STORE_KEY as CH3_STORE_KEY } from '@/lib/chapter3/progress'
@@ -104,13 +105,29 @@ const ARROW_L = 'M14 6l-6 6 6 6' // ← continue / enter (RTL)
 /* persistent sidebar (YouTube-style): a fixed-width panel that toggles between the full
    width and a slim icon rail via the header hamburger. Widths live in the stylesheet. */
 
+/* ניקוד, גרש ומקף אינם חלק מהחיפוש: „הגרה" מוצא „הִגְ'רָה" */
 function norm(s: string): string {
-  return s.replace(/[׳'"״’–—-]/g, '').toLowerCase()
+  return s.replace(/[֑-ׇ]/g, '').replace(/[׳'"״’–—-]/g, '').toLowerCase()
 }
+/* מה שהפרק מלמד — כותרות המקטעים וכותרות המשנה שלו, והמונחים שהקטעים שלו מדגישים.
+   אינדקס קטן (‎~7KB‎) שנבנה מ-layout.json / passages.json של כל פרק, כדי שהחיפוש
+   ימצא „תפילה" בפרק 6 בלי לטעון לכאן את נתוני כל הפרקים. */
+const TOPICS = CHAPTER_TOPICS as unknown as Record<string, string[] | undefined>
 function chapterHit(chp: ChapterDef, q: string): boolean {
   const nq = norm(q)
   if (!nq) return true
-  return norm(chp.title).includes(nq) || String(chp.number) === q.trim() || norm('פרק ' + chp.number).includes(nq)
+  return (
+    norm(chp.title).includes(nq) ||
+    String(chp.number) === q.trim() ||
+    norm('פרק ' + chp.number).includes(nq) ||
+    topicHit(chp, q) !== null
+  )
+}
+/** the first section title / term of the chapter that matches — shown on its card */
+function topicHit(chp: ChapterDef, q: string): string | null {
+  const nq = norm(q)
+  if (nq.length < 2) return null
+  return (TOPICS[String(chp.number)] ?? []).find((t) => norm(t).includes(nq)) ?? null
 }
 
 interface ChapterStatus {
@@ -423,7 +440,7 @@ export default function ChaptersScreen() {
           type="text"
           value={query}
           placeholder={placeholder}
-          aria-label="חיפוש פרק"
+          aria-label="חיפוש פרק או נושא"
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e: ReactKeyboardEvent) => {
             if (e.key === 'Escape' && query) setQuery('')
@@ -470,10 +487,14 @@ export default function ChaptersScreen() {
   const tools = secondaryItems.filter((s) => s.id !== 'exams')
   const examItem = secondaryItems.find((s) => s.id === 'exams')
 
+  /* the collapsed rail hides the words (display:none), which also takes the link's accessible
+     name away — so a link in the rail names itself; open, its own text (name + line) does it */
+  const railName = (title: string) => (isDesktop && collapsed ? title : undefined)
+
   function toolRow(s: { id: string; title: string; icon: string; href?: string }) {
     if (s.href)
       return (
-        <Link className="m-item x-item" key={s.id} href={s.href} data-tip={s.title} onClick={() => setDrawer(false)}>
+        <Link className="m-item x-item" key={s.id} href={s.href} data-tip={s.title} aria-label={railName(s.title)} onClick={() => setDrawer(false)}>
           <span className="x-ico" aria-hidden="true">
             {CAT_ICON[s.icon]}
           </span>
@@ -512,7 +533,7 @@ export default function ChaptersScreen() {
         {/* חדר המבחנים — בבלוק משלו, מתחת לכלי העזר: הוא לא חומר עיון אלא מבחן. */}
         {examItem && (
           <nav className="menu-extra menu-exam" aria-label="מבחנים">
-            <Link className="m-item x-item" href="/exams" data-tip={examItem.title} onClick={() => setDrawer(false)}>
+            <Link className="m-item x-item" href="/exams" data-tip={examItem.title} aria-label={railName(examItem.title)} onClick={() => setDrawer(false)}>
               <span className="x-ico" aria-hidden="true">
                 {CAT_ICON[examItem.icon]}
               </span>
@@ -522,7 +543,7 @@ export default function ChaptersScreen() {
         )}
         {/* המחברת שלי — היחידה בבלוק שכבר חיה: הערות אישיות לפי פרקים */}
         <nav className="menu-extra menu-exam menu-notebook" aria-label="המחברת שלי">
-          <Link className="m-item x-item" href="/notebook" data-tip="המחברת שלי" onClick={() => setDrawer(false)}>
+          <Link className="m-item x-item" href="/notebook" data-tip="המחברת שלי" aria-label={railName('המחברת שלי')} onClick={() => setDrawer(false)}>
             <span className="x-ico" aria-hidden="true">
               <FIcon d={IF_NOTEBOOK} />
             </span>
@@ -536,8 +557,12 @@ export default function ChaptersScreen() {
   function card(chp: ChapterDef, idx: number) {
     const st = status[chp.number]
     const progress = st?.progress ?? 0
+    /* the search found this chapter by one of its sections or terms, not by its name —
+       say which, or the card looks like a wrong result */
+    const hit = q && !norm(chp.title).includes(norm(q)) ? topicHit(chp, q) : null
     const label =
       `פרק ${chp.number} — ${chp.title}` +
+      (hit ? ` — נמצא: ${hit}` : '') +
       (st?.completed ? ' — הושלם' + (st.score !== null ? ` — ציון ${st.score}` : '') : progress > 0 ? ` — ${progress}% הושלמו` : '') +
       (chp.available ? '' : ' — יעלה בקרוב')
     const inner = (
@@ -558,6 +583,7 @@ export default function ChaptersScreen() {
             פרק {chp.number}
             {st?.completed && st.score !== null && <span className="card-score"> · ציון {st.score}</span>}
           </span>
+          {hit && <span className="card-hit">נמצא: {hit}</span>}
           {progress > 0 && (
             <span className="card-progress" aria-hidden="true">
               <i style={{ width: progress + '%' }} />
@@ -611,7 +637,8 @@ export default function ChaptersScreen() {
             >
               ?
             </button>
-            {searchField('hdr-search', 'חיפוש...', true)}
+            {/* the phone's field is ~150px — the long hint would be cut mid-word */}
+            {searchField('hdr-search', isDesktop ? 'חיפוש פרק או נושא…' : 'פרק או נושא…', true)}
           </div>
         </div>
       </header>
@@ -696,7 +723,7 @@ export default function ChaptersScreen() {
 
           {/* ============ all chapters ============ */}
           <section className="sec chapters-panel" aria-label="פרקי הלמידה">
-            {/* YouTube-style topic chips: filter the grid; "הכל" clears the filter */}
+            {/* YouTube-style topic chips: filter the grid; "הכול" clears the filter */}
             <div className="chip-row" role="group" aria-label="סינון לפי נושא">
               <button
                 type="button"
@@ -704,7 +731,7 @@ export default function ChaptersScreen() {
                 aria-pressed={activeTopic === null}
                 onClick={() => setActiveTopic(null)}
               >
-                הכל
+                הכול
               </button>
               {chapterCategories.map((cat) => (
                 <button
@@ -723,6 +750,12 @@ export default function ChaptersScreen() {
             ) : (
               <div className="grid-empty">
                 <p>לא נמצאו פרקים התואמים לחיפוש</p>
+                {q && (
+                  <p className="grid-empty-hint">
+                    מחפשים מושג?{' '}
+                    <Link href={`/glossary?q=${encodeURIComponent(q)}`}>חיפוש „{q}” במילון המונחים</Link>
+                  </p>
+                )}
                 <button type="button" className="empty-clear" onClick={() => { setQuery(''); setActiveTopic(null) }}>
                   ניקוי החיפוש
                 </button>

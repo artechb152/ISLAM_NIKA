@@ -3,7 +3,7 @@
 /* חדר המבחנים.
 
    ארבעה מסכים ומכונת מצבים אחת ביניהם: בונים מבחן, יושבים בו, מקבלים ציון
-   וסוקרים, ומסתכלים על ההיסטוריה. הכל בעמוד אחד, ללא ניתוב — מבחן שנפתח
+   וסוקרים, ומסתכלים על ההיסטוריה. הכול בעמוד אחד, ללא ניתוב — מבחן שנפתח
    בכתובת משלו אפשר לרענן באמצע ולאבד, וזה בדיוק מה שאסור לו לעשות.
 
    ⚠ המעטפת היא PracticeNav — המעטפת של האתר, לא מעטפת דומה לה.
@@ -79,6 +79,15 @@ function fmtDate(ms: number): string {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+/** „פרק 6" / „פרקים 2, 6" — יחיד ורבים */
+function chaptersLabel(list: number[]): string {
+  return list.length === 1 ? `פרק ${list[0]}` : `פרקים ${list.join(', ')}`
+}
+/** „בפרק אחד" / „ב-3 פרקים" */
+function inChapters(n: number): string {
+  return n === 1 ? 'בפרק אחד' : `ב-${n} פרקים`
 }
 
 export default function ExamRoom() {
@@ -248,21 +257,23 @@ export default function ExamRoom() {
   /* סרגל הצד הוא ניווט גם במבחן: כל שורה בו קישור `#xq-…`. כשעל המסך שאלה
      אחת, היעד של שורה אחרת אינו קיים בעמוד — ולכן הלחיצה נתפסת כאן ומחליפה
      שאלה במקום לחפש עוגן. */
+  /* בזמן מבחן שורה בסרגל היא פרק ולא שאלה (המספרים מעל השאלה הם הניווט בין
+     שאלות). לחיצה עליה עוברת לשאלה הראשונה שלא נענתה באותו פרק, או לראשונה בו. */
   useEffect(() => {
     if (view !== 'sit') return
-    const byHash = new Map(items.map(({ q }, i) => [q.id, i] as const))
     const onClick = (e: MouseEvent) => {
-      const a = (e.target as Element | null)?.closest?.('.chapter-menu-nav a[href^="#xq-"]')
+      const a = (e.target as Element | null)?.closest?.('.chapter-menu-nav a[href^="#xc-"]')
       if (!a) return
-      const id = (a.getAttribute('href') ?? '').slice(4).replace(/-go$/, '')
-      const i = byHash.get(id)
-      if (i === undefined) return
+      const ch = Number((a.getAttribute('href') ?? '').slice(4).replace(/-go$/, ''))
+      const inCh = items.map((it, i) => ({ it, i })).filter(({ it }) => it.chapter === ch)
+      if (!inCh.length) return
       e.preventDefault()
-      go(i)
+      const open = inCh.find(({ it }) => !isFilled(it.q, answers[it.q.id]))
+      go((open ?? inCh[0]).i)
     }
     document.addEventListener('click', onClick, true)
     return () => document.removeEventListener('click', onClick, true)
-  }, [view, items, go])
+  }, [view, items, answers, go])
 
   /* הערכה עצמית של שאלה פתוחה מתעדכנת גם ברשומה השמורה, אחרת ציון שנקבע
      אחרי ההגשה לא היה חוזר בסקירה של מחר. */
@@ -333,16 +344,31 @@ export default function ExamRoom() {
     if (view === 'history') {
       return history.map((a) => ({ id: `xh-${a.id}`, label: fmtDate(a.at), done: true }))
     }
-    return items.map(({ q, chapter }, i) => {
+    /* במבחן: שורה לכל פרק, עם כמה מהשאלות שלו נענו. שורה לכל שאלה („01 פרק 6"…)
+       שכפלה את רצועת המספרים שמעל השאלה — עשרים שורות שאומרות אותו דבר פעמיים.
+       ⚠ רק הפרק של השאלה שעל המסך נושא את המזהה האמיתי. הסרגל מסמן את השורה
+       הנוכחית לפי IntersectionObserver על המזהים, ונדרך מחדש רק כשרשימת המזהים
+       משתנה — אז היא משתנה עם כל מעבר פרק, והפרק שעל המסך הוא היחיד שנמצא. */
+    if (view === 'sit') {
+      const curCh = items[cur]?.chapter
+      const chs = [...new Set(items.map((it) => it.chapter))]
+      return chs.map((ch) => {
+        const its = items.filter((it) => it.chapter === ch)
+        const n = its.filter((it) => isFilled(it.q, answers[it.q.id])).length
+        return {
+          id: ch === curCh ? `xc-${ch}` : `xc-${ch}-go`,
+          label: `פרק ${ch} · נענו ${n}/${its.length}`,
+          done: n === its.length,
+        }
+      })
+    }
+    /* הסקירה: שורה לכל שאלה, והווי אומר „נכונה“ */
+    return items.map(({ q, chapter }) => {
       const a = answers[q.id]
       return {
-        /* ⚠ במבחן, רק השאלה שעל המסך נושאת את המזהה האמיתי. הסרגל מסמן את
-           השורה הנוכחית לפי IntersectionObserver על המזהים האלה, והוא נדרך מחדש
-           רק כשרשימת המזהים משתנה — אז היא משתנה עם כל מעבר שאלה, והשאלה שעל
-           המסך היא היחידה שנמצאת. בלי זה השורה הראשונה נשארת מסומנת לכל המבחן. */
-        id: view === 'sit' && i !== cur ? `xq-${q.id}-go` : `xq-${q.id}`,
+        id: `xq-${q.id}`,
         label: `פרק ${chapter}` + (q.type === 'open' ? ' · פתוחה' : ''),
-        done: view === 'result' ? (q.type === 'open' ? !!grades[q.id] : isRight(q, a)) : isFilled(q, a),
+        done: q.type === 'open' ? !!grades[q.id] : isRight(q, a),
       }
     })
   }, [view, picked, history, items, answers, grades, cur])
@@ -351,16 +377,16 @@ export default function ExamRoom() {
      הם צריכים להיות גלויים תמיד, והחזרה צריכה לעבור דרך אישור. */
   const hud =
     view === 'sit' ? (
-      <div className="xr-hud">
+      <div className={'xr-hud' + (limit > 0 ? ' is-timed' : '')}>
         <span className="xr-count">
-          {answeredCount} / {items.length}
+          נענו {answeredCount} / {items.length}
         </span>
-        {limit > 0 ? (
-          <span className={'xr-clock' + (remaining <= 60 ? ' is-low' : '')} role="timer" aria-live="off">
+        {/* שעון רק במבחן עם הגבלת זמן. „בלי הגבלת זמן" ושעון רץ בפינה סתרו זה את זה */}
+        {limit > 0 && (
+          <span className={'xr-clock' + (remaining <= 60 ? ' is-low' : '')} role="timer" aria-live="off" aria-label={`הזמן שנותר ${fmtClock(remaining)}`}>
+            <small aria-hidden="true">נותרו</small>
             {fmtClock(remaining)}
           </span>
-        ) : (
-          <span className="xr-clock is-up">{fmtClock(elapsed)}</span>
         )}
       </div>
     ) : undefined
@@ -401,7 +427,7 @@ export default function ExamRoom() {
             <div className="xr-lead">
               <h1>המבחן</h1>
               <p>
-                {items.length} שאלות מ-{attempt?.chapters.length} פרקים, שאלה אחת בכל פעם. אפשר לדלג ולחזור
+                {items.length} שאלות {attempt?.chapters.length === 1 ? 'מפרק אחד' : `מ-${attempt?.chapters.length} פרקים`}, שאלה אחת בכל פעם. אפשר לדלג ולחזור
                 דרך המספרים, וההגשה בשאלה האחרונה.
                 {limit > 0
                   ? ` הזמן: ${fmtSpan(limit)} (${perQuestionLabel(attempt?.perQ ?? PER_QUESTION_DEFAULT)}). בסופו המבחן ייבדק מעצמו.`
@@ -435,9 +461,10 @@ export default function ExamRoom() {
               </p>
             </nav>
 
+            {/* העוגן של שורת הפרק הנוכחי בסרגל — הסרגל מסמן את הפרק שהמזהה שלו על המסך */}
+            <div id={`xc-${chapter}`}>
             <p className="xr-progress" ref={progressRef} tabIndex={-1} aria-live="polite">
               <b>שאלה {cur + 1} מתוך {items.length}</b>
-              <span>נענו {answeredCount}</span>
             </p>
 
             <ExamQuestion
@@ -451,6 +478,7 @@ export default function ExamRoom() {
               held={held}
               setHeld={setHeld}
             />
+            </div>
 
             {/* „הבא“ ו„הגשה“ הם שני כפתורים ולא כפתור אחד שמחליף תווית — אחרת
                 לחיצה כפולה על „הבא“ בשאלה הלפני-אחרונה הייתה מגישה את המבחן */}
@@ -525,7 +553,7 @@ export default function ExamRoom() {
                 </ul>
               )}
               <p className="xr-score-meta">
-                {fmtDate(attempt.at)} · פרקים {attempt.chapters.join(', ')} · משך {fmtClock(Math.floor(attempt.elapsedMs / 1000))}
+                {fmtDate(attempt.at)} · {chaptersLabel(attempt.chapters)} · משך {fmtClock(Math.floor(attempt.elapsedMs / 1000))}
               </p>
               {score.openUngraded > 0 && (
                 <p className="xr-score-warn">
@@ -592,7 +620,7 @@ export default function ExamRoom() {
                         <span className="xr-hbody">
                           <b>{fmtDate(a.at)}</b>
                           <span>
-                            פרקים {a.chapters.join(', ')} · {a.items.length} שאלות · {fmtClock(Math.floor(a.elapsedMs / 1000))}
+                            {chaptersLabel(a.chapters)} · {a.items.length} שאלות · {fmtClock(Math.floor(a.elapsedMs / 1000))}
                             {a.timed && (a.perQ ? ` · ${perQuestionLabel(a.perQ)}` : ' · עם שעון')}
                             {s.openUngraded > 0 && ` · ${s.openUngraded} פתוחות לא הוערכו`}
                           </span>
@@ -695,37 +723,24 @@ function Build({
             <p>אפשר לבחור כמה שרוצים. הסינון לפי נושא מצמצם את הרשימה, ואינו מבטל בחירה שכבר נעשתה.</p>
           </div>
         </header>
-        <TopicFilter
-          active={topic}
-          onPick={setTopic}
-          options={topics}
-          allCount={BANKS.length}
-          label="סינון הפרקים לפי נושא"
-        />
-        <ul className="xr-chapters">
-          {shown.map((b) => {
-            const on = picked.includes(b.chapter)
-            return (
-              <li key={b.chapter}>
-                <button type="button" className={'xr-ch' + (on ? ' is-on' : '')} aria-pressed={on} onClick={() => toggle(b.chapter)}>
-                  <span className="xr-ch-n">{b.chapter}</span>
-                  <span className="xr-ch-name">{b.title}</span>
-                  <span className="xr-ch-count">{examPool(b).length} שאלות במאגר</span>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
-        {/* „בחירת הכל“ פועל על מה שגלוי כרגע ולא על כל הפרקים: שורת סינון שנבחר בה
-            נושא, וכפתור שבוחר גם את מה שהוסתר, הם שני דברים שסותרים זה את זה. */}
-        <div className="xr-chapters-all">
+        {/* „בחירת הכול“ יושב ליד שורת הנושאים, מעל הפרקים — לא אחרי שש-עשרה שורות.
+            הוא פועל על מה שגלוי כרגע ולא על כל הפרקים: שורת סינון שנבחר בה נושא,
+            וכפתור שבוחר גם את מה שהוסתר, הם שני דברים שסותרים זה את זה. */}
+        <div className="xr-filter-row">
+          <TopicFilter
+            active={topic}
+            onPick={setTopic}
+            options={topics}
+            allCount={BANKS.length}
+            label="סינון הפרקים לפי נושא"
+          />
           {(() => {
             const visible = shown.map((b) => b.chapter)
             const allVisiblePicked = visible.length > 0 && visible.every((n) => picked.includes(n))
             return (
               <button
                 type="button"
-                className="xr-secondary"
+                className="xr-secondary xr-all"
                 onClick={() =>
                   setPicked(allVisiblePicked ? picked.filter((n) => !visible.includes(n)) : [...new Set([...picked, ...visible])])
                 }
@@ -734,13 +749,33 @@ function Build({
               </button>
             )
           })()}
-          {picked.length > 0 && (
-            <span className="xr-note">
-              {poolSize} שאלות זמינות ב-{picked.length} פרקים שנבחרו
-              {hiddenPicked > 0 && ` · ${hiddenPicked} מהם מחוץ לנושא המסונן`}.
-            </span>
-          )}
         </div>
+        {/* רשת של שורות שמסמנים — שתיים-שלוש בשורה, אחת בטלפון */}
+        <ul className="xr-chapters">
+          {shown.map((b) => {
+            const on = picked.includes(b.chapter)
+            return (
+              <li key={b.chapter}>
+                <button type="button" className={'xr-ch' + (on ? ' is-on' : '')} aria-pressed={on} onClick={() => toggle(b.chapter)}>
+                  <span className="xr-ch-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12.5 10 17.5 19 7.5" />
+                    </svg>
+                  </span>
+                  <span className="xr-ch-name">
+                    <span className="xr-ch-n">פרק {b.chapter}</span> {b.title}
+                  </span>
+                  <span className="xr-ch-count">{examPool(b).length} שאלות במאגר</span>
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+        {hiddenPicked > 0 && (
+          <p className="xr-note xr-hidden-note">
+            {hiddenPicked === 1 ? 'פרק אחד שנבחר נמצא' : `${hiddenPicked} פרקים שנבחרו נמצאים`} מחוץ לנושא המסונן.
+          </p>
+        )}
       </section>
 
       <section className="xr-step" id="xr-s2" aria-labelledby="xr-s2-t">
@@ -808,12 +843,20 @@ function Build({
         )}
       </section>
 
-      <div className="xr-submit">
+      {/* פס דביק בתחתית המסך: מה ייבנה, וכפתור ההתחלה — תמיד בהישג יד, גם באמצע
+          בחירת הפרקים. הכפתור נשאר נעול עם הסיבה כתובה עליו עד שנבחר פרק. */}
+      <div className="xr-startbar">
         <button type="button" className="xr-go" disabled={!picked.length} onClick={onStart}>
           {picked.length ? 'מתחילים' : 'בחרו פרק אחד לפחות'}
         </button>
+        <p className="xr-startbar-sum" aria-live="polite">
+          {picked.length > 0
+            ? `${poolSize} שאלות זמינות ${inChapters(picked.length)} · המבחן: ${willAsk} שאלות` +
+              (timed ? ` · ${fmtSpan(perQ * willAsk)}` : ' · בלי הגבלת זמן')
+            : 'עוד לא נבחר פרק'}
+        </p>
         {ready && history.length > 0 && (
-          <button type="button" className="xr-secondary" onClick={onHistory}>
+          <button type="button" className="xr-secondary xr-startbar-hist" onClick={onHistory}>
             המבחנים שלי ({history.length})
           </button>
         )}

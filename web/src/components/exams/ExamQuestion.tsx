@@ -296,9 +296,10 @@ export default function ExamQuestion(p: QProps) {
       {mode === 'review' && (
         <footer className="xq-foot">
           <p className="xq-ok">{q.ok}</p>
-          <p className="xq-src">
-            <span>{q.sources}</span>
-            <a href={`/chapter${chapter}`}>לפרק {chapter}</a>
+          {/* `q.sources` הוא מזהה קטע פנימי (‎§7, rm-2‎) — הוא קושר את השאלה למקור בשער,
+              ואין לו משמעות לקוראת; על המסך רק הדרך חזרה לפרק */}
+          <p className="xq-src" data-source={q.sources}>
+            <a href={`/chapter${chapter}`}>לקריאה חוזרת בפרק {chapter}</a>
           </p>
         </footer>
       )}

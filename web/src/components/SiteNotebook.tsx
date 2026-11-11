@@ -8,6 +8,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import SiteFooter from '@/components/SiteFooter'
 import TopicFilter from '@/components/TopicFilter'
 import { allChapters, categoryOfChapter } from '@/lib/chapters-data'
 import { deleteMark, GOTO_PARAM, MARKS_EVENT, readMarks, setMarkNote, type Mark } from '@/lib/site-notebook'
@@ -108,7 +109,7 @@ export default function SiteNotebook() {
   }
 
   return (
-    <div className="chapter-page">
+    <div className="chapter-page nb-page">
       <header className="chapter-site-header">
         <div className="chapter-site-header-inner">
           <div className="chapter-hdr-start">
@@ -182,12 +183,21 @@ export default function SiteNotebook() {
                 <h1 className="nb-h1">מה שסימנתם לעצמכם</h1>
                 {/* הספירה היא של מה שגלוי כרגע. כותרת שסופרת את הכל מעל רשימה
                     מסוננת סותרת את מה שרואים מתחתיה. */}
-                <p className="opening-subtitle">
-                  {ready && marks.length > 0
-                    ? `${sections.reduce((n, s) => n + s.marks.length, 0)} סימונים ב-${sections.length} פרקים` +
-                      (active ? ' · מסונן לפי נושא' : '')
-                    : 'כאן נאסף מה שסימנתם בפרקים'}
-                </p>
+                {/* בלי סימונים אין שורת משנה: „כאן נאסף מה שסימנתם" חזר על הכותרת, וההסבר
+                    איך מסמנים כבר יושב בפסקה שמתחת */}
+                {ready && marks.length > 0 && (
+                  <p className="opening-subtitle">
+                    {(() => {
+                      const n = sections.reduce((k, s) => k + s.marks.length, 0)
+                      const c = sections.length
+                      return (
+                        (n === 1 ? 'סימון אחד' : `${n} סימונים`) +
+                        (c === 1 ? ' בפרק אחד' : ` ב-${c} פרקים`) +
+                        (active ? ' · מסונן לפי נושא' : '')
+                      )
+                    })()}
+                  </p>
+                )}
                 <div className="nb-lede">
                   <p>
                     במהלך הקריאה בפרק אפשר לסמן משפט — בעכבר, או בלחיצה ארוכה בטלפון —
@@ -310,6 +320,8 @@ export default function SiteNotebook() {
               ))}
             </main>
           </div>
+          {/* the shared footer, as under every other page of the site */}
+          <SiteFooter />
         </div>
       </div>
     </div>

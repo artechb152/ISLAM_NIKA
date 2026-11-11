@@ -234,5 +234,31 @@
 .ch1-word.is-flipped .is-front{transform:rotateY(-180deg)}
 .ch1-word.is-flipped .is-back{transform:rotateY(0)}
 .chapter-article .ch1-words-caption{text-align:center;margin-top:14px;font:500 16px/1.5 var(--font-body);color:var(--muted)}
-@media (max-width:560px){.ch1-word{aspect-ratio:1}.ch1-word-face.is-back small{font-size:13px}}
+/* the sign that the card turns: a small arrow pair in the reading corner of both faces
+   (the fronts gave no hint, audit 11.11) */
+.ch1-word-face{position:relative;padding-inline:10px;text-align:center}
+.ch1-word-flip{position:absolute;top:10px;inset-inline-start:10px;width:18px;height:18px;
+  fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
+.ch1-word-face.is-back .ch1-word-flip{stroke:var(--gold-soft)}
+.ch1-word:hover .is-front .ch1-word-flip{stroke:var(--maroon);opacity:1}
+/* a phone: three 103px cards — the two-word front („עט כתיבה") wraps onto two lines
+   instead of pressing against the edges */
+@media (max-width:560px){
+  .ch1-word{aspect-ratio:1}
+  .ch1-word-face{padding-inline:6px}
+  .ch1-word-face.is-front b{font-size:20px;line-height:1.15;text-wrap:balance}
+  .ch1-word-face.is-back b{font-size:22px}
+  .ch1-word-face.is-back small{font-size:13px}
+  .ch1-word-flip{top:7px;inset-inline-start:7px;width:15px;height:15px}
+}
 @media (prefers-reduced-motion:reduce){.ch1-word-face{transition:none}}
+
+/* ============================ the line ============================
+   11.11.2026, the user: „תקצר את השורות". Running prose ran the whole 1025px column at
+   1440 — up to 123 characters a line. It now stops at chapter 6's reading measure, 760px
+   (~70 characters at 20px), on the reading edge; the devices, the cover, the cards, the
+   statement and the map keep their own widths, so the alternation of rule 48 stays. */
+.chapter-article > section > p,
+.chapter-article > section > :is(ul,ol){max-width:760px}
+/* the sentence under each row of tablets belongs to that centred device: centred with it */
+.chapter-article .ch1-idols-text{max-width:760px;width:100%;margin-inline:auto}

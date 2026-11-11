@@ -11,6 +11,16 @@
    teaches, rather than a tick that congratulates. */
 
 import { FEEDBACK, type McqDef } from '@/lib/chapter6/summary-data'
+import { okBody } from '@/components/practice/opener'
+
+/* a ruled-out option says so with a mark, not with its fade alone (11.11.2026) */
+export function WrongMark() {
+  return (
+    <svg className="gv-x" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round">
+      <path d="M7 7l10 10M17 7 7 17" />
+    </svg>
+  )
+}
 
 export default function Mcq({
   q,
@@ -42,7 +52,9 @@ export default function Mcq({
               disabled={answered || isWrong}
               aria-disabled={answered || isWrong ? true : undefined}
             >
+              {isWrong && <WrongMark />}
               {o}
+              {isWrong && <span className="sr-only"> — לא נכון</span>}
             </button>
           )
         })}
@@ -54,7 +66,9 @@ export default function Mcq({
               <path d="M5 12.5 10 17.5 19 7.5" />
             </svg>
           </span>
-          {q.ok}
+          {/* the success opener is one word on every practice: the mark says „נכון" */}
+          <b className="gv-ok-word">נכון</b>
+          <span>{okBody(q.ok)}</span>
         </p>
       )}
       {/* nothing at all until there IS something to say. The exercises reserve a feedback line

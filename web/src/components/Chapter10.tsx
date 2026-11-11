@@ -207,9 +207,9 @@ function Split({ id, a, d }: { id: string; a: React.ReactNode; d: React.ReactNod
     <div className="ch10-split">
       <div className="ch10-sides">
         {name('a')}
-        {focus
-          ? <button type="button" className="ch10-both" onClick={() => setFocus(null)}>שניהם</button>
-          : <i aria-hidden="true" />}
+        {/* always there (UX pass 11.11.2026): it appeared only after a press, 27px high, so the
+            band read as two headings and not as a three-way choice */}
+        <button type="button" className="ch10-both" aria-pressed={focus === null} onClick={() => setFocus(null)}>שניהם</button>
         {name('d')}
       </div>
       {col('a', a)}

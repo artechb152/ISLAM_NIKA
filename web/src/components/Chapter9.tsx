@@ -508,7 +508,7 @@ function Balance() {
               <div className={'ch9-bal-st' + (k === i ? ' is-on' : '')} key={k} aria-hidden={k !== i}>
                 <div className={'ch9-bal-media' + (x.art === 'night' ? ' is-muted' : '')}>{art(x.art)}</div>
                 <span className="ch9-bal-yr">{one(x.year)}</span>
-                <h4>{one(x.title)}</h4>
+                <h3>{one(x.title)}</h3>
                 <p>{sentences(groupsRefs[k])}</p>
               </div>
             ))}
@@ -599,7 +599,7 @@ function Pair() {
     <div className="ch9-pair" data-reveal>
       {meta('growth').pair!.map((c) => (
         <div className="ch9-card" key={one(c.name)}>
-          <h4>{one(c.name)} · <span className="ch9-tr">{one(c.tr)}</span></h4>
+          <h3>{one(c.name)} · <span className="ch9-tr">{one(c.tr)}</span></h3>
           <p>{one(c.say)}</p>
         </div>
       ))}

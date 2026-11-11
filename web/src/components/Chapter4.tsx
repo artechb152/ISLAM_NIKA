@@ -483,7 +483,9 @@ function More({ id, title, children }: { id: string; title: string; children: Re
           }}
         >
           <span aria-hidden="true">+</span>
-          להרחבה
+          {/* names its door, like chapter 6's „+ להרחבה: {topic}" (audit 11.11) — the
+              title already reads „להרחבה: …", so it IS the label */}
+          {title}
         </button>
       </p>
       <dialog

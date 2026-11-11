@@ -164,3 +164,24 @@
 }
 @media (prefers-reduced-motion:reduce){ .ch16-days-cells li,.ch16-cal-dot{transition:none} }
 
+
+/* ===== LINE LENGTH (11.11.2026 — the user: „תקצר את השורות") =====
+   Overrides rule 48 („prose on the full column"): at 1440 a paragraph ran the whole 1025px
+   column, 105–128 characters a line. Running prose now stops at chapter 6's own reading
+   measure, min(760px,100%), on the reading edge (right) — ~85 characters, the line chapter 6's
+   `.rm-dayline` sets. Zero specificity, so every device or centred line that names its own
+   width keeps it; mechanisms, maps, scenes, pictures and bleeds stay wide. */
+:where(.chapter-article > section) > p{max-width:760px}
+/* the axis rows: the node and rail stay on the column's edge, the words stop at the measure */
+:where(.ch16-occ) > p{max-width:760px}
+
+/* ===== UX pass 11.11.2026 — tap targets and the two tracks in words =====
+   1 · the wheel's dots were 17px at 390 and 26px at 1440: an invisible 44px hit area around
+       each (::before), the drawn dot unchanged;
+   2 · list rows 39px → 44, and „למקטע" (59×26) a 44px-high target;
+   3 · a Shi'i row differed from the others only by its dot's colour — it now says so („שיעי"). */
+.ch16-cal-dot::before{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;translate:-50% -50%;border-radius:50%}
+.ch16-cal-list button{min-height:44px;align-items:center}
+.chapter-article .ch16-cal-go{display:inline-flex;align-items:center;min-height:44px;padding-inline:10px;margin-inline-end:0}
+.ch16-cal-tag{font-style:normal;font-size:14px;font-weight:700;line-height:1.3;color:var(--ink);
+  padding:1px 9px;border-radius:999px;border:1px solid color-mix(in srgb,var(--ink) 45%,transparent)}

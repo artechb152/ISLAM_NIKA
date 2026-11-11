@@ -42,6 +42,20 @@ export default function Maps() {
     if (!d) return
     if (open && !d.open) d.showModal()
     if (!open && d.open) d.close()
+    /* on the phone the enlarged map opens scrolled to its middle, not pinned to one edge */
+    const frame = d.querySelector<HTMLElement>('.ref-lightbox-frame')
+    const img = frame?.querySelector('img')
+    const centre = () => {
+      if (!frame) return
+      const dx = frame.scrollWidth - frame.clientWidth
+      const dy = frame.scrollHeight - frame.clientHeight
+      if (dx > 0) frame.scrollLeft = -dx / 2 // RTL: scrollLeft runs 0 → negative
+      if (dy > 0) frame.scrollTop = dy / 2
+    }
+    if (open && img) {
+      if (img.complete) centre()
+      else img.addEventListener('load', centre, { once: true })
+    }
   }, [open])
 
   /* שורה לכל עמוד בחוברת: מה שחלק עמוד עומד יחד */
@@ -70,11 +84,18 @@ export default function Maps() {
       >
         {open && (
           <figure style={{ ['--map-w' as string]: `${open.dw * 2}px` }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={open.src} width={open.w} height={open.h} alt={open.caption} />
+            {/* בטלפון המסגרת נגללת לשני הכיוונים והמפה בה במידת הקובץ — אחרת „הגדלה"
+                הייתה מציגה אותה ברוחב המסך, כמעט כמו בעמוד עצמו */}
+            <div className="ref-lightbox-frame" tabIndex={0} role="group" aria-label="המפה — אפשר לגלול ולהגדיל">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={open.src} width={open.w} height={open.h} alt={open.caption} />
+            </div>
             <figcaption>
               <b>{open.caption}</b>
               <span>{open.credit}</span>
+              <a className="ref-lightbox-file" href={open.src} target="_blank" rel="noopener noreferrer">
+                פתיחת קובץ המפה בלשונית חדשה
+              </a>
             </figcaption>
           </figure>
         )}

@@ -221,3 +221,12 @@ a.ch13-go { display: inline-block; text-decoration: none; }
   .ch13-textveil { padding: 8px; }
   .ch13-textbox { max-height: calc(100dvh - 16px); }
 }
+
+/* ── כרטיס הפתיחה: הוראות לפי סוג המצביע (סבב UX, 11.11.2026) ──
+   במגע אין מקלדת ואין נעילת סמן — הכרטיס מראה את לוח החצים, את הגרירה ואת ההקשה על שם הדגל */
+.ch13-keys .is-touch { display: none; }
+@media (pointer: coarse) {
+  .ch13-keys .is-key { display: none; }
+  .ch13-keys .is-touch { display: list-item; }
+}
+.ch13-keys kbd { min-width: 1.8em; }

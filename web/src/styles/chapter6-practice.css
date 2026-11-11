@@ -669,3 +669,66 @@
   .gv-slot.is-refused,.gv-fin.is-fresh{animation:none}
   .gv-slot-n,.gv-chip,.gv-end-ico,.gv-pick{transition:none}
 }
+
+/* ======================================================== 11.11.2026 — the audit ====
+   WRONG IS MARKED, NOT ONLY FADED. A ruled-out option carried nothing but `opacity:.38` — a
+   state told by tone alone. It now carries a ✕ and a dashed stamp-red line, and its text is
+   struck through; the fade stays, so the field still narrows the way the chapter's own check
+   narrows it. */
+.gv-pick.is-wrong{
+  display:inline-flex;align-items:center;gap:7px;
+  border-style:dashed;border-color:var(--stamp);text-decoration:line-through;text-decoration-thickness:1px;
+}
+.gv-x{width:16px;height:16px;flex:none;color:var(--stamp)}
+/* the success opener is one word on every practice („נכון"), set the way the tick beside it is */
+.gv-ok-word{flex:none;font-family:var(--font-heading);font-weight:700;color:var(--maroon)}
+.gv-closing-miss.gv-feedback{margin-top:14px}
+
+/* AN EMPTY PIN IS A 44px TARGET. The dot stays the article's size; a transparent disc around it
+   takes the tap. Only the EMPTY pin gets one: a filled pin is no longer a target. */
+.gv-map .gv-slot.is-empty::before{
+  content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;
+  translate:-50% -50%;border-radius:50%;
+}
+
+/* THE MAP FITS THE COLUMN ON A PHONE. Below 720px the painting took a 620px floor and the
+   wrapper scrolled sideways — on a 390px phone the column is 334px, so stations 4 and 5 started
+   off-screen with nothing saying they were there. The pins are per cent, so the painting can
+   simply be the column's width.
+
+   What the floor protected: „טוואף" (80/74) and „סעי" (84/80) are ~19px apart at 334px, closer
+   than a dot plus its tap disc. So here a pin is laid out WITHOUT a transform (a transform makes
+   every pin its own stacking context, and the later pin's tap disc would then cover the earlier
+   pin's dot): the pin box is exactly the dot, centred on its coordinate by negative margins, the
+   name hangs under it absolutely, and every dot (z-index 1) paints above every tap disc (auto) —
+   a tap on a dot always lands on that dot, a tap beside it on the nearest disc. Measured with
+   elementFromPoint at each dot's centre. */
+@media (max-width:720px){
+  .gv-mapwrap{overflow-x:visible}
+  .gv-map{min-width:0;width:100%}
+  .gv-map .gv-slot{
+    transform:none;z-index:auto;display:block;
+    width:26px;height:26px;margin:-13px 0 0 -13px;
+  }
+  .gv-map .gv-slot-n{position:relative;z-index:1}
+  /* the name sits to the LEFT of its dot, not under it: under it, „טוואף" landed on „סעי"'s dot
+     (4% right, 6% down). Every pin has open painting to its left at this size — the right-hand
+     cluster most of all. Physical `right`, like the pins' `left` (rule 61). */
+  .gv-map .gv-slot-line{position:absolute;z-index:2;top:50%;right:calc(100% + 3px);transform:translateY(-50%)}
+}
+@media (max-width:500px){
+  .gv-map .gv-slot{width:22px;height:22px;margin:-11px 0 0 -11px}
+  .gv-map .gv-slot-n{width:22px;height:22px;font-size:12px}
+  .gv-map .gv-slot-line{font-size:10.5px;padding:1px 4px}
+}
+
+/* THE FIVE AT THE END ON A PHONE. The frieze kept its five columns while each item turned into
+   an icon-beside-name row, so at 390px three of the five names ran out of the column, clipped.
+   Two columns of rows (measured at 334px: the longest name fits). */
+@media (max-width:720px){
+  .gv-end-frieze{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}
+}
+
+/* the shared lead (PracticeLead) sits between the banner and the first commandment, whose
+   section carries no top rule of its own here — the lead takes the gap below it */
+.chapter-article.gv-article .pscore-lead{margin-bottom:clamp(36px,5vw,64px)}

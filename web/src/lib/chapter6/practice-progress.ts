@@ -6,8 +6,8 @@
    The split matters for one reason: resetting this screen must not cost the reader the chapter
    they already read, and a corrupt store here must not take the chapter down with it.
 
-   TWO DEGREES PER COMMANDMENT. The sidebar (PracticeNav) is the whole progress display —
-   there is no separate bar, and no score. A commandment's row gets its tick at degree 2:
+   TWO DEGREES PER COMMANDMENT. The sidebar (PracticeNav) is the progress display while the
+   reader works; the score comes at the end (see MISSED below). A commandment's row gets its tick at degree 2:
 
      0  nothing yet
      1  its exercise complete
@@ -52,6 +52,12 @@ const VALID = new Set<string>([
   CLOSING_ID,
 ])
 
+/* MISSED (11.11.2026, the score every closing practice now shows). What took a wrong attempt
+   on the way, by the thing the score counts: a commandment's key (its exercise or its beat), a
+   quiz question's id, or CLOSING_ID. Stored beside `done` in the same key; a store written
+   before this existed loads with none. */
+export const MISS_IDS = new Set<string>([...EXERCISES.map((ex) => ex.key), ...QUIZ.map((q) => q.id), CLOSING_ID])
+
 export type Degree = 0 | 1 | 2
 
 export interface PracticeProgress {
@@ -64,13 +70,15 @@ export interface PracticeProgress {
   quizDone: Record<string, boolean>
   closingDone: boolean
   completed: boolean
+  /* score units that took a wrong attempt — see MISSED */
+  missed: string[]
 }
 
 export function emptyProgress(): PracticeProgress {
   return derive([])
 }
 
-export function derive(ids: string[]): PracticeProgress {
+export function derive(ids: string[], missedIds: string[] = []): PracticeProgress {
   const done = ids.filter((id) => VALID.has(idOf(id)))
   const set = new Set(done.map(idOf))
 
@@ -102,6 +110,7 @@ export function derive(ids: string[]): PracticeProgress {
     quizDone,
     closingDone: set.has(CLOSING_ID),
     completed: allFull && allQuiz && set.has(CLOSING_ID),
+    missed: [...new Set(missedIds.filter((m) => MISS_IDS.has(m)))],
   }
 }
 
@@ -112,18 +121,19 @@ export function readPractice(): PracticeProgress {
   try {
     const raw = window.localStorage.getItem(PRACTICE_KEY)
     if (!raw) return emptyProgress()
-    const parsed = JSON.parse(raw) as { done?: unknown } | null
+    const parsed = JSON.parse(raw) as { done?: unknown; missed?: unknown } | null
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.done)) return emptyProgress()
-    return derive(parsed.done.filter((v): v is string => typeof v === 'string'))
+    const missed = Array.isArray(parsed.missed) ? parsed.missed.filter((v): v is string => typeof v === 'string') : []
+    return derive(parsed.done.filter((v): v is string => typeof v === 'string'), missed)
   } catch {
     return emptyProgress()
   }
 }
 
-function write(done: string[]): void {
+function write(done: string[], missed: string[]): void {
   if (typeof window === 'undefined') return
   try {
-    window.localStorage.setItem(PRACTICE_KEY, JSON.stringify({ v: 2, done }))
+    window.localStorage.setItem(PRACTICE_KEY, JSON.stringify({ v: 2, done, missed }))
   } catch {
     /* blocked or full storage must never break the screen — the session stays in memory */
   }
@@ -133,8 +143,17 @@ function write(done: string[]): void {
 export function recordDone(id: string): PracticeProgress {
   const current = readPractice()
   if (current.done.some((e) => idOf(e) === idOf(id))) return current
-  const next = derive([...current.done, id])
-  write(next.done)
+  const next = derive([...current.done, id], current.missed)
+  write(next.done, next.missed)
+  return next
+}
+
+/* Called once per wrong attempt, with the score unit it counts against. Never on render. */
+export function recordMiss(id: string): PracticeProgress {
+  const current = readPractice()
+  if (!MISS_IDS.has(id) || current.missed.includes(id)) return current
+  const next = derive(current.done, [...current.missed, id])
+  write(next.done, next.missed)
   return next
 }
 

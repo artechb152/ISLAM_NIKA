@@ -16,20 +16,24 @@
    THE VERBS COME BACK HERE, and only here: as the chapter's own sentence (drawerContent[2]),
    read rather than operated. A sentence to finish on, not an interface to work.
 
-   No score: the spec is explicit — „לא להציג ציון מספרי אלא סטטוס השלמה ומשוב ממוקד“. */
+   THE SCORE (11.11.2026). The spec once said „לא להציג ציון מספרי אלא סטטוס השלמה ומשוב
+   ממוקד“; the user then asked for a score on every closing practice, and for the reader to be
+   told so up front. It is the shared PracticeScore, under the heading — and its „לחזרה“ links
+   are the focused return the commandments-to-revisit line used to give, so that line is gone. */
 
 import Link from 'next/link'
-import { END, PILLARS, PILLAR_NAME, type PillarKey } from '@/lib/chapter6/summary-data'
+import type { ReactNode } from 'react'
+import { END, PILLARS } from '@/lib/chapter6/summary-data'
 
 export default function ChapterEnd({
-  missed,
+  score,
   onReset,
   confirmReset,
   onAskReset,
   onCancelReset,
 }: {
-  /* the commandments that took a wrong attempt along the way — for the focused return */
-  missed: PillarKey[]
+  /* the score block, with the questions that took a wrong attempt as links back */
+  score: ReactNode
   onReset: () => void
   confirmReset: boolean
   onAskReset: () => void
@@ -51,6 +55,8 @@ export default function ChapterEnd({
         </div>
         <p>{END.lead}</p>
       </header>
+
+      {score}
 
       {/* Not gold-framed. `.shahada-quote` is the chapter's ONE illuminated frame and it is
           already spent on this page — the pilgrimage clause in the closing, just above. A
@@ -77,17 +83,6 @@ export default function ChapterEnd({
           </li>
         ))}
       </ul>
-
-      {missed.length > 0 && (
-        <p className="gv-revisit">
-          <span>{END.revisit}</span>
-          {missed.map((k) => (
-            <Link key={k} href={PILLARS.find((p) => p.key === k)!.anchor}>
-              {PILLAR_NAME[k]}
-            </Link>
-          ))}
-        </p>
-      )}
 
       <div className="gv-out">
         <Link className="chapter-end-back" href="/chapters">

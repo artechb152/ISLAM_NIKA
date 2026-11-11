@@ -7,7 +7,11 @@
    לשנות את מה שהתרגול כותב. הוא נשמר גם ב-`islam:score:N` (אחוז), כדי שמסך הפרקים יוכל להראות
    אותו, וגם נקרא מחדש כשחוזרים לתרגול שכבר הושלם.
 
-   השאלות שדרשו ניסיון נוסף מופיעות כקישורים אל השאלה עצמה — „לחזרה". */
+   השאלות שדרשו ניסיון נוסף מופיעות כקישורים אל השאלה עצמה — „לחזרה".
+
+   ⚠ הלומד יודע מראש שיש ציון (המשתמשת, 11.11.2026). עד אז כל פתיח אמר „אין ניקוד ואין
+   כישלון" — ובסוף הופיע ציון. `PracticeLead` הוא הפתיח היחיד של כל התרגולים, כולל פרק 6,
+   ומילה אחת לאורך כל האתר: „ציון", אף פעם לא „ניקוד". */
 import '@/styles/practice-score.css'
 import { useEffect } from 'react'
 
@@ -24,6 +28,26 @@ export function readScore(chapter: number): number | null {
   }
 }
 
+/* המספר בפתיח נגזר ממספר השאלות (כלל 32) — ובמילים, כמו בכל משפט באתר */
+const COUNT_WORDS: Record<number, string> = {
+  2: 'שתי', 3: 'שלוש', 4: 'ארבע', 5: 'חמש', 6: 'שש', 7: 'שבע', 8: 'שמונה', 9: 'תשע', 10: 'עשר',
+  11: 'אחת-עשרה', 12: 'שתים-עשרה', 13: 'שלוש-עשרה', 14: 'ארבע-עשרה', 15: 'חמש-עשרה',
+}
+export const countWord = (n: number): string => COUNT_WORDS[n] ?? String(n)
+
+/** הפתיח של כל תרגול מסכם: כמה שאלות, ושבסוף יש ציון ועל מה הוא נספר */
+export function PracticeLead({ title, count }: { title: string; count: number }) {
+  return (
+    <p className="pscore-lead" data-reveal>
+      {title} — {countWord(count)} שאלות.{' '}
+      <span className="pscore-lead-key">
+        בסוף התרגול מקבלים ציון: הוא סופר את השאלות שנענו נכון בניסיון הראשון.
+      </span>{' '}
+      אחרי טעות אפשר לנסות שוב, עד שהתשובה נכונה.
+    </p>
+  )
+}
+
 export default function PracticeScore({
   chapter,
   questions,
@@ -31,7 +55,8 @@ export default function PracticeScore({
   idPrefix = 'p2-',
 }: {
   chapter: number
-  questions: { id: string; label: string }[]
+  /** `href` כשהעוגן של השאלה אינו `#${idPrefix}${id}` (פרק 6: שתי שאלות חולקות מקטע אחד) */
+  questions: { id: string; label: string; href?: string }[]
   missed: string[]
   /** הקידומת של ה-id שעל כל שאלה בעמוד, ליעד של „לחזרה" */
   idPrefix?: string
@@ -62,7 +87,7 @@ export default function PracticeScore({
         <div className="pscore-review">
           <span>לחזרה:</span>
           {retried.map((q) => (
-            <a key={q.id} href={`#${idPrefix}${q.id}`}>
+            <a key={q.id} href={q.href ?? `#${idPrefix}${q.id}`}>
               {q.label}
             </a>
           ))}

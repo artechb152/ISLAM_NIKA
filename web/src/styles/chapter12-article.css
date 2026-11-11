@@ -163,3 +163,31 @@
   .ch12-desk-hit polygon{transition:none}
   .ch12-unit:not(.is-away){animation:none}
 }
+
+/* ===== UX pass 11.11.2026 — the desk says what it is for =====
+   1 · one editorial line under the title („בחרו תיק כדי לפתוח אותו");
+   2 · the hover/focus name sits ON the folder (at its measured centre), not under the outline's
+       bounding box where the site's tag put 01's name on folder 04's label;
+   3 · at ≤900px the folder names in the render are ~8px and there is no hover, so the five
+       folders are also a list of real links, ≥44px each, under the desk. */
+.ch12-desk-stage{position:relative}
+.chapter-article .ch12-desk-hint{margin:clamp(6px,1vw,12px) 0 0;font-family:var(--font-heading);font-weight:700;
+  font-size:clamp(17px,1.5vw,21px);line-height:1.3;color:var(--cream);text-shadow:0 1px 10px rgba(30,18,8,.7)}
+.ch12-desk-tag{position:absolute;z-index:2;translate:-50% -50%;pointer-events:none;white-space:nowrap;
+  padding:5px 14px;border-radius:999px;background:var(--maroon-deep);color:var(--cream);box-shadow:var(--shadow);
+  font-family:var(--font-heading);font-weight:700;font-size:16px;line-height:1.3}
+.ch12-desk-tag b{color:var(--gold-soft);margin-inline-end:4px}
+.ch12-desk-list{display:none}
+@media (max-width:900px){
+  .chapter-article .ch12-desk-hint{display:none}
+  .ch12-desk-tag{display:none}
+  .ch12-desk-list{display:block;background:var(--panel);padding:16px var(--content-gutter) 22px}
+  .chapter-article .ch12-desk-list-hint{margin:0 0 10px;font-family:var(--font-heading);font-weight:700;font-size:17px;color:var(--maroon)}
+  .ch12-desk-list ol{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .ch12-desk-list a{display:flex;align-items:center;gap:10px;min-height:48px;box-sizing:border-box;padding:8px 16px;
+    border:1px solid var(--edge);border-radius:14px;background:var(--paper);text-decoration:none;
+    font-family:var(--font-heading);font-weight:700;font-size:18px;line-height:1.3;color:var(--maroon-deep)}
+  .ch12-desk-list a b{color:var(--stamp);font-variant-numeric:tabular-nums}
+  .ch12-desk-list a::after{content:"←";margin-inline-start:auto;color:var(--maroon)}
+  .ch12-desk-list a:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
+}

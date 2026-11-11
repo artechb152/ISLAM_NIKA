@@ -220,3 +220,22 @@
   /* outranks the original odd-day rule above (three pseudo-classes) */
   .ch7-feb .ch7-feb-cells li:is(:nth-child(5n),:first-child,.is-start):nth-child(n):nth-child(n) span{visibility:visible}
 }
+
+/* ===== LINE LENGTH (11.11.2026 — the user: „תקצר את השורות") =====
+   Overrides rule 48 („prose on the full column"): at 1440 a paragraph ran the whole 1025px
+   column, 105–128 characters a line. Running prose now stops at chapter 6's own reading
+   measure, min(760px,100%), on the reading edge (right) — ~85 characters, the line chapter 6's
+   `.rm-dayline` sets. Zero specificity, so every device or centred line that names its own
+   width keeps it; mechanisms, maps, scenes, pictures and bleeds stay wide. */
+:where(.chapter-article > section) > p{max-width:760px}
+/* ===== UX pass 11.11.2026 — the February strip on a phone =====
+   The day numbers were 12px (14 is the floor in a device), and the cells were `1fr` — whose
+   minimum is the content's, so a cell with a two-digit number stood wider than its neighbours.
+   minmax(0,1fr) makes every day the same width; a number may overrun into the hidden ones
+   beside it. */
+.ch7-feb-cells{grid-template-columns:repeat(var(--days),minmax(0,1fr))}
+.ch7-feb-cells li{min-width:0;overflow:visible}
+.ch7-feb-cells span{font-size:14px}
+@media (max-width:640px){
+  .ch7-feb-cells span{font-size:14px;letter-spacing:-.03em}
+}

@@ -19,7 +19,7 @@
 .chip {
   all: unset; box-sizing: border-box; cursor: pointer; flex: none; white-space: nowrap;
   display: inline-flex; align-items: center; gap: 8px;
-  min-height: 38px; padding: 8px 17px; border-radius: 999px;
+  min-height: 44px; padding: 8px 17px; border-radius: 999px;
   background: var(--panel); border: 1px solid var(--edge); color: var(--ink);
   font-family: var(--font-body); font-weight: 600; font-size: 14.5px;
   transition: background .18s ease, color .18s ease, border-color .18s ease;

@@ -12,3 +12,12 @@
   font-family:var(--font-body,Arial,sans-serif);font-size:15px;color:var(--ink-soft,#6f5c43)}
 .pscore-review a{color:var(--maroon,#8a2733);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .pscore-review a:focus-visible{outline:2px solid var(--maroon,#8a2733);outline-offset:3px;border-radius:2px}
+
+/* הפתיח של כל תרגול מסכם (`PracticeLead`). `.chapter-article` בסלקטור: `.chapter-article p`
+   (0,1,1) גובר על מחלקה בודדת על <p> (כלל 77). המשפט על הציון בדיו ולא באפור — זה הדבר
+   שהלומד צריך לדעת לפני השאלה הראשונה. */
+.chapter-article .pscore-lead{
+  margin:var(--flow-lead,56px) 0 0;max-width:var(--measure,880px);
+  font-size:var(--read,19px);line-height:1.82;color:var(--muted,#6f5c43);
+}
+.pscore-lead-key{color:var(--ink,#3c2c1d);font-weight:500}

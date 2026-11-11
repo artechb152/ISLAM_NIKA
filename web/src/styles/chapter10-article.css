@@ -161,3 +161,13 @@
   .ch10-solo-wrap::before{display:none}
   .ch10-solo{grid-column:1;padding-inline:0}
 }
+
+/* ===== UX pass 11.11.2026 — the band is a choice, and it looks like one =====
+   The two names were aria-pressed buttons that read as plain headings; „שניהם" showed only
+   after a press and stood 27px high. Now all three are pills with a 1px cream outline at rest
+   (chapter 7's year pills, on maroon), ≥44px high, and „שניהם" is always there — pressed while
+   both sides are shown. */
+.ch10-sides button{min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+  border:1px solid color-mix(in srgb,var(--cream) 70%,transparent)}
+.ch10-sides .ch10-both{min-height:44px;padding:0 18px;font-size:15px;border:1px solid color-mix(in srgb,var(--cream) 70%,transparent)}
+.ch10-sides button[aria-pressed="true"]{border-color:var(--cream)}

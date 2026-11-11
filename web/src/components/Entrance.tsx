@@ -43,12 +43,33 @@ export default function Entrance() {
     const reveal = revealRef.current
     if (!canvas || !stage || !reveal) return
 
+    /* Tab order follows what can be seen: „לכניסה" is out of it while it is still
+       transparent (it renders with tabIndex -1), and „דילוג" leaves it once it has faded.
+       The skip button hands focus to the entrance link programmatically, which tabIndex -1
+       still allows. */
+    const enter = enterRef.current
+    const skipEl = stage.querySelector<HTMLButtonElement>('#skip')
+    let wasLive: boolean | null = null
+    function setLive(live: boolean): void {
+      if (live === wasLive) return
+      wasLive = live
+      reveal!.classList.toggle('is-live', live)
+      if (enter) enter.tabIndex = live ? 0 : -1
+      if (skipEl) {
+        skipEl.tabIndex = live ? -1 : 0
+        /* focus never stays on a control that has faded out */
+        if (live && document.activeElement === skipEl) enter?.focus({ preventScroll: true })
+        if (live) skipEl.setAttribute('aria-hidden', 'true')
+        else skipEl.removeAttribute('aria-hidden')
+      }
+    }
+
     const reduce =
       window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduce) {
       setNoIntro(true)
       stage.style.setProperty('--reveal', '1')
-      reveal.classList.add('is-live')
+      setLive(true)
       window.setTimeout(() => {
         try {
           enterRef.current?.focus({ preventScroll: true })
@@ -56,9 +77,13 @@ export default function Entrance() {
       }, 200)
       return
     }
+    setLive(false)
 
     const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    if (!ctx) {
+      setLive(true)
+      return
+    }
 
     /* Direction: scrolling DOWN enters (winds the film forward, deeper into the building,
        to the "לכניסה"); scrolling up backs out. It used to be the other way round — the
@@ -146,7 +171,7 @@ export default function Entrance() {
 
       const r = smoothstep((p - REVEAL_START) / (1 - REVEAL_START))
       stage!.style.setProperty('--reveal', r.toFixed(4))
-      reveal!.classList.toggle('is-live', r > 0.35)
+      setLive(r > 0.35)
 
       if (Math.abs(target - curr) > 0.01) raf = requestAnimationFrame(frame)
       else running = false
@@ -223,9 +248,17 @@ export default function Entrance() {
         <div id="reveal" ref={revealRef}>
           <div className="veil" aria-hidden="true" />
           <div className="inner">
+            <h1
+              style={{
+                position: 'absolute', width: 1, height: 1, margin: -1, padding: 0,
+                overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0,
+              }}
+            >
+              אסלאם — דת ותרבות
+            </h1>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="brand" src="/assets/logo-cream.png" alt="אסלאם" />
-            <Link className="enter" id="enter" href="/chapters" ref={enterRef}>
+            <Link className="enter" id="enter" href="/chapters" ref={enterRef} tabIndex={-1}>
               לכניסה
             </Link>
           </div>

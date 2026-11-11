@@ -40,7 +40,8 @@
    היא של פרק 6, `min(760px,100%)`, והיא מתחילה בקצה — לא ממורכזת. */
 .xr-article { padding-bottom: clamp(40px, 6vw, 80px) }
 .xr-lead { margin-bottom: clamp(30px, 4.4vw, 52px) }
-.xr-lead h1 { margin: 0; font-size: clamp(34px, 4.4vw, 52px); font-weight: 900; color: var(--maroon) }
+/* the design system's h1 (chapter6-article.css: clamp(42,5vw,72), 900) — no local size */
+.xr-lead h1 { margin: 0 }
 .xr-lead p {
   width: min(760px, 100%); margin: 16px 0 0;
   font-size: var(--read); line-height: 1.75; color: var(--muted);
@@ -50,7 +51,8 @@
    יושבים בסלוט הסופי של המסטהד, במקום כפתור החזרה — ולכן הם על מרון, באותה
    שפה של `.gv-back` שהמאמר שם באותו מקום. */
 .xr-hud { display: flex; align-items: center; gap: 14px }
-.xr-count { font-size: 15px; color: rgba(245, 236, 214, .78) }
+.xr-count { font-size: 15px; font-weight: 600; color: var(--cream); white-space: nowrap; font-variant-numeric: tabular-nums }
+.xr-clock small { font-family: var(--font-body); font-weight: 600; font-size: 13px; margin-inline-end: 6px; opacity: .85 }
 .xr-clock {
   font-family: var(--font-heading); font-weight: 800; font-size: 20px;
   min-width: 76px; text-align: center;
@@ -98,30 +100,49 @@
 }
 .xr-step-head p { margin: 6px 0 0; font-size: clamp(15px, 1.6vw, 18px); color: var(--muted) }
 
-.xr-chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px }
+/* a compact grid of checkable rows — two-three across, one on the phone. Sixteen full-width
+   cards (1024×93 each) pushed „בחירת הכול“ to y=2154 and the start button to y=2846. */
+.xr-chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)) }
+.xr-filter-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px 14px; margin-bottom: clamp(14px, 2vw, 20px) }
+.xr-filter-row .chip-row { flex: 1 1 320px; min-width: 0; margin-bottom: 0 }
+.xr-filter-row .xr-all { flex: none }
+.xr-hidden-note { margin-top: 12px }
 /* כרטיס פרק הוא הדבר היחיד בעמוד שכן מצויר כשטח לחיץ, ומסיבה טובה: הוא בחירה
    של אובייקט ולא של ערך, והוא נושא שלוש שורות מידע. גם הוא בלי מילוי — שיער
    אחד, ומילוי מרון כשהוא נבחר, כמו כל בחירה אחרת בעמוד. */
+.xr-chapters > li { display: flex }
 .xr-ch {
-  all: unset; box-sizing: border-box; cursor: pointer; width: 100%;
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 16px; align-items: center;
-  padding: 14px 18px; border: 1px solid var(--edge); border-radius: 14px; background: var(--mat);
+  all: unset; box-sizing: border-box; cursor: pointer; width: 100%; min-height: 56px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1px 12px; align-items: center;
+  padding: 9px 14px; border: 1px solid var(--edge); border-radius: 14px; background: var(--paper);
   transition: background .2s ease, border-color .2s ease, color .2s ease;
 }
-.xr-ch:hover:not(.is-on) { background: rgba(165, 50, 47, .1); border-color: var(--maroon) }
+.xr-ch:hover:not(.is-on) { background: rgba(165, 50, 47, .08); border-color: var(--maroon) }
 .xr-ch:focus-visible { outline: 2px solid var(--maroon); outline-offset: 2px }
-.xr-ch-n {
-  grid-row: 1 / span 2; width: 38px; height: 38px; border-radius: 50%;
-  display: grid; place-items: center; background: var(--paper); border: 2px solid var(--gold);
-  font-family: var(--font-heading); font-weight: 800; font-size: 16px; color: var(--maroon);
+/* the check box: an empty hairline square, a maroon-filled tick when chosen */
+.xr-ch-box {
+  grid-row: 1 / span 2; width: 22px; height: 22px; border-radius: 6px;
+  display: grid; place-items: center; border: 1.5px solid var(--edge); background: var(--mat); color: transparent;
 }
-.xr-ch-name { font-family: var(--font-heading); font-weight: 700; font-size: 20px; color: var(--maroon) }
-.xr-ch-count { grid-column: 2; font-size: 14px; color: var(--muted) }
-.xr-ch.is-on { background: var(--maroon); border-color: var(--maroon) }
-.xr-ch.is-on .xr-ch-name { color: var(--cream) }
-.xr-ch.is-on .xr-ch-count { color: rgba(245, 236, 214, .72) }
-.xr-ch.is-on .xr-ch-n { background: var(--cream); border-color: var(--cream); color: var(--maroon-deep) }
-.xr-chapters-all { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 16px }
+.xr-ch-box svg { width: 15px; height: 15px }
+.xr-ch-name { font-family: var(--font-heading); font-weight: 700; font-size: 17px; line-height: 1.3; color: var(--maroon-deep) }
+.xr-ch-n { color: var(--stamp); font-variant-numeric: tabular-nums }
+.xr-ch-count { grid-column: 2; font-size: 14px; line-height: 1.35; color: var(--muted) }
+.xr-ch.is-on { border-color: var(--maroon); background: rgba(165, 50, 47, .08) }
+.xr-ch.is-on .xr-ch-box { background: var(--maroon); border-color: var(--maroon); color: var(--cream) }
+
+/* the start bar — sticky at the foot of the screen while the exam is being built */
+.xr-startbar {
+  position: sticky; bottom: 0; z-index: 4;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px;
+  margin-top: clamp(24px, 3.4vw, 40px); margin-inline: calc(-1 * var(--content-gutter));
+  padding: 12px var(--content-gutter) calc(12px + env(safe-area-inset-bottom, 0px));
+  background: var(--panel); border-top: 1px solid var(--edge);
+  box-shadow: 0 -8px 22px rgba(60, 35, 18, .08);
+}
+.xr-startbar .xr-go { min-height: 48px; padding-block: 10px }
+.xr-startbar-sum { margin: 0; flex: 1 1 260px; font-size: 15.5px; line-height: 1.5; color: var(--ink); font-variant-numeric: tabular-nums }
+.xr-startbar-hist { flex: none }
 
 .xr-lengths { display: flex; flex-wrap: wrap; gap: 11px }
 
@@ -185,9 +206,9 @@
 .xr-strip ol { list-style: none; margin: 0; padding: 4px; display: flex; flex-wrap: wrap; gap: 8px }
 .xr-num {
   all: unset; box-sizing: border-box; cursor: pointer;
-  width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
   background: var(--paper); border: 1.5px solid var(--gold);
-  font-family: var(--font-heading); font-weight: 800; font-size: 14px; color: var(--maroon);
+  font-family: var(--font-heading); font-weight: 800; font-size: 15px; color: var(--maroon);
   font-variant-numeric: tabular-nums;
   transition: background .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
 }
@@ -408,13 +429,28 @@ button.xq-slot:focus-visible { outline: 2px solid var(--maroon); outline-offset:
 .chapter-menu-nav .menu-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 
 /* ---------------------------------------------------------------- צר ---- */
+/* while answering, „שאלה 4 מתוך 20" and the number strip already say which question this is —
+   the medallion in the question head is a third copy. It stays in the review. */
+.xq:not(.is-review) > .xq-head > .xq-n { display: none }
+
+/* the floating accessibility button sits at the bottom-left on narrow screens — the start
+   bar keeps its words clear of it */
+@media (max-width: 899px) {
+  .xr-startbar { padding-inline-end: calc(var(--content-gutter) + 58px) }
+}
+
 @media (max-width: 680px) {
-  .xr-count { display: none }
+  /* a timed exam needs the clock more than the count; an untimed one keeps the count */
+  .xr-hud.is-timed .xr-count { display: none }
   .xr-n, .xq-n { width: 34px; height: 34px; font-size: 14px }
   .xq-match::before { inset-inline-start: 17px }
   .xq-match-row { gap: 6px 12px }
-  .xr-ch { grid-template-columns: auto minmax(0, 1fr) }
-  .xr-ch-count { grid-column: 2 }
+  .xr-chapters { grid-template-columns: 1fr }
+  .xr-filter-row .chip-row { flex-basis: 100% }
+  .xr-startbar { gap: 6px 10px; padding-block: 8px calc(8px + env(safe-area-inset-bottom, 0px)) }
+  .xr-startbar .xr-go { flex: 1 1 auto; min-height: 46px; padding: 8px 18px; font-size: 18px; white-space: nowrap }
+  .xr-startbar-hist { padding-inline: 14px; font-size: 15px }
+  .xr-startbar-sum { font-size: 14px; line-height: 1.4; flex-basis: 100% }
   .xr-history > li { flex-wrap: wrap }
   /* שישים מספרים בשורות עוטפות הם שמונה שורות מעל השאלה. בטלפון הרצועה היא
      שורה אחת שנגללת לרוחב בתוך עצמה — העמוד עצמו לא זז הצידה. */

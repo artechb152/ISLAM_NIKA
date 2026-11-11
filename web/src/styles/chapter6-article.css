@@ -63,7 +63,7 @@ a{color:inherit}
 }
 .chapter-hdr-start{display:flex;align-items:center;gap:10px}
 .chapter-burger{
-  all:unset;box-sizing:border-box;cursor:pointer;width:40px;height:40px;border-radius:9px;
+  all:unset;box-sizing:border-box;cursor:pointer;width:44px;height:44px;border-radius:9px;
   display:grid;place-items:center;color:var(--cream);transition:background .2s ease;
 }
 .chapter-burger svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
@@ -84,18 +84,38 @@ a{color:inherit}
 .chapter-find input::placeholder{color:rgba(245,236,214,.6)}
 .chapter-find input::-webkit-search-cancel-button{display:none}
 .chapter-find input:hover{background:rgba(245,236,214,.16);border-color:rgba(245,236,214,.4)}
-.chapter-find input:focus-visible{background:rgba(245,236,214,.18);border-color:var(--cream);outline:none}
+.chapter-find input:focus-visible{background:rgba(245,236,214,.18);border-color:var(--cream);outline:2px solid var(--cream);outline-offset:2px}
 .chapter-find-ico{position:absolute;inset-inline-start:10px;top:50%;translate:0 -50%;display:grid;place-items:center;pointer-events:none;color:rgba(245,236,214,.72)}
 .chapter-find-ico svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .chapter-find-tools{position:absolute;inset-inline-end:6px;top:50%;translate:0 -50%;display:flex;align-items:center;gap:2px}
 .chapter-find-count{font-size:12px;color:rgba(245,236,214,.75);min-width:34px;text-align:center;font-variant-numeric:tabular-nums}
+/* the hit area is the whole 44px box; the 26px circle is drawn by ::before, so the field
+   looks as it did. 44 wide where the field has room; 32 below 900px, where three 44s and
+   the count would cover everything typed (audit 11.11) */
+.chapter-find-tools{gap:0}
 .chapter-find-tools button{
-  all:unset;box-sizing:border-box;cursor:pointer;width:24px;height:24px;border-radius:50%;
+  all:unset;box-sizing:border-box;cursor:pointer;position:relative;width:44px;height:44px;border-radius:50%;
   display:grid;place-items:center;color:rgba(245,236,214,.8);
 }
-.chapter-find-tools button:hover{background:rgba(245,236,214,.18);color:var(--cream)}
+.chapter-find-tools button::before{content:"";position:absolute;inset:50% auto auto 50%;translate:-50% -50%;
+  width:26px;height:26px;border-radius:50%}
+.chapter-find-tools button svg{position:relative}
+@media (max-width:899px){.chapter-find-tools button{width:32px}}
+/* the typed words never run under the tools: the field reserves their width while they show */
+.chapter-find:has(.chapter-find-tools) input{padding-inline-end:176px}
+@media (max-width:899px){.chapter-find:has(.chapter-find-tools) input{padding-inline-end:138px}}
+/* a phone: while a query is open the field takes the room the logo leaves, and the
+   magnifier gives its 38px to the words */
+@media (max-width:680px){
+  .chapter-find:has(.chapter-find-tools){width:clamp(120px,52vw,240px)}
+  .chapter-find:has(.chapter-find-tools) .chapter-find-ico{display:none}
+  .chapter-find:has(.chapter-find-tools) input{padding-inline-start:12px}
+}
+.chapter-find-tools button:hover{color:var(--cream)}
+.chapter-find-tools button:hover::before{background:rgba(245,236,214,.18)}
 .chapter-find-tools button:disabled{opacity:.35;cursor:default}
-.chapter-find-tools button:focus-visible{outline:2px solid var(--cream);outline-offset:1px}
+.chapter-find-tools button:focus-visible{outline:none}
+.chapter-find-tools button:focus-visible::before{outline:2px solid var(--cream);outline-offset:1px}
 .chapter-find-tools svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 ::highlight(chapter-find){background:rgba(245,196,90,.5);color:inherit}
 ::highlight(chapter-find-current){background:var(--stamp);color:#fff}
@@ -163,12 +183,16 @@ a{color:inherit}
   .chapter-drawer.is-collapsed{width:var(--ch6-side-rail)}
   .chapter-scrim{display:none}
   /* centre the hamburger over the collapsed icon rail (matches the chapters header gutter) */
-  .chapter-site-header-inner{padding-inline:calc((var(--ch6-side-rail) - 40px) / 2)}
+  .chapter-site-header-inner{padding-inline:calc((var(--ch6-side-rail) - 44px) / 2)}
   /* the persistent sidebar needs no in-panel head — the hamburger is the only control */
   .chapter-drawer .menu-head{display:none}
   .chapter-menu-nav{padding-top:14px}
   /* collapsed → slim rail: only the section numbers show */
-  .chapter-drawer.is-collapsed .menu-label{display:none}
+  /* the name is hidden from the eye only: with display:none a screen reader heard the
+     collapsed rail as „01"…„07" (audit 11.11). Every chapter renders the same markup, so
+     this one rule fixes the rail everywhere. */
+  .chapter-drawer.is-collapsed .menu-label{position:absolute;width:1px;height:1px;overflow:hidden;
+    clip-path:inset(50%);white-space:nowrap}
   .chapter-drawer.is-collapsed .chapter-menu-nav a{justify-content:center;gap:0;padding-inline:0}
   .chapter-drawer.is-collapsed .menu-extra{align-items:center;padding-inline:8px}
   .chapter-drawer.is-collapsed .menu-x-item{font-size:0;justify-content:center;padding-inline:0}
@@ -197,7 +221,7 @@ a{color:inherit}
 }
 .opening-section{text-align:right}
 .chapter-number{
-  display:block;color:var(--maroon);font-size:14px;font-weight:600;letter-spacing:2.5px;margin-bottom:4px;
+  display:block;color:var(--maroon);font-size:14px;font-weight:600;letter-spacing:0;margin-bottom:4px; /* was 2.5px: tracking pulls Hebrew word shapes apart (11.11) */
 }
 h1,h2,h3{font-family:var(--font-heading);color:var(--maroon);line-height:1.17;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 h1{font-size:clamp(42px,5vw,72px);font-weight:900}
@@ -250,8 +274,12 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
 .story-film-big-play svg{width:28px;height:28px;fill:currentColor;margin-inline-start:3px}
 /* --- control bar: full-width scrubber row, then the button row (see StoryFilm.tsx) --- */
 .story-film-bar{background:#2c141b;color:var(--cream);padding:2px 12px 4px}
-.story-film-controls{height:44px;display:flex;align-items:center;gap:4px}
-.story-film-controls button{all:unset;cursor:pointer;width:36px;height:36px;display:grid;place-items:center;border-radius:7px;color:var(--cream)}
+.story-film-controls{height:48px;display:flex;align-items:center;gap:2px}
+.story-film-controls button{all:unset;box-sizing:border-box;cursor:pointer;width:44px;height:44px;display:grid;place-items:center;border-radius:7px;color:var(--cream)}
+/* all:unset takes the UA focus ring with it — every control draws its own (audit 11.11: none at 390) */
+.story-film-controls button:focus-visible{outline:2px solid var(--cream);outline-offset:-2px}
+.story-film-big-play:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
+.story-film-bar input[type=range]:focus-visible{outline:2px solid var(--cream);outline-offset:1px;border-radius:6px}
 .story-film-controls button:hover{background:rgba(245,236,214,.12)}
 .story-film-controls button svg{width:19px;height:19px;fill:currentColor;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 .film-time{font-size:12.5px;color:rgba(245,236,214,.82);font-variant-numeric:tabular-nums;white-space:nowrap;margin-inline-start:8px}
@@ -264,7 +292,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
    --film-track/--film-dot are the resting sizes; the scrubber grows both on hover. The webkit
    thumb has no auto-centering, hence the margin-top: half the difference between the two. */
 .story-film-bar input[type=range]{
-  appearance:none;background:transparent;cursor:pointer;height:16px;margin:0;
+  appearance:none;background:transparent;cursor:pointer;height:28px;margin:0;
   --film-track:3px;--film-dot:12px;--film-accent:var(--stamp);
 }
 .story-film-bar input[type=range]::-webkit-slider-runnable-track{height:var(--film-track);border-radius:99px;background:linear-gradient(to right,var(--film-accent) var(--film-progress),rgba(245,236,214,.25) 0)}
@@ -432,7 +460,7 @@ h1{font-size:clamp(42px,5vw,72px);font-weight:900}
   h1{font-size:38px;text-wrap:balance}
   /* narrow bar: drop the timestamp so play + volume + fullscreen keep full-size hit areas
      (the old rule here was `> span`, which took the volume control down with it) */
-  .story-film{border-radius:10px}.story-film-bar{padding-inline:9px}.story-film-controls{height:40px}.film-time{display:none}
+  .story-film{border-radius:10px}.story-film-bar{padding-inline:9px}.story-film-controls{height:46px}.film-time{display:none}
   .story-film-caption{font-size:14px;padding:6px 10px;bottom:4%}
   .story-film-big-play{width:56px;height:56px}.story-film-big-play svg{width:23px;height:23px}
   /* `:not(.title-ornament)` is load-bearing. The diamond ornament is ALSO a direct div child of
@@ -1096,3 +1124,11 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
 .menu-x-item svg{width:20px;height:20px}
 .menu-x-item:hover{background:rgba(165,50,47,.14)}
 @media (min-width:1024px){.chapter-drawer.is-collapsed .menu-x-item{border-color:transparent;background:none}}
+
+/* ===== the line (11.11.2026, the user: „תקצר את השורות") =====
+   Chapter 6's reading measure is 760px (`.rm-dayline`, the film, the pillars lead), but
+   four of its own prose blocks still ran the whole 1025px column at 1440 — up to 118
+   characters a line. They stop at the same 760px now, on the reading edge. These classes
+   are chapter 6's (and `.story-copy` chapter 4's Badr story); every other chapter sets its
+   own measure in its own sheet, never here. */
+.prayer-block > p,.hajj-intro p,.ch6-more-body p,.story-copy p{max-width:760px}

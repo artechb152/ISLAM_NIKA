@@ -77,3 +77,6 @@ concept/chapter11/gen/
 concept/chapter13/blender/*.blend
 concept/chapter13/blender/*.blend1
 concept/chapter13/blender/tex/
+
+# the archived chapter-1 game keeps its Blender sources locally, as web/blender/ did
+archive/chapter1-game/web/blender/

@@ -324,12 +324,20 @@ A Fragment is:
 
 ## 5. The practice page
 
-Chapters 2, 4 and 5 share one model; chapter 6's is richer.
+**Since 11.11.2026 chapters 1–5 and 7–16 run ONE engine:** `components/practice/PracticeEngine.tsx`
+(+ `store.ts`, `opener.ts`, `styles/shared-practice.css`). Each `ChapterNPractice.tsx` is a thin
+wrapper — practice.json + practice-progress.ts + a two-line `chapterN-practice.css` banner + the
+route (see Chapter15Practice.tsx as the template). Chapter 6 keeps its own engine (`chapter6/summary`).
+The notes below describe the original model; where they disagree with the engine, the engine wins.
 
 - **Shell:** `PracticeNav` (`components/chapter6/summary/PracticeNav`). It re-renders the masthead and rail. The end slot is a "חזרה לפרק N" pill, and the rail holds one row per question with a tick.
-  - **The rail ticks are the only progress display.** No score, no bar, no percentage ("לא להציג ציון מספרי").
-- **Banner:** the chapter's banner **still, without the video**, with h1 "התרגול המסכם" (chapter 6: "תרגול מסכם").
-- **Lead:** "{title} — N שאלות…". The count is derived from `QUESTIONS.length` (rule 32; chapter 2 still hard-codes "שמונה").
+  - **Every practice shows a score (9.11; announced up front since 11.11):** `PracticeLead` (in
+    `PracticeScore.tsx`) says at the top that the score counts first-try correct answers;
+    `PracticeScore` shows it at the end. Chapter 6 included (score out of 8). The old rule "לא
+    להציג ציון מספרי" is void.
+- **Feedback:** right = gold box "✓ נכון"; wrong = dashed stamp box "↩ נסו שוב" plus ✕ and a dashed border on the wrong option/slot/step — never colour alone.
+- **Banner:** the chapter's banner **still, without the video**, with h1 "התרגול המסכם" (every chapter, 6 included).
+- **Lead:** `PracticeLead` — "{title} — N שאלות. בסוף התרגול מקבלים ציון…". The count is derived from `QUESTIONS.length` (rule 32).
 - **Each question** is `section.article-section.p2-q` with the article's full section heading (`.p2-q-n` number + the prompt as `h2` + the diamond), then `.p2-work`. `.has-plate` adds a 320px picture column that reuses a chapter asset.
 - **Question types** (chapters 2, 4, 5):
   - `single`/`multi`: `.p2-option[aria-pressed]` buttons, then "בדיקה".

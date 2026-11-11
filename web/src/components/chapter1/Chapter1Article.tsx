@@ -302,6 +302,15 @@ function IdolNames({ refs }: { refs: string[] }) {
 
 /* ---------------- 08 · §47's three words ---------------- */
 
+/** the corner sign that a card turns over (chapter 2's cards carry a chevron for the same job) */
+function FlipMark() {
+  return (
+    <svg className="ch1-word-flip" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 10a8 8 0 0 1 14.5-3.5M20 4v4h-4M20 14a8 8 0 0 1-14.5 3.5M4 20v-4h4" />
+    </svg>
+  )
+}
+
 /** Three cards that turn over: the Hebrew meaning on the front, the Arabic word on the
     back — only what §47 says (no Latin or Greek source words: they are not in it). Both
     faces stay in the DOM, so search finds either. */
@@ -318,8 +327,14 @@ function Words({ refs }: { refs: string[] }) {
         {w.cards.map((c) => (
           <li key={c.front}>
             <button type="button" className={'ch1-word' + (open.has(c.front) ? ' is-flipped' : '')} aria-pressed={open.has(c.front)} onClick={() => flip(c.front)}>
-              <span className="ch1-word-face is-front"><b>{wordIn(r, c.front)}</b></span>
-              <span className="ch1-word-face is-back">
+              {/* only the face that shows is read out: the back's word is the answer, and the
+                  card's name used to announce it before the card was turned (audit 11.11) */}
+              <span className="ch1-word-face is-front" aria-hidden={open.has(c.front) || undefined}>
+                <b>{wordIn(r, c.front)}</b>
+                <FlipMark />
+              </span>
+              <span className="ch1-word-face is-back" aria-hidden={!open.has(c.front) || undefined}>
+                <FlipMark />
                 <b lang="he">{wordIn(r, c.back)}</b>
                 {c.note && <small>{wordIn(r, c.note)}</small>}
               </span>
