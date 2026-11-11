@@ -332,4 +332,4 @@
    own widths and stay centred. */
 .chapter-article > section > p,
 .chapter-article > section > :is(ul,ol),
-.ch5-figrow-copy > p,.ch5-split-copy > p{max-width:760px}
+.ch5-figrow-copy > p,.ch5-split-copy > p{max-width:var(--prose-measure,80%)}

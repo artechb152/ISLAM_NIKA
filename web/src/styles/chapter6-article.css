@@ -1131,4 +1131,10 @@ mark.wmark.is-on{background:rgba(201,154,60,.3);box-shadow:inset 0 -2px 0 var(--
    characters a line. They stop at the same 760px now, on the reading edge. These classes
    are chapter 6's (and `.story-copy` chapter 4's Badr story); every other chapter sets its
    own measure in its own sheet, never here. */
-.prayer-block > p,.hajj-intro p,.ch6-more-body p,.story-copy p{max-width:760px}
+.prayer-block > p,.hajj-intro p,.ch6-more-body p,.story-copy p{max-width:var(--prose-measure,80%)}
+
+/* Running prose takes 80% of the column on desktop (11.11, the user: „תעשה 80% ברוחב",
+   after 760px and 900px were both too short). On a narrow screen 80% would waste the line,
+   so under 900px prose runs the full column. */
+:root{--prose-measure:80%}
+@media (max-width:900px){:root{--prose-measure:100%}}

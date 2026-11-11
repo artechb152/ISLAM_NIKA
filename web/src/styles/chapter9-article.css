@@ -379,7 +379,7 @@
    measure, min(760px,100%), on the reading edge (right) — ~85 characters, the line chapter 6's
    `.rm-dayline` sets. Zero specificity, so every device or centred line that names its own
    width keeps it; mechanisms, maps, scenes, pictures and bleeds stay wide. */
-:where(.chapter-article > section) > p{max-width:760px}
+:where(.chapter-article > section) > p{max-width:var(--prose-measure,80%)}
 /* the §8 steps and the feast's words: running prose inside a device, held to the same measure */
 .ch9-steps{max-width:800px}
-:where(.ch9-feast) p{max-width:760px}
+:where(.ch9-feast) p{max-width:var(--prose-measure,80%)}

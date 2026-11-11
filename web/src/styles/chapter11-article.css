@@ -126,7 +126,7 @@
    (116–118 characters a line). It now stops at chapter 6's reading measure, min(760px,100%), on
    the reading edge. Zero specificity: the centred quote and the cards keep their own widths;
    the live map stays wide. */
-:where(.ch11-flow, .ch11-body, .ch11-stop) > p{max-width:760px}
+:where(.ch11-flow, .ch11-body, .ch11-stop) > p{max-width:var(--prose-measure,80%)}
 /* the quoted formula is centred text: its 760 box is centred in the column, not on the edge */
 .chapter-article .ch11-quote{margin-inline:auto}
 

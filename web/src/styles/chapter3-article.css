@@ -1203,4 +1203,4 @@
    126 characters in the folded full texts). It now stops at chapter 6's reading measure,
    760px, on the reading edge. The prose beside a plate and inside a card keeps its
    `max-width:none` (more specific), and every device keeps its own width. */
-.chapter-article .ch3-body{max-width:760px}
+.chapter-article .ch3-body{max-width:var(--prose-measure,80%)}

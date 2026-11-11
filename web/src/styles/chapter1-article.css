@@ -259,6 +259,6 @@
    (~70 characters at 20px), on the reading edge; the devices, the cover, the cards, the
    statement and the map keep their own widths, so the alternation of rule 48 stays. */
 .chapter-article > section > p,
-.chapter-article > section > :is(ul,ol){max-width:760px}
+.chapter-article > section > :is(ul,ol){max-width:var(--prose-measure,80%)}
 /* the sentence under each row of tablets belongs to that centred device: centred with it */
 .chapter-article .ch1-idols-text{max-width:760px;width:100%;margin-inline:auto}

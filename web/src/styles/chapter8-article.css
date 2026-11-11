@@ -369,7 +369,7 @@
    measure, min(760px,100%), on the reading edge (right) — ~85 characters, the line chapter 6's
    `.rm-dayline` sets. Zero specificity, so every device or centred line that names its own
    width keeps it; mechanisms, maps, scenes, pictures and bleeds stay wide. */
-:where(.chapter-article > section) > p{max-width:760px}
+:where(.chapter-article > section) > p{max-width:var(--prose-measure,80%)}
 /* ===== UX pass 11.11.2026 — 14px floor for text in a device =====
    the spine names (11px on a phone), the map's place names (13) and the axis's fates (13px
    italic), books and spans (13 on a phone). */
