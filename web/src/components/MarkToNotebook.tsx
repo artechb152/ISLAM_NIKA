@@ -348,8 +348,20 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
     setSaved('added')
     announce('נוסף למחברת')
     setAddedId(m?.id ?? null)
-    /* זמן לראות את „הוספת הערה" וללחוץ עליו */
-    closeIn(m ? 4500 : 1250)
+    /* זמן לראות את „הוספת הערה" ו„הסרה" וללחוץ על אחד מהם */
+    closeIn(m ? 6000 : 1250)
+  }
+
+  /* „הסרה" מיד אחרי הסימון (המשתמשת, 22.11.2026: „אחרי שסימנתי משהו במחברת זה מציע להסיר"):
+     מוציא את הסימון שנוסף עכשיו, בלי ללכת למחברת ובלי לסמן שוב */
+  const undo = () => {
+    if (!addedId) return
+    deleteMark(addedId)
+    setAddedId(null)
+    setNoting(false)
+    setSaved('removed')
+    announce('הוסר מהמחברת')
+    closeIn(1250)
   }
 
   saveRef.current = save
@@ -445,6 +457,11 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
           {saved === 'added' && addedId && !noted && (
             <button type="button" className="nb-mark-addnote" onClick={openNote}>
               הוספת הערה
+            </button>
+          )}
+          {saved === 'added' && addedId && (
+            <button type="button" className="nb-mark-addnote nb-mark-undo" onClick={undo}>
+              הסרה
             </button>
           )}
         </span>
