@@ -86,6 +86,10 @@ function Choice({ q, ans, onAnswer, mode }: Pick<QProps, 'q' | 'ans' | 'onAnswer
                   <span className="xq-opt-mark" aria-hidden="true">{o.right ? <Tick /> : <Cross />}</span>
                 )}
                 <span>{o.text}</span>
+                {/* הוי והכוכב הם ציור (aria-hidden) והצבע הוא CSS — בלי המילים קורא מסך שומע
+                    רק את הטקסט של האפשרות ולא יודע מה נכון ומה סומן */}
+                {locked && o.right && <span className="xq-sr"> — התשובה הנכונה{on ? ', בחרתם' : ''}</span>}
+                {locked && on && !o.right && <span className="xq-sr"> — בחרתם, לא נכון</span>}
               </button>
             </li>
           )
@@ -183,6 +187,7 @@ function Match({ q, ans, onAnswer, mode, held, setHeld }: Pick<QProps, 'q' | 'an
                   <span className="xq-slot-mark" aria-hidden="true">{ok ? <Tick /> : <Cross />}</span>
                   {got ?? <i>לא נענה</i>}
                   {!ok && <em className="xq-fix">{p.right}</em>}
+                  <span className="xq-sr">{ok ? ' — נכון' : ' — לא נכון, התשובה הנכונה מופיעה כאן'}</span>
                 </span>
               ) : (
                 <button

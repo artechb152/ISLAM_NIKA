@@ -318,11 +318,19 @@ function Words({ refs }: { refs: string[] }) {
   const [r] = refs
   const w = LAYOUT.words
   const [open, setOpen] = useState<Set<string>>(new Set())
-  const flip = (k: string) => setOpen((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n })
+  /* הפנים שנחשף נקרא בקול — שם הכפתור משתנה, אבל זה לא תמיד מוקרא; אזור חי שקיים תמיד */
+  const [said, setSaid] = useState('')
+  const flip = (k: string) => {
+    const turned = !open.has(k)
+    const c = w.cards.find((x) => x.front === k)
+    if (c) setSaid(wordIn(r, turned ? c.back : c.front) + (turned && c.note ? ' — ' + wordIn(r, c.note) : ''))
+    setOpen((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n })
+  }
   return (
     <>
     <T refs={refs} />
     <div className="ch1-words" data-reveal>
+      <p className="sr-only" role="status" aria-live="polite">{said}</p>
       <ul className="ch1-words-cards">
         {w.cards.map((c) => (
           <li key={c.front}>

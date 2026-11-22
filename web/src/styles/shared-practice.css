@@ -199,6 +199,10 @@
 /* RIGHT AND WRONG ARE TOLD APART BY A MARK AND A WORD — chapter 2's fix (chapter2-article.css,
    „תשובה נכונה, שאי אפשר לפספס"), now on every practice, and its mirror for a miss: a gold box
    with „✓ נכון" against a dashed stamp-red box with „↩ נסו שוב". */
+.p2-live{flex:1 1 320px;min-width:0;border-radius:12px}
+.p2-live:empty{flex:0 0 0;width:0}
+.p2-live:focus{outline:none}
+.p2-live:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
 .chapter-article .p2-feedback{
   flex:1 1 320px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
   margin:0;padding:12px 16px;border-radius:12px;max-width:var(--measure,880px);

@@ -39,9 +39,13 @@ import '@/styles/shared-practice.css'
 /* `photo` NAMES A FILE THE CHAPTER ALREADY PAINTED: the practice gets no picture set of its own,
    so a reader who worked the chapter recognises the plate. */
 type Base = { id: string; label: string; photo?: string; prompt: string; ok: string; retry: string }
+/* `alt` on a pair: when the plate IS the question (chapter 13's flags — the reader matches a
+   picture to a name) a reader who cannot see it needs the picture in words. It is built only from
+   the phrases the chapter's own cards state about that picture. A plate that merely illustrates a
+   question that is already in words carries no `alt` and stays hidden from assistive tech. */
 export type PracticeQuestion =
   | (Base & { type: 'single' | 'multi'; options: { text: string; right: boolean }[] })
-  | (Base & { type: 'match'; pairs: { left: string; right: string; photo?: string }[] })
+  | (Base & { type: 'match'; pairs: { left: string; right: string; photo?: string; alt?: string }[] })
   | (Base & { type: 'order'; steps: string[]; photos?: Record<string, string> })
   | (Base & { type: 'situations'; pairs: { key: string; text: string; to: string; photo?: string }[] })
   /* chapter 3's prophets: numbered places, a name into each. Drawn as a numbered match; the
@@ -131,17 +135,31 @@ const Cross = ({ className }: { className?: string }) => (
   </svg>
 )
 
+/* THE LIVE REGION IS MOUNTED EMPTY AND FILLED LATER — a role=status that arrives together with its
+   text is announced unreliably. It is also where focus goes after a right answer: the check button
+   is disabled by then and a disabled control drops focus to <body> (WCAG 2.4.3), so the reader
+   lands on the very words that say what happened. The first render's state is not an event: a
+   board restored as solved does not steal focus. */
 function Feedback({ state, q }: { state: State; q: PracticeQuestion }) {
-  if (state === 'idle') return null
+  const box = useRef<HTMLDivElement>(null)
+  const was = useRef<State>(state)
+  useEffect(() => {
+    if (state === 'right' && was.current !== 'right') box.current?.focus()
+    was.current = state
+  }, [state])
   const right = state === 'right'
   return (
-    <p className={'p2-feedback' + (right ? ' is-right' : ' is-wrong')} role="status">
-      <b className="p2-feedback-mark">
-        {right ? <Tick /> : <Retry />}
-        {right ? 'נכון' : 'נסו שוב'}
-      </b>
-      <span className="p2-feedback-text">{right ? okBody(q.ok) : q.retry}</span>
-    </p>
+    <div className="p2-live" role="status" ref={box} tabIndex={-1}>
+      {state !== 'idle' && (
+        <p className={'p2-feedback' + (right ? ' is-right' : ' is-wrong')}>
+          <b className="p2-feedback-mark">
+            {right ? <Tick /> : <Retry />}
+            {right ? 'נכון' : 'נסו שוב'}
+          </b>
+          <span className="p2-feedback-text">{right ? okBody(q.ok) : q.retry}</span>
+        </p>
+      )}
+    </div>
   )
 }
 
@@ -227,7 +245,7 @@ function Choice({ q, solved, onSolved, onMissed, initial, onWork }: Ex<'single' 
   )
 }
 
-type Row = { left: string; right: string; photo?: string }
+type Row = { left: string; right: string; photo?: string; alt?: string }
 
 function Match({
   q,
@@ -242,7 +260,7 @@ function Match({
   const numbered = q.type === 'place'
   const rows: Row[] =
     q.type === 'match'
-      ? q.pairs.map((p) => ({ left: p.left, right: p.right, photo: p.photo }))
+      ? q.pairs.map((p) => ({ left: p.left, right: p.right, photo: p.photo, alt: p.alt }))
       : q.type === 'situations'
         ? q.pairs.map((p) => ({ left: p.key + ' — ' + p.text, right: p.to, photo: p.photo }))
         : [...q.slots].sort((a, b) => a.n - b.n).map((s) => ({ left: String(s.n), right: s.answer }))
@@ -327,13 +345,13 @@ function Match({
         {rows.map((r) => {
           const val = chosen[r.left]
           const wrong = state === 'wrong' && !!val && val !== r.right
-          const name = numbered ? `מקום ${r.left}` : r.left
+          const name = (numbered ? `מקום ${r.left}` : r.left) + (r.alt ? ` (${r.alt})` : '')
           return (
             <li className={'p2-match-row' + (wrong ? ' is-wrong' : '')} key={r.left}>
               {r.photo && (
-                <span className="p2-shot" aria-hidden="true">
+                <span className="p2-shot" aria-hidden={r.alt ? undefined : true}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={art + r.photo} alt="" loading="lazy" decoding="async" />
+                  <img src={art + r.photo} alt={r.alt ?? ''} loading="lazy" decoding="async" />
                 </span>
               )}
               <span className={numbered ? 'p2-order-n' : 'p2-match-left'}>{r.left}</span>
@@ -539,6 +557,15 @@ export default function PracticeEngine({
   const saveWork = useCallback((id: string, value: unknown) => {
     setStore((s) => ({ ...s, work: { ...s.work, [id]: value } }))
   }, [])
+  /* the button that was pressed unmounts when the confirm swaps in (and back): focus follows */
+  const yesRef = useRef<HTMLButtonElement>(null)
+  const againRef = useRef<HTMLButtonElement>(null)
+  const askWas = useRef(false)
+  useEffect(() => {
+    if (askReset) yesRef.current?.focus()
+    else if (askWas.current) againRef.current?.focus()
+    askWas.current = askReset
+  }, [askReset])
   const reset = () => {
     if (!io.reset) return
     const fresh = io.reset()
@@ -619,8 +646,11 @@ export default function PracticeEngine({
           )
         })}
 
+        {/* announced from a region that exists before the chapter is done; the block below holds
+            links and buttons and so cannot itself be a status */}
+        <p className="sr-only" role="status">{finished ? 'הפרק הושלם.' : ''}</p>
         {finished && (
-          <div className="p2-done" role="status">
+          <div className="p2-done">
             <div className="title-ornament" aria-hidden="true"><span /></div>
             <p className="p2-done-title">הפרק הושלם.</p>
             <PracticeScore chapter={chapter} questions={questions} missed={store.missed} idPrefix={idPrefix} />
@@ -631,11 +661,11 @@ export default function PracticeEngine({
                 (askReset ? (
                   <span className="p2-reset-confirm" role="group" aria-label="אישור חזרה על התרגול">
                     <span className="p2-reset-ask">לאפס ולהתחיל מחדש?</span>
-                    <button type="button" className="p2-secondary" onClick={reset}>כן, להתחיל מחדש</button>
+                    <button type="button" className="p2-secondary" ref={yesRef} onClick={reset}>כן, להתחיל מחדש</button>
                     <button type="button" className="p2-secondary" onClick={() => setAskReset(false)}>ביטול</button>
                   </span>
                 ) : (
-                  <button type="button" className="p2-secondary" onClick={() => setAskReset(true)}>לעבור על התרגול שוב</button>
+                  <button type="button" className="p2-secondary" ref={againRef} onClick={() => setAskReset(true)}>לעבור על התרגול שוב</button>
                 ))}
             </div>
             {io.reset && <p className="p2-out-note">איפוס מוחק את התשובות בלבד. הפרק נשאר מסומן כהושלם.</p>}

@@ -52,6 +52,7 @@ export default function StoryFilm({
 }: FilmProps = {}) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const rootRef = useRef<HTMLDivElement | null>(null)
+  const barPlay = useRef<HTMLButtonElement | null>(null)
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(false)
   const [volume, setVolume] = useState(1)
@@ -133,7 +134,7 @@ export default function StoryFilm({
   const shownVolume = muted ? 0 : volume
 
   return (
-    <div className="story-film" ref={rootRef} aria-label={label}>
+    <div className="story-film" ref={rootRef} role="group" aria-label={label}>
       <div className="story-film-stage">
         <video
           ref={videoRef}
@@ -167,7 +168,11 @@ export default function StoryFilm({
           {caption}
         </p>
         {!playing && !finished && (
-          <button className="story-film-big-play" type="button" onClick={togglePlayback} aria-label="הפעלת הסרטון">
+          <button className="story-film-big-play" type="button" onClick={() => {
+            togglePlayback()
+            /* הכפתור הגדול יורד מה-DOM ברגע שהסרטון מתנגן — הפוקוס עובר לכפתור שבסרגל */
+            window.setTimeout(() => barPlay.current?.focus({ preventScroll: true }), 0)
+          }} aria-label="הפעלת הסרטון">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -190,10 +195,17 @@ export default function StoryFilm({
           aria-label="מיקום בסרטון"
           aria-valuetext={`${formatTime(time)} מתוך ${formatTime(total)}`}
           onChange={(event) => seek(Number(event.target.value))}
+          /* צעד של 0.1 שנייה טוב לגרירה, ולמקלדת הוא אינסופי — חצים מדלגים 5 שניות */
+          onKeyDown={(event) => {
+            const dir = event.key === 'ArrowRight' || event.key === 'ArrowUp' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? -1 : 0
+            if (!dir) return
+            event.preventDefault()
+            seek(Math.min(total, Math.max(0, time + dir * 5)))
+          }}
           style={{ ['--film-progress' as string]: `${(time / total) * 100}%` }}
         />
         <div className="story-film-controls" role="group" aria-label="בקרת הסרטון">
-          <button type="button" onClick={togglePlayback} aria-label={playing ? 'השהיית הסרטון' : finished ? 'הפעלת הסרטון מחדש' : 'הפעלת הסרטון'}>
+          <button ref={barPlay} type="button" onClick={togglePlayback} aria-label={playing ? 'השהיית הסרטון' : finished ? 'הפעלת הסרטון מחדש' : 'הפעלה / השהיה'}>
             {playing ? (
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z" /></svg>
             ) : (

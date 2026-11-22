@@ -129,3 +129,5 @@
 .nb-mark-note-actions{display:flex;gap:8px}
 .nb-mark-fab .nb-mark-note-actions button{box-shadow:none;padding:7px 14px;font-size:13px}
 .nb-mark-fab .nb-mark-note-actions button:not(.is-primary){background:transparent;color:#8a2733;border:1px solid #d8c7a3}
+.nb-mark-live{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.nb-lede kbd{font-family:inherit;font-size:.9em;padding:0 6px;border:1px solid var(--rule,#d8c7a3);border-radius:4px;background:transparent}

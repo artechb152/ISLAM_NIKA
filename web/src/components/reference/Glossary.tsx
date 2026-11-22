@@ -119,7 +119,7 @@ export default function Glossary() {
       </p>
       <nav
         className={'ref-letters' + (where === 'is-inline' ? (fade.start ? ' fade-start' : '') + (fade.end ? ' fade-end' : '') : '')}
-        aria-label="קפיצה לפי אות"
+        aria-label={where === 'is-rail' ? 'קפיצה לפי אות — בסרגל' : 'קפיצה לפי אות'}
         ref={where === 'is-inline' ? inlineLetters : undefined}
         onScroll={where === 'is-inline' ? (e: UIEvent<HTMLElement>) => syncFade(e.currentTarget) : undefined}
       >

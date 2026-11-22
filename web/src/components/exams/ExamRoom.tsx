@@ -208,6 +208,50 @@ export default function ExamRoom() {
   const stripRef = useRef<HTMLOListElement | null>(null)
   const firstSit = useRef(true)
 
+  /* ⚠ כל מעבר מסך מוחק את הכפתור שנלחץ („מתחילים", „הגשה ובדיקה", „יציאה") והפוקוס נופל
+     ל-body — קורא מסך לא שומע שהמסך התחלף (WCAG 2.4.3). אחרי מעבר הפוקוס עובר לכותרת
+     הראשית של המסך החדש. ברנדר הראשון אין מה להזיז. */
+  const mainRef = useRef<HTMLElement | null>(null)
+  const viewWas = useRef<View>(view)
+  useEffect(() => {
+    if (viewWas.current === view) return
+    viewWas.current = view
+    const h = mainRef.current?.querySelector<HTMLElement>('h1')
+    if (h) {
+      h.tabIndex = -1
+      h.focus({ preventScroll: true })
+    }
+  }, [view])
+
+  /* שני האישורים („יציאה בלי להגיש", מחיקת מבחן): הכפתור שנלחץ מוחלף בטקסט האישור,
+     והפוקוס עובר אליו — כך הוא גם מוקרא. ביטול מחזיר את הפוקוס למי שפתח. */
+  const leaveBox = useRef<HTMLSpanElement | null>(null)
+  const leaveOpener = useRef<HTMLButtonElement | null>(null)
+  const leaveWas = useRef(false)
+  useEffect(() => {
+    if (confirmLeave) leaveBox.current?.focus()
+    else if (leaveWas.current) leaveOpener.current?.focus()
+    leaveWas.current = confirmLeave
+  }, [confirmLeave])
+  const delWas = useRef<string | null>(null)
+  useEffect(() => {
+    const prev = delWas.current
+    delWas.current = confirmDel
+    if (view !== 'history') return
+    if (confirmDel) {
+      document.querySelector<HTMLElement>(`#xh-${confirmDel} .xr-confirm`)?.focus()
+    } else if (prev) {
+      /* ביטול: אל כפתור המחיקה של אותה שורה; מחיקה: השורה איננה, אל הכותרת */
+      const row = document.querySelector<HTMLElement>(`#xh-${prev} .xr-del`)
+      const h = mainRef.current?.querySelector<HTMLElement>('h1')
+      if (row) row.focus()
+      else if (h) {
+        h.tabIndex = -1
+        h.focus({ preventScroll: true })
+      }
+    }
+  }, [confirmDel, view])
+
   const go = useCallback(
     (i: number) => {
       setHeld(null)
@@ -400,7 +444,7 @@ export default function ExamRoom() {
     >
       {/* `.chapter-article` הוא העמוד של המאמר — אותה עמודה, אותו קצה, אותו
           קצב אנכי. `xr-article` מוסיף רק את מה ששייך למבחן. */}
-      <main className="chapter-article xr-article">
+      <main className="chapter-article xr-article" ref={mainRef}>
         {view === 'build' && (
           <Build
             picked={picked}
@@ -465,6 +509,8 @@ export default function ExamRoom() {
             <div id={`xc-${chapter}`}>
             <p className="xr-progress" ref={progressRef} tabIndex={-1} aria-live="polite">
               <b>שאלה {cur + 1} מתוך {items.length}</b>
+              {/* נשמע אחרי „הבא": שורת האזעקה מקריאה גם את השאלה עצמה ולא רק את המספר */}
+              <span className="xq-sr">. {q.prompt}</span>
             </p>
 
             <ExamQuestion
@@ -508,7 +554,7 @@ export default function ExamRoom() {
 
             <div className="xr-submit xr-leave">
               {confirmLeave ? (
-                <span className="xr-confirm">
+                <span className="xr-confirm" role="alertdialog" aria-label="יציאה בלי להגיש" ref={leaveBox} tabIndex={-1}>
                   <span>לצאת בלי להגיש? המבחן יימחק.</span>
                   <button type="button" className="xr-secondary" onClick={toBuild}>
                     כן, לצאת
@@ -518,7 +564,7 @@ export default function ExamRoom() {
                   </button>
                 </span>
               ) : (
-                <button type="button" className="xr-secondary" onClick={() => setConfirmLeave(true)}>
+                <button type="button" className="xr-secondary" ref={leaveOpener} onClick={() => setConfirmLeave(true)}>
                   יציאה בלי להגיש
                 </button>
               )}
@@ -530,7 +576,7 @@ export default function ExamRoom() {
         {view === 'result' && attempt && (
           <>
             <div className="xr-score">
-              <h1 className="xr-score-n">
+              <h1 className="xr-score-n" tabIndex={-1}>
                 <span>ציון</span>
                 <b>{score.percent}</b>
               </h1>
@@ -627,7 +673,7 @@ export default function ExamRoom() {
                         </span>
                       </button>
                       {confirmDel === a.id ? (
-                        <span className="xr-confirm">
+                        <span className="xr-confirm" role="group" aria-label={`אישור מחיקת המבחן מ-${fmtDate(a.at)}`} tabIndex={-1}>
                           <button type="button" className="xr-secondary" onClick={() => { deleteAttempt(a.id); setConfirmDel(null) }}>
                             כן, למחוק
 
@@ -637,7 +683,7 @@ export default function ExamRoom() {
                           </button>
                         </span>
                       ) : (
-                        <button type="button" className="xr-del" aria-label="מחיקת המבחן" onClick={() => setConfirmDel(a.id)}>
+                        <button type="button" className="xr-del" aria-label={`מחיקת המבחן מ-${fmtDate(a.at)}`} onClick={() => setConfirmDel(a.id)}>
                           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round">
                             <path d="M6 6l12 12M18 6 6 18" />
                           </svg>
@@ -793,6 +839,7 @@ function Build({
               type="button"
               className={'xr-pick' + (length === n ? ' is-on' : '')}
               aria-pressed={length === n}
+              aria-label={`${n} שאלות`}
               disabled={picked.length > 0 && !usable(n)}
               onClick={() => setLength(n)}
             >

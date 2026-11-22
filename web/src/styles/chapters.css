@@ -116,6 +116,7 @@ a.card:focus-visible{outline:2px solid var(--maroon);outline-offset:3px}
 .card.is-locked{cursor:default;opacity:.66}
 .card.is-locked .card-shot{filter:grayscale(.4) brightness(.98)}
 
+.grid-status{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 .grid-empty{padding:52px 0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:16px;font-family:var(--font-body);font-size:17px;color:var(--ink-soft)}
 .empty-clear{all:unset;box-sizing:border-box;cursor:pointer;font-family:var(--font-body);font-weight:500;font-size:15px;color:var(--maroon);padding:10px 22px;min-height:44px;border-radius:999px;border:1px solid var(--edge);background:var(--panel);transition:.2s ease}
 .empty-clear:hover{border-color:var(--maroon);background:rgba(165,50,47,.1)}

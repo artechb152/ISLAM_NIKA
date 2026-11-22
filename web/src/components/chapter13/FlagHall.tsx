@@ -741,7 +741,10 @@ export default function FlagHall() {
     /* <main> — היעד של „דילוג לתוכן" (SiteChrome) */
     <main id="main" className="ch13-root">
       <div ref={stageRef} inert={text || showFinale} className={`ch13-stage${lookLive ? ' is-look' : ''}`} {...stageInput} onPointerCancel={stageInput.onPointerUp} onLostPointerCapture={stageInput.onPointerUp}>
+        {/* הקנבס הוא ציור בלבד — כל מה שבו זמין כטקסט בכפתור שבכותרת (ובפתיחה) */}
         <Canvas
+          role="img"
+          aria-label="האולם התלת-ממדי — כל הכרטיסים זמינים כטקסט בכפתור „כל הכרטיסים כטקסט”"
           dpr={[1, 1.75]}
           gl={{ antialias: true, toneMapping: THREE.AgXToneMapping, toneMappingExposure: 1.1 }}
           camera={{ fov: 62, near: 0.05, far: 90, position: [0, EYE, 4.8] }}
@@ -794,6 +797,11 @@ export default function FlagHall() {
           </Link>
         )}
       </header>
+
+      {/* הכפתור „E” מופיע ונעלם בלי שקורא מסך שומע — אזור חי שקיים תמיד, ריק עד שניגשים לדגל */}
+      <p className="ch13-live" role="status" aria-live="polite">
+        {started && open === null && !showFinale && !text && near !== null ? `ליד הדגל: ${CARDS[STATIONS[near].sec].title.name} — לחצו E לפתיחת הכרטיס` : ''}
+      </p>
 
       {started && open === null && !showFinale && !text && near !== null && (
         <button type="button" className="ch13-prompt" onClick={() => openCard(near)}>

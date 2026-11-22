@@ -490,3 +490,10 @@ button.xq-slot:focus-visible { outline: 2px solid var(--maroon); outline-offset:
 
 /* the fixed start bar (92px) covered a focused chapter row while tabbing the list (WCAG 2.4.11) */
 html:has(.xr-startbar) { scroll-padding-bottom: 120px }
+
+/* טקסט לקורא מסך בלבד — מה שהוי והצבע אומרים בעין, בסקירה ובשורת ההתקדמות */
+.xq-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.xr-confirm:focus{outline:none}
+.xr-confirm:focus-visible{outline:2px solid var(--maroon);outline-offset:4px;border-radius:8px}
+.xr-score-n:focus{outline:none}
+.xr-lead h1:focus{outline:none}

@@ -57,7 +57,8 @@ export default function ResetProgress({ onOpen }: { onOpen?: () => void }) {
     resetProgress({ notebook, exams })
     setDone(true)
     /* המסך קורא את האחסון כשהוא עולה — הטענה מחדש מציגה אותו נקי */
-    window.setTimeout(() => window.location.reload(), 900)
+    /* ההודעה „ההתקדמות אופסה." צריכה זמן להיקרא לפני שהעמוד נטען מחדש */
+    window.setTimeout(() => window.location.reload(), 1800)
   }
 
   return (

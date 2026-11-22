@@ -750,6 +750,10 @@ export default function ChaptersScreen() {
                 </button>
               ))}
             </div>
+            {/* אזור חי שקיים תמיד (ריק) — הודעה שנכנסת יחד עם האזור לא תמיד מוקראת */}
+            <p className="grid-status" role="status">
+              {q || activeTopic ? (gridChapters.length ? `נמצאו ${gridChapters.length} פרקים` : 'לא נמצאו פרקים התואמים לחיפוש') : ''}
+            </p>
             {gridChapters.length ? (
               <ul className="cards">{gridChapters.map((chp, idx) => card(chp, idx))}</ul>
             ) : (

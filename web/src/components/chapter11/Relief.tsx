@@ -346,7 +346,9 @@ export default function Relief(props: Props) {
   const labels = useMemo(() => props.stops.flatMap((s, k) => (s.labels ?? []).map((l, j) => ({ ...l, id: `${k}-${j}` }))), [props.stops])
   return (
     <>
+      {/* aria-hidden: המפה היא ציור של מה שהכרטיסים שלידה אומרים במלואו, ושמות הנקודות הם הכפתורים */}
       <Canvas
+        aria-hidden="true"
         frameloop="demand"
         dpr={[1, 1.75]}
         camera={{ fov: 35, near: 0.05, far: 120, position: [0, 24, 0.01] }}

@@ -200,6 +200,10 @@ function MapSection({ id }: { id: string }) {
   const [active, setActive] = useState(1)
   const stageRef = useRef<HTMLDivElement | null>(null)
 
+  /* „הבא”/„הקודם” סוגרים את הכרטיס שהכפתור בתוכו — הפוקוס נופל ל-body. מעבירים אותו לכותרת של הכרטיס שנפתח */
+  const focusCard = (k: number) =>
+    window.setTimeout(() => stageRef.current?.querySelectorAll<HTMLElement>('.ch11-pop-head')[k]?.focus({ preventScroll: true }), 0)
+
   /* a phone stacks the card under the map: bring the map back to the top so both are in view */
   const open = (view: number) => {
     setActive(view)
@@ -270,9 +274,9 @@ function MapSection({ id }: { id: string }) {
               {p.stops.map((k) => <Blocks key={k} blocks={stops[k].blocks} />)}
             </div>
             <nav className="ch11-pop-nav" aria-label="מעבר בין הנקודות במפה">
-              <button type="button" disabled={i === 0} aria-label="הקודם" onClick={() => open(i)}>→</button>
+              <button type="button" disabled={i === 0} aria-label="הקודם" onClick={() => { open(i); focusCard(i - 1) }}>→</button>
               <span>{i + 1} מתוך {pts.length}</span>
-              <button type="button" disabled={i === pts.length - 1} aria-label="הבא" onClick={() => open(i + 2)}>←</button>
+              <button type="button" disabled={i === pts.length - 1} aria-label="הבא" onClick={() => { open(i + 2); focusCard(i + 1) }}>←</button>
             </nav>
           </details>
         ))}

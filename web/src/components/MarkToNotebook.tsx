@@ -33,6 +33,7 @@
    לבד כמו קודם. */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { addMark, deleteMark, setMarkNote, GOTO_PARAM, marksInChapter, MARKS_EVENT, SITE_NOTEBOOK_KEY } from '@/lib/site-notebook'
 import { buildIndex, highlightApi, MARK_ROOT, MARK_SKIP, occurrenceOf, rangeOfMark } from '@/lib/site-notebook-find'
 
@@ -76,6 +77,18 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
   const fab = useRef<HTMLDivElement | null>(null)
   /* אחרי "נוסף למחברת" הבחירה מתבטלת — וזה לא סיבה להעלים את האישור */
   const holdUntil = useRef(0)
+  /* אזור חי שקיים תמיד — ההודעה על הוספה/הסרה, ועל קיצור המקלדת */
+  const [msg, setMsg] = useState('')
+  const msgTimer = useRef(0)
+  /* evaluate מתוך האפקט, ו-save העדכני — לקיצור Alt+M */
+  const evalNow = useRef<() => void>(() => {})
+  const saveRef = useRef<() => void>(() => {})
+  const hitsRef = useRef<string[]>([])
+  const announce = useCallback((t: string) => {
+    window.clearTimeout(msgTimer.current)
+    setMsg('')
+    msgTimer.current = window.setTimeout(() => setMsg(t), 60)
+  }, [])
 
   const hide = useCallback(() => {
     if (Date.now() < holdUntil.current) return
@@ -118,10 +131,12 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
       pending.current = { text, where: head?.textContent?.trim() || undefined, occ, range }
       const ids = [...painted.current].filter(([, r]) => overlaps(range, r)).map(([id]) => id)
       const notes = new Set(marksInChapter(ch).filter((m) => m.note).map((m) => m.id))
+      hitsRef.current = ids
       setHits({ ids, noted: ids.some((id) => notes.has(id)) })
       setSaved('')
       setAt({ x: rect.left + rect.width / 2, top: rect.top, bottom: rect.bottom })
     }
+    evalNow.current = evaluate
     const schedule = (ms: number) => {
       window.clearTimeout(timer)
       timer = window.setTimeout(evaluate, ms)
@@ -322,18 +337,37 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
     const p = pending.current
     if (!p) return
     window.getSelection()?.removeAllRanges()
-    if (hits.ids.length) {
-      for (const id of hits.ids) deleteMark(id)
+    if (hitsRef.current.length) {
+      for (const id of hitsRef.current) deleteMark(id)
       setSaved('removed')
+      announce('הוסר מהמחברת')
       closeIn(1250)
       return
     }
     const m = addMark(ch, p.text, p.where, p.occ)
     setSaved('added')
+    announce('נוסף למחברת')
     setAddedId(m?.id ?? null)
     /* זמן לראות את „הוספת הערה" וללחוץ עליו */
     closeIn(m ? 4500 : 1250)
   }
+
+  saveRef.current = save
+
+  /* ---------- Alt+M: אותה פעולה של הכפתור, בלי עכבר ---------- */
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      /* e.code ולא e.key — במקלדת עברית Alt+M אינו „m” */
+      if (!e.altKey || e.ctrlKey || e.metaKey || e.code !== 'KeyM') return
+      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return
+      e.preventDefault()
+      evalNow.current()
+      if (pending.current) saveRef.current()
+      else announce('סמנו טקסט ואז Alt+M')
+    }
+    document.addEventListener('keydown', key)
+    return () => document.removeEventListener('keydown', key)
+  }, [announce])
 
   const openNote = () => {
     window.clearTimeout(closeTimer.current)
@@ -350,7 +384,12 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
     closeIn(note.trim() ? 1250 : 1)
   }
 
-  if (!at) return null
+  const live = (
+    <p className="nb-mark-live" role="status" aria-live="polite">
+      {msg}
+    </p>
+  )
+  if (!at) return live
 
   /* בעכבר הכפתור מעל הבחירה. במגע — מתחתיה: מעליה הדפדפן פותח את תפריט
      ההעתקה שלו, והיה מכסה את הכפתור */
@@ -363,12 +402,12 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
       ? at.top - 46
       : at.bottom + 12
 
-  return (
+  /* ב-portal בסוף ה-body: לא עוצר Tab בראש העמוד, ולא תלוי בטרנספורמציות של הפרק */
+  const fabEl = (
     <div
       ref={fab}
       className={`nb-mark-fab${saved ? ' is-saved' : ''}${hits.ids.length && !saved ? ' is-remove' : ''}`}
       style={{ left: x, top }}
-      role="status"
       onMouseDown={(e) => {
         /* שומר על הבחירה בעמוד — אבל לא בתוך תיבת ההערה, שצריכה סמן */
         if (!(e.target instanceof HTMLTextAreaElement)) e.preventDefault()
@@ -410,14 +449,14 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
           )}
         </span>
       ) : hits.ids.length ? (
-        <button type="button" onClick={save}>
+        <button type="button" aria-keyshortcuts="Alt+M" onClick={save}>
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1ZM9.5 10.5h5" />
           </svg>
           {hits.noted ? 'הסרה מהמחברת (גם ההערה)' : 'הסרה מהמחברת'}
         </button>
       ) : (
-        <button type="button" onClick={save}>
+        <button type="button" aria-keyshortcuts="Alt+M" onClick={save}>
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1Z" />
           </svg>
@@ -425,5 +464,11 @@ export default function MarkToNotebook({ ch, root = MARK_ROOT }: { ch: number; r
         </button>
       )}
     </div>
+  )
+  return (
+    <>
+      {live}
+      {createPortal(fabEl, document.body)}
+    </>
   )
 }

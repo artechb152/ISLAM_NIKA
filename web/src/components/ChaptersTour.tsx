@@ -66,8 +66,16 @@ export default function ChaptersTour({ isDesktop }: { isDesktop: boolean }) {
   const [box, setBox] = useState<Box | null>(null)
   const next = useRef<HTMLButtonElement | null>(null)
 
+  /* מי פתח: הכפתור „?" (אליו חוזר הפוקוס) או הכניסה הראשונה (אל הכרטיס הראשון) */
+  const fromHelp = useRef(false)
+
   const close = useCallback(() => {
     setStep(null)
+    /* הכפתור שהפעיל את הדיאלוג נעלם עם הסיור — בלי זה הפוקוס נופל ל-body */
+    window.setTimeout(() => {
+      const back = fromHelp.current ? document.querySelector<HTMLElement>('.hdr-help') : null
+      ;(back ?? document.querySelector<HTMLElement>('.cards a'))?.focus({ preventScroll: true })
+    }, 0)
     try {
       localStorage.setItem(TOUR_KEY, 'done')
     } catch {}
@@ -80,7 +88,7 @@ export default function ChaptersTour({ isDesktop }: { isDesktop: boolean }) {
       seen = !!localStorage.getItem(TOUR_KEY)
     } catch {}
     const t = seen ? undefined : window.setTimeout(() => setStep(0), 900)
-    const open = () => setStep(0)
+    const open = () => { fromHelp.current = true; setStep(0) }
     window.addEventListener(TOUR_EVENT, open)
     return () => { window.clearTimeout(t); window.removeEventListener(TOUR_EVENT, open) }
   }, [])
@@ -116,6 +124,17 @@ export default function ChaptersTour({ isDesktop }: { isDesktop: boolean }) {
     next.current?.focus()
     const key = (e: KeyboardEvent) => {
       if (e.key === 'Escape') close()
+      /* aria-modal בלי מלכודת: Tab היה יוצא אל העמוד שמאחורי הסיור */
+      if (e.key === 'Tab') {
+        const items = [...document.querySelectorAll<HTMLElement>('.tour-bubble button')]
+        if (!items.length) return
+        const first = items[0]
+        const last = items[items.length - 1]
+        const at = document.activeElement as HTMLElement | null
+        const inside = !!at && items.includes(at)
+        if (e.shiftKey && (at === first || !inside)) { e.preventDefault(); last.focus() }
+        else if (!e.shiftKey && (at === last || !inside)) { e.preventDefault(); first.focus() }
+      }
       /* RTL: the arrow that points forward on the page is the left one */
       if (e.key === 'ArrowLeft') setStep((n) => (n === null ? n : Math.min(n + 1, STEPS.length - 1)))
       if (e.key === 'ArrowRight') setStep((n) => (n === null ? n : Math.max(n - 1, 0)))
