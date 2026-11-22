@@ -13,6 +13,8 @@
      · גודל — לפחות 36 שאלות סגורות (פתוחות אינן נשלפות למבחן).
 
    המקור: concept/chapterN/SOURCE-TEXT.md אם קיים (בין כותרת הפרק להערות העריכה, בלי תיאורי
+   תמונה בסוגריים מרובעים), אחרת passages.json; ופרק 6 — data.ts + summary-data.ts.
+   (הנוסח הישן, לפני הרחבה:) concept/chapterN/SOURCE-TEXT.md אם קיים (בין כותרת הפרק להערות העריכה, בלי תיאורי
    תמונה בסוגריים מרובעים), אחרת כל המחרוזות של web/src/lib/chapterN/passages.json.
 
    ריצה: node concept/exams/verify-banks.mjs [פרק …]   (בלי ארגומנטים — כל המאגרים) */
@@ -32,7 +34,20 @@ async function sourceOf(n) {
     const secs = new Set([...t.matchAll(/^### (§\d+)/gm)].map((m) => m[1]))
     return { text: body, secs, kind: 'SOURCE-TEXT' }
   }
-  const js = JSON.parse(await readFile(new URL(`web/src/lib/chapter${n}/passages.json`, root), 'utf8'))
+  /* פרק 6, הראשון שנבנה, אין לו SOURCE-TEXT ואין passages.json — הטקסט שלו חי בקבצי הנתונים
+     data.ts ו-summary-data.ts. נקראים כטקסט גולמי: אחרי הסרת פיסוק ומירכאות, מחרוזת לימודית היא
+     תת-מחרוזת שלו. אין בהם § (בדיקת ה-§ מדולגת). */
+  const pj = new URL(`web/src/lib/chapter${n}/passages.json`, root)
+  if (!existsSync(pj)) {
+    const parts = []
+    for (const nm of ['data.ts', 'summary-data.ts']) {
+      const u = new URL(`web/src/lib/chapter${n}/${nm}`, root)
+      if (existsSync(u)) parts.push(await readFile(u, 'utf8'))
+    }
+    if (!parts.length) throw new Error(`ch${n}: אין מקור (SOURCE-TEXT / passages.json / data.ts)`)
+    return { text: parts.join('\n'), secs: new Set(), kind: 'data.ts' }
+  }
+  const js = JSON.parse(await readFile(pj, 'utf8'))
   const out = []
   const secs = new Set()
   const walk = (v, key) => {
