@@ -7,6 +7,7 @@
    The header search, the off-canvas category drawer (hamburger), navigation and completion
    marks all carry over unchanged; one data source (lib/chapters-data) still feeds everything. */
 
+import ResetProgress from '@/components/ResetProgress'
 import ChaptersTour, { TOUR_EVENT } from '@/components/ChaptersTour'
 import SiteFooter from '@/components/SiteFooter'
 import Link from 'next/link'
@@ -549,6 +550,10 @@ export default function ChaptersScreen() {
             </span>
             {named('notebook', 'המחברת שלי')}
           </Link>
+        </nav>
+        {/* איפוס ההתקדמות — שורה משלו מתחת לשאר, כי הוא לא כלי עיון אלא פעולה הרסנית */}
+        <nav className="menu-extra menu-reset" aria-label="איפוס התקדמות">
+          <ResetProgress onOpen={() => setDrawer(false)} />
         </nav>
       </>
     )
