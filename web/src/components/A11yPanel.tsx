@@ -35,9 +35,14 @@ function apply(p: Prefs) {
   c.toggle('a11y-links', p.links)
 }
 
+/* only what plays BY ITSELF: banner loops and scroll-loaded clips. A film the reader pressed play on
+   (custom player, no native controls) must keep playing — pausing it made the captioned films
+   unplayable with this setting on (audit 22.11.2026, WCAG 2.2.2 is about content that moves unasked). */
+const movesByItself = (v: HTMLVideoElement) => v.loop || v.hasAttribute('autoplay')
+
 function pauseAll() {
   document.querySelectorAll('video').forEach((v) => {
-    if (!v.paused) v.pause()
+    if (!v.paused && movesByItself(v)) v.pause()
   })
 }
 
@@ -57,7 +62,7 @@ export default function A11yPanel() {
     if (!p.still) return
     /* videos that autoplay later (scroll-loaded clips, a hero that starts on load) */
     pauseAll()
-    const onPlay = (e: Event) => { if (e.target instanceof HTMLVideoElement && !e.target.controls) e.target.pause() }
+    const onPlay = (e: Event) => { if (e.target instanceof HTMLVideoElement && !e.target.controls && movesByItself(e.target)) e.target.pause() }
     document.addEventListener('play', onPlay, true)
     return () => document.removeEventListener('play', onPlay, true)
   }, [p])

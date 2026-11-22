@@ -112,7 +112,7 @@ function mark(t: string, groups: { phrases: string[]; paint: Paint }[], key: str
 }
 
 const bold = (cls: string): Paint =>
-  function paintBold(phrase, k) { return <b className={cls} key={k}>{phrase}</b> }
+  function paintBold(phrase, k) { return <b className={cls} key={k} lang={/[؀-ۿ]/.test(phrase) ? 'ar' : undefined}>{phrase}</b> }
 
 /** every marked phrase a fragment carries, in the two colours it carries them in;
     `skip` leaves out phrases another painter owns (the map's scroll-lit places) */

@@ -79,6 +79,6 @@ html.a11y-zoom-2 body{zoom:1.3}
 /* not a filter: contrast() pushed the parchment toward white (the rule: no white anywhere)
    and changed every painting. Instead the text tokens every sheet uses get darker — the
    paper and the art stay as they are, only what is read gets stronger. */
-html.a11y-contrast body{--ink:#160b04;--muted:#2a1a0d;--ink-soft:#2a1a0d;--maroon:#5e0f1a;--maroon-deep:#3d0811;--stamp:#7a1715;--gold-ink:#5a3d08}
+html.a11y-contrast body{--ink:#160b04;--muted:#2a1a0d;--ink-soft:#2a1a0d;--maroon:#5e0f1a;--maroon-deep:#3d0811;--stamp:#7a1715;--gold-ink:#5a3d08;--gold-text:#5a3d08}
 html.a11y-still *,html.a11y-still *::before,html.a11y-still *::after{animation-duration:.001s!important;animation-iteration-count:1!important;transition-duration:.001s!important;scroll-behavior:auto!important}
 html.a11y-links a{text-decoration:underline!important;text-underline-offset:3px}

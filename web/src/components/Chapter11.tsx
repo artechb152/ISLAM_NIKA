@@ -121,7 +121,7 @@ function mark(t: string, groups: { phrases: string[]; paint: Paint }[], key: str
 }
 
 const bold = (cls: string): Paint =>
-  function paintBold(phrase, k) { return <b className={cls} key={k}>{phrase}</b> }
+  function paintBold(phrase, k) { return <b className={cls} key={k} lang={/[؀-ۿ]/.test(phrase) ? 'ar' : undefined}>{phrase}</b> }
 
 const marks = (r: string) => [
   { phrases: em(r), paint: bold('key') },

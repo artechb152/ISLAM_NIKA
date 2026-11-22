@@ -530,10 +530,10 @@ export default function ExamRoom() {
         {view === 'result' && attempt && (
           <>
             <div className="xr-score">
-              <p className="xr-score-n">
+              <h1 className="xr-score-n">
                 <span>ציון</span>
                 <b>{score.percent}</b>
-              </p>
+              </h1>
               <p className="xr-score-points">
                 {Number.isInteger(score.points) ? score.points : score.points.toFixed(1)} מתוך {score.total} נקודות
               </p>

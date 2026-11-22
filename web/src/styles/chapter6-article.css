@@ -23,7 +23,7 @@
      to live in lesson.css, which this route no longer loads). */
   --gold:#c79a3c;
   --gold-soft:#d9b45b;
-  --gold-text:#856016;
+  --gold-text:#7a5810;
   --shadow:0 8px 22px rgba(60,35,18,.10);
   --header-height:56px;
   --content-gutter:clamp(28px,4vw,64px);  /* mirrors the chapters-screen content gutter */

@@ -368,7 +368,7 @@
 /* §8 steps, revealed with the scroll */
 .ch9-steps.is-scroll::after{content:"";position:absolute;inset-block-start:10px;inset-inline-start:7px;width:2px;background:var(--maroon);
   height:calc((100% - 20px) * var(--fill,0));transition:height .25s linear}
-.ch9-steps.is-scroll li{opacity:.28;translate:0 10px;transition:opacity .6s,translate .6s}
+.ch9-steps.is-scroll li{opacity:.7;translate:0 10px;transition:opacity .6s,translate .6s}
 .ch9-steps.is-scroll li.is-on{opacity:1;translate:0 0}
 .ch9-steps.is-scroll li::before{transition:background-color .4s}
 .ch9-steps.is-scroll li.is-on::before{background:var(--gold)}

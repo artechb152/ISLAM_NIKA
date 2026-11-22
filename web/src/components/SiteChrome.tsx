@@ -55,6 +55,12 @@ export default function SiteChrome() {
   const timer = useRef<number | undefined>(undefined)
   const first = useRef(true)
 
+  /* the skip link's target: only the 3D hall had id="main" — give every page's <main> one */
+  useEffect(() => {
+    const main = document.querySelector<HTMLElement>('main, [role="main"]')
+    if (main && !main.id) main.id = 'main'
+  }, [pathname])
+
   /* finish the bar this page arrived with */
   useEffect(() => {
     const finish = () => setBar('done')

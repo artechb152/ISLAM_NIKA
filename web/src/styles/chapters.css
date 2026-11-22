@@ -338,3 +338,6 @@ a.m-item:hover .m-dot{background:var(--maroon);border-color:var(--maroon)}
 .reset-go:disabled,.reset-cancel:disabled{opacity:.5;cursor:default}
 .reset-go:focus-visible,.reset-cancel:focus-visible{outline:2px solid var(--maroon,#8a2733);outline-offset:2px}
 @media (min-width:1024px){.side.is-collapsed .reset-row{justify-content:center;padding-inline:0}}
+
+/* 320px (400% zoom): hamburger + logo + ? + search no longer fit at 150px */
+@media (max-width:360px){.site-hdr .search-field{width:108px}}
